@@ -1,13 +1,13 @@
 ﻿using UnityEngine;
+using Unity.Entities;
+using Unity.Mathematics;
 
 namespace LeyLineHybridECS
 {
-    public class IsVisible : MonoBehaviour
+    public struct IsVisible : IComponentData
     {
-        public bool Value;
-        public bool RequireUpdate;
-        public MeshRenderer MeshRenderer;
+        public byte Value;
+        public byte RequireUpdate;
         public float LerpSpeed;
-        public GameObject GO;
     }
 }

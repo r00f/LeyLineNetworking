@@ -14,7 +14,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<Position3D> PositionData;
             public readonly ComponentArray<BoxCollider> ColliderData;
-            public readonly ComponentArray<IsVisible> IsVisibleData;
+            public readonly ComponentDataArray<IsVisible> IsVisibleData;
             public ComponentArray<Health> HealthData;
         }
 
@@ -46,7 +46,14 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    health.HealthBarInstance.SetActive(isVisible.Value);
+                    if (isVisible.Value == 1)
+                    {
+                        health.HealthBarInstance.SetActive(true);
+                    }
+                    else
+                    {
+                        health.HealthBarInstance.SetActive(false);
+                    }
                     health.HealthBarInstance.transform.position = WorldToUISpace(canvas, position.Value + new float3(0, collider.bounds.size.y + 1f, 0));
                     health.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(health.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, (float)health.CurrentHealth / (float)health.TotalHealth, 0.1f);
                 }

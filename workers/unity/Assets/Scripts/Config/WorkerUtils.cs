@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Gdk.TransformSynchronization;
 using Unity.Entities;
+using LeyLineHybridECS;
 
 public static class WorkerUtils
 {
@@ -16,6 +17,8 @@ public static class WorkerUtils
     public static void AddClientSystems(World world)
     {
         world.GetOrCreateManager<MouseStateSystem>();
+        world.GetOrCreateManager<CellStateSystem>();
+        world.GetOrCreateManager<CellMarkerSystem>();
         world.GetOrCreateManager<AddComponentsSystem>();
     }
 

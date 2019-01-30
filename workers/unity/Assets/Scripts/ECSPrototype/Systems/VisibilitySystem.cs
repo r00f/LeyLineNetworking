@@ -18,7 +18,7 @@ namespace LeyLineHybridECS
         struct CellData
         {
             public readonly int Length;
-            public ComponentArray<IsVisible> IsVisibleData;
+            public ComponentDataArray<IsVisible> IsVisibleData;
             public ComponentArray<CellType> CellTypeData;
             //public ComponentArray<Cell> Cell;
         }
@@ -87,8 +87,9 @@ namespace LeyLineHybridECS
             {
                 var c_IsVisible = m_cData.IsVisibleData[i];
 
-                if (c_IsVisible.RequireUpdate)
+                if (c_IsVisible.RequireUpdate == 1)
                 {
+                    /*
                     GameObject go = m_cData.IsVisibleData[i].GO;
                     bool isVisible = m_cData.IsVisibleData[i].Value;
 
@@ -127,6 +128,7 @@ namespace LeyLineHybridECS
 
                         }
                     }
+                    */
                 }
             }
         }
@@ -139,8 +141,8 @@ namespace LeyLineHybridECS
             foreach(IsVisible c in p_Vision.Vision)
             {
                 IsVisible IV = c;
-                IV.Value = false;
-                IV.RequireUpdate = true;
+                IV.Value = 0;
+                IV.RequireUpdate = 1;
             }
 
             p_Vision.Vision.Clear();
@@ -155,8 +157,8 @@ namespace LeyLineHybridECS
                     {
                         p_Vision.Vision.Add(c);
                         IsVisible IV = c;
-                        IV.Value = true;
-                        IV.RequireUpdate = true;
+                        IV.Value = 1;
+                        IV.RequireUpdate = 1;
                     }
                 }
             }
@@ -177,10 +179,12 @@ namespace LeyLineHybridECS
             List<List<IsVisible>> RelevantClusters = new List<List<IsVisible>>();
             foreach (IsVisible c in sight)
             {
+                /*
                 if (c.GetComponent<CellType>().thisCellsTerrain.obstructVision)
                 {
                     Obstructive.Add(c);
                 }
+                */
             }
 
             RelevantClusters.Clear();
@@ -218,7 +222,7 @@ namespace LeyLineHybridECS
             {
                 ObstructVisionCluster OVC = new ObstructVisionCluster(RelevantClusters[i], OCell.Cell.GetComponent<IsVisible>());
                 Cluster_DetermineAngles(OVC);
-                sight = Cluster_UseAngles(OVC, sight);
+                //sight = Cluster_UseAngles(OVC, sight);
             }
 
 
@@ -239,19 +243,20 @@ namespace LeyLineHybridECS
         {
             foreach (IsVisible c in inCluster.cluster)
             {
+                /*
                 Angle angle = new Angle(c, m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>()));
 
                 if (!inCluster.RelevantAngles.Contains(angle))
                 {
                     inCluster.RelevantAngles.Add(angle);
                 }
-
+                */
             }
             //print("Relevant angles Count: " + inCluster.RelevantAngles.Count());
 
         }
 
-
+        /*
         private List<IsVisible> Cluster_UseAngles(ObstructVisionCluster inCluster, List<IsVisible> watching)
         {
             int count = inCluster.RelevantAngles.Count;
@@ -286,11 +291,13 @@ namespace LeyLineHybridECS
             {
                 foreach (IsVisible c in watching)
                 {
+
                     float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
                     if ((largest.angle_float >= Angle) && (Angle >= smallest.angle_float))
                     {
                         Cone.Add(c);
                     }
+
                 }
 
                 for (int i = count - 1; i >= 0; i--)
@@ -451,6 +458,7 @@ namespace LeyLineHybridECS
             
 #endregion
     }
+    */
 
         private void BuildFixClusters()
         {
@@ -474,7 +482,7 @@ namespace LeyLineHybridECS
                 IsVisible c = obstructed[0];
                 RawCluster go = new RawCluster(c);
                 obstructed.Remove(c);
-                BuildCluster(c, go, obstructed, out obstructed);
+                //BuildCluster(c, go, obstructed, out obstructed);
                 raw.Add(go);
 
             }
@@ -487,10 +495,10 @@ namespace LeyLineHybridECS
                 }
             }
         }
-
+        /*
         private void BuildCluster(IsVisible cell, RawCluster cluster, List<IsVisible> obstructed, out List<IsVisible> newObstructed)
         {
-            List<Cell> neighbours = cell.GetComponent<Neighbours>().NeighboursList;
+            //List<Cell> neighbours = cell.GetComponent<Neighbours>().NeighboursList;
             for (int i = neighbours.Count - 1; i >= 0; i--)
             {
                 if (neighbours[i] == null || !obstructed.Contains(neighbours[i].GetComponent<IsVisible>())) neighbours.Remove(neighbours[i]);
@@ -509,7 +517,7 @@ namespace LeyLineHybridECS
             }
             newObstructed = obstructed;
         }
-
+        */
     }
     public struct ObstructVisionCluster
     {
