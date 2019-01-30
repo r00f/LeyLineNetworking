@@ -4,3 +4,6 @@
 *.asset text eol=lf
 *.asmdef text eol=lf
 *.sh text eol=lf
+*.psd filter=lfs diff=lfs merge=lfs -text
+*.png filter=lfs diff=lfs merge=lfs -text
+*.jpeg filter=lfs diff=lfs merge=lfs -text
