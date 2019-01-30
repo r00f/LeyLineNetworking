@@ -5,9 +5,13 @@
         "Improbable.Gdk.BuildSystem",
         "Improbable.Gdk.Core",
         "Improbable.Gdk.Generated",
-        "Unity.Entities"
+        "Unity.Entities",
+        "Unity.Mathematics",
+        "Unity.Entities.Hybrid"
     ],
-    "optionalUnityReferences": [],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
     "includePlatforms": [
         "Editor"
     ],

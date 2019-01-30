@@ -3,6 +3,7 @@ using Improbable.Gdk.Core;
 using Improbable.PlayerLifecycle;
 using UnityEngine;
 using Snapshot = Improbable.Gdk.Core.Snapshot;
+using LeyLineHybridECS;
 
 namespace BlankProject.Editor
 {
@@ -25,9 +26,18 @@ namespace BlankProject.Editor
         private static Snapshot CreateSnapshot()
         {
             var snapshot = new Snapshot();
-
             AddPlayerSpawner(snapshot);
+            AddCellGrid(snapshot);
             return snapshot;
+        }
+
+        private static void AddCellGrid(Snapshot snapshot)
+        {
+            foreach (Cell c in Object.FindObjectsOfType<Cell>())
+            {
+                var cell = LeyLineEntityTemplates.Cell(new Vector3f(c.GetComponent<Position3DDataComponent>().Value.Value.x, c.GetComponent<Position3DDataComponent>().Value.Value.y, c.GetComponent<Position3DDataComponent>().Value.Value.z), c.GetComponent<IsTaken>().Value);
+                snapshot.AddEntity(cell);
+            }
         }
 
         private static void AddPlayerSpawner(Snapshot snapshot)

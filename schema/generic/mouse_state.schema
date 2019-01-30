@@ -1,0 +1,14 @@
+package generic;
+		
+component MouseState
+{
+    id = 102;
+    MouseStateEnum mouse_state = 1;
+}
+
+enum MouseStateEnum
+{
+	Neutral = 0;
+	Hovered = 1;
+	Clicked = 2;
+}

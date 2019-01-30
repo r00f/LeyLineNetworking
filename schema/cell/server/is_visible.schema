@@ -1,0 +1,9 @@
+package cells;
+		
+component IsVisible {
+	
+    id = 101;
+    bool is_visible = 1;
+	bool require_update = 2;
+	
+}

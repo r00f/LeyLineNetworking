@@ -2,6 +2,8 @@
 using Improbable.Gdk.Core;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Gdk.TransformSynchronization;
+using Improbable.Gdk.GameObjectRepresentation;
+using Improbable.Gdk.GameObjectCreation;
 
 namespace BlankProject
 {
@@ -19,9 +21,11 @@ namespace BlankProject
         {
             Worker.World.GetOrCreateManager<MetricSendSystem>();
             PlayerLifecycleHelper.AddServerSystems(Worker.World);
+            GameObjectRepresentationHelper.AddSystems(Worker.World);
+            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, gameObject);
         }
 
-        private static EntityTemplate CreatePlayerEntityTemplate(string workerId, Improbable.Vector3f position)
+        private static EntityTemplate CreatePlayerEntityTemplate(string workerId, Vector3f position)
         {
             var clientAttribute = $"workerId:{workerId}";
             var serverAttribute = WorkerType;
