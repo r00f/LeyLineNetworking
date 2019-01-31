@@ -19,7 +19,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public ComponentDataArray<IsVisible> IsVisibleData;
-            public ComponentArray<CellType> CellTypeData;
+            //public ComponentArray<CellType> CellTypeData;
             //public ComponentArray<Cell> Cell;
         }
 
@@ -467,13 +467,15 @@ namespace LeyLineHybridECS
 
             for (int i = m_cData.Length - 1; i >= 0; i--)
             {
-                var CellTypeData = m_cData.CellTypeData[i];
+                //var CellTypeData = m_cData.CellTypeData[i];
                 var isVisible = m_cData.IsVisibleData[i];
                 //var Cell = m_cData.Cell[i];
+                /*
                 if (CellTypeData.thisCellsTerrain.obstructVision)
                 {
                     obstructed.Add(isVisible);
                 }
+                */
             }
 
             List<RawCluster> raw = new List<RawCluster>();

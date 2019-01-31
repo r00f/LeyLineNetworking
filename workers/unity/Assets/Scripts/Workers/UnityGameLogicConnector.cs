@@ -13,7 +13,6 @@ namespace BlankProject
         
         private async void Start()
         {
-            PlayerLifecycleConfig.CreatePlayerEntityTemplate = CreatePlayerEntityTemplate;
             await Connect(WorkerType, new ForwardingDispatcher()).ConfigureAwait(false);
         }
 
@@ -24,7 +23,7 @@ namespace BlankProject
             GameObjectRepresentationHelper.AddSystems(Worker.World);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, gameObject);
         }
-
+        /*
         private static EntityTemplate CreatePlayerEntityTemplate(string workerId, Vector3f position)
         {
             var clientAttribute = $"workerId:{workerId}";
@@ -41,5 +40,6 @@ namespace BlankProject
 
             return template;
         }
+        */
     }
 }

@@ -4,8 +4,11 @@ using UnityEditor;
 using System.Collections.Generic;
 using Unity.Mathematics;
 
+
+#if UNITY_EDITOR
 namespace LeyLineHybridECS
 {
+
     public class TerrainController : MonoBehaviour
     {
         [SerializeField]
@@ -597,3 +600,4 @@ namespace LeyLineHybridECS
 
     }
 }
+#endif

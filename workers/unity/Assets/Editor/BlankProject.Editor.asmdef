@@ -5,16 +5,17 @@
         "Improbable.Gdk.BuildSystem",
         "Improbable.Gdk.Core",
         "Improbable.Gdk.Generated",
-        "Unity.Entities",
-        "Unity.Mathematics",
-        "Unity.Entities.Hybrid"
+        "Unity.Entities.Hybrid",
+        "Unity.Mathematics"
     ],
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ],
+    "optionalUnityReferences": [],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
 }

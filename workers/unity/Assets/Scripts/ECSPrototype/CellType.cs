@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 
+#if UNITY_EDITOR
 namespace LeyLineHybridECS
 {
 
@@ -26,8 +27,6 @@ namespace LeyLineHybridECS
         [SerializeField]
         [Range(0, 10)]
         float height;
-
-#if UNITY_EDITOR
 
         // Use this for initialization
         void OnEnable()
@@ -122,8 +121,9 @@ namespace LeyLineHybridECS
             }
         }
 
-#endif
+
     }
 
 
 }
+#endif

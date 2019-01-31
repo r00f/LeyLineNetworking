@@ -43,9 +43,20 @@ namespace BlankProject.Editor
         private static void AddPlayerSpawner(Snapshot snapshot)
         {
             var serverAttribute = UnityGameLogicConnector.WorkerType;
-            
+
+            Position.Snapshot pos = new Position.Snapshot
+            {
+                Coords = new Coordinates
+                {
+                    X = 50,
+                    Y = 2,
+                    Z = 31
+
+                }
+            };
+
             var template = new EntityTemplate();
-            template.AddComponent(new Position.Snapshot(), serverAttribute);
+            template.AddComponent(pos, serverAttribute);
             template.AddComponent(new Metadata.Snapshot { EntityType = "PlayerCreator" }, serverAttribute);
             template.AddComponent(new Persistence.Snapshot(), serverAttribute);
             template.AddComponent(new PlayerCreator.Snapshot(), serverAttribute);

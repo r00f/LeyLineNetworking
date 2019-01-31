@@ -11,10 +11,15 @@
         "Unity.Entities",
         "Unity.Entities.Hybrid",
         "Unity.Mathematics",
-        "Improbable.Gdk.GameObjectCreation"
+        "Improbable.Gdk.GameObjectCreation",
+        "Improbable.Gdk.StandardTypes"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": []
 }
