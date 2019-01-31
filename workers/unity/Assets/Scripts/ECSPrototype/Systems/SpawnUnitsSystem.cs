@@ -1,24 +1,18 @@
 ﻿using Unity.Entities;
 using System.Collections.Generic;
+using UnityEngine;
+using Improbable.Gdk.Core.Commands;
 
 namespace LeyLineHybridECS
 {
     public class SpawnUnitsSystem : ComponentSystem
     {
-
-        struct CellData
-        {
-            public Position3D Position;
-            public UnitToSpawn UnitToSpawn;
-            public Cell Cell;
-        }
-
         public struct Data
         {
             public readonly int Length;
-            public readonly ComponentDataArray<Position3D> Position;
-            public ComponentArray<UnitToSpawn> UnitToSpawn;
-            public ComponentArray<Cell> Cell;
+            public readonly ComponentDataArray<Improbable.Position.Component> Position;
+            public ComponentDataArray<Cells.UnitToSpawn.Component> UnitToSpawn;
+            public ComponentDataArray<WorldCommands.CreateEntity.CommandSender> CreateEntitySender;
         }
 
         [Inject] private Data m_Data;
@@ -27,38 +21,30 @@ namespace LeyLineHybridECS
         {
             if(GameStateSystem.CurrentState == GameStateSystem.State.Spawning)
             {
-                var unitSpawnData = new List<UnitSpawnData>();
-
                 for (int i = 0; i < m_Data.Length; ++i)
                 {
                     var position = m_Data.Position[i];
                     var unitToSpawn = m_Data.UnitToSpawn[i];
-                    var cell = m_Data.Cell[i];
+                    var requestSender = m_Data.CreateEntitySender[i];
 
-                    if (unitToSpawn.Unit)
+                    if(unitToSpawn.UnitName.Length != 0)
                     {
-                        UnitSpawnData spawn = new UnitSpawnData()
-                        {
-                            Position = position.Value,
-                            UnitToSpawn = unitToSpawn.Unit,
-                            Cell = cell
-                        };
-                        unitSpawnData.Add(spawn);
+                        var entity = LeyLineEntityTemplates.Unit(unitToSpawn.UnitName, position, 1);
 
-                        m_Data.UnitToSpawn[i].Unit = null;
+                        requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
+                        (
+                            entity
+                        ));
+
+                        m_Data.CreateEntitySender[i] = requestSender;
+
+                        var unitToSpawnComponent = m_Data.UnitToSpawn[i];
+                        unitToSpawnComponent.UnitName = "";
+                        m_Data.UnitToSpawn[i] = unitToSpawnComponent;
                     }
                 }
 
-                foreach (UnitSpawnData u in unitSpawnData)
-                {
-                    UnitSpawnSystem.SpawnUnit(u);
-                }
-
-                //when all Units have been spawned, move to attack phase
-                if(unitSpawnData.Count == 0)
-                {
-                    GameStateSystem.CurrentState = GameStateSystem.State.Attacking;
-                }
+                GameStateSystem.CurrentState = GameStateSystem.State.Attacking;
 
             }
         }

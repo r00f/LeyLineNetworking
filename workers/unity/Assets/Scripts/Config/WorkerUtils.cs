@@ -24,7 +24,7 @@ public static class WorkerUtils
 
     public static void AddGameLogicSystems(World world)
     {
-
+        world.GetOrCreateManager<SpawnUnitsSystem>();
     }
 
 }

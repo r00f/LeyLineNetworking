@@ -15,7 +15,7 @@ public static class LeyLineEntityTemplates {
 
 
 
-    public static EntityTemplate Cell(Vector3f position, bool isTaken)
+    public static EntityTemplate Cell(Vector3f position, bool isTaken, string unitName)
     {
         
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -36,10 +36,17 @@ public static class LeyLineEntityTemplates {
             IsTaken = isTaken
         };
 
+        var unitToSpawn = new Cells.UnitToSpawn.Snapshot
+        {
+
+            UnitName = unitName
+        };
+
         var template = new EntityTemplate();
         template.AddComponent(pos, gameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, gameLogic);
         template.AddComponent(new Persistence.Snapshot(), gameLogic);
+        template.AddComponent(unitToSpawn, gameLogic);
         template.AddComponent(taken, gameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
@@ -64,7 +71,6 @@ public static class LeyLineEntityTemplates {
         };
 
         var pos = new Position.Snapshot { Coords = spawnPosition.ToSpatialCoordinates() };
-        Debug.Log(spawnPosition.ToSpatialCoordinates());
         var serverMovement = new ServerMovement.Snapshot { Latest = serverResponse };
         var clientMovement = new ClientMovement.Snapshot { Latest = new ClientRequest() };
         var clientRotation = new ClientRotation.Snapshot { Latest = rotationUpdate };
@@ -77,6 +83,24 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientRotation, client);
         template.SetReadAccess(WorkerUtils.UnityClient, WorkerUtils.UnityGameLogic, WorkerUtils.SimulatedPlayer);
         template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
+        return template;
+    }
+
+    public static EntityTemplate Unit(string unitName, Position.Component position, int faction)
+    {
+
+        var pos = new Position.Snapshot
+        {
+            Coords = position.Coords
+        };
+
+
+        var template = new EntityTemplate();
+
+        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
+
+        template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
     }
 }

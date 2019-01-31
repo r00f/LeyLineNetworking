@@ -5,7 +5,7 @@ namespace LeyLineHybridECS
 {
     public class UnitToSpawn : MonoBehaviour
     {
-        public GameObject Unit;
+        public string UnitName;
     }
 }
 
