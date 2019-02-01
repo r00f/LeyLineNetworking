@@ -3,6 +3,7 @@ using Improbable;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Movement;
 using Improbable.Gdk.StandardTypes;
+using Improbable.Gdk.Health;
 using Improbable.Common;
 using Unity.Entities;
 using UnityEngine;
@@ -70,6 +71,12 @@ public static class LeyLineEntityTemplates {
             Pitch = spawnPitch.ToInt1k()
         };
 
+        var energy = new Player.EnergyComponent.Snapshot
+        {
+            MaxEnergy = 10,
+            Energy = 10
+        };
+
         var pos = new Position.Snapshot { Coords = spawnPosition.ToSpatialCoordinates() };
         var serverMovement = new ServerMovement.Snapshot { Latest = serverResponse };
         var clientMovement = new ClientMovement.Snapshot { Latest = new ClientRequest() };
@@ -78,6 +85,8 @@ public static class LeyLineEntityTemplates {
         var template = new EntityTemplate();
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(serverMovement, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientMovement, client);
         template.AddComponent(clientRotation, client);
@@ -86,7 +95,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string unitName, Position.Component position, int faction)
+    public static EntityTemplate Unit(string unitName, Position.Component position, uint faction)
     {
 
         var pos = new Position.Snapshot
@@ -94,11 +103,25 @@ public static class LeyLineEntityTemplates {
             Coords = position.Coords
         };
 
+        var health = new HealthComponent.Snapshot
+        {
+            MaxHealth = 10,
+            Health = 10
+
+        };
+
+        var factionSnapshot = new Generic.FactionComponent.Snapshot
+        {
+            Faction = faction
+        };
+
 
         var template = new EntityTemplate();
-
+        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(health, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(new HealthRegenComponent.Snapshot(), WorkerUtils.UnityGameLogic);
 
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;

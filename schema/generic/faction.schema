@@ -1,0 +1,8 @@
+package generic;
+		
+component FactionComponent {
+	
+    id = 102;
+    uint32 faction = 1;
+	
+}

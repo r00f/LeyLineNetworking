@@ -8,6 +8,7 @@ namespace BlankProject
     public static class OneTimeInitialisation
     {
         private static bool initialized;
+        private static uint faction = 1;
 
         [RuntimeInitializeOnLoadMethod]
         private static void Init()
@@ -23,6 +24,8 @@ namespace BlankProject
 
             // Setup template to use for player on connecting client
             PlayerLifecycleConfig.CreatePlayerEntityTemplate = LeyLineEntityTemplates.Player;
+            faction++;
+
         }
     }
 }
