@@ -1,0 +1,19 @@
+package generic;
+
+component GameState {
+	
+    id = 105;
+	GameStateEnum current_state = 1;
+	
+}
+
+enum GameStateEnum {
+
+	calculate_energy = 1;
+	planning = 2;
+	spawning = 3;
+	attacking = 4;
+	moving = 5;
+	game_over = 6;
+
+}

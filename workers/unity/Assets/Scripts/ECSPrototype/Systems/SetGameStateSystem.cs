@@ -9,20 +9,68 @@ namespace LeyLineHybridECS
         public struct Data
         {
             public readonly int Length;
-            public readonly ComponentArray<IsIdle> IsIdleData;
-            public readonly ComponentDataArray<MouseState> MouseStateData;
+            public ComponentDataArray<Generic.GameState.Component> GameStateData;
         }
 
         [Inject] private Data m_Data;
 
+        public struct PlayerData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<Player.PlayerState.Component> PlayerStateData;
+        }
+
+        [Inject] private PlayerData m_PlayerData;
+
+
+        /*
         protected override void OnCreateManager()
         {
             base.OnCreateManager();
             GameStateSystem.CurrentState = GameStateSystem.State.Spawning;
         }
-
+        */
         protected override void OnUpdate()
         {
+
+            var gameState = m_Data.GameStateData[0];
+
+            switch (m_Data.GameStateData[0].CurrentState)
+            {
+                case Generic.GameStateEnum.calculate_energy:
+                    gameState.CurrentState = Generic.GameStateEnum.planning;
+                    m_Data.GameStateData[0] = gameState;
+                    break;
+                case Generic.GameStateEnum.planning:
+                    if (AllPlayersReady())
+                    {
+                        gameState.CurrentState = Generic.GameStateEnum.spawning;
+                        m_Data.GameStateData[0] = gameState;
+                    }
+                    break;
+                case Generic.GameStateEnum.spawning:
+                    Debug.Log("Spawning");
+                    gameState.CurrentState = Generic.GameStateEnum.attacking;
+                    m_Data.GameStateData[0] = gameState;
+                    break;
+                case Generic.GameStateEnum.attacking:
+                    gameState.CurrentState = Generic.GameStateEnum.moving;
+                    m_Data.GameStateData[0] = gameState;
+                    break;
+                case Generic.GameStateEnum.moving:
+                    if (AllUnitsIdle())
+                    {
+                        gameState.CurrentState = Generic.GameStateEnum.calculate_energy;
+                        m_Data.GameStateData[0] = gameState;
+                    }
+                    break;
+                case Generic.GameStateEnum.game_over:
+                    //display gameOver screen
+                    break;
+
+            }
+
+            /*
             if (GameStateSystem.CurrentState == GameStateSystem.State.CalculateEnergy)
             {
                 GameStateSystem.CurrentState = GameStateSystem.State.WaitingForInput;
@@ -53,8 +101,11 @@ namespace LeyLineHybridECS
                     GameStateSystem.CurrentState = GameStateSystem.State.CalculateEnergy;
                 }
             }
+
+            */
         }
 
+        /*
         private bool AnyUnitClicked()
         {
 
@@ -67,10 +118,22 @@ namespace LeyLineHybridECS
             }
             return false;
         }
+        */
+        private bool AllPlayersReady()
+        {
+            for (int i = 0; i < m_PlayerData.Length; i++)
+            {
+                var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
+                if (playerState != Player.PlayerStateEnum.ready)
+                    return false;
+            }
+            return true;
+        }
+
 
         private bool AllUnitsIdle()
         {
-            
+            /*
             //loop through all Units to check if idle
             for (int i = 0; i < m_Data.Length; i++)
             {
@@ -80,8 +143,10 @@ namespace LeyLineHybridECS
             }
 
             return true;
-
+            */
+            return true;
         }
+
     }
 
 

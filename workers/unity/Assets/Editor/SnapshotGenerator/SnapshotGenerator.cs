@@ -27,8 +27,14 @@ namespace BlankProject.Editor
         {
             var snapshot = new Snapshot();
             AddPlayerSpawner(snapshot);
+            AddGameState(snapshot);
             AddCellGrid(snapshot);
             return snapshot;
+        }
+
+        private static void AddGameState(Snapshot snapshot)
+        {
+            snapshot.AddEntity(LeyLineEntityTemplates.GameState());
         }
 
         private static void AddCellGrid(Snapshot snapshot)

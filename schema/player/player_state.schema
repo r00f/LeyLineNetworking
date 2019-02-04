@@ -1,0 +1,16 @@
+package player;
+
+component PlayerState {
+	
+    id = 104;
+	PlayerStateEnum current_state = 1;
+	
+}
+
+enum PlayerStateEnum {
+
+	waiting = 1;
+	unit_selected = 2;
+	ready = 3;
+
+}

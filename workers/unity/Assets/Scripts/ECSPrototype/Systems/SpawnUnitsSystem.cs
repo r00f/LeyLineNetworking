@@ -17,9 +17,18 @@ namespace LeyLineHybridECS
 
         [Inject] private Data m_Data;
 
+        public struct GameStateData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<Generic.GameState.Component> GameState;
+        }
+
+        [Inject] private GameStateData m_GameStateData;
+
+
         protected override void OnUpdate()
         {
-            if(GameStateSystem.CurrentState == GameStateSystem.State.Spawning)
+            if (m_GameStateData.GameState[0].CurrentState == Generic.GameStateEnum.spawning)
             {
                 for (int i = 0; i < m_Data.Length; ++i)
                 {
@@ -27,7 +36,7 @@ namespace LeyLineHybridECS
                     var unitToSpawn = m_Data.UnitToSpawn[i];
                     var requestSender = m_Data.CreateEntitySender[i];
 
-                    if(unitToSpawn.UnitName.Length != 0)
+                    if (unitToSpawn.UnitName.Length != 0)
                     {
                         var entity = LeyLineEntityTemplates.Unit(unitToSpawn.UnitName, position, 1);
 
@@ -44,7 +53,7 @@ namespace LeyLineHybridECS
                     }
                 }
 
-                GameStateSystem.CurrentState = GameStateSystem.State.Attacking;
+                //GameStateSystem.CurrentState = GameStateSystem.State.Attacking;
 
             }
         }

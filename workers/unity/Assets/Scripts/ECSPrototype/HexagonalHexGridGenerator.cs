@@ -9,7 +9,7 @@ using Unity.Entities;
 /// </summary>
 /// 
 
-#if UNITY_EDITOR
+
 namespace LeyLineHybridECS
 {
     [ExecuteInEditMode()]
@@ -21,6 +21,8 @@ namespace LeyLineHybridECS
         int Radius;
 
         public List<Cell> hexagons;
+
+        #if UNITY_EDITOR
 
         public override List<Cell> GenerateGrid()
         {
@@ -138,8 +140,8 @@ namespace LeyLineHybridECS
         new float3(+1, -1, 0), new float3(+1, 0, -1), new float3(0, +1, -1),
         new float3(-1, +1, 0), new float3(-1, 0, +1), new float3(0, -1, +1)};
 
-
+    #endif
     }
 }
-#endif
+
 

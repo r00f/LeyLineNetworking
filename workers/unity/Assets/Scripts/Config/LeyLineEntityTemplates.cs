@@ -12,8 +12,24 @@ public static class LeyLineEntityTemplates {
 
     
     private static readonly List<string> AllWorkerAttributes =
-        new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient, WorkerUtils.SimulatedPlayer };
+        new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
+
+    public static EntityTemplate GameState()
+    {
+        var gameState = new Generic.GameState.Snapshot
+        {
+            CurrentState = Generic.GameStateEnum.spawning
+        };
+
+        var template = new EntityTemplate();
+        template.AddComponent(new Position.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Metadata.Snapshot { EntityType = "GameState" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(gameState, WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        return template;
+    }
 
 
     public static EntityTemplate Cell(Vector3f position, bool isTaken, string unitName)
@@ -87,11 +103,12 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Player.PlayerState.Snapshot(), client);
         template.AddComponent(serverMovement, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientMovement, client);
         template.AddComponent(clientRotation, client);
-        template.SetReadAccess(WorkerUtils.UnityClient, WorkerUtils.UnityGameLogic, WorkerUtils.SimulatedPlayer);
-        template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        //template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
         return template;
     }
 

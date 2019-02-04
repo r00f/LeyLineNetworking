@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Unity.Mathematics;
 
 
-#if UNITY_EDITOR
 namespace LeyLineHybridECS
 {
 
@@ -44,14 +43,15 @@ namespace LeyLineHybridECS
         [SerializeField]
         float[,] strength;
 
+
+        #if UNITY_EDITOR
+
         public void GetTerrainHeight()
         {
             //print(terrain.terrainData.GetHeight((int)getTerrainHeightCoordinates.x, (int)getTerrainHeightCoordinates.y));
             print(terrain.terrainData.alphamapWidth);
             print(terrain.terrainData.heightmapWidth);
         }
-
-#if UNITY_EDITOR
 
         public void UpdateLeyLineCracks()
         {
@@ -155,8 +155,6 @@ namespace LeyLineHybridECS
                 treeList.Add(treeInstance);
             }
         }
-
-#endif
 
         public void SetSquareTerrainHeight()
         {
@@ -597,7 +595,6 @@ namespace LeyLineHybridECS
             terrain.terrainData.SetAlphamaps(0, 0, alphaMap);
         }
 
-
+#endif
     }
 }
-#endif
