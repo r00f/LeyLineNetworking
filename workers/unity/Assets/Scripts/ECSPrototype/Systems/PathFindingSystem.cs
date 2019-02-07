@@ -63,8 +63,9 @@ namespace LeyLineHybridECS
                 var occupiedCell = m_UnitData.OccupiedCellData[i];
                 float3 offset = new float3(0, 0.3f, 0);
 
+
                 if(Input.GetButtonDown("Fire2"))
-                    m_CellGridSystem.GetRadius(occupiedCell.Cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate, movementData.Range);
+                   // m_CellGridSystem.GetRadius(occupiedCell.Cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate, movementData.Range);
 
                 //if the GameState is UnitClicked and this Unit is clicked
                 if (GameStateSystem.CurrentState == GameStateSystem.State.UnitClicked && mouseState.CurrentState == MouseState.State.Clicked)
@@ -89,7 +90,7 @@ namespace LeyLineHybridECS
                         if (pathListsData.PathsInRange.Count == 0)
                         {
 
-                            pathListsData.CellsInMovementRange = m_CellGridSystem.GetRadius(occupiedCell.Cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate, movementData.Range);
+                            //pathListsData.CellsInMovementRange = m_CellGridSystem.GetRadius(occupiedCell.Cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate, movementData.Range);
 
                             pathListsData.LineRenderer.enabled = true;
                             pathListsData.LineRenderer.positionCount = pathListsData.CurrentPath.Count + 1;

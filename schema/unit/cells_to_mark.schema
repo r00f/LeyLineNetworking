@@ -1,0 +1,25 @@
+package unit;
+
+import "improbable/vector3.schema";
+
+
+type CellsInRangeRequest {
+
+	improbable.Vector3f origin = 1;
+	uint32 range = 2;
+
+}
+
+type CellsInRangeResponse {
+
+	list<improbable.Vector3f> cells_in_range = 1;
+
+}
+
+component CellsToMark {
+	
+    id = 106;
+	command CellsInRangeResponse cells_in_range_command(CellsInRangeRequest);
+	list<improbable.Vector3f> cells_in_range = 1;
+
+}

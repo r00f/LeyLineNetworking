@@ -169,11 +169,12 @@ namespace LeyLineHybridECS
         {
             //Debug.Log("HALLO");
             List<IsVisible> sight = new List<IsVisible>();
-
+            /*
             foreach (Cell c in m_CGS.GetRadius(OCell.Cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate, UVD.VisionRange))
             {
                 sight.Add(c.GetComponent<IsVisible>());
             }
+            */
 
             List<IsVisible> Obstructive = new List<IsVisible>();
             List<List<IsVisible>> RelevantClusters = new List<List<IsVisible>>();

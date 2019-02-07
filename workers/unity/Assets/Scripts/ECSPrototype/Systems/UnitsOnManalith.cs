@@ -6,6 +6,7 @@ namespace LeyLineHybridECS
 {
     public class UnitsOnManalith : MonoBehaviour
     {
+        /*
         public List<UnitOnCell> UnitsOnCells;
         public List<KeyValuePair<Unit, int>> UnitsKeyValueList;
 
@@ -20,6 +21,7 @@ namespace LeyLineHybridECS
 
             //Debug.Log(UnitsKeyValueList.Count);
         }
+        */
     }
 }
 

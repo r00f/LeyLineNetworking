@@ -12,6 +12,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<Improbable.Position.Component> Position;
             public ComponentDataArray<Cells.UnitToSpawn.Component> UnitToSpawn;
+            public ComponentDataArray<Cells.CubeCoordinate.Component> CoordinateData;
             public ComponentDataArray<WorldCommands.CreateEntity.CommandSender> CreateEntitySender;
         }
 
@@ -32,13 +33,14 @@ namespace LeyLineHybridECS
             {
                 for (int i = 0; i < m_Data.Length; ++i)
                 {
+                    var coord = m_Data.CoordinateData[i].CubeCoordinate;
                     var position = m_Data.Position[i];
                     var unitToSpawn = m_Data.UnitToSpawn[i];
                     var requestSender = m_Data.CreateEntitySender[i];
 
                     if (unitToSpawn.UnitName.Length != 0)
                     {
-                        var entity = LeyLineEntityTemplates.Unit(unitToSpawn.UnitName, position, 1);
+                        var entity = LeyLineEntityTemplates.Unit(unitToSpawn.UnitName, position, coord, 1);
 
                         requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
                         (

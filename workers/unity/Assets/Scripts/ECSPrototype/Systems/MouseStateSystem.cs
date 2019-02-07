@@ -46,6 +46,7 @@ public class MouseStateSystem : JobComponentSystem
                     {
                         CurrentState = MouseState.State.Clicked
                     };
+                    Debug.Log("Clicked");
                 }
                 //set its MouseState to Hovered if we hover
                 else if (state.CurrentState != MouseState.State.Clicked)

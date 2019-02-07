@@ -32,7 +32,7 @@ public static class LeyLineEntityTemplates {
     }
 
 
-    public static EntityTemplate Cell(Vector3f position, bool isTaken, string unitName)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName)
     {
         
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -48,6 +48,11 @@ public static class LeyLineEntityTemplates {
             }
         };
 
+        var coord = new Cells.CubeCoordinate.Snapshot
+        {
+            CubeCoordinate = cubeCoordinate
+        };
+
         var taken = new Cells.IsTaken.Snapshot
         {
             IsTaken = isTaken
@@ -55,7 +60,6 @@ public static class LeyLineEntityTemplates {
 
         var unitToSpawn = new Cells.UnitToSpawn.Snapshot
         {
-
             UnitName = unitName
         };
 
@@ -64,10 +68,10 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, gameLogic);
         template.AddComponent(new Persistence.Snapshot(), gameLogic);
         template.AddComponent(unitToSpawn, gameLogic);
+        template.AddComponent(coord, gameLogic);
         template.AddComponent(taken, gameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
-
     }
 
     public static EntityTemplate Player(string workerId, Vector3f position)
@@ -112,13 +116,19 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string unitName, Position.Component position, uint faction)
+    public static EntityTemplate Unit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction)
     {
 
         var pos = new Position.Snapshot
         {
             Coords = position.Coords
         };
+
+        var coord = new Cells.CubeCoordinate.Snapshot
+        {
+            CubeCoordinate = cubeCoordinate
+        };
+
 
         var health = new HealthComponent.Snapshot
         {
@@ -132,12 +142,18 @@ public static class LeyLineEntityTemplates {
             Faction = faction
         };
 
+        var cellsToMarkSnapshot = new Unit.CellsToMark.Snapshot
+        {
+            CellsInRange = new List<Vector3f>()
+        };
 
         var template = new EntityTemplate();
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
+        template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         //template.AddComponent(new HealthRegenComponent.Snapshot(), WorkerUtils.UnityGameLogic);
 
         template.SetReadAccess(AllWorkerAttributes.ToArray());

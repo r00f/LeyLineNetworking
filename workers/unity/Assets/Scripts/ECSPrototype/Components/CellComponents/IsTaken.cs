@@ -5,6 +5,6 @@ namespace LeyLineHybridECS
     public class IsTaken : MonoBehaviour
     {
         public bool Value;
-        public Unit UnitOnCell;
+        //public Unit UnitOnCell;
     }
 }

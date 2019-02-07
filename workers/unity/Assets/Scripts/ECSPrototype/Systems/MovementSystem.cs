@@ -47,10 +47,10 @@ namespace LeyLineHybridECS
                     if (isIdle.Value)
                     {
                         movementData.PathIndex = 0;
-                        occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
+                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
                         occupiedCell.Cell.GetComponent<IsTaken>().Value = false;
                         occupiedCell.Cell = pathLists.CurrentPath[0];
-                        occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
+                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
                         occupiedCell.gameObject.GetComponent<UnitVisionData>().RequireUpdate = true;
                         heading.Value = pathLists.CurrentPath[0].GetComponent<Position3DDataComponent>().Value.Value;
                         isIdle.Value = false;
@@ -74,17 +74,17 @@ namespace LeyLineHybridECS
                             PathIndex = movementData.PathIndex + 1
                         };
                         m_Data.MovementData[i] = tmpMovementData;
-                        occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
+                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
                         occupiedCell.Cell = pathLists.CurrentPath[m_Data.MovementData[i].PathIndex];
-                        occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
+                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
                         heading.Value = pathLists.CurrentPath[m_Data.MovementData[i].PathIndex].GetComponent<Position3DDataComponent>().Value.Value;
                         occupiedCell.gameObject.GetComponent<UnitVisionData>().RequireUpdate = true;
                     }
                     else
                     {
-                        occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
+                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
                         occupiedCell.Cell = pathLists.CurrentPath[movementData.PathIndex];
-                        occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
+                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
                         heading.Value = pathLists.CurrentPath[movementData.PathIndex].GetComponent<Position3DDataComponent>().Value.Value;
                         pathLists.CurrentPath[movementData.PathIndex].GetComponent<IsTaken>().Value = true;
                         occupiedCell.gameObject.GetComponent<UnitVisionData>().RequireUpdate = true;

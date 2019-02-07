@@ -4,6 +4,8 @@ using Unity.Mathematics;
 using System;
 using System.Collections.Generic;
 using Unity.Entities;
+using Improbable.Gdk;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
@@ -14,7 +16,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentArray<Cell> CellData;
-            public readonly ComponentDataArray<GridCoordinates> OffsetCoordinateData;
+            public readonly ComponentDataArray<Cells.CubeCoordinate.Component> CoordinateData;
         }
 
         [Inject] Data m_Data;
@@ -29,28 +31,29 @@ namespace LeyLineHybridECS
         new float3(-1, +1, 0), new float3(-1, 0, +1), new float3(0, -1, +1)};
 
 
-        public int GetDistance(float3 originCubeCoordinate, float3 otherCubeCoordinate)
+        public int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
         {
-            int distance = (int)(Mathf.Abs(originCubeCoordinate.x - otherCubeCoordinate.x) + Mathf.Abs(originCubeCoordinate.y - otherCubeCoordinate.y) + Mathf.Abs(originCubeCoordinate.z - otherCubeCoordinate.z)) / 2;
+            int distance = (int)(Mathf.Abs(originCubeCoordinate.X - otherCubeCoordinate.X) + Mathf.Abs(originCubeCoordinate.Y - otherCubeCoordinate.Y) + Mathf.Abs(originCubeCoordinate.Z - otherCubeCoordinate.Z)) / 2;
             return distance;
         }//Distance is given using Manhattan Norm.
 
 
-        public List<Cell> GetRadius(float3 originCellCubeCoordinate, int radius)
+        public List<Vector3f> GetRadius(Vector3f originCellCubeCoordinate, int radius)
         {
-            var neighbours = new List<Cell>();
+            //returns a list of offsetCoordinates
+            var coordsInRadius = new List<Vector3f>();
 
             for(int i = 0; i < m_Data.Length; i++)
             {
                 var cell = m_Data.CellData[i];
 
-                float3 cubeCoordinate = m_Data.OffsetCoordinateData[i].CubeCoordinate;
+                Vector3f cubeCoordinate = m_Data.CoordinateData[i].CubeCoordinate;
 
                 if (GetDistance(originCellCubeCoordinate, cubeCoordinate) < radius)
-                    neighbours.Add(cell);
+                    coordsInRadius.Add(m_Data.CoordinateData[i].CubeCoordinate);
             }
 
-            return neighbours;
+            return coordsInRadius;
         }
 
         public float GetAngles(Cell origin, Cell target)

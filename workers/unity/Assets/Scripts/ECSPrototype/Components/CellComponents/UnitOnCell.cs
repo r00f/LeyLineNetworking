@@ -5,6 +5,6 @@ namespace LeyLineHybridECS
 {
     public class UnitOnCell : MonoBehaviour
     {
-        public Unit Value;
+        //public Unit Value;
     }
 }

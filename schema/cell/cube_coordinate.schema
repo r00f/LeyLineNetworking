@@ -1,0 +1,10 @@
+package cells;
+
+import "improbable/vector3.schema";
+		
+component CubeCoordinate {
+	
+    id = 107;
+    improbable.Vector3f cube_coordinate  = 1;
+	
+}
