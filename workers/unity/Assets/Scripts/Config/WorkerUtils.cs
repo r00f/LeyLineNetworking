@@ -19,6 +19,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<AddComponentsSystem>();
         world.GetOrCreateManager<PlayerStateSystem>();
         world.GetOrCreateManager<SendCellsInRangeRequestSystem>();
+        //world.GetOrCreateManager<HandleCellsInRangeResponseSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -27,7 +28,6 @@ public static class WorkerUtils
         world.GetOrCreateManager<SetPlayerFactionSystem>();
         world.GetOrCreateManager<SetGameStateSystem>();
         world.GetOrCreateManager<HandleCellsInRangeRequestSystem>();
-        world.GetOrCreateManager<HandleCellsInRangeResponseSystem>();
     }
 
 }
