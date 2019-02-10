@@ -32,7 +32,7 @@ public static class LeyLineEntityTemplates {
     }
 
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName, List<Cells.CellAttribute> neighbours)
     {
         
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -48,14 +48,26 @@ public static class LeyLineEntityTemplates {
             }
         };
 
-        var coord = new Cells.CubeCoordinate.Snapshot
+        var coord = new Generic.CubeCoordinate.Snapshot
         {
             CubeCoordinate = cubeCoordinate
         };
 
-        var taken = new Cells.IsTaken.Snapshot
+
+        var cellAttributes = new Cells.CellAttributesComponent.Snapshot
         {
-            IsTaken = isTaken
+            CellAttributes = new Cells.CellAttributes
+            {
+                Cell = new Cells.CellAttribute
+                {
+                    Position = position,
+                    CubeCoordinate = cubeCoordinate,
+                    IsTaken = isTaken,
+                    MovementCost = 1
+                },
+                Neighbours = neighbours
+            }
+
         };
 
         var unitToSpawn = new Cells.UnitToSpawn.Snapshot
@@ -69,7 +81,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(new Persistence.Snapshot(), gameLogic);
         template.AddComponent(unitToSpawn, gameLogic);
         template.AddComponent(coord, gameLogic);
-        template.AddComponent(taken, gameLogic);
+        template.AddComponent(cellAttributes, gameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
     }
@@ -101,8 +113,13 @@ public static class LeyLineEntityTemplates {
         var serverMovement = new ServerMovement.Snapshot { Latest = serverResponse };
         var clientMovement = new ClientMovement.Snapshot { Latest = new ClientRequest() };
         var clientRotation = new ClientRotation.Snapshot { Latest = rotationUpdate };
+        var owningWorker = new Improbable.PlayerLifecycle.OwningWorker.Snapshot
+        {
+            WorkerId = client
+        };
 
         var template = new EntityTemplate();
+        template.AddComponent(owningWorker, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
@@ -116,15 +133,16 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction)
+    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction)
     {
+        var client = workerId;
 
         var pos = new Position.Snapshot
         {
             Coords = position.Coords
         };
 
-        var coord = new Cells.CubeCoordinate.Snapshot
+        var coord = new Generic.CubeCoordinate.Snapshot
         {
             CubeCoordinate = cubeCoordinate
         };
@@ -144,7 +162,13 @@ public static class LeyLineEntityTemplates {
 
         var cellsToMarkSnapshot = new Unit.CellsToMark.Snapshot
         {
-            CellsInRange = new List<Vector3f>()
+            CellsInRange = new List<Cells.CellAttributes>(),
+            CachedPaths = new Dictionary<Cells.CellAttribute, Unit.CellAttributeList>()
+        };
+
+        var currentPathSnapshot = new Unit.CurrentPath.Snapshot
+        {
+            Path = new Unit.CellAttributeList(new List<Cells.CellAttribute>()),
         };
 
         var template = new EntityTemplate();
@@ -154,6 +178,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
+        template.AddComponent(currentPathSnapshot, client);
         //template.AddComponent(new HealthRegenComponent.Snapshot(), WorkerUtils.UnityGameLogic);
 
         template.SetReadAccess(AllWorkerAttributes.ToArray());

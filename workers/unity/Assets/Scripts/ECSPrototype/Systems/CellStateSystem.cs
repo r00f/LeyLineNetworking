@@ -12,10 +12,10 @@ namespace LeyLineHybridECS
         public struct Data
         {
             public readonly int Length;
-            public readonly ComponentDataArray<Cells.CubeCoordinate.Component> CoordinateData;
+            public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
+            public readonly ComponentDataArray<Cells.CellAttributesComponent.Component> Celldata;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public ComponentDataArray<MarkerState> MarkerStateData;
-
         }
 
         [Inject] private Data m_Data;
@@ -45,7 +45,7 @@ namespace LeyLineHybridECS
             {
                 MouseState mouseState = m_Data.MouseStateData[i];
                 MarkerState markerState = m_Data.MarkerStateData[i];
-                Vector3f coord = m_Data.CoordinateData[i].CubeCoordinate;
+                Vector3f coords = m_Data.CoordinateData[i].CubeCoordinate;
 
                 for (int ui = 0; ui < m_UnitData.Length; ++ui)
                 {
@@ -54,9 +54,9 @@ namespace LeyLineHybridECS
 
                     if(faction == m_PlayerData.FactionData[0].Faction)
                     {
-                        foreach (Vector3f c in cellsToMark.CellsInRange)
+                        foreach (Cells.CellAttribute c in cellsToMark.CachedPaths.Keys)
                         {
-                            if (c == coord)
+                            if (c.CubeCoordinate == coords)
                             {
                                 if (m_PlayerData.PlayerStateData[0].CurrentState == Player.PlayerStateEnum.unit_selected)
                                 {

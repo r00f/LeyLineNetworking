@@ -11,7 +11,7 @@ public class AddComponentsSystem : ComponentSystem
         public readonly int Length;
         public EntityArray Entites;
         [ReadOnly] public ComponentArray<Transform> Transform;
-        [ReadOnly] public ComponentDataArray<Cells.IsTaken.Component> IsTakenComponent;
+        [ReadOnly] public ComponentDataArray<Cells.CellAttributesComponent.Component> CellAttributesData;
         [ReadOnly] public ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
     }
 

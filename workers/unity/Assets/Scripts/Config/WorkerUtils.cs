@@ -18,8 +18,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<CellMarkerSystem>();
         world.GetOrCreateManager<AddComponentsSystem>();
         world.GetOrCreateManager<PlayerStateSystem>();
-        world.GetOrCreateManager<SendCellsInRangeRequestSystem>();
-        //world.GetOrCreateManager<HandleCellsInRangeResponseSystem>();
+        world.GetOrCreateManager<SendCellGridRequestsSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -27,7 +26,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<SpawnUnitsSystem>();
         world.GetOrCreateManager<SetPlayerFactionSystem>();
         world.GetOrCreateManager<SetGameStateSystem>();
-        world.GetOrCreateManager<HandleCellsInRangeRequestSystem>();
+        world.GetOrCreateManager<HandleCellGridRequestsSystem>();
     }
 
 }

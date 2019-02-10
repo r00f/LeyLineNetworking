@@ -1,0 +1,11 @@
+package unit;
+
+import "unit/cells_to_mark.schema";
+
+component CurrentPath {
+	
+    id = 109;
+	unit.CellAttributeList path = 1;
+
+}
+

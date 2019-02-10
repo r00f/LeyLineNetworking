@@ -16,7 +16,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentArray<Cell> CellData;
-            public readonly ComponentDataArray<Cells.CubeCoordinate.Component> CoordinateData;
+           // public readonly ComponentDataArray<Cells.CellAttributes.Component> CellData;
         }
 
         [Inject] Data m_Data;
@@ -37,7 +37,7 @@ namespace LeyLineHybridECS
             return distance;
         }//Distance is given using Manhattan Norm.
 
-
+        /*
         public List<Vector3f> GetRadius(Vector3f originCellCubeCoordinate, int radius)
         {
             //returns a list of offsetCoordinates
@@ -66,7 +66,7 @@ namespace LeyLineHybridECS
             //Debug.Log(Angle);
             return Angle;
         }
-
+        */
     }
 
 

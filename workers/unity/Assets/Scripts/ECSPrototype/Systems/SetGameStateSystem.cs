@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Entities;
+using Improbable.PlayerLifecycle;
 
 namespace LeyLineHybridECS
 {
@@ -32,6 +33,9 @@ namespace LeyLineHybridECS
         */
         protected override void OnUpdate()
         {
+
+            if (m_PlayerData.Length == 0)
+                return;
 
             var gameState = m_Data.GameStateData[0];
 

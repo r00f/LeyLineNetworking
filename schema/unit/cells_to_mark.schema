@@ -1,6 +1,13 @@
 package unit;
 
 import "improbable/vector3.schema";
+import "cells/cell_attributes.schema";
+
+type CellAttributeList {
+
+	list<cells.CellAttribute> cell_attributes = 1;
+
+}
 
 
 type CellsInRangeRequest {
@@ -12,14 +19,31 @@ type CellsInRangeRequest {
 
 type CellsInRangeResponse {
 
-	list<improbable.Vector3f> cells_in_range = 1;
 
 }
+
+
+type FindAllPathsRequest {
+
+	cells.CellAttribute origin = 1;
+	uint32 range = 2;
+	list<cells.CellAttributes> cells_in_range = 3;
+	map<cells.CellAttribute, CellAttributeList> cached_paths = 4;
+
+}
+
+type FindAllPathsResponse {
+
+}
+
 
 component CellsToMark {
 	
     id = 106;
 	command CellsInRangeResponse cells_in_range_command(CellsInRangeRequest);
-	list<improbable.Vector3f> cells_in_range = 1;
+	command FindAllPathsResponse find_all_paths_command(FindAllPathsRequest);
+	list<cells.CellAttributes> cells_in_range = 1;
+	map<cells.CellAttribute, CellAttributeList> cached_paths = 2;
 
 }
+

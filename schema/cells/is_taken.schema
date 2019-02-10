@@ -1,0 +1,8 @@
+package cells;
+		
+component IsTaken {
+	
+    id = 100;
+    bool is_taken = 1;
+	
+}

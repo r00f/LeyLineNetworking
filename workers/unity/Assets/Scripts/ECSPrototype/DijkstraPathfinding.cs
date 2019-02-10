@@ -9,54 +9,14 @@ namespace LeyLineHybridECS
 {
     class DijkstraPathfinding : IPathfinding
     {
-        public List<Cell> GetRadius(Dictionary<Cell, Dictionary<Cell, int>> edges, Cell originNode, int radius)
+        public Dictionary<Cells.CellAttribute, Unit.CellAttributeList> FindAllPaths(Dictionary<Cells.CellAttribute, Dictionary<Cells.CellAttribute, int>> edges, Cells.CellAttribute originNode)
         {
-            List<Cell> cellsInRadius = new List<Cell>();
-            IPriorityQueue<Cell> frontier = new HeapPriorityQueue<Cell>();
+            IPriorityQueue<Cells.CellAttribute> frontier = new HeapPriorityQueue<Cells.CellAttribute>();
             frontier.Enqueue(originNode, 0);
 
-            Dictionary<Cell, Cell> cameFrom = new Dictionary<Cell, Cell>();
-            cameFrom.Add(originNode, default(Cell));
-            Dictionary<Cell, int> costSoFar = new Dictionary<Cell, int>();
-            costSoFar.Add(originNode, 0);
-
-            while (frontier.Count != 0)
-            {
-                var current = frontier.Dequeue();
-                var neighbours = GetNeigbours(edges, current);
-                foreach (var neighbour in neighbours)
-                {
-                    var newCost = costSoFar[current] + edges[current][neighbour];
-                    if (newCost <= radius)
-                    {
-                        if (!costSoFar.ContainsKey(neighbour) || newCost < costSoFar[neighbour])
-                        {
-                            costSoFar[neighbour] = newCost;
-                            cameFrom[neighbour] = current;
-                            frontier.Enqueue(neighbour, newCost);
-                        }
-
-                    }
-
-                }
-            }
-
-            foreach (Cell destination in cameFrom.Keys)
-            {
-                cellsInRadius.Add(destination);
-            }
-
-            return cellsInRadius;
-        }
-
-        public Dictionary<Cell, List<Cell>> FindAllPaths(Dictionary<Cell, Dictionary<Cell, int>> edges, Cell originNode)
-        {
-            IPriorityQueue<Cell> frontier = new HeapPriorityQueue<Cell>();
-            frontier.Enqueue(originNode, 0);
-
-            Dictionary<Cell, Cell> cameFrom = new Dictionary<Cell, Cell>();
-            cameFrom.Add(originNode, default(Cell));
-            Dictionary<Cell, int> costSoFar = new Dictionary<Cell, int>();
+            Dictionary<Cells.CellAttribute, Cells.CellAttribute> cameFrom = new Dictionary<Cells.CellAttribute, Cells.CellAttribute>();
+            cameFrom.Add(originNode, default(Cells.CellAttribute));
+            Dictionary<Cells.CellAttribute, int> costSoFar = new Dictionary<Cells.CellAttribute, int>();
             costSoFar.Add(originNode, 0);
 
             while (frontier.Count != 0)
@@ -75,17 +35,17 @@ namespace LeyLineHybridECS
                 }
             }
 
-            Dictionary<Cell, List<Cell>> paths = new Dictionary<Cell, List<Cell>>();
-            foreach (Cell destination in cameFrom.Keys)
+            Dictionary<Cells.CellAttribute, Unit.CellAttributeList> paths = new Dictionary<Cells.CellAttribute, Unit.CellAttributeList>();
+            foreach (Cells.CellAttribute destination in cameFrom.Keys)
             {
-                List<Cell> path = new List<Cell>();
+                List<Cells.CellAttribute> path = new List<Cells.CellAttribute>();
                 var current = destination;
                 while (!current.Equals(originNode))
                 {
                     path.Add(current);
                     current = cameFrom[current];
                 }
-                paths.Add(destination, path);
+                paths.Add(destination, new Unit.CellAttributeList {CellAttributes = path});
             }
             return paths;
         }

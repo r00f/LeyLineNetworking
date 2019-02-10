@@ -4,6 +4,7 @@ using Improbable.PlayerLifecycle;
 using UnityEngine;
 using Snapshot = Improbable.Gdk.Core.Snapshot;
 using LeyLineHybridECS;
+using System.Collections.Generic;
 
 namespace BlankProject.Editor
 {
@@ -41,8 +42,20 @@ namespace BlankProject.Editor
         {
             foreach (Cell c in Object.FindObjectsOfType<Cell>())
             {
+                var neighbours = new List<Cells.CellAttribute>();
+                foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                {
+                    neighbours.Add(new Cells.CellAttribute
+                    {
+                        Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
+                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                        IsTaken = n.GetComponent<IsTaken>().Value,
+                        MovementCost = n.GetComponent<MovementCost>().Value
+                    });
+                }
                 var cell = LeyLineEntityTemplates.Cell(new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z), 
-                    new Vector3f(c.GetComponent<Position3DDataComponent>().Value.Value.x, c.GetComponent<Position3DDataComponent>().Value.Value.y, c.GetComponent<Position3DDataComponent>().Value.Value.z), c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawn>().UnitName);
+                    new Vector3f(c.GetComponent<Position3DDataComponent>().Value.Value.x, c.GetComponent<Position3DDataComponent>().Value.Value.y, c.GetComponent<Position3DDataComponent>().Value.Value.z), c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawn>().UnitName,
+                    neighbours);
                 snapshot.AddEntity(cell);
             }
         }
