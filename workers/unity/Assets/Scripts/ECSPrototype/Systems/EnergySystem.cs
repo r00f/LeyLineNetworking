@@ -28,7 +28,7 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-
+            /*
             if (GameStateSystem.CurrentState == GameStateSystem.State.CalculateEnergy)
             {
                 for (int pi = 0; pi < m_PlayerData.Length; pi++)
@@ -59,7 +59,7 @@ namespace LeyLineHybridECS
                     }
                 }
             }
-
+            */
             for (int i = 0; i < m_PlayerData.Length; i++)
             {
                 if(m_PlayerData.PlayerEnergyData[i].EnergyBarInstance)

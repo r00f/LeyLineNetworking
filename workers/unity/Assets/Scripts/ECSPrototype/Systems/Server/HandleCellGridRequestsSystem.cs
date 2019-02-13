@@ -69,7 +69,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                 foreach (var findAllPathsRequest in findAllPathsRequests.Requests)
                 {
-                    cellsToMarkData.CachedPaths = GetAllPathsInRadius(findAllPathsRequest.Payload.Range, findAllPathsRequest.Payload.CellsInRange, findAllPathsRequest.Payload.Origin, cellsToMarkData.CachedPaths);
+                    cellsToMarkData.CachedPaths = GetAllPathsInRadius(findAllPathsRequest.Payload.Range, findAllPathsRequest.Payload.CellsInRange, findAllPathsRequest.Payload.Origin);
                     m_FindAllPathsRequestData.CellsToMarkData[ci] = cellsToMarkData;
                 }
             }
@@ -106,10 +106,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return cellsInRadius;
     }
 
-    public Dictionary<Cells.CellAttribute, Unit.CellAttributeList> GetAllPathsInRadius(uint radius, List<Cells.CellAttributes> cellsInRange, Cells.CellAttribute origin, Dictionary<Cells.CellAttribute, Unit.CellAttributeList> cachedPaths)
+    public Dictionary<Cells.CellAttribute, Unit.CellAttributeList> GetAllPathsInRadius(uint radius, List<Cells.CellAttributes> cellsInRange, Cells.CellAttribute origin)
     {
         var paths = CachePaths(cellsInRange, origin);
-
+        var cachedPaths = new Dictionary<Cells.CellAttribute, Unit.CellAttributeList>();
         foreach (var key in paths.Keys)
         {
             var path = paths[key];

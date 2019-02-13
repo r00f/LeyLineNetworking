@@ -38,7 +38,7 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1265331746098294776}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -256,14 +256,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 1bb6ea378b0b19a4a9543a50f92ba338, type: 2}
-    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 400008, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -306,6 +298,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400008, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 1bb6ea378b0b19a4a9543a50f92ba338, type: 2}
+    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
+      propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100120, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}

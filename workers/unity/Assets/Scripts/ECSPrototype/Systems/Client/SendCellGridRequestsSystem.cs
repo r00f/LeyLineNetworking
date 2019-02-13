@@ -5,6 +5,8 @@ using Improbable;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
+using Generic;
+using Unit;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendCellGridRequestsSystem : ComponentSystem
@@ -12,12 +14,13 @@ public class SendCellGridRequestsSystem : ComponentSystem
     public struct CellsInRangeRequestData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<CurrentPath.Component>> AuthorativeData;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<MouseState> MouseStateData;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<Unit.CellsToMark.Component> CellsToMarkData;
-        public ComponentDataArray<Unit.CellsToMark.CommandSenders.CellsInRangeCommand> CellsInRangeSenders;
-        public ComponentDataArray<Unit.CellsToMark.CommandSenders.FindAllPathsCommand> FindAllPathsSenders;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+        public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<CellsToMark.CommandSenders.CellsInRangeCommand> CellsInRangeSenders;
+        public ComponentDataArray<CellsToMark.CommandSenders.FindAllPathsCommand> FindAllPathsSenders;
     }
 
     [Inject] private CellsInRangeRequestData m_CellsInRangeRequest;
@@ -35,18 +38,26 @@ public class SendCellGridRequestsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<MouseState> MouseStateData;
-        public readonly ComponentDataArray<Unit.CellsToMark.Component> CellsToMarkData;
-        public ComponentDataArray<Unit.CurrentPath.Component> PathData;
+        public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<CurrentPath.Component> PathData;
     }
 
     [Inject] private CurrentPathData m_CurrentPathData;
+
+    public struct GameStateData
+    {
+        public readonly ComponentDataArray<GameState.Component> GameState;
+    }
+
+    [Inject] private GameStateData m_GameStateData;
 
     public struct LineRendererData
     {
         public readonly int Length;
         public readonly ComponentDataArray<MouseState> MouseStateData;
-        public readonly ComponentDataArray<Unit.CurrentPath.Component> Paths;
-        public readonly ComponentDataArray<Unit.CellsToMark.Component> CellsToMarkData;
+        public readonly ComponentDataArray<Authoritative<CurrentPath.Component>> AuthorativeData;
+        public ComponentDataArray<CurrentPath.Component> Paths;
+        public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public ComponentArray<LineRendererComponent> LineRenderers;
     }
 
@@ -54,6 +65,31 @@ public class SendCellGridRequestsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
+        {
+            for (int li = 0; li < m_LineRendererData.Length; li++)
+            {
+                var lr = m_LineRendererData.LineRenderers[li];
+
+                if (lr.lineRenderer.enabled)
+                {
+                    lr.lineRenderer.enabled = false;
+                }
+
+                if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.calculate_energy)
+                {
+                    var path = m_LineRendererData.Paths[li];
+                    if(path.Path.CellAttributes.Count > 0)
+                    {
+                        path.Path.CellAttributes.Clear();
+                        m_LineRendererData.Paths[li] = path;
+                    }
+
+                }
+            }
+            return;
+        }
+
         for (int i = 0; i < m_CellsInRangeRequest.Length; i++)
         {
             var mouseState = m_CellsInRangeRequest.MouseStateData[i];
@@ -69,10 +105,10 @@ public class SendCellGridRequestsSystem : ComponentSystem
                     var cellsInRangerequestSender = m_CellsInRangeRequest.CellsInRangeSenders[i];
                     var coord = m_CellsInRangeRequest.CoordinateData[i].CubeCoordinate;
 
-                    var request = Unit.CellsToMark.CellsInRangeCommand.CreateRequest
+                    var request = CellsToMark.CellsInRangeCommand.CreateRequest
                     (
                         targetEntityId,
-                        new Unit.CellsInRangeRequest(coord, 5)
+                        new CellsInRangeRequest(coord, 5)
                     );
 
                     cellsInRangerequestSender.RequestsToSend.Add(request);
@@ -83,10 +119,10 @@ public class SendCellGridRequestsSystem : ComponentSystem
                 {
                     var findAllPathsRequestSender = m_CellsInRangeRequest.FindAllPathsSenders[i];
 
-                    var request2 = Unit.CellsToMark.FindAllPathsCommand.CreateRequest
+                    var request2 = CellsToMark.FindAllPathsCommand.CreateRequest
                     (
                         targetEntityId,
-                        new Unit.FindAllPathsRequest(cellsToMark.CellsInRange[0].Cell, 5, cellsToMark.CellsInRange, cellsToMark.CachedPaths)
+                        new FindAllPathsRequest(cellsToMark.CellsInRange[0].Cell, 5, cellsToMark.CellsInRange)
                     );
 
                     findAllPathsRequestSender.RequestsToSend.Add(request2);
@@ -98,6 +134,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
         for (int pi = 0; pi < m_CurrentPathData.Length; pi++)
         {
             var mouseState = m_CurrentPathData.MouseStateData[pi];
+            var path = m_CurrentPathData.PathData[pi];
 
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
@@ -108,9 +145,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
 
                     if (cellMousestate.CurrentState == MouseState.State.Hovered)
                     {
-                        //Debug.Log("Update currentPath");
                         var cellsToMark = m_CurrentPathData.CellsToMarkData[pi];
-                        var path = m_CurrentPathData.PathData[pi];
                         path.Path = FindPath(cellAttributes.CellAttributes.Cell, cellsToMark.CachedPaths);
                         m_CurrentPathData.PathData[pi] = path;
                     }
@@ -119,18 +154,18 @@ public class SendCellGridRequestsSystem : ComponentSystem
         }
 
         //Update LineRenderers
-        
+
         for (int li = 0; li < m_LineRendererData.Length; li++)
         {
             var mouseState = m_LineRendererData.MouseStateData[li];
+            var lr = m_LineRendererData.LineRenderers[li];
 
-            if(mouseState.CurrentState == MouseState.State.Clicked)
+            if (mouseState.CurrentState == MouseState.State.Clicked)
             {
                 var path = m_LineRendererData.Paths[li];
-                var lr = m_LineRendererData.LineRenderers[li];
                 var cellsToMark = m_LineRendererData.CellsToMarkData[li];
                 //update Linerenderer
-
+                lr.lineRenderer.enabled = true;
                 lr.lineRenderer.positionCount = path.Path.CellAttributes.Count + 1;
                 lr.lineRenderer.SetPosition(0, lr.transform.position + lr.offset);
 
@@ -138,24 +173,19 @@ public class SendCellGridRequestsSystem : ComponentSystem
                 {
                     lr.lineRenderer.SetPosition(pi, path.Path.CellAttributes[pi - 1].Position.ToUnityVector() + lr.offset);
                 }
-
-                //clear currentpath and LineRenderer
-                //m_UnitData.PathListsData[i].CurrentPath.Clear();
-                //m_UnitData.PathListsData[i].LineRenderer.positionCount = 0;
             }
 
         }
-        
     }
 
-    public Unit.CellAttributeList FindPath(Cells.CellAttribute destination, Dictionary<Cells.CellAttribute, Unit.CellAttributeList> cachedPaths)
+    public CellAttributeList FindPath(Cells.CellAttribute destination, Dictionary<Cells.CellAttribute, CellAttributeList> cachedPaths)
     {
         if (cachedPaths.ContainsKey(destination))
         {
             return cachedPaths[destination];
         }
         else
-            return new Unit.CellAttributeList(new List<Cells.CellAttribute>());
+            return new CellAttributeList(new List<Cells.CellAttribute>());
     }
 
 }

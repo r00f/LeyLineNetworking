@@ -52,6 +52,7 @@ namespace LeyLineHybridECS
         {
             if (init) BuildFixClusters();
 
+            /*
             if(GameStateSystem.CurrentState == GameStateSystem.State.Moving)
             {
                 for (int i = m_uData.Length - 1; i >= 0; i--)
@@ -81,7 +82,7 @@ namespace LeyLineHybridECS
                 }
 
             }
-
+            */
 
             for (int i = 0; i < m_cData.Length; i++)
             {

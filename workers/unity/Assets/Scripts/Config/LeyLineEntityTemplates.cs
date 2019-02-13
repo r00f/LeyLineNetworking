@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Improbable;
+using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Movement;
 using Improbable.Gdk.StandardTypes;
@@ -110,18 +111,22 @@ public static class LeyLineEntityTemplates {
         };
 
         var pos = new Position.Snapshot { Coords = spawnPosition.ToSpatialCoordinates() };
+     
         var serverMovement = new ServerMovement.Snapshot { Latest = serverResponse };
         var clientMovement = new ClientMovement.Snapshot { Latest = new ClientRequest() };
         var clientRotation = new ClientRotation.Snapshot { Latest = rotationUpdate };
-        var owningWorker = new Improbable.PlayerLifecycle.OwningWorker.Snapshot
-        {
-            WorkerId = client
-        };
+
+        var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
+        var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
+        var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
+
 
         var template = new EntityTemplate();
-        template.AddComponent(owningWorker, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(clientHeartbeat, client);
+        template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
+        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Player.PlayerState.Snapshot(), client);
@@ -171,16 +176,21 @@ public static class LeyLineEntityTemplates {
             Path = new Unit.CellAttributeList(new List<Cells.CellAttribute>()),
         };
 
+        var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
+        var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
+        var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
+
         var template = new EntityTemplate();
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(clientHeartbeat, client);
+        template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
+        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(currentPathSnapshot, client);
-        //template.AddComponent(new HealthRegenComponent.Snapshot(), WorkerUtils.UnityGameLogic);
-
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
     }

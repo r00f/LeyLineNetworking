@@ -5,7 +5,7 @@ using Improbable.PlayerLifecycle;
 
 namespace LeyLineHybridECS
 {
-    public class SetGameStateSystem : ComponentSystem
+    public class GameStateSystem : ComponentSystem
     {
         public struct Data
         {
@@ -24,13 +24,15 @@ namespace LeyLineHybridECS
         [Inject] private PlayerData m_PlayerData;
 
 
-        /*
-        protected override void OnCreateManager()
+        public struct UnitData
         {
-            base.OnCreateManager();
-            GameStateSystem.CurrentState = GameStateSystem.State.Spawning;
+            public readonly int Length;
+            public readonly ComponentDataArray<Unit.CurrentPath.Component> Paths;
         }
-        */
+
+        [Inject] UnitData m_UnitData;
+
+
         protected override void OnUpdate()
         {
 
@@ -53,7 +55,6 @@ namespace LeyLineHybridECS
                     }
                     break;
                 case Generic.GameStateEnum.spawning:
-                    Debug.Log("Spawning");
                     gameState.CurrentState = Generic.GameStateEnum.attacking;
                     m_Data.GameStateData[0] = gameState;
                     break;
@@ -69,60 +70,11 @@ namespace LeyLineHybridECS
                     }
                     break;
                 case Generic.GameStateEnum.game_over:
-                    //display gameOver screen
+
                     break;
-
             }
-
-            /*
-            if (GameStateSystem.CurrentState == GameStateSystem.State.CalculateEnergy)
-            {
-                GameStateSystem.CurrentState = GameStateSystem.State.WaitingForInput;
-            }
-            else if (GameStateSystem.CurrentState == GameStateSystem.State.WaitingForInput)
-            {
-                if(AnyUnitClicked())
-                {
-                    GameStateSystem.CurrentState = GameStateSystem.State.UnitClicked;
-                }
-            }
-            else if(GameStateSystem.CurrentState == GameStateSystem.State.UnitClicked)
-            {
-                if (!AnyUnitClicked())
-                {
-                    GameStateSystem.CurrentState = GameStateSystem.State.WaitingForInput;
-                }
-            }
-            else if (GameStateSystem.CurrentState == GameStateSystem.State.Attacking)
-            {
-                GameStateSystem.CurrentState = GameStateSystem.State.Moving;
-            }
-            else if (GameStateSystem.CurrentState == GameStateSystem.State.Moving)
-            {
-                //if all Units are Idle, set GameState to Planning
-                if (AllUnitsIdle() && m_Data.Length != 0)
-                {
-                    GameStateSystem.CurrentState = GameStateSystem.State.CalculateEnergy;
-                }
-            }
-
-            */
         }
 
-        /*
-        private bool AnyUnitClicked()
-        {
-
-            //loop through all Units to check if clicked
-            for (int i = 0; i < m_Data.Length; i++)
-            {
-                var mouseState = m_Data.MouseStateData[i].CurrentState;
-                if (mouseState == MouseState.State.Clicked)
-                    return true;
-            }
-            return false;
-        }
-        */
         private bool AllPlayersReady()
         {
             for (int i = 0; i < m_PlayerData.Length; i++)
@@ -137,18 +89,16 @@ namespace LeyLineHybridECS
 
         private bool AllUnitsIdle()
         {
-            /*
             //loop through all Units to check if idle
-            for (int i = 0; i < m_Data.Length; i++)
+            for (int i = 0; i < m_UnitData.Length; i++)
             {
-                bool isIdle = m_Data.IsIdleData[i].Value;
-                if (isIdle == false)
+                var path = m_UnitData.Paths[i];
+                if (path.Path.CellAttributes.Count != 0)
                     return false;
             }
 
             return true;
-            */
-            return true;
+
         }
 
     }

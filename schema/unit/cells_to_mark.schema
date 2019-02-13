@@ -28,8 +28,6 @@ type FindAllPathsRequest {
 	cells.CellAttribute origin = 1;
 	uint32 range = 2;
 	list<cells.CellAttributes> cells_in_range = 3;
-	map<cells.CellAttribute, CellAttributeList> cached_paths = 4;
-
 }
 
 type FindAllPathsResponse {

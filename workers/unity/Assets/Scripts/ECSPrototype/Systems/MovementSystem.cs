@@ -4,24 +4,32 @@ using Unity.Entities;
 using Unity.Mathematics;
 using System.Collections;
 using System.Collections.Generic;
+using Generic;
+using Unit;
+using Improbable;
 using System; 
 
 namespace LeyLineHybridECS
 {
     public class MovementSystem : ComponentSystem
     {
-        public struct Data
+        public struct UnitData
         {
             public readonly int Length;
-            public ComponentDataArray<MovementData> MovementData;
-            public ComponentArray<Heading3D> HeadingData;
-            public ComponentDataArray<Position3D> Position3DData;
-            public ComponentArray<OccupiedCell> OccupiedCellData;
-            public ComponentArray<PathLists> PathListsData;
-            public ComponentArray<IsIdle> IsIdleData;
+            public ComponentDataArray<CellsToMark.Component> CellsToMark;
+            public ComponentDataArray<CubeCoordinate.Component> CubeCoordinates;
+            public ComponentDataArray<CurrentPath.Component> CurrentPaths;
+            public ComponentDataArray<Position.Component> Positions;
         }
 
-        [Inject] private Data m_Data;
+        [Inject] private UnitData m_UnitData;
+
+        public struct GameStateData
+        {
+            public readonly ComponentDataArray<GameState.Component> GameState;
+        }
+
+        [Inject] private GameStateData m_GameStateData;
 
         protected override void OnStartRunning()
         {
@@ -32,77 +40,40 @@ namespace LeyLineHybridECS
         protected override void OnUpdate()
         {
 
-            for (int i = 0; i < m_Data.Length; ++i)
+            for (int i = 0; i < m_UnitData.Length; ++i)
             {
-                var heading = m_Data.HeadingData[i];
-                var occupiedCell = m_Data.OccupiedCellData[i];
-                var position = m_Data.Position3DData[i];
-                var pathLists = m_Data.PathListsData[i];
-                var movementData = m_Data.MovementData[i];
-                var isIdle = m_Data.IsIdleData[i];
+                var currentPath = m_UnitData.CurrentPaths[i];
+                var position = m_UnitData.Positions[i];
+                var coord = m_UnitData.CubeCoordinates[i];
+                var cellsToMark = m_UnitData.CellsToMark[i];
 
-                //if the GameState is executing and the unit has a Path Planned
-                if (GameStateSystem.CurrentState == GameStateSystem.State.Moving && pathLists.CurrentPath.Count != 0)
+                if (m_GameStateData.GameState[0].CurrentState == GameStateEnum.moving)
                 {
-                    if (isIdle.Value)
-                    {
-                        movementData.PathIndex = 0;
-                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
-                        occupiedCell.Cell.GetComponent<IsTaken>().Value = false;
-                        occupiedCell.Cell = pathLists.CurrentPath[0];
-                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
-                        occupiedCell.gameObject.GetComponent<UnitVisionData>().RequireUpdate = true;
-                        heading.Value = pathLists.CurrentPath[0].GetComponent<Position3DDataComponent>().Value.Value;
-                        isIdle.Value = false;
-                    }
 
-                    if(!position.Value.Equals(heading.Value))
+                    if (currentPath.Path.CellAttributes.Count != 0)
                     {
-                        m_Data.Position3DData[i] = new Position3D{
-
-                            Value = Vector3.MoveTowards(position.Value, heading.Value, Time.deltaTime * movementData.Speed)
-                        };
-
-                    }
-                    else if (m_Data.MovementData[i].PathIndex < pathLists.CurrentPath.Count - 1 && !pathLists.CurrentPath[m_Data.MovementData[i].PathIndex + 1].GetComponent<IsTaken>().Value)
-                    {
-                        //movementData.PathIndex++;
-                        MovementData tmpMovementData = new MovementData
+                        if (position.Coords.ToUnityVector() != currentPath.Path.CellAttributes[0].Position.ToUnityVector())
                         {
-                            Range = movementData.Range,
-                            Speed = movementData.Speed,
-                            PathIndex = movementData.PathIndex + 1
-                        };
-                        m_Data.MovementData[i] = tmpMovementData;
-                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
-                        occupiedCell.Cell = pathLists.CurrentPath[m_Data.MovementData[i].PathIndex];
-                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
-                        heading.Value = pathLists.CurrentPath[m_Data.MovementData[i].PathIndex].GetComponent<Position3DDataComponent>().Value.Value;
-                        occupiedCell.gameObject.GetComponent<UnitVisionData>().RequireUpdate = true;
-                    }
-                    else
-                    {
-                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = null;
-                        occupiedCell.Cell = pathLists.CurrentPath[movementData.PathIndex];
-                        //occupiedCell.Cell.GetComponent<UnitOnCell>().Value = occupiedCell.GetComponent<Unit>();
-                        heading.Value = pathLists.CurrentPath[movementData.PathIndex].GetComponent<Position3DDataComponent>().Value.Value;
-                        pathLists.CurrentPath[movementData.PathIndex].GetComponent<IsTaken>().Value = true;
-                        occupiedCell.gameObject.GetComponent<UnitVisionData>().RequireUpdate = true;
-                        MovementData tmpMovementData = new MovementData
+                            Vector3 newPos = Vector3.MoveTowards(position.Coords.ToUnityVector(), currentPath.Path.CellAttributes[0].Position.ToUnityVector(), Time.deltaTime);
+                            position.Coords = new Coordinates(newPos.x, newPos.y, newPos.z);
+                            m_UnitData.Positions[i] = position;
+                        }
+                        else
                         {
-                            Range = movementData.Range,
-                            Speed = movementData.Speed,
-                            PathIndex = 0
-                        };
-                        m_Data.MovementData[i] = tmpMovementData;
-                        pathLists.CurrentPath.Clear();
-                        isIdle.Value = true;
+                            coord.CubeCoordinate = currentPath.Path.CellAttributes[0].CubeCoordinate;
+                            m_UnitData.CubeCoordinates[i] = coord;
+                            currentPath.Path.CellAttributes.RemoveAt(0);
+                        }
                     }
+                }
+                else if (m_GameStateData.GameState[0].CurrentState == GameStateEnum.calculate_energy)
+                {
+                    cellsToMark.CachedPaths = new Dictionary<Cells.CellAttribute, CellAttributeList>();
+                    cellsToMark.CellsInRange = new List<Cells.CellAttributes>();
 
+                    m_UnitData.CellsToMark[i] = cellsToMark;
                 }
             }
-
         }
     }
-
 }

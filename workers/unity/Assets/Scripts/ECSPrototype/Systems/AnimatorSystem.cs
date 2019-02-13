@@ -26,7 +26,7 @@ namespace LeyLineHybridECS
                 {
                     animatorState.CurrentState = 0;
                 }
-
+                /*
                 //if the GameState is executing and the unit has a Path Planned
                 if (GameStateSystem.CurrentState == GameStateSystem.State.Moving && pathLists.CurrentPath.Count != 0)
                 {
@@ -41,6 +41,7 @@ namespace LeyLineHybridECS
                 {
                     animatorState.Animator.SetBool("Moving", false);
                 }
+                */
             }
         }
     }
