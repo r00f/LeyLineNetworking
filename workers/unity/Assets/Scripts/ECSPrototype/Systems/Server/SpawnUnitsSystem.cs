@@ -7,7 +7,7 @@ using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
 {
-    [UpdateAfter(typeof(SetPlayerFactionSystem))]
+    [UpdateAfter(typeof(InitializePlayerSystem))]
     public class SpawnUnitsSystem : ComponentSystem
     {
         public struct Data
@@ -58,32 +58,24 @@ namespace LeyLineHybridECS
                         {
                             var playerFaction = m_PlayerData.Faction[pi];
                             var owningWorker = m_PlayerData.OwningWorker[pi];
-                            
 
-                            if(playerFaction.Faction == 1)
-                            {
-                                Debug.Log("SPAWNUNIT");
+                            Debug.Log("SPAWNUNIT");
 
-                                var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, 1);
+                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
 
-                                requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
-                                (
-                                    entity
-                                ));
+                            requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
+                            (
+                                entity
+                            ));
 
-                                m_Data.CreateEntitySender[i] = requestSender;
+                            m_Data.CreateEntitySender[i] = requestSender;
 
-                                var unitToSpawnComponent = m_Data.UnitToSpawn[i];
-                                unitToSpawnComponent.UnitName = "";
-                                m_Data.UnitToSpawn[i] = unitToSpawnComponent;
-
-                            }
+                            var unitToSpawnComponent = m_Data.UnitToSpawn[i];
+                            unitToSpawnComponent.UnitName = "";
+                            m_Data.UnitToSpawn[i] = unitToSpawnComponent;
                         }
                     }
                 }
-
-                //GameStateSystem.CurrentState = GameStateSystem.State.Attacking;
-
             }
         }
     }

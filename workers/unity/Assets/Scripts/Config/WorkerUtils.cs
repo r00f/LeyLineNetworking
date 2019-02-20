@@ -20,12 +20,13 @@ public static class WorkerUtils
         world.GetOrCreateManager<PlayerStateSystem>();
         world.GetOrCreateManager<SendCellGridRequestsSystem>();
         world.GetOrCreateManager<ClientMovementSystem>();
+        world.GetOrCreateManager<InitializeUnitsSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
     {
         world.GetOrCreateManager<SpawnUnitsSystem>();
-        world.GetOrCreateManager<SetPlayerFactionSystem>();
+        world.GetOrCreateManager<InitializePlayerSystem>();
         world.GetOrCreateManager<GameStateSystem>();
         world.GetOrCreateManager<HandleCellGridRequestsSystem>();
         world.GetOrCreateManager<MovementSystem>();

@@ -1,15 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Jobs;
-using Unity.Burst;
 using Unity.Collections;
 using Improbable;
-using Improbable.Gdk;
-using Improbable.Worker;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
+using UnityEngine.EventSystems;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class MouseStateSystem : JobComponentSystem
@@ -22,6 +18,13 @@ public class MouseStateSystem : JobComponentSystem
     }
 
     [Inject] private Data m_Data;
+
+    EventSystem eventSystem;
+
+    protected override void OnCreateManager()
+    {
+        eventSystem = Object.FindObjectOfType<EventSystem>();
+    }
 
     struct MouseStateJob : IJobParallelFor
     {
@@ -93,7 +96,7 @@ public class MouseStateSystem : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit) && !eventSystem.IsPointerOverGameObject())
         {
             var mouseStateJob = new MouseStateJob
             {
@@ -107,6 +110,5 @@ public class MouseStateSystem : JobComponentSystem
         }
         else
             return inputDeps;
-
     }
 }

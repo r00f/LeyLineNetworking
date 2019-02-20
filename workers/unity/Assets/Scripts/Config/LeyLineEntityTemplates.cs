@@ -8,6 +8,7 @@ using Improbable.Gdk.Health;
 using Improbable.Common;
 using Unity.Entities;
 using UnityEngine;
+using Player;
 
 public static class LeyLineEntityTemplates {
 
@@ -33,7 +34,7 @@ public static class LeyLineEntityTemplates {
     }
 
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName, List<Cells.CellAttribute> neighbours)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName, bool isSpawn, uint faction, List<Cells.CellAttribute> neighbours)
     {
         
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -73,7 +74,9 @@ public static class LeyLineEntityTemplates {
 
         var unitToSpawn = new Cells.UnitToSpawn.Snapshot
         {
-            UnitName = unitName
+            UnitName = unitName,
+            IsSpawn = isSpawn,
+            Faction = faction
         };
 
         var template = new EntityTemplate();
@@ -104,10 +107,15 @@ public static class LeyLineEntityTemplates {
             Pitch = spawnPitch.ToInt1k()
         };
 
-        var energy = new Player.EnergyComponent.Snapshot
+        var energy = new EnergyComponent.Snapshot
         {
             MaxEnergy = 10,
             Energy = 10
+        };
+
+        var playerAttributes = new PlayerAttributes.Snapshot
+        {
+            HeroName = "KingCroak"
         };
 
         var pos = new Position.Snapshot { Coords = spawnPosition.ToSpatialCoordinates() };
@@ -129,7 +137,8 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Player.PlayerState.Snapshot(), client);
+        template.AddComponent(new PlayerState.Snapshot(), client);
+        template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(serverMovement, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientMovement, client);
         template.AddComponent(clientRotation, client);
@@ -138,7 +147,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction)
+    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, Generic.FactionComponent.Component faction)
     {
         var client = workerId;
 
@@ -162,7 +171,8 @@ public static class LeyLineEntityTemplates {
 
         var factionSnapshot = new Generic.FactionComponent.Snapshot
         {
-            Faction = faction
+            Faction = faction.Faction,
+            TeamColor = faction.TeamColor
         };
 
         var cellsToMarkSnapshot = new Unit.CellsToMark.Snapshot

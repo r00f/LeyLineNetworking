@@ -54,7 +54,7 @@ namespace BlankProject.Editor
                     });
                 }
                 var cell = LeyLineEntityTemplates.Cell(new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z), 
-                    new Vector3f(c.GetComponent<Position3DDataComponent>().Value.Value.x, c.GetComponent<Position3DDataComponent>().Value.Value.y, c.GetComponent<Position3DDataComponent>().Value.Value.z), c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawn>().UnitName,
+                    new Vector3f(c.GetComponent<Position3DDataComponent>().Value.Value.x, c.GetComponent<Position3DDataComponent>().Value.Value.y, c.GetComponent<Position3DDataComponent>().Value.Value.z), c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawn>().UnitName, c.GetComponent<UnitToSpawn>().IsHeroSpawn, c.GetComponent<UnitToSpawn>().Faction,
                     neighbours);
                 snapshot.AddEntity(cell);
             }
