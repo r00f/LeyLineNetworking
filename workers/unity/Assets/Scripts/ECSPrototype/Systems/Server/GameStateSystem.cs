@@ -23,7 +23,6 @@ namespace LeyLineHybridECS
 
         [Inject] private PlayerData m_PlayerData;
 
-
         public struct UnitData
         {
             public readonly int Length;
@@ -31,7 +30,6 @@ namespace LeyLineHybridECS
         }
 
         [Inject] UnitData m_UnitData;
-
 
         protected override void OnUpdate()
         {
@@ -85,7 +83,6 @@ namespace LeyLineHybridECS
             }
             return true;
         }
-
 
         private bool AllUnitsIdle()
         {

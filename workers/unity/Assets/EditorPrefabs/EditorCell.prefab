@@ -130,6 +130,7 @@ GameObject:
   - component: {fileID: 114682127691947554}
   - component: {fileID: 114536721178803552}
   - component: {fileID: 4702773772585713269}
+  - component: {fileID: 6901035575790381649}
   m_Layer: 0
   m_Name: EditorCell
   m_TagString: Untagged
@@ -301,7 +302,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Value: 0
-  UnitOnCell: {fileID: 0}
 --- !u!114 &4702773772585713269
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -315,6 +315,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: 
+  IsHeroSpawn: 0
+  Faction: 0
+--- !u!114 &6901035575790381649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1667097178242444}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9e5b6fa085784934c8d3ea5d7a965b6a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Value: 0
 --- !u!1 &1669076608269378
 GameObject:
   m_ObjectHideFlags: 0
