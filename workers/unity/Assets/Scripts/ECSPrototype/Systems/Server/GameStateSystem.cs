@@ -2,6 +2,7 @@
 using System.Collections;
 using Unity.Entities;
 using Improbable.PlayerLifecycle;
+using Unit;
 
 namespace LeyLineHybridECS
 {
@@ -26,7 +27,7 @@ namespace LeyLineHybridECS
         public struct UnitData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<Unit.CurrentPath.Component> Paths;
+            public readonly ComponentDataArray<ServerPath.Component> Paths;
         }
 
         [Inject] UnitData m_UnitData;

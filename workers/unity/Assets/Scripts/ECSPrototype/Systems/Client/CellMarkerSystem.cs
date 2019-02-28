@@ -14,6 +14,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<MarkerState> MarkerStateData;
             public ComponentArray<MarkerGameObjects> MarkerGameObjectsData;
         }
+
         [Inject]
         private Data m_Data;
 

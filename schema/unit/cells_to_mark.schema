@@ -3,12 +3,6 @@ package unit;
 import "improbable/vector3.schema";
 import "cells/cell_attributes.schema";
 
-type CellAttributeList {
-
-	list<cells.CellAttribute> cell_attributes = 1;
-
-}
-
 
 type CellsInRangeRequest {
 
@@ -41,7 +35,7 @@ component CellsToMark {
 	command CellsInRangeResponse cells_in_range_command(CellsInRangeRequest);
 	command FindAllPathsResponse find_all_paths_command(FindAllPathsRequest);
 	list<cells.CellAttributes> cells_in_range = 1;
-	map<cells.CellAttribute, CellAttributeList> cached_paths = 2;
+	map<cells.CellAttribute, cells.CellAttributeList> cached_paths = 2;
 
 }
 

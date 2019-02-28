@@ -11,6 +11,7 @@ public static class WorkerUtils
     public const string UnityClient = "UnityClient";
     public const string UnityGameLogic = "UnityGameLogic";
 
+
     public static void AddClientSystems(World world)
     {
         world.GetOrCreateManager<MouseStateSystem>();
@@ -21,6 +22,8 @@ public static class WorkerUtils
         world.GetOrCreateManager<SendCellGridRequestsSystem>();
         world.GetOrCreateManager<ClientMovementSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
+        world.GetOrCreateManager<ClientPathVisualsSystem>();
+        //world.GetOrCreateManager<MeshColorLerpSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -30,6 +33,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<GameStateSystem>();
         world.GetOrCreateManager<HandleCellGridRequestsSystem>();
         world.GetOrCreateManager<MovementSystem>();
+        world.GetOrCreateManager<ManalithSystem>();
     }
 
 }

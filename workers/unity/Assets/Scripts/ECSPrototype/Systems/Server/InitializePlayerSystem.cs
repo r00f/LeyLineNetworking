@@ -53,7 +53,7 @@ public class InitializePlayerSystem : ComponentSystem
 
                     if(unitToSpawn.IsSpawn)
                     {
-                        if (unitToSpawn.Faction == (uint)m_PlayerData.Length)
+                        if (unitToSpawn.Faction == factionComp.Faction)
                         {
                             unitToSpawn.UnitName = playerAttributes.HeroName;
                             unitToSpawn.TeamColor = factionComp.TeamColor;

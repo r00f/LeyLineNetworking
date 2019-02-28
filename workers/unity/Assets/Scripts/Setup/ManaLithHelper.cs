@@ -28,6 +28,11 @@ namespace LeyLineHybridECS
                 myTarget.ConnectManaLith();
             }
 
+            if (GUILayout.Button("Move Transform"))
+            {
+                myTarget.MoveTransform();
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
 

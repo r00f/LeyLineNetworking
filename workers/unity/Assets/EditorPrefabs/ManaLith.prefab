@@ -16,7 +16,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 0
 --- !u!4 &6723355821302448604
 Transform:
@@ -93,12 +93,13 @@ GameObject:
   - component: {fileID: 6937184275549026721}
   - component: {fileID: 1834378173387480814}
   - component: {fileID: 8904282212590161307}
+  - component: {fileID: 5355327006581274844}
   m_Layer: 8
   m_Name: LeyLinePathRenderer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &5919806952928909310
 Transform:
@@ -4949,6 +4950,18 @@ MonoBehaviour:
   mesh: {fileID: 0}
   uv: []
   colors: []
+--- !u!114 &5355327006581274844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3416131609979959237}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &8076838793856098722
 GameObject:
   m_ObjectHideFlags: 0
@@ -4969,7 +4982,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &2569946401504693920
 Transform:
@@ -9819,12 +9832,13 @@ GameObject:
   - component: {fileID: 2851528508582804146}
   - component: {fileID: 1677520158795209200}
   - component: {fileID: 4955763010153806745}
+  - component: {fileID: 3716064494397730003}
   m_Layer: 8
   m_Name: ManaLith
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 4294967295
+  m_StaticEditorFlags: 0
   m_IsActive: 1
 --- !u!4 &3686015656037253889
 Transform:
@@ -9875,6 +9889,7 @@ MonoBehaviour:
   leyLineCircleMeshRenderer: {fileID: 1117199391049767067}
   circlePs: {fileID: 1484804398595048160}
   pathPs: {fileID: 2120174005218378684}
+  leyLineCircle: []
   connectedLeyLineRenderers: []
   connectedManaLith: {fileID: 0}
   otherManaliths: []
@@ -9898,3 +9913,15 @@ MonoBehaviour:
   LerpColor: {r: 0, g: 0, b: 0, a: 0}
   MeshRenderer: {fileID: 1117199391049767067}
   ParticleSystem: {fileID: 1484804398595048160}
+--- !u!114 &3716064494397730003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8361903899685021776}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 

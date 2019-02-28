@@ -59,20 +59,24 @@ namespace LeyLineHybridECS
                             var playerFaction = m_PlayerData.Faction[pi];
                             var owningWorker = m_PlayerData.OwningWorker[pi];
 
-                            Debug.Log("SPAWNUNIT");
+                            if(unitToSpawn.Faction == playerFaction.Faction)
+                            {
+                                Debug.Log("SPAWNUNIT");
 
-                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
+                                var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
 
-                            requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
-                            (
-                                entity
-                            ));
+                                requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
+                                (
+                                    entity
+                                ));
 
-                            m_Data.CreateEntitySender[i] = requestSender;
+                                m_Data.CreateEntitySender[i] = requestSender;
 
-                            var unitToSpawnComponent = m_Data.UnitToSpawn[i];
-                            unitToSpawnComponent.UnitName = "";
-                            m_Data.UnitToSpawn[i] = unitToSpawnComponent;
+                                var unitToSpawnComponent = m_Data.UnitToSpawn[i];
+                                unitToSpawnComponent.UnitName = "";
+                                m_Data.UnitToSpawn[i] = unitToSpawnComponent;
+
+                            }
                         }
                     }
                 }
