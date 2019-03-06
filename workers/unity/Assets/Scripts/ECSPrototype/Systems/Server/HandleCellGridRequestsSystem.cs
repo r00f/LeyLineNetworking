@@ -9,7 +9,7 @@ using System.Linq;
 using Cells;
 using Unit;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+//[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
@@ -54,7 +54,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<CellAttributesComponent.Component> CellsData;
+        public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
 
     [Inject] private CellData m_CellData;
@@ -124,7 +124,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             {
                 foreach (var findPathRequest in findPathRequests.Requests)
                 {
-                    Debug.Log("findPathRequest");
+                    //Debug.Log("findPathRequest");
                     serverPathData.Path = FindPath(findPathRequest.Payload.Destination, cellsToMarkData.CachedPaths);
                     m_FindPathRequestData.ServerPathData[i] = serverPathData;
                 }
@@ -152,12 +152,12 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             if (GetDistance(originCellCubeCoordinate, cubeCoordinate) <= radius)
             {
-                if(m_CellData.CellsData[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
+                if(m_CellData.CellAttributes[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
                 {
-                    cellsInRadius[0] = m_CellData.CellsData[i].CellAttributes;
+                    cellsInRadius[0] = m_CellData.CellAttributes[i].CellAttributes;
                 }
                 else
-                    cellsInRadius.Add(m_CellData.CellsData[i].CellAttributes);
+                    cellsInRadius.Add(m_CellData.CellAttributes[i].CellAttributes);
             }
         }
         return cellsInRadius;
@@ -237,5 +237,58 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         }
         else
             return new CellAttributeList(new List<CellAttribute>());
+    }
+
+    public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, EntityId entityId)
+    {
+        CellAttributes cellAtt = new CellAttributes
+        {
+            Neighbours = cellAttributes.Neighbours,
+
+            Cell = new CellAttribute
+            {
+                IsTaken = isTaken,
+                UnitOnCellId = entityId,
+
+                MovementCost = cellAttributes.Cell.MovementCost,
+                Position = cellAttributes.Cell.Position,
+                CubeCoordinate = cellAttributes.Cell.CubeCoordinate,
+
+            }
+
+        };
+
+        UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours);
+
+        return cellAtt;
+    }
+
+    public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours)
+    {
+        for (int ci = 0; ci < m_CellData.Length; ci++)
+        {
+            var cellAtt = m_CellData.CellAttributes[ci];
+
+            for (int n = 0; n < neighbours.CellAttributes.Count; n++)
+            {
+                if (neighbours.CellAttributes[n].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
+                {
+                    for (int cn = 0; cn < cellAtt.CellAttributes.Neighbours.CellAttributes.Count; cn++)
+                    {
+                        if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
+                        {
+                            cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = new CellAttribute
+                            {
+                                IsTaken = cell.IsTaken,
+                                CubeCoordinate = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate,
+                                Position = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].Position,
+                                MovementCost = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].MovementCost
+                            };
+                            m_CellData.CellAttributes[ci] = cellAtt;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

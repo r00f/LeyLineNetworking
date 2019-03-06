@@ -106,7 +106,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
                         {
                             if (destinationCell.CubeCoordinate == clientPath.Path.CellAttributes[clientPath.Path.CellAttributes.Count - 1].CubeCoordinate)
                             {
-                                Debug.Log("ClickEvent");
+                                //Debug.Log("ClickEvent");
                                 var findPathRequestSender = m_CellsInRangeRequest.FindPathSenders[i];
 
                                 var request3 = ServerPath.FindPathCommand.CreateRequest

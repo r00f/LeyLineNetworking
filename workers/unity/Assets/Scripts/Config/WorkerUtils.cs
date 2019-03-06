@@ -23,17 +23,17 @@ public static class WorkerUtils
         world.GetOrCreateManager<ClientMovementSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
         world.GetOrCreateManager<ClientPathVisualsSystem>();
-        //world.GetOrCreateManager<MeshColorLerpSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
     {
-        world.GetOrCreateManager<SpawnUnitsSystem>();
-        world.GetOrCreateManager<InitializePlayerSystem>();
         world.GetOrCreateManager<GameStateSystem>();
+        world.GetOrCreateManager<InitializePlayerSystem>();
+        world.GetOrCreateManager<SpawnUnitsSystem>();
         world.GetOrCreateManager<HandleCellGridRequestsSystem>();
         world.GetOrCreateManager<MovementSystem>();
         world.GetOrCreateManager<ManalithSystem>();
+        world.GetOrCreateManager<UnitLifeCycleSystem>();
     }
 
 }

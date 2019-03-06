@@ -236,9 +236,13 @@ public class Moba_Camera : MonoBehaviour {
 	// Constant values
 	private const float MAXROTATIONXAXIS = 89.0f;
 	private const float MINROTATIONXAXIS = -89.0f;
+
+    HeroTransform heroTransform;
 	
 	// Use this for initialization
 	void Start () {
+
+        heroTransform = GetComponent<HeroTransform>();
 		
 		if(!requirements.pivot || !requirements.offset || !requirements.camera) {
 			string missingRequirements = "";
@@ -289,8 +293,10 @@ public class Moba_Camera : MonoBehaviour {
 	
 	// Called from Update or FixedUpdate Depending on value of useFixedUpdate
 	void CameraUpdate()
-	{	
-		CalculateCameraZoom();
+	{
+        SetTarget();
+
+        CalculateCameraZoom();
 		
 		CalculateCameraRotation();
 		
@@ -300,6 +306,18 @@ public class Moba_Camera : MonoBehaviour {
 		
 		CalculateCameraBoundaries();
 	}
+
+    void SetTarget()
+    {
+        if(heroTransform.Transform != null)
+        {
+            if(settings.lockTargetTransform == null)
+            {
+                settings.lockTargetTransform = heroTransform.Transform;
+                settings.cameraLocked = true;
+            }
+        }
+    }
 	
 	void CalculateCameraZoom() {
 		////////////////////////////////////////////////////////////////////////////////////////////////////

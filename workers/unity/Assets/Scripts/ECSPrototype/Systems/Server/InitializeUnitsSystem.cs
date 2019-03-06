@@ -9,6 +9,7 @@ public class InitializeUnitsSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
+        public readonly ComponentArray<Transform> Transforms;
         public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
         public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
         public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
@@ -16,16 +17,26 @@ public class InitializeUnitsSystem : ComponentSystem
 
     [Inject] private UnitData m_UnitData;
 
+    public struct PlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
+        public ComponentArray<HeroTransform> HeroTransforms;
+    }
+
+    [Inject] private PlayerData m_PlayerData;
+
     protected override void OnUpdate()
     {
         for(int i = 0; i < m_UnitData.Length; i++)
         {
-            var factionComp = m_UnitData.FactionData[i];
+            var unitFactionComp = m_UnitData.FactionData[i];
             var teamColorMeshes = m_UnitData.TeamColorMeshesData[i];
+            var unitTransform = m_UnitData.Transforms[i];
 
             foreach(MeshRenderer r in teamColorMeshes.meshRenderers)
             {
-                switch(factionComp.TeamColor)
+                switch(unitFactionComp.TeamColor)
                 {
                     case Generic.TeamColorEnum.blue:
                         r.material.color = Color.blue;
@@ -34,6 +45,21 @@ public class InitializeUnitsSystem : ComponentSystem
                         r.material.color = Color.red;
                         break;
                 }
+            }
+
+            //Debug.Log(m_PlayerData.Length);
+
+            for(int pi = 0; pi < m_PlayerData.Length; pi++)
+            {
+
+                var playerFactionComp = m_PlayerData.FactionData[pi];
+                var heroTransform = m_PlayerData.HeroTransforms[pi];
+
+                if(playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
+                {
+                    heroTransform.Transform = unitTransform;
+                }
+
             }
         }
     }

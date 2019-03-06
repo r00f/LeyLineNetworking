@@ -8,6 +8,7 @@ using Unity.Entities;
 using Unit;
 using Generic;
 
+[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ClientPathVisualsSystem : ComponentSystem
 {
 

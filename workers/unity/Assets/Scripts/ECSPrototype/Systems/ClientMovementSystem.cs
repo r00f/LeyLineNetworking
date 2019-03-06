@@ -42,16 +42,11 @@ public class ClientMovementSystem : ComponentSystem
             {
                 //move
                 transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
-
                 //rotate towards movement direction
                 Vector3 targetDir = serverPosition.Coords.ToUnityVector() - animatorComponent.RotateTransform.position;
                 float rotSpeed = Time.deltaTime * 3;
                 Vector3 newDir = Vector3.RotateTowards(animatorComponent.RotateTransform.forward, targetDir, rotSpeed, 0.0f);
                 animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(newDir);
-            }
-
-            if(m_GameStateData.GameState[0].CurrentState == GameStateEnum.moving && serverPath.Path.CellAttributes.Count != 0)
-            {
                 animatorComponent.Animator.SetBool("Moving", true);
             }
             else

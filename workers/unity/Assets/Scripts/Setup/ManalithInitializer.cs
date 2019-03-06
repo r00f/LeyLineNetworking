@@ -100,7 +100,7 @@ namespace LeyLineHybridECS
                 //create unique name for the asset
                 string assetName = "leylinepath" + Resources.FindObjectsOfTypeAll(typeof(Mesh)).Count();
 
-                if(leyLinePathMeshFilter.mesh.name != assetName)
+                if(leyLinePathMeshFilter.sharedMesh.name != assetName)
                 {
                     Mesh lineMesh = Instantiate(leyLinePathMeshFilter.sharedMesh);
                     AssetDatabase.CreateAsset(lineMesh, "Assets/Resources/ManalithMeshes/" + assetName + ".asset");

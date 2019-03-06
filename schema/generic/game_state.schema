@@ -4,6 +4,7 @@ component GameState {
 	
     id = 105;
 	GameStateEnum current_state = 1;
+	uint32 players_on_map_count = 2;
 	
 }
 

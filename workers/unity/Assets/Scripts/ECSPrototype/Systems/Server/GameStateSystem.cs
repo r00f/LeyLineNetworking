@@ -3,9 +3,11 @@ using System.Collections;
 using Unity.Entities;
 using Improbable.PlayerLifecycle;
 using Unit;
+using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
 {
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem))]
     public class GameStateSystem : ComponentSystem
     {
         public struct Data
@@ -34,11 +36,14 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-
-            if (m_PlayerData.Length == 0)
-                return;
-
             var gameState = m_Data.GameStateData[0];
+            if (m_PlayerData.Length == 0)
+            {
+                gameState.PlayersOnMapCount = 0;
+                m_Data.GameStateData[0] = gameState;
+                return;
+            }
+
 
             switch (m_Data.GameStateData[0].CurrentState)
             {

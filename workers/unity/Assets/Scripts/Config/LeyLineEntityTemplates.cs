@@ -20,7 +20,8 @@ public static class LeyLineEntityTemplates {
     {
         var gameState = new Generic.GameState.Snapshot
         {
-            CurrentState = Generic.GameStateEnum.spawning
+            CurrentState = Generic.GameStateEnum.planning,
+            PlayersOnMapCount = 0
         };
 
         var template = new EntityTemplate();
@@ -145,6 +146,12 @@ public static class LeyLineEntityTemplates {
             HeroName = "KingCroak"
         };
 
+        var factionSnapshot = new Generic.FactionComponent.Snapshot
+        {
+            Faction = 0,
+            TeamColor = Generic.TeamColorEnum.blue
+        };
+
         var pos = new Position.Snapshot { Coords = spawnPosition.ToSpatialCoordinates() };
      
         var serverMovement = new ServerMovement.Snapshot { Latest = serverResponse };
@@ -162,7 +169,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientHeartbeat, client);
         template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(new PlayerState.Snapshot(), client);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
@@ -170,7 +177,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientMovement, client);
         template.AddComponent(clientRotation, client);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
-        //template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
+        template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
         return template;
     }
 
@@ -219,6 +226,12 @@ public static class LeyLineEntityTemplates {
             Path = new CellAttributeList(new List<CellAttribute>()),
         };
 
+        var movementVariables = new MovementVariables.Snapshot
+        {
+            MovementRange = 4,
+            TravelTime = 1.7f,
+        };
+
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
         var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
@@ -234,6 +247,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(serverPathSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientPathSnapshot, client);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;

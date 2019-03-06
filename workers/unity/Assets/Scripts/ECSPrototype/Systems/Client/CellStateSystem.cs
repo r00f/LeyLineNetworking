@@ -60,7 +60,7 @@ namespace LeyLineHybridECS
                         {
                             if (c.CubeCoordinate == coords)
                             {
-                                if (unitMouseState.CurrentState == MouseState.State.Clicked && !c.IsTaken)
+                                if (unitMouseState.CurrentState == MouseState.State.Clicked && !c.IsTaken && cellMouseState.CurrentState != MouseState.State.Hovered)
                                 {
                                     m_Data.MarkerStateData[i] = new MarkerState
                                     {
@@ -68,7 +68,7 @@ namespace LeyLineHybridECS
                                         IsSet = 0
                                     };
                                 }
-                                else if (m_PlayerData.PlayerStateData[0].CurrentState != Player.PlayerStateEnum.unit_selected && markerState.CurrentState != (MarkerState.State)(int)cellMouseState.CurrentState)
+                                else if (markerState.CurrentState != (MarkerState.State)(int)cellMouseState.CurrentState)
                                 {
                                     m_Data.MarkerStateData[i] = new MarkerState
                                     {

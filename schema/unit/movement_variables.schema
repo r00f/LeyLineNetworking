@@ -1,0 +1,14 @@
+package unit;
+
+component MovementVariables {
+	
+    id = 114;
+	uint32 movement_range = 1;
+	float travel_time = 2;
+	float time_left = 3;
+
+
+}
+
+
+

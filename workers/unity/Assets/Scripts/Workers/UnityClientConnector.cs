@@ -23,11 +23,9 @@ namespace BlankProject
         protected override void HandleWorkerConnectionEstablished()
         {
             Worlds.ClientWorld = Worker.World.GetOrCreateManager<EntityManager>();
-            
             PlayerLifecycleHelper.AddClientSystems(Worker.World);
             GameObjectRepresentationHelper.AddSystems(Worker.World);
             WorkerUtils.AddClientSystems(Worker.World);
-            print(Worlds.ClientWorld.IsCreated);
             World.Active.GetOrCreateManager<LeyLineHybridECS.MeshColorLerpSystem>();
             var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer, fallback), gameObject);
