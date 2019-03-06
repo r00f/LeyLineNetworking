@@ -6,8 +6,10 @@ using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using System.Collections.Generic;
 using System.Linq;
+using Cells;
+using Unit;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+//[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
@@ -15,8 +17,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct CellsInRangeRequestData
     {
         public readonly int Length;
-        public ComponentDataArray<Unit.CellsToMark.CommandRequests.CellsInRangeCommand> ReceivedCellsInRangeRequests;
-        public ComponentDataArray<Unit.CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<CellsToMark.CommandRequests.CellsInRangeCommand> ReceivedCellsInRangeRequests;
+        public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
     }
 
     [Inject] private CellsInRangeRequestData m_CellsInRangeRequestData;
@@ -24,23 +26,49 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct FindAllPathsRequestData
     {
         public readonly int Length;
-        public ComponentDataArray<Unit.CellsToMark.CommandRequests.FindAllPathsCommand> ReceivedFindAllPathsRequests;
-        public ComponentDataArray<Unit.CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<CellsToMark.CommandRequests.FindAllPathsCommand> ReceivedFindAllPathsRequests;
+        public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
     }
 
     [Inject] private FindAllPathsRequestData m_FindAllPathsRequestData;
+
+    public struct FindPathRequestData
+    {
+        public readonly int Length;
+        public ComponentDataArray<ServerPath.CommandRequests.FindPathCommand> ReceivedFindPathRequests;
+        public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<ServerPath.Component> ServerPathData;
+    }
+
+    [Inject] private FindPathRequestData m_FindPathRequestData;
+
+    public struct ServerPathData
+    {
+        public readonly int Length;
+        public ComponentDataArray<ServerPath.Component> ServerPaths;
+    }
+
+    [Inject] private ServerPathData m_ServerPathData;
 
     public struct CellData
     {
         public readonly int Length;
         public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<Cells.CellAttributesComponent.Component> CellsData;
+        public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
 
     [Inject] private CellData m_CellData;
 
+    public struct GameStateData
+    {
+        public readonly ComponentDataArray<Generic.GameState.Component> GameState;
+    }
+
+    [Inject] private GameStateData m_GameStateData;
+
     protected override void OnUpdate()
     {
+
         for (int i = 0; i < m_CellsInRangeRequestData.Length; i++)
         {
             var cellsToMarkData = m_CellsInRangeRequestData.CellsToMarkData[i];
@@ -54,9 +82,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     cellsToMarkData.CellsInRange = GetRadius(cellsInRangeRequest.Payload.Origin, cellsInRangeRequest.Payload.Range);
                     m_CellsInRangeRequestData.CellsToMarkData[i] = cellsToMarkData;
                 }
-
             }
-
         }
 
         for (int ci = 0; ci < m_FindAllPathsRequestData.Length; ci++)
@@ -74,6 +100,37 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 }
             }
         }
+
+        for(int i = 0; i < m_ServerPathData.Length; i++)
+        {
+            var serverPath = m_ServerPathData.ServerPaths[i];
+            if (m_GameStateData.GameState[0].CurrentState == Generic.GameStateEnum.calculate_energy)
+            {
+                serverPath.Path = new CellAttributeList
+                {
+                    CellAttributes = new List<CellAttribute>()
+                };
+                m_ServerPathData.ServerPaths[i] = serverPath;
+            }
+        }
+
+        for (int i = 0; i < m_FindPathRequestData.Length; i++)
+        {
+            var serverPathData = m_FindPathRequestData.ServerPathData[i];
+            var findPathRequests = m_FindPathRequestData.ReceivedFindPathRequests[i];
+            var cellsToMarkData = m_FindPathRequestData.CellsToMarkData[i];
+
+            if (cellsToMarkData.CachedPaths.Count != 0)
+            {
+                foreach (var findPathRequest in findPathRequests.Requests)
+                {
+                    //Debug.Log("findPathRequest");
+                    serverPathData.Path = FindPath(findPathRequest.Payload.Destination, cellsToMarkData.CachedPaths);
+                    m_FindPathRequestData.ServerPathData[i] = serverPathData;
+                }
+            }
+
+        }
     }
 
     public int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
@@ -82,34 +139,35 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return distance;
     }
 
-    public List<Cells.CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius)
+    public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius)
     {
         //returns a list of offsetCoordinates
-        var cellsInRadius = new List<Cells.CellAttributes>();
+        var cellsInRadius = new List<CellAttributes>();
         //reserve first index for origin
-        cellsInRadius.Add(new Cells.CellAttributes());
+        cellsInRadius.Add(new CellAttributes());
 
         for (int i = 0; i < m_CellData.Length; i++)
         {
             Vector3f cubeCoordinate = m_CellData.CoordinateData[i].CubeCoordinate;
 
-            if (GetDistance(originCellCubeCoordinate, cubeCoordinate) < radius)
+            if (GetDistance(originCellCubeCoordinate, cubeCoordinate) <= radius)
             {
-                if(m_CellData.CellsData[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
+                if(m_CellData.CellAttributes[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
                 {
-                    cellsInRadius[0] = m_CellData.CellsData[i].CellAttributes;
+                    cellsInRadius[0] = m_CellData.CellAttributes[i].CellAttributes;
                 }
                 else
-                    cellsInRadius.Add(m_CellData.CellsData[i].CellAttributes);
+                    cellsInRadius.Add(m_CellData.CellAttributes[i].CellAttributes);
             }
         }
         return cellsInRadius;
     }
 
-    public Dictionary<Cells.CellAttribute, Unit.CellAttributeList> GetAllPathsInRadius(uint radius, List<Cells.CellAttributes> cellsInRange, Cells.CellAttribute origin)
+    public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, CellAttribute origin)
     {
         var paths = CachePaths(cellsInRange, origin);
-        var cachedPaths = new Dictionary<Cells.CellAttribute, Unit.CellAttributeList>();
+        var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
+
         foreach (var key in paths.Keys)
         {
             var path = paths[key];
@@ -127,12 +185,12 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 cachedPaths.Add(key, path);
             }
         }
-
+        
         return cachedPaths;
 
     }
 
-    public Dictionary<Cells.CellAttribute, Unit.CellAttributeList> CachePaths(List<Cells.CellAttributes> cellsInRange, Cells.CellAttribute origin)
+    public Dictionary<CellAttribute, CellAttributeList> CachePaths(List<CellAttributes> cellsInRange, CellAttribute origin)
     {
         var edges = GetGraphEdges(cellsInRange, origin);
         var paths = pathfinder.FindAllPaths(edges, origin);
@@ -142,22 +200,22 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     /// <summary>
     /// Method returns graph representation of cell grid for pathfinding.
     /// </summary>
-    public Dictionary<Cells.CellAttribute, Dictionary<Cells.CellAttribute, int>> GetGraphEdges(List<Cells.CellAttributes> cellsInRange, Cells.CellAttribute origin)
+    public Dictionary<CellAttribute, Dictionary<CellAttribute, int>> GetGraphEdges(List<CellAttributes> cellsInRange, CellAttribute origin)
     {
-        Dictionary<Cells.CellAttribute, Dictionary<Cells.CellAttribute, int>> ret = new Dictionary<Cells.CellAttribute, Dictionary<Cells.CellAttribute, int>>();
+        Dictionary<CellAttribute, Dictionary<CellAttribute, int>> ret = new Dictionary<CellAttribute, Dictionary<CellAttribute, int>>();
 
         //instead of looping over all cells in grid only loop over cells in CellsInMovementRange
 
         for (int i = 0; i < cellsInRange.Count; ++i)
         {
-            Cells.CellAttributes cell = cellsInRange[i];
+            CellAttributes cell = cellsInRange[i];
             
             var isTaken = cellsInRange[i].Cell.IsTaken;
             var movementCost = cellsInRange[i].Cell.MovementCost;
-            var neighbours = cellsInRange[i].Neighbours;
+            var neighbours = cellsInRange[i].Neighbours.CellAttributes;
             
 
-            ret[cell.Cell] = new Dictionary<Cells.CellAttribute, int>();
+            ret[cell.Cell] = new Dictionary<CellAttribute, int>();
 
 
             if (!isTaken || cell.Cell.CubeCoordinate == origin.CubeCoordinate)
@@ -167,9 +225,70 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     ret[cell.Cell][neighbour] = neighbour.MovementCost;
                 }
             }
-
-
         }
         return ret;
+    }
+
+    public CellAttributeList FindPath(CellAttribute destination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
+    {
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new CellAttributeList(new List<CellAttribute>());
+    }
+
+    public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, EntityId entityId)
+    {
+        CellAttributes cellAtt = new CellAttributes
+        {
+            Neighbours = cellAttributes.Neighbours,
+
+            Cell = new CellAttribute
+            {
+                IsTaken = isTaken,
+                UnitOnCellId = entityId,
+
+                MovementCost = cellAttributes.Cell.MovementCost,
+                Position = cellAttributes.Cell.Position,
+                CubeCoordinate = cellAttributes.Cell.CubeCoordinate,
+
+            }
+
+        };
+
+        UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours);
+
+        return cellAtt;
+    }
+
+    public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours)
+    {
+        for (int ci = 0; ci < m_CellData.Length; ci++)
+        {
+            var cellAtt = m_CellData.CellAttributes[ci];
+
+            for (int n = 0; n < neighbours.CellAttributes.Count; n++)
+            {
+                if (neighbours.CellAttributes[n].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
+                {
+                    for (int cn = 0; cn < cellAtt.CellAttributes.Neighbours.CellAttributes.Count; cn++)
+                    {
+                        if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
+                        {
+                            cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = new CellAttribute
+                            {
+                                IsTaken = cell.IsTaken,
+                                CubeCoordinate = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate,
+                                Position = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].Position,
+                                MovementCost = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].MovementCost
+                            };
+                            m_CellData.CellAttributes[ci] = cellAtt;
+                        }
+                    }
+                }
+            }
+        }
     }
 }

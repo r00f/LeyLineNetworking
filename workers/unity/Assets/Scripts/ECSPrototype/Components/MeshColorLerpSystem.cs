@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Unity.Entities;
+using Improbable.Gdk.Core;
+using Improbable.Gdk.PlayerLifecycle;
+using Improbable.Worker.CInterop;
 
 namespace LeyLineHybridECS
 {
+    [DisableAutoCreation]
     public class MeshColorLerpSystem : ComponentSystem
     {
-
         public struct CircleData
         {
             public readonly int Length;
@@ -23,10 +26,61 @@ namespace LeyLineHybridECS
 
         [Inject] private LineData m_LineData;
 
+        private ComponentGroup manalithGroup;
+
+        protected override void OnCreateManager()
+        {
+            
+            base.OnCreateManager();
+
+            //var Manager = World.Active.GetExistingManager<EntityManager>();
+            manalithGroup = Worlds.ClientWorld.CreateComponentGroup(
+
+                ComponentType.Create<Generic.FactionComponent.Component>(),
+                ComponentType.Create<Cells.CircleCells.Component>(),
+                ComponentType.Create<Improbable.Position.Component>()
+            );
+
+
+        }
+
         protected override void OnUpdate()
         {
+            for (int ci = 0; ci < m_CircleData.Length; ci++)
+            {
+                for (int i = 0; i < manalithGroup.GetEntityArray().Length; i++)
+                {
+                    var faction = manalithGroup.GetComponentDataArray<Generic.FactionComponent.Component>()[i];
+                    var position = manalithGroup.GetComponentDataArray<Improbable.Position.Component>()[i];
+
+                    var circlePos = m_CircleData.MeshColorData[ci].transform.position;
+
+                    if (position.Coords.ToUnityVector() == circlePos)
+                    {
+                        var circleColor = m_CircleData.MeshColorData[ci].Color;
+
+                        switch (faction.Faction)
+                        {
+                            case 0:
+                                circleColor = Color.yellow;
+                                break;
+                            case 1:
+                                circleColor = Color.blue;
+                                break;
+                            case 2:
+                                circleColor = Color.red;
+                                break;
+                        }
+
+                        m_CircleData.MeshColorData[ci].Color = circleColor;
+                    }
+
+                }
+            }
+
             for (int i = 0; i < m_CircleData.Length; i++)
             {
+                //Debug.Log("??");
                 var meshColor = m_CircleData.MeshColorData[i];
 
                 if (meshColor.LerpColor != meshColor.Color)
@@ -47,7 +101,7 @@ namespace LeyLineHybridECS
                 var meshGradientColor = m_LineData.MeshGradientColorData[i];
 
 
-                if(meshGradientColor.ManalithColor.LerpColor != meshGradientColor.ManalithColor.Color || meshGradientColor.ConnectedManalithColor.LerpColor != meshGradientColor.ConnectedManalithColor.Color)
+                if (meshGradientColor.ManalithColor.LerpColor != meshGradientColor.ManalithColor.Color || meshGradientColor.ConnectedManalithColor.LerpColor != meshGradientColor.ConnectedManalithColor.Color)
                 {
                     // Instead if vertex.y we use uv.x
                     for (int li = 0; li < meshGradientColor.uv.Length; li++)
@@ -60,45 +114,4 @@ namespace LeyLineHybridECS
             }
         }
     }
-
-
-        /*
-        [SerializeField]
-        Color color1;
-        [SerializeField]
-        Color color2;
-
-        Mesh mesh;
-
-        [SerializeField]
-        Vector2[] uv;
-        ParticleSystem pathPs;
-
-
-        void Start()
-        {
-            pathPs = GetComponent<ParticleSystem>();
-            mesh = GetComponent<MeshFilter>().mesh;
-            uv = mesh.uv;
-
-            ParticleSystem pPs = pathPs;
-            var pathShapeModule = pPs.shape;
-            pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
-            pathShapeModule.mesh = mesh;
-        }
-
-        // Update is called once per frame
-        void Update()
-        {
-            var colors = new Color[uv.Length];
-
-            // Instead if vertex.y we use uv.x
-            for (int i = 0; i < uv.Length; i++)
-                colors[i] = Color.Lerp(color1, color2, uv[i].x / uv[uv.Length - 1].x);
-
-            mesh.colors = colors;
-
-        }
-    }
-    */
 }

@@ -5,10 +5,9 @@ using Improbable.Gdk.Core;
 using Improbable.Gdk.Movement;
 using Improbable.Gdk.StandardTypes;
 using Improbable.Gdk.Health;
-using Improbable.Common;
-using Unity.Entities;
-using UnityEngine;
 using Player;
+using Cells;
+using Unit;
 
 public static class LeyLineEntityTemplates {
 
@@ -21,7 +20,8 @@ public static class LeyLineEntityTemplates {
     {
         var gameState = new Generic.GameState.Snapshot
         {
-            CurrentState = Generic.GameStateEnum.spawning
+            CurrentState = Generic.GameStateEnum.planning,
+            PlayersOnMapCount = 0
         };
 
         var template = new EntityTemplate();
@@ -33,8 +33,36 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
+    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells)
+    {
+        var pos = new Position.Snapshot
+        {
+            Coords = new Coordinates
+            {
+                X = position.X,
+                Y = position.Y,
+                Z = position.Z
+            }
+        };
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName, bool isSpawn, uint faction, List<Cells.CellAttribute> neighbours)
+        var circle = new CircleCells.Snapshot
+        {
+            CircleAttributeList = circleCells
+        };
+
+
+        var template = new EntityTemplate();
+        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Metadata.Snapshot { EntityType = "Manalith" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(circle, WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        return template;
+    }
+
+
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours)
     {
         
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -56,11 +84,11 @@ public static class LeyLineEntityTemplates {
         };
 
 
-        var cellAttributes = new Cells.CellAttributesComponent.Snapshot
+        var cellAttributes = new CellAttributesComponent.Snapshot
         {
-            CellAttributes = new Cells.CellAttributes
+            CellAttributes = new CellAttributes
             {
-                Cell = new Cells.CellAttribute
+                Cell = new CellAttribute
                 {
                     Position = position,
                     CubeCoordinate = cubeCoordinate,
@@ -72,7 +100,7 @@ public static class LeyLineEntityTemplates {
 
         };
 
-        var unitToSpawn = new Cells.UnitToSpawn.Snapshot
+        var unitToSpawn = new UnitToSpawn.Snapshot
         {
             UnitName = unitName,
             IsSpawn = isSpawn,
@@ -118,6 +146,12 @@ public static class LeyLineEntityTemplates {
             HeroName = "KingCroak"
         };
 
+        var factionSnapshot = new Generic.FactionComponent.Snapshot
+        {
+            Faction = 0,
+            TeamColor = Generic.TeamColorEnum.blue
+        };
+
         var pos = new Position.Snapshot { Coords = spawnPosition.ToSpatialCoordinates() };
      
         var serverMovement = new ServerMovement.Snapshot { Latest = serverResponse };
@@ -135,7 +169,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientHeartbeat, client);
         template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(new PlayerState.Snapshot(), client);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
@@ -143,7 +177,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientMovement, client);
         template.AddComponent(clientRotation, client);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
-        //template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
+        template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
         return template;
     }
 
@@ -177,13 +211,25 @@ public static class LeyLineEntityTemplates {
 
         var cellsToMarkSnapshot = new Unit.CellsToMark.Snapshot
         {
-            CellsInRange = new List<Cells.CellAttributes>(),
-            CachedPaths = new Dictionary<Cells.CellAttribute, Unit.CellAttributeList>()
+            CellsInRange = new List<CellAttributes>(),
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
         };
 
-        var currentPathSnapshot = new Unit.CurrentPath.Snapshot
+        
+        var clientPathSnapshot = new ClientPath.Snapshot
         {
-            Path = new Unit.CellAttributeList(new List<Cells.CellAttribute>()),
+            Path = new CellAttributeList(new List<CellAttribute>()),
+        };
+
+        var serverPathSnapshot = new ServerPath.Snapshot
+        {
+            Path = new CellAttributeList(new List<CellAttribute>()),
+        };
+
+        var movementVariables = new MovementVariables.Snapshot
+        {
+            MovementRange = 4,
+            TravelTime = 1.7f,
         };
 
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
@@ -200,7 +246,9 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
-        template.AddComponent(currentPathSnapshot, client);
+        template.AddComponent(serverPathSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
+        template.AddComponent(clientPathSnapshot, client);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
     }

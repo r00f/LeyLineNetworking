@@ -7,15 +7,16 @@ using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
 {
-    [UpdateAfter(typeof(InitializePlayerSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(InitializePlayerSystem))]
     public class SpawnUnitsSystem : ComponentSystem
     {
         public struct Data
         {
             public readonly int Length;
             public readonly ComponentDataArray<Improbable.Position.Component> Position;
+            public readonly ComponentDataArray<Cells.CellAttributesComponent.Component> CellData;
             public ComponentDataArray<Cells.UnitToSpawn.Component> UnitToSpawn;
-            public ComponentDataArray<Cells.CellAttributesComponent.Component> CellData;
+
             public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
             public ComponentDataArray<WorldCommands.CreateEntity.CommandSender> CreateEntitySender;
         }
@@ -43,6 +44,9 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
+            if (m_GameStateData.Length == 0)
+                return;
+
             if (m_GameStateData.GameState[0].CurrentState == Generic.GameStateEnum.spawning)
             {
                 for (int i = 0; i < m_Data.Length; ++i)
@@ -51,6 +55,7 @@ namespace LeyLineHybridECS
                     var position = m_Data.Position[i];
                     var unitToSpawn = m_Data.UnitToSpawn[i];
                     var requestSender = m_Data.CreateEntitySender[i];
+                    var cell = m_Data.CellData[i];
 
                     if (unitToSpawn.UnitName.Length != 0)
                     {
@@ -59,20 +64,23 @@ namespace LeyLineHybridECS
                             var playerFaction = m_PlayerData.Faction[pi];
                             var owningWorker = m_PlayerData.OwningWorker[pi];
 
-                            Debug.Log("SPAWNUNIT");
+                            if(unitToSpawn.Faction == playerFaction.Faction)
+                            {
+                                //Debug.Log("SPAWNUNIT");
+                                var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
 
-                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
+                                requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
+                                (
+                                    entity
+                                ));
 
-                            requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
-                            (
-                                entity
-                            ));
+                                m_Data.CreateEntitySender[i] = requestSender;
 
-                            m_Data.CreateEntitySender[i] = requestSender;
+                                unitToSpawn.UnitName = "";
+                                //unitToSpawn.Faction = 0;
+                                m_Data.UnitToSpawn[i] = unitToSpawn;
 
-                            var unitToSpawnComponent = m_Data.UnitToSpawn[i];
-                            unitToSpawnComponent.UnitName = "";
-                            m_Data.UnitToSpawn[i] = unitToSpawnComponent;
+                            }
                         }
                     }
                 }

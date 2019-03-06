@@ -9,6 +9,7 @@ namespace LeyLineHybridECS
     public struct Faction : IComponentData
     {
         public int Value;
+        public Vector3 Position;
     }
 
     public class FactionDataComponent : ComponentDataWrapper<Faction> { }

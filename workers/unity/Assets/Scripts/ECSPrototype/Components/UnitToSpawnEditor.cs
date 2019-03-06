@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace LeyLineHybridECS
 {
-    public class UnitToSpawn : MonoBehaviour
+    public class UnitToSpawnEditor : MonoBehaviour
     {
         public string UnitName;
         public bool IsHeroSpawn;

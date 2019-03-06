@@ -17,6 +17,8 @@ namespace LeyLineHybridECS
         }
 
         public State CurrentState;
+
+        public byte ClickEvent;
     }
 
     public class MouseStateDataComponent : ComponentDataWrapper<MouseState> { }

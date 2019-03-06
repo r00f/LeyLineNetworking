@@ -1,6 +1,7 @@
 package cells;
 
 import "improbable/vector3.schema";
+import "generic/faction.schema";
 
 component CellAttributesComponent 
 {
@@ -12,7 +13,7 @@ type CellAttributes {
 	
 
 	CellAttribute cell = 1;
-	list<CellAttribute> neighbours = 2;
+	CellAttributeList neighbours = 2;
 
 }
 
@@ -22,5 +23,13 @@ type CellAttribute	{
 	improbable.Vector3f cube_coordinate = 2;
 	bool is_taken = 3;
 	int32 movement_cost = 4;
+	EntityId unit_on_cell_id = 5;
+}
+
+type CellAttributeList {
+
+	list<CellAttribute> cell_attributes = 1;
 
 }
+
+

@@ -1,0 +1,23 @@
+package unit;
+
+import "cells/cell_attributes.schema";
+
+component ServerPath {
+	
+    id = 112;
+	command FindPathResponse find_path_command(FindPathRequest);
+	cells.CellAttributeList path = 1;
+
+}
+
+type FindPathRequest {
+
+	cells.CellAttribute destination = 1;
+}
+
+type FindPathResponse {
+
+}
+
+
+
