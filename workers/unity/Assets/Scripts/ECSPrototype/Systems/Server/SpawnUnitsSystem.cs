@@ -4,6 +4,7 @@ using UnityEngine;
 using Improbable.Gdk.Core.Commands;
 using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
+using Generic;
 
 namespace LeyLineHybridECS
 {
@@ -16,7 +17,6 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<Improbable.Position.Component> Position;
             public readonly ComponentDataArray<Cells.CellAttributesComponent.Component> CellData;
             public ComponentDataArray<Cells.UnitToSpawn.Component> UnitToSpawn;
-
             public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
             public ComponentDataArray<WorldCommands.CreateEntity.CommandSender> CreateEntitySender;
         }
@@ -26,6 +26,7 @@ namespace LeyLineHybridECS
         public struct GameStateData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<Generic.GameState.Component> GameState;
         }
 
@@ -35,6 +36,7 @@ namespace LeyLineHybridECS
         public struct PlayerData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<Generic.FactionComponent.Component> Faction;
             public readonly ComponentDataArray<Player.PlayerState.Component> Playerstate;
             public readonly ComponentDataArray<OwningWorker.Component> OwningWorker;
@@ -44,42 +46,50 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            if (m_GameStateData.Length == 0)
-                return;
-
-            if (m_GameStateData.GameState[0].CurrentState == Generic.GameStateEnum.spawning)
+            for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
-                for (int i = 0; i < m_Data.Length; ++i)
+                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
+
+                for (int pi = 0; pi < m_PlayerData.Length; pi++)
                 {
-                    var coord = m_Data.CoordinateData[i].CubeCoordinate;
-                    var position = m_Data.Position[i];
-                    var unitToSpawn = m_Data.UnitToSpawn[i];
-                    var requestSender = m_Data.CreateEntitySender[i];
-                    var cell = m_Data.CellData[i];
+                    var playerFaction = m_PlayerData.Faction[pi];
+                    var owningWorker = m_PlayerData.OwningWorker[pi];
+                    var worldIndex = m_PlayerData.WorldIndexData[pi].Value;
 
-                    if (unitToSpawn.UnitName.Length != 0)
+                    if (worldIndex == gameStateWorldIndex)
                     {
-                        for (int pi = 0; pi < m_PlayerData.Length; pi++)
+                        var gameState = m_GameStateData.GameState[gi].CurrentState;
+                        if (gameState == GameStateEnum.spawning)
                         {
-                            var playerFaction = m_PlayerData.Faction[pi];
-                            var owningWorker = m_PlayerData.OwningWorker[pi];
-
-                            if(unitToSpawn.Faction == playerFaction.Faction)
+                            for (int i = 0; i < m_Data.Length; ++i)
                             {
-                                //Debug.Log("SPAWNUNIT");
-                                var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
+                                var coord = m_Data.CoordinateData[i].CubeCoordinate;
+                                var position = m_Data.Position[i];
+                                var requestSender = m_Data.CreateEntitySender[i];
+                                var cell = m_Data.CellData[i];
+                                var unitToSpawn = m_Data.UnitToSpawn[i];
 
-                                requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
-                                (
-                                    entity
-                                ));
+                                if (unitToSpawn.UnitName.Length != 0)
+                                {
 
-                                m_Data.CreateEntitySender[i] = requestSender;
+                                    if (unitToSpawn.Faction == playerFaction.Faction)
+                                    {
+                                        //Debug.Log("SPAWNUNIT");
+                                        var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction, worldIndex);
 
-                                unitToSpawn.UnitName = "";
-                                //unitToSpawn.Faction = 0;
-                                m_Data.UnitToSpawn[i] = unitToSpawn;
+                                        requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
+                                        (
+                                            entity
+                                        ));
 
+                                        m_Data.CreateEntitySender[i] = requestSender;
+
+                                        unitToSpawn.UnitName = "";
+                                        //unitToSpawn.Faction = 0;
+                                        m_Data.UnitToSpawn[i] = unitToSpawn;
+
+                                    }
+                                }
                             }
                         }
                     }

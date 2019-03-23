@@ -2,25 +2,30 @@
 using System.Collections;
 using Unity.Entities;
 using Cells;
+using Unit;
+using Generic;
 using Improbable.Gdk.Core;
 
 
-[UpdateAfter(typeof(HandleCellGridRequestsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(AddComponentsSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData
     {
-        public Generic.CubeCoordinate.Component CubeCoordState;
+        public CubeCoordinate.Component CubeCoordState;
+        public WorldIndex.Component WorldIndexState;
     }
+   
 
     private struct UnitAddedData
     {
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly EntityArray Entities;
-        public readonly ComponentDataArray<Unit.ServerPath.Component> PathData;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
-        public SubtractiveComponent<UnitStateData> CoordinateState;
+        public readonly ComponentDataArray<ServerPath.Component> PathData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+        public SubtractiveComponent<UnitStateData> UnitState;
     }
 
     [Inject] private UnitAddedData m_UnitAddedData;
@@ -29,8 +34,9 @@ public class UnitLifeCycleSystem : ComponentSystem
     {
         public readonly int Length;
         public EntityArray Entities;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
-        public ComponentDataArray<UnitStateData> CoordinateState;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+        public ComponentDataArray<UnitStateData> UnitState;
     }
 
     [Inject] private UnitChangedData m_UnitChangedData;
@@ -39,8 +45,8 @@ public class UnitLifeCycleSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly EntityArray Entities;
-        public SubtractiveComponent<Generic.CubeCoordinate.Component> SubstractiveCoordinateData;
-        public readonly ComponentDataArray<UnitStateData> CoordinateState;
+        public SubtractiveComponent<CubeCoordinate.Component> SubstractiveCoordinateData;
+        public readonly ComponentDataArray<UnitStateData> UnitState;
     }
 
     [Inject] private UnitRemovedData m_UnitRemovedData;
@@ -48,8 +54,9 @@ public class UnitLifeCycleSystem : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CubeCoordinateData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CubeCoordinateData;
     }
 
     [Inject] private CellData m_CellData;
@@ -58,74 +65,52 @@ public class UnitLifeCycleSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-
         for (int i = 0; i < m_UnitAddedData.Length; i++)
         {
-            //Debug.Log("Added Unit");
-
+            var unitWorldIndex = m_UnitAddedData.WorldIndexData[i].Value;
             var unitCubeCoordinate = m_UnitAddedData.CoordinateData[i].CubeCoordinate;
             var unitEntityId = m_UnitAddedData.EntityIds[i];
 
             for (int ci = 0; ci < m_CellData.Length; ci++)
             {
                 var cellCubeCoordinate = m_CellData.CubeCoordinateData[ci];
+                var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
+                var cellAtt = m_CellData.CellAttributes[ci];
 
-                if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate)
+                if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex)
                 {
-                    var cellAtt = m_CellData.CellAttributes[ci];
-
-                    //Debug.Log("Set cellAttributes at coordinate: " + cellCubeCoordinate.CubeCoordinate);
-
-                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, unitEntityId.EntityId);
-
+                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, unitEntityId.EntityId, cellWorldIndex);
                     m_CellData.CellAttributes[ci] = cellAtt;
-
-                    //m_CellGridSystem.UpdateNeighbours(m_CellData.CellAttributes[ci].CellAttributes.Cell, m_CellData.CellAttributes[ci].CellAttributes.Neighbours);
                 }
             }
-
-            PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitAddedData.CoordinateData[i] });
+            PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitAddedData.CoordinateData[i], WorldIndexState = m_UnitAddedData.WorldIndexData[i] });
         }
 
         for (int i = 0; i < m_UnitChangedData.Length; i++)
         {
-            if (m_UnitChangedData.CoordinateState[i].CubeCoordState.CubeCoordinate != m_UnitChangedData.CoordinateData[i].CubeCoordinate)
+            if (m_UnitChangedData.UnitState[i].CubeCoordState.CubeCoordinate != m_UnitChangedData.CoordinateData[i].CubeCoordinate || m_UnitChangedData.UnitState[i].WorldIndexState.Value != m_UnitChangedData.WorldIndexData[i].Value)
             {
-                //Debug.Log("Update Unit state data");
-                // there are some changed to the component, do some stuff
-                PostUpdateCommands.SetComponent(m_UnitChangedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitChangedData.CoordinateData[i] });
+                PostUpdateCommands.SetComponent(m_UnitChangedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitChangedData.CoordinateData[i], WorldIndexState = m_UnitChangedData.WorldIndexData[i] });
             }
         }
 
-
         for (int i = 0; i < m_UnitRemovedData.Length; i++)
         {
-            //var coordinate = m_UnitData.CoordinateData[i];
-            //var entity = m_UnitData.Entities[i];
+            var unitCubeCoordinate = m_UnitRemovedData.UnitState[i].CubeCoordState.CubeCoordinate;
+            var unitWorldIndex = m_UnitRemovedData.UnitState[i].WorldIndexState.Value;
 
-            var unitCubeCoordinate = m_UnitRemovedData.CoordinateState[i].CubeCoordState.CubeCoordinate;
-
-            for(int ci = 0; ci <m_CellData.Length; ci++)
+            for (int ci = 0; ci <m_CellData.Length; ci++)
             {
                 var cellCubeCoordinate = m_CellData.CubeCoordinateData[ci];
+                var cellAtt = m_CellData.CellAttributes[ci];
+                var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
 
-                if(unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate)
+                if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex)
                 {
-                    var cellAtt = m_CellData.CellAttributes[ci];
-
-                    //Debug.Log("Clean up cell at coordinate: " + cellCubeCoordinate.CubeCoordinate);
-
-                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId());
-
+                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
                     m_CellData.CellAttributes[ci] = cellAtt;
-
-                    //m_CellGridSystem.UpdateNeighbours(m_CellData.CellAttributes[ci].CellAttributes.Cell, m_CellData.CellAttributes[ci].CellAttributes.Neighbours);
                 }
             }
-
-
-            //Debug.Log("Removed Unit");
-
             PostUpdateCommands.RemoveComponent<UnitStateData>(m_UnitRemovedData.Entities[i]);
 
         }

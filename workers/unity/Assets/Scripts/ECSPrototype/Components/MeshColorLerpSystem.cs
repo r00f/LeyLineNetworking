@@ -59,17 +59,22 @@ namespace LeyLineHybridECS
                     {
                         var circleColor = m_CircleData.MeshColorData[ci].Color;
 
-                        switch (faction.Faction)
+                        if(faction.Faction == 0)
                         {
-                            case 0:
-                                circleColor = Color.yellow;
-                                break;
-                            case 1:
-                                circleColor = Color.blue;
-                                break;
-                            case 2:
-                                circleColor = Color.red;
-                                break;
+                            circleColor = Color.yellow;
+                        }
+                        else
+                        {
+                            switch (faction.TeamColor)
+                            {
+                                case Generic.TeamColorEnum.blue:
+                                    circleColor = Color.blue;
+                                    break;
+                                case Generic.TeamColorEnum.red:
+                                    circleColor = Color.red;
+                                    break;
+                            }
+
                         }
 
                         m_CircleData.MeshColorData[ci].Color = circleColor;

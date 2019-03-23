@@ -14,6 +14,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public ComponentDataArray<Generic.GameState.Component> GameStateData;
+            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] private Data m_Data;
@@ -22,6 +23,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<Player.PlayerState.Component> PlayerStateData;
+            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] private PlayerData m_PlayerData;
@@ -30,76 +32,96 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<ServerPath.Component> Paths;
+            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] UnitData m_UnitData;
 
         protected override void OnUpdate()
         {
-            var gameState = m_Data.GameStateData[0];
-            if (m_PlayerData.Length == 0)
+            for(int i = 0; i < m_Data.Length; i++)
             {
-                gameState.PlayersOnMapCount = 0;
-                m_Data.GameStateData[0] = gameState;
-                return;
+                var gameState = m_Data.GameStateData[i];
+                var gameStateWorldIndex = m_Data.WorldIndexData[i].Value;
+
+                if (gameState.PlayersOnMapCount == 2)
+                {
+                    switch (gameState.CurrentState)
+                    {
+                        case Generic.GameStateEnum.waiting_for_players:
+                            gameState.CurrentState = Generic.GameStateEnum.spawning;
+                            m_Data.GameStateData[i] = gameState;
+                            break;
+                        case Generic.GameStateEnum.calculate_energy:
+                            gameState.CurrentState = Generic.GameStateEnum.planning;
+                            m_Data.GameStateData[i] = gameState;
+                            break;
+                        case Generic.GameStateEnum.planning:
+                            if (AllPlayersReady(gameStateWorldIndex))
+                            {
+                                gameState.CurrentState = Generic.GameStateEnum.spawning;
+                                m_Data.GameStateData[i] = gameState;
+                            }
+                            break;
+                        case Generic.GameStateEnum.spawning:
+                            gameState.CurrentState = Generic.GameStateEnum.attacking;
+                            m_Data.GameStateData[i] = gameState;
+                            break;
+                        case Generic.GameStateEnum.attacking:
+                            gameState.CurrentState = Generic.GameStateEnum.moving;
+                            m_Data.GameStateData[i] = gameState;
+                            break;
+                        case Generic.GameStateEnum.moving:
+                            if (AllUnitsIdle(gameStateWorldIndex))
+                            {
+                                gameState.CurrentState = Generic.GameStateEnum.calculate_energy;
+                                m_Data.GameStateData[i] = gameState;
+                            }
+                            break;
+                        case Generic.GameStateEnum.game_over:
+
+                            break;
+                    }
+                }
+                else if (gameState.CurrentState != Generic.GameStateEnum.waiting_for_players)
+                {
+                    gameState.CurrentState = Generic.GameStateEnum.waiting_for_players;
+                    m_Data.GameStateData[i] = gameState;
+                }
             }
 
-
-            switch (m_Data.GameStateData[0].CurrentState)
-            {
-                case Generic.GameStateEnum.calculate_energy:
-                    gameState.CurrentState = Generic.GameStateEnum.planning;
-                    m_Data.GameStateData[0] = gameState;
-                    break;
-                case Generic.GameStateEnum.planning:
-                    if (AllPlayersReady())
-                    {
-                        gameState.CurrentState = Generic.GameStateEnum.spawning;
-                        m_Data.GameStateData[0] = gameState;
-                    }
-                    break;
-                case Generic.GameStateEnum.spawning:
-                    gameState.CurrentState = Generic.GameStateEnum.attacking;
-                    m_Data.GameStateData[0] = gameState;
-                    break;
-                case Generic.GameStateEnum.attacking:
-                    gameState.CurrentState = Generic.GameStateEnum.moving;
-                    m_Data.GameStateData[0] = gameState;
-                    break;
-                case Generic.GameStateEnum.moving:
-                    if (AllUnitsIdle())
-                    {
-                        gameState.CurrentState = Generic.GameStateEnum.calculate_energy;
-                        m_Data.GameStateData[0] = gameState;
-                    }
-                    break;
-                case Generic.GameStateEnum.game_over:
-
-                    break;
-            }
         }
 
-        private bool AllPlayersReady()
+        private bool AllPlayersReady(uint gameStateWorldIndex)
         {
             for (int i = 0; i < m_PlayerData.Length; i++)
             {
-                var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
-                if (playerState != Player.PlayerStateEnum.ready)
-                    return false;
+                var playerWorldIndex = m_PlayerData.WorldIndexData[i].Value;
+
+                if (playerWorldIndex == gameStateWorldIndex)
+                {
+                    var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
+                    if (playerState != Player.PlayerStateEnum.ready)
+                        return false;
+                }
             }
             return true;
         }
 
-        private bool AllUnitsIdle()
+        private bool AllUnitsIdle(uint gameStateWorldIndex)
         {
             //loop through all Units to check if idle
             for (int i = 0; i < m_UnitData.Length; i++)
             {
-                var path = m_UnitData.Paths[i];
-                if (path.Path.CellAttributes.Count != 0)
-                    return false;
-            }
+                var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
 
+                if (unitWorldIndex == gameStateWorldIndex)
+                {
+                    var path = m_UnitData.Paths[i];
+                    if (path.Path.CellAttributes.Count != 0)
+                        return false;
+                }
+            }
             return true;
 
         }

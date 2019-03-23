@@ -5,15 +5,17 @@ using UnityEngine;
 using LeyLineHybridECS;
 using System.Collections.Generic;
 
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class AddComponentsSystem : ComponentSystem
 {
     public struct CellData
     {
         public readonly int Length;
         public EntityArray Entites;
-        [ReadOnly] public ComponentArray<Transform> Transform;
-        [ReadOnly] public ComponentDataArray<Cells.CellAttributesComponent.Component> CellAttributesData;
-        [ReadOnly] public ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
+        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentArray<Transform> Transform;
+        public readonly ComponentDataArray<Cells.CellAttributesComponent.Component> CellAttributesData;
+        public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
     }
 
     [Inject] private CellData m_CellData;
@@ -22,18 +24,31 @@ public class AddComponentsSystem : ComponentSystem
     {
         public readonly int Length;
         public EntityArray Entites;
-        [ReadOnly] public ComponentArray<Transform> Transform;
-        [ReadOnly] public ComponentDataArray<Improbable.Gdk.Health.HealthComponent.Component> Health;
-        [ReadOnly] public ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
+        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentArray<Transform> Transform;
+        public readonly ComponentDataArray<Improbable.Gdk.Health.HealthComponent.Component> Health;
+        public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
     }
 
     [Inject] private UnitData m_UnitData;
 
+    public struct PlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<Authoritative<Player.PlayerState.Component>> AuthorativeData;
+    }
+
+    [Inject] private PlayerData m_PlayerData;
+
     protected override void OnUpdate()
     {
+        var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+
         //adds IComponentData components to SpatialOS entities that don't need to be synced
         for (int i = 0; i < m_CellData.Length; i++)
         {
+            var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
             var transform = m_CellData.Transform[i];
             var entity = m_CellData.Entites[i];
 
@@ -54,15 +69,17 @@ public class AddComponentsSystem : ComponentSystem
                 CurrentState = MarkerState.State.Neutral
             };
 
-            PostUpdateCommands.AddComponent(entity, mouseState);
-            PostUpdateCommands.AddComponent(entity, markerState);
-            PostUpdateCommands.AddComponent(entity, isVisible);
-
-
+            if (cellWorldIndex == playerWorldIndex)
+            {
+                PostUpdateCommands.AddComponent(entity, mouseState);
+                PostUpdateCommands.AddComponent(entity, markerState);
+                PostUpdateCommands.AddComponent(entity, isVisible);
+            }
         }
 
         for (int i = 0; i < m_UnitData.Length; i++)
         {
+            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
             var transform = m_UnitData.Transform[i];
             var entity = m_UnitData.Entites[i];
 
@@ -71,7 +88,10 @@ public class AddComponentsSystem : ComponentSystem
                 CurrentState = MouseState.State.Neutral
             };
 
-            PostUpdateCommands.AddComponent(entity, mouseState);
+            if (unitWorldIndex == playerWorldIndex)
+            {
+                PostUpdateCommands.AddComponent(entity, mouseState);
+            }
         }
     }
 }

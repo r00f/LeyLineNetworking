@@ -8,6 +8,7 @@ type CellsInRangeRequest {
 
 	improbable.Vector3f origin = 1;
 	uint32 range = 2;
+	uint32 world_index = 3;
 
 }
 

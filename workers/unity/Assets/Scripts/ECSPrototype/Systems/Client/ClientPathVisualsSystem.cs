@@ -37,6 +37,7 @@ public class ClientPathVisualsSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public ComponentDataArray<ClientPath.Component> Paths;
         public ComponentArray<LineRendererComponent> LineRenderers;
@@ -46,6 +47,8 @@ public class ClientPathVisualsSystem : ComponentSystem
 
     public struct GameStateData
     {
+        public readonly int Length;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<GameState.Component> GameState;
     }
 
@@ -55,29 +58,35 @@ public class ClientPathVisualsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-
-        if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
+        for (int li = 0; li < m_LineRendererData.Length; li++)
         {
-            for (int li = 0; li < m_LineRendererData.Length; li++)
+            var lr = m_LineRendererData.LineRenderers[li];
+            var unitWorldIndex = m_LineRendererData.WorldIndexData[li].Value;
+
+            for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
-                var lr = m_LineRendererData.LineRenderers[li];
+                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
 
-                if (lr.lineRenderer.enabled)
+                if (unitWorldIndex == gameStateWorldIndex)
                 {
-                    lr.lineRenderer.enabled = false;
-                }
-
-                if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.calculate_energy)
-                {
-                    var path = m_LineRendererData.Paths[li];
-                    if (path.Path.CellAttributes.Count > 0)
+                    if (m_GameStateData.GameState[gi].CurrentState != GameStateEnum.planning)
                     {
-                        path.Path.CellAttributes.Clear();
-                        m_LineRendererData.Paths[li] = path;
+                        if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.calculate_energy)
+                        {
+                            var path = m_LineRendererData.Paths[li];
+                            if (path.Path.CellAttributes.Count > 0)
+                            {
+                                path.Path.CellAttributes.Clear();
+                                m_LineRendererData.Paths[li] = path;
+                            }
+                        }
+                        if (lr.lineRenderer.enabled)
+                        {
+                            lr.lineRenderer.enabled = false;
+                        }
                     }
                 }
             }
-            return;
         }
 
         for (int pi = 0; pi < m_ClientPathData.Length; pi++)

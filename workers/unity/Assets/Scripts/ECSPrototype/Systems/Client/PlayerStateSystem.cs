@@ -1,21 +1,21 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using UnityEngine.UI;
-using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
-using Improbable;
-using Unity.Collections;
+using Generic;
+using Player;
 
 
 namespace LeyLineHybridECS
 {
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class PlayerStateSystem : ComponentSystem
     {
         public struct GameStateData
         {
             public readonly int Length;
-            public ComponentDataArray<Generic.GameState.Component> GameState;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+            public ComponentDataArray<GameState.Component> GameState;
         }
 
         [Inject] private GameStateData m_GameStateData;
@@ -23,8 +23,9 @@ namespace LeyLineHybridECS
         public struct PlayerData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<Authoritative<Player.PlayerState.Component>> AuthorativeData;
-            public ComponentDataArray<Player.PlayerState.Component> PlayerStateData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
         [Inject] private PlayerData m_PlayerData;
@@ -32,56 +33,97 @@ namespace LeyLineHybridECS
         public struct UnitData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Improbable.Gdk.Health.HealthComponent.Component> HealthData;
         }
 
         [Inject] private UnitData m_UnitData;
 
-        Button readyButton;
-        
+        UIReferences uiRef;
+
+        //Button readyButton;
+        //GameObject startUpPanel;
+
+        protected override void OnStartRunning()
+        {
+
+        }
+
         protected override void OnUpdate()
         {
-            if(readyButton == null)
+            if(uiRef == null)
             {
-                readyButton = GameObject.Find("ReadyButton").GetComponent<Button>();
-                readyButton.onClick.AddListener(delegate { SetPlayerState(Player.PlayerStateEnum.ready); });
+                uiRef = Object.FindObjectOfType<UIReferences>();
+                uiRef.ReadyButton.onClick.AddListener(delegate { SetPlayerState(PlayerStateEnum.ready); });
             }
 
-            if (m_GameStateData.Length > 0)
+            for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
-                var gameState = m_GameStateData.GameState[0];
-                if (gameState.CurrentState != Generic.GameStateEnum.planning)
-                {
-                    SetPlayerState(Player.PlayerStateEnum.waiting);
-                    return;
-                }
-            }
+                var playerState = m_PlayerData.PlayerStateData[0];
+                var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
+                var gameState = m_GameStateData.GameState[gi];
 
-            var playerState = m_PlayerData.PlayerStateData[0];
+                if (playerWorldIndex == gameStateWorldIndex)
+                {
+                    if(uiRef != null)
+                    {
+                        if(gameState.CurrentState == GameStateEnum.waiting_for_players)
+                        {
+                            //if (!uiRef.StartupPanel.activeSelf)
+                                //uiRef.StartupPanel.SetActive(true);
+                        }
+                        else
+                        {
+                            if (uiRef.StartupPanel.activeSelf)
+                            {
+                                if(!uiRef.MatchReadyPanel.activeSelf)
+                                {
+                                    uiRef.MatchReadyPanel.SetActive(true);
+                                }
+                                if(uiRef.StartUpWaitTime > 0)
+                                {
+                                    uiRef.StartUpWaitTime -= Time.deltaTime;
+                                }
+                                else
+                                {
+                                    uiRef.StartupPanel.SetActive(false);
+                                }
+                            }
+                                
+                        }
+                    }
 
-            if (playerState.CurrentState != Player.PlayerStateEnum.ready)
-            {
-                if (AnyUnitClicked())
-                {
-                    SetPlayerState(Player.PlayerStateEnum.unit_selected);
-                }
-                else
-                {
-                    SetPlayerState(Player.PlayerStateEnum.waiting);
+                    if (gameState.CurrentState == GameStateEnum.planning)
+                    {
+                        if (playerState.CurrentState != PlayerStateEnum.ready)
+                        {
+                            if (AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.unit_selected)
+                            {
+                                SetPlayerState(PlayerStateEnum.unit_selected);
+                            }
+                            else if (playerState.CurrentState != PlayerStateEnum.waiting)
+                            {
+                                SetPlayerState(PlayerStateEnum.waiting);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        SetPlayerState(PlayerStateEnum.waiting);
+                        return;
+                    }
                 }
             }
         }
 
-        public void SetPlayerState(Player.PlayerStateEnum state)
+        public void SetPlayerState(PlayerStateEnum state)
         {
+            UpdateInjectedComponentGroups();
             var playerState = m_PlayerData.PlayerStateData[0];
-            if (playerState.CurrentState != state)
-            {
-                playerState.CurrentState = state;
-                m_PlayerData.PlayerStateData[0] = playerState;
-            }
+            playerState.CurrentState = state;
+            m_PlayerData.PlayerStateData[0] = playerState;
         }
 
         private bool AnyUnitClicked()

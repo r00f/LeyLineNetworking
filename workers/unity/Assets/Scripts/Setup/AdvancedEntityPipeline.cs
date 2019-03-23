@@ -39,21 +39,25 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
         var prefabName = entity.GetComponent<Metadata.Component>().EntityType;
         if (prefabName.Equals(PlayerMetadata))
         {
-            var clientMovement = entity.GetComponent<ClientMovement.Component>();
+            //var clientMovement = entity.GetComponent<ClientMovement.Component>();
+            var playerState = entity.GetComponent<Player.PlayerState.Component>();
             if (entity.GetComponent<EntityAcl.Component>().ComponentWriteAcl
-                .TryGetValue(clientMovement.ComponentId, out var clientMovementWrite))
+                .TryGetValue(playerState.ComponentId, out var playerStateWrite))
             {
                 var authority = false;
-                foreach (var attributeSet in clientMovementWrite.AttributeSet)
+                
+                foreach (var attributeSet in playerStateWrite.AttributeSet)
                 {
                     if (attributeSet.Attribute.Contains(workerIdAttribute))
                     {
                         authority = true;
                     }
                 }
+                
 
-                var serverPosition = entity.GetComponent<ServerMovement.Component>();
-                var position = serverPosition.Latest.Position.ToVector3() + worker.Origin;
+                //var serverPosition = entity.GetComponent<ServerMovement.Component>();
+
+                var position = worker.Origin;
 
                 var prefab = authority ? cachedAuthPlayer : cachedNonAuthPlayer;
                 var gameObject = Object.Instantiate(prefab, position, Quaternion.identity);
@@ -62,7 +66,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
                 return gameObject;
             }
         }
-
+        
         return fallback.OnEntityCreated(entity);
     }
 

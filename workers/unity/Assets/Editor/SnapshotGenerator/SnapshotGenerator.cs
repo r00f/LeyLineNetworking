@@ -37,7 +37,10 @@ namespace BlankProject.Editor
 
         private static void AddGameState(Snapshot snapshot)
         {
-            snapshot.AddEntity(LeyLineEntityTemplates.GameState());
+            foreach(EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
+            {
+                snapshot.AddEntity(LeyLineEntityTemplates.GameState(wi.WorldIndex));
+            }
         }
 
         private static void AddManaliths(Snapshot snaphot)
@@ -60,7 +63,8 @@ namespace BlankProject.Editor
                     });
                 }
                 Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);
-                var manalith = LeyLineEntityTemplates.Manalith(pos, circle);
+                uint worldIndex = m.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
+                var manalith = LeyLineEntityTemplates.Manalith(pos, circle, worldIndex);
                 snaphot.AddEntity(manalith);
             }
         }
@@ -84,10 +88,10 @@ namespace BlankProject.Editor
                         MovementCost = n.GetComponent<MovementCost>().Value
                     });
                 }
-                Vector3f pos = new Vector3f(c.GetComponent<Position3DDataComponent>().Value.Value.x, c.GetComponent<Position3DDataComponent>().Value.Value.y, c.GetComponent<Position3DDataComponent>().Value.Value.z);
+                Vector3f pos = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z);
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
-
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours);
+                uint worldIndex = c.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
+                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex);
                 snapshot.AddEntity(cell);
             }
         }
