@@ -1,0 +1,12 @@
+package generic;
+
+import "cells/cell_attributes.schema";
+
+component Vision {
+	
+    id = 111;
+	uint32 vision_range = 1;
+	list<cells.CellAttributes> cells_in_visionrange = 2;
+	bool require_update = 3;
+	
+}

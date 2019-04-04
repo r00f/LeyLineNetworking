@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+﻿
+using UnityEngine;
 using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using System.Collections.Generic;
 using System.Linq;
-
+/*
 namespace LeyLineHybridECS
 {
     public class VisibilitySystem : ComponentSystem
@@ -82,7 +83,7 @@ namespace LeyLineHybridECS
                 }
 
             }
-            */
+            
 
             for (int i = 0; i < m_cData.Length; i++)
             {
@@ -129,7 +130,7 @@ namespace LeyLineHybridECS
 
                         }
                     }
-                    */
+                    
                 }
             }
         }
@@ -175,7 +176,7 @@ namespace LeyLineHybridECS
             {
                 sight.Add(c.GetComponent<IsVisible>());
             }
-            */
+           
 
             List<IsVisible> Obstructive = new List<IsVisible>();
             List<List<IsVisible>> RelevantClusters = new List<List<IsVisible>>();
@@ -186,7 +187,7 @@ namespace LeyLineHybridECS
                 {
                     Obstructive.Add(c);
                 }
-                */
+                
             }
 
             RelevantClusters.Clear();
@@ -252,215 +253,13 @@ namespace LeyLineHybridECS
                 {
                     inCluster.RelevantAngles.Add(angle);
                 }
-                */
+                
             }
             //print("Relevant angles Count: " + inCluster.RelevantAngles.Count());
 
         }
 
-        /*
-        private List<IsVisible> Cluster_UseAngles(ObstructVisionCluster inCluster, List<IsVisible> watching)
-        {
-            int count = inCluster.RelevantAngles.Count;
-            Angle largest;
-            Angle smallest;
-            List<IsVisible> Cone = new List<IsVisible>();
-            //if count = 1 (solve the broblem of only one angle by making it into 2 angles based on distance to watcher
-            inCluster.RelevantAngles.Sort((x, y) => x.angle_float.CompareTo(y.angle_float));
-            largest = inCluster.RelevantAngles[count - 1];
-            smallest = inCluster.RelevantAngles[0];
-            //Debug.Log("Largest: " + largest.angle_float + " , " + "Smallest: " + smallest.angle_float);
-
-
-
-            #region logic for checking if something is behind an obstructed cell
-            bool specialcase = false;
-
-            for (int i = count - 1; i >= 0; i--)
-            {
-                if (i == 0)
-                    continue;
-                else
-                {
-                    if (Mathf.Abs(inCluster.RelevantAngles[i].angle_float - inCluster.RelevantAngles[i - 1].angle_float) > 60)
-                    {
-                        specialcase = true;
-                    }
-                }
-            }
-
-            if (!specialcase)
-            {
-                foreach (IsVisible c in watching)
-                {
-
-                    float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
-                    if ((largest.angle_float >= Angle) && (Angle >= smallest.angle_float))
-                    {
-                        Cone.Add(c);
-                    }
-
-                }
-
-                for (int i = count - 1; i >= 0; i--)
-                {
-                    if (i == 0)
-                        continue;
-                    else
-                    {
-                        float3 watcherCubeCoordinate = inCluster.watcher.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-                        float3 currentCubeCoordinate = inCluster.RelevantAngles[i].cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-                        float3 nextCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                        foreach (IsVisible c in Cone)
-                        {
-                            float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
-                            float3 coneCellCubeCoordinate = c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-
-                            if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i - 1].angle_float)
-                            {
-                                if (m_CGS.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                                {
-                                    if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                                    {
-                                        if (watching.Contains(c)) watching.Remove(c);
-                                    }
-                                }
-                                else
-                                {
-                                    if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                                    {
-                                        if (watching.Contains(c)) watching.Remove(c);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                #endregion
-                return watching;
-            }
-            #region SpecialCase
-            else
-            {
-                Debug.Log("SPECIAL CASE!! DOES IT WORK?");
-                List<Angle> Positives = new List<Angle>();
-                List<Angle> Negatives = new List<Angle>();
-                for (int i = count - 1; i >= 0; i--)
-                {
-                    if (inCluster.RelevantAngles[i].angle_float >= 0)
-                    {
-                        Positives.Add(inCluster.RelevantAngles[i]);
-                    }
-                    else {
-                        Negatives.Add(inCluster.RelevantAngles[i]);
-                    }
-
-                }
-                Debug.Log(Positives[0].angle_float + " ; " + Positives[Positives.Count - 1].angle_float);
-                foreach (IsVisible c in watching)
-                {
-                    float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
-                    if ((Positives[Positives.Count - 1].angle_float <= Angle && Angle >= 0) || (Angle <= Negatives[0].angle_float && Angle <= 0))
-                    {
-                        Cone.Add(c);
-                    }
-                }
-                Debug.Log("clustercount" + Cone.Count);
-
-                float3 watcherCubeCoordinate = inCluster.watcher.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-                float3 largestCubeCoordinate = largest.cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-                float3 smallestCubeCoordinate = smallest.cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                foreach (IsVisible c in Cone)
-                {
-                    float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
-                    float3 coneCellCubeCoordinate = c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                    if (largest.angle_float <= Angle || Angle <= smallest.angle_float)
-                    {
-
-                        if (m_CGS.GetDistance(watcherCubeCoordinate, largestCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, smallestCubeCoordinate))
-                        {
-                            if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, largestCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                        else
-                        {
-                            if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, smallestCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                    }
-                }
-                for (int i = 0; i < Positives.Count - 1; i++)
-                {
-                    float3 currentCubeCoordinate = inCluster.RelevantAngles[i].cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-                    float3 nextCubeCoordinate = inCluster.RelevantAngles[i + 1].cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                    foreach (IsVisible c in Cone)
-                    {
-                        float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
-                        float3 coneCellCubeCoordinate = c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                        if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i + 1].angle_float)
-                        {
-                            if (m_CGS.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) <= m_CGS.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                            {
-                                if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                                {
-                                    if (watching.Contains(c)) watching.Remove(c);
-                                }
-                            }
-                            else
-                            {
-                                if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                                {
-                                    if (watching.Contains(c)) watching.Remove(c);
-                                }
-                            }
-                        }
-                    }
-                }
-                for (int i = Negatives.Count; i > 0; i--)
-                {
-                    float3 currentCubeCoordinate = inCluster.RelevantAngles[i].cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-                    float3 nextCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                    foreach (IsVisible c in Cone)
-                    {
-                        float Angle = m_CGS.GetAngles(inCluster.watcher.GetComponent<Cell>(), c.GetComponent<Cell>());
-                        float3 coneCellCubeCoordinate = c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
-
-                        if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i - 1].angle_float)
-                        {
-                            if (m_CGS.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                            {
-                                if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                                {
-                                    if (watching.Contains(c)) watching.Remove(c);
-                                }
-                            }
-                            else
-                            {
-                                if (m_CGS.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= m_CGS.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                                {
-                                    if (watching.Contains(c)) watching.Remove(c);
-                                }
-                            }
-                        }
-                    }
-                }
-                return watching;
-            }
-            
-#endregion
-    }
-    */
+        
 
         private void BuildFixClusters()
         {
@@ -477,7 +276,7 @@ namespace LeyLineHybridECS
                 {
                     obstructed.Add(isVisible);
                 }
-                */
+                
             }
 
             List<RawCluster> raw = new List<RawCluster>();
@@ -521,7 +320,7 @@ namespace LeyLineHybridECS
             }
             newObstructed = obstructed;
         }
-        */
+        
     }
     public struct ObstructVisionCluster
     {
@@ -568,3 +367,4 @@ namespace LeyLineHybridECS
         }
     }
 }
+*/
