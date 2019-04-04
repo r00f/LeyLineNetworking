@@ -7,6 +7,9 @@ using LeyLineHybridECS;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using Generic;
+using Cells;
+using Player;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
@@ -15,8 +18,8 @@ public class VisionSystem_Server : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CellCoordinateData;
-        public ComponentDataArray<Cells.CellAttributesComponent.Component> CellsData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CellCoordinateData;
+        public ComponentDataArray<CellAttributesComponent.Component> CellsData;
     }
 
     [Inject]
@@ -25,9 +28,10 @@ public class VisionSystem_Server : ComponentSystem
     public struct PlayerData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Player.PlayerAttributes.Component> PlayerAttributes;
-        public ComponentDataArray<Generic.FactionComponent.Component> FactionComponent;
-        public ComponentDataArray<Generic.Vision.Component> VisionComponent;
+        public readonly ComponentDataArray<PlayerAttributes.Component> PlayerAttributes;
+        public ComponentDataArray<FactionComponent.Component> FactionComponent;
+        public ComponentDataArray<Vision.Component> VisionComponent;
+
     }
 
     [Inject]
@@ -36,10 +40,11 @@ public class VisionSystem_Server : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> UnitCoordinateData;
-        public ComponentDataArray<Generic.Vision.Component> VisionComponent;
-        public ComponentDataArray<Generic.FactionComponent.Component> FactionComponent;
-        public readonly ComponentDataArray<Unit.CurrentPath.Component> Path;
+        public readonly ComponentDataArray<WorldIndex.Component> WordIndexData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> UnitCoordinateData;
+        public ComponentDataArray<Vision.Component> VisionComponent;
+        public ComponentDataArray<FactionComponent.Component> FactionComponent;
+        public readonly ComponentDataArray<Improbable.Gdk.Health.HealthComponent.Component> Health;
     }
     [Inject]
     private UnitData m_UnitData;
@@ -69,20 +74,20 @@ public class VisionSystem_Server : ComponentSystem
             //Debug.Log("CellCount2: " + m_CellData.Length);
             for (int i = m_UnitData.Length - 1; i >= 0; i--)
             {
+                var u_worldIndex = m_UnitData.WordIndexData[i].Value;
                 var u_Vision = m_UnitData.VisionComponent[i];
                 var u_OccupiedCell = m_UnitData.UnitCoordinateData[i];
                 var u_Faction = m_UnitData.FactionComponent[i];
 
                 if (u_Vision.RequireUpdate == true)
                 {
-                    u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction);
-                    Debug.Log("uVisionbool: " + u_Vision.RequireUpdate);
+                    u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex);
                     u_Vision.CellsInVisionrange = u_Vision.CellsInVisionrange;
                     u_Vision.RequireUpdate = u_Vision.RequireUpdate;
                     m_UnitData.VisionComponent[i] = u_Vision;
-                    //Debug.Log("appliedCount: " + m_UnitData.VisionComponent[i].CellsInVisionrange.Count);
                 }
             }
+
             for (int i = m_PlayerData.Length - 1; i >= 0; i--)
             {
                 var p_Vision = m_PlayerData.VisionComponent[i];
@@ -98,19 +103,20 @@ public class VisionSystem_Server : ComponentSystem
             }
         }
     }
-    private Generic.Vision.Component UpdateUnitVision(Generic.CubeCoordinate.Component coor, Generic.Vision.Component inVision, Generic.FactionComponent.Component inFaction)
+
+    private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
-        List<Cells.CellAttributes> sight = new List<Cells.CellAttributes>();
+        List<CellAttributes> sight = new List<CellAttributes>();
         
-        foreach (Cells.CellAttributes c in GridSys.GetRadius(coor.CubeCoordinate, inVision.VisionRange))
+        foreach (CellAttributes c in GridSys.GetRadius(coor.CubeCoordinate, inVision.VisionRange, inWorldIndex))
         {
             sight.Add(c);
         }
-        //Debug.Log("Sightlength before subtraction:" + sight.Count);
 
-        List<Cells.CellAttributes> Obstructive = new List<Cells.CellAttributes>();
-        List<List<Cells.CellAttributesComponent.Component>> RelevantClusters = new List<List<Cells.CellAttributesComponent.Component>>();
-        foreach (Cells.CellAttributes c in sight)
+        List<CellAttributes> Obstructive = new List<CellAttributes>();
+        List<List<CellAttributesComponent.Component>> RelevantClusters = new List<List<CellAttributesComponent.Component>>();
+
+        foreach (CellAttributes c in sight)
         {
             
             if (c.Cell.ObstructVision)
@@ -122,22 +128,15 @@ public class VisionSystem_Server : ComponentSystem
 
 
         RelevantClusters.Clear();
-        //RelevantClusters = FixClusters;
 
         while (Obstructive.Count > 0)
         {
             int i = Obstructive.Count - 1;
             if (i >= 0)
             {
-                List<Cells.CellAttributesComponent.Component> Cluster = new List<Cells.CellAttributesComponent.Component>();
+                List<CellAttributesComponent.Component> Cluster = new List<CellAttributesComponent.Component>();
                 foreach (RawCluster lc in FixClusters)
                 {
-                    //Debug.Log("clustercount" + lc.cluster.Count);
-                    /*if (lc.Contains(Obstructive[i]))
-                    {
-                        Cluster = lc;
-                    }*/
-                    //foreach (Cells.CellAttributesComponent.Component c in lc.cluster)
                     for (int e = lc.cluster.Count - 1; e >= 0; e--)
                     {
                         if (lc.cluster[e].CellAttributes.Cell.CubeCoordinate == Obstructive[i].Cell.CubeCoordinate)
@@ -148,15 +147,15 @@ public class VisionSystem_Server : ComponentSystem
                 }
                 if (Cluster.Count > 0)
                  {
-                        List<Cells.CellAttributes> toRemove = new List<Cells.CellAttributes>();
-                        foreach (Cells.CellAttributesComponent.Component c in Cluster)
+                        List<CellAttributes> toRemove = new List<CellAttributes>();
+                        foreach (CellAttributesComponent.Component c in Cluster)
                         {
-                            foreach (Cells.CellAttributes ca in sight)
+                            foreach (CellAttributes ca in sight)
                             {
                                 if (ca.Cell.CubeCoordinate == c.CellAttributes.Cell.CubeCoordinate) toRemove.Add(ca);
                             }
                         }
-                        foreach (Cells.CellAttributes c in toRemove)
+                        foreach (CellAttributes c in toRemove)
                         {
                             sight.Remove(c);
                             Obstructive.Remove(c);
@@ -170,7 +169,7 @@ public class VisionSystem_Server : ComponentSystem
         //Debug.Log(RelevantClusters.Count);
 
         //Fetch watcher out of all the cells
-        Cells.CellAttributesComponent.Component Watcher = new Cells.CellAttributesComponent.Component();
+        CellAttributesComponent.Component Watcher = new CellAttributesComponent.Component();
         bool isSet = false;
         for(int i = m_CellData.Length-1; i>=0; i--)
         {
@@ -210,7 +209,7 @@ public class VisionSystem_Server : ComponentSystem
         return inVision;
     }
 
-    private Generic.Vision.Component UpdatePlayerVision(Generic.Vision.Component inVision, Generic.FactionComponent.Component inFaction)
+    private Vision.Component UpdatePlayerVision(Vision.Component inVision, FactionComponent.Component inFaction)
     {
 
             inVision.CellsInVisionrange.Clear();
@@ -222,7 +221,7 @@ public class VisionSystem_Server : ComponentSystem
 
                 if(inFaction.Faction == UnitFaction.Faction)
                 {
-                    foreach(Cells.CellAttributes c in UnitVision.CellsInVisionrange)
+                    foreach(CellAttributes c in UnitVision.CellsInVisionrange)
                     {
                         if (!inVision.CellsInVisionrange.Contains(c)) inVision.CellsInVisionrange.Add(c);
                     }
@@ -236,7 +235,7 @@ public class VisionSystem_Server : ComponentSystem
     private void BuildRawClusters()
     {
         
-        List<Cells.CellAttributesComponent.Component> obstructed = new List<Cells.CellAttributesComponent.Component>();
+        List<CellAttributesComponent.Component> obstructed = new List<CellAttributesComponent.Component>();
 
         //Debug.Log(m_CellData.Length);
         for (int i = m_CellData.Length - 1; i >= 0; i--)
@@ -255,7 +254,7 @@ public class VisionSystem_Server : ComponentSystem
         List<RawCluster> raw = new List<RawCluster>();
         while (obstructed.Count > 0)
         {
-            Cells.CellAttributesComponent.Component c = obstructed[0];
+            CellAttributesComponent.Component c = obstructed[0];
             RawCluster go = new RawCluster(c);
             obstructed.Remove(c);
             BuildCluster(c, go, obstructed, out obstructed);
@@ -274,14 +273,14 @@ public class VisionSystem_Server : ComponentSystem
         Init = false;
     }
 
-    private void BuildCluster(Cells.CellAttributesComponent.Component cell, RawCluster cluster, List<Cells.CellAttributesComponent.Component> obstructed, out List<Cells.CellAttributesComponent.Component> newObstructed)
+    private void BuildCluster(CellAttributesComponent.Component cell, RawCluster cluster, List<CellAttributesComponent.Component> obstructed, out List<CellAttributesComponent.Component> newObstructed)
     {
-        List<Cells.CellAttribute> neighbours = cell.CellAttributes.Neighbours;
+        List<CellAttribute> neighbours = cell.CellAttributes.Neighbours.CellAttributes;
         for (int i = neighbours.Count - 1; i >= 0; i--)
         {
             bool contains = false;
             {
-                foreach (Cells.CellAttributesComponent.Component c in obstructed)
+                foreach (CellAttributesComponent.Component c in obstructed)
                 {
                     if (c.CellAttributes.Cell.CubeCoordinate == neighbours[i].CubeCoordinate)
                     {
@@ -296,7 +295,7 @@ public class VisionSystem_Server : ComponentSystem
         {
             bool contains = false;
 
-            foreach (Cells.CellAttributesComponent.Component c in cluster.cluster)
+            foreach (CellAttributesComponent.Component c in cluster.cluster)
             {
                 if (c.CellAttributes.Cell.CubeCoordinate == neighbours[i].CubeCoordinate) contains = true;
             }
@@ -304,8 +303,8 @@ public class VisionSystem_Server : ComponentSystem
             if (!contains)
             {
                 bool isSet = false;
-                Cells.CellAttributesComponent.Component toRemove = new Cells.CellAttributesComponent.Component();
-                foreach (Cells.CellAttributesComponent.Component c in obstructed)
+                CellAttributesComponent.Component toRemove = new CellAttributesComponent.Component();
+                foreach (CellAttributesComponent.Component c in obstructed)
                 {
                     if (c.CellAttributes.Cell.CubeCoordinate == neighbours[i].CubeCoordinate) toRemove = c;
                     isSet = true;
@@ -325,7 +324,7 @@ public class VisionSystem_Server : ComponentSystem
 
     private void Cluster_DetermineAngles(ObstructVisionCluster inCluster)
     {
-        foreach (Cells.CellAttributesComponent.Component c in inCluster.cluster)
+        foreach (CellAttributesComponent.Component c in inCluster.cluster)
         {
 
             Angle angle = new Angle(c, GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.CellAttributes.Cell.Position));
@@ -339,12 +338,12 @@ public class VisionSystem_Server : ComponentSystem
         //print("Relevant angles Count: " + inCluster.RelevantAngles.Count());
 
     }
-    private List<Cells.CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<Cells.CellAttributes> watching)
+    private List<CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<CellAttributes> watching)
     {
         int count = inCluster.RelevantAngles.Count;
         Angle largest;
         Angle smallest;
-        List<Cells.CellAttributes> Cone = new List<Cells.CellAttributes>();
+        List<CellAttributes> Cone = new List<CellAttributes>();
         //if count = 1 (solve the broblem of only one angle by making it into 2 angles based on distance to watcher
         inCluster.RelevantAngles.Sort((x, y) => x.angle_float.CompareTo(y.angle_float));
         largest = inCluster.RelevantAngles[count - 1];
@@ -371,7 +370,7 @@ public class VisionSystem_Server : ComponentSystem
 
         if (!specialcase)
         {
-            foreach (Cells.CellAttributes c in watching)
+            foreach (CellAttributes c in watching)
             {
 
                 float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
@@ -392,7 +391,7 @@ public class VisionSystem_Server : ComponentSystem
                     Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
                     Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.CellAttributes.Cell.CubeCoordinate;
 
-                    foreach (Cells.CellAttributes c in Cone)
+                    foreach (CellAttributes c in Cone)
                     {
                         float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
                         Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
@@ -438,7 +437,7 @@ public class VisionSystem_Server : ComponentSystem
 
             }
             Debug.Log(Positives[0].angle_float + " ; " + Positives[Positives.Count - 1].angle_float);
-            foreach (Cells.CellAttributes c in watching)
+            foreach (CellAttributes c in watching)
             {
                 float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
                 if ((Positives[Positives.Count - 1].angle_float <= Angle && Angle >= 0) || (Angle <= Negatives[0].angle_float && Angle <= 0))
@@ -452,7 +451,7 @@ public class VisionSystem_Server : ComponentSystem
             Vector3f largestCubeCoordinate = largest.cell.CellAttributes.Cell.CubeCoordinate;
             Vector3f smallestCubeCoordinate = smallest.cell.CellAttributes.Cell.CubeCoordinate;
 
-            foreach (Cells.CellAttributes c in Cone)
+            foreach (CellAttributes c in Cone)
             {
                 float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
                 Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
@@ -481,7 +480,7 @@ public class VisionSystem_Server : ComponentSystem
                 Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
                 Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i + 1].cell.CellAttributes.Cell.CubeCoordinate;
 
-                foreach (Cells.CellAttributes c in Cone)
+                foreach (CellAttributes c in Cone)
                 {
                     float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
                     Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
@@ -510,7 +509,7 @@ public class VisionSystem_Server : ComponentSystem
                 Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
                 Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.CellAttributes.Cell.CubeCoordinate;
 
-                foreach (Cells.CellAttributes c in Cone)
+                foreach (CellAttributes c in Cone)
                 {
                     float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
                     Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
@@ -546,10 +545,10 @@ public class VisionSystem_Server : ComponentSystem
 #region ClusterDef
 public struct ObstructVisionCluster
 {
-    public List<Cells.CellAttributesComponent.Component> cluster;
+    public List<CellAttributesComponent.Component> cluster;
     public List<Angle> RelevantAngles;
-    public Cells.CellAttributesComponent.Component watcher;
-    public ObstructVisionCluster(List<Cells.CellAttributesComponent.Component> inCluster, Cells.CellAttributesComponent.Component inWatcher)
+    public CellAttributesComponent.Component watcher;
+    public ObstructVisionCluster(List<CellAttributesComponent.Component> inCluster, CellAttributesComponent.Component inWatcher)
 
     {
         watcher = inWatcher;
@@ -557,32 +556,32 @@ public struct ObstructVisionCluster
         RelevantAngles = new List<Angle>();
     }
 
-    public ObstructVisionCluster(Cells.CellAttributesComponent.Component start, Cells.CellAttributesComponent.Component inWatcher)
+    public ObstructVisionCluster(CellAttributesComponent.Component start, CellAttributesComponent.Component inWatcher)
     {
         watcher = inWatcher;
-        cluster = new List<Cells.CellAttributesComponent.Component>();
+        cluster = new List<CellAttributesComponent.Component>();
         cluster.Add(start);
         RelevantAngles = new List<Angle>();
     }
 }
 public struct RawCluster
 {
-    public List<Cells.CellAttributesComponent.Component> cluster;
-    public RawCluster(List<Cells.CellAttributesComponent.Component> inCluster)
+    public List<CellAttributesComponent.Component> cluster;
+    public RawCluster(List<CellAttributesComponent.Component> inCluster)
     {
         cluster = inCluster;
     }
-    public RawCluster(Cells.CellAttributesComponent.Component inStart)
+    public RawCluster(CellAttributesComponent.Component inStart)
     {
-        cluster = new List<Cells.CellAttributesComponent.Component>();
+        cluster = new List<CellAttributesComponent.Component>();
         cluster.Add(inStart);
     }
 }
 public struct Angle
 {
-    public Cells.CellAttributesComponent.Component cell;
+    public CellAttributesComponent.Component cell;
     public float angle_float;
-    public Angle(Cells.CellAttributesComponent.Component inCell, float inAngle)
+    public Angle(CellAttributesComponent.Component inCell, float inAngle)
     {
         cell = inCell;
         angle_float = inAngle;
