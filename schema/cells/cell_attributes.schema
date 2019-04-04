@@ -24,6 +24,8 @@ type CellAttribute	{
 	bool is_taken = 3;
 	int32 movement_cost = 4;
 	EntityId unit_on_cell_id = 5;
+	bool obstruct_vision = 6;
+
 }
 
 type CellAttributeList {

@@ -23,6 +23,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<ClientMovementSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
         world.GetOrCreateManager<ClientPathVisualsSystem>();
+        world.GetOrCreateManager<VisionSystem_Client>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -34,6 +35,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<MovementSystem>();
         world.GetOrCreateManager<ManalithSystem>();
         world.GetOrCreateManager<UnitLifeCycleSystem>();
+        world.GetOrCreateManager<VisionSystem_Server>();
     }
 
 }

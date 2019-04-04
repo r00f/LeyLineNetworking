@@ -81,7 +81,8 @@ namespace LeyLineHybridECS
                                         if (unitToSpawn.Faction == playerFaction.Faction)
                                         {
                                             //Debug.Log("SPAWNUNIT");
-                                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction, worldIndex);
+                                            var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+                                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction, worldIndex, Stats);
 
                                             requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
                                             (

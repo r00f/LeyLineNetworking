@@ -87,7 +87,8 @@ namespace BlankProject.Editor
                         Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
                         CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
                         IsTaken = n.GetComponent<IsTaken>().Value,
-                        MovementCost = n.GetComponent<MovementCost>().Value
+                        MovementCost = n.GetComponent<MovementCost>().Value,
+                        ObstructVision = n.GetComponent<CellType>().thisCellsTerrain.obstructVision
                     });
                 }
                 Vector3f pos = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z);

@@ -22,6 +22,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<CubeCoordinate.Component> CubeCoordinates;
             public ComponentDataArray<ServerPath.Component> ServerPathData;
             public ComponentDataArray<Position.Component> Positions;
+            public ComponentDataArray<Vision.Component> Vision;
         }
 
         [Inject] private UnitData m_UnitData;
@@ -132,6 +133,8 @@ namespace LeyLineHybridECS
 
                                     m_UnitData.MovementVariables[i] = movementVariables;
                                     coord.CubeCoordinate = currentPath.Path.CellAttributes[0].CubeCoordinate;
+                                    vision.RequireUpdate = true;
+                                    m_UnitData.Vision[i] = vision;
                                     m_UnitData.CubeCoordinates[i] = coord;
                                     currentPath.Path.CellAttributes.RemoveAt(0);
                                 }

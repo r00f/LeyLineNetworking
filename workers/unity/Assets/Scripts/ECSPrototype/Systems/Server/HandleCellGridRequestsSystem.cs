@@ -158,6 +158,13 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return distance;
     }
 
+    public float GetAngle(Vector3f originPos, Vector3f targetPos)
+    {
+        Vector3f dir = targetPos - originPos;
+        float Angle = Mathf.Atan2(dir.X, dir.Z) * Mathf.Rad2Deg;
+        return Angle;
+    }
+
     public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
         //returns a list of offsetCoordinates
