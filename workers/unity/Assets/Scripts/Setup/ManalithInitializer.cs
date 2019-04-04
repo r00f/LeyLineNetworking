@@ -6,7 +6,6 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEditor;
 
-#if UNITY_EDITOR
 namespace LeyLineHybridECS
 {
     [ExecuteInEditMode]
@@ -16,6 +15,7 @@ namespace LeyLineHybridECS
         Camera projectorCam;
         DijkstraPathfinding pathFinder;
         HexagonalHexGridGenerator gridGenerator;
+        Transform manaLithParent;
 
         Cell occupiedCell;
 
@@ -41,7 +41,7 @@ namespace LeyLineHybridECS
 
         List<Cell> leyLinePath = new List<Cell>();
 
-        List<Cell> leyLineCircle = new List<Cell>();
+        public List<Cell> leyLineCircle = new List<Cell>();
 
         [HideInInspector]
         public List<LineRenderer> connectedLeyLineRenderers = new List<LineRenderer>();
@@ -73,17 +73,63 @@ namespace LeyLineHybridECS
         [SerializeField]
         CircleSize circleSize;
 
+        #if UNITY_EDITOR
+
         void OnDestroy()
         {
+            /*
             foreach (Cell c in leyLineCircle)
             {
                 c.GetComponent<IsCircleCell>().Value = false;
             }
+            */
         }
 
         void OnEnable()
         {
             //ConnectManaLith();
+        }
+
+        public void MoveTransform()
+        {
+            manaLithParent = GameObject.Find("Manaliths").transform;
+            transform.parent = manaLithParent;
+
+            if(leyLinePathMeshFilter.sharedMesh != null)
+            {
+                //create unique name for the asset
+                string assetName = "leylinepath" + Resources.FindObjectsOfTypeAll(typeof(Mesh)).Count();
+
+                if(leyLinePathMeshFilter.sharedMesh.name != assetName)
+                {
+                    Mesh lineMesh = Instantiate(leyLinePathMeshFilter.sharedMesh);
+                    AssetDatabase.CreateAsset(lineMesh, "Assets/Resources/ManalithMeshes/" + assetName + ".asset");
+                    AssetDatabase.SaveAssets();
+                }
+
+                var mesh = Resources.Load("ManalithMeshes/" + assetName);
+                leyLinePathMeshFilter.sharedMesh = (Mesh)mesh;
+
+            }
+
+            if(leyLineCircleMeshFilter.sharedMesh != null)
+            {
+                //create unique name for the asset
+                string assetName = "leylinecircle" + circleSize;
+
+                //if this circlesize does not exist
+
+                if(Resources.Load("ManalithMeshes/" + assetName) == null)
+                {
+                    Mesh circleMesh = Instantiate(leyLineCircleMeshFilter.sharedMesh);
+                    AssetDatabase.CreateAsset(circleMesh, "Assets/Resources/ManalithMeshes/" + assetName + ".asset");
+                    AssetDatabase.SaveAssets();
+                }
+
+                var mesh = Resources.Load("ManalithMeshes/" + assetName);
+                leyLineCircleMeshFilter.sharedMesh = (Mesh)mesh;
+            }
+
         }
 
 
@@ -93,13 +139,14 @@ namespace LeyLineHybridECS
             terrainController.leyLineCrackPositions.Clear();
 
             otherManaliths.Clear();
+            /*
             foreach (ManalithInitializer m in FindObjectsOfType<ManalithInitializer>())
             {
                 if (m != this && !otherManaliths.Contains(m.transform.GetComponentInParent<Cell>()))
                     otherManaliths.Add(m.transform.GetComponentInParent<Cell>());
             }
             otherManaliths = otherManaliths.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).ToList();
-
+            */
             projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
             gridGenerator = FindObjectOfType<HexagonalHexGridGenerator>();
             pathFinder = new DijkstraPathfinding();
@@ -113,6 +160,7 @@ namespace LeyLineHybridECS
 
 
             terrainController.UpdateLeyLineCracks();
+
             //UpdateLeyLinePath();
             //RemovePathOverLap();
         }
@@ -122,7 +170,7 @@ namespace LeyLineHybridECS
 
             foreach (Cell c in leyLineCircle)
             {
-                c.GetComponent<IsCircleCell>().Value = false;
+                c.GetComponent<EditorIsCircleCell>().Value = false;
             }
 
             switch (circleSize)
@@ -137,7 +185,7 @@ namespace LeyLineHybridECS
                     }
                     foreach (Cell c in leyLineCircle)
                     {
-                        c.GetComponent<IsCircleCell>().Value = true;
+                        c.GetComponent<EditorIsCircleCell>().Value = true;
                         //GetComponent<UnitsOnManalith>().UnitsOnCells.Add(c.GetComponent<UnitOnCell>());
                     }
                     UpdateLeyLinePath();
@@ -150,7 +198,7 @@ namespace LeyLineHybridECS
                     leyLineCircle.AddRange(GetComponentInParent<Neighbours>().NeighboursList);
                     foreach (Cell c in leyLineCircle)
                     {
-                        c.GetComponent<IsCircleCell>().Value = true;
+                        c.GetComponent<EditorIsCircleCell>().Value = true;
                         //GetComponent<UnitsOnManalith>().UnitsOnCells.Add(c.GetComponent<UnitOnCell>());
                     }
                     UpdateLeyLinePath();
@@ -186,11 +234,11 @@ namespace LeyLineHybridECS
         {
             if (leyLinePath.Count > 2)
             {
-                if (leyLinePath[leyLinePath.Count - 2].GetComponent<IsCircleCell>().Value)
+                if (leyLinePath[leyLinePath.Count - 2].GetComponent<EditorIsCircleCell>().Value)
                 {
                     leyLinePath.RemoveAt(leyLinePath.Count - 1);
                 }
-                if (leyLinePath[1].GetComponent<IsCircleCell>().Value)
+                if (leyLinePath[1].GetComponent<EditorIsCircleCell>().Value)
                 {
                     leyLinePath.RemoveAt(0);
                 }
@@ -300,8 +348,6 @@ namespace LeyLineHybridECS
 
         #endregion
 
-
+    #endif
     }
-
 }
-#endif

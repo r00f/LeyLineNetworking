@@ -20,27 +20,9 @@ namespace BlankProject
         {
             Worker.World.GetOrCreateManager<MetricSendSystem>();
             WorkerUtils.AddGameLogicSystems(Worker.World);
-            PlayerLifecycleHelper.AddServerSystems(Worker.World);
             GameObjectRepresentationHelper.AddSystems(Worker.World);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, gameObject);
+            PlayerLifecycleHelper.AddServerSystems(Worker.World);
         }
-        /*
-        private static EntityTemplate CreatePlayerEntityTemplate(string workerId, Vector3f position)
-        {
-            var clientAttribute = $"workerId:{workerId}";
-            var serverAttribute = WorkerType;
-
-            var template = new EntityTemplate();
-            template.AddComponent(new Position.Snapshot(), clientAttribute);
-            template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, serverAttribute);
-            TransformSynchronizationHelper.AddTransformSynchronizationComponents(template, clientAttribute);
-            PlayerLifecycleHelper.AddPlayerLifecycleComponents(template, workerId, clientAttribute, serverAttribute);
-
-            template.SetReadAccess(UnityClientConnector.WorkerType, AndroidClientWorkerConnector.WorkerType, iOSClientWorkerConnector.WorkerType, serverAttribute);
-            template.SetComponentWriteAccess(EntityAcl.ComponentId, serverAttribute);
-
-            return template;
-        }
-        */
     }
 }

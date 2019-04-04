@@ -13,8 +13,8 @@ public class ClientMovementSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<CurrentPath.Component> CurrentPaths;
         public readonly ComponentDataArray<Position.Component> Positions;
+        public readonly ComponentDataArray<ServerPath.Component> ServerPaths;
         public ComponentArray<AnimatorComponent> AnimatorComponents;
         public ComponentArray<Transform> Transforms;
     }
@@ -33,25 +33,20 @@ public class ClientMovementSystem : ComponentSystem
     {
         for(int i = 0; i < m_UnitData.Length; i++)
         {
-            var currentPath = m_UnitData.CurrentPaths[i];
             var serverPosition = m_UnitData.Positions[i];
             var transform = m_UnitData.Transforms[i];
             var animatorComponent = m_UnitData.AnimatorComponents[i];
+            var serverPath = m_UnitData.ServerPaths[i];
 
             if (transform.position != serverPosition.Coords.ToUnityVector())
             {
                 //move
                 transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
-
                 //rotate towards movement direction
                 Vector3 targetDir = serverPosition.Coords.ToUnityVector() - animatorComponent.RotateTransform.position;
                 float rotSpeed = Time.deltaTime * 3;
                 Vector3 newDir = Vector3.RotateTowards(animatorComponent.RotateTransform.forward, targetDir, rotSpeed, 0.0f);
                 animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(newDir);
-            }
-
-            if(m_GameStateData.GameState[0].CurrentState == GameStateEnum.moving)
-            {
                 animatorComponent.Animator.SetBool("Moving", true);
             }
             else

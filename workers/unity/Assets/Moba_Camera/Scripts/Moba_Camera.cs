@@ -236,9 +236,13 @@ public class Moba_Camera : MonoBehaviour {
 	// Constant values
 	private const float MAXROTATIONXAXIS = 89.0f;
 	private const float MINROTATIONXAXIS = -89.0f;
+
+    HeroTransform heroTransform;
 	
 	// Use this for initialization
 	void Start () {
+
+        heroTransform = GetComponent<HeroTransform>();
 		
 		if(!requirements.pivot || !requirements.offset || !requirements.camera) {
 			string missingRequirements = "";
@@ -289,8 +293,10 @@ public class Moba_Camera : MonoBehaviour {
 	
 	// Called from Update or FixedUpdate Depending on value of useFixedUpdate
 	void CameraUpdate()
-	{	
-		CalculateCameraZoom();
+	{
+        SetTarget();
+
+        CalculateCameraZoom();
 		
 		CalculateCameraRotation();
 		
@@ -300,6 +306,18 @@ public class Moba_Camera : MonoBehaviour {
 		
 		CalculateCameraBoundaries();
 	}
+
+    void SetTarget()
+    {
+        if(heroTransform.Transform != null)
+        {
+            if(settings.lockTargetTransform == null)
+            {
+                settings.lockTargetTransform = heroTransform.Transform;
+                settings.cameraLocked = true;
+            }
+        }
+    }
 	
 	void CalculateCameraZoom() {
 		////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -335,14 +353,18 @@ public class Moba_Camera : MonoBehaviour {
 		// Camera rotate
 		float changeInRotationX = 0.0f;
 		float changeInRotationY = 0.0f;
-		Screen.lockCursor = false;
-		
-		if((inputs.useKeyCodeInputs)?
+        //Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+        //Screen.lockCursor = false;
+
+        if ((inputs.useKeyCodeInputs)?
 			(Input.GetKey(inputs.keycodes.RotateCamera)&&inputs.useKeyCodeInputs):
 			(Input.GetButton(inputs.axis.button_rotate_camera))) {
 			// Lock the cursor to the center of the screen and hide the cursor
-			Screen.lockCursor = true;
-			if(!settings.rotation.lockRotationX) {
+			//Screen.lockCursor = true;
+            //Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            if (!settings.rotation.lockRotationX) {
 				float deltaMouseVertical = Input.GetAxis(inputs.axis.DeltaMouseVertical);
 				if(deltaMouseVertical != 0.0) {
 					if(settings.rotation.constRotationRate) {

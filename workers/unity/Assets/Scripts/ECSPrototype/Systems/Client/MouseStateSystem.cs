@@ -47,7 +47,8 @@ public class MouseStateSystem : JobComponentSystem
                 {
                     MouseStates[index] = new MouseState
                     {
-                        CurrentState = MouseState.State.Clicked
+                        CurrentState = MouseState.State.Clicked,
+                        ClickEvent = 1
                     };
                 }
                 //set its MouseState to Hovered if we hover
@@ -60,6 +61,14 @@ public class MouseStateSystem : JobComponentSystem
                             CurrentState = MouseState.State.Hovered
                         };
                     }
+                }
+                else if (MouseStates[index].ClickEvent == 1)
+                {
+                    MouseStates[index] = new MouseState
+                    {
+                        CurrentState = MouseState.State.Clicked,
+                        ClickEvent = 0
+                    };
                 }
             }
             //if the mouse is anywhere but over the collider 

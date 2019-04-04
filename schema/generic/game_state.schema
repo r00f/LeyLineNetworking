@@ -4,16 +4,18 @@ component GameState {
 	
     id = 105;
 	GameStateEnum current_state = 1;
+	uint32 players_on_map_count = 2;
 	
 }
 
 enum GameStateEnum {
-
-	calculate_energy = 1;
-	planning = 2;
-	spawning = 3;
-	attacking = 4;
-	moving = 5;
-	game_over = 6;
+	
+	waiting_for_players = 1;
+	calculate_energy = 2;
+	planning = 3;
+	spawning = 4;
+	attacking = 5;
+	moving = 6;
+	game_over = 7;
 
 }

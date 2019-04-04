@@ -9,7 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_GeneratorAsset: {fileID: 0}
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: Forest
   m_EditorClassIdentifier: 
@@ -20,7 +19,7 @@ MonoBehaviour:
   detailIndex: 0
   terrain_Name: Forest
   additionalCost: 0
-  yOffset: 0.2
+  yOffset: 0.1
   Walkable: 0
   spawnAllAssets: 0
   probabilityToSpawnAsset: 100
