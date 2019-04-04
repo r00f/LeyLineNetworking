@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BlankProject
 {
-    public static class OneTimeInitialisation
+    public class OneTimeInitialisation
     {
         private static bool initialized;
 

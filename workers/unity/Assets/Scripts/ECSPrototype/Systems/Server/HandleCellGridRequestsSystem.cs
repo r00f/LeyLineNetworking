@@ -45,6 +45,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct ServerPathData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<ServerPath.Component> ServerPaths;
     }
 
@@ -54,6 +55,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
+        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
 
@@ -61,6 +63,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public struct GameStateData
     {
+        public readonly int Length;
+        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Generic.GameState.Component> GameState;
     }
 
@@ -79,7 +83,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                 foreach (var cellsInRangeRequest in cellsInRangeRequests.Requests)
                 {
-                    cellsToMarkData.CellsInRange = GetRadius(cellsInRangeRequest.Payload.Origin, cellsInRangeRequest.Payload.Range);
+                    cellsToMarkData.CellsInRange = GetRadius(cellsInRangeRequest.Payload.Origin, cellsInRangeRequest.Payload.Range, cellsInRangeRequest.Payload.WorldIndex);
                     m_CellsInRangeRequestData.CellsToMarkData[i] = cellsToMarkData;
                 }
             }
@@ -104,13 +108,28 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         for(int i = 0; i < m_ServerPathData.Length; i++)
         {
             var serverPath = m_ServerPathData.ServerPaths[i];
-            if (m_GameStateData.GameState[0].CurrentState == Generic.GameStateEnum.calculate_energy)
+            var unitWorldIndex = m_ServerPathData.WorldIndexData[i].Value;
+
+            for(int gi = 0; gi < m_GameStateData.Length; gi++)
             {
-                serverPath.Path = new CellAttributeList
+                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
+
+                if(unitWorldIndex == gameStateWorldIndex)
                 {
-                    CellAttributes = new List<CellAttribute>()
-                };
-                m_ServerPathData.ServerPaths[i] = serverPath;
+                    var gameState = m_GameStateData.GameState[gi].CurrentState;
+
+                    if(gameState == Generic.GameStateEnum.calculate_energy)
+                    {
+                        serverPath.Path = new CellAttributeList
+                        {
+                            CellAttributes = new List<CellAttribute>()
+                        };
+                        m_ServerPathData.ServerPaths[i] = serverPath;
+
+                    }
+
+                }
+
             }
         }
 
@@ -139,7 +158,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return distance;
     }
 
-    public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius)
+    public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
         //returns a list of offsetCoordinates
         var cellsInRadius = new List<CellAttributes>();
@@ -148,16 +167,21 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
         for (int i = 0; i < m_CellData.Length; i++)
         {
-            Vector3f cubeCoordinate = m_CellData.CoordinateData[i].CubeCoordinate;
+            uint cellWorldIndex = m_CellData.WorldIndexData[i].Value;
 
-            if (GetDistance(originCellCubeCoordinate, cubeCoordinate) <= radius)
+            if (cellWorldIndex == unitWorldIndex)
             {
-                if(m_CellData.CellAttributes[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
+                Vector3f cubeCoordinate = m_CellData.CoordinateData[i].CubeCoordinate;
+
+                if (GetDistance(originCellCubeCoordinate, cubeCoordinate) <= radius)
                 {
-                    cellsInRadius[0] = m_CellData.CellAttributes[i].CellAttributes;
+                    if (m_CellData.CellAttributes[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
+                    {
+                        cellsInRadius[0] = m_CellData.CellAttributes[i].CellAttributes;
+                    }
+                    else
+                        cellsInRadius.Add(m_CellData.CellAttributes[i].CellAttributes);
                 }
-                else
-                    cellsInRadius.Add(m_CellData.CellAttributes[i].CellAttributes);
             }
         }
         return cellsInRadius;
@@ -239,7 +263,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             return new CellAttributeList(new List<CellAttribute>());
     }
 
-    public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, EntityId entityId)
+    public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, EntityId entityId, uint worldIndex)
     {
         CellAttributes cellAtt = new CellAttributes
         {
@@ -258,33 +282,36 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
         };
 
-        UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours);
+        UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours, worldIndex);
 
         return cellAtt;
     }
 
-    public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours)
+    public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours, uint worldIndex)
     {
         for (int ci = 0; ci < m_CellData.Length; ci++)
         {
-            var cellAtt = m_CellData.CellAttributes[ci];
-
-            for (int n = 0; n < neighbours.CellAttributes.Count; n++)
+            var cellWordlIndex = m_CellData.WorldIndexData[ci].Value;
+            if(worldIndex == cellWordlIndex)
             {
-                if (neighbours.CellAttributes[n].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
+                var cellAtt = m_CellData.CellAttributes[ci];
+                for (int n = 0; n < neighbours.CellAttributes.Count; n++)
                 {
-                    for (int cn = 0; cn < cellAtt.CellAttributes.Neighbours.CellAttributes.Count; cn++)
+                    if (neighbours.CellAttributes[n].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
                     {
-                        if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
+                        for (int cn = 0; cn < cellAtt.CellAttributes.Neighbours.CellAttributes.Count; cn++)
                         {
-                            cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = new CellAttribute
+                            if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
                             {
-                                IsTaken = cell.IsTaken,
-                                CubeCoordinate = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate,
-                                Position = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].Position,
-                                MovementCost = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].MovementCost
-                            };
-                            m_CellData.CellAttributes[ci] = cellAtt;
+                                cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = new CellAttribute
+                                {
+                                    IsTaken = cell.IsTaken,
+                                    CubeCoordinate = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate,
+                                    Position = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].Position,
+                                    MovementCost = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].MovementCost
+                                };
+                                m_CellData.CellAttributes[ci] = cellAtt;
+                            }
                         }
                     }
                 }

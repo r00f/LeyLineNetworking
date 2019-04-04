@@ -20,9 +20,9 @@ namespace BlankProject
         {
             Worker.World.GetOrCreateManager<MetricSendSystem>();
             WorkerUtils.AddGameLogicSystems(Worker.World);
-            PlayerLifecycleHelper.AddServerSystems(Worker.World);
             GameObjectRepresentationHelper.AddSystems(Worker.World);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, gameObject);
+            PlayerLifecycleHelper.AddServerSystems(Worker.World);
         }
     }
 }

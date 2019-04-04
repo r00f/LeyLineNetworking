@@ -23,12 +23,12 @@ namespace BlankProject
         protected override void HandleWorkerConnectionEstablished()
         {
             Worlds.ClientWorld = Worker.World.GetOrCreateManager<EntityManager>();
-            PlayerLifecycleHelper.AddClientSystems(Worker.World);
-            GameObjectRepresentationHelper.AddSystems(Worker.World);
             WorkerUtils.AddClientSystems(Worker.World);
             World.Active.GetOrCreateManager<LeyLineHybridECS.MeshColorLerpSystem>();
+            GameObjectRepresentationHelper.AddSystems(Worker.World);
             var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer, fallback), gameObject);
+            PlayerLifecycleHelper.AddClientSystems(Worker.World);
         }
 
         protected override string SelectDeploymentName(DeploymentList deployments)

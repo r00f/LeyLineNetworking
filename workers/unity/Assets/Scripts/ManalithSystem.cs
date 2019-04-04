@@ -12,6 +12,7 @@ public class ManalithSystem : ComponentSystem
     public struct ManalithData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CircleCells.Component> CircleCells;
         public ComponentDataArray<FactionComponent.Component> Factions;
     }
@@ -21,7 +22,10 @@ public class ManalithSystem : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellAttributesComponent.Component> Cells;
+        public readonly ComponentDataArray<IsCircleCell.Component> IsCircleCellData;
     }
 
     [Inject] private CellData m_CellData;
@@ -38,8 +42,9 @@ public class ManalithSystem : ComponentSystem
 
     public struct GameStateData
     {
-
         public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<GameState.Component> GameStates;
     }
 
@@ -47,51 +52,67 @@ public class ManalithSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        //if (m_GameStateData.GameStates[0].CurrentState != GameStateEnum.calculate_energy)
-            //return;
-
-        for(int i = 0; i < m_ManaLithData.Length; i++)
+        for (int i = 0; i < m_ManaLithData.Length; i++)
         {
             var circleCells = m_ManaLithData.CircleCells[i];
             var faction = m_ManaLithData.Factions[i];
+            var manalithWorldIndex = m_ManaLithData.WorldIndexData[i].Value;
 
             //update CircleCells
-            for(int ci = 0; ci < m_CellData.Length; ci++)
+            for (int ci = 0; ci < m_CellData.Length; ci++)
             {
+                var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
                 var cellAtt = m_CellData.Cells[ci];
 
-                for(int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
+                if (manalithWorldIndex == cellWorldIndex)
                 {
-                    if(circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
+                    for (int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
                     {
-                        if (circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
+                        if (circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
                         {
-                            circleCells.CircleAttributeList.CellAttributes[cci] = new CellAttribute
+                            if (circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
                             {
-                                UnitOnCellId = cellAtt.CellAttributes.Cell.UnitOnCellId,
-                                CubeCoordinate = circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate
-                            };
+                                circleCells.CircleAttributeList.CellAttributes[cci] = new CellAttribute
+                                {
+                                    UnitOnCellId = cellAtt.CellAttributes.Cell.UnitOnCellId,
+                                    CubeCoordinate = circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate
+                                };
 
-                            //workaround for a weird bug where inspector is not updated 
-                            circleCells.CircleAttributeList = circleCells.CircleAttributeList;
+                                //workaround for a weird bug where inspector is not updated 
+                                circleCells.CircleAttributeList = circleCells.CircleAttributeList;
 
-                            m_ManaLithData.CircleCells[i] = circleCells;
+                                m_ManaLithData.CircleCells[i] = circleCells;
 
-                            faction = new FactionComponent.Component
-                            {
-                                Faction = UpdateFaction(circleCells),
-                                TeamColor = (TeamColorEnum)UpdateFaction(circleCells)
-                            };
+                                uint fact = UpdateFaction(circleCells, manalithWorldIndex);
+                                TeamColorEnum tColor = new TeamColorEnum();
+                                //if odd
+                                if (fact % 2 == 1)
+                                {
+                                    tColor = TeamColorEnum.blue;
 
-                            m_ManaLithData.Factions[i] = faction;
+                                }
+                                else if (fact % 2 == 0)
+                                {
+                                    tColor = TeamColorEnum.red;
+                                }
+
+                                faction = new FactionComponent.Component
+                                {
+                                    Faction = fact,
+                                    TeamColor = tColor
+                                };
+
+                                m_ManaLithData.Factions[i] = faction;
+                            }
                         }
                     }
                 }
             }
+
         }
     }
 
-    public uint UpdateFaction(CircleCells.Component circleCells)
+    public uint UpdateFaction(CircleCells.Component circleCells, uint worldIndex)
     {
         int player1Units = 0;
         int player2Units = 0;
@@ -106,11 +127,11 @@ public class ManalithSystem : ComponentSystem
                 {
                     var unitFaction = m_UnitData.Factions[ui];
 
-                    if(unitFaction.Faction == 1)
+                    if (unitFaction.Faction == (worldIndex - 1) * 2 + 1)
                     {
                         player1Units++;
                     }
-                    else if (unitFaction.Faction == 2)
+                    else if (unitFaction.Faction == (worldIndex - 1) * 2 + 2)
                     {
                         player2Units++;
                     }
@@ -118,17 +139,18 @@ public class ManalithSystem : ComponentSystem
             }
         }
 
-        if(player1Units > player2Units)
+        if (player1Units > player2Units)
         {
-            return 1;
+            return (worldIndex - 1) * 2 + 1;
         }
-        else if(player1Units < player2Units)
+        else if (player1Units < player2Units)
         {
-            return 2;
+            return (worldIndex - 1) * 2 + 2;
         }
         else
         {
             return 0;
         }
     }
+
 }

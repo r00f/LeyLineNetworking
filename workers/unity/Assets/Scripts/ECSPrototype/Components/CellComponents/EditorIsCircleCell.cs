@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace LeyLineHybridECS
 {
-    public class IsCircleCell : MonoBehaviour
+    public class EditorIsCircleCell : MonoBehaviour
     {
         public bool Value;
     }

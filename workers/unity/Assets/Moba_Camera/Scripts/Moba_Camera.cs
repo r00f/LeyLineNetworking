@@ -353,14 +353,18 @@ public class Moba_Camera : MonoBehaviour {
 		// Camera rotate
 		float changeInRotationX = 0.0f;
 		float changeInRotationY = 0.0f;
-		Screen.lockCursor = false;
-		
-		if((inputs.useKeyCodeInputs)?
+        //Cursor.lockState = CursorLockMode.Confined;
+        Cursor.visible = true;
+        //Screen.lockCursor = false;
+
+        if ((inputs.useKeyCodeInputs)?
 			(Input.GetKey(inputs.keycodes.RotateCamera)&&inputs.useKeyCodeInputs):
 			(Input.GetButton(inputs.axis.button_rotate_camera))) {
 			// Lock the cursor to the center of the screen and hide the cursor
-			Screen.lockCursor = true;
-			if(!settings.rotation.lockRotationX) {
+			//Screen.lockCursor = true;
+            //Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+            if (!settings.rotation.lockRotationX) {
 				float deltaMouseVertical = Input.GetAxis(inputs.axis.DeltaMouseVertical);
 				if(deltaMouseVertical != 0.0) {
 					if(settings.rotation.constRotationRate) {

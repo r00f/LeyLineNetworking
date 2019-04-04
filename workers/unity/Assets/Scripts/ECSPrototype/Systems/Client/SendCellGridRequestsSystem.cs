@@ -22,6 +22,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellsToMark.CommandSenders.CellsInRangeCommand> CellsInRangeSenders;
         public ComponentDataArray<CellsToMark.CommandSenders.FindAllPathsCommand> FindAllPathsSenders;
         public ComponentDataArray<ServerPath.CommandSenders.FindPathCommand> FindPathSenders;
@@ -40,20 +41,32 @@ public class SendCellGridRequestsSystem : ComponentSystem
 
     public struct GameStateData
     {
+        public readonly int Length;
         public readonly ComponentDataArray<GameState.Component> GameState;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
     }
 
     [Inject] private GameStateData m_GameStateData;
 
     protected override void OnUpdate()
     {
-        if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
-            return;
-
         for (int i = 0; i < m_CellsInRangeRequest.Length; i++)
         {
             var unitMouseState = m_CellsInRangeRequest.MouseStateData[i];
             var targetEntityId = m_CellsInRangeRequest.EntityIds[i].EntityId;
+            var unitWorldIndex = m_CellsInRangeRequest.WorldIndexData[i].Value;
+
+            for(int gi = 0; gi < m_GameStateData.Length; gi++)
+            {
+                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
+
+                if(unitWorldIndex == gameStateWorldIndex)
+                {
+                    if (m_GameStateData.GameState[gi].CurrentState != GameStateEnum.planning)
+                        return;
+                }
+
+            }
 
             //only request onetime
             if (unitMouseState.CurrentState == MouseState.State.Clicked)
@@ -69,7 +82,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
                     var request = CellsToMark.CellsInRangeCommand.CreateRequest
                     (
                         targetEntityId,
-                        new CellsInRangeRequest(coord, 3)
+                        new CellsInRangeRequest(coord, 3, unitWorldIndex)
                     );
 
                     cellsInRangerequestSender.RequestsToSend.Add(request);

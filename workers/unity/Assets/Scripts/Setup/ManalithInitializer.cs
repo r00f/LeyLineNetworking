@@ -170,7 +170,7 @@ namespace LeyLineHybridECS
 
             foreach (Cell c in leyLineCircle)
             {
-                c.GetComponent<IsCircleCell>().Value = false;
+                c.GetComponent<EditorIsCircleCell>().Value = false;
             }
 
             switch (circleSize)
@@ -185,7 +185,7 @@ namespace LeyLineHybridECS
                     }
                     foreach (Cell c in leyLineCircle)
                     {
-                        c.GetComponent<IsCircleCell>().Value = true;
+                        c.GetComponent<EditorIsCircleCell>().Value = true;
                         //GetComponent<UnitsOnManalith>().UnitsOnCells.Add(c.GetComponent<UnitOnCell>());
                     }
                     UpdateLeyLinePath();
@@ -198,7 +198,7 @@ namespace LeyLineHybridECS
                     leyLineCircle.AddRange(GetComponentInParent<Neighbours>().NeighboursList);
                     foreach (Cell c in leyLineCircle)
                     {
-                        c.GetComponent<IsCircleCell>().Value = true;
+                        c.GetComponent<EditorIsCircleCell>().Value = true;
                         //GetComponent<UnitsOnManalith>().UnitsOnCells.Add(c.GetComponent<UnitOnCell>());
                     }
                     UpdateLeyLinePath();
@@ -234,11 +234,11 @@ namespace LeyLineHybridECS
         {
             if (leyLinePath.Count > 2)
             {
-                if (leyLinePath[leyLinePath.Count - 2].GetComponent<IsCircleCell>().Value)
+                if (leyLinePath[leyLinePath.Count - 2].GetComponent<EditorIsCircleCell>().Value)
                 {
                     leyLinePath.RemoveAt(leyLinePath.Count - 1);
                 }
-                if (leyLinePath[1].GetComponent<IsCircleCell>().Value)
+                if (leyLinePath[1].GetComponent<EditorIsCircleCell>().Value)
                 {
                     leyLinePath.RemoveAt(0);
                 }
