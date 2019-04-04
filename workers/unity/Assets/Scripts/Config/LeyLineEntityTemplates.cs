@@ -4,6 +4,7 @@ using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.StandardTypes;
 using Improbable.Gdk.Health;
+using Generic;
 using Player;
 using Cells;
 using Unit;
@@ -15,7 +16,7 @@ public static class LeyLineEntityTemplates {
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
 
-    public static EntityTemplate GameState(uint worldIndex)
+    public static EntityTemplate GameState(Vector3f position, uint worldIndex)
     {
         var gameState = new Generic.GameState.Snapshot
         {
@@ -28,8 +29,18 @@ public static class LeyLineEntityTemplates {
             Value = worldIndex
         };
 
+        var pos = new Position.Snapshot
+        {
+            Coords = new Coordinates
+            {
+                X = position.X,
+                Y = position.Y,
+                Z = position.Z
+            }
+        };
+
         var template = new EntityTemplate();
-        template.AddComponent(new Position.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "GameState" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(gameState, WorkerUtils.UnityGameLogic);
@@ -72,11 +83,12 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex)
     {
-        
         var gameLogic = WorkerUtils.UnityGameLogic;
         //var clientLogic = WorkerUtils.UnityClient;
+
+        //var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
 
         var pos = new Position.Snapshot
         {
@@ -88,7 +100,7 @@ public static class LeyLineEntityTemplates {
             }
         };
 
-        var coord = new Generic.CubeCoordinate.Snapshot
+        var coord = new CubeCoordinate.Snapshot
         {
             CubeCoordinate = cubeCoordinate
         };
@@ -117,10 +129,9 @@ public static class LeyLineEntityTemplates {
             Faction = (worldIndex - 1) * 2 + faction
         };
 
-        var wIndex = new Generic.WorldIndex.Snapshot
+        var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
-
         };
 
         var template = new EntityTemplate();
@@ -131,11 +142,16 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(coord, gameLogic);
         template.AddComponent(cellAttributes, gameLogic);
         template.AddComponent(wIndex, gameLogic);
+        if (isCircleCell)
+            template.AddComponent(new IsCircleCell.Snapshot(), gameLogic);
+        if (isSpawn)
+            template.AddComponent(new IsSpawn.Snapshot(), gameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
+
         return template;
     }
 
-    public static EntityTemplate Player(string workerId, Vector3f position, uint worldIndex)
+    public static EntityTemplate Player(string workerId, Vector3f position)
     {
         var client = $"workerId:{workerId}";
 
@@ -150,16 +166,11 @@ public static class LeyLineEntityTemplates {
             HeroName = "KingCroak"
         };
 
-        var factionSnapshot = new Generic.FactionComponent.Snapshot
-        {
-            Faction = 0,
-            TeamColor = Generic.TeamColorEnum.blue
-        };
+        var factionSnapshot = new FactionComponent.Snapshot();
 
-        var wIndex = new Generic.WorldIndex.Snapshot
-        {
-            Value = worldIndex
-        };
+
+        var wIndex = new WorldIndex.Snapshot();
+
 
         var pos = new Position.Snapshot { Coords = position.ToUnityVector().ToSpatialCoordinates() };
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();

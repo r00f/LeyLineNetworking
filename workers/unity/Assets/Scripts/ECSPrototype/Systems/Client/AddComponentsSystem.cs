@@ -4,38 +4,49 @@ using Unity.Entities;
 using UnityEngine;
 using LeyLineHybridECS;
 using System.Collections.Generic;
+using Generic;
+using Unit;
+using Cells;
 
+[DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class AddComponentsSystem : ComponentSystem
 {
-    public struct CellData
+    public struct WorldIndexStateData : ISystemStateComponentData
     {
-        public readonly int Length;
-        public EntityArray Entites;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
-        public readonly ComponentArray<Transform> Transform;
-        public readonly ComponentDataArray<Cells.CellAttributesComponent.Component> CellAttributesData;
-        public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
+        public WorldIndex.Component WorldIndexState;
     }
 
-    [Inject] private CellData m_CellData;
-
-    public struct UnitData
+    private struct CellAddedData
     {
         public readonly int Length;
-        public EntityArray Entites;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly EntityArray Entities;
+
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentArray<Transform> Transform;
+        public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributesData;
+        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
+    }
+
+    [Inject] private CellAddedData m_CellAddedData;
+
+    private struct UnitAddedData
+    {
+        public readonly int Length;
+        public readonly EntityArray Entities;
+
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Transform> Transform;
         public readonly ComponentDataArray<Improbable.Gdk.Health.HealthComponent.Component> Health;
-        public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
+        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] private UnitAddedData m_UnitAddedData;
 
     public struct PlayerData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Authoritative<Player.PlayerState.Component>> AuthorativeData;
     }
 
@@ -43,55 +54,62 @@ public class AddComponentsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_PlayerData.Length == 0)
+            return;
+
         var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
 
-        //adds IComponentData components to SpatialOS entities that don't need to be synced
-        for (int i = 0; i < m_CellData.Length; i++)
+        if (playerWorldIndex == 0)
+            return;
+
+        for (int i = 0; i < m_CellAddedData.Length; i++)
         {
-            var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
-            var transform = m_CellData.Transform[i];
-            var entity = m_CellData.Entites[i];
+            var cellWorldIndex = m_CellAddedData.WorldIndexData[i];
+            var entity = m_CellAddedData.Entities[i];
 
-            IsVisible isVisible = new IsVisible
+            if (cellWorldIndex.Value == playerWorldIndex)
             {
-                Value = 0,
-                RequireUpdate = 1,
-                LerpSpeed = 0.5f,
-            };
+                IsVisible isVisible = new IsVisible
+                {
+                    Value = 0,
+                    RequireUpdate = 1,
+                    LerpSpeed = 0.5f,
+                };
 
-            MouseState mouseState = new MouseState
-            {
-                CurrentState = MouseState.State.Neutral
-            };
+                MouseState mouseState = new MouseState
+                {
+                    CurrentState = MouseState.State.Neutral
+                };
 
-            MarkerState markerState = new MarkerState
-            {
-                CurrentState = MarkerState.State.Neutral
-            };
+                MarkerState markerState = new MarkerState
+                {
+                    CurrentState = MarkerState.State.Neutral
+                };
 
-            if (cellWorldIndex == playerWorldIndex)
-            {
                 PostUpdateCommands.AddComponent(entity, mouseState);
                 PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, isVisible);
             }
+
+            PostUpdateCommands.AddComponent(m_CellAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = cellWorldIndex });
         }
-
-        for (int i = 0; i < m_UnitData.Length; i++)
+        
+        for (int i = 0; i < m_UnitAddedData.Length; i++)
         {
-            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
-            var transform = m_UnitData.Transform[i];
-            var entity = m_UnitData.Entites[i];
+            var unitWorldIndex = m_UnitAddedData.WorldIndexData[i];
+            var entity = m_UnitAddedData.Entities[i];
 
-            MouseState mouseState = new MouseState
+            if (unitWorldIndex.Value == playerWorldIndex)
             {
-                CurrentState = MouseState.State.Neutral
-            };
+                MouseState mouseState = new MouseState
+                {
+                    CurrentState = MouseState.State.Neutral
+                };
 
-            if (unitWorldIndex == playerWorldIndex)
-            {
                 PostUpdateCommands.AddComponent(entity, mouseState);
             }
+
+            PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         }
     }
 }

@@ -22,8 +22,10 @@ public class ManalithSystem : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellAttributesComponent.Component> Cells;
+        public readonly ComponentDataArray<IsCircleCell.Component> IsCircleCellData;
     }
 
     [Inject] private CellData m_CellData;
@@ -41,7 +43,8 @@ public class ManalithSystem : ComponentSystem
     public struct GameStateData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<GameState.Component> GameStates;
     }
 
@@ -49,74 +52,63 @@ public class ManalithSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        for(int i = 0; i < m_ManaLithData.Length; i++)
+        for (int i = 0; i < m_ManaLithData.Length; i++)
         {
             var circleCells = m_ManaLithData.CircleCells[i];
             var faction = m_ManaLithData.Factions[i];
             var manalithWorldIndex = m_ManaLithData.WorldIndexData[i].Value;
 
-            for (int gi = 0; gi < m_GameStateData.Length; gi++)
+            //update CircleCells
+            for (int ci = 0; ci < m_CellData.Length; ci++)
             {
-                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
-                var gameState = m_GameStateData.GameStates[gi].CurrentState;
+                var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
+                var cellAtt = m_CellData.Cells[ci];
 
-                if (manalithWorldIndex == gameStateWorldIndex)
+                if (manalithWorldIndex == cellWorldIndex)
                 {
-                    if(gameState == GameStateEnum.moving || gameState == GameStateEnum.calculate_energy)
+                    for (int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
                     {
-                        //update CircleCells
-                        for (int ci = 0; ci < m_CellData.Length; ci++)
+                        if (circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
                         {
-                            var cellAtt = m_CellData.Cells[ci];
-                            var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
-
-                            if(cellWorldIndex == manalithWorldIndex)
+                            if (circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
                             {
-                                for (int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
+                                circleCells.CircleAttributeList.CellAttributes[cci] = new CellAttribute
                                 {
-                                    if (circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
-                                    {
-                                        if (circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
-                                        {
-                                            circleCells.CircleAttributeList.CellAttributes[cci] = new CellAttribute
-                                            {
-                                                UnitOnCellId = cellAtt.CellAttributes.Cell.UnitOnCellId,
-                                                CubeCoordinate = circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate
-                                            };
+                                    UnitOnCellId = cellAtt.CellAttributes.Cell.UnitOnCellId,
+                                    CubeCoordinate = circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate
+                                };
 
-                                            //workaround for a weird bug where inspector is not updated 
-                                            circleCells.CircleAttributeList = circleCells.CircleAttributeList;
+                                //workaround for a weird bug where inspector is not updated 
+                                circleCells.CircleAttributeList = circleCells.CircleAttributeList;
 
-                                            m_ManaLithData.CircleCells[i] = circleCells;
+                                m_ManaLithData.CircleCells[i] = circleCells;
 
-                                            uint fact = UpdateFaction(circleCells, manalithWorldIndex);
-                                            TeamColorEnum tColor = new TeamColorEnum();
-                                            //if odd
-                                            if(fact%2 == 1)
-                                            {
-                                                tColor = TeamColorEnum.blue;
+                                uint fact = UpdateFaction(circleCells, manalithWorldIndex);
+                                TeamColorEnum tColor = new TeamColorEnum();
+                                //if odd
+                                if (fact % 2 == 1)
+                                {
+                                    tColor = TeamColorEnum.blue;
 
-                                            }
-                                            else if(fact% 2 == 0)
-                                            {
-                                                tColor = TeamColorEnum.red;
-                                            }
-
-                                            faction = new FactionComponent.Component
-                                            {
-                                                Faction = fact,
-                                                TeamColor = tColor
-                                            };
-
-                                            m_ManaLithData.Factions[i] = faction;
-                                        }
-                                    }
                                 }
-                            } 
+                                else if (fact % 2 == 0)
+                                {
+                                    tColor = TeamColorEnum.red;
+                                }
+
+                                faction = new FactionComponent.Component
+                                {
+                                    Faction = fact,
+                                    TeamColor = tColor
+                                };
+
+                                m_ManaLithData.Factions[i] = faction;
+                            }
                         }
                     }
                 }
             }
+
         }
     }
 
@@ -135,7 +127,7 @@ public class ManalithSystem : ComponentSystem
                 {
                     var unitFaction = m_UnitData.Factions[ui];
 
-                    if(unitFaction.Faction == (worldIndex - 1) * 2 + 1)
+                    if (unitFaction.Faction == (worldIndex - 1) * 2 + 1)
                     {
                         player1Units++;
                     }
@@ -147,11 +139,11 @@ public class ManalithSystem : ComponentSystem
             }
         }
 
-        if(player1Units > player2Units)
+        if (player1Units > player2Units)
         {
             return (worldIndex - 1) * 2 + 1;
         }
-        else if(player1Units < player2Units)
+        else if (player1Units < player2Units)
         {
             return (worldIndex - 1) * 2 + 2;
         }
@@ -160,4 +152,5 @@ public class ManalithSystem : ComponentSystem
             return 0;
         }
     }
+
 }

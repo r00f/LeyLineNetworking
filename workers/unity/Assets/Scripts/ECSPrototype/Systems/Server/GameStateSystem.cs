@@ -3,6 +3,9 @@ using System.Collections;
 using Unity.Entities;
 using Improbable.PlayerLifecycle;
 using Unit;
+using Generic;
+using Player;
+using Cells;
 using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
@@ -13,8 +16,9 @@ namespace LeyLineHybridECS
         public struct Data
         {
             public readonly int Length;
-            public ComponentDataArray<Generic.GameState.Component> GameStateData;
-            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
+            public ComponentDataArray<GameState.Component> GameStateData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] private Data m_Data;
@@ -22,8 +26,9 @@ namespace LeyLineHybridECS
         public struct PlayerData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<Player.PlayerState.Component> PlayerStateData;
-            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<PlayerAttributes.Component> AttributesData;
+            public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] private PlayerData m_PlayerData;
@@ -32,10 +37,21 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<ServerPath.Component> Paths;
-            public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] UnitData m_UnitData;
+
+        public struct CellData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
+            public readonly ComponentDataArray<Cells.IsSpawn.Component> IsSpawnData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<Cells.UnitToSpawn.Component> UnitToSpawnData;
+        }
+
+        [Inject] private CellData m_CellData;
 
         protected override void OnUpdate()
         {
@@ -48,49 +64,68 @@ namespace LeyLineHybridECS
                 {
                     switch (gameState.CurrentState)
                     {
-                        case Generic.GameStateEnum.waiting_for_players:
-                            gameState.CurrentState = Generic.GameStateEnum.spawning;
+                        case GameStateEnum.waiting_for_players:
+                            if(AllSpawnsInitialized(gameStateWorldIndex))
+                            {
+                                gameState.CurrentState = GameStateEnum.spawning;
+                                m_Data.GameStateData[i] = gameState;
+                            }
+                            break;
+                        case GameStateEnum.calculate_energy:
+                            gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;
                             break;
-                        case Generic.GameStateEnum.calculate_energy:
-                            gameState.CurrentState = Generic.GameStateEnum.planning;
-                            m_Data.GameStateData[i] = gameState;
-                            break;
-                        case Generic.GameStateEnum.planning:
+                        case GameStateEnum.planning:
                             if (AllPlayersReady(gameStateWorldIndex))
                             {
-                                gameState.CurrentState = Generic.GameStateEnum.spawning;
+                                gameState.CurrentState = GameStateEnum.spawning;
                                 m_Data.GameStateData[i] = gameState;
                             }
                             break;
-                        case Generic.GameStateEnum.spawning:
-                            gameState.CurrentState = Generic.GameStateEnum.attacking;
+                        case GameStateEnum.spawning:
+                            gameState.CurrentState = GameStateEnum.attacking;
                             m_Data.GameStateData[i] = gameState;
                             break;
-                        case Generic.GameStateEnum.attacking:
-                            gameState.CurrentState = Generic.GameStateEnum.moving;
+                        case GameStateEnum.attacking:
+                            gameState.CurrentState = GameStateEnum.moving;
                             m_Data.GameStateData[i] = gameState;
                             break;
-                        case Generic.GameStateEnum.moving:
+                        case GameStateEnum.moving:
                             if (AllUnitsIdle(gameStateWorldIndex))
                             {
-                                gameState.CurrentState = Generic.GameStateEnum.calculate_energy;
+                                gameState.CurrentState = GameStateEnum.calculate_energy;
                                 m_Data.GameStateData[i] = gameState;
                             }
                             break;
-                        case Generic.GameStateEnum.game_over:
+                        case GameStateEnum.game_over:
 
                             break;
                     }
                 }
-                else if (gameState.CurrentState != Generic.GameStateEnum.waiting_for_players)
+                else if (gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
-                    gameState.CurrentState = Generic.GameStateEnum.waiting_for_players;
+                    gameState.CurrentState = GameStateEnum.waiting_for_players;
                     m_Data.GameStateData[i] = gameState;
                 }
             }
 
         }
+        private bool AllSpawnsInitialized(uint gameStateWorldIndex)
+        {
+            for (int i = 0; i < m_CellData.Length; i++)
+            {
+                var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
+                var unitToSpawn = m_CellData.UnitToSpawnData[i];
+
+                if (cellWorldIndex == gameStateWorldIndex)
+                {
+                    if (unitToSpawn.UnitName.Length == 0)
+                        return false;
+                }
+            }
+            return true;
+        }
+
 
         private bool AllPlayersReady(uint gameStateWorldIndex)
         {
@@ -101,7 +136,7 @@ namespace LeyLineHybridECS
                 if (playerWorldIndex == gameStateWorldIndex)
                 {
                     var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
-                    if (playerState != Player.PlayerStateEnum.ready)
+                    if (playerState != PlayerStateEnum.ready)
                         return false;
                 }
             }

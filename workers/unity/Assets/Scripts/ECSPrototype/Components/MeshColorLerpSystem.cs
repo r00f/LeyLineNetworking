@@ -26,12 +26,39 @@ namespace LeyLineHybridECS
 
         [Inject] private LineData m_LineData;
 
+        private struct ProjectorAddedData
+        {
+            public readonly int Length;
+            public ComponentArray<Transform> Transforms;
+            public readonly ComponentArray<Projector> Projectors;
+        }
+
+        [Inject] private ProjectorAddedData m_ProjectorAddedData;
+
+
         private ComponentGroup manalithGroup;
+        private ComponentGroup playerGroup;
+        private ComponentGroup gameControllerGroup;
 
         protected override void OnCreateManager()
         {
             
             base.OnCreateManager();
+
+            playerGroup = Worlds.ClientWorld.CreateComponentGroup(
+
+                ComponentType.Create<Authoritative<Player.PlayerState.Component>>(),
+                ComponentType.Create<Generic.WorldIndex.Component>()
+
+            );
+
+            gameControllerGroup = Worlds.ClientWorld.CreateComponentGroup(
+
+                ComponentType.Create<Generic.GameState.Component>(),
+                ComponentType.Create<Generic.WorldIndex.Component>(),
+                ComponentType.Create<Improbable.Position.Component>()
+
+            );
 
             //var Manager = World.Active.GetExistingManager<EntityManager>();
             manalithGroup = Worlds.ClientWorld.CreateComponentGroup(
@@ -41,11 +68,35 @@ namespace LeyLineHybridECS
                 ComponentType.Create<Improbable.Position.Component>()
             );
 
-
         }
 
         protected override void OnUpdate()
         {
+
+
+            if(m_ProjectorAddedData.Length != 0 && playerGroup.GetEntityArray().Length != 0)
+            {
+                var playerWorldIndex = playerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[0].Value;
+
+                for (int i = 0; i < gameControllerGroup.GetEntityArray().Length; i++)
+                {
+                    var gameControllerWorldIndex = gameControllerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[i].Value;
+                    var position = gameControllerGroup.GetComponentDataArray<Improbable.Position.Component>()[i].Coords.ToUnityVector();
+
+                    if (gameControllerWorldIndex == playerWorldIndex)
+                    {
+
+                        if (m_ProjectorAddedData.Transforms[0].position != position + new Vector3(0, 10, 50))
+                        {
+                            Debug.Log("SetProjectorPosition");
+                            m_ProjectorAddedData.Transforms[0].position = position + new Vector3(0, 10, 50);
+                        }
+
+                    }
+                }
+            }
+
+
             for (int ci = 0; ci < m_CircleData.Length; ci++)
             {
                 for (int i = 0; i < manalithGroup.GetEntityArray().Length; i++)

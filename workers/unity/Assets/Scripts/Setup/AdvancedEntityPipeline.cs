@@ -37,6 +37,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
         }
 
         var prefabName = entity.GetComponent<Metadata.Component>().EntityType;
+
         if (prefabName.Equals(PlayerMetadata))
         {
             //var clientMovement = entity.GetComponent<ClientMovement.Component>();
@@ -45,7 +46,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
                 .TryGetValue(playerState.ComponentId, out var playerStateWrite))
             {
                 var authority = false;
-                
+
                 foreach (var attributeSet in playerStateWrite.AttributeSet)
                 {
                     if (attributeSet.Attribute.Contains(workerIdAttribute))
@@ -53,7 +54,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
                         authority = true;
                     }
                 }
-                
+
 
                 //var serverPosition = entity.GetComponent<ServerMovement.Component>();
 
@@ -65,8 +66,8 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
                 gameObject.name = GetGameObjectName(prefab, entity, worker);
                 return gameObject;
             }
+
         }
-        
         return fallback.OnEntityCreated(entity);
     }
 

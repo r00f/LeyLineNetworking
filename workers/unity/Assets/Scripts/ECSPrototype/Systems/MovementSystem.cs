@@ -29,6 +29,7 @@ namespace LeyLineHybridECS
         public struct CellData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
         }
@@ -38,6 +39,7 @@ namespace LeyLineHybridECS
         public struct GameStateData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<GameState.Component> GameState;
         }

@@ -39,7 +39,9 @@ namespace BlankProject.Editor
         {
             foreach(EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
             {
-                snapshot.AddEntity(LeyLineEntityTemplates.GameState(wi.WorldIndex));
+                Vector3f pos = new Vector3f(wi.transform.position.x + 50, wi.transform.position.y, wi.transform.position.z);
+                var gameState = LeyLineEntityTemplates.GameState(pos, wi.WorldIndex);
+                snapshot.AddEntity(gameState);
             }
         }
 
@@ -91,7 +93,7 @@ namespace BlankProject.Editor
                 Vector3f pos = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z);
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
                 uint worldIndex = c.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex);
+                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex);
                 snapshot.AddEntity(cell);
             }
         }
@@ -104,9 +106,9 @@ namespace BlankProject.Editor
             {
                 Coords = new Coordinates
                 {
-                    X = 50,
-                    Y = 2,
-                    Z = 31
+                    X = 0,
+                    Y = 0,
+                    Z = 0
                 }
             };
 
