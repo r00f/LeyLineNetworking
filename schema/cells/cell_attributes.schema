@@ -22,5 +22,6 @@ type CellAttribute	{
 	improbable.Vector3f cube_coordinate = 2;
 	bool is_taken = 3;
 	int32 movement_cost = 4;
+	bool obstruct_vision = 5;
 
 }

@@ -20,6 +20,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<CubeCoordinate.Component> CubeCoordinates;
             public ComponentDataArray<CurrentPath.Component> CurrentPaths;
             public ComponentDataArray<Position.Component> Positions;
+            public ComponentDataArray<Vision.Component> Vision;
         }
 
         [Inject] private UnitData m_UnitData;
@@ -46,6 +47,7 @@ namespace LeyLineHybridECS
                 var position = m_UnitData.Positions[i];
                 var coord = m_UnitData.CubeCoordinates[i];
                 var cellsToMark = m_UnitData.CellsToMark[i];
+                var vision = m_UnitData.Vision[i];
 
                 if (m_GameStateData.GameState[0].CurrentState == GameStateEnum.moving)
                 {
@@ -61,6 +63,8 @@ namespace LeyLineHybridECS
                         else
                         {
                             coord.CubeCoordinate = currentPath.Path.CellAttributes[0].CubeCoordinate;
+                            vision.RequireUpdate = true;
+                            m_UnitData.Vision[i] = vision;
                             m_UnitData.CubeCoordinates[i] = coord;
                             currentPath.Path.CellAttributes.RemoveAt(0);
                         }

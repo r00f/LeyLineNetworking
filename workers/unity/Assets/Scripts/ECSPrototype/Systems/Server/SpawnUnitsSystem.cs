@@ -59,9 +59,15 @@ namespace LeyLineHybridECS
                             var playerFaction = m_PlayerData.Faction[pi];
                             var owningWorker = m_PlayerData.OwningWorker[pi];
 
-                            Debug.Log("SPAWNUNIT");
+                            Debug.Log("SPAWNUNIT" + ": " + unitToSpawn.UnitName+"Stats");
 
-                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction);
+                            //ToDo: change to loading from a library instead of resources
+
+                            var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+
+                            Debug.Log(Stats);
+
+                            var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction, Stats);
 
                             requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
                             (

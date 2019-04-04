@@ -21,6 +21,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<SendCellGridRequestsSystem>();
         world.GetOrCreateManager<ClientMovementSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
+        world.GetOrCreateManager<VisionSystem_Client>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -30,6 +31,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<GameStateSystem>();
         world.GetOrCreateManager<HandleCellGridRequestsSystem>();
         world.GetOrCreateManager<MovementSystem>();
+        world.GetOrCreateManager<VisionSystem_Server>();
     }
 
 }
