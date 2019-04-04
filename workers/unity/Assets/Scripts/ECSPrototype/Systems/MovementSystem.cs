@@ -75,6 +75,7 @@ namespace LeyLineHybridECS
                             var position = m_UnitData.Positions[i];
                             var coord = m_UnitData.CubeCoordinates[i];
                             var movementVariables = m_UnitData.MovementVariables[i];
+                            var vision = m_UnitData.Vision[i];
 
                             if (currentPath.Path.CellAttributes.Count != 0 && cellsToMark.CellsInRange.Count != 0)
                             {
