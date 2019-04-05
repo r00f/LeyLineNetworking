@@ -10,18 +10,19 @@ using Improbable.Gdk.Core;
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation]
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(VisionSystem_Server))]
     public class VisionSystem_Client : ComponentSystem
     {
-        struct playerData
+        struct PlayerData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<Player.PlayerState.Component>> AuthorativeData;
             public readonly ComponentDataArray<Generic.Vision.Component> VisionData;
         }
         [Inject]
-        playerData m_Player;
-        struct cellData
+        PlayerData m_Player;
+
+        struct CellData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Generic.CubeCoordinate.Component> Coordinate;
@@ -29,44 +30,30 @@ namespace LeyLineHybridECS
             public ComponentArray<IsVisibleReferences> VisibleRef;
         }
         [Inject]
-        cellData m_Cells;
-
-        struct gameStateData
-        {
-            public readonly int Length;
-            public ComponentDataArray<Generic.GameState.Component> GameStateData;
-        }
-        [Inject]
-        gameStateData m_GameState;
+        CellData m_Cells;
 
         protected override void OnUpdate()
         {
-            //Debug.Log("CellsClient:" + m_Cells.Length);
-            var GameState = m_GameState.GameStateData[0];
-            if (GameState.CurrentState == Generic.GameStateEnum.moving)
+            for (int i = m_Player.Length - 1; i >= 0; i--)
             {
-                for (int i = m_Player.Length - 1; i >= 0; i--)
-                {
-                    var Vision = m_Player.VisionData[i];
+                var Vision = m_Player.VisionData[i];
 
-                    for (int e = m_Cells.Length - 1; e >= 0; e--)
+                for (int e = m_Cells.Length - 1; e >= 0; e--)
+                {
+                    var coordinate = m_Cells.Coordinate[e];
+                    var visible = m_Cells.Visible[e];
+                    visible.Value = 0;
+                    foreach (Cells.CellAttributes c in Vision.CellsInVisionrange)
                     {
-                        var coordinate = m_Cells.Coordinate[e];
-                        var visible = m_Cells.Visible[e];
-                        visible.Value = 0;
-                        foreach (Cells.CellAttributes c in Vision.CellsInVisionrange)
+                        if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
                         {
-                            if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
-                            {
-                                visible.Value = 1;
-                                
-                            }
+                            visible.Value = 1;
+
                         }
-                        
-                        visible.RequireUpdate = 1;
-                        m_Cells.Visible[e] = visible;
-                        //Debug.Log("val: " + m_Cells.Visible[e].Value + " up:" + m_Cells.Visible[e].RequireUpdate);
                     }
+
+                    visible.RequireUpdate = 1;
+                    m_Cells.Visible[e] = visible;
                 }
             }
             for (int i = 0; i < m_Cells.Length; i++)
@@ -79,25 +66,6 @@ namespace LeyLineHybridECS
 
                 if (c_IsVisible.RequireUpdate == 1)
                 {
-                    //Debug.Log("Ayaya");
-                    
-
-                    /*if (c_IsVisible.LerpSpeed == 0f)
-                    {
-                            if (isVisible == 1) {
-                                go.SetActive(true);
-                            }
-                            else
-                            {
-                                go.SetActive(false);
-
-                            }
-                        c_IsVisible.RequireUpdate = 0;
-                    }
-
-                    else
-                    {
-                        */
                     if (isVisible == 0)
                     {
                         if (meshRenderer.material.color.a > 0)
@@ -114,7 +82,6 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        //Debug.Log("Ayaya");    
                         go.SetActive(true);
                             
                         if (meshRenderer.material.color.a < 1)
@@ -126,10 +93,8 @@ namespace LeyLineHybridECS
                             c_IsVisible.RequireUpdate = 0;
                         }
 
-                    //}
                 }
               }
-                //m_Cells.Visible[i] = c_IsVisible;
             }
         }
     }

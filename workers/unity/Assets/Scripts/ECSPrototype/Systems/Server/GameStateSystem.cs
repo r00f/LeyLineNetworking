@@ -42,16 +42,16 @@ namespace LeyLineHybridECS
 
         [Inject] UnitData m_UnitData;
 
-        public struct CellData
+        public struct SpawnCellData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
-            public readonly ComponentDataArray<Cells.IsSpawn.Component> IsSpawnData;
+            public readonly ComponentDataArray<IsSpawn.Component> IsSpawnData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<Cells.UnitToSpawn.Component> UnitToSpawnData;
+            public readonly ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
         }
 
-        [Inject] private CellData m_CellData;
+        [Inject] private SpawnCellData m_SpawnCellData;
 
         protected override void OnUpdate()
         {
@@ -60,62 +60,70 @@ namespace LeyLineHybridECS
                 var gameState = m_Data.GameStateData[i];
                 var gameStateWorldIndex = m_Data.WorldIndexData[i].Value;
 
-                if (gameState.PlayersOnMapCount == 2)
+                switch (gameState.CurrentState)
                 {
-                    switch (gameState.CurrentState)
-                    {
-                        case GameStateEnum.waiting_for_players:
-                            if(AllSpawnsInitialized(gameStateWorldIndex))
-                            {
-                                gameState.CurrentState = GameStateEnum.spawning;
-                                m_Data.GameStateData[i] = gameState;
-                            }
-                            break;
-                        case GameStateEnum.calculate_energy:
-                            gameState.CurrentState = GameStateEnum.planning;
-                            m_Data.GameStateData[i] = gameState;
-                            break;
-                        case GameStateEnum.planning:
-                            if (AllPlayersReady(gameStateWorldIndex))
-                            {
-                                gameState.CurrentState = GameStateEnum.spawning;
-                                m_Data.GameStateData[i] = gameState;
-                            }
-                            break;
-                        case GameStateEnum.spawning:
-                            gameState.CurrentState = GameStateEnum.attacking;
-                            m_Data.GameStateData[i] = gameState;
-                            break;
-                        case GameStateEnum.attacking:
-                            gameState.CurrentState = GameStateEnum.moving;
-                            m_Data.GameStateData[i] = gameState;
-                            break;
-                        case GameStateEnum.moving:
-                            if (AllUnitsIdle(gameStateWorldIndex))
-                            {
-                                gameState.CurrentState = GameStateEnum.calculate_energy;
-                                m_Data.GameStateData[i] = gameState;
-                            }
-                            break;
-                        case GameStateEnum.game_over:
+                    case GameStateEnum.waiting_for_players:
+                        #if UNITY_EDITOR
 
-                            break;
-                    }
+                        gameState.CurrentState = GameStateEnum.planning;
+                        m_Data.GameStateData[i] = gameState;
+
+                        #endif
+                        if (AllSpawnsInitialized(gameStateWorldIndex))
+                        {
+                            gameState.CurrentState = GameStateEnum.spawning;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        break;
+                    case GameStateEnum.calculate_energy:
+                        gameState.CurrentState = GameStateEnum.planning;
+                        m_Data.GameStateData[i] = gameState;
+                        break;
+                    case GameStateEnum.planning:
+                        if (AllPlayersReady(gameStateWorldIndex))
+                        {
+                            gameState.CurrentState = GameStateEnum.spawning;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        break;
+                    case GameStateEnum.spawning:
+                        gameState.CurrentState = GameStateEnum.attacking;
+                        m_Data.GameStateData[i] = gameState;
+                        break;
+                    case GameStateEnum.attacking:
+                        gameState.CurrentState = GameStateEnum.moving;
+                        m_Data.GameStateData[i] = gameState;
+                        break;
+                    case GameStateEnum.moving:
+                        if (AllUnitsIdle(gameStateWorldIndex))
+                        {
+                            gameState.CurrentState = GameStateEnum.calculate_energy;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        break;
+                    case GameStateEnum.game_over:
+
+                        break;
                 }
-                else if (gameState.CurrentState != GameStateEnum.waiting_for_players)
+
+                #if UNITY_STANDALONE
+
+                if(gameState.PlayersOnMapCount < 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
                     gameState.CurrentState = GameStateEnum.waiting_for_players;
                     m_Data.GameStateData[i] = gameState;
                 }
+
+                #endif
             }
 
         }
         private bool AllSpawnsInitialized(uint gameStateWorldIndex)
         {
-            for (int i = 0; i < m_CellData.Length; i++)
+            for (int i = 0; i < m_SpawnCellData.Length; i++)
             {
-                var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
-                var unitToSpawn = m_CellData.UnitToSpawnData[i];
+                var cellWorldIndex = m_SpawnCellData.WorldIndexData[i].Value;
+                var unitToSpawn = m_SpawnCellData.UnitToSpawnData[i];
 
                 if (cellWorldIndex == gameStateWorldIndex)
                 {

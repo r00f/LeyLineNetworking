@@ -18,13 +18,13 @@ public static class LeyLineEntityTemplates {
 
     public static EntityTemplate GameState(Vector3f position, uint worldIndex)
     {
-        var gameState = new Generic.GameState.Snapshot
+        var gameState = new GameState.Snapshot
         {
-            CurrentState = Generic.GameStateEnum.planning,
+            CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0
         };
 
-        var wIndex = new Generic.WorldIndex.Snapshot
+        var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
         };
@@ -66,7 +66,7 @@ public static class LeyLineEntityTemplates {
             CircleAttributeList = circleCells
         };
 
-        var wIndex = new Generic.WorldIndex.Snapshot
+        var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
         };
@@ -76,7 +76,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Manalith" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Generic.FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(new FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(circle, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
@@ -171,7 +171,7 @@ public static class LeyLineEntityTemplates {
 
         var playerVision = new Vision.Snapshot
         {
-            CellsInVisionrange = new List<Cells.CellAttributes>()
+            CellsInVisionrange = new List<CellAttributes>()
         };
 
         var wIndex = new WorldIndex.Snapshot();
@@ -200,7 +200,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, Generic.FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
+    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
     {
         var client = workerId;
 
@@ -209,7 +209,7 @@ public static class LeyLineEntityTemplates {
             Coords = position.Coords
         };
 
-        var coord = new Generic.CubeCoordinate.Snapshot
+        var coord = new CubeCoordinate.Snapshot
         {
             CubeCoordinate = cubeCoordinate
         };
@@ -222,7 +222,7 @@ public static class LeyLineEntityTemplates {
 
         };
 
-        var factionSnapshot = new Generic.FactionComponent.Snapshot
+        var factionSnapshot = new FactionComponent.Snapshot
         {
             Faction = faction.Faction,
             TeamColor = faction.TeamColor
@@ -251,7 +251,7 @@ public static class LeyLineEntityTemplates {
             TravelTime = 1.7f,
         };
 
-        var wIndex = new Generic.WorldIndex.Snapshot
+        var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
 
@@ -260,7 +260,7 @@ public static class LeyLineEntityTemplates {
         var unitVision = new Vision.Snapshot
         {
 
-            CellsInVisionrange = new List<Cells.CellAttributes>(),
+            CellsInVisionrange = new List<CellAttributes>(),
             RequireUpdate = true,
             VisionRange = Stats.VisionRange
 

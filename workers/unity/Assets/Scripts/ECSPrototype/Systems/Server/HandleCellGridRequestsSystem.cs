@@ -9,7 +9,7 @@ using System.Linq;
 using Cells;
 using Unit;
 
-//[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem))]
 public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
@@ -105,6 +105,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             }
         }
 
+        
         for(int i = 0; i < m_ServerPathData.Length; i++)
         {
             var serverPath = m_ServerPathData.ServerPaths[i];
@@ -132,6 +133,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             }
         }
+        
 
         for (int i = 0; i < m_FindPathRequestData.Length; i++)
         {

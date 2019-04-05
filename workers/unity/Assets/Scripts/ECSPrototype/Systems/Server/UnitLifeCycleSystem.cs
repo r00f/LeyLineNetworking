@@ -7,7 +7,7 @@ using Generic;
 using Improbable.Gdk.Core;
 
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(AddComponentsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData

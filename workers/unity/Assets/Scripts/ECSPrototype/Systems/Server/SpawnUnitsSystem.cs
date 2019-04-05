@@ -9,7 +9,7 @@ using Cells;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(InitializePlayerSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(VisionSystem_Server))]
     public class SpawnUnitsSystem : ComponentSystem
     {
         public struct CellData
