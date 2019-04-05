@@ -65,15 +65,16 @@ namespace LeyLineHybridECS
                     case GameStateEnum.waiting_for_players:
                         #if UNITY_EDITOR
 
-                        gameState.CurrentState = GameStateEnum.planning;
+                        gameState.CurrentState = GameStateEnum.spawning;
                         m_Data.GameStateData[i] = gameState;
 
-                        #endif
+                        #else
                         if (AllSpawnsInitialized(gameStateWorldIndex))
                         {
                             gameState.CurrentState = GameStateEnum.spawning;
                             m_Data.GameStateData[i] = gameState;
                         }
+                        #endif
                         break;
                     case GameStateEnum.calculate_energy:
                         gameState.CurrentState = GameStateEnum.planning;
@@ -106,7 +107,9 @@ namespace LeyLineHybridECS
                         break;
                 }
 
-                #if UNITY_STANDALONE
+                #if UNITY_EDITOR
+
+                #else
 
                 if(gameState.PlayersOnMapCount < 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
