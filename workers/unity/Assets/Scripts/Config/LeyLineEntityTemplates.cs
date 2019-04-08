@@ -232,11 +232,7 @@ public static class LeyLineEntityTemplates {
             Path = new CellAttributeList(new List<CellAttribute>()),
         };
 
-        var movementVariables = new MovementVariables.Snapshot
-        {
-            MovementRange = 4,
-            TravelTime = 1.7f,
-        };
+
 
         var wIndex = new WorldIndex.Snapshot
         {
@@ -253,23 +249,22 @@ public static class LeyLineEntityTemplates {
 
         };
 
-        var unitAttributes = new UnitAttributes.Snapshot
+        var health = new Health.Snapshot
         {
-            Health = new Health
-            {
-                MaxHealth = Stats.BaseHealth,
-                CurrentHealth = Stats.BaseHealth
-            },
-            Energy = new Energy
-            {
-                SpawnCost = Stats.SpawnCost,
-                EnergyUpkeep = Stats.UpkeepCost
-            },
-            Movement = new Movement
-            {
-                MovementRange = Stats.MovementRange,
-                TravelTime = 1.7f
-            }
+            MaxHealth = Stats.BaseHealth,
+            CurrentHealth = Stats.BaseHealth
+        };
+
+        var energy = new Energy.Snapshot
+        {
+            SpawnCost = Stats.SpawnCost,
+            EnergyUpkeep = Stats.UpkeepCost
+        };
+
+        var movementVariables = new MovementVariables.Snapshot
+        {
+            MovementRange = Stats.MovementRange,
+            TravelTime = 1.7f
         };
 
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
@@ -283,7 +278,8 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientHeartbeat, client);
         template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        template.AddComponent(unitAttributes, WorkerUtils.UnityGameLogic);
+        template.AddComponent(health, WorkerUtils.UnityGameLogic);
+        template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(serverPathSnapshot, WorkerUtils.UnityGameLogic);

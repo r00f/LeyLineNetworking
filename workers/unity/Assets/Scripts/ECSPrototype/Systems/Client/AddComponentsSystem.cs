@@ -37,7 +37,7 @@ public class AddComponentsSystem : ComponentSystem
 
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Transform> Transform;
-        public readonly ComponentDataArray<UnitAttributes.Component> UnitAttributeData;
+        public readonly ComponentDataArray<Health.Component> UnitAttributeData;
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 

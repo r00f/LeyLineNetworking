@@ -23,7 +23,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<UnitAttributes.Component> UnitAttributeData;
+        public readonly ComponentDataArray<MovementVariables.Component> MovementVarData;
         public ComponentDataArray<CellsToMark.CommandSenders.CellsInRangeCommand> CellsInRangeSenders;
         public ComponentDataArray<CellsToMark.CommandSenders.FindAllPathsCommand> FindAllPathsSenders;
         public ComponentDataArray<ServerPath.CommandSenders.FindPathCommand> FindPathSenders;
@@ -56,7 +56,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
             var unitMouseState = m_CellsInRangeRequest.MouseStateData[i];
             var targetEntityId = m_CellsInRangeRequest.EntityIds[i].EntityId;
             var unitWorldIndex = m_CellsInRangeRequest.WorldIndexData[i].Value;
-            var unitAttribute = m_CellsInRangeRequest.UnitAttributeData[i];
+            var movementVars = m_CellsInRangeRequest.MovementVarData[i];
 
             for(int gi = 0; gi < m_GameStateData.Length; gi++)
             {
@@ -84,7 +84,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
                     var request = CellsToMark.CellsInRangeCommand.CreateRequest
                     (
                         targetEntityId,
-                        new CellsInRangeRequest(coord, unitAttribute.Movement.MovementRange, unitWorldIndex)
+                        new CellsInRangeRequest(coord, movementVars.MovementRange, unitWorldIndex)
                     );
 
                     cellsInRangerequestSender.RequestsToSend.Add(request);
@@ -98,7 +98,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
                     var request2 = CellsToMark.FindAllPathsCommand.CreateRequest
                     (
                         targetEntityId,
-                        new FindAllPathsRequest(cellsToMark.CellsInRange[0].Cell, unitAttribute.Movement.MovementRange, cellsToMark.CellsInRange)
+                        new FindAllPathsRequest(cellsToMark.CellsInRange[0].Cell, movementVars.MovementRange, cellsToMark.CellsInRange)
                     );
 
                     findAllPathsRequestSender.RequestsToSend.Add(request2);

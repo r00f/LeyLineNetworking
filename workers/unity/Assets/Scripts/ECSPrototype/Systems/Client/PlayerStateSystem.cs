@@ -36,7 +36,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
-            public readonly ComponentDataArray<UnitAttributes.Component> UnitAttributeData;
+            public readonly ComponentDataArray<Health.Component> HealthData;
         }
 
         [Inject] private UnitData m_UnitData;

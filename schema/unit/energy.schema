@@ -1,0 +1,15 @@
+package unit;
+
+component Energy {
+	
+    id = 123;
+	uint32 spawn_cost = 1;
+	uint32 energy_upkeep = 2;
+	uint32 energy_income = 3;
+	bool harvesting = 4;
+
+}
+
+
+
+

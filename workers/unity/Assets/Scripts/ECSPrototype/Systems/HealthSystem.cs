@@ -3,6 +3,7 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine.UI;
+using Unit;
 
 namespace LeyLineHybridECS
 {
@@ -15,7 +16,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<Position3D> PositionData;
             public readonly ComponentArray<BoxCollider> ColliderData;
             public readonly ComponentDataArray<IsVisible> IsVisibleData;
-            public ComponentArray<Health> HealthData;
+            //public ComponentArray<Health> HealthData;
         }
 
         [Inject] private Data m_Data;
@@ -30,6 +31,7 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
+            /*
             for (int i = 0; i < m_Data.Length; i++)
             {
                 var position = m_Data.PositionData[i];
@@ -58,6 +60,7 @@ namespace LeyLineHybridECS
                     health.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(health.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, (float)health.CurrentHealth / (float)health.TotalHealth, 0.1f);
                 }
             }
+            */
         }
 
         public Vector3 WorldToUISpace(Canvas parentCanvas, Vector3 worldPos)
