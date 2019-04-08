@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using Improbable.Gdk.Core;
 using Generic;
 using Player;
+using Unit;
 
 
 namespace LeyLineHybridECS
@@ -35,7 +36,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
-            public readonly ComponentDataArray<Improbable.Gdk.Health.HealthComponent.Component> HealthData;
+            public readonly ComponentDataArray<UnitAttributes.Component> UnitAttributeData;
         }
 
         [Inject] private UnitData m_UnitData;

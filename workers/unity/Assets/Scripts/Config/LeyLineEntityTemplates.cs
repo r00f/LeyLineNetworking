@@ -3,7 +3,6 @@ using Improbable;
 using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.StandardTypes;
-using Improbable.Gdk.Health;
 using Generic;
 using Player;
 using Cells;
@@ -86,9 +85,6 @@ public static class LeyLineEntityTemplates {
     public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
-        //var clientLogic = WorkerUtils.UnityClient;
-
-        //var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
 
         var pos = new Position.Snapshot
         {
@@ -214,14 +210,6 @@ public static class LeyLineEntityTemplates {
             CubeCoordinate = cubeCoordinate
         };
 
-
-        var health = new HealthComponent.Snapshot
-        {
-            MaxHealth = 10,
-            Health = 10
-
-        };
-
         var factionSnapshot = new FactionComponent.Snapshot
         {
             Faction = faction.Faction,
@@ -234,7 +222,6 @@ public static class LeyLineEntityTemplates {
             CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
         };
 
-        
         var clientPathSnapshot = new ClientPath.Snapshot
         {
             Path = new CellAttributeList(new List<CellAttribute>()),
@@ -266,6 +253,25 @@ public static class LeyLineEntityTemplates {
 
         };
 
+        var unitAttributes = new UnitAttributes.Snapshot
+        {
+            Health = new Health
+            {
+                MaxHealth = Stats.BaseHealth,
+                CurrentHealth = Stats.BaseHealth
+            },
+            Energy = new Energy
+            {
+                SpawnCost = Stats.SpawnCost,
+                EnergyUpkeep = Stats.UpkeepCost
+            },
+            Movement = new Movement
+            {
+                MovementRange = Stats.MovementRange,
+                TravelTime = 1.7f
+            }
+        };
+
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
         var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
@@ -277,7 +283,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(clientHeartbeat, client);
         template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        template.AddComponent(health, WorkerUtils.UnityGameLogic);
+        template.AddComponent(unitAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(serverPathSnapshot, WorkerUtils.UnityGameLogic);

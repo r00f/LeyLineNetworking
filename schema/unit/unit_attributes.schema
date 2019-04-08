@@ -1,0 +1,34 @@
+package unit;
+
+component UnitAttributes {
+	
+    id = 122;
+	Health health = 1;
+	Energy energy = 2;
+	Movement movement = 3;
+
+}
+
+type Health {
+
+	uint32 max_health = 1;
+	uint32 current_health = 2;
+
+}
+
+type Energy {
+
+	uint32 spawn_cost = 1;
+	uint32 energy_upkeep = 2;
+
+}
+
+type Movement {
+
+	uint32 movement_range = 1;
+	float travel_time = 2;
+	float time_left = 3;
+}
+
+
+
