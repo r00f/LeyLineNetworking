@@ -3,6 +3,7 @@ using System.Collections;
 using Unity.Entities;
 using Cells;
 using Generic;
+using Unit;
 using Improbable;
 using Improbable.Gdk.Core;
 
@@ -35,7 +36,7 @@ public class ManalithSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> Ids;
         public readonly ComponentDataArray<FactionComponent.Component> Factions;
-        public readonly ComponentDataArray<Unit.ServerPath.Component> Paths;
+        public ComponentDataArray<Energy.Component> EnergyData;
     }
 
     [Inject] private UnitData m_UnitData;
@@ -102,6 +103,25 @@ public class ManalithSystem : ComponentSystem
                                     TeamColor = tColor
                                 };
 
+                                for (int ui = 0; ui < m_UnitData.Length; ui++)
+                                {
+                                    var energy = m_UnitData.EnergyData[ui];
+                                    var unitId = m_UnitData.Ids[ui];
+                                    var unitFaction = m_UnitData.Factions[ui];
+
+                                    energy.Harvesting = false;
+
+                                    if (unitId.EntityId == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
+                                    {
+                                        if (unitFaction.Faction == faction.Faction)
+                                            energy.Harvesting = true;
+                                        else
+                                            energy.Harvesting = false;
+                                    }
+
+                                    m_UnitData.EnergyData[ui] = energy;
+                                }
+
                                 m_ManaLithData.Factions[i] = faction;
                             }
                         }
@@ -109,6 +129,7 @@ public class ManalithSystem : ComponentSystem
                 }
             }
 
+            //update harvesting units
         }
     }
 
@@ -122,11 +143,10 @@ public class ManalithSystem : ComponentSystem
             for (int ui = 0; ui < m_UnitData.Length; ui++)
             {
                 var unitId = m_UnitData.Ids[ui];
+                var unitFaction = m_UnitData.Factions[ui];
 
                 if (unitId.EntityId == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
                 {
-                    var unitFaction = m_UnitData.Factions[ui];
-
                     if (unitFaction.Faction == (worldIndex - 1) * 2 + 1)
                     {
                         player1Units++;

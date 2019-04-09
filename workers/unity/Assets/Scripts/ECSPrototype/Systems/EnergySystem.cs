@@ -2,7 +2,6 @@
 using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine.UI;
 
 namespace LeyLineHybridECS
 {
@@ -11,7 +10,7 @@ namespace LeyLineHybridECS
         public struct PlayerData
         {
             public readonly int Length;
-            public ComponentArray<PlayerEnergy> PlayerEnergyData;
+            //public ComponentArray<PlayerEnergy> PlayerEnergyData;
             public ComponentDataArray<Faction> FactionData;
         }
 
@@ -60,25 +59,7 @@ namespace LeyLineHybridECS
                 }
             }
             */
-            for (int i = 0; i < m_PlayerData.Length; i++)
-            {
-                if(m_PlayerData.PlayerEnergyData[i].EnergyBarInstance)
-                {
-                    var maxEnergy = m_PlayerData.PlayerEnergyData[i].TotalEnergy;
-                    var currentEnergy = m_PlayerData.PlayerEnergyData[i].CurrentEnergy;
-                    var energyIncome = m_PlayerData.PlayerEnergyData[i].TotalIncome;
-                    var energyFill = m_PlayerData.PlayerEnergyData[i].EnergyBarInstance.transform.GetChild(0).GetChild(1).GetComponent<Image>();
-                    var incomeEnergyFill = m_PlayerData.PlayerEnergyData[i].EnergyBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>();
 
-
-                    energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
-
-                    if (energyFill.fillAmount >= currentEnergy / maxEnergy - .01f)
-                        incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
-                }
-
-
-            }
         }
 
     }

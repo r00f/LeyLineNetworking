@@ -1,0 +1,12 @@
+package player;
+
+component PlayerEnergy {
+	
+    id = 103;
+    uint32 energy = 1;
+	uint32 max_energy = 2;
+    uint32 income = 3;
+    uint32 upkeep = 4;
+	uint32 base_income = 5;
+	
+}

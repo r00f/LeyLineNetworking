@@ -152,10 +152,11 @@ public static class LeyLineEntityTemplates {
     {
         var client = $"workerId:{workerId}";
 
-        var energy = new EnergyComponent.Snapshot
+        var energy = new PlayerEnergy.Snapshot
         {
-            MaxEnergy = 10,
-            Energy = 10
+            MaxEnergy = 20,
+            Energy = 5,
+            BaseIncome = 1
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
@@ -252,13 +253,14 @@ public static class LeyLineEntityTemplates {
         var health = new Health.Snapshot
         {
             MaxHealth = Stats.BaseHealth,
-            CurrentHealth = Stats.BaseHealth
+            CurrentHealth = Stats.BaseHealth - 2
         };
 
         var energy = new Energy.Snapshot
         {
             SpawnCost = Stats.SpawnCost,
-            EnergyUpkeep = Stats.UpkeepCost
+            EnergyUpkeep = Stats.EnergyUpkeep,
+            EnergyIncome = Stats.EnergyIncome
         };
 
         var movementVariables = new MovementVariables.Snapshot
