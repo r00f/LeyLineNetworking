@@ -6,10 +6,11 @@ using Generic;
 using Unit;
 using Improbable;
 using Improbable.Gdk.Core;
+using LeyLineHybridECS;
 
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : ComponentSystem
 {
-
     public struct ManalithData
     {
         public readonly int Length;
@@ -34,8 +35,10 @@ public class ManalithSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<SpatialEntityId> Ids;
         public readonly ComponentDataArray<FactionComponent.Component> Factions;
+        public readonly ComponentDataArray<ServerPath.Component> Paths;
         public ComponentDataArray<Energy.Component> EnergyData;
     }
 
@@ -53,6 +56,30 @@ public class ManalithSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        //reset unit harvesting if they have a path
+        
+        for(int i = 0; i < m_GameStateData.Length; i++)
+        {
+            var gameStateWorldIndex = m_GameStateData.WorldIndexData[i].Value;
+            var gameState = m_GameStateData.GameStates[i].CurrentState;
+
+            for (int ui = 0; ui < m_UnitData.Length; ui++)
+            {
+                var unitWorldIndex = m_UnitData.WorldIndexData[ui].Value;
+                var energy = m_UnitData.EnergyData[ui];
+                var path = m_UnitData.Paths[ui].Path.CellAttributes.Count;
+
+                if(gameStateWorldIndex == unitWorldIndex)
+                {
+                    if(gameState == GameStateEnum.moving && energy.Harvesting && path != 0)
+                    {
+                        energy.Harvesting = false;
+                        m_UnitData.EnergyData[ui] = energy;
+                    }
+                }
+            }
+        }
+        
         for (int i = 0; i < m_ManaLithData.Length; i++)
         {
             var circleCells = m_ManaLithData.CircleCells[i];
@@ -86,41 +113,28 @@ public class ManalithSystem : ComponentSystem
 
                                 uint fact = UpdateFaction(circleCells, manalithWorldIndex);
                                 TeamColorEnum tColor = new TeamColorEnum();
+
                                 //if odd
-                                if (fact % 2 == 1)
+                                if(fact == 0)
                                 {
                                     tColor = TeamColorEnum.blue;
-
+                                }
+                                else if (fact % 2 == 1)
+                                {
+                                    tColor = TeamColorEnum.blue;
                                 }
                                 else if (fact % 2 == 0)
                                 {
                                     tColor = TeamColorEnum.red;
                                 }
-
+                                
                                 faction = new FactionComponent.Component
                                 {
                                     Faction = fact,
                                     TeamColor = tColor
                                 };
 
-                                for (int ui = 0; ui < m_UnitData.Length; ui++)
-                                {
-                                    var energy = m_UnitData.EnergyData[ui];
-                                    var unitId = m_UnitData.Ids[ui];
-                                    var unitFaction = m_UnitData.Factions[ui];
-
-                                    energy.Harvesting = false;
-
-                                    if (unitId.EntityId == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
-                                    {
-                                        if (unitFaction.Faction == faction.Faction)
-                                            energy.Harvesting = true;
-                                        else
-                                            energy.Harvesting = false;
-                                    }
-
-                                    m_UnitData.EnergyData[ui] = energy;
-                                }
+                                UpdateUnit(cellAtt.CellAttributes.Cell.UnitOnCellId, fact);
 
                                 m_ManaLithData.Factions[i] = faction;
                             }
@@ -128,8 +142,6 @@ public class ManalithSystem : ComponentSystem
                     }
                 }
             }
-
-            //update harvesting units
         }
     }
 
@@ -170,6 +182,26 @@ public class ManalithSystem : ComponentSystem
         else
         {
             return 0;
+        }
+    }
+
+    public void UpdateUnit(EntityId inUnitId, uint faction)
+    {
+        for (int ui = 0; ui < m_UnitData.Length; ui++)
+        {
+            var energy = m_UnitData.EnergyData[ui];
+            var unitId = m_UnitData.Ids[ui].EntityId;
+            var unitFaction = m_UnitData.Factions[ui];
+
+            if (unitId == inUnitId)
+            {
+                if (unitFaction.Faction == faction)
+                    energy.Harvesting = true;
+                else
+                    energy.Harvesting = false;
+            }
+
+            m_UnitData.EnergyData[ui] = energy;
         }
     }
 

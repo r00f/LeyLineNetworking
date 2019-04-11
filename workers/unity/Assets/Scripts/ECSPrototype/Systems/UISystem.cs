@@ -133,7 +133,7 @@ namespace LeyLineHybridECS
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 
-                //if (energyFill.fillAmount >= currentEnergy / maxEnergy - .02f)
+                if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
             }
         }

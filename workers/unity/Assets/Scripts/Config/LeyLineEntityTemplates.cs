@@ -20,7 +20,9 @@ public static class LeyLineEntityTemplates {
         var gameState = new GameState.Snapshot
         {
             CurrentState = GameStateEnum.waiting_for_players,
-            PlayersOnMapCount = 0
+            PlayersOnMapCount = 0,
+            CalculateWaitTime = 1.7f,
+            CurrentWaitTime = 1.7f
         };
 
         var wIndex = new WorldIndex.Snapshot

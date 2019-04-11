@@ -12,7 +12,7 @@ using Cells;
 using Player;
 using Unit;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ResourceSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class VisionSystem_Server : ComponentSystem
 {
     public struct CellData
@@ -421,7 +421,7 @@ public class VisionSystem_Server : ComponentSystem
                 }
 
             }
-            Debug.Log(Positives[0].angle_float + " ; " + Positives[Positives.Count - 1].angle_float);
+            //Debug.Log(Positives[0].angle_float + " ; " + Positives[Positives.Count - 1].angle_float);
             foreach (CellAttributes c in watching)
             {
                 float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
@@ -430,7 +430,7 @@ public class VisionSystem_Server : ComponentSystem
                     Cone.Add(c);
                 }
             }
-            Debug.Log("clustercount" + Cone.Count);
+            //Debug.Log("clustercount" + Cone.Count);
 
             Vector3f watcherCubeCoordinate = inCluster.watcher.CellAttributes.Cell.CubeCoordinate;
             Vector3f largestCubeCoordinate = largest.cell.CellAttributes.Cell.CubeCoordinate;
