@@ -154,33 +154,24 @@ namespace LeyLineHybridECS
                 var faction = m_PlayerData.FactionData[i];
                 var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
 
-                var workerSystem = World.GetExistingManager<WorkerSystem>();
-
-                
-                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("PlayerState.")
-                .WithField("State", playerState));
-                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("PlayerColor.")
-                .WithField("Color", faction.TeamColor));
-
                 if (faction.TeamColor == TeamColorEnum.blue)
                 {
-                    if (playerState == PlayerStateEnum.ready)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueToggle.isOn)
                     {
                         UIRef.BlueToggle.isOn = true;
                     }
-                    else
+                    else if(playerState != PlayerStateEnum.ready)
                     {
                         UIRef.BlueToggle.isOn = false;
                     }
-
                 }
                 else if(faction.TeamColor == TeamColorEnum.red)
                 {
-                    if (playerState == PlayerStateEnum.ready)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.RedToggle.isOn)
                     {
                         UIRef.RedToggle.isOn = true;
                     }
-                    else
+                    else if(playerState != PlayerStateEnum.ready)
                     {
                         UIRef.RedToggle.isOn = false;
                     }

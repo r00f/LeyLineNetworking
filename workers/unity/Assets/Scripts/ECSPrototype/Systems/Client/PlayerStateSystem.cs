@@ -66,7 +66,7 @@ namespace LeyLineHybridECS
                             }
                         }
                     }
-                    else
+                    else if(gameState.CurrentState == GameStateEnum.calculate_energy)
                     {
                         SetPlayerState(PlayerStateEnum.waiting);
                         return;
