@@ -10,7 +10,8 @@ using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
 {
-
+    [DisableAutoCreation]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(PlayerStateSystem))]
     public class UISystem : ComponentSystem
     {
         struct UnitData
@@ -19,7 +20,6 @@ namespace LeyLineHybridECS
             public readonly ComponentArray<Transform> TransformData;
             public readonly ComponentArray<BoxCollider> ColliderData;
             public readonly ComponentDataArray<Health.Component> HealthData;
-            //public readonly ComponentDataArray<IsVisible> IsVisibleData;
             public ComponentArray<Healthbar> HealthbarData;
         }
 
@@ -33,11 +33,20 @@ namespace LeyLineHybridECS
 
         [Inject] private GameStateData m_GameStateData;
 
-        public struct PlayerData
+        public struct AuthoritativePlayerData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
             public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
+            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+        }
+
+        [Inject] private AuthoritativePlayerData m_AuthoritativePlayerData;
+
+        public struct PlayerData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
         }
 
@@ -76,7 +85,7 @@ namespace LeyLineHybridECS
                     else
                     {
 
-                        switch (m_PlayerData.FactionData[0].TeamColor)
+                        switch (m_AuthoritativePlayerData.FactionData[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
                                 UIRef.CurrentEnergyFill.color = Color.blue;
@@ -123,18 +132,59 @@ namespace LeyLineHybridECS
                 }
             }
 
-            for (int i = 0; i < m_PlayerData.Length; i++)
+            
+            for (int i = 0; i < m_AuthoritativePlayerData.Length; i++)
             {
-                float maxEnergy = m_PlayerData.PlayerEnergyData[i].MaxEnergy;
-                float currentEnergy = m_PlayerData.PlayerEnergyData[i].Energy;
-                float energyIncome = m_PlayerData.PlayerEnergyData[i].Income;
+                float maxEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].MaxEnergy;
+                float currentEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].Energy;
+                float energyIncome = m_AuthoritativePlayerData.PlayerEnergyData[i].Income;
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
+
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
+            }
+            
+
+            for(int i = 0; i < m_PlayerData.Length; i++)
+            {
+                var faction = m_PlayerData.FactionData[i];
+                var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
+
+                var workerSystem = World.GetExistingManager<WorkerSystem>();
+
+                
+                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("PlayerState.")
+                .WithField("State", playerState));
+                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("PlayerColor.")
+                .WithField("Color", faction.TeamColor));
+
+                if (faction.TeamColor == TeamColorEnum.blue)
+                {
+                    if (playerState == PlayerStateEnum.ready)
+                    {
+                        UIRef.BlueToggle.isOn = true;
+                    }
+                    else
+                    {
+                        UIRef.BlueToggle.isOn = false;
+                    }
+
+                }
+                else if(faction.TeamColor == TeamColorEnum.red)
+                {
+                    if (playerState == PlayerStateEnum.ready)
+                    {
+                        UIRef.RedToggle.isOn = true;
+                    }
+                    else
+                    {
+                        UIRef.RedToggle.isOn = false;
+                    }
+                }
             }
         }
 

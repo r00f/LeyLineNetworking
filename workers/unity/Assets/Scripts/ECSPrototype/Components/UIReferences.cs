@@ -14,4 +14,6 @@ public class UIReferences : MonoBehaviour
     public GameObject StartupPanel;
     public GameObject MatchReadyPanel;
     public float HealthBarYOffset;
+    public Toggle RedToggle;
+    public Toggle BlueToggle;
 }
