@@ -72,8 +72,8 @@ public class ResourceSystem : ComponentSystem
             {
                 playerEnergy.IncomeAdded = false;
                 m_PlayerData.PlayerEnergyData[pi] = playerEnergy;
-                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("ResetIncomeAdded.")
-                .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));
+                /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("ResetIncomeAdded.")
+                .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));*/
             }
         }
     }
@@ -100,6 +100,7 @@ public class ResourceSystem : ComponentSystem
                     {
                         var unitFaction = m_UnitData.FactionData[ui].Faction;
                         var unitEnergy = m_UnitData.UnitEnergyData[ui];
+
                         //if the player and the unit share the same Faction
                         if (unitFaction == playerFaction)
                         {
@@ -121,8 +122,8 @@ public class ResourceSystem : ComponentSystem
 
                     m_PlayerData.PlayerEnergyData[pi] = playerEnergy;
 
-                    workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("AddIncome.")
-                    .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));
+                    /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("AddIncome.")
+                    .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));*/
 
                 }
             }
@@ -131,8 +132,7 @@ public class ResourceSystem : ComponentSystem
 
     public void AddEnergy(uint playerFaction, uint energyAmount)
     {
-        Debug.Log("Add " + energyAmount + " energy to player " + playerFaction);
-
+        //Debug.Log("Add " + energyAmount + " energy to player " + playerFaction);
         for (int i = 0; i < m_PlayerData.Length; i++)
         {
             var faction = m_PlayerData.FactionData[i].Faction;
@@ -177,6 +177,29 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
+    public void Heal(uint unitID, uint healAmount)
+    {
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId;
+            var health = m_UnitData.HealthData[i];
+
+            if (unitID.Equals(id))
+            {
+                if (health.CurrentHealth + healAmount <= health.MaxHealth)
+                {
+                    health.CurrentHealth += healAmount;
+                }
+                else
+                {
+                    health.CurrentHealth = health.MaxHealth;
+                }
+
+                m_UnitData.HealthData[i] = health;
+            }
+        }
+    }
+
     public void DealDamage(uint unitID, uint damageAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
@@ -193,6 +216,7 @@ public class ResourceSystem : ComponentSystem
                 else
                 {
                     health.CurrentHealth = 0;
+                    Die(unitID);
                 }
 
                 m_UnitData.HealthData[i] = health;
@@ -200,14 +224,17 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void Heal(uint unitID, uint healAmount)
+    public void Die(uint unitID)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
+            var id = m_UnitData.EntityIdData[i].EntityId;
 
+            if (unitID.Equals(id))
+            {
+                //DEATH CODE
 
-
+            }
         }
     }
-
 }
