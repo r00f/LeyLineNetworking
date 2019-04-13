@@ -140,7 +140,7 @@ public class ResourceSystem : ComponentSystem
 
             if(playerFaction == faction)
             {
-                if (energyComp.Energy + energyAmount <= energyComp.MaxEnergy)
+                if (energyComp.Energy + energyAmount < energyComp.MaxEnergy)
                 {
                     energyComp.Energy += energyAmount;
                 }
@@ -163,7 +163,9 @@ public class ResourceSystem : ComponentSystem
 
             if (playerFaction == faction)
             {
-                if (energyComp.Energy - energyAmount >= 0)
+                //Debug.Log(energyComp.Energy - energyAmount);
+                //since uint cant be negative and turns into a huge number convert to int to check
+                if ((int)energyComp.Energy - (int)energyAmount > 0)
                 {
                     energyComp.Energy -= energyAmount;
                 }
@@ -186,7 +188,7 @@ public class ResourceSystem : ComponentSystem
 
             if (unitID.Equals(id))
             {
-                if (health.CurrentHealth + healAmount <= health.MaxHealth)
+                if (health.CurrentHealth + healAmount < health.MaxHealth)
                 {
                     health.CurrentHealth += healAmount;
                 }
@@ -209,7 +211,7 @@ public class ResourceSystem : ComponentSystem
 
             if(unitID.Equals(id))
             {
-                if(health.CurrentHealth - damageAmount >= 0)
+                if((int)health.CurrentHealth - (int)damageAmount > 0)
                 {
                     health.CurrentHealth -= damageAmount;
                 }

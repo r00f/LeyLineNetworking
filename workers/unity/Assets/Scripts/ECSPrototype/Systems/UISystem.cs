@@ -84,7 +84,6 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-
                         switch (m_AuthoritativePlayerData.FactionData[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
@@ -117,12 +116,11 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    
-                    if (gameState == GameStateEnum.planning || gameState == GameStateEnum.calculate_energy)
+                    if (gameState == GameStateEnum.planning && !healthbar.HealthBarInstance.activeSelf)
                     {
                         healthbar.HealthBarInstance.SetActive(true);
                     }
-                    else
+                    else if(gameState != GameStateEnum.planning)
                     {
                         healthbar.HealthBarInstance.SetActive(false);
                     }
@@ -132,7 +130,7 @@ namespace LeyLineHybridECS
                 }
             }
 
-            
+            //this clients player
             for (int i = 0; i < m_AuthoritativePlayerData.Length; i++)
             {
                 float maxEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].MaxEnergy;
@@ -141,14 +139,13 @@ namespace LeyLineHybridECS
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
 
-
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
             }
-            
 
+            //all players
             for(int i = 0; i < m_PlayerData.Length; i++)
             {
                 var faction = m_PlayerData.FactionData[i];
