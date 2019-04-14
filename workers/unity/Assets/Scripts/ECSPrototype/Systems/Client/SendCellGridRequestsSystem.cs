@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Improbable;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Generic;
 using Unit;
 using Cells;
-using Unity.Mathematics;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendCellGridRequestsSystem : ComponentSystem
@@ -50,6 +46,15 @@ public class SendCellGridRequestsSystem : ComponentSystem
 
     [Inject] private GameStateData m_GameStateData;
 
+    public struct PlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
+    }
+
+    [Inject] private PlayerData m_PlayerData;
+
     protected override void OnUpdate()
     {
         for (int i = 0; i < m_CellsInRangeRequest.Length; i++)
@@ -83,11 +88,22 @@ public class SendCellGridRequestsSystem : ComponentSystem
                 {
                     var cellsInRangerequestSender = m_CellsInRangeRequest.CellsInRangeSenders[i];
                     var coord = m_CellsInRangeRequest.CoordinateData[i].CubeCoordinate;
+                    uint playerEnergy = m_PlayerData.PlayerEnergyData[0].Energy;
+                    uint range;
+
+                    if(playerEnergy >= movementVars.MovementRange)
+                    {
+                        range = movementVars.MovementRange;
+                    }
+                    else
+                    {
+                        range = m_PlayerData.PlayerEnergyData[0].Energy;
+                    }
 
                     var request = CellsToMark.CellsInRangeCommand.CreateRequest
                     (
                         targetEntityId,
-                        new CellsInRangeRequest(coord, movementVars.MovementRange, unitWorldIndex)
+                        new CellsInRangeRequest(coord, range, unitWorldIndex)
                     );
 
                     cellsInRangerequestSender.RequestsToSend.Add(request);
