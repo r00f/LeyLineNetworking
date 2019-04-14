@@ -17,7 +17,17 @@ ModelImporter:
     3300002: Main
     4300000: Jewels
     4300002: Main
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: CeptreMetallic
+    second: {fileID: 2100000, guid: a61655d38df3405489316e53e7a895ba, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: MAGICBALL
+    second: {fileID: 2100000, guid: 619b2cfdf6ebb2e438c88b95072da9a2, type: 2}
   materials:
     importMaterials: 1
     materialName: 0
