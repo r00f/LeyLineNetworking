@@ -72,8 +72,6 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-
-
             if(m_ProjectorAddedData.Length != 0 && playerGroup.GetEntityArray().Length != 0)
             {
                 var playerWorldIndex = playerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[0].Value;
@@ -88,7 +86,7 @@ namespace LeyLineHybridECS
 
                         if (m_ProjectorAddedData.Transforms[0].position != position + new Vector3(0, 10, 50))
                         {
-                            Debug.Log("SetProjectorPosition");
+                            //Debug.Log("SetProjectorPosition");
                             m_ProjectorAddedData.Transforms[0].position = position + new Vector3(0, 10, 50);
                         }
 
@@ -99,38 +97,30 @@ namespace LeyLineHybridECS
 
             for (int ci = 0; ci < m_CircleData.Length; ci++)
             {
+                var circlePos = m_CircleData.MeshColorData[ci].transform.position.sqrMagnitude;
+                var circleColor = m_CircleData.MeshColorData[ci].Color;
+
                 for (int i = 0; i < manalithGroup.GetEntityArray().Length; i++)
                 {
                     var faction = manalithGroup.GetComponentDataArray<Generic.FactionComponent.Component>()[i];
-                    var position = manalithGroup.GetComponentDataArray<Improbable.Position.Component>()[i];
+                    var position = manalithGroup.GetComponentDataArray<Improbable.Position.Component>()[i].Coords.ToUnityVector().sqrMagnitude;
 
-                    var circlePos = m_CircleData.MeshColorData[ci].transform.position;
-
-                    if (position.Coords.ToUnityVector() == circlePos)
+                    if (position == circlePos)
                     {
-                        var circleColor = m_CircleData.MeshColorData[ci].Color;
-
-                        if(faction.Faction == 0)
+                        switch (faction.Faction)
                         {
-                            circleColor = Color.yellow;
+                            case 0:
+                                circleColor = Color.yellow;
+                                break;
+                            case 1:
+                                circleColor = Color.blue;
+                                break;
+                            case 2:
+                                circleColor = Color.red;
+                                break;
                         }
-                        else
-                        {
-                            switch (faction.TeamColor)
-                            {
-                                case Generic.TeamColorEnum.blue:
-                                    circleColor = Color.blue;
-                                    break;
-                                case Generic.TeamColorEnum.red:
-                                    circleColor = Color.red;
-                                    break;
-                            }
-
-                        }
-
                         m_CircleData.MeshColorData[ci].Color = circleColor;
                     }
-
                 }
             }
 

@@ -24,18 +24,20 @@ public static class WorkerUtils
         world.GetOrCreateManager<InitializeUnitsSystem>();
         world.GetOrCreateManager<ClientPathVisualsSystem>();
         world.GetOrCreateManager<VisionSystem_Client>();
+        world.GetOrCreateManager<UISystem>();
     }
 
     public static void AddGameLogicSystems(World world)
     {
-        world.GetOrCreateManager<GameStateSystem>();
         world.GetOrCreateManager<InitializePlayerSystem>();
+        world.GetOrCreateManager<GameStateSystem>();
         world.GetOrCreateManager<SpawnUnitsSystem>();
         world.GetOrCreateManager<HandleCellGridRequestsSystem>();
         world.GetOrCreateManager<MovementSystem>();
         world.GetOrCreateManager<ManalithSystem>();
         world.GetOrCreateManager<UnitLifeCycleSystem>();
         world.GetOrCreateManager<VisionSystem_Server>();
+        world.GetOrCreateManager<ResourceSystem>();
     }
 
 }

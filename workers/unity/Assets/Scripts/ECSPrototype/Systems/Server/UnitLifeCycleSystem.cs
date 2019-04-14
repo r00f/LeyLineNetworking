@@ -5,9 +5,10 @@ using Cells;
 using Unit;
 using Generic;
 using Improbable.Gdk.Core;
+using LeyLineHybridECS;
 
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData

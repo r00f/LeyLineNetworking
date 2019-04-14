@@ -17,7 +17,17 @@ ModelImporter:
     3300002: staff_main
     4300000: staff_main
     4300002: Cristal
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: MAGICBALL
+    second: {fileID: 2100000, guid: 619b2cfdf6ebb2e438c88b95072da9a2, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: staffmain
+    second: {fileID: 2100000, guid: 794e612927b23ba4780e04105ad73d4b, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

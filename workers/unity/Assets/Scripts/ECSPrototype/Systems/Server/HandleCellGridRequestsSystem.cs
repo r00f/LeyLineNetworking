@@ -6,10 +6,11 @@ using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using System.Collections.Generic;
 using System.Linq;
+using Generic;
 using Cells;
 using Unit;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ResourceSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
@@ -35,6 +36,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct FindPathRequestData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<FactionComponent.Component> FactionData;
         public ComponentDataArray<ServerPath.CommandRequests.FindPathCommand> ReceivedFindPathRequests;
         public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public ComponentDataArray<ServerPath.Component> ServerPathData;
@@ -69,6 +71,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     }
 
     [Inject] private GameStateData m_GameStateData;
+    [Inject] private ResourceSystem m_ResourceSystem;
 
     protected override void OnUpdate()
     {
@@ -140,13 +143,16 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var serverPathData = m_FindPathRequestData.ServerPathData[i];
             var findPathRequests = m_FindPathRequestData.ReceivedFindPathRequests[i];
             var cellsToMarkData = m_FindPathRequestData.CellsToMarkData[i];
+            var faction = m_FindPathRequestData.FactionData[i].Faction;
 
             if (cellsToMarkData.CachedPaths.Count != 0)
             {
                 foreach (var findPathRequest in findPathRequests.Requests)
                 {
                     //Debug.Log("findPathRequest");
+                    m_ResourceSystem.AddEnergy(faction, (uint)serverPathData.Path.CellAttributes.Count());
                     serverPathData.Path = FindPath(findPathRequest.Payload.Destination, cellsToMarkData.CachedPaths);
+                    m_ResourceSystem.SubstactEnergy(faction, (uint)serverPathData.Path.CellAttributes.Count());
                     m_FindPathRequestData.ServerPathData[i] = serverPathData;
                 }
             }
