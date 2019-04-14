@@ -19,7 +19,9 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<FactionComponent.Component> FactionComponent;
+            public readonly ComponentDataArray<PlayerAttributes.Component> PlayerAttributes;
+            public readonly ComponentDataArray<PlayerStateData> WorldIndexState;
+            public ComponentDataArray<FactionComponent.Component> FactionComponent;
         }
 
         [Inject] private PlayerData m_PlayerData;
@@ -54,8 +56,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly EntityArray Entities;
-            public readonly ComponentDataArray<Authoritative<WorldIndex.Component>> AuthorativeData;
-            public readonly ComponentDataArray<PlayerAttributes.Component> PlayerAttributes;
+            public readonly ComponentDataArray<Authoritative<PlayerAttributes.Component>> AuthorativeData;
             public ComponentDataArray<Position.Component> Positions;
             public ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public ComponentDataArray<FactionComponent.Component> FactionComponent;
@@ -79,12 +80,10 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            
+
             for (int i = 0; i < m_PlayerAddedData.Length; i++)
             {
                 var worldIndex = m_PlayerAddedData.WorldIndexData[i];
-                var factionComp = m_PlayerAddedData.FactionComponent[i];
-                var playerAttributes = m_PlayerAddedData.PlayerAttributes[i];
                 var pos = m_PlayerAddedData.Positions[i];
 
                 if(worldIndex.Value == 0)
@@ -92,7 +91,9 @@ namespace LeyLineHybridECS
                     uint wIndex = SetPlayerWorld();
 
                     worldIndex.Value = wIndex;
-                    factionComp = SetPlayerFaction(wIndex);
+                    m_PlayerAddedData.WorldIndexData[i] = worldIndex;
+
+                    //Debug.Log(wIndex + ", " + m_PlayerAddedData.WorldIndexData[i].Value);
 
                     for (int gi = 0; gi < m_GameStateData.Length; gi++)
                     {
@@ -103,25 +104,7 @@ namespace LeyLineHybridECS
                             pos.Coords = gameStatePos.Coords;
                     }
 
-                    m_PlayerAddedData.WorldIndexData[i] = worldIndex;
-                    m_PlayerAddedData.FactionComponent[i] = factionComp;
                     m_PlayerAddedData.Positions[i] = pos;
-
-                    for (int ci = 0; ci < m_CellData.Length; ci++)
-                    {
-                        var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
-                        var unitToSpawn = m_CellData.UnitToSpawnData[ci];
-
-                        if (cellWorldIndex == worldIndex.Value)
-                        {
-                            if (unitToSpawn.Faction == factionComp.Faction)
-                            {
-                                unitToSpawn.UnitName = playerAttributes.HeroName;
-                                unitToSpawn.TeamColor = factionComp.TeamColor;
-                                m_CellData.UnitToSpawnData[ci] = unitToSpawn;
-                            }
-                        }
-                    }
                 }
 
                 PostUpdateCommands.AddComponent(m_PlayerAddedData.Entities[i], new PlayerStateData { WorldIndexState = worldIndex });
@@ -145,27 +128,57 @@ namespace LeyLineHybridECS
 
                 PostUpdateCommands.RemoveComponent<PlayerStateData>(m_PlayerRemovedData.Entities[i]);
             }
+
+            
+            for(int i = 0; i < m_PlayerData.Length; i++)
+            {
+                var worldIndex = m_PlayerData.WorldIndexState[i];
+                var factionComp = m_PlayerData.FactionComponent[i];
+                var playerAttributes = m_PlayerData.PlayerAttributes[i];
+
+                if (worldIndex.WorldIndexState.Value != 0 && factionComp.Faction == 0)
+                {
+                    factionComp = SetPlayerFaction(worldIndex.WorldIndexState.Value);
+                    m_PlayerData.FactionComponent[i] = factionComp;
+
+                    for (int ci = 0; ci < m_CellData.Length; ci++)
+                    {
+                        var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
+                        var unitToSpawn = m_CellData.UnitToSpawnData[ci];
+
+                        if (cellWorldIndex == worldIndex.WorldIndexState.Value)
+                        {
+                            if (unitToSpawn.Faction == factionComp.Faction)
+                            {
+                                unitToSpawn.UnitName = playerAttributes.HeroName;
+                                unitToSpawn.TeamColor = factionComp.TeamColor;
+                                m_CellData.UnitToSpawnData[ci] = unitToSpawn;
+                            }
+                        }
+                    }
+                }
+            }
             
         }
-
 
         public uint SetPlayerWorld()
         {
             uint sortIndex = 1;
-            uint worldIndex = 0;
 
             for (int i = 0; i < m_GameStateData.Length; i++)
             {
                 var gameState = m_GameStateData.GameStates[i];
                 var mapWorldIndex = m_GameStateData.WorldIndexData[i].Value;
 
+                //Debug.Log("SetPlayerWorldLoop " + m_GameStateData.WorldIndexData[i].Value);
+
                 if (mapWorldIndex == sortIndex)
                 {
                     if (gameState.PlayersOnMapCount < 2)
                     {
-                        worldIndex = mapWorldIndex;
                         gameState.PlayersOnMapCount++;
                         m_GameStateData.GameStates[i] = gameState;
+                        return mapWorldIndex;
                     }
                     else
                     {
@@ -175,7 +188,7 @@ namespace LeyLineHybridECS
                 }
             }
 
-            return worldIndex;
+            return 0;
         }
 
         public FactionComponent.Component SetPlayerFaction(uint worldIndex)
