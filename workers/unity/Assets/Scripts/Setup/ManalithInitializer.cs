@@ -170,7 +170,8 @@ namespace LeyLineHybridECS
 
             foreach (Cell c in leyLineCircle)
             {
-                c.GetComponent<EditorIsCircleCell>().Value = false;
+                if(c.GetComponent<EditorIsCircleCell>())
+                    c.GetComponent<EditorIsCircleCell>().Value = false;
             }
 
             switch (circleSize)

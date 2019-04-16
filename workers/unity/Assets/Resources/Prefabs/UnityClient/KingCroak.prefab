@@ -135,12 +135,12 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 800862004979978160}
-  - component: {fileID: 3299403803739336480}
   - component: {fileID: 8898852741660551068}
   - component: {fileID: 8950170168944560130}
   - component: {fileID: 4440954350749950428}
   - component: {fileID: 1494769374946863884}
   - component: {fileID: 6417101695087793806}
+  - component: {fileID: 9121732361173887378}
   m_Layer: 11
   m_Name: KingCroak
   m_TagString: Untagged
@@ -164,19 +164,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &3299403803739336480
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4245292855223164028}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &8898852741660551068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,6 +243,20 @@ MonoBehaviour:
   HealthBarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}
+--- !u!114 &9121732361173887378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4245292855223164028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MeshRenderer: {fileID: 8894037239879066281}
+  GO: {fileID: 8108814016297623155}
 --- !u!1 &8108814016297623155
 GameObject:
   m_ObjectHideFlags: 0
@@ -265,6 +266,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5548772758455220403}
+  - component: {fileID: 5710465184585868648}
   m_Layer: 11
   m_Name: Visuals
   m_TagString: Untagged
@@ -287,6 +289,19 @@ Transform:
   m_Father: {fileID: 800862004979978160}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &5710465184585868648
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8108814016297623155}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 2, z: 1}
+  m_Center: {x: 0, y: 1, z: 0}
 --- !u!1001 &2149937189910046954
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -753,6 +768,12 @@ PrefabInstance:
 --- !u!23 &8894037239879066283 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 2300000, guid: 9ebb329545f82c14ca20a2933e7160fd,
+    type: 3}
+  m_PrefabInstance: {fileID: 8894037239881104075}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &8894037239879066281 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2300002, guid: 9ebb329545f82c14ca20a2933e7160fd,
     type: 3}
   m_PrefabInstance: {fileID: 8894037239881104075}
   m_PrefabAsset: {fileID: 0}

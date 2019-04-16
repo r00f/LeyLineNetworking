@@ -218,7 +218,6 @@ public class VisionSystem_Server : ComponentSystem
 
     private void BuildRawClusters()
     {
-        
         List<CellAttributesComponent.Component> obstructed = new List<CellAttributesComponent.Component>();
 
         //Debug.Log(m_CellData.Length);

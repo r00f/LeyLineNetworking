@@ -22,7 +22,10 @@ public static class LeyLineEntityTemplates {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
             CalculateWaitTime = 1.7f,
-            CurrentWaitTime = 1.7f
+            CurrentWaitTime = 1.7f,
+            PlanningTime = 60f,
+            CurrentPlanningTime = 60f,
+            RopeDisplayTime = 30f
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -240,16 +243,13 @@ public static class LeyLineEntityTemplates {
         var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
-
         };
 
         var unitVision = new Vision.Snapshot
         {
-
             CellsInVisionrange = new List<CellAttributes>(),
             RequireUpdate = true,
             VisionRange = Stats.VisionRange
-
         };
 
         var health = new Health.Snapshot

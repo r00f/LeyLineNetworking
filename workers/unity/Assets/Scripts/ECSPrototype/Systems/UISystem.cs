@@ -18,8 +18,9 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentArray<Transform> TransformData;
-            public readonly ComponentArray<BoxCollider> ColliderData;
+            //public readonly ComponentArray<BoxCollider> ColliderData;
             public readonly ComponentDataArray<Health.Component> HealthData;
+            public readonly ComponentDataArray<IsVisible> IsVisibleData;
             public ComponentArray<Healthbar> HealthbarData;
         }
 
@@ -87,9 +88,11 @@ namespace LeyLineHybridECS
                         switch (m_AuthoritativePlayerData.FactionData[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
+                                UIRef.HeroPortraitTeamColour.color = Color.blue;
                                 UIRef.CurrentEnergyFill.color = Color.blue;
                                 break;
                             case TeamColorEnum.red:
+                                UIRef.HeroPortraitTeamColour.color = Color.red;
                                 UIRef.CurrentEnergyFill.color = Color.red;
                                 break;
                         }
@@ -104,8 +107,7 @@ namespace LeyLineHybridECS
                 var position = m_UnitData.TransformData[i].position;
                 var health = m_UnitData.HealthData[i];
                 var healthbar = m_UnitData.HealthbarData[i];
-                var collider = m_UnitData.ColliderData[i];
-                //var isVisible = m_Data.IsVisibleData[i];
+                var isVisible = m_UnitData.IsVisibleData[i];
 
 
                 //if there is no healthbar, instantiate it into healthBarParent
@@ -116,16 +118,16 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    if (gameState == GameStateEnum.planning && !healthbar.HealthBarInstance.activeSelf)
+                    if (gameState == GameStateEnum.planning && !healthbar.HealthBarInstance.activeSelf && isVisible.Value == 1)
                     {
                         healthbar.HealthBarInstance.SetActive(true);
                     }
-                    else if(gameState != GameStateEnum.planning)
+                    else if(gameState != GameStateEnum.planning || isVisible.Value == 0)
                     {
                         healthbar.HealthBarInstance.SetActive(false);
                     }
                     
-                    healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, collider.bounds.size.y + UIRef.HealthBarYOffset, 0));
+                    healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
                     healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, (float)health.CurrentHealth / (float)health.MaxHealth, 0.1f);
                 }
             }
@@ -153,26 +155,36 @@ namespace LeyLineHybridECS
 
                 if (faction.TeamColor == TeamColorEnum.blue)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueToggle.isOn)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueReady.enabled)
                     {
-                        UIRef.BlueToggle.isOn = true;
+                        UIRef.BlueReady.enabled = true;
                     }
                     else if(playerState != PlayerStateEnum.ready)
                     {
-                        UIRef.BlueToggle.isOn = false;
+                        UIRef.BlueReady.enabled = false;
                     }
                 }
                 else if(faction.TeamColor == TeamColorEnum.red)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.RedToggle.isOn)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.RedReady.enabled)
                     {
-                        UIRef.RedToggle.isOn = true;
+                        UIRef.RedReady.enabled = true;
                     }
                     else if(playerState != PlayerStateEnum.ready)
                     {
-                        UIRef.RedToggle.isOn = false;
+                        UIRef.RedReady.enabled = false;
                     }
                 }
+            }
+
+            if(m_GameStateData.GameStates[0].CurrentPlanningTime <= m_GameStateData.GameStates[0].RopeDisplayTime)
+            {
+                UIRef.RopeBar.enabled = true;
+                UIRef.RopeBar.fillAmount = m_GameStateData.GameStates[0].CurrentPlanningTime / m_GameStateData.GameStates[0].RopeDisplayTime;
+            }
+            else
+            {
+                UIRef.RopeBar.enabled = false;
             }
         }
 

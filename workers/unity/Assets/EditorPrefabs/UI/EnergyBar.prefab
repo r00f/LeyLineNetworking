@@ -65,12 +65,12 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: d69934f35c397f549aabdf51d1ec810a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4012e8880b489c84b8c5798466b2379d, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 1
+  m_FillAmount: 0.68
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.5}
   m_AnchorMax: {x: 0, y: 0.5}
-  m_AnchoredPosition: {x: 1.699857, y: 0.000061035156}
+  m_AnchoredPosition: {x: 1.6998596, y: 0.000061035156}
   m_SizeDelta: {x: 408.95996, y: 21}
   m_Pivot: {x: -0.0000000433065, y: 0.5}
 --- !u!222 &5758686000386796250
@@ -229,12 +229,12 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: d69934f35c397f549aabdf51d1ec810a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4012e8880b489c84b8c5798466b2379d, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 0
-  m_FillAmount: 1
+  m_FillAmount: 0.45
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
@@ -249,7 +249,6 @@ GameObject:
   - component: {fileID: 5758686001372867635}
   - component: {fileID: 5758686001372867645}
   - component: {fileID: 5758686001372867644}
-  - component: {fileID: 2242974790139494878}
   m_Layer: 5
   m_Name: EnergyBar
   m_TagString: Untagged
@@ -264,7 +263,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5758686001372867634}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -314,20 +313,3 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
---- !u!114 &2242974790139494878
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5758686001372867634}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 65c1eb75b69f1d4469789b13b0a9e322, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  barPartPrefab: {fileID: 4466254772935610047, guid: 89b9b948ee2b5474b8b015014670d4c8,
-    type: 3}
-  rectTransform: {fileID: 5758686000386796255}
-  currentEnergyFill: {fileID: 5758686001260246299}
-  incomeEnergyFill: {fileID: 7552149170535503703}

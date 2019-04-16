@@ -54,6 +54,7 @@ namespace BlankProject.Editor
                     CellAttributes = new List<CellAttribute>()
                 };
 
+                
                 foreach (Cell n in m.leyLineCircle)
                 {
                     circle.CellAttributes.Add(new CellAttribute
@@ -64,6 +65,7 @@ namespace BlankProject.Editor
                         MovementCost = n.GetComponent<MovementCost>().Value
                     });
                 }
+                
                 Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);
                 uint worldIndex = m.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
                 var manalith = LeyLineEntityTemplates.Manalith(pos, circle, worldIndex);

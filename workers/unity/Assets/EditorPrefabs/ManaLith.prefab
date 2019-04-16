@@ -281,7 +281,7 @@ ParticleSystem:
   m_GameObject: {fileID: 3416131609979959237}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.5
+  simulationSpeed: 0.2
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -354,9 +354,9 @@ ParticleSystem:
     enabled: 1
     startLifetime:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0.4
-      minScalar: 5
+      minScalar: 0.25
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -524,8 +524,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.8
-      minScalar: 0.6
+      scalar: 0.9
+      minScalar: 0.7
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -846,7 +846,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -3
+      scalar: -2.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -1105,7 +1105,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 60
+      scalar: 500
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -5168,7 +5168,7 @@ ParticleSystem:
   m_GameObject: {fileID: 8076838793856098722}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.5
+  simulationSpeed: 0.2
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -5241,9 +5241,9 @@ ParticleSystem:
     enabled: 1
     startLifetime:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0.4
-      minScalar: 5
+      minScalar: 0.25
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5411,8 +5411,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.8
-      minScalar: 0.6
+      scalar: 0.9
+      minScalar: 0.7
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5733,7 +5733,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -3
+      scalar: -2.5
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -5860,7 +5860,7 @@ ParticleSystem:
     m_Sprite: {fileID: 0}
     m_SpriteRenderer: {fileID: 0}
     m_UseMeshMaterialIndex: 0
-    m_UseMeshColors: 0
+    m_UseMeshColors: 1
     alignToDirection: 0
     m_Texture: {fileID: 0}
     m_TextureClipChannel: 3
@@ -5992,7 +5992,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 60
+      scalar: 500
       minScalar: 10
       maxCurve:
         serializedVersion: 2
