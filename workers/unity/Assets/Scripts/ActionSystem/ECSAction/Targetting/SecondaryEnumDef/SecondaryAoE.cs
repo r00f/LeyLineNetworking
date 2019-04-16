@@ -6,6 +6,7 @@ using UnityEngine;
 namespace LeyLineHybridECS
 {
     [CreateAssetMenu]
+    [System.Serializable]
     public class SecondaryAoE : ECSActionSecondaryTargets
     {
         public int areaSize;

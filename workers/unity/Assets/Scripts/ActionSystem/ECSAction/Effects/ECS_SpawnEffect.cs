@@ -5,8 +5,9 @@ using UnityEngine;
 namespace LeyLineHybridECS
 {
     [CreateAssetMenu]
+    [System.Serializable]
     public class ECS_SpawnEffect : ECSActionEffect
     {
-        public GameObject UnitToSpawn;
+        public string UnitNameToSpawn;
     }
 }

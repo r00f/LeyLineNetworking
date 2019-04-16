@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace LeyLineHybridECS
 {
+    [System.Serializable]
     public class ECSActionTarget : ScriptableObject
     {
         public enum HighlightDef

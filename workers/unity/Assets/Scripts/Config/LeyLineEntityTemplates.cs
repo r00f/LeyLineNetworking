@@ -7,10 +7,14 @@ using Generic;
 using Player;
 using Cells;
 using Unit;
+using LeyLineHybridECS;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public static class LeyLineEntityTemplates {
 
-    
+
+
     private static readonly List<string> AllWorkerAttributes =
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
@@ -232,8 +236,6 @@ public static class LeyLineEntityTemplates {
             Path = new CellAttributeList(new List<CellAttribute>()),
         };
 
-
-
         var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
@@ -267,6 +269,9 @@ public static class LeyLineEntityTemplates {
             TravelTime = 1.7f
         };
 
+
+        var actions = SetActions(Stats);
+
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
         var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
@@ -287,7 +292,149 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientPathSnapshot, client);
         template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
+        template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
     }
+    static Actions.Snapshot SetActions (Unit_BaseDataSet inStats){
+        Action myBasicAttack = new Action();
+        myBasicAttack.Targets = new List<ActionTarget>();
+        Action myBasicMove = new Action();
+        myBasicMove.Targets = new List<ActionTarget>();
+        List<Action> myOtherActions = new List<Action>();
+        if(inStats.BasicAttack != null)
+        {
+            myBasicAttack = SetAction(inStats.BasicAttack);
+        }
+        if(inStats.BasicMove != null)
+        {
+            myBasicMove = SetAction(inStats.BasicMove);
+        }
+        foreach(ECSAction a in inStats.Actions)
+        {
+            myOtherActions.Add(SetAction(a));
+        }
+        var newActions = new Actions.Snapshot
+        {
+            BasicMove = myBasicMove,
+            BasicAttack = myBasicAttack,
+            OtherActions = myOtherActions
+        };
+
+        return newActions;
+        }
+    static Action SetAction (ECSAction inAction)
+    {
+        Action newAction = new Action();
+        newAction.Targets = new List<ActionTarget>();
+        for (int i = 0; i <= inAction.Targets.Count - 1; i++)
+        {
+            if (inAction.Targets[i] is ECSATarget_Tile)
+            {
+                ECSATarget_Tile go = inAction.Targets[i] as ECSATarget_Tile;
+                ActionTarget newAT = new ActionTarget();
+                newAT.TargetType = TargetTypeEnum.cell;
+                newAT.Mods = new List<TargetMod>();
+                newAT.CellTargetNested.RequireEmpty = go.requireEmpty;
+                newAT.CellTargetNested.RequireVisible = false;
+                newAT.Targettingrange = go.targettingRange;
+                foreach (ECSActionSecondaryTargets t in go.SecondaryTargets)
+                {
+                    if (t is SecondaryAoE)
+                    {
+                        SecondaryAoE go1 = t as SecondaryAoE;
+                        TargetMod mod = new TargetMod();
+                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.aoe;
+                        mod.AoeNested.Radius = go1.areaSize;
+                        newAT.Mods.Add(mod);
+                    }
+                    if (t is SecondaryPath)
+                    {
+                        SecondaryPath go1 = t as SecondaryPath;
+                        TargetMod mod = new TargetMod();
+                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.path;
+                        mod.PathNested.Costpertile = go1.costPerTile;
+                        newAT.Mods.Add(mod);
+                    }
+                    newAction.Targets.Add(newAT);
+                }
+               
+            }
+            if (inAction.Targets[i] is ECSATarget_Unit)
+            {
+                ECSATarget_Unit go = inAction.Targets[i] as ECSATarget_Unit;
+                ActionTarget newAT = new ActionTarget();
+                newAT.Mods = new List<TargetMod>();
+                newAT.TargetType = TargetTypeEnum.unit;
+                switch (go.Restrictions)
+                {
+                    case ECSATarget_Unit.UnitRestrictions.Any:
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.all;
+                        break;
+                    case ECSATarget_Unit.UnitRestrictions.Enemy:
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.enemy;
+                        break;
+                    case ECSATarget_Unit.UnitRestrictions.Friendly:
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.friendly;
+                        break;
+                    case ECSATarget_Unit.UnitRestrictions.Self:
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.self;
+                        break;
+                    case ECSATarget_Unit.UnitRestrictions.FriendlyOther:
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.other;
+                        break;
+                }
+                newAT.Targettingrange = go.targettingRange;
+                foreach (ECSActionSecondaryTargets t in go.SecondaryTargets)
+                {
+                    if (t is SecondaryAoE)
+                    {
+                        SecondaryAoE go1 = t as SecondaryAoE;
+                        TargetMod mod = new TargetMod();
+                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.aoe;
+                        mod.AoeNested.Radius = go1.areaSize;
+                        newAT.Mods.Add(mod);
+                    }
+                    if (t is SecondaryPath)
+                    {
+                        SecondaryPath go1 = t as SecondaryPath;
+                        TargetMod mod = new TargetMod();
+                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.path;
+                        newAT.Mods.Add(mod);
+
+                    }
+                }
+                newAction.Targets.Add(newAT);
+            }
+        }
+
+      return newAction;
+    }
+    /* static byte[] ToByteArray<T>(T obj)
+     {
+         if (obj == null)
+             return null;
+         BinaryFormatter bf = new BinaryFormatter();
+         using (MemoryStream ms = new MemoryStream())
+         {
+             bf.Serialize(ms, obj);
+             return ms.ToArray();
+         }
+     }
+     static T FromByteArray<T>(byte[] data)
+     {
+         if (data == null)
+             return default(T);
+         BinaryFormatter bf = new BinaryFormatter();
+         using (MemoryStream ms = new MemoryStream(data))
+         {
+             object obj = bf.Deserialize(ms);
+             return (T)obj;
+         }
+     }
+     */
 }

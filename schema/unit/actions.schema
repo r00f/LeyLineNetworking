@@ -1,0 +1,72 @@
+package unit;
+import "improbable/vector3.schema";
+
+component Actions{
+	
+    id = 125;
+	
+	
+	Action basic_move = 1;
+	Action basic_attack = 2;
+	list<Action> other_actions = 3;
+}
+
+
+
+type Action {
+	int32 using_id = 1;
+	list<ActionTarget> targets = 2;
+
+}
+
+type ActionTarget {
+	type UnitTarget {
+		int32 target_id = 1;
+		UnitRequisitesEnum unit_req = 2;
+		
+	}
+	type CellTarget {
+		improbable.Vector3f target_coord = 1;
+		bool require_empty = 2;
+		bool require_visible = 3;
+	}
+	int32 targettingrange = 1;
+	list<TargetMod> mods = 2;
+	CellTarget cell_target_nested = 3;
+	UnitTarget unit_target_nested = 4;
+	TargetTypeEnum target_type = 5;
+	
+}
+type TargetMod {
+	
+	type AoE {
+		int32 radius = 1;
+		}
+	type Path {
+		int32 costpertile = 1;
+	}
+	list<improbable.Vector3f> secondary_coordinates = 1;
+	AoE aoe_nested = 2;
+	Path path_nested = 3;
+	ModTypeEnum mod_type = 4;
+
+}
+
+enum UnitRequisitesEnum {
+	all = 0;
+	friendly = 1;
+	enemy = 2;
+	other = 3;
+	self = 4;
+}
+
+enum TargetTypeEnum {
+cell = 0;
+unit = 1;
+}
+
+enum ModTypeEnum {
+aoe = 1;
+path = 2;
+}
+	

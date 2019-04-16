@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Improbable;
 
 
 namespace LeyLineHybridECS
 {
     [CreateAssetMenu]
-
+    [System.Serializable]
     public class ECSAction : ScriptableObject
     {
         /*
@@ -22,7 +23,7 @@ namespace LeyLineHybridECS
     */
         public List<ECSActionTarget> Targets;
         public List<ECSActionEffect> Effects;
-        //public Unit usedby;
+        public Vector3f UnitUsedByCoordinate;
         public int baseEneryCost;
         public int currentEnergyCost;
         public string ButtonName;

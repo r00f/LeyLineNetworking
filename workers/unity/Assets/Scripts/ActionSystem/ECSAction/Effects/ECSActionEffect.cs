@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
+    [System.Serializable]
     public class ECSActionEffect : ScriptableObject
     {
         public enum ApplyTo
