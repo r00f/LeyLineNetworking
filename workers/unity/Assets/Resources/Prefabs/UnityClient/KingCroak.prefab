@@ -237,11 +237,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce3a8fbf57d589e408be1be498ac8db5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  VisionRange: 0
+  VisionRange: 6
   BaseHealth: 5
   UpkeepCost: 0
   SpawnCost: 0
-  MovementRange: 5
+  MovementRange: 4
   EnergyUpkeep: 0
   EnergyIncome: 4
   BasicMove: {fileID: 11400000, guid: b8b7a9c01245f3a49a0b57e14483d56c, type: 2}

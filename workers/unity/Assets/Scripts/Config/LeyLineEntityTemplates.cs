@@ -325,7 +325,9 @@ public static class LeyLineEntityTemplates {
             BasicMove = myBasicMove,
             BasicAttack = myBasicAttack,
             OtherActions = myOtherActions,
-            NullAction = myNullableAction
+            NullAction = myNullableAction,
+            CurrentSelected = myNullableAction,
+            LockedAction = myNullableAction
         };
 
         return newActions;
