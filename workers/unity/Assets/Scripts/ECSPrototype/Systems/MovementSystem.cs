@@ -9,7 +9,7 @@ using Improbable;
 
 namespace LeyLineHybridECS
 {
-    [UpdateAfter(typeof(HandleCellGridRequestsSystem))]
+    [UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class MovementSystem : ComponentSystem
     {
         public struct UnitData

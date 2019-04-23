@@ -39,10 +39,10 @@ public class InitializeUnitsSystem : ComponentSystem
                 switch(unitFactionComp.TeamColor)
                 {
                     case Generic.TeamColorEnum.blue:
-                        r.material.color = Color.blue;
+                        r.material.color = new Color(Color.blue.r, Color.blue.g, Color.blue.b, r.material.color.a);
                         break;
                     case Generic.TeamColorEnum.red:
-                        r.material.color = Color.red;
+                        r.material.color = new Color(Color.red.r, Color.red.g, Color.red.b, r.material.color.a);
                         break;
                 }
             }

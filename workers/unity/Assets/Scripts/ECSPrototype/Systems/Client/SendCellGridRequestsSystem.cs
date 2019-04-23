@@ -1,14 +1,10 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Improbable;
-using Unity.Entities;
+﻿using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Generic;
 using Unit;
 using Cells;
-using Unity.Mathematics;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendCellGridRequestsSystem : ComponentSystem
@@ -22,6 +18,7 @@ public class SendCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
+        public readonly ComponentDataArray<ServerPath.Component> ServerPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<MovementVariables.Component> MovementVarData;
         public ComponentDataArray<CellsToMark.CommandSenders.CellsInRangeCommand> CellsInRangeSenders;
@@ -49,6 +46,15 @@ public class SendCellGridRequestsSystem : ComponentSystem
 
     [Inject] private GameStateData m_GameStateData;
 
+    public struct PlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
+    }
+
+    [Inject] private PlayerData m_PlayerData;
+
     protected override void OnUpdate()
     {
         for (int i = 0; i < m_CellsInRangeRequest.Length; i++)
@@ -57,8 +63,10 @@ public class SendCellGridRequestsSystem : ComponentSystem
             var targetEntityId = m_CellsInRangeRequest.EntityIds[i].EntityId;
             var unitWorldIndex = m_CellsInRangeRequest.WorldIndexData[i].Value;
             var movementVars = m_CellsInRangeRequest.MovementVarData[i];
+            var clientPath = m_CellsInRangeRequest.ClientPathData[i];
+            var serverPath = m_CellsInRangeRequest.ServerPathData[i];
 
-            for(int gi = 0; gi < m_GameStateData.Length; gi++)
+            for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
                 var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
 
@@ -80,11 +88,22 @@ public class SendCellGridRequestsSystem : ComponentSystem
                 {
                     var cellsInRangerequestSender = m_CellsInRangeRequest.CellsInRangeSenders[i];
                     var coord = m_CellsInRangeRequest.CoordinateData[i].CubeCoordinate;
+                    uint playerEnergy = m_PlayerData.PlayerEnergyData[0].Energy;
+                    uint range;
+
+                    if(playerEnergy >= movementVars.MovementRange)
+                    {
+                        range = movementVars.MovementRange;
+                    }
+                    else
+                    {
+                        range = m_PlayerData.PlayerEnergyData[0].Energy;
+                    }
 
                     var request = CellsToMark.CellsInRangeCommand.CreateRequest
                     (
                         targetEntityId,
-                        new CellsInRangeRequest(coord, movementVars.MovementRange, unitWorldIndex)
+                        new CellsInRangeRequest(coord, range, unitWorldIndex)
                     );
 
                     cellsInRangerequestSender.RequestsToSend.Add(request);
@@ -115,7 +134,6 @@ public class SendCellGridRequestsSystem : ComponentSystem
                     if (cellMousestate.ClickEvent == 1)
                     {
                         var destinationCell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
-                        var clientPath = m_CellsInRangeRequest.ClientPathData[i];
 
                         if (clientPath.Path.CellAttributes.Count != 0)
                         {
@@ -134,6 +152,21 @@ public class SendCellGridRequestsSystem : ComponentSystem
                                 m_CellsInRangeRequest.FindPathSenders[i] = findPathRequestSender;
                             }
                         }
+                        else if(serverPath.Path.CellAttributes.Count != 0)
+                        {
+                            //Debug.Log("ClickEvent");
+                            var findPathRequestSender = m_CellsInRangeRequest.FindPathSenders[i];
+
+                            var request4 = ServerPath.FindPathCommand.CreateRequest
+                            (
+                                targetEntityId,
+                                new FindPathRequest(new CellAttribute())
+                            );
+
+                            findPathRequestSender.RequestsToSend.Add(request4);
+                            m_CellsInRangeRequest.FindPathSenders[i] = findPathRequestSender;
+                        }
+
                     }
                 }
             }

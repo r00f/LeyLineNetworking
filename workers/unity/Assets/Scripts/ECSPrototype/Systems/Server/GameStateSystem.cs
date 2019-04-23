@@ -10,7 +10,7 @@ using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class GameStateSystem : ComponentSystem
     {
         public struct Data
@@ -53,9 +53,11 @@ namespace LeyLineHybridECS
 
         [Inject] private SpawnCellData m_SpawnCellData;
 
+        [Inject] ResourceSystem m_ResourceSystem;
+
         protected override void OnUpdate()
         {
-            for(int i = 0; i < m_Data.Length; i++)
+            for (int i = 0; i < m_Data.Length; i++)
             {
                 var gameState = m_Data.GameStateData[i];
                 var gameStateWorldIndex = m_Data.WorldIndexData[i].Value;
@@ -77,13 +79,28 @@ namespace LeyLineHybridECS
                         #endif
                         break;
                     case GameStateEnum.calculate_energy:
-                        gameState.CurrentState = GameStateEnum.planning;
-                        m_Data.GameStateData[i] = gameState;
+                        if(gameState.CurrentWaitTime > 0)
+                        {
+                            gameState.CurrentWaitTime -= Time.deltaTime;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        else
+                        {
+                            gameState.CurrentPlanningTime = gameState.PlanningTime;
+                            gameState.CurrentState = GameStateEnum.planning;
+                            m_Data.GameStateData[i] = gameState;
+                        }
                         break;
                     case GameStateEnum.planning:
-                        if (AllPlayersReady(gameStateWorldIndex))
+                        if (AllPlayersReady(gameStateWorldIndex) || gameState.CurrentPlanningTime <= 0)
                         {
+                            gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.spawning;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        else if(AnyPlayerReady(gameStateWorldIndex))
+                        {
+                            gameState.CurrentPlanningTime -= Time.deltaTime;
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
@@ -135,6 +152,22 @@ namespace LeyLineHybridECS
                 }
             }
             return true;
+        }
+
+        private bool AnyPlayerReady(uint gameStateWorldIndex)
+        {
+            for (int i = 0; i < m_PlayerData.Length; i++)
+            {
+                var playerWorldIndex = m_PlayerData.WorldIndexData[i].Value;
+
+                if (playerWorldIndex == gameStateWorldIndex)
+                {
+                    var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
+                    if (playerState == PlayerStateEnum.ready)
+                        return true;
+                }
+            }
+            return false;
         }
 
 

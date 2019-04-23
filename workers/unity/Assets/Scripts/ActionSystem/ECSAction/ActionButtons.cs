@@ -49,7 +49,7 @@ namespace LeyLineHybridECS
             {
                 MyImage.enabled = true;
                 ButtonRef.interactable = true;
-                MyText.text = AssignedAction.ButtonName;
+                //MyText.text = AssignedAction.ButtonName;
             }
         }
 

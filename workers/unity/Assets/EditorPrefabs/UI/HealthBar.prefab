@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 2381369280438972641}
   - component: {fileID: 3558092571445533366}
   m_Layer: 5
-  m_Name: UnitHealthBar
+  m_Name: HealthBar
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -140,10 +140,10 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: d69934f35c397f549aabdf51d1ec810a, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 4012e8880b489c84b8c5798466b2379d, type: 3}
   m_Type: 3
   m_PreserveAspect: 0
-  m_FillCenter: 1
+  m_FillCenter: 0
   m_FillMethod: 0
   m_FillAmount: 1
   m_FillClockwise: 1

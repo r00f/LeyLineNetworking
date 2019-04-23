@@ -5,6 +5,11 @@ component GameState {
     id = 105;
 	GameStateEnum current_state = 1;
 	uint32 players_on_map_count = 2;
+	float calculate_wait_time = 3;
+	float current_wait_time = 4;
+	float planning_time = 5;
+	float current_planning_time = 6;
+	float rope_display_time = 7;
 	
 }
 

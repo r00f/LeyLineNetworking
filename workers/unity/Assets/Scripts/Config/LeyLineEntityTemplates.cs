@@ -24,7 +24,12 @@ public static class LeyLineEntityTemplates {
         var gameState = new GameState.Snapshot
         {
             CurrentState = GameStateEnum.waiting_for_players,
-            PlayersOnMapCount = 0
+            PlayersOnMapCount = 0,
+            CalculateWaitTime = 1.7f,
+            CurrentWaitTime = 1.7f,
+            PlanningTime = 60f,
+            CurrentPlanningTime = 60f,
+            RopeDisplayTime = 30f
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -156,10 +161,11 @@ public static class LeyLineEntityTemplates {
     {
         var client = $"workerId:{workerId}";
 
-        var energy = new EnergyComponent.Snapshot
+        var energy = new PlayerEnergy.Snapshot
         {
-            MaxEnergy = 10,
-            Energy = 10
+            MaxEnergy = 20,
+            Energy = 5,
+            BaseIncome = 1
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
@@ -239,28 +245,26 @@ public static class LeyLineEntityTemplates {
         var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
-
         };
 
         var unitVision = new Vision.Snapshot
         {
-
             CellsInVisionrange = new List<CellAttributes>(),
             RequireUpdate = true,
             VisionRange = Stats.VisionRange
-
         };
 
         var health = new Health.Snapshot
         {
             MaxHealth = Stats.BaseHealth,
-            CurrentHealth = Stats.BaseHealth
+            CurrentHealth = Stats.BaseHealth - 2
         };
 
         var energy = new Energy.Snapshot
         {
             SpawnCost = Stats.SpawnCost,
-            EnergyUpkeep = Stats.UpkeepCost
+            EnergyUpkeep = Stats.EnergyUpkeep,
+            EnergyIncome = Stats.EnergyIncome
         };
 
         var movementVariables = new MovementVariables.Snapshot

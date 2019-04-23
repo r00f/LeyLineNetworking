@@ -26,6 +26,7 @@ namespace LeyLineHybridECS
         public Vector3f UnitUsedByCoordinate;
         public int baseEneryCost;
         public int currentEnergyCost;
-        public string ButtonName;
+        public string ActionName;
+        public Sprite ActionIcon;
     }
 }

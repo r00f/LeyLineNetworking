@@ -1,9 +1,0 @@
-package player;
-
-component EnergyComponent {
-	
-    id = 103;
-    uint32 energy = 1;
-	uint32 max_energy = 2;
-	
-}

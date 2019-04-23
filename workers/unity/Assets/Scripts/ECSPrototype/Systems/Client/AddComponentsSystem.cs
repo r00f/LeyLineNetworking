@@ -106,7 +106,15 @@ public class AddComponentsSystem : ComponentSystem
                     CurrentState = MouseState.State.Neutral
                 };
 
+                IsVisible isVisible = new IsVisible
+                {
+                    Value = 0,
+                    RequireUpdate = 1,
+                    LerpSpeed = 0f,
+                };
+
                 PostUpdateCommands.AddComponent(entity, mouseState);
+                PostUpdateCommands.AddComponent(entity, isVisible);
             }
 
             PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = unitWorldIndex });

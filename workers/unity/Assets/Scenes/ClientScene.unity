@@ -196,7 +196,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &224311028
 Transform:
   m_ObjectHideFlags: 0
@@ -860,10 +860,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -884,6 +959,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -982,10 +1137,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -1006,6 +1236,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -1690,7 +2000,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &666429234
 Transform:
   m_ObjectHideFlags: 0
@@ -1794,10 +2104,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -1818,6 +2203,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -1844,7 +2309,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &937584836
 Transform:
   m_ObjectHideFlags: 0
@@ -1876,7 +2341,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1051200882
 Transform:
   m_ObjectHideFlags: 0
@@ -1908,7 +2373,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1062346675
 Transform:
   m_ObjectHideFlags: 0
@@ -2012,10 +2477,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -2036,6 +2576,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -2342,7 +2962,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1214806023
 Transform:
   m_ObjectHideFlags: 0
@@ -2476,156 +3096,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7926929094435442881, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094435442881, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094435442881, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094435442881, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094435442881, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094435442881, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095411590618, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095411590618, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095411590618, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095411590618, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095411590618, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095411590618, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929093858027065, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929093858027065, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929093858027065, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929093858027065, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929093858027065, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929093858027065, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094209370490, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094209370490, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094209370490, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094209370490, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094209370490, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929094209370490, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095247347659, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095247347659, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095247347659, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095247347659, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095247347659, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7926929095247347659, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1cb12f61b1de230419c494fb26b4c842, type: 3}
 --- !u!1001 &1326298201
@@ -2715,10 +3185,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -2739,6 +3284,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -3117,10 +3742,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -3141,6 +3841,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -3393,10 +4173,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -3417,6 +4272,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -3515,10 +4450,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -3539,6 +4549,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -3565,7 +4655,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1638196268
 Transform:
   m_ObjectHideFlags: 0
@@ -3929,54 +5019,7 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: leyLineCircle.Array.data[0]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: leyLineCircle.Array.data[1]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: leyLineCircle.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: ShapeModule.m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: ShapeModule.m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: leyLineCircle.Array.data[0]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: leyLineCircle.Array.data[1]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: leyLineCircle.Array.data[2]
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
-        type: 3}
-      propertyPath: ShapeModule.m_Mesh
-      value: 
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
-    - {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: fbbd798869560574183a68cde1675071, type: 3}
 --- !u!4 &1751439021 stripped
 Transform:
@@ -4279,7 +5322,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1876903788
 Transform:
   m_ObjectHideFlags: 0
@@ -4943,10 +5986,85 @@ PrefabInstance:
       propertyPath: ShapeModule.m_Mesh
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7298349460441704471, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
     - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4708394855003114009, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     - target: {fileID: 321554951863513627, guid: fbbd798869560574183a68cde1675071,
         type: 3}
@@ -4967,6 +6085,86 @@ PrefabInstance:
         type: 3}
       propertyPath: ShapeModule.m_Mesh
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_UseMeshColors
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6100621029438500731, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minMaxState
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startLifetime.minScalar
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.scalar
+      value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.startSize.minScalar
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: InitialModule.gravityModifier.scalar
+      value: -2.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: ShapeModule.m_Mesh
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 6621087474803133574, guid: fbbd798869560574183a68cde1675071,
+        type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 500
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1446470661372169806, guid: fbbd798869560574183a68cde1675071, type: 3}
@@ -4993,7 +6191,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2115652506
 Transform:
   m_ObjectHideFlags: 0
