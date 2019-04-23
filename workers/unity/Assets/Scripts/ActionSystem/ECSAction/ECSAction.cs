@@ -25,6 +25,7 @@ namespace LeyLineHybridECS
         //public Unit usedby;
         public int baseEneryCost;
         public int currentEnergyCost;
-        public string ButtonName;
+        public string ActionName;
+        public Sprite ActionIcon;
     }
 }

@@ -47,7 +47,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct ServerPathData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<ServerPath.Component> ServerPaths;
     }
 
@@ -56,8 +56,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
 
@@ -66,8 +66,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct GameStateData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Generic.GameState.Component> GameState;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<GameState.Component> GameState;
     }
 
     [Inject] private GameStateData m_GameStateData;
@@ -75,7 +75,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-
         for (int i = 0; i < m_CellsInRangeRequestData.Length; i++)
         {
             var cellsToMarkData = m_CellsInRangeRequestData.CellsToMarkData[i];

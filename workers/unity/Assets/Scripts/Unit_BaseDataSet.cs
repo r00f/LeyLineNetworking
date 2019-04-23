@@ -12,4 +12,5 @@ public class Unit_BaseDataSet : MonoBehaviour
     public uint EnergyIncome;
     public uint SpawnCost;
     public uint MovementRange;
+    public bool IsHero;
 }

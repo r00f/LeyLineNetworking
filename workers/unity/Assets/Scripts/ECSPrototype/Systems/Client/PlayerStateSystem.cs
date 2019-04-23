@@ -60,7 +60,7 @@ namespace LeyLineHybridECS
                             {
                                 SetPlayerState(PlayerStateEnum.unit_selected);
                             }
-                            else if (playerState.CurrentState != PlayerStateEnum.waiting)
+                            else if (!AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.waiting)
                             {
                                 SetPlayerState(PlayerStateEnum.waiting);
                             }

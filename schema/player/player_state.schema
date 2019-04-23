@@ -4,6 +4,7 @@ component PlayerState {
 	
     id = 104;
 	PlayerStateEnum current_state = 1;
+	uint32 selected_unit_id = 2;
 	
 }
 

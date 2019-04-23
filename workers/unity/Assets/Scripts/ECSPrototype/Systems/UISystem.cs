@@ -17,10 +17,15 @@ namespace LeyLineHybridECS
         struct UnitData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
             public readonly ComponentArray<Transform> TransformData;
+            public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
             //public readonly ComponentArray<BoxCollider> ColliderData;
+            public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
             public readonly ComponentDataArray<IsVisible> IsVisibleData;
+            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentArray<AnimatedPortraitReference> PortraitData;
             public ComponentArray<Healthbar> HealthbarData;
         }
 
@@ -40,6 +45,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
             public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
         [Inject] private AuthoritativePlayerData m_AuthoritativePlayerData;
@@ -49,6 +55,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
         }
 
         [Inject] private PlayerData m_PlayerData;
@@ -104,16 +111,111 @@ namespace LeyLineHybridECS
 
             for (int i = 0; i < m_UnitData.Length; i++)
             {
+                GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
+                var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
+                uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var position = m_UnitData.TransformData[i].position;
-                var health = m_UnitData.HealthData[i];
+                float currentHealth = m_UnitData.HealthData[i].CurrentHealth;
+                float maxHealth = m_UnitData.HealthData[i].MaxHealth;
                 var healthbar = m_UnitData.HealthbarData[i];
                 var isVisible = m_UnitData.IsVisibleData[i];
+                var animatedPortrait = m_UnitData.PortraitData[i].PortraitClip;
+                var mouseState = m_UnitData.MouseStateData[i].CurrentState;
+                var faction = m_UnitData.FactionData[i];
+                var factionColor = m_UnitData.FactionData[i].TeamColor;
+                var stats = m_UnitData.BaseDataSets[i];
+                //var portraitPlayerColor = ;
+
+                if(mouseState == MouseState.State.Clicked)
+                {
+                    if(playerState.SelectedUnitId != unitId)
+                    {
+                        playerState.SelectedUnitId = unitId;
+                        m_AuthoritativePlayerData.PlayerStateData[0] = playerState;
+                    }
+                }
+
+                if (playerState.SelectedUnitId != 0)
+                {
+                    if (!unitInfoPanel.activeSelf)
+                        unitInfoPanel.SetActive(true);
+                }
+                else
+                {
+                    if (unitInfoPanel.activeSelf)
+                        unitInfoPanel.SetActive(false);
+                }
+
+                if (unitId == playerState.SelectedUnitId)
+                {
+                    if(stats.IsHero)
+                    {
+                        if (!UIRef.HeroEnergyPanel.activeSelf)
+                            UIRef.HeroEnergyPanel.SetActive(true);
+
+                        
+
+                        //get player with faction
+
+                        for(int pi = 0; pi < m_PlayerData.Length; pi++)
+                        {
+                            var playerEnergy = m_PlayerData.PlayerEnergyData[pi];
+                            var playerFaction = m_PlayerData.FactionData[pi];
+
+                            if(faction.Faction == playerFaction.Faction)
+                            {
+                                switch(playerFaction.TeamColor)
+                                {
+                                    case TeamColorEnum.blue:
+                                        UIRef.HeroCurrentEnergyFill.color = Color.blue;
+                                        break;
+                                    case TeamColorEnum.red:
+                                        UIRef.HeroCurrentEnergyFill.color = Color.red;
+                                        break;
+                                }
+
+                                UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, .1f);
+
+                                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
+                                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, .1f);
+
+                                UIRef.HeroEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
+
+                            }
+
+                        }
+
+
+                    }
+                    else
+                    {
+                        if (!UIRef.HeroEnergyPanel.activeSelf)
+                            UIRef.HeroEnergyPanel.SetActive(false);
+                    }
+
+                    if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
+                        UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
+
+                    UIRef.HealthText.text = currentHealth + " / " + maxHealth;
+                    UIRef.HealthFill.fillAmount = Mathf.Lerp(UIRef.HealthFill.fillAmount, currentHealth / maxHealth, 0.1f);
+
+                    if (factionColor == TeamColorEnum.blue)
+                    {
+                        if (UIRef.PortraitPlayerColor.color != Color.blue)
+                            UIRef.PortraitPlayerColor.color = Color.blue;
+                    }
+                    else if (factionColor == TeamColorEnum.red)
+                    {
+                        if (UIRef.PortraitPlayerColor.color != Color.red)
+                            UIRef.PortraitPlayerColor.color = Color.red;
+                    }
+                }
 
 
                 //if there is no healthbar, instantiate it into healthBarParent
                 if(!healthbar.HealthBarInstance)
                 {
-                    health.CurrentHealth = health.MaxHealth;
+                    currentHealth = maxHealth;
                     healthbar.HealthBarInstance = Object.Instantiate(healthbar.HealthBarPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
                 }
                 else
@@ -128,13 +230,14 @@ namespace LeyLineHybridECS
                     }
                     
                     healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
-                    healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, (float)health.CurrentHealth / (float)health.MaxHealth, 0.1f);
+                    healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, currentHealth / maxHealth, 0.1f);
                 }
             }
 
             //this clients player
             for (int i = 0; i < m_AuthoritativePlayerData.Length; i++)
             {
+                var playerState = m_AuthoritativePlayerData.PlayerStateData[i];
                 float maxEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].MaxEnergy;
                 float currentEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].Energy;
                 float energyIncome = m_AuthoritativePlayerData.PlayerEnergyData[i].Income;
