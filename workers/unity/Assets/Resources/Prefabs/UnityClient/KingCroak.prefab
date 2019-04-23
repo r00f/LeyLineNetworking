@@ -140,8 +140,8 @@ GameObject:
   - component: {fileID: 4440954350749950428}
   - component: {fileID: 9121732361173887378}
   - component: {fileID: 3289465276142304449}
-  - component: {fileID: 4182008901132661493}
-  - component: {fileID: 3318665112223572706}
+  - component: {fileID: 1130299993275380547}
+  - component: {fileID: 930118610718755571}
   m_Layer: 11
   m_Name: KingCroak
   m_TagString: Untagged
@@ -249,7 +249,7 @@ MonoBehaviour:
   IsHero: 1
   Actions:
   - {fileID: 11400000, guid: 990555597dab8c74ba70b2349dab9666, type: 2}
---- !u!114 &4182008901132661493
+--- !u!114 &1130299993275380547
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -258,13 +258,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 4245292855223164028}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 478ae98e8d289db49a43683d36ff1839, type: 3}
+  m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   HealthBarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}
---- !u!114 &3318665112223572706
+--- !u!114 &930118610718755571
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -273,10 +273,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4245292855223164028}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc53b64924e6784479af829c578c125b, type: 3}
+  m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: 45214594227ee154bb12fe9bb7cdf099, type: 2}
+  PortraitClip: {fileID: 7400000, guid: b679d83761469f14fabae96db96c52dc, type: 2}
 --- !u!1 &8108814016297623155
 GameObject:
   m_ObjectHideFlags: 0
@@ -392,6 +392,14 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5548772758455220403}
     m_Modifications:
+    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 1bb6ea378b0b19a4a9543a50f92ba338, type: 2}
+    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 100008, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_Name
       value: KingCroak
@@ -407,14 +415,6 @@ PrefabInstance:
     - target: {fileID: 100062, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_Layer
       value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 1bb6ea378b0b19a4a9543a50f92ba338, type: 2}
-    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400008, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_LocalPosition.x

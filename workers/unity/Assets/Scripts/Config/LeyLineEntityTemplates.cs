@@ -330,6 +330,7 @@ public static class LeyLineEntityTemplates {
 
         return newActions;
         }
+
     static Action SetAction (ECSAction inAction)
     {
         Action newAction = new Action();
