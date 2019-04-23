@@ -301,6 +301,8 @@ public static class LeyLineEntityTemplates {
         myBasicAttack.Targets = new List<ActionTarget>();
         Action myBasicMove = new Action();
         myBasicMove.Targets = new List<ActionTarget>();
+        Action myNullableAction = new Action();
+        myNullableAction.Targets = new List<ActionTarget>();
         List<Action> myOtherActions = new List<Action>();
         if(inStats.BasicAttack != null)
         {
@@ -318,7 +320,8 @@ public static class LeyLineEntityTemplates {
         {
             BasicMove = myBasicMove,
             BasicAttack = myBasicAttack,
-            OtherActions = myOtherActions
+            OtherActions = myOtherActions,
+            NullAction = myNullableAction
         };
 
         return newActions;
@@ -338,6 +341,21 @@ public static class LeyLineEntityTemplates {
                 newAT.CellTargetNested.RequireEmpty = go.requireEmpty;
                 newAT.CellTargetNested.RequireVisible = false;
                 newAT.Targettingrange = go.targettingRange;
+                switch (inAction.Targets[i].HighlighterToUse)
+                {
+                    case ECSActionTarget.HighlightDef.Path:
+                        newAT.Higlighter = UseHighlighterEnum.pathing;
+                        break;
+                    case ECSActionTarget.HighlightDef.Radius:
+                        newAT.Higlighter = UseHighlighterEnum.no_pathing;
+                        break;
+                    case ECSActionTarget.HighlightDef.Path_Visible:
+                        newAT.Higlighter = UseHighlighterEnum.pathing_visible;
+                        break;
+                    case ECSActionTarget.HighlightDef.Radius_Visible:
+                        newAT.Higlighter = UseHighlighterEnum.no_pathing_visible;
+                        break;
+                }
                 foreach (ECSActionSecondaryTargets t in go.SecondaryTargets)
                 {
                     if (t is SecondaryAoE)
@@ -384,6 +402,21 @@ public static class LeyLineEntityTemplates {
                         break;
                     case ECSATarget_Unit.UnitRestrictions.FriendlyOther:
                         newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.other;
+                        break;
+                }
+                switch (inAction.Targets[i].HighlighterToUse)
+                {
+                    case ECSActionTarget.HighlightDef.Path:
+                        newAT.Higlighter = UseHighlighterEnum.pathing;
+                        break;
+                    case ECSActionTarget.HighlightDef.Radius:
+                        newAT.Higlighter = UseHighlighterEnum.no_pathing;
+                        break;
+                    case ECSActionTarget.HighlightDef.Path_Visible:
+                        newAT.Higlighter = UseHighlighterEnum.pathing_visible;
+                        break;
+                    case ECSActionTarget.HighlightDef.Radius_Visible:
+                        newAT.Higlighter = UseHighlighterEnum.no_pathing_visible;
                         break;
                 }
                 newAT.Targettingrange = go.targettingRange;

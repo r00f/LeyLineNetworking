@@ -9,6 +9,11 @@ component Actions{
 	Action basic_move = 1;
 	Action basic_attack = 2;
 	list<Action> other_actions = 3;
+	Action current_selected = 4;
+	Action locked_action = 5;
+	Action null_action = 6;
+	command SelectActionResponse select_action_command(SelectActionRequest);
+	command SetTargetResponse set_target_command(SetTargetRequest);
 }
 
 
@@ -35,6 +40,7 @@ type ActionTarget {
 	CellTarget cell_target_nested = 3;
 	UnitTarget unit_target_nested = 4;
 	TargetTypeEnum target_type = 5;
+	UseHighlighterEnum higlighter = 6;
 	
 }
 type TargetMod {
@@ -69,4 +75,25 @@ enum ModTypeEnum {
 aoe = 1;
 path = 2;
 }
-	
+
+enum UseHighlighterEnum {
+no_pathing = 1;
+pathing = 2;
+no_pathing_visible = 3;
+pathing_visible = 4;
+}
+
+type SelectActionRequest {
+
+	int32 action_id = 1;
+}
+
+type SelectActionResponse {
+
+}
+
+type SetTargetRequest {
+	improbable.Vector3f target_coordinates = 1;
+}
+type SetTargetResponse {
+}
