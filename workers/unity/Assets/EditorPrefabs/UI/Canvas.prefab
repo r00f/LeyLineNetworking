@@ -355,7 +355,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 492441062635082958}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
@@ -13334,6 +13334,7 @@ MonoBehaviour:
   - {fileID: 1418901583353728085}
   - {fileID: 7234179049455614645}
   - {fileID: 5066920579352513508}
+  SpawnToggle: {fileID: 6909536701225566475}
 --- !u!1 &7926929094423171271
 GameObject:
   m_ObjectHideFlags: 0

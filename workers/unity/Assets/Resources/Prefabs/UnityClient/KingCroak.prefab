@@ -245,9 +245,11 @@ MonoBehaviour:
   EnergyUpkeep: 0
   EnergyIncome: 4
   BasicMove: {fileID: 11400000, guid: b8b7a9c01245f3a49a0b57e14483d56c, type: 2}
-  BasicAttack: {fileID: 11400000, guid: b8b7a9c01245f3a49a0b57e14483d56c, type: 2}
+  BasicAttack: {fileID: 11400000, guid: d51596d7ea1b837439db264152a65798, type: 2}
   IsHero: 1
   Actions:
+  - {fileID: 11400000, guid: b8b7a9c01245f3a49a0b57e14483d56c, type: 2}
+  SpawnActions:
   - {fileID: 11400000, guid: 990555597dab8c74ba70b2349dab9666, type: 2}
 --- !u!114 &1130299993275380547
 MonoBehaviour:
@@ -392,14 +394,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5548772758455220403}
     m_Modifications:
-    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 1bb6ea378b0b19a4a9543a50f92ba338, type: 2}
-    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 100008, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_Name
       value: KingCroak
@@ -415,6 +409,14 @@ PrefabInstance:
     - target: {fileID: 100062, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 1bb6ea378b0b19a4a9543a50f92ba338, type: 2}
+    - target: {fileID: 9500000, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400008, guid: 41c81d7cc09d0a74d806fe357d41043d, type: 3}
       propertyPath: m_LocalPosition.x

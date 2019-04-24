@@ -18,5 +18,6 @@ public class Unit_BaseDataSet : MonoBehaviour
     public bool IsHero;
 
     public List<ECSAction> Actions;
+    public List<ECSAction> SpawnActions;
 
 }

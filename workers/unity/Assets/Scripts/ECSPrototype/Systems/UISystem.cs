@@ -113,6 +113,7 @@ namespace LeyLineHybridECS
             {
                 GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
                 var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
+                var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var position = m_UnitData.TransformData[i].position;
                 float currentHealth = m_UnitData.HealthData[i].CurrentHealth;
@@ -124,10 +125,82 @@ namespace LeyLineHybridECS
                 var faction = m_UnitData.FactionData[i];
                 var factionColor = m_UnitData.FactionData[i].TeamColor;
                 var stats = m_UnitData.BaseDataSets[i];
+
+                int actionCount = stats.Actions.Count + 2;
+                int spawnActionCount = stats.SpawnActions.Count;
                 //var portraitPlayerColor = ;
 
                 if(mouseState == MouseState.State.Clicked)
                 {
+                    if (faction.Faction == authPlayerFaction)
+                    {
+                        if(stats.SpawnActions.Count == 0)
+                        {
+                            UIRef.SpawnToggle.SetActive(false);
+                        }
+                        else
+                        {
+                            UIRef.SpawnToggle.SetActive(true);
+                        }
+
+                        for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+                        {
+                            if (si < spawnActionCount)
+                            {
+                                UIRef.SpawnActions[si].Visuals.SetActive(true);
+                                UIRef.SpawnActions[si].ActionName = stats.SpawnActions[si].ActionName;
+                                UIRef.SpawnActions[si].Icon.sprite = stats.SpawnActions[si].ActionIcon;
+                            }
+                            else
+                            {
+                                UIRef.SpawnActions[si].Visuals.SetActive(false);
+                            }
+                        }
+
+                        for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+                        {
+                            if (bi < actionCount)
+                            {
+                                UIRef.Actions[bi].Visuals.SetActive(true);
+
+                                //basic move
+                                if (bi == 0)
+                                {
+                                    UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
+                                    UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
+                                }
+                                //basic attack
+                                else if (bi == 1)
+                                {
+                                    UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
+                                    UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
+                                }
+                                //all other actions
+                                else
+                                {
+                                    UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
+                                    UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
+                                }
+                            }
+                            else
+                            {
+                                UIRef.Actions[bi].Visuals.SetActive(false);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+                        {
+                            UIRef.Actions[bi].Visuals.SetActive(false);
+                        }
+
+                        for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+                        {
+                            UIRef.SpawnActions[si].Visuals.SetActive(false);
+                        }
+                    }
+
                     if(playerState.SelectedUnitId != unitId)
                     {
                         playerState.SelectedUnitId = unitId;
@@ -184,8 +257,6 @@ namespace LeyLineHybridECS
                             }
 
                         }
-
-
                     }
                     else
                     {
@@ -210,7 +281,6 @@ namespace LeyLineHybridECS
                             UIRef.PortraitPlayerColor.color = Color.red;
                     }
                 }
-
 
                 //if there is no healthbar, instantiate it into healthBarParent
                 if(!healthbar.HealthBarInstance)
@@ -248,6 +318,20 @@ namespace LeyLineHybridECS
 
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
+
+
+                if(playerState.CurrentState != PlayerStateEnum.unit_selected)
+                {
+                    for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+                    {
+                        UIRef.Actions[bi].Visuals.SetActive(false);
+                    }
+
+                    for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+                    {
+                        UIRef.SpawnActions[si].Visuals.SetActive(false);
+                    }
+                }
             }
 
             //all players

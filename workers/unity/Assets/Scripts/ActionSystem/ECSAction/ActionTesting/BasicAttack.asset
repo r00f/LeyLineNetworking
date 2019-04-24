@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
-  m_Name: SpawnHeroAct
+  m_Name: BasicAttack
   m_EditorClassIdentifier: 
   Targets:
-  - {fileID: 11400000, guid: f27666dc49f9113458d4168fdfd7e2a0, type: 2}
+  - {fileID: 11400000, guid: 99e6e3aa137e8e5419c297615ecdb6c4, type: 2}
   Effects:
-  - {fileID: 11400000, guid: e2337044e32e5a94ab20280baff910d3, type: 2}
+  - {fileID: 11400000, guid: 580471991a636544e84d9648372801f0, type: 2}
   baseEneryCost: 0
   currentEnergyCost: 0
-  ActionName: Spawn Hero
-  ActionIcon: {fileID: 21300010, guid: eb8958cff882395448ffd3c376786797, type: 3}
+  ActionName: Attack
+  ActionIcon: {fileID: 21300000, guid: 5041f3c82626a1f4bacee1b01e209b77, type: 3}

@@ -9,15 +9,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_GeneratorAsset: {fileID: 0}
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: BasicMove5
   m_EditorClassIdentifier: 
-  MultiTargetting: 0
   Targets:
   - {fileID: 11400000, guid: 2ddb07881279b304ba8129686220be98, type: 2}
   Effects:
   - {fileID: 11400000, guid: 580471991a636544e84d9648372801f0, type: 2}
-  usedby: {fileID: 0}
   baseEneryCost: 0
   currentEnergyCost: 0
+  ActionName: Move
+  ActionIcon: {fileID: 21300000, guid: 5b76f7ce06cccad4cbfa36d4f44328a1, type: 3}
