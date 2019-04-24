@@ -15,23 +15,26 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
 
-    public struct CellsInRangeRequestData
+    public struct SelectActionRequestData
     {
         public readonly int Length;
-        public ComponentDataArray<CellsToMark.CommandRequests.CellsInRangeCommand> ReceivedCellsInRangeRequests;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<Actions.CommandRequests.SelectActionCommand> ReceivedSelectActionRequests;
+        public ComponentDataArray<Actions.Component> ActionsData;
     }
 
-    [Inject] private CellsInRangeRequestData m_CellsInRangeRequestData;
+    [Inject] private SelectActionRequestData m_SelectActionRequestData;
 
-    public struct FindAllPathsRequestData
+    public struct SetTargetRequestData
     {
         public readonly int Length;
-        public ComponentDataArray<CellsToMark.CommandRequests.FindAllPathsCommand> ReceivedFindAllPathsRequests;
-        public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public ComponentDataArray<Actions.CommandRequests.SetTargetCommand> ReceivedSetTargetRequests;
+        public ComponentDataArray<Actions.Component> ActionsData;
     }
 
-    [Inject] private FindAllPathsRequestData m_FindAllPathsRequestData;
+    [Inject] private SetTargetRequestData m_SetTargetRequestData;
 
     public struct FindPathRequestData
     {
@@ -56,6 +59,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
@@ -75,53 +79,115 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        for (int i = 0; i < m_CellsInRangeRequestData.Length; i++)
+
+        for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
-            var cellsToMarkData = m_CellsInRangeRequestData.CellsToMarkData[i];
+            var actionData = m_SelectActionRequestData.ActionsData[i];
+            var selectActionRequest = m_SelectActionRequestData.ReceivedSelectActionRequests[i];
+            var cellsToMarkData = m_SelectActionRequestData.CellsToMarkData[i];
+            var coord = m_SelectActionRequestData.CoordinateData[i].CubeCoordinate;
+            var worldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
 
-            if(cellsToMarkData.CellsInRange.Count == 0)
+            foreach (var sar in selectActionRequest.Requests)
             {
-                var cellsInRangeRequests = m_CellsInRangeRequestData.ReceivedCellsInRangeRequests[i];
+                int index = sar.Payload.ActionId;
 
-                foreach (var cellsInRangeRequest in cellsInRangeRequests.Requests)
+                if(index >= 0)
                 {
-                    cellsToMarkData.CellsInRange = GetRadius(cellsInRangeRequest.Payload.Origin, cellsInRangeRequest.Payload.Range, cellsInRangeRequest.Payload.WorldIndex);
-                    m_CellsInRangeRequestData.CellsToMarkData[i] = cellsToMarkData;
+                    actionData.CurrentSelected = actionData.OtherActions[index];
+                }
+                else
+                {
+                    if(index == -3)
+                    {
+                        actionData.CurrentSelected = actionData.NullAction;
+                    }
+                    else if(index == -2)
+                    {
+                        actionData.CurrentSelected = actionData.BasicMove;
+
+                    }
+                    else if(index == -1)
+                    {
+                        actionData.CurrentSelected = actionData.BasicAttack;
+                    }
+                }
+            }
+
+            m_SelectActionRequestData.ActionsData[i] = actionData;
+
+            if(actionData.CurrentSelected.Targets.Count != 0)
+            {
+                if (cellsToMarkData.CellsInRange.Count == 0)
+                {
+                    cellsToMarkData.CellsInRange = GetRadius(coord, (uint)actionData.CurrentSelected.Targets[0].Targettingrange, worldIndex);
+                    m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
+                }
+
+                switch(actionData.CurrentSelected.Targets[0].Higlighter)
+                {
+                    case UseHighlighterEnum.pathing:
+                        cellsToMarkData.CachedPaths = GetAllPathsInRadius((uint)actionData.CurrentSelected.Targets[0].Targettingrange, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
+                        m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
+                        break;
+                    case UseHighlighterEnum.no_pathing:
+                        //do stuff
+
+                        break;
                 }
             }
         }
 
-        for (int ci = 0; ci < m_FindAllPathsRequestData.Length; ci++)
+        for (int i = 0; i < m_SetTargetRequestData.Length; i++)
         {
-            var cellsToMarkData = m_FindAllPathsRequestData.CellsToMarkData[ci];
+            var actionData = m_SetTargetRequestData.ActionsData[i];
+            var setTargetRequest = m_SetTargetRequestData.ReceivedSetTargetRequests[i];
 
-            if (cellsToMarkData.CachedPaths.Count == 0 && cellsToMarkData.CellsInRange.Count != 0)
+            foreach (var str in setTargetRequest.Requests)
             {
-                var findAllPathsRequests = m_FindAllPathsRequestData.ReceivedFindAllPathsRequests[ci];
+                long id = str.Payload.TargetId;
 
-                foreach (var findAllPathsRequest in findAllPathsRequests.Requests)
+                switch (actionData.CurrentSelected.Targets[0].TargetType)
                 {
-                    cellsToMarkData.CachedPaths = GetAllPathsInRadius(findAllPathsRequest.Payload.Range, findAllPathsRequest.Payload.CellsInRange, findAllPathsRequest.Payload.Origin);
-                    m_FindAllPathsRequestData.CellsToMarkData[ci] = cellsToMarkData;
+                    case TargetTypeEnum.cell:
+                        for(int ci = 0; ci < m_CellData.Length; ci++)
+                        {
+                            var cellId = m_CellData.EntityIds[ci].EntityId.Id;
+
+                            if(cellId == id)
+                            {
+                                //check if in range
+                                actionData.LockedAction = actionData.CurrentSelected;
+                                var t = actionData.LockedAction.Targets[0];
+                                t.CellTargetNested.TargetId = id;
+                                actionData.LockedAction.Targets[0] = t;
+                            }
+                        }
+                        break;
+                    case TargetTypeEnum.unit:
+                        //do stuff
+
+                        break;
                 }
             }
+
+            m_SetTargetRequestData.ActionsData[i] = actionData;
         }
 
-        
-        for(int i = 0; i < m_ServerPathData.Length; i++)
+        for (int i = 0; i < m_ServerPathData.Length; i++)
         {
             var serverPath = m_ServerPathData.ServerPaths[i];
             var unitWorldIndex = m_ServerPathData.WorldIndexData[i].Value;
 
-            for(int gi = 0; gi < m_GameStateData.Length; gi++)
+            for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
                 var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
 
-                if(unitWorldIndex == gameStateWorldIndex)
+                if (unitWorldIndex == gameStateWorldIndex)
                 {
                     var gameState = m_GameStateData.GameState[gi].CurrentState;
 
-                    if(gameState == Generic.GameStateEnum.calculate_energy)
+                    if (gameState == Generic.GameStateEnum.calculate_energy)
                     {
                         serverPath.Path = new CellAttributeList
                         {
@@ -130,12 +196,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         m_ServerPathData.ServerPaths[i] = serverPath;
 
                     }
-
                 }
-
             }
         }
-        
 
         for (int i = 0; i < m_FindPathRequestData.Length; i++)
         {

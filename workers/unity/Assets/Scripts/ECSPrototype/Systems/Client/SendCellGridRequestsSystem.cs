@@ -9,28 +9,26 @@ using Player;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendCellGridRequestsSystem : ComponentSystem
 {
-    public struct CellsInRangeRequestData
+    public struct SelectActionRequestData
     {
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthorativeData;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<MouseState> MouseStateData;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
         public readonly ComponentDataArray<ServerPath.Component> ServerPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<MovementVariables.Component> MovementVarData;
-        public ComponentDataArray<CellsToMark.CommandSenders.CellsInRangeCommand> CellsInRangeSenders;
-        public ComponentDataArray<CellsToMark.CommandSenders.FindAllPathsCommand> FindAllPathsSenders;
+        public ComponentDataArray<Actions.CommandSenders.SelectActionCommand> SelectActionSenders;
+        public ComponentDataArray<Actions.CommandSenders.SetTargetCommand> SetTargetSenders;
         public ComponentDataArray<ServerPath.CommandSenders.FindPathCommand> FindPathSenders;
     }
 
-    [Inject] private CellsInRangeRequestData m_CellsInRangeRequest;
+    [Inject] private SelectActionRequestData m_SelectActionRequestData;
 
     public struct CellData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
@@ -57,14 +55,15 @@ public class SendCellGridRequestsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        for (int i = 0; i < m_CellsInRangeRequest.Length; i++)
+        for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
-            var unitMouseState = m_CellsInRangeRequest.MouseStateData[i];
-            var targetEntityId = m_CellsInRangeRequest.EntityIds[i].EntityId;
-            var unitWorldIndex = m_CellsInRangeRequest.WorldIndexData[i].Value;
-            var movementVars = m_CellsInRangeRequest.MovementVarData[i];
-            var clientPath = m_CellsInRangeRequest.ClientPathData[i];
-            var serverPath = m_CellsInRangeRequest.ServerPathData[i];
+            var unitMouseState = m_SelectActionRequestData.MouseStateData[i];
+            var targetEntityId = m_SelectActionRequestData.EntityIds[i].EntityId;
+            var unitWorldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
+            var clientPath = m_SelectActionRequestData.ClientPathData[i];
+            var serverPath = m_SelectActionRequestData.ServerPathData[i];
+            var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
+
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
@@ -75,100 +74,86 @@ public class SendCellGridRequestsSystem : ComponentSystem
                     if (m_GameStateData.GameState[gi].CurrentState != GameStateEnum.planning)
                         return;
                 }
-
             }
 
-            //only request onetime
-            if (unitMouseState.CurrentState == MouseState.State.Clicked)
+            //only request onetime maybe check if currentAction is empty
+            if (unitMouseState.ClickEvent == 1)
             {
-                var cellsToMark = m_CellsInRangeRequest.CellsToMarkData[i];
-
-                //fill both cellsInRange and CachedPathLists
-                if (cellsToMark.CellsInRange.Count == 0)
-                {
-                    var cellsInRangerequestSender = m_CellsInRangeRequest.CellsInRangeSenders[i];
-                    var coord = m_CellsInRangeRequest.CoordinateData[i].CubeCoordinate;
-                    uint playerEnergy = m_PlayerData.PlayerEnergyData[0].Energy;
-                    uint range;
-
-                    if(playerEnergy >= movementVars.MovementRange)
-                    {
-                        range = movementVars.MovementRange;
-                    }
-                    else
-                    {
-                        range = m_PlayerData.PlayerEnergyData[0].Energy;
-                    }
-
-                    var request = CellsToMark.CellsInRangeCommand.CreateRequest
-                    (
-                        targetEntityId,
-                        new CellsInRangeRequest(coord, range, unitWorldIndex)
-                    );
-
-                    cellsInRangerequestSender.RequestsToSend.Add(request);
-                    m_CellsInRangeRequest.CellsInRangeSenders[i] = cellsInRangerequestSender;
-
-                }
-                else if (cellsToMark.CachedPaths.Count == 0)
-                {
-                    var findAllPathsRequestSender = m_CellsInRangeRequest.FindAllPathsSenders[i];
-
-                    var request2 = CellsToMark.FindAllPathsCommand.CreateRequest
-                    (
-                        targetEntityId,
-                        new FindAllPathsRequest(cellsToMark.CellsInRange[0].Cell, movementVars.MovementRange, cellsToMark.CellsInRange)
-                    );
-
-                    findAllPathsRequestSender.RequestsToSend.Add(request2);
-                    m_CellsInRangeRequest.FindAllPathsSenders[i] = findAllPathsRequestSender;
-                }
+                SelectActionCommand(-2, targetEntityId.Id);
             }
 
-            else
+            for (int ci = 0; ci < m_CellData.Length; ci++)
             {
-                for (int ci = 0; ci < m_CellData.Length; ci++)
+                var cellMousestate = m_CellData.MouseStateData[ci];
+                var cellEntityId = m_CellData.EntityIds[i].EntityId.Id;
+
+                if (cellMousestate.ClickEvent == 1)
                 {
-                    var cellMousestate = m_CellData.MouseStateData[ci];
+                    //lock action
+                    var destinationCell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
 
-                    if (cellMousestate.ClickEvent == 1)
+                    var request = Actions.SetTargetCommand.CreateRequest
+                    (
+                        targetEntityId,
+                        new SetTargetRequest(cellEntityId)
+                    );
+
+                    setTargetRequest.RequestsToSend.Add(request);
+                    m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+
+                    if (clientPath.Path.CellAttributes.Count != 0)
                     {
-                        var destinationCell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
-
-                        if (clientPath.Path.CellAttributes.Count != 0)
-                        {
-                            if (destinationCell.CubeCoordinate == clientPath.Path.CellAttributes[clientPath.Path.CellAttributes.Count - 1].CubeCoordinate)
-                            {
-                                //Debug.Log("ClickEvent");
-                                var findPathRequestSender = m_CellsInRangeRequest.FindPathSenders[i];
-
-                                var request3 = ServerPath.FindPathCommand.CreateRequest
-                                (
-                                    targetEntityId,
-                                    new FindPathRequest(destinationCell)
-                                );
-
-                                findPathRequestSender.RequestsToSend.Add(request3);
-                                m_CellsInRangeRequest.FindPathSenders[i] = findPathRequestSender;
-                            }
-                        }
-                        else if(serverPath.Path.CellAttributes.Count != 0)
+                        if (destinationCell.CubeCoordinate == clientPath.Path.CellAttributes[clientPath.Path.CellAttributes.Count - 1].CubeCoordinate)
                         {
                             //Debug.Log("ClickEvent");
-                            var findPathRequestSender = m_CellsInRangeRequest.FindPathSenders[i];
+                            var findPathRequestSender = m_SelectActionRequestData.FindPathSenders[i];
 
-                            var request4 = ServerPath.FindPathCommand.CreateRequest
+                            var request3 = ServerPath.FindPathCommand.CreateRequest
                             (
                                 targetEntityId,
-                                new FindPathRequest(new CellAttribute())
+                                new FindPathRequest(destinationCell)
                             );
 
-                            findPathRequestSender.RequestsToSend.Add(request4);
-                            m_CellsInRangeRequest.FindPathSenders[i] = findPathRequestSender;
+                            findPathRequestSender.RequestsToSend.Add(request3);
+                            m_SelectActionRequestData.FindPathSenders[i] = findPathRequestSender;
                         }
+                    }
+                    else if (serverPath.Path.CellAttributes.Count != 0)
+                    {
+                        //Debug.Log("ClickEvent");
+                        var findPathRequestSender = m_SelectActionRequestData.FindPathSenders[i];
 
+                        var request4 = ServerPath.FindPathCommand.CreateRequest
+                        (
+                            targetEntityId,
+                            new FindPathRequest(new CellAttribute())
+                        );
+
+                        findPathRequestSender.RequestsToSend.Add(request4);
+                        m_SelectActionRequestData.FindPathSenders[i] = findPathRequestSender;
                     }
                 }
+            }
+        }
+    }
+
+    public void SelectActionCommand(int actionIndex, long entityId)
+    {
+        for (int i = 0; i < m_SelectActionRequestData.Length; i++)
+        {
+            var idComp = m_SelectActionRequestData.EntityIds[i].EntityId;
+            var selectActionSender = m_SelectActionRequestData.SelectActionSenders[i];
+
+            if (idComp.Id == entityId)
+            {
+                var request = Actions.SelectActionCommand.CreateRequest
+                (
+                idComp,
+                new SelectActionRequest(actionIndex)
+                );
+
+                selectActionSender.RequestsToSend.Add(request);
+                m_SelectActionRequestData.SelectActionSenders[i] = selectActionSender;
             }
         }
     }
