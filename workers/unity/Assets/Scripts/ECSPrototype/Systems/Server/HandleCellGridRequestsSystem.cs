@@ -32,20 +32,14 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly int Length;
         public ComponentDataArray<Actions.CommandRequests.SetTargetCommand> ReceivedSetTargetRequests;
         public ComponentDataArray<Actions.Component> ActionsData;
+        public ComponentDataArray<ServerPath.Component> ServerPathData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+
     }
 
     [Inject] private SetTargetRequestData m_SetTargetRequestData;
 
-    public struct FindPathRequestData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-        public ComponentDataArray<ServerPath.CommandRequests.FindPathCommand> ReceivedFindPathRequests;
-        public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
-        public ComponentDataArray<ServerPath.Component> ServerPathData;
-    }
-
-    [Inject] private FindPathRequestData m_FindPathRequestData;
 
     public struct ServerPathData
     {
@@ -79,6 +73,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        #region selectactions
 
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
@@ -137,11 +132,15 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 }
             }
         }
+#endregion
 
         for (int i = 0; i < m_SetTargetRequestData.Length; i++)
         {
             var actionData = m_SetTargetRequestData.ActionsData[i];
             var setTargetRequest = m_SetTargetRequestData.ReceivedSetTargetRequests[i];
+            var serverPath = m_SetTargetRequestData.ServerPathData[i];
+            var unitWorldIndex = m_SetTargetRequestData.WorldIndexData[i].Value;
+            var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
 
             foreach (var str in setTargetRequest.Requests)
             {
@@ -153,14 +152,31 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         for(int ci = 0; ci < m_CellData.Length; ci++)
                         {
                             var cellId = m_CellData.EntityIds[ci].EntityId.Id;
-
-                            if(cellId == id)
+                            var cell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
+                     
+                            if (cellId == id)
                             {
                                 //check if in range
+                                //energy stuff inc
                                 actionData.LockedAction = actionData.CurrentSelected;
                                 var t = actionData.LockedAction.Targets[0];
                                 t.CellTargetNested.TargetId = id;
                                 actionData.LockedAction.Targets[0] = t;
+
+                                foreach (TargetMod tm in actionData.LockedAction.Targets[0].Mods)
+                                {
+                                    if(tm.ModType == ModTypeEnum.aoe)
+                                    {
+
+                                    }
+                                    if(tm.ModType == ModTypeEnum.path)
+                                    {
+                                        
+                                        serverPath.Path = FindPath(cell, cellsToMark.CachedPaths);
+                                        //Debug.Log(cell.CubeCoordinate);
+                                        m_SetTargetRequestData.ServerPathData[i] = serverPath;
+                                    }
+                                }
                             }
                         }
                         break;
@@ -170,7 +186,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         break;
                 }
             }
-
+            
             m_SetTargetRequestData.ActionsData[i] = actionData;
         }
 
@@ -198,30 +214,11 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     }
                 }
             }
+            
         }
 
-        for (int i = 0; i < m_FindPathRequestData.Length; i++)
-        {
-            var serverPathData = m_FindPathRequestData.ServerPathData[i];
-            var findPathRequests = m_FindPathRequestData.ReceivedFindPathRequests[i];
-            var cellsToMarkData = m_FindPathRequestData.CellsToMarkData[i];
-            var faction = m_FindPathRequestData.FactionData[i].Faction;
 
-            if (cellsToMarkData.CachedPaths.Count != 0)
-            {
-                foreach (var findPathRequest in findPathRequests.Requests)
-                {
-                    //Debug.Log("findPathRequest");
-                    m_ResourceSystem.AddEnergy(faction, (uint)serverPathData.Path.CellAttributes.Count());
-                    serverPathData.Path = FindPath(findPathRequest.Payload.Destination, cellsToMarkData.CachedPaths);
-                    m_ResourceSystem.SubstactEnergy(faction, (uint)serverPathData.Path.CellAttributes.Count());
-                    m_FindPathRequestData.ServerPathData[i] = serverPathData;
-                }
-            }
-
-        }
     }
-
     public int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
     {
         int distance = (int)(Mathf.Abs(originCubeCoordinate.X - otherCubeCoordinate.X) + Mathf.Abs(originCubeCoordinate.Y - otherCubeCoordinate.Y) + Mathf.Abs(originCubeCoordinate.Z - otherCubeCoordinate.Z)) / 2;

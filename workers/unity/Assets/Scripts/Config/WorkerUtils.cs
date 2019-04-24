@@ -19,7 +19,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<CellMarkerSystem>();
         world.GetOrCreateManager<AddComponentsSystem>();
         world.GetOrCreateManager<PlayerStateSystem>();
-        world.GetOrCreateManager<SendCellGridRequestsSystem>();
+        world.GetOrCreateManager<SendActionRequestSystem>();
         world.GetOrCreateManager<ClientMovementSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
         world.GetOrCreateManager<ClientPathVisualsSystem>();

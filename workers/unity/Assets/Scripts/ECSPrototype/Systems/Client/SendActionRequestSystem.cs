@@ -7,7 +7,7 @@ using Cells;
 using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-public class SendCellGridRequestsSystem : ComponentSystem
+public class SendActionRequestSystem : ComponentSystem
 {
     public struct SelectActionRequestData
     {
@@ -20,7 +20,6 @@ public class SendCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<Actions.CommandSenders.SelectActionCommand> SelectActionSenders;
         public ComponentDataArray<Actions.CommandSenders.SetTargetCommand> SetTargetSenders;
-        public ComponentDataArray<ServerPath.CommandSenders.FindPathCommand> FindPathSenders;
     }
 
     [Inject] private SelectActionRequestData m_SelectActionRequestData;
@@ -82,55 +81,26 @@ public class SendCellGridRequestsSystem : ComponentSystem
                 SelectActionCommand(-2, targetEntityId.Id);
             }
 
+            else
+            { 
             for (int ci = 0; ci < m_CellData.Length; ci++)
             {
                 var cellMousestate = m_CellData.MouseStateData[ci];
-                var cellEntityId = m_CellData.EntityIds[i].EntityId.Id;
+                var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
 
-                if (cellMousestate.ClickEvent == 1)
-                {
-                    //lock action
-                    var destinationCell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
-
-                    var request = Actions.SetTargetCommand.CreateRequest
-                    (
-                        targetEntityId,
-                        new SetTargetRequest(cellEntityId)
-                    );
-
-                    setTargetRequest.RequestsToSend.Add(request);
-                    m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
-
-                    if (clientPath.Path.CellAttributes.Count != 0)
+                    if (cellMousestate.ClickEvent == 1)
                     {
-                        if (destinationCell.CubeCoordinate == clientPath.Path.CellAttributes[clientPath.Path.CellAttributes.Count - 1].CubeCoordinate)
-                        {
-                            //Debug.Log("ClickEvent");
-                            var findPathRequestSender = m_SelectActionRequestData.FindPathSenders[i];
+                        //lock action
+                        var destinationCell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
 
-                            var request3 = ServerPath.FindPathCommand.CreateRequest
-                            (
-                                targetEntityId,
-                                new FindPathRequest(destinationCell)
-                            );
-
-                            findPathRequestSender.RequestsToSend.Add(request3);
-                            m_SelectActionRequestData.FindPathSenders[i] = findPathRequestSender;
-                        }
-                    }
-                    else if (serverPath.Path.CellAttributes.Count != 0)
-                    {
-                        //Debug.Log("ClickEvent");
-                        var findPathRequestSender = m_SelectActionRequestData.FindPathSenders[i];
-
-                        var request4 = ServerPath.FindPathCommand.CreateRequest
+                        var request = Actions.SetTargetCommand.CreateRequest
                         (
                             targetEntityId,
-                            new FindPathRequest(new CellAttribute())
+                            new SetTargetRequest(cellEntityId)
                         );
 
-                        findPathRequestSender.RequestsToSend.Add(request4);
-                        m_SelectActionRequestData.FindPathSenders[i] = findPathRequestSender;
+                        setTargetRequest.RequestsToSend.Add(request);
+                        m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                     }
                 }
             }
