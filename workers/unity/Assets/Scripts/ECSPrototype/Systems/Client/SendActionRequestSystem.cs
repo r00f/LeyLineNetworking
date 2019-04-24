@@ -5,6 +5,7 @@ using Generic;
 using Unit;
 using Cells;
 using Player;
+using UnityEngine;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendActionRequestSystem : ComponentSystem
@@ -109,6 +110,7 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
+        Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
             var idComp = m_SelectActionRequestData.EntityIds[i].EntityId;

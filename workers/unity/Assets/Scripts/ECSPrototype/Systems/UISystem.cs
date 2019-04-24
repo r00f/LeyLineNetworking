@@ -62,6 +62,8 @@ namespace LeyLineHybridECS
 
         [Inject] private PlayerStateSystem m_PlayerStateSystem;
 
+        [Inject] private SendActionRequestSystem m_SendActionRequestSystem;
+
         UIReferences UIRef;
 
         protected override void OnStartRunning()
@@ -69,6 +71,18 @@ namespace LeyLineHybridECS
             base.OnStartRunning();
             UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
+
+            for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+            {
+                ActionButton ab = UIRef.Actions[bi];
+                ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
+            }
+
+            for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+            {
+                ActionButton ab = UIRef.SpawnActions[si];
+                ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
+            }
         }
 
         protected override void OnUpdate()
@@ -150,6 +164,8 @@ namespace LeyLineHybridECS
                                 UIRef.SpawnActions[si].Visuals.SetActive(true);
                                 UIRef.SpawnActions[si].ActionName = stats.SpawnActions[si].ActionName;
                                 UIRef.SpawnActions[si].Icon.sprite = stats.SpawnActions[si].ActionIcon;
+                                UIRef.SpawnActions[si].ActionIndex = stats.Actions.Count + si;
+                                UIRef.SpawnActions[si].UnitId = (int)unitId;
                             }
                             else
                             {
@@ -162,24 +178,27 @@ namespace LeyLineHybridECS
                             if (bi < actionCount)
                             {
                                 UIRef.Actions[bi].Visuals.SetActive(true);
-
+                                UIRef.Actions[bi].UnitId = (int)unitId;
                                 //basic move
                                 if (bi == 0)
                                 {
                                     UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
                                     UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
+                                    UIRef.Actions[bi].ActionIndex = -2;
                                 }
                                 //basic attack
                                 else if (bi == 1)
                                 {
                                     UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
                                     UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
+                                    UIRef.Actions[bi].ActionIndex = -1;
                                 }
                                 //all other actions
                                 else
                                 {
                                     UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
                                     UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
+                                    UIRef.Actions[bi].ActionIndex = bi - 2;
                                 }
                             }
                             else
