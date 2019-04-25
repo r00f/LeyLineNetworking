@@ -7,6 +7,6 @@ component CellsToMark {
     id = 106;
 	list<cells.CellAttributes> cells_in_range = 1;
 	map<cells.CellAttribute, cells.CellAttributeList> cached_paths = 2;
-
+	bool set_client_range = 3;
 }
 

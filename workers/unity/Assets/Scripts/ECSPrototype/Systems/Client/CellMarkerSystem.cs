@@ -3,9 +3,12 @@ using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 using System.Collections.Generic;
+using Improbable;
+using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
 {
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class CellMarkerSystem : ComponentSystem
     {
         struct Data

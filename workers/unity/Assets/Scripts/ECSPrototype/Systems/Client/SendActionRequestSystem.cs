@@ -25,15 +25,7 @@ public class SendActionRequestSystem : ComponentSystem
     }
 
     [Inject] private SelectActionRequestData m_SelectActionRequestData;
-
-    public struct SelectActionResponseData
-    {
-        public readonly int Length;
-        public ComponentDataArray<Actions.CommandResponses.SelectActionCommand> ReceivedSelectActionResponses;
-    }
-
-    [Inject] private SelectActionResponseData m_SelectActionResponseData;
-
+    
     public struct CellData
     {
         public readonly int Length;
@@ -71,8 +63,6 @@ public class SendActionRequestSystem : ComponentSystem
     }
 
     [Inject] private PlayerData m_PlayerData;
-
-    [Inject] private CellStateSystem m_CellStateSystem;
 
     protected override void OnUpdate()
     {
@@ -148,22 +138,11 @@ public class SendActionRequestSystem : ComponentSystem
                 }
             }
         }
-
-        for (int i = 0; i < m_SelectActionResponseData.Length; i++)
-        {
-            var responses = m_SelectActionResponseData.ReceivedSelectActionResponses[i];
-
-            foreach(var r in responses.Responses)
-            {
-                m_CellStateSystem.ResetCellVisuals();
-            }
-            
-        }
     }
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
-        Debug.Log(actionIndex + ", " + entityId);
+        //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
             var idComp = m_SelectActionRequestData.EntityIds[i].EntityId;
@@ -181,7 +160,5 @@ public class SendActionRequestSystem : ComponentSystem
                 m_SelectActionRequestData.SelectActionSenders[i] = selectActionSender;
             }
         }
-
-        //m_CellStateSystem.ResetCellVisuals();
     }
 }

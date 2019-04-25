@@ -70,6 +70,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     [Inject] private GameStateData m_GameStateData;
     [Inject] private ResourceSystem m_ResourceSystem;
+    [Inject] private CellStateSystem m_CellStateSystem;
 
     protected override void OnUpdate()
     {
@@ -82,6 +83,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var cellsToMarkData = m_SelectActionRequestData.CellsToMarkData[i];
             var coord = m_SelectActionRequestData.CoordinateData[i].CubeCoordinate;
             var worldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
+
+            cellsToMarkData.SetClientRange = false;
+            m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -111,27 +115,29 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             if(actionData.CurrentSelected.Targets.Count != 0)
             {
-                if (!actionData.CurrentSelected.Equals(actionData.LastSelected))
+                if (!actionData.CurrentSelected.Equals(actionData.LastSelected) || cellsToMarkData.CellsInRange.Count == 0)
                 {
                     cellsToMarkData.CellsInRange = GetRadius(coord, (uint)actionData.CurrentSelected.Targets[0].Targettingrange, worldIndex);
-                    m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
-                }
 
-                switch(actionData.CurrentSelected.Targets[0].Higlighter)
-                {
-                    case UseHighlighterEnum.pathing:
-                        cellsToMarkData.CachedPaths = GetAllPathsInRadius((uint)actionData.CurrentSelected.Targets[0].Targettingrange, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
-                        m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
-                        break;
-                    case UseHighlighterEnum.no_pathing:
-                        //do stuff
+                    switch (actionData.CurrentSelected.Targets[0].Higlighter)
+                    {
+                        case UseHighlighterEnum.pathing:
+                            cellsToMarkData.CachedPaths = GetAllPathsInRadius((uint)actionData.CurrentSelected.Targets[0].Targettingrange, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
+                            break;
+                        case UseHighlighterEnum.no_pathing:
+                            //do stuff
 
-                        break;
+                            break;
+                    }
                 }
             }
+
+
             actionData.LastSelected = actionData.CurrentSelected;
             m_SelectActionRequestData.ActionsData[i] = actionData;
 
+            cellsToMarkData.SetClientRange = true;
+            m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
         }
 
         #endregion
