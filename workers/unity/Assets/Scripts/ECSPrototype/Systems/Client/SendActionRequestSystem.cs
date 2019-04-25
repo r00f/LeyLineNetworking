@@ -19,11 +19,20 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
         public readonly ComponentDataArray<ServerPath.Component> ServerPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<Actions.Component> ActionsData;
         public ComponentDataArray<Actions.CommandSenders.SelectActionCommand> SelectActionSenders;
         public ComponentDataArray<Actions.CommandSenders.SetTargetCommand> SetTargetSenders;
     }
 
     [Inject] private SelectActionRequestData m_SelectActionRequestData;
+
+    public struct SelectActionResponseData
+    {
+        public readonly int Length;
+        public ComponentDataArray<Actions.CommandResponses.SelectActionCommand> ReceivedSelectActionResponses;
+    }
+
+    [Inject] private SelectActionResponseData m_SelectActionResponseData;
 
     public struct CellData
     {
@@ -34,6 +43,16 @@ public class SendActionRequestSystem : ComponentSystem
     }
 
     [Inject] private CellData m_CellData;
+
+    public struct UnitData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+        public readonly ComponentDataArray<MouseState> MouseStateData;
+        public readonly ComponentDataArray<Health.Component> HealthAttributes;
+    }
+
+    [Inject] private UnitData m_UnitData;
 
     public struct GameStateData
     {
@@ -53,6 +72,8 @@ public class SendActionRequestSystem : ComponentSystem
 
     [Inject] private PlayerData m_PlayerData;
 
+    [Inject] private CellStateSystem m_CellStateSystem;
+
     protected override void OnUpdate()
     {
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
@@ -63,6 +84,7 @@ public class SendActionRequestSystem : ComponentSystem
             var clientPath = m_SelectActionRequestData.ClientPathData[i];
             var serverPath = m_SelectActionRequestData.ServerPathData[i];
             var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
+            var actionsData = m_SelectActionRequestData.ActionsData[i];
 
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
@@ -82,29 +104,60 @@ public class SendActionRequestSystem : ComponentSystem
                 SelectActionCommand(-2, targetEntityId.Id);
             }
 
-            else
-            { 
-            for (int ci = 0; ci < m_CellData.Length; ci++)
+            else if(actionsData.CurrentSelected.Targets.Count != 0)
             {
-                var cellMousestate = m_CellData.MouseStateData[ci];
-                var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
-
-                    if (cellMousestate.ClickEvent == 1)
+                if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
+                {
+                    for (int ci = 0; ci < m_CellData.Length; ci++)
                     {
-                        //lock action
-                        var destinationCell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
+                        var cellMousestate = m_CellData.MouseStateData[ci];
+                        var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
 
-                        var request = Actions.SetTargetCommand.CreateRequest
-                        (
-                            targetEntityId,
-                            new SetTargetRequest(cellEntityId)
-                        );
+                        if (cellMousestate.ClickEvent == 1)
+                        {
+                            var request = Actions.SetTargetCommand.CreateRequest
+                            (
+                                targetEntityId,
+                                new SetTargetRequest(cellEntityId)
+                            );
 
-                        setTargetRequest.RequestsToSend.Add(request);
-                        m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                            setTargetRequest.RequestsToSend.Add(request);
+                            m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                        }
+                    }
+                }
+                else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
+                {
+                    for (int ci = 0; ci < m_UnitData.Length; ci++)
+                    {
+                        var unitMousestate = m_UnitData.MouseStateData[ci];
+                        var unitEntityId = m_UnitData.EntityIds[ci].EntityId.Id;
+
+                        if (unitMousestate.ClickEvent == 1)
+                        {
+                            var request = Actions.SetTargetCommand.CreateRequest
+                            (
+                                targetEntityId,
+                                new SetTargetRequest(unitEntityId)
+                            );
+
+                            setTargetRequest.RequestsToSend.Add(request);
+                            m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                        }
                     }
                 }
             }
+        }
+
+        for (int i = 0; i < m_SelectActionResponseData.Length; i++)
+        {
+            var responses = m_SelectActionResponseData.ReceivedSelectActionResponses[i];
+
+            foreach(var r in responses.Responses)
+            {
+                m_CellStateSystem.ResetCellVisuals();
+            }
+            
         }
     }
 
@@ -128,5 +181,7 @@ public class SendActionRequestSystem : ComponentSystem
                 m_SelectActionRequestData.SelectActionSenders[i] = selectActionSender;
             }
         }
+
+        //m_CellStateSystem.ResetCellVisuals();
     }
 }

@@ -19,7 +19,6 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     public int ActionIndex;
     public int UnitId;
 
-
     public void OnPointerDown(PointerEventData eventData)
     {
         IconRectTransform.anchoredPosition = Offset;

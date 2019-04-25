@@ -308,18 +308,27 @@ public static class LeyLineEntityTemplates {
         Action myNullableAction = new Action();
         myNullableAction.Targets = new List<ActionTarget>();
         List<Action> myOtherActions = new List<Action>();
+
         if(inStats.BasicAttack != null)
         {
             myBasicAttack = SetAction(inStats.BasicAttack);
         }
+
         if(inStats.BasicMove != null)
         {
             myBasicMove = SetAction(inStats.BasicMove);
         }
+
         foreach(ECSAction a in inStats.Actions)
         {
             myOtherActions.Add(SetAction(a));
         }
+
+        foreach(ECSAction a in inStats.SpawnActions)
+        {
+            myOtherActions.Add(SetAction(a));
+        }
+
         var newActions = new Actions.Snapshot
         {
             BasicMove = myBasicMove,
@@ -327,6 +336,7 @@ public static class LeyLineEntityTemplates {
             OtherActions = myOtherActions,
             NullAction = myNullableAction,
             CurrentSelected = myNullableAction,
+            LastSelected = myNullableAction,
             LockedAction = myNullableAction
         };
 

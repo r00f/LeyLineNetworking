@@ -73,7 +73,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        #region selectactions
+        #region select action
 
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
@@ -109,11 +109,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 }
             }
 
-            m_SelectActionRequestData.ActionsData[i] = actionData;
-
             if(actionData.CurrentSelected.Targets.Count != 0)
             {
-                if (cellsToMarkData.CellsInRange.Count == 0)
+                if (!actionData.CurrentSelected.Equals(actionData.LastSelected))
                 {
                     cellsToMarkData.CellsInRange = GetRadius(coord, (uint)actionData.CurrentSelected.Targets[0].Targettingrange, worldIndex);
                     m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
@@ -131,8 +129,14 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         break;
                 }
             }
+            actionData.LastSelected = actionData.CurrentSelected;
+            m_SelectActionRequestData.ActionsData[i] = actionData;
+
         }
-#endregion
+
+        #endregion
+
+        #region set target
 
         for (int i = 0; i < m_SetTargetRequestData.Length; i++)
         {
@@ -171,7 +175,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     }
                                     if(tm.ModType == ModTypeEnum.path)
                                     {
-                                        
                                         serverPath.Path = FindPath(cell, cellsToMark.CachedPaths);
                                         //Debug.Log(cell.CubeCoordinate);
                                         m_SetTargetRequestData.ServerPathData[i] = serverPath;
@@ -189,6 +192,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             
             m_SetTargetRequestData.ActionsData[i] = actionData;
         }
+
+        #endregion
+
+        #region set serverPath
 
         for (int i = 0; i < m_ServerPathData.Length; i++)
         {
@@ -217,7 +224,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             
         }
 
-
+        #endregion
     }
     public int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
     {
