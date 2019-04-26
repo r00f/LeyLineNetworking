@@ -35,6 +35,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public ComponentDataArray<ServerPath.Component> ServerPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
+        public readonly ComponentDataArray<FactionComponent.Component> Faction;
 
     }
 
@@ -60,6 +61,19 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     }
 
     [Inject] private CellData m_CellData;
+
+    public struct UnitData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<Health.Component> HealthData;
+        public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+    }
+
+    [Inject]
+    private UnitData m_UnitData;
 
     public struct GameStateData
     {
@@ -151,27 +165,38 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var serverPath = m_SetTargetRequestData.ServerPathData[i];
             var unitWorldIndex = m_SetTargetRequestData.WorldIndexData[i].Value;
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
+            var faction = m_SetTargetRequestData.Faction[i];
 
             foreach (var str in setTargetRequest.Requests)
             {
                 long id = str.Payload.TargetId;
-
+                if (!actionData.LockedAction.Equals(actionData.NullAction))
+                {
+                   
+                    Debug.Log("Ayaya");
+                    m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
+                    actionData.LockedAction = actionData.NullAction;
+                }
+                
                 switch (actionData.CurrentSelected.Targets[0].TargetType)
                 {
+                    
                     case TargetTypeEnum.cell:
                         for(int ci = 0; ci < m_CellData.Length; ci++)
                         {
                             var cellId = m_CellData.EntityIds[ci].EntityId.Id;
                             var cell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
-                     
+
                             if (cellId == id)
                             {
                                 //check if in range
-                                //energy stuff inc
+                                
                                 actionData.LockedAction = actionData.CurrentSelected;
+                                var locked = actionData.LockedAction;
                                 var t = actionData.LockedAction.Targets[0];
                                 t.CellTargetNested.TargetId = id;
                                 actionData.LockedAction.Targets[0] = t;
+                                uint costToSubtract = t.EnergyCost;
 
                                 foreach (TargetMod tm in actionData.LockedAction.Targets[0].Mods)
                                 {
@@ -184,15 +209,54 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         serverPath.Path = FindPath(cell, cellsToMark.CachedPaths);
                                         //Debug.Log(cell.CubeCoordinate);
                                         m_SetTargetRequestData.ServerPathData[i] = serverPath;
+                                        costToSubtract += (uint)serverPath.Path.CellAttributes.Count;
                                     }
                                 }
+                                locked.CombinedCost = costToSubtract;
+                                actionData.LockedAction = locked;
+                                m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+
                             }
                         }
                         break;
                     case TargetTypeEnum.unit:
-                        //do stuff
+                        for (int ci = 0; ci < m_UnitData.Length; ci++)
+                        {
+                            var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
 
-                        break;
+                            if (unitId == id)
+                            {
+                                //check if in range
+
+                                actionData.LockedAction = actionData.CurrentSelected;
+                                var locked = actionData.LockedAction;
+                                var t = actionData.LockedAction.Targets[0];
+                                t.UnitTargetNested.TargetId = id;
+                                actionData.LockedAction.Targets[0] = t;
+                                uint costToSubtract = t.EnergyCost;
+
+                                foreach (TargetMod tm in actionData.LockedAction.Targets[0].Mods)
+                                {
+                                    if (tm.ModType == ModTypeEnum.aoe)
+                                    {
+
+                                    }
+                                    if (tm.ModType == ModTypeEnum.path)
+                                    {
+                                        /*serverPath.Path = FindPath(cell, cellsToMark.CachedPaths);
+                                        //Debug.Log(cell.CubeCoordinate);
+                                        m_SetTargetRequestData.ServerPathData[i] = serverPath;
+                                        costToSubtract += (uint)serverPath.Path.CellAttributes.Count;*/
+                                    }
+                                }
+                                locked.CombinedCost = costToSubtract;
+                                actionData.LockedAction = locked;
+                                m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+
+                            }
+                        }
+
+                            break;
                 }
             }
             

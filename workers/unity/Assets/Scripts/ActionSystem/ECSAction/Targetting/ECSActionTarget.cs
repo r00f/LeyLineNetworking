@@ -15,6 +15,7 @@ namespace LeyLineHybridECS
         }
         public HighlightDef HighlighterToUse;
         public int targettingRange;
+        public uint energyCost;
         public List<ECSActionSecondaryTargets> SecondaryTargets = new List<ECSActionSecondaryTargets>();
 
     }

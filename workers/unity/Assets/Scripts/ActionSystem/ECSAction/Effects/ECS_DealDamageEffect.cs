@@ -4,12 +4,11 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-
     [CreateAssetMenu]
     [System.Serializable]
-    public class ECS_MoveAlongPathEffect : ECSActionEffect
+    public class ECS_DealDamageEffect : ECSActionEffect
     {
-        public uint MovementSpeed;
-        public int pathIndex;
+        public uint damageAmount;
     }
+        
 }

@@ -1,5 +1,6 @@
 package unit;
 import "improbable/vector3.schema";
+import "unit/action_effect.schema";
 
 component Actions{
 	
@@ -21,6 +22,9 @@ component Actions{
 
 type Action {
 	list<ActionTarget> targets = 1;
+	list<unit.ActionEffect> effects = 2;
+	uint32 combined_cost = 3;
+
 }
 
 type ActionTarget {
@@ -34,11 +38,13 @@ type ActionTarget {
 		bool require_visible = 3;
 	}
 	int32 targettingrange = 1;
-	list<TargetMod> mods = 2;
-	CellTarget cell_target_nested = 3;
-	UnitTarget unit_target_nested = 4;
-	TargetTypeEnum target_type = 5;
-	UseHighlighterEnum higlighter = 6;
+	uint32 energy_cost = 2;
+	UseHighlighterEnum higlighter = 3;
+	TargetTypeEnum target_type = 4;
+	CellTarget cell_target_nested = 5;
+	UnitTarget unit_target_nested = 6;
+	list<TargetMod> mods = 7;
+	
 	
 }
 type TargetMod {
@@ -70,15 +76,15 @@ unit = 1;
 }
 
 enum ModTypeEnum {
-aoe = 1;
-path = 2;
+aoe = 0;
+path = 1;
 }
 
 enum UseHighlighterEnum {
-no_pathing = 1;
-pathing = 2;
-no_pathing_visible = 3;
-pathing_visible = 4;
+no_pathing = 0;
+pathing = 1;
+no_pathing_visible = 2;
+pathing_visible = 3;
 }
 
 type SelectActionRequest {

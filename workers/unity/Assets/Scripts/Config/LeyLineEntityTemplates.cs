@@ -303,10 +303,13 @@ public static class LeyLineEntityTemplates {
     static Actions.Snapshot SetActions (Unit_BaseDataSet inStats){
         Action myBasicAttack = new Action();
         myBasicAttack.Targets = new List<ActionTarget>();
+        myBasicAttack.Effects = new List<ActionEffect>();
         Action myBasicMove = new Action();
         myBasicMove.Targets = new List<ActionTarget>();
+        myBasicMove.Effects = new List<ActionEffect>();
         Action myNullableAction = new Action();
         myNullableAction.Targets = new List<ActionTarget>();
+        myNullableAction.Effects = new List<ActionEffect>();
         List<Action> myOtherActions = new List<Action>();
 
         if(inStats.BasicAttack != null)
@@ -347,17 +350,22 @@ public static class LeyLineEntityTemplates {
     {
         Action newAction = new Action();
         newAction.Targets = new List<ActionTarget>();
+        newAction.Effects = new List<ActionEffect>();
+        newAction.CombinedCost = 0;
         for (int i = 0; i <= inAction.Targets.Count - 1; i++)
         {
+            ActionTarget newAT = new ActionTarget();
+            newAT.EnergyCost = inAction.Targets[i].energyCost;
+            newAT.Targettingrange = inAction.Targets[i].targettingRange;
+            newAT.Mods = new List<TargetMod>();
+
             if (inAction.Targets[i] is ECSATarget_Tile)
             {
                 ECSATarget_Tile go = inAction.Targets[i] as ECSATarget_Tile;
-                ActionTarget newAT = new ActionTarget();
                 newAT.TargetType = TargetTypeEnum.cell;
-                newAT.Mods = new List<TargetMod>();
                 newAT.CellTargetNested.RequireEmpty = go.requireEmpty;
                 newAT.CellTargetNested.RequireVisible = false;
-                newAT.Targettingrange = go.targettingRange;
+                
                 switch (inAction.Targets[i].HighlighterToUse)
                 {
                     case ECSActionTarget.HighlightDef.Path:
@@ -393,15 +401,11 @@ public static class LeyLineEntityTemplates {
                         mod.PathNested.Costpertile = go1.costPerTile;
                         newAT.Mods.Add(mod);
                     }
-                    newAction.Targets.Add(newAT);
                 }
-               
             }
             if (inAction.Targets[i] is ECSATarget_Unit)
             {
                 ECSATarget_Unit go = inAction.Targets[i] as ECSATarget_Unit;
-                ActionTarget newAT = new ActionTarget();
-                newAT.Mods = new List<TargetMod>();
                 newAT.TargetType = TargetTypeEnum.unit;
                 switch (go.Restrictions)
                 {
@@ -436,7 +440,6 @@ public static class LeyLineEntityTemplates {
                         newAT.Higlighter = UseHighlighterEnum.no_pathing_visible;
                         break;
                 }
-                newAT.Targettingrange = go.targettingRange;
                 foreach (ECSActionSecondaryTargets t in go.SecondaryTargets)
                 {
                     if (t is SecondaryAoE)
@@ -458,33 +461,33 @@ public static class LeyLineEntityTemplates {
 
                     }
                 }
-                newAction.Targets.Add(newAT);
             }
-        }
 
+            newAction.Targets.Add(newAT);
+        }
+        for(int i = 0; i <= inAction.Effects.Count - 1; i++)
+        {
+            ActionEffect AF = new ActionEffect();
+            if(inAction.Effects[i] is ECS_SpawnEffect)
+            {
+                ECS_SpawnEffect go = inAction.Effects[i] as ECS_SpawnEffect;
+                AF.EffectType = EffectTypeEnum.spawn_unit;
+                AF.SpawnUnitNested.UnitName = go.UnitNameToSpawn;
+            }
+            if (inAction.Effects[i] is ECS_MoveAlongPathEffect)
+            {
+                ECS_MoveAlongPathEffect go = inAction.Effects[i] as ECS_MoveAlongPathEffect;
+                AF.EffectType = EffectTypeEnum.move_along_path;
+                AF.MoveAlongPathNested.MovementSpeed = go.MovementSpeed;
+            }
+            if (inAction.Effects[i] is ECS_DealDamageEffect)
+            {
+                ECS_DealDamageEffect go = inAction.Effects[i] as ECS_DealDamageEffect;
+                AF.EffectType = EffectTypeEnum.deal_damage;
+                AF.DealDamageNested.DamageAmount = go.damageAmount;
+            }
+            newAction.Effects.Add(AF);
+        }
       return newAction;
     }
-    /* static byte[] ToByteArray<T>(T obj)
-     {
-         if (obj == null)
-             return null;
-         BinaryFormatter bf = new BinaryFormatter();
-         using (MemoryStream ms = new MemoryStream())
-         {
-             bf.Serialize(ms, obj);
-             return ms.ToArray();
-         }
-     }
-     static T FromByteArray<T>(byte[] data)
-     {
-         if (data == null)
-             return default(T);
-         BinaryFormatter bf = new BinaryFormatter();
-         using (MemoryStream ms = new MemoryStream(data))
-         {
-             object obj = bf.Deserialize(ms);
-             return (T)obj;
-         }
-     }
-     */
 }

@@ -23,9 +23,6 @@ namespace LeyLineHybridECS
     */
         public List<ECSActionTarget> Targets;
         public List<ECSActionEffect> Effects;
-        public Vector3f UnitUsedByCoordinate;
-        public int baseEneryCost;
-        public int currentEnergyCost;
         public string ActionName;
         public Sprite ActionIcon;
     }
