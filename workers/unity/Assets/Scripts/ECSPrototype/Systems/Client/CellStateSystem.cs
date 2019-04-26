@@ -37,6 +37,15 @@ namespace LeyLineHybridECS
 
         [Inject] private UnitData m_UnitData;
 
+        public struct GameStateData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<GameState.Component> GameState;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        }
+
+        [Inject] private GameStateData m_GameStateData;
+
         protected override void OnUpdate()
         {
             ResetCellVisuals();

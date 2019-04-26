@@ -38,6 +38,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<UnitLifeCycleSystem>();
         world.GetOrCreateManager<VisionSystem_Server>();
         world.GetOrCreateManager<ResourceSystem>();
+        world.GetOrCreateManager<ExecuteActionsSystem>();
     }
 
 }

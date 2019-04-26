@@ -9,11 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_GeneratorAsset: {fileID: 0}
   m_Script: {fileID: 11500000, guid: 43cb690f53afba849bd1b6d695e07014, type: 3}
-  m_Name: SpawnHeroEff
+  m_Name: SpawnKingCroakEffect
   m_EditorClassIdentifier: 
   applyTo: 3
   specificTargetIdentifier: 0
-  UnitToSpawn: {fileID: 5354235908507515955, guid: 7a1ca415177bcff46a4789818f343681,
-    type: 3}
+  UnitNameToSpawn: KingCroak
