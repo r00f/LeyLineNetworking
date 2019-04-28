@@ -14,7 +14,7 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class CellStateSystem : ComponentSystem
     {
-        public struct Data
+        public struct CellData
         {
             public readonly int Length;
             public readonly ComponentDataArray<MouseState> CellMouseStateData;
@@ -23,12 +23,13 @@ namespace LeyLineHybridECS
             public ComponentDataArray<MarkerState> MarkerStateData;
         }
 
-        [Inject] private Data m_CellData;
+        [Inject] private CellData m_CellData;
 
         public struct UnitData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthorativeData;
+            public readonly ComponentDataArray<SpatialEntityId> EntityIds;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Actions.Component> ActionsData;
             public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
@@ -46,55 +47,79 @@ namespace LeyLineHybridECS
 
         [Inject] private GameStateData m_GameStateData;
 
+        public struct PlayerData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+        }
+
+        [Inject] private PlayerData m_PlayerData;
+
         protected override void OnUpdate()
         {
+            if(m_PlayerData.PlayerStateData.Length == 0)
+            {
+                return;
+            }
+            var playerState = m_PlayerData.PlayerStateData[0];
+
             ResetCellVisuals();
 
-            for (int ui = 0; ui < m_UnitData.Length; ui++)
+            if (playerState.CurrentState == PlayerStateEnum.waiting_for_target)
             {
-                MouseState unitMouseState = m_UnitData.MouseStateData[ui];
-                var cellsToMark = m_UnitData.CellsToMarkData[ui];
-                var faction = m_UnitData.FactionData[ui].Faction;
-                var actionData = m_UnitData.ActionsData[ui];
-
-                if (unitMouseState.CurrentState == MouseState.State.Clicked)
+                for (int ui = 0; ui < m_UnitData.Length; ui++)
                 {
-                    for (int i = 0; i < m_CellData.Length; i++)
-                    {
-                        MouseState cellMouseState = m_CellData.CellMouseStateData[i];
-                        MarkerState markerState = m_CellData.MarkerStateData[i];
-                        Vector3f coords = m_CellData.CoordinateData[i].CubeCoordinate;
+                    MouseState unitMouseState = m_UnitData.MouseStateData[ui];
+                    var cellsToMark = m_UnitData.CellsToMarkData[ui];
+                    var faction = m_UnitData.FactionData[ui].Faction;
+                    var actionData = m_UnitData.ActionsData[ui];
+                    var unitId = m_UnitData.EntityIds[ui].EntityId.Id;
 
-                        foreach (CellAttribute c in cellsToMark.CachedPaths.Keys)
+                    if(playerState.SelectedUnitId == unitId)
+                    {
+                        for (int i = 0; i < m_CellData.Length; i++)
                         {
-                            if (c.CubeCoordinate == coords)
+                            MouseState cellMouseState = m_CellData.CellMouseStateData[i];
+                            MarkerState markerState = m_CellData.MarkerStateData[i];
+                            Vector3f coords = m_CellData.CoordinateData[i].CubeCoordinate;
+
+                            foreach (CellAttribute c in cellsToMark.CachedPaths.Keys)
                             {
-                                if (cellMouseState.CurrentState != MouseState.State.Hovered)
+                                if (c.CubeCoordinate == coords)
                                 {
-                                    if (!c.IsTaken)
+                                    if (cellMouseState.CurrentState != MouseState.State.Hovered)
                                     {
-                                        if (markerState.CurrentState != MarkerState.State.Reachable)
+                                        if (!c.IsTaken)
                                         {
-                                            m_CellData.MarkerStateData[i] = new MarkerState
+                                            if (markerState.CurrentState != MarkerState.State.Reachable)
                                             {
-                                                CurrentState = MarkerState.State.Reachable,
-                                                IsSet = 0
-                                            };
+                                                m_CellData.MarkerStateData[i] = new MarkerState
+                                                {
+                                                    CurrentState = MarkerState.State.Reachable,
+                                                    IsSet = 0
+                                                };
+                                            }
                                         }
                                     }
-                                }
-                                else
-                                {
-                                    m_CellData.MarkerStateData[i] = new MarkerState
+                                    else
                                     {
-                                        CurrentState = MarkerState.State.Hovered,
-                                        IsSet = 0
-                                    };
+                                        m_CellData.MarkerStateData[i] = new MarkerState
+                                        {
+                                            CurrentState = MarkerState.State.Hovered,
+                                            IsSet = 0
+                                        };
+                                    }
                                 }
                             }
                         }
                     }
                 }
+            }
+            else
+            {
+
+
             }
         }
 
@@ -104,8 +129,32 @@ namespace LeyLineHybridECS
             {
                 MouseState cellMouseState = m_CellData.CellMouseStateData[i];
                 MarkerState markerState = m_CellData.MarkerStateData[i];
+                var celldata = m_CellData.Celldata[i];
+                var gameState = m_GameStateData.GameState[0].CurrentState;
 
-                if (markerState.CurrentState != (MarkerState.State)(int)cellMouseState.CurrentState)
+                if (gameState != GameStateEnum.planning)
+                {
+                    if (m_CellData.MarkerStateData[i].CurrentState != MarkerState.State.Neutral)
+                    {
+                        m_CellData.MarkerStateData[i] = new MarkerState
+                        {
+                            CurrentState = MarkerState.State.Neutral,
+                            IsSet = 0
+                        };
+                    }
+                }
+                else if(celldata.CellAttributes.Cell.IsTaken)
+                {
+                    if (m_CellData.MarkerStateData[i].CurrentState != MarkerState.State.Neutral)
+                    {
+                        m_CellData.MarkerStateData[i] = new MarkerState
+                        {
+                            CurrentState = MarkerState.State.Neutral,
+                            IsSet = 0
+                        };
+                    }
+                }
+                else if (markerState.CurrentState != (MarkerState.State)(int)cellMouseState.CurrentState)
                 {
                     m_CellData.MarkerStateData[i] = new MarkerState
                     {

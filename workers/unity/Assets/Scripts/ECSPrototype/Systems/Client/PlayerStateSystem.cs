@@ -39,6 +39,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
+            public ComponentArray<UnitComponentReferences> UnitCompReferences;
         }
 
         [Inject] private UnitData m_UnitData;
@@ -56,36 +57,58 @@ namespace LeyLineHybridECS
                 {
                     if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        if (playerState.CurrentState != PlayerStateEnum.ready)
-                        {
-                            if (playerState.SelectedUnitId != 0)
-                            {
-                                for(int ui = 0; ui < m_UnitData.Length; ui++)
-                                {
-                                    var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
-                                    var actions = m_UnitData.ActionsData[ui];
 
-                                    if(unitId == playerState.SelectedUnitId)
+                        for (int ui = 0; ui < m_UnitData.Length; ui++)
+                        {
+                            var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
+                            var actions = m_UnitData.ActionsData[ui];
+                            var unitComponentReferences = m_UnitData.UnitCompReferences[ui];
+                            var mouseState = m_UnitData.MouseStateData[ui];
+
+                            if (playerState.CurrentState != PlayerStateEnum.ready)
+                            {
+                                if (unitId == playerState.SelectedUnitId)
+                                {
+                                    //if selected unit is waiting for target set playerstate to waitingForTarget
+                                    if (actions.CurrentSelected.Targets.Count != 0 && actions.LockedAction.Targets.Count == 0)
                                     {
-                                        //if selected unit is waiting for target set playerstate to waitingForTarget
-                                        if (actions.CurrentSelected.Targets.Count != 0 && actions.LockedAction.Targets.Count == 0)
-                                        {
-                                            SetPlayerState(PlayerStateEnum.waiting_for_target);
-                                        }
-                                        else
-                                        {
-                                            SetPlayerState(PlayerStateEnum.unit_selected);
-                                        }
+                                        SetPlayerState(PlayerStateEnum.waiting_for_target);
                                     }
+                                    else
+                                    {
+                                        SetPlayerState(PlayerStateEnum.unit_selected);
+                                    }
+
+                                    if (!unitComponentReferences.SelectionCircleGO.activeSelf)
+                                        unitComponentReferences.SelectionCircleGO.SetActive(true);
+                                    /*
+                                    else if (!AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.waiting)
+                                    {
+                                        SetPlayerState(PlayerStateEnum.waiting);
+                                    }
+                                    */
+                                }
+                                else if (playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
+                                {
+                                    playerState.SelectedUnitId = unitId;
+                                    m_PlayerData.PlayerStateData[0] = playerState;
+                                }
+                                else
+                                {
+                                    if (unitComponentReferences.SelectionCircleGO.activeSelf)
+                                        unitComponentReferences.SelectionCircleGO.SetActive(false);
                                 }
                             }
-                            else if (!AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.waiting)
+                            else if(playerState.SelectedUnitId != 0)
                             {
-                                SetPlayerState(PlayerStateEnum.waiting);
+                                playerState.SelectedUnitId = 0;
+                                m_PlayerData.PlayerStateData[0] = playerState;
+                                if (unitComponentReferences.SelectionCircleGO.activeSelf)
+                                    unitComponentReferences.SelectionCircleGO.SetActive(false);
                             }
                         }
                     }
-                    else if(gameState.CurrentState == GameStateEnum.calculate_energy)
+                    else if (gameState.CurrentState == GameStateEnum.calculate_energy)
                     {
                         SetPlayerState(PlayerStateEnum.waiting);
                         return;

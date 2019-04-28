@@ -406,7 +406,7 @@ public class VisionSystem_Server : ComponentSystem
         #region SpecialCase
         else
         {
-            Debug.Log("SPECIAL CASE!! DOES IT WORK?");
+            //Debug.Log("SPECIAL CASE!! DOES IT WORK?");
             List<Angle> Positives = new List<Angle>();
             List<Angle> Negatives = new List<Angle>();
             for (int i = count - 1; i >= 0; i--)

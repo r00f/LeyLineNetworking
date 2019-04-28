@@ -144,7 +144,7 @@ namespace LeyLineHybridECS
                 int spawnActionCount = stats.SpawnActions.Count;
                 //var portraitPlayerColor = ;
 
-                if(mouseState == MouseState.State.Clicked)
+                if(playerState.SelectedUnitId == unitId)
                 {
                     if (faction.Faction == authPlayerFaction)
                     {
@@ -218,13 +218,6 @@ namespace LeyLineHybridECS
                         {
                             UIRef.SpawnActions[si].Visuals.SetActive(false);
                         }
-                    }
-
-                    //only select if current action does not require unit target
-                    if(playerState.SelectedUnitId != unitId && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
-                    {
-                        playerState.SelectedUnitId = unitId;
-                        m_AuthoritativePlayerData.PlayerStateData[0] = playerState;
                     }
                 }
 

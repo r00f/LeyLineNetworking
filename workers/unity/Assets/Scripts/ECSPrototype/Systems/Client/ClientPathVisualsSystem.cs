@@ -7,6 +7,7 @@ using LeyLineHybridECS;
 using Unity.Entities;
 using Unit;
 using Generic;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ClientPathVisualsSystem : ComponentSystem
@@ -32,18 +33,29 @@ public class ClientPathVisualsSystem : ComponentSystem
 
     [Inject] private CellData m_CellData;
 
-    public struct LineRendererData
+    public struct UnitData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public ComponentDataArray<ClientPath.Component> Paths;
         public ComponentArray<LineRendererComponent> LineRenderers;
+        public ComponentArray<UnitComponentReferences> ComponentReferences;
     }
 
-    [Inject] private LineRendererData m_LineRendererData;
+    [Inject] private UnitData m_UnitData;
+
+    public struct AuthoritativePlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+    }
+
+    [Inject] private AuthoritativePlayerData m_AuthoritativePlayerData;
 
     public struct GameStateData
     {
@@ -58,10 +70,10 @@ public class ClientPathVisualsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        for (int li = 0; li < m_LineRendererData.Length; li++)
+        for (int li = 0; li < m_UnitData.Length; li++)
         {
-            var lr = m_LineRendererData.LineRenderers[li];
-            var unitWorldIndex = m_LineRendererData.WorldIndexData[li].Value;
+            var lr = m_UnitData.LineRenderers[li];
+            var unitWorldIndex = m_UnitData.WorldIndexData[li].Value;
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
@@ -73,11 +85,11 @@ public class ClientPathVisualsSystem : ComponentSystem
                     {
                         if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.calculate_energy)
                         {
-                            var path = m_LineRendererData.Paths[li];
+                            var path = m_UnitData.Paths[li];
                             if (path.Path.CellAttributes.Count > 0)
                             {
                                 path.Path.CellAttributes.Clear();
-                                m_LineRendererData.Paths[li] = path;
+                                m_UnitData.Paths[li] = path;
                             }
                         }
                         if (lr.lineRenderer.enabled)
@@ -93,8 +105,9 @@ public class ClientPathVisualsSystem : ComponentSystem
         {
             var mouseState = m_ClientPathData.MouseStateData[pi];
             var path = m_ClientPathData.PathData[pi];
+            var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
 
-            if (mouseState.CurrentState == MouseState.State.Clicked)
+            if (playerState.CurrentState == PlayerStateEnum.waiting_for_target)
             {
                 for (int ci = 0; ci < m_CellData.Length; ci++)
                 {
@@ -113,15 +126,17 @@ public class ClientPathVisualsSystem : ComponentSystem
 
         //Update LineRenderers
 
-        for (int li = 0; li < m_LineRendererData.Length; li++)
+        for (int li = 0; li < m_UnitData.Length; li++)
         {
-            var mouseState = m_LineRendererData.MouseStateData[li];
-            var lr = m_LineRendererData.LineRenderers[li];
-
-            if (mouseState.CurrentState == MouseState.State.Clicked)
+            var mouseState = m_UnitData.MouseStateData[li];
+            var lr = m_UnitData.LineRenderers[li];
+            var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
+            var unitId = m_UnitData.EntityIds[li].EntityId.Id;
+            
+            if (playerState.SelectedUnitId == unitId)
             {
-                var path = m_LineRendererData.Paths[li];
-                var cellsToMark = m_LineRendererData.CellsToMarkData[li];
+                var path = m_UnitData.Paths[li];
+                var cellsToMark = m_UnitData.CellsToMarkData[li];
                 //update Linerenderer
                 lr.lineRenderer.enabled = true;
                 lr.lineRenderer.positionCount = path.Path.CellAttributes.Count + 1;
