@@ -8,7 +8,7 @@ using Player;
 using Unit;
 
 [DisableAutoCreation]
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ManalithSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ResourceSystem : ComponentSystem
 {
     public struct PlayerData
@@ -179,7 +179,7 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void Heal(uint unitID, uint healAmount)
+    public void Heal(long unitID, uint healAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
@@ -202,15 +202,16 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void DealDamage(uint unitID, uint damageAmount)
+    public void DealDamage(long unitID, uint damageAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
-            var id = m_UnitData.EntityIdData[i].EntityId;
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
             var health = m_UnitData.HealthData[i];
 
-            if(unitID.Equals(id))
+            if(unitID == id)
             {
+                Debug.Log("Deal damage to unit: " + unitID + ", " + damageAmount);
                 if((int)health.CurrentHealth - (int)damageAmount > 0)
                 {
                     health.CurrentHealth -= damageAmount;
@@ -226,7 +227,7 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void Die(uint unitID)
+    public void Die(long unitID)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {

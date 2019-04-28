@@ -4,8 +4,9 @@ using Improbable.Gdk.Core;
 using Generic;
 using Cells;
 using LeyLineHybridECS;
+using UnityEngine;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem)), UpdateBefore(typeof(PlayerStateSystem)), UpdateBefore(typeof(GameStateSystem)), UpdateBefore(typeof(SpawnUnitsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
 {
     public struct UnitData
@@ -58,29 +59,35 @@ public class ExecuteActionsSystem : ComponentSystem
 
                 if(unitWorldIndex == gamestateWorldIndex)
                 {
-                    if(!actions.LockedAction.Equals(actions.NullAction) && gameState != GameStateEnum.planning)
+                    if(actions.LockedAction.Effects.Count != 0 && gameState != GameStateEnum.planning)
                     {
+                        //Debug.Log("lockedAction != nullaction");
+
                         switch (gameState)
                         {
                             case GameStateEnum.spawning:
                                 if(actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
                                 {
                                     SetUnitSpawn(actions.LockedAction.Effects[0].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].CellTargetNested.TargetId);
-                                    actions.LockedAction = actions.NullAction;
-                                    m_UnitData.ActionData[i] = actions;
                                 }
                                 break;
                             case GameStateEnum.attacking:
-
-
-
-
+                                if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.deal_damage)
+                                {
+                                    
+                                    Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].UnitTargetNested.TargetId);
+                                }
                                 break;
                             case GameStateEnum.moving:
+                                if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                                {
 
-
-
-
+                                }
+                                break;
+                            case GameStateEnum.calculate_energy:
+                                //clear locked action
+                                actions.LockedAction = actions.NullAction;
+                                m_UnitData.ActionData[i] = actions;
                                 break;
                         }
                     }
@@ -105,5 +112,29 @@ public class ExecuteActionsSystem : ComponentSystem
                 m_CellData.UnitToSpawnData[i] = unitToSpawn;
             }
         }
+    }
+
+    public void Attack(uint damage, long attackingUnitId, long targetUnitId)
+    {
+        Debug.Log("Execute Attack with damage to unit: " + damage + ", " + targetUnitId);
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+            var actions = m_UnitData.ActionData[i];
+            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
+            var faction = m_UnitData.FactionData[i];
+
+            if (unitId == attackingUnitId)
+            {
+                //set animation triggers / spawn partilce effects / sound fx usw.
+            }
+            else if (unitId == targetUnitId)
+            {
+                //trigger getHit animation / sound fx
+
+            }
+        }
+
+        m_ResourceSystem.DealDamage(targetUnitId, damage);
     }
 }

@@ -4,7 +4,7 @@ component PlayerState {
 	
     id = 104;
 	PlayerStateEnum current_state = 1;
-	uint32 selected_unit_id = 2;
+	int64 selected_unit_id = 2;
 	
 }
 
@@ -12,6 +12,7 @@ enum PlayerStateEnum {
 
 	waiting = 0;
 	unit_selected = 1;
-	ready = 2;
+	waiting_for_target = 2;
+	ready = 3;
 
 }

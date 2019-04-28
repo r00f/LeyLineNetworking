@@ -34,6 +34,8 @@ namespace LeyLineHybridECS
         public struct UnitData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
+            public readonly ComponentDataArray<Actions.Component> ActionsData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
@@ -56,9 +58,26 @@ namespace LeyLineHybridECS
                     {
                         if (playerState.CurrentState != PlayerStateEnum.ready)
                         {
-                            if (AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.unit_selected)
+                            if (playerState.SelectedUnitId != 0)
                             {
-                                SetPlayerState(PlayerStateEnum.unit_selected);
+                                for(int ui = 0; ui < m_UnitData.Length; ui++)
+                                {
+                                    var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
+                                    var actions = m_UnitData.ActionsData[ui];
+
+                                    if(unitId == playerState.SelectedUnitId)
+                                    {
+                                        //if selected unit is waiting for target set playerstate to waitingForTarget
+                                        if (actions.CurrentSelected.Targets.Count != 0 && actions.LockedAction.Targets.Count == 0)
+                                        {
+                                            SetPlayerState(PlayerStateEnum.waiting_for_target);
+                                        }
+                                        else
+                                        {
+                                            SetPlayerState(PlayerStateEnum.unit_selected);
+                                        }
+                                    }
+                                }
                             }
                             else if (!AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.waiting)
                             {

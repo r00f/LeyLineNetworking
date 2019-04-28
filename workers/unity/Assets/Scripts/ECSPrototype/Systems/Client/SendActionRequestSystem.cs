@@ -7,7 +7,8 @@ using Cells;
 using Player;
 using UnityEngine;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+//Update after playerState selected unit has been set
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UISystem))]
 public class SendActionRequestSystem : ComponentSystem
 {
     public struct SelectActionRequestData
@@ -60,6 +61,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
         public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
+        public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
     }
 
     [Inject] private PlayerData m_PlayerData;
@@ -69,12 +71,13 @@ public class SendActionRequestSystem : ComponentSystem
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
             var unitMouseState = m_SelectActionRequestData.MouseStateData[i];
-            var targetEntityId = m_SelectActionRequestData.EntityIds[i].EntityId;
+            var unitEntityId = m_SelectActionRequestData.EntityIds[i].EntityId;
             var unitWorldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
             var clientPath = m_SelectActionRequestData.ClientPathData[i];
             var serverPath = m_SelectActionRequestData.ServerPathData[i];
             var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
             var actionsData = m_SelectActionRequestData.ActionsData[i];
+            var playerState = m_PlayerData.PlayerStateData[0];
 
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
@@ -88,13 +91,19 @@ public class SendActionRequestSystem : ComponentSystem
                 }
             }
 
-            //only request onetime maybe check if currentAction is empty
-            if (unitMouseState.ClickEvent == 1)
+            //if the current selected unit wants an unitTarget
+
+
+
+            //set unit action to basic move it is clicked
+            if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
-                SelectActionCommand(-2, targetEntityId.Id);
+                SelectActionCommand(-2, unitEntityId.Id);
             }
 
-            else if(actionsData.CurrentSelected.Targets.Count != 0)
+            #region targetting
+            //check if unit is the selected unit in playerState and if current selected action is not empty
+            if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Targets.Count != 0)
             {
                 if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
                 {
@@ -107,7 +116,7 @@ public class SendActionRequestSystem : ComponentSystem
                         {
                             var request = Actions.SetTargetCommand.CreateRequest
                             (
-                                targetEntityId,
+                                unitEntityId,
                                 new SetTargetRequest(cellEntityId)
                             );
 
@@ -118,17 +127,19 @@ public class SendActionRequestSystem : ComponentSystem
                 }
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
+
                     for (int ci = 0; ci < m_UnitData.Length; ci++)
                     {
                         var unitMousestate = m_UnitData.MouseStateData[ci];
-                        var unitEntityId = m_UnitData.EntityIds[ci].EntityId.Id;
+                        var targetUnitEntityId = m_UnitData.EntityIds[ci].EntityId.Id;
 
                         if (unitMousestate.ClickEvent == 1)
                         {
+                            Debug.Log("Send SelectUnitRequest: " + targetUnitEntityId);
                             var request = Actions.SetTargetCommand.CreateRequest
                             (
-                                targetEntityId,
-                                new SetTargetRequest(unitEntityId)
+                                unitEntityId,
+                                new SetTargetRequest(targetUnitEntityId)
                             );
 
                             setTargetRequest.RequestsToSend.Add(request);
@@ -136,7 +147,11 @@ public class SendActionRequestSystem : ComponentSystem
                         }
                     }
                 }
+
             }
+
+
+            #endregion
         }
     }
 
@@ -145,14 +160,14 @@ public class SendActionRequestSystem : ComponentSystem
         //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
-            var idComp = m_SelectActionRequestData.EntityIds[i].EntityId;
+            var idCompomnent = m_SelectActionRequestData.EntityIds[i].EntityId;
             var selectActionSender = m_SelectActionRequestData.SelectActionSenders[i];
 
-            if (idComp.Id == entityId)
+            if (idCompomnent.Id == entityId)
             {
                 var request = Actions.SelectActionCommand.CreateRequest
                 (
-                idComp,
+                idCompomnent,
                 new SelectActionRequest(actionIndex)
                 );
 

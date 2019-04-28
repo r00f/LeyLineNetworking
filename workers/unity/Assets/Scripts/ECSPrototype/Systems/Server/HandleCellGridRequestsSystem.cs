@@ -10,7 +10,7 @@ using Generic;
 using Cells;
 using Unit;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ResourceSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
@@ -23,6 +23,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public ComponentDataArray<Actions.CommandRequests.SelectActionCommand> ReceivedSelectActionRequests;
         public ComponentDataArray<Actions.Component> ActionsData;
+        public readonly ComponentDataArray<FactionComponent.Component> Faction;
     }
 
     [Inject] private SelectActionRequestData m_SelectActionRequestData;
@@ -97,9 +98,13 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var cellsToMarkData = m_SelectActionRequestData.CellsToMarkData[i];
             var coord = m_SelectActionRequestData.CoordinateData[i].CubeCoordinate;
             var worldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
+            var faction = m_SelectActionRequestData.Faction[i];
 
             cellsToMarkData.SetClientRange = false;
             m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
+
+            m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
+            actionData.LockedAction = actionData.NullAction;
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -167,20 +172,13 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
             var faction = m_SetTargetRequestData.Faction[i];
 
+            Debug.Log("SetTargetRequest to TargetId: " + setTargetRequest.Requests[0].Payload.TargetId);
+
             foreach (var str in setTargetRequest.Requests)
             {
                 long id = str.Payload.TargetId;
-                if (!actionData.LockedAction.Equals(actionData.NullAction))
-                {
-                   
-                    Debug.Log("Ayaya");
-                    m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
-                    actionData.LockedAction = actionData.NullAction;
-                }
-                
                 switch (actionData.CurrentSelected.Targets[0].TargetType)
                 {
-                    
                     case TargetTypeEnum.cell:
                         for(int ci = 0; ci < m_CellData.Length; ci++)
                         {
@@ -223,11 +221,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         for (int ci = 0; ci < m_UnitData.Length; ci++)
                         {
                             var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
-
                             if (unitId == id)
                             {
-                                //check if in range
-
                                 actionData.LockedAction = actionData.CurrentSelected;
                                 var locked = actionData.LockedAction;
                                 var t = actionData.LockedAction.Targets[0];
@@ -258,8 +253,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                             break;
                 }
+
+                actionData.CurrentSelected = actionData.NullAction;
             }
-            
             m_SetTargetRequestData.ActionsData[i] = actionData;
         }
 
@@ -280,7 +276,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 {
                     var gameState = m_GameStateData.GameState[gi].CurrentState;
 
-                    if (gameState == Generic.GameStateEnum.calculate_energy)
+                    if (gameState == GameStateEnum.calculate_energy)
                     {
                         serverPath.Path = new CellAttributeList
                         {

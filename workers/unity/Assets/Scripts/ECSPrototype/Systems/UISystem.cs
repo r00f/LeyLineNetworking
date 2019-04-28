@@ -220,7 +220,8 @@ namespace LeyLineHybridECS
                         }
                     }
 
-                    if(playerState.SelectedUnitId != unitId)
+                    //only select if current action does not require unit target
+                    if(playerState.SelectedUnitId != unitId && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                     {
                         playerState.SelectedUnitId = unitId;
                         m_AuthoritativePlayerData.PlayerStateData[0] = playerState;
@@ -339,7 +340,7 @@ namespace LeyLineHybridECS
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
 
 
-                if(playerState.CurrentState != PlayerStateEnum.unit_selected)
+                if(playerState.CurrentState != PlayerStateEnum.unit_selected && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                 {
                     for (int bi = 0; bi < UIRef.Actions.Count; bi++)
                     {

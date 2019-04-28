@@ -8,12 +8,8 @@ using Player;
 using Cells;
 using Unit;
 using LeyLineHybridECS;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 
 public static class LeyLineEntityTemplates {
-
-
 
     private static readonly List<string> AllWorkerAttributes =
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
@@ -164,7 +160,7 @@ public static class LeyLineEntityTemplates {
         var energy = new PlayerEnergy.Snapshot
         {
             MaxEnergy = 20,
-            Energy = 5,
+            Energy = 20,
             BaseIncome = 1
         };
 
@@ -257,7 +253,7 @@ public static class LeyLineEntityTemplates {
         var health = new Health.Snapshot
         {
             MaxHealth = Stats.BaseHealth,
-            CurrentHealth = Stats.BaseHealth - 2
+            CurrentHealth = Stats.BaseHealth
         };
 
         var energy = new Energy.Snapshot

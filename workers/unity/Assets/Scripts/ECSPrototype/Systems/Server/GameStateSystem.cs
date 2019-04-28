@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
-using Improbable.PlayerLifecycle;
 using Unit;
 using Generic;
 using Player;
