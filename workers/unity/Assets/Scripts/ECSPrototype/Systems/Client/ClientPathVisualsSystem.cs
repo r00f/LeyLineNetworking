@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using Improbable.Gdk.Core;
+﻿using Improbable.Gdk.Core;
 using System.Collections.Generic;
 using Cells;
 using LeyLineHybridECS;
@@ -12,7 +10,6 @@ using Player;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ClientPathVisualsSystem : ComponentSystem
 {
-
     public struct ClientPathData
     {
         public readonly int Length;

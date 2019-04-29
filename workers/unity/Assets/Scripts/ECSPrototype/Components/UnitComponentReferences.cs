@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class UnitComponentReferences : MonoBehaviour
 {
+    [Header("UnitVisuals")]
+    public GameObject RotationParent;
+    public Animator Animator;
+
     [Header("PlayerColorMeshRenderers")]
     public List<MeshRenderer> MeshRenderers;
     public Color PlayerColor;
@@ -15,7 +19,4 @@ public class UnitComponentReferences : MonoBehaviour
     [Header("SelectionCircle")]
     public GameObject SelectionCircleGO;
     public MeshRenderer SelectionMeshRenderer;
-
-
-
 }

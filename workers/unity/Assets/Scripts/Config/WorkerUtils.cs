@@ -20,7 +20,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<AddComponentsSystem>();
         world.GetOrCreateManager<PlayerStateSystem>();
         world.GetOrCreateManager<SendActionRequestSystem>();
-        world.GetOrCreateManager<ClientMovementSystem>();
+        world.GetOrCreateManager<UnitAnimationSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
         world.GetOrCreateManager<ClientPathVisualsSystem>();
         world.GetOrCreateManager<VisionSystem_Client>();

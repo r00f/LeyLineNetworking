@@ -53,6 +53,8 @@ namespace LeyLineHybridECS
 
         [Inject] ResourceSystem m_ResourceSystem;
 
+        [Inject] ExecuteActionsSystem m_ExecuteSystem;
+
         protected override void OnUpdate()
         {
             for (int i = 0; i < m_Data.Length; i++)
@@ -84,6 +86,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
+                            m_ExecuteSystem.ClearAllLockedActions(gameStateWorldIndex);
                             gameState.CurrentPlanningTime = gameState.PlanningTime;
                             gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;

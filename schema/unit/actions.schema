@@ -5,8 +5,6 @@ import "unit/action_effect.schema";
 component Actions{
 	
     id = 125;
-	
-	
 	Action basic_move = 1;
 	Action basic_attack = 2;
 	list<Action> other_actions = 3;
@@ -21,10 +19,11 @@ component Actions{
 
 
 type Action {
-	list<ActionTarget> targets = 1;
-	list<unit.ActionEffect> effects = 2;
-	uint32 combined_cost = 3;
-
+	string name = 1;
+	uint32 combined_cost = 2;
+	int32 index = 3;
+	list<ActionTarget> targets = 4;
+	list<unit.ActionEffect> effects = 5;
 }
 
 type ActionTarget {

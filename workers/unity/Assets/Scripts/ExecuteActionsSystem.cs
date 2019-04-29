@@ -74,7 +74,6 @@ public class ExecuteActionsSystem : ComponentSystem
                             case GameStateEnum.attacking:
                                 if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.deal_damage)
                                 {
-                                    
                                     Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].UnitTargetNested.TargetId);
                                 }
                                 break;
@@ -85,9 +84,7 @@ public class ExecuteActionsSystem : ComponentSystem
                                 }
                                 break;
                             case GameStateEnum.calculate_energy:
-                                //clear locked action
-                                actions.LockedAction = actions.NullAction;
-                                m_UnitData.ActionData[i] = actions;
+
                                 break;
                         }
                     }
@@ -96,7 +93,23 @@ public class ExecuteActionsSystem : ComponentSystem
         }
     }
 
-    public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, long cellId)
+    public void ClearAllLockedActions(uint worldIndex)
+    {
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+            var actions = m_UnitData.ActionData[i];
+
+            if(unitWorldIndex == worldIndex)
+            {
+                //clear locked action
+                actions.LockedAction = actions.NullAction;
+                m_UnitData.ActionData[i] = actions;
+            }
+        }
+    }
+
+        public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, long cellId)
     {
         for(int i= 0; i < m_CellData.Length; i++)
         {

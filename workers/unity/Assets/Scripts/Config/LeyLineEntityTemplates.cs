@@ -202,6 +202,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
+
     public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
     {
         var client = workerId;
@@ -296,7 +297,9 @@ public static class LeyLineEntityTemplates {
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
     }
+
     static Actions.Snapshot SetActions (Unit_BaseDataSet inStats){
+
         Action myBasicAttack = new Action();
         myBasicAttack.Targets = new List<ActionTarget>();
         myBasicAttack.Effects = new List<ActionEffect>();
@@ -304,28 +307,30 @@ public static class LeyLineEntityTemplates {
         myBasicMove.Targets = new List<ActionTarget>();
         myBasicMove.Effects = new List<ActionEffect>();
         Action myNullableAction = new Action();
+        myNullableAction.Index = -3;
         myNullableAction.Targets = new List<ActionTarget>();
         myNullableAction.Effects = new List<ActionEffect>();
         List<Action> myOtherActions = new List<Action>();
 
-        if(inStats.BasicAttack != null)
+
+        if (inStats.BasicMove != null)
         {
-            myBasicAttack = SetAction(inStats.BasicAttack);
+            myBasicMove = SetAction(inStats.BasicMove, -2);
         }
 
-        if(inStats.BasicMove != null)
+        if (inStats.BasicAttack != null)
         {
-            myBasicMove = SetAction(inStats.BasicMove);
+            myBasicAttack = SetAction(inStats.BasicAttack, -1);
         }
 
-        foreach(ECSAction a in inStats.Actions)
+        for(int i = 0; i < inStats.Actions.Count; i++)
         {
-            myOtherActions.Add(SetAction(a));
+            myOtherActions.Add(SetAction(inStats.Actions[i], i));
         }
 
-        foreach(ECSAction a in inStats.SpawnActions)
+        for (int i = 0; i < inStats.SpawnActions.Count; i++)
         {
-            myOtherActions.Add(SetAction(a));
+            myOtherActions.Add(SetAction(inStats.SpawnActions[i], i + inStats.Actions.Count));
         }
 
         var newActions = new Actions.Snapshot
@@ -342,9 +347,11 @@ public static class LeyLineEntityTemplates {
         return newActions;
         }
 
-    static Action SetAction (ECSAction inAction)
+    static Action SetAction (ECSAction inAction, int index)
     {
         Action newAction = new Action();
+        newAction.Name = inAction.name;
+        newAction.Index = index;
         newAction.Targets = new List<ActionTarget>();
         newAction.Effects = new List<ActionEffect>();
         newAction.CombinedCost = 0;

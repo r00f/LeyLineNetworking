@@ -249,8 +249,7 @@ MonoBehaviour:
   BasicMove: {fileID: 11400000, guid: e3b7e39962e948c4aaeb72ea32bc7b0a, type: 2}
   BasicAttack: {fileID: 11400000, guid: d51596d7ea1b837439db264152a65798, type: 2}
   IsHero: 1
-  Actions:
-  - {fileID: 11400000, guid: b8b7a9c01245f3a49a0b57e14483d56c, type: 2}
+  Actions: []
   SpawnActions:
   - {fileID: 11400000, guid: 990555597dab8c74ba70b2349dab9666, type: 2}
 --- !u!114 &1130299993275380547
@@ -293,6 +292,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d542142e32d1de44a9c563f6a3cc2e61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  RotationParent: {fileID: 0}
+  Animator: {fileID: 0}
   MeshRenderers:
   - {fileID: 9100260055605795712}
   - {fileID: 9100260055605795714}
