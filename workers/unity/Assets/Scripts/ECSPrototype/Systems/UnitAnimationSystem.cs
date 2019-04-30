@@ -66,9 +66,23 @@ public class UnitAnimationSystem : ComponentSystem
                         //move
                         transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
                         rotateTarget = serverPosition.Coords.ToUnityVector();
+                        
                     }
                     else
                     {
+                        //if moveAction
+                        if(actions.LockedAction.Index == -2)
+                        {
+                            if (transform.position == GetTargetPosition(actions.LockedAction.Targets[0].TargetId))
+                            {
+                                if(!animatorComponent.DestinationReachTriggerSet)
+                                {
+                                    animatorComponent.Animator.SetTrigger("DestinationReached");
+                                    animatorComponent.DestinationReachTriggerSet = true;
+                                }
+                            }
+                        }
+
                         rotateTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
                     }
 
@@ -78,6 +92,11 @@ public class UnitAnimationSystem : ComponentSystem
             }
             else
             {
+                if (animatorComponent.DestinationReachTriggerSet)
+                {
+                    animatorComponent.Animator.ResetTrigger("DestinationReached");
+                    animatorComponent.DestinationReachTriggerSet = false;
+                }
                 if (animatorComponent.ExecuteTriggerSet)
                 {
                     animatorComponent.Animator.ResetTrigger("Execute");

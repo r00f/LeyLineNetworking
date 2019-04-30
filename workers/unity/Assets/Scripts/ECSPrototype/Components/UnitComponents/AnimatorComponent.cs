@@ -10,4 +10,6 @@ public class AnimatorComponent : MonoBehaviour
     public Animator Animator;
     [SerializeField]
     public bool ExecuteTriggerSet;
+    [SerializeField]
+    public bool DestinationReachTriggerSet;
 }
