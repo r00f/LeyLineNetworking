@@ -12,4 +12,5 @@ public class AnimatorComponent : MonoBehaviour
     public bool ExecuteTriggerSet;
     [SerializeField]
     public bool DestinationReachTriggerSet;
+    public Vector3 DestinationPosition;
 }

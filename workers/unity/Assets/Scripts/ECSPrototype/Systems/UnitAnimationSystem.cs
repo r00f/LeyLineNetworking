@@ -50,39 +50,25 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
             {
-                if (actions.LockedAction.Index != -3 && !animatorComponent.ExecuteTriggerSet)
-                {
-                    animatorComponent.Animator.SetTrigger("Execute");
-                    animatorComponent.ExecuteTriggerSet = true;
-                }
-
-
                 if(actions.LockedAction.Index != -3)
                 {
                     Vector3 rotateTarget;
 
-                    if (transform.position != serverPosition.Coords.ToUnityVector())
+                    if (animatorComponent.DestinationPosition != GetTargetPosition(actions.LockedAction.Targets[0].TargetId))
+                        animatorComponent.DestinationPosition = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+
+                    if (!animatorComponent.ExecuteTriggerSet)
                     {
-                        //move
-                        transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
+                        animatorComponent.Animator.SetTrigger("Execute");
+                        animatorComponent.ExecuteTriggerSet = true;
+                    }
+
+                    if(actions.LockedAction.Index == -2)
+                    {
                         rotateTarget = serverPosition.Coords.ToUnityVector();
-                        
                     }
                     else
                     {
-                        //if moveAction
-                        if(actions.LockedAction.Index == -2)
-                        {
-                            if (transform.position == GetTargetPosition(actions.LockedAction.Targets[0].TargetId))
-                            {
-                                if(!animatorComponent.DestinationReachTriggerSet)
-                                {
-                                    animatorComponent.Animator.SetTrigger("DestinationReached");
-                                    animatorComponent.DestinationReachTriggerSet = true;
-                                }
-                            }
-                        }
-
                         rotateTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
                     }
 
@@ -101,6 +87,22 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     animatorComponent.Animator.ResetTrigger("Execute");
                     animatorComponent.ExecuteTriggerSet = false;
+                }
+            }
+
+            if (transform.position != serverPosition.Coords.ToUnityVector())
+            {
+                //move
+                transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
+            }
+
+            if (transform.position == animatorComponent.DestinationPosition)
+            {
+                if (!animatorComponent.DestinationReachTriggerSet)
+                {
+                    animatorComponent.Animator.SetTrigger("DestinationReached");
+                    animatorComponent.DestinationPosition = Vector3.zero;
+                    animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
         }
