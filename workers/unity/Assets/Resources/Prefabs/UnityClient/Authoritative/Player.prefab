@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8195576728557857289}
   - component: {fileID: 1485824628171233307}
-  - component: {fileID: 2146476478158456617}
   - component: {fileID: 2166054225254654349}
   - component: {fileID: 2852161677659539131}
   m_Layer: 0
@@ -76,14 +75,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: 0.022
---- !u!92 &2146476478158456617
-Behaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1291058334780168697}
-  m_Enabled: 1
 --- !u!124 &2166054225254654349
 Behaviour:
   m_ObjectHideFlags: 0
@@ -191,11 +182,11 @@ MonoBehaviour:
       cameraRotationRate: {x: 100, y: 100}
     zoom:
       invertZoom: 0
-      defaultZoom: 15
-      minZoom: 10
-      maxZoom: 20
+      defaultZoom: 10
+      minZoom: 8
+      maxZoom: 12
       zoomRate: 10
-      constZoomRate: 0
+      constZoomRate: 1
 --- !u!114 &566376838980519233
 MonoBehaviour:
   m_ObjectHideFlags: 0
