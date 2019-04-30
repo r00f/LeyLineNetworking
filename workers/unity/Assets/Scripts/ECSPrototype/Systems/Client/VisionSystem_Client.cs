@@ -3,7 +3,7 @@ using Unity.Entities;
 using Improbable.Gdk.Core;
 using Generic;
 using Player;
-using Unit;
+using Cell;
 
 namespace LeyLineHybridECS
 {
@@ -42,7 +42,7 @@ namespace LeyLineHybridECS
                     var visible = m_IsVisible.Visible[e];
                     visible.Value = 0;
 
-                    foreach (Cells.CellAttributes c in playerVision.CellsInVisionrange)
+                    foreach (CellAttributes c in playerVision.CellsInVisionrange)
                     {
                         if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
                         {

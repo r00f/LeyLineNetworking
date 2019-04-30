@@ -1,12 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Entities;
-using Unity.Mathematics;
+﻿using Unity.Entities;
 using Improbable;
 using Improbable.Gdk.Core;
 using Unit;
 using Generic;
-using Cells;
+using Cell;
 using Player;
 
 namespace LeyLineHybridECS
@@ -143,7 +140,7 @@ namespace LeyLineHybridECS
                         };
                     }
                 }
-                else if(celldata.CellAttributes.Cell.IsTaken)
+                else if(celldata.CellAttributes.Cell.IsTaken && m_CellData.MarkerStateData[i].CurrentState != MarkerState.State.Reachable)
                 {
                     if (m_CellData.MarkerStateData[i].CurrentState != MarkerState.State.Neutral)
                     {

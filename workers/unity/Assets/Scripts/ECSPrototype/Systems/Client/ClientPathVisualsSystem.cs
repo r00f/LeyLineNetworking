@@ -1,6 +1,6 @@
 ﻿using Improbable.Gdk.Core;
 using System.Collections.Generic;
-using Cells;
+using Cell;
 using LeyLineHybridECS;
 using Unity.Entities;
 using Unit;

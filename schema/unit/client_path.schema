@@ -1,11 +1,11 @@
 package unit;
 
-import "cells/cell_attributes.schema";
+import "cell/cell_attributes.schema";
 
 component ClientPath {
 	
     id = 109;
-	cells.CellAttributeList path = 1;
+	cell.CellAttributeList path = 1;
 
 }
 

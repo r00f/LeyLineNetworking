@@ -1,12 +1,9 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Entities;
-using Cells;
+﻿using Unity.Entities;
+using Cell;
 using Unit;
 using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
-
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
@@ -22,9 +19,9 @@ public class UnitLifeCycleSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+        public readonly ComponentDataArray<Health.Component> HealthData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly EntityArray Entities;
-        public readonly ComponentDataArray<ServerPath.Component> PathData;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public SubtractiveComponent<UnitStateData> UnitState;
     }

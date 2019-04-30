@@ -3,7 +3,7 @@ using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Generic;
 using Unit;
-using Cells;
+using Cell;
 using Player;
 using UnityEngine;
 
@@ -18,7 +18,6 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
-        public readonly ComponentDataArray<ServerPath.Component> ServerPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Actions.Component> ActionsData;
         public ComponentDataArray<Actions.CommandSenders.SelectActionCommand> SelectActionSenders;
@@ -74,7 +73,6 @@ public class SendActionRequestSystem : ComponentSystem
             var unitEntityId = m_SelectActionRequestData.EntityIds[i].EntityId;
             var unitWorldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
             var clientPath = m_SelectActionRequestData.ClientPathData[i];
-            var serverPath = m_SelectActionRequestData.ServerPathData[i];
             var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
             var actionsData = m_SelectActionRequestData.ActionsData[i];
             var playerState = m_PlayerData.PlayerStateData[0];

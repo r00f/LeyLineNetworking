@@ -6,7 +6,7 @@ using Generic;
 using System.Collections.Generic;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Gdk;
-using Cells;
+using Cell;
 using Improbable;
 
 namespace LeyLineHybridECS

@@ -1,14 +1,11 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Improbable;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using System.Collections.Generic;
-using System.Linq;
-using System;
 using Generic;
-using Cells;
+using Cell;
 using Player;
 using Unit;
 
@@ -42,7 +39,7 @@ public class VisionSystem_Server : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WordIndexData;
         public readonly ComponentDataArray<CubeCoordinate.Component> UnitCoordinateData;
         public readonly ComponentDataArray<FactionComponent.Component> FactionComponent;
-        public readonly ComponentDataArray<ServerPath.Component> ServerPath;
+        public readonly ComponentDataArray<Health.Component> HealthData;
         public ComponentDataArray<Vision.Component> VisionComponent;
     }
     [Inject]

@@ -1,9 +1,4 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Entities;
-using Unity.Mathematics;
-using System.Collections.Generic;
-using Improbable;
+﻿using Unity.Entities;
 using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS

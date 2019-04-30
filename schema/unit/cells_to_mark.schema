@@ -1,12 +1,12 @@
 package unit;
 
-import "cells/cell_attributes.schema";
+import "cell/cell_attributes.schema";
 
 component CellsToMark {
 	
     id = 106;
-	list<cells.CellAttributes> cells_in_range = 1;
-	map<cells.CellAttribute, cells.CellAttributeList> cached_paths = 2;
+	list<cell.CellAttributes> cells_in_range = 1;
+	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 2;
 	bool set_client_range = 3;
 }
 

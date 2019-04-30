@@ -13,7 +13,6 @@ public class UnitAnimationSystem : ComponentSystem
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Actions.Component> ActionsData;
         public readonly ComponentDataArray<Position.Component> Positions;
-        public readonly ComponentDataArray<ServerPath.Component> ServerPaths;
         public ComponentArray<AnimatorComponent> AnimatorComponents;
         public ComponentArray<Transform> Transforms;
     }
@@ -44,7 +43,6 @@ public class UnitAnimationSystem : ComponentSystem
             var serverPosition = m_UnitData.Positions[i];
             var transform = m_UnitData.Transforms[i];
             var animatorComponent = m_UnitData.AnimatorComponents[i];
-            var serverPath = m_UnitData.ServerPaths[i];
             var actions = m_UnitData.ActionsData[i];
 
             if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
@@ -52,8 +50,12 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
             {
-                if (m_GameStateData.GameState[0].CurrentState == GameStateEnum.spawning && actions.LockedAction.Index != -3)
+                if (actions.LockedAction.Index != -3 && !animatorComponent.ExecuteTriggerSet)
+                {
                     animatorComponent.Animator.SetTrigger("Execute");
+                    animatorComponent.ExecuteTriggerSet = true;
+                }
+
 
                 if(actions.LockedAction.Index != -3)
                 {
@@ -67,14 +69,7 @@ public class UnitAnimationSystem : ComponentSystem
                     }
                     else
                     {
-                        if (actions.LockedAction.Targets[0].TargetType == TargetTypeEnum.cell)
-                        {
-                            rotateTarget = GetTargetPosition(actions.LockedAction.Targets[0].CellTargetNested.TargetId);
-                        }
-                        else
-                        {
-                            rotateTarget = GetTargetPosition(actions.LockedAction.Targets[0].UnitTargetNested.TargetId);
-                        }
+                        rotateTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
                     }
 
                     Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, rotateTarget, 3);
@@ -83,7 +78,11 @@ public class UnitAnimationSystem : ComponentSystem
             }
             else
             {
-                animatorComponent.Animator.ResetTrigger("Execute");
+                if (animatorComponent.ExecuteTriggerSet)
+                {
+                    animatorComponent.Animator.ResetTrigger("Execute");
+                    animatorComponent.ExecuteTriggerSet = false;
+                }
             }
         }
     }
@@ -106,6 +105,7 @@ public class UnitAnimationSystem : ComponentSystem
     public Vector3 RotateTowardsDirection(Transform originTransform, Vector3 targetPosition, float rotationSpeed)
     {
         Vector3 targetDir = targetPosition - originTransform.position;
+        targetDir.y = 0;
         float rotSpeed = Time.deltaTime * rotationSpeed;
         Vector3 direction = Vector3.RotateTowards(originTransform.forward, targetDir, rotSpeed, 0.0f);
         

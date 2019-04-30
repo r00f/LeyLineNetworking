@@ -1,5 +1,5 @@
 ﻿using Unity.Entities;
-using Cells;
+using Cell;
 using Generic;
 using Unit;
 using Improbable.Gdk.Core;
@@ -35,7 +35,7 @@ public class ManalithSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<SpatialEntityId> Ids;
         public readonly ComponentDataArray<FactionComponent.Component> Factions;
-        public readonly ComponentDataArray<ServerPath.Component> Paths;
+        public readonly ComponentDataArray<Actions.Component> ActionsData;
         public ComponentDataArray<Energy.Component> EnergyData;
     }
 
@@ -53,8 +53,7 @@ public class ManalithSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        //reset unit harvesting if they have a path
-
+        //reset unit harvesting if they have a locked moveaction
         for (int i = 0; i < m_GameStateData.Length; i++)
         {
             var gameStateWorldIndex = m_GameStateData.WorldIndexData[i].Value;
@@ -64,11 +63,11 @@ public class ManalithSystem : ComponentSystem
             {
                 var unitWorldIndex = m_UnitData.WorldIndexData[ui].Value;
                 var energy = m_UnitData.EnergyData[ui];
-                var path = m_UnitData.Paths[ui].Path.CellAttributes.Count;
+                var lockedAction = m_UnitData.ActionsData[ui].LockedAction;
 
                 if (gameStateWorldIndex == unitWorldIndex)
                 {
-                    if (gameState == GameStateEnum.moving && energy.Harvesting && path != 0)
+                    if (gameState == GameStateEnum.moving && energy.Harvesting && lockedAction.Index == -2)
                     {
                         energy.Harvesting = false;
                         m_UnitData.EnergyData[ui] = energy;

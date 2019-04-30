@@ -1,12 +1,10 @@
 ﻿using Improbable.Gdk.Core;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using LeyLineHybridECS;
-using System.Collections.Generic;
 using Generic;
 using Unit;
-using Cells;
+using Cell;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]

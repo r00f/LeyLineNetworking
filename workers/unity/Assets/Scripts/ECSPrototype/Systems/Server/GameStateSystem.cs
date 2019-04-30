@@ -3,7 +3,7 @@ using Unity.Entities;
 using Unit;
 using Generic;
 using Player;
-using Cells;
+using Cell;
 using Improbable.Gdk.Core;
 
 namespace LeyLineHybridECS
@@ -34,7 +34,7 @@ namespace LeyLineHybridECS
         public struct UnitData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<ServerPath.Component> Paths;
+            public readonly ComponentDataArray<Actions.Component> ActionsData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
@@ -114,7 +114,7 @@ namespace LeyLineHybridECS
                         m_Data.GameStateData[i] = gameState;
                         break;
                     case GameStateEnum.moving:
-                        if (AllUnitsIdle(gameStateWorldIndex))
+                        if (NoUnitMoving(gameStateWorldIndex))
                         {
                             gameState.CurrentState = GameStateEnum.calculate_energy;
                             m_Data.GameStateData[i] = gameState;
@@ -188,7 +188,7 @@ namespace LeyLineHybridECS
             return true;
         }
 
-        private bool AllUnitsIdle(uint gameStateWorldIndex)
+        private bool NoUnitMoving(uint gameStateWorldIndex)
         {
             //loop through all Units to check if idle
             for (int i = 0; i < m_UnitData.Length; i++)
@@ -197,9 +197,13 @@ namespace LeyLineHybridECS
 
                 if (unitWorldIndex == gameStateWorldIndex)
                 {
-                    var path = m_UnitData.Paths[i];
-                    if (path.Path.CellAttributes.Count != 0)
-                        return false;
+                    var lockedAction = m_UnitData.ActionsData[i].LockedAction;
+
+                    if(lockedAction.Index == -2)
+                    {
+                        if (lockedAction.Targets[0].Mods[0].CellAttributes.CellAttributes.Count != 0)
+                            return false;
+                    }
                 }
             }
             return true;

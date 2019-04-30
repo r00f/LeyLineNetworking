@@ -5,7 +5,7 @@ using UnityEngine;
 using Snapshot = Improbable.Gdk.Core.Snapshot;
 using LeyLineHybridECS;
 using System.Collections.Generic;
-using Cells;
+using Cell;
 
 namespace BlankProject.Editor
 {
@@ -55,7 +55,7 @@ namespace BlankProject.Editor
                 };
 
                 
-                foreach (Cell n in m.leyLineCircle)
+                foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
                     circle.CellAttributes.Add(new CellAttribute
                     {
@@ -75,14 +75,14 @@ namespace BlankProject.Editor
 
         private static void AddCellGrid(Snapshot snapshot)
         {
-            foreach (Cell c in Object.FindObjectsOfType<Cell>())
+            foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
             {
                 var neighbours = new CellAttributeList
                 {
                     CellAttributes = new List<CellAttribute>()
                 };
 
-                foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                foreach(LeyLineHybridECS.Cell n in c.GetComponent<Neighbours>().NeighboursList)
                 {
                     neighbours.CellAttributes.Add(new CellAttribute
                     {

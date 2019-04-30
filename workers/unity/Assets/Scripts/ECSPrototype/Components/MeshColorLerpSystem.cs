@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
-using Improbable.Gdk.PlayerLifecycle;
-using Improbable.Worker.CInterop;
+using Improbable;
+using Cell;
+using Generic;
+using Player;
 
 namespace LeyLineHybridECS
 {
@@ -47,25 +48,25 @@ namespace LeyLineHybridECS
 
             playerGroup = Worlds.ClientWorld.CreateComponentGroup(
 
-                ComponentType.Create<Authoritative<Player.PlayerState.Component>>(),
-                ComponentType.Create<Generic.WorldIndex.Component>()
+                ComponentType.Create<Authoritative<PlayerState.Component>>(),
+                ComponentType.Create<WorldIndex.Component>()
 
             );
 
             gameControllerGroup = Worlds.ClientWorld.CreateComponentGroup(
 
-                ComponentType.Create<Generic.GameState.Component>(),
-                ComponentType.Create<Generic.WorldIndex.Component>(),
-                ComponentType.Create<Improbable.Position.Component>()
+                ComponentType.Create<GameState.Component>(),
+                ComponentType.Create<WorldIndex.Component>(),
+                ComponentType.Create<Position.Component>()
 
             );
 
             //var Manager = World.Active.GetExistingManager<EntityManager>();
             manalithGroup = Worlds.ClientWorld.CreateComponentGroup(
 
-                ComponentType.Create<Generic.FactionComponent.Component>(),
-                ComponentType.Create<Cells.CircleCells.Component>(),
-                ComponentType.Create<Improbable.Position.Component>()
+                ComponentType.Create<FactionComponent.Component>(),
+                ComponentType.Create<CircleCells.Component>(),
+                ComponentType.Create<Position.Component>()
             );
 
         }
@@ -74,12 +75,12 @@ namespace LeyLineHybridECS
         {
             if(m_ProjectorAddedData.Length != 0 && playerGroup.GetEntityArray().Length != 0)
             {
-                var playerWorldIndex = playerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[0].Value;
+                var playerWorldIndex = playerGroup.GetComponentDataArray<WorldIndex.Component>()[0].Value;
 
                 for (int i = 0; i < gameControllerGroup.GetEntityArray().Length; i++)
                 {
-                    var gameControllerWorldIndex = gameControllerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[i].Value;
-                    var position = gameControllerGroup.GetComponentDataArray<Improbable.Position.Component>()[i].Coords.ToUnityVector();
+                    var gameControllerWorldIndex = gameControllerGroup.GetComponentDataArray<WorldIndex.Component>()[i].Value;
+                    var position = gameControllerGroup.GetComponentDataArray<Position.Component>()[i].Coords.ToUnityVector();
 
                     if (gameControllerWorldIndex == playerWorldIndex)
                     {
@@ -102,8 +103,8 @@ namespace LeyLineHybridECS
 
                 for (int i = 0; i < manalithGroup.GetEntityArray().Length; i++)
                 {
-                    var faction = manalithGroup.GetComponentDataArray<Generic.FactionComponent.Component>()[i];
-                    var position = manalithGroup.GetComponentDataArray<Improbable.Position.Component>()[i].Coords.ToUnityVector().sqrMagnitude;
+                    var faction = manalithGroup.GetComponentDataArray<FactionComponent.Component>()[i];
+                    var position = manalithGroup.GetComponentDataArray<Position.Component>()[i].Coords.ToUnityVector().sqrMagnitude;
 
                     if (position == circlePos)
                     {

@@ -2,7 +2,7 @@
 using Unit;
 using Improbable.Gdk.Core;
 using Generic;
-using Cells;
+using Cell;
 using LeyLineHybridECS;
 using UnityEngine;
 
@@ -68,13 +68,13 @@ public class ExecuteActionsSystem : ComponentSystem
                             case GameStateEnum.spawning:
                                 if(actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
                                 {
-                                    SetUnitSpawn(actions.LockedAction.Effects[0].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].CellTargetNested.TargetId);
+                                    SetUnitSpawn(actions.LockedAction.Effects[0].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].TargetId);
                                 }
                                 break;
                             case GameStateEnum.attacking:
                                 if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.deal_damage)
                                 {
-                                    Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].UnitTargetNested.TargetId);
+                                    Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].TargetId);
                                 }
                                 break;
                             case GameStateEnum.moving:

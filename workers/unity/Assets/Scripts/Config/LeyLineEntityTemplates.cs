@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿
+using System.Collections.Generic;
 using Improbable;
 using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.StandardTypes;
 using Generic;
 using Player;
-using Cells;
+using Cell;
 using Unit;
 using LeyLineHybridECS;
 
@@ -202,7 +203,6 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-
     public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
     {
         var client = workerId;
@@ -230,11 +230,6 @@ public static class LeyLineEntityTemplates {
         };
 
         var clientPathSnapshot = new ClientPath.Snapshot
-        {
-            Path = new CellAttributeList(new List<CellAttribute>()),
-        };
-
-        var serverPathSnapshot = new ServerPath.Snapshot
         {
             Path = new CellAttributeList(new List<CellAttribute>()),
         };
@@ -288,7 +283,6 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
-        template.AddComponent(serverPathSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientPathSnapshot, client);
@@ -390,7 +384,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryAoE go1 = t as SecondaryAoE;
                         TargetMod mod = new TargetMod();
-                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
                         mod.ModType = ModTypeEnum.aoe;
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
@@ -399,7 +393,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryPath go1 = t as SecondaryPath;
                         TargetMod mod = new TargetMod();
-                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
                         mod.ModType = ModTypeEnum.path;
                         mod.PathNested.Costpertile = go1.costPerTile;
                         newAT.Mods.Add(mod);
@@ -449,7 +443,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryAoE go1 = t as SecondaryAoE;
                         TargetMod mod = new TargetMod();
-                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
                         mod.ModType = ModTypeEnum.aoe;
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
@@ -458,7 +452,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryPath go1 = t as SecondaryPath;
                         TargetMod mod = new TargetMod();
-                        mod.SecondaryCoordinates = new List<Vector3f>();
+                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
                         mod.ModType = ModTypeEnum.path;
                         newAT.Mods.Add(mod);
 

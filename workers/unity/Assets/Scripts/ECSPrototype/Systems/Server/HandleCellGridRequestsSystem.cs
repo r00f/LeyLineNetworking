@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -7,7 +6,7 @@ using LeyLineHybridECS;
 using System.Collections.Generic;
 using System.Linq;
 using Generic;
-using Cells;
+using Cell;
 using Unit;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
@@ -33,7 +32,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly int Length;
         public ComponentDataArray<Actions.CommandRequests.SetTargetCommand> ReceivedSetTargetRequests;
         public ComponentDataArray<Actions.Component> ActionsData;
-        public ComponentDataArray<ServerPath.Component> ServerPathData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<FactionComponent.Component> Faction;
@@ -41,16 +39,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     }
 
     [Inject] private SetTargetRequestData m_SetTargetRequestData;
-
-
-    public struct ServerPathData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public ComponentDataArray<ServerPath.Component> ServerPaths;
-    }
-
-    [Inject] private ServerPathData m_ServerPathData;
 
     public struct CellData
     {
@@ -105,6 +93,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
             actionData.LockedAction = actionData.NullAction;
+
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -167,7 +156,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         {
             var actionData = m_SetTargetRequestData.ActionsData[i];
             var setTargetRequest = m_SetTargetRequestData.ReceivedSetTargetRequests[i];
-            var serverPath = m_SetTargetRequestData.ServerPathData[i];
             var unitWorldIndex = m_SetTargetRequestData.WorldIndexData[i].Value;
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
             var faction = m_SetTargetRequestData.Faction[i];
@@ -192,24 +180,27 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 actionData.LockedAction = actionData.CurrentSelected;
                                 var locked = actionData.LockedAction;
                                 var t = actionData.LockedAction.Targets[0];
-                                t.CellTargetNested.TargetId = id;
+                                t.TargetId = id;
                                 actionData.LockedAction.Targets[0] = t;
                                 uint costToSubtract = t.EnergyCost;
 
-                                foreach (TargetMod tm in actionData.LockedAction.Targets[0].Mods)
+                                for(int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                 {
-                                    if(tm.ModType == ModTypeEnum.aoe)
+                                    var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+
+                                    if (modType == ModTypeEnum.aoe)
                                     {
 
                                     }
-                                    if(tm.ModType == ModTypeEnum.path)
+                                    if (modType == ModTypeEnum.path)
                                     {
-                                        serverPath.Path = FindPath(cell, cellsToMark.CachedPaths);
-                                        //Debug.Log(cell.CubeCoordinate);
-                                        m_SetTargetRequestData.ServerPathData[i] = serverPath;
-                                        costToSubtract += (uint)serverPath.Path.CellAttributes.Count;
+                                        var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                        mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+                                        actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                        costToSubtract += (uint)mod.CellAttributes.CellAttributes.Count;
                                     }
                                 }
+
                                 locked.CombinedCost = costToSubtract;
                                 actionData.LockedAction = locked;
                                 m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
@@ -226,22 +217,26 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 actionData.LockedAction = actionData.CurrentSelected;
                                 var locked = actionData.LockedAction;
                                 var t = actionData.LockedAction.Targets[0];
-                                t.UnitTargetNested.TargetId = id;
+                                t.TargetId = id;
                                 actionData.LockedAction.Targets[0] = t;
                                 uint costToSubtract = t.EnergyCost;
 
-                                foreach (TargetMod tm in actionData.LockedAction.Targets[0].Mods)
+                                for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                 {
-                                    if (tm.ModType == ModTypeEnum.aoe)
+                                    var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+
+                                    if (modType == ModTypeEnum.aoe)
                                     {
 
                                     }
-                                    if (tm.ModType == ModTypeEnum.path)
+                                    if (modType == ModTypeEnum.path)
                                     {
-                                        /*serverPath.Path = FindPath(cell, cellsToMark.CachedPaths);
-                                        //Debug.Log(cell.CubeCoordinate);
-                                        m_SetTargetRequestData.ServerPathData[i] = serverPath;
-                                        costToSubtract += (uint)serverPath.Path.CellAttributes.Count;*/
+                                        /*
+                                        var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                        mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+                                        actionData.LockedAction.Targets[0].Mods[0] = mod;
+
+                                        */
                                     }
                                 }
                                 locked.CombinedCost = costToSubtract;
@@ -261,37 +256,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
         #endregion
 
-        #region set serverPath
-
-        for (int i = 0; i < m_ServerPathData.Length; i++)
-        {
-            var serverPath = m_ServerPathData.ServerPaths[i];
-            var unitWorldIndex = m_ServerPathData.WorldIndexData[i].Value;
-
-            for (int gi = 0; gi < m_GameStateData.Length; gi++)
-            {
-                var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
-
-                if (unitWorldIndex == gameStateWorldIndex)
-                {
-                    var gameState = m_GameStateData.GameState[gi].CurrentState;
-
-                    if (gameState == GameStateEnum.calculate_energy)
-                    {
-                        serverPath.Path = new CellAttributeList
-                        {
-                            CellAttributes = new List<CellAttribute>()
-                        };
-                        m_ServerPathData.ServerPaths[i] = serverPath;
-
-                    }
-                }
-            }
-            
-        }
-
-        #endregion
     }
+
     public int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
     {
         int distance = (int)(Mathf.Abs(originCubeCoordinate.X - otherCubeCoordinate.X) + Mathf.Abs(originCubeCoordinate.Y - otherCubeCoordinate.Y) + Mathf.Abs(originCubeCoordinate.Z - otherCubeCoordinate.Z)) / 2;

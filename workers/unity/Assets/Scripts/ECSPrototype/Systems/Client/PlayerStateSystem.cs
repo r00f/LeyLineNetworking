@@ -1,11 +1,8 @@
-﻿using UnityEngine;
-using Unity.Entities;
-using UnityEngine.UI;
+﻿using Unity.Entities;
 using Improbable.Gdk.Core;
 using Generic;
 using Player;
 using Unit;
-
 
 namespace LeyLineHybridECS
 {

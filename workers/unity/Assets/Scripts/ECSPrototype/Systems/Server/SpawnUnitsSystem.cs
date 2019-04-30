@@ -1,11 +1,10 @@
 ﻿using Unity.Entities;
-using System.Collections.Generic;
 using UnityEngine;
 using Improbable.Gdk.Core.Commands;
 using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Generic;
-using Cells;
+using Cell;
 
 namespace LeyLineHybridECS
 {

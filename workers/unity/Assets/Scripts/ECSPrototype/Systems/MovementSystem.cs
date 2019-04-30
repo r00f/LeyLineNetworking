@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Improbable.Gdk.Core;
 using Generic;
 using Unit;
-using Cells;
+using Cell;
 using Improbable;
 
 namespace LeyLineHybridECS
@@ -17,10 +17,10 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<SpatialEntityId> EntityIDs;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<Actions.Component> ActionsData;
             public ComponentDataArray<MovementVariables.Component> MovementVariables;
             public ComponentDataArray<CellsToMark.Component> CellsToMark;
             public ComponentDataArray<CubeCoordinate.Component> CubeCoordinates;
-            public ComponentDataArray<ServerPath.Component> ServerPathData;
             public ComponentDataArray<Position.Component> Positions;
             public ComponentDataArray<Vision.Component> Vision;
         }
@@ -59,94 +59,97 @@ namespace LeyLineHybridECS
         {
             for (int i = 0; i < m_UnitData.Length; ++i)
             {
+                var actionsData = m_UnitData.ActionsData[i];
                 var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+                var position = m_UnitData.Positions[i];
+                var coord = m_UnitData.CubeCoordinates[i];
+                var movementVariables = m_UnitData.MovementVariables[i];
+                var vision = m_UnitData.Vision[i];
 
-                for (int gi = 0; gi < m_GameStateData.Length; gi++)
+                if (actionsData.LockedAction.Index == -2)
                 {
-                    var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
+                    var currentPath = m_UnitData.ActionsData[i].LockedAction.Targets[0].Mods[0].CellAttributes;
 
-                    if (unitWorldIndex == gameStateWorldIndex)
+                    for (int gi = 0; gi < m_GameStateData.Length; gi++)
                     {
-                        var cellsToMark = m_UnitData.CellsToMark[i];
+                        var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
 
-                        if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.moving)
+                        if (unitWorldIndex == gameStateWorldIndex)
                         {
-                            var currentPath = m_UnitData.ServerPathData[i];
-                            var position = m_UnitData.Positions[i];
-                            var coord = m_UnitData.CubeCoordinates[i];
-                            var movementVariables = m_UnitData.MovementVariables[i];
-                            var vision = m_UnitData.Vision[i];
+                            var cellsToMark = m_UnitData.CellsToMark[i];
 
-                            if (currentPath.Path.CellAttributes.Count != 0 && cellsToMark.CellsInRange.Count != 0)
+                            if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.moving)
                             {
-                                for (int ci = 0; ci < m_CellData.Length; ci++)
+                                if (currentPath.CellAttributes.Count != 0 && cellsToMark.CellsInRange.Count != 0)
                                 {
-                                    var cellAtt = m_CellData.CellAttributes[ci];
-                                    var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
-
-                                    if (cellsToMark.CellsInRange[0].Cell.CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellAtt.CellAttributes.Cell.IsTaken && cellWorldIndex == unitWorldIndex)
+                                    for (int ci = 0; ci < m_CellData.Length; ci++)
                                     {
-                                        //Debug.Log("ASYD");
-                                        cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
+                                        var cellAtt = m_CellData.CellAttributes[ci];
+                                        var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
 
-                                        m_CellData.CellAttributes[ci] = cellAtt;
-
-                                        //m_CellGridSystem.UpdateNeighbours(cellAtt.CellAttributes.Cell, cellAtt.CellAttributes.Neighbours);
-                                    }
-                                }
-
-                                //instead of lerping towards next pos in path, set pos and wait for client to catch up
-                                if (position.Coords.ToUnityVector() != currentPath.Path.CellAttributes[0].Position.ToUnityVector())
-                                {
-                                    if (movementVariables.TimeLeft > 0)
-                                    {
-                                        movementVariables.TimeLeft -= Time.deltaTime;
-                                        m_UnitData.MovementVariables[i] = movementVariables;
-                                    }
-                                    else
-                                    {
-                                        position.Coords = new Coordinates(currentPath.Path.CellAttributes[0].Position.X, currentPath.Path.CellAttributes[0].Position.Y, currentPath.Path.CellAttributes[0].Position.Z);
-                                        m_UnitData.Positions[i] = position;
-                                    }
-                                }
-                                else
-                                {
-                                    movementVariables.TimeLeft = movementVariables.TravelTime;
-
-                                    if (currentPath.Path.CellAttributes.Count == 1)
-                                    {
-                                        movementVariables.TimeLeft = 0;
-                                        for (int ci = 0; ci < m_CellData.Length; ci++)
+                                        if (cellsToMark.CellsInRange[0].Cell.CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellAtt.CellAttributes.Cell.IsTaken && cellWorldIndex == unitWorldIndex)
                                         {
-                                            var cellAtt = m_CellData.CellAttributes[ci];
-                                            var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
+                                            //Debug.Log("ASYD");
+                                            cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
+                                            m_CellData.CellAttributes[ci] = cellAtt;
 
-                                            if (currentPath.Path.CellAttributes[0].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
-                                            {
-                                                cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId, cellWorldIndex);
-
-                                                m_CellData.CellAttributes[ci] = cellAtt;
-
-                                                //m_CellGridSystem.UpdateNeighbours(cellAtt.CellAttributes.Cell, cellAtt.CellAttributes.Neighbours);
-                                            }
+                                            //m_CellGridSystem.UpdateNeighbours(cellAtt.CellAttributes.Cell, cellAtt.CellAttributes.Neighbours);
                                         }
                                     }
 
-                                    m_UnitData.MovementVariables[i] = movementVariables;
-                                    coord.CubeCoordinate = currentPath.Path.CellAttributes[0].CubeCoordinate;
-                                    vision.RequireUpdate = true;
-                                    m_UnitData.Vision[i] = vision;
-                                    m_UnitData.CubeCoordinates[i] = coord;
-                                    currentPath.Path.CellAttributes.RemoveAt(0);
-                                }
-                            }
+                                    //instead of lerping towards next pos in path, set pos and wait for client to catch up
+                                    if (position.Coords.ToUnityVector() != currentPath.CellAttributes[0].Position.ToUnityVector())
+                                    {
+                                        if (movementVariables.TimeLeft > 0)
+                                        {
+                                            movementVariables.TimeLeft -= Time.deltaTime;
+                                            m_UnitData.MovementVariables[i] = movementVariables;
+                                        }
+                                        else
+                                        {
+                                            position.Coords = new Coordinates(currentPath.CellAttributes[0].Position.X, currentPath.CellAttributes[0].Position.Y, currentPath.CellAttributes[0].Position.Z);
+                                            m_UnitData.Positions[i] = position;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        movementVariables.TimeLeft = movementVariables.TravelTime;
 
-                        }
-                        else if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.calculate_energy)
-                        {
-                            cellsToMark.CachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-                            cellsToMark.CellsInRange = new List<CellAttributes>();
-                            m_UnitData.CellsToMark[i] = cellsToMark;
+                                        if (currentPath.CellAttributes.Count == 1)
+                                        {
+                                            movementVariables.TimeLeft = 0;
+                                            for (int ci = 0; ci < m_CellData.Length; ci++)
+                                            {
+                                                var cellAtt = m_CellData.CellAttributes[ci];
+                                                var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
+
+                                                if (currentPath.CellAttributes[0].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
+                                                {
+                                                    cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId, cellWorldIndex);
+
+                                                    m_CellData.CellAttributes[ci] = cellAtt;
+
+                                                    //m_CellGridSystem.UpdateNeighbours(cellAtt.CellAttributes.Cell, cellAtt.CellAttributes.Neighbours);
+                                                }
+                                            }
+                                        }
+
+                                        m_UnitData.MovementVariables[i] = movementVariables;
+                                        coord.CubeCoordinate = currentPath.CellAttributes[0].CubeCoordinate;
+                                        vision.RequireUpdate = true;
+                                        m_UnitData.Vision[i] = vision;
+                                        m_UnitData.CubeCoordinates[i] = coord;
+                                        currentPath.CellAttributes.RemoveAt(0);
+                                    }
+                                }
+
+                            }
+                            else if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.calculate_energy)
+                            {
+                                cellsToMark.CachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
+                                cellsToMark.CellsInRange = new List<CellAttributes>();
+                                m_UnitData.CellsToMark[i] = cellsToMark;
+                            }
                         }
                     }
                 }

@@ -8,4 +8,6 @@ public class AnimatorComponent : MonoBehaviour
     public Transform RotateTransform;
     [SerializeField]
     public Animator Animator;
+    [SerializeField]
+    public bool ExecuteTriggerSet;
 }

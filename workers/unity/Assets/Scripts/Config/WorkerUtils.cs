@@ -1,8 +1,3 @@
-using Improbable.Gdk.GameObjectRepresentation;
-using Improbable.Gdk.GameObjectCreation;
-using System.Collections.Generic;
-using Improbable.Gdk.PlayerLifecycle;
-using Improbable.Gdk.TransformSynchronization;
 using Unity.Entities;
 using LeyLineHybridECS;
 
