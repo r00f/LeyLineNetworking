@@ -97,55 +97,46 @@ public class VisionSystem_Server : ComponentSystem
 
         foreach (CellAttributes c in sight)
         {
-            
             if (c.Cell.ObstructVision)
             {
                 Obstructive.Add(c);
             }
-            
         }
-
 
         RelevantClusters.Clear();
 
-        while (Obstructive.Count > 0)
+        for (int i = 0; i < Obstructive.Count; i++)
         {
-            int i = Obstructive.Count - 1;
-            if (i >= 0)
+            List<CellAttributesComponent.Component> Cluster = new List<CellAttributesComponent.Component>();
+            foreach (RawCluster lc in FixClusters)
             {
-                List<CellAttributesComponent.Component> Cluster = new List<CellAttributesComponent.Component>();
-                foreach (RawCluster lc in FixClusters)
+                for (int e = lc.cluster.Count - 1; e >= 0; e--)
                 {
-                    for (int e = lc.cluster.Count - 1; e >= 0; e--)
+                    if (lc.cluster[e].CellAttributes.Cell.CubeCoordinate == Obstructive[i].Cell.CubeCoordinate)
                     {
-                        if (lc.cluster[e].CellAttributes.Cell.CubeCoordinate == Obstructive[i].Cell.CubeCoordinate)
-                        {
-                            Cluster = lc.cluster;
-                        }
+                        Cluster = lc.cluster;
                     }
                 }
-                if (Cluster.Count > 0)
-                 {
-                        List<CellAttributes> toRemove = new List<CellAttributes>();
-                        foreach (CellAttributesComponent.Component c in Cluster)
-                        {
-                            foreach (CellAttributes ca in sight)
-                            {
-                                if (ca.Cell.CubeCoordinate == c.CellAttributes.Cell.CubeCoordinate) toRemove.Add(ca);
-                            }
-                        }
-                        foreach (CellAttributes c in toRemove)
-                        {
-                            sight.Remove(c);
-                            Obstructive.Remove(c);
-                        }
-                        RelevantClusters.Add(Cluster);
-                    }
-                
             }
+            if (Cluster.Count > 0)
+            {
+                List<CellAttributes> toRemove = new List<CellAttributes>();
+                foreach (CellAttributesComponent.Component c in Cluster)
+                {
+                    foreach (CellAttributes ca in sight)
+                    {
+                        if (ca.Cell.CubeCoordinate == c.CellAttributes.Cell.CubeCoordinate) toRemove.Add(ca);
+                    }
+                }
+                foreach (CellAttributes c in toRemove)
+                {
+                    sight.Remove(c);
+                    Obstructive.Remove(c);
+                }
 
+                RelevantClusters.Add(Cluster);
+            }
         }
-        //Debug.Log(RelevantClusters.Count);
 
         //Fetch watcher out of all the cells
         CellAttributesComponent.Component Watcher = new CellAttributesComponent.Component();
@@ -239,7 +230,6 @@ public class VisionSystem_Server : ComponentSystem
             obstructed.Remove(c);
             BuildCluster(c, go, obstructed, out obstructed);
             raw.Add(go);
-
         }
 
         for (int i = raw.Count - 1; i >= 0; i--)
@@ -322,6 +312,7 @@ public class VisionSystem_Server : ComponentSystem
     private List<CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<CellAttributes> watching)
     {
         int count = inCluster.RelevantAngles.Count;
+        //Debug.Log(count);
         Angle largest;
         Angle smallest;
         List<CellAttributes> Cone = new List<CellAttributes>();
@@ -331,79 +322,67 @@ public class VisionSystem_Server : ComponentSystem
         smallest = inCluster.RelevantAngles[0];
         //Debug.Log("Largest: " + largest.angle_float + " , " + "Smallest: " + smallest.angle_float);
 
-
-
-        #region logic for checking if something is behind an obstructed cell
         bool specialcase = false;
-
-        for (int i = count - 1; i >= 0; i--)
+        
+        for (int i = 1; i < count; i++)
         {
-            if (i == 0)
-                continue;
-            else
+            if (Mathf.Abs(inCluster.RelevantAngles[i].angle_float - inCluster.RelevantAngles[i - 1].angle_float) > 60)
             {
-                if (Mathf.Abs(inCluster.RelevantAngles[i].angle_float - inCluster.RelevantAngles[i - 1].angle_float) > 60)
-                {
-                    specialcase = true;
-                }
+                specialcase = true;
             }
         }
 
+        Debug.Log(specialcase);
+
+        #region normal case
         if (!specialcase)
         {
             foreach (CellAttributes c in watching)
             {
-
                 float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
                 if ((largest.angle_float >= Angle) && (Angle >= smallest.angle_float))
                 {
                     Cone.Add(c);
                 }
-
             }
 
-            for (int i = count - 1; i >= 0; i--)
+            for (int i = 1; i < count; i++)
             {
-                if (i == 0)
-                    continue;
-                else
+                Vector3f watcherCubeCoordinate = inCluster.watcher.CellAttributes.Cell.CubeCoordinate;
+                Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.CellAttributes.Cell.CubeCoordinate;
+                Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
+
+                foreach (CellAttributes c in Cone)
                 {
-                    Vector3f watcherCubeCoordinate = inCluster.watcher.CellAttributes.Cell.CubeCoordinate;
-                    Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
-                    Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.CellAttributes.Cell.CubeCoordinate;
+                    float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
+                    Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
 
-                    foreach (CellAttributes c in Cone)
+                    if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i - 1].angle_float)
                     {
-                        float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                        Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
-
-                        if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i - 1].angle_float)
+                        if (GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
                         {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
+                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
                             {
-                                if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                                {
-                                    if (watching.Contains(c)) watching.Remove(c);
-                                }
+                                if (watching.Contains(c)) watching.Remove(c);
                             }
-                            else
+                        }
+                        else
+                        {
+                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
                             {
-                                if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                                {
-                                    if (watching.Contains(c)) watching.Remove(c);
-                                }
+                                if (watching.Contains(c)) watching.Remove(c);
                             }
                         }
                     }
                 }
             }
-            #endregion
             return watching;
         }
+        #endregion
+        
         #region SpecialCase
         else
         {
-            //Debug.Log("SPECIAL CASE!! DOES IT WORK?");
             List<Angle> Positives = new List<Angle>();
             List<Angle> Negatives = new List<Angle>();
             for (int i = count - 1; i >= 0; i--)
@@ -412,10 +391,10 @@ public class VisionSystem_Server : ComponentSystem
                 {
                     Positives.Add(inCluster.RelevantAngles[i]);
                 }
-                else {
+                else
+                {
                     Negatives.Add(inCluster.RelevantAngles[i]);
                 }
-
             }
             //Debug.Log(Positives[0].angle_float + " ; " + Positives[Positives.Count - 1].angle_float);
             foreach (CellAttributes c in watching)
@@ -439,7 +418,6 @@ public class VisionSystem_Server : ComponentSystem
 
                 if (largest.angle_float <= Angle || Angle <= smallest.angle_float)
                 {
-
                     if (GridSys.GetDistance(watcherCubeCoordinate, largestCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, smallestCubeCoordinate))
                     {
                         if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, largestCubeCoordinate))
@@ -516,8 +494,8 @@ public class VisionSystem_Server : ComponentSystem
             }
             return watching;
         }
-
         #endregion
+        
     }
 
 }
