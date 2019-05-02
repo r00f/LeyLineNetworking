@@ -13,4 +13,18 @@ public class AnimatorComponent : MonoBehaviour
     [SerializeField]
     public bool DestinationReachTriggerSet;
     public Vector3 DestinationPosition;
+    public uint LastHealth;
+    public bool TriggerEnter;
+    [SerializeField]
+    Collider WeaponCollider;
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.CompareTag("DamageCollider") && other != WeaponCollider)
+        {
+            Debug.Log("GameObject with name: " + other.name + " enters the trigger");
+            TriggerEnter = true;
+        }
+    }
+
 }

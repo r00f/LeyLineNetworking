@@ -10,6 +10,7 @@ public class UnitAnimationSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<Health.Component> HealthData;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Actions.Component> ActionsData;
         public readonly ComponentDataArray<Position.Component> Positions;
@@ -44,6 +45,28 @@ public class UnitAnimationSystem : ComponentSystem
             var transform = m_UnitData.Transforms[i];
             var animatorComponent = m_UnitData.AnimatorComponents[i];
             var actions = m_UnitData.ActionsData[i];
+            var healthComponent = m_UnitData.HealthData[i];
+
+            if(animatorComponent.LastHealth != healthComponent.CurrentHealth)
+            {
+                if(animatorComponent.LastHealth > healthComponent.CurrentHealth)
+                {
+                    if(animatorComponent.TriggerEnter)
+                    {
+                        Debug.Log("LostHealth");
+                        animatorComponent.Animator.SetTrigger("GetHit");
+                        animatorComponent.TriggerEnter = false;
+                        animatorComponent.LastHealth = healthComponent.CurrentHealth;
+                    }
+                }
+                else
+                {
+                    Debug.Log("Gained Health");
+                    animatorComponent.LastHealth = healthComponent.CurrentHealth;
+                }
+            }
+            if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
+                animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
             if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
