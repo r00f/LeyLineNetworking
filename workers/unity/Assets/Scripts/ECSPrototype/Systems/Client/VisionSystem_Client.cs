@@ -4,6 +4,7 @@ using Improbable.Gdk.Core;
 using Generic;
 using Player;
 using Cell;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
@@ -32,27 +33,24 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            for (int i = m_Player.Length - 1; i >= 0; i--)
+            var playerVision = m_Player.VisionData[0];
+
+            for (int e = m_IsVisible.Length - 1; e >= 0; e--)
             {
-                var playerVision = m_Player.VisionData[i];
+                var coordinate = m_IsVisible.Coordinate[e];
+                var visible = m_IsVisible.Visible[e];
 
-                for (int e = m_IsVisible.Length - 1; e >= 0; e--)
+                visible.Value = 0;
+                foreach (CellAttributes c in playerVision.CellsInVisionrange)
                 {
-                    var coordinate = m_IsVisible.Coordinate[e];
-                    var visible = m_IsVisible.Visible[e];
-                    visible.Value = 0;
-
-                    foreach (CellAttributes c in playerVision.CellsInVisionrange)
+                    if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
                     {
-                        if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
-                        {
-                            visible.Value = 1;
-                        }
+                        visible.Value = 1;
                     }
-
-                    visible.RequireUpdate = 1;
-                    m_IsVisible.Visible[e] = visible;
                 }
+                //visible.RequireUpdate = 1;
+                m_IsVisible.Visible[e] = visible;
+
             }
 
             for (int i = 0; i < m_IsVisible.Length; i++)
@@ -61,22 +59,24 @@ namespace LeyLineHybridECS
                 MeshRenderer meshRenderer = m_IsVisible.VisibleRef[i].MeshRenderer;
                 GameObject go = m_IsVisible.VisibleRef[i].GO;
                 byte isVisible = m_IsVisible.Visible[i].Value;
-                //Debug.Log(isVisible);
 
                 if (isVisibleComp.RequireUpdate == 1)
                 {
+                    Color color = meshRenderer.material.color;
+
                     if (isVisibleComp.LerpSpeed != 0)
                     {
                         if (isVisible == 0)
                         {
                             if (meshRenderer.material.color.a > 0)
                             {
-                                meshRenderer.material.color = new Color(1, 1, 1, meshRenderer.material.color.a - isVisibleComp.LerpSpeed * Time.deltaTime);
+                                color.a = meshRenderer.material.color.a - isVisibleComp.LerpSpeed * Time.deltaTime;
+                                meshRenderer.material.color = color;
                             }
                             else
                             {
                                 go.SetActive(false);
-                                isVisibleComp.RequireUpdate = 0;
+                                //isVisibleComp.RequireUpdate = 0;
                             }
                         }
                         else
@@ -85,11 +85,12 @@ namespace LeyLineHybridECS
 
                             if (meshRenderer.material.color.a < 1)
                             {
-                                meshRenderer.material.color = new Color(1, 1, 1, meshRenderer.material.color.a + isVisibleComp.LerpSpeed * Time.deltaTime);
+                                color.a = meshRenderer.material.color.a + isVisibleComp.LerpSpeed * Time.deltaTime;
+                                meshRenderer.material.color = color;
                             }
                             else
                             {
-                                isVisibleComp.RequireUpdate = 0;
+                                //isVisibleComp.RequireUpdate = 0;
                             }
                         }
                     }

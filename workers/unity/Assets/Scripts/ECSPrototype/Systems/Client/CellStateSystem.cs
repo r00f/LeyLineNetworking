@@ -5,6 +5,7 @@ using Unit;
 using Generic;
 using Cell;
 using Player;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {

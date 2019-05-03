@@ -5,6 +5,7 @@ using Generic;
 using Player;
 using Cell;
 using Improbable.Gdk.Core;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
@@ -78,20 +79,6 @@ namespace LeyLineHybridECS
                         }
                         #endif
                         break;
-                    case GameStateEnum.calculate_energy:
-                        if(gameState.CurrentWaitTime > 0)
-                        {
-                            gameState.CurrentWaitTime -= Time.deltaTime;
-                            m_Data.GameStateData[i] = gameState;
-                        }
-                        else
-                        {
-                            m_ExecuteSystem.ClearAllLockedActions(gameStateWorldIndex);
-                            gameState.CurrentPlanningTime = gameState.PlanningTime;
-                            gameState.CurrentState = GameStateEnum.planning;
-                            m_Data.GameStateData[i] = gameState;
-                        }
-                        break;
                     case GameStateEnum.planning:
                         if (AllPlayersReady(gameStateWorldIndex) || gameState.CurrentPlanningTime <= 0)
                         {
@@ -120,8 +107,25 @@ namespace LeyLineHybridECS
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
+                    case GameStateEnum.calculate_energy:
+                        if (gameState.CurrentWaitTime > 0)
+                        {
+                            gameState.CurrentWaitTime -= Time.deltaTime;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        else
+                        {
+                            m_ExecuteSystem.ClearAllLockedActions(gameStateWorldIndex);
+                            gameState.CurrentPlanningTime = gameState.PlanningTime;
+                            gameState.CurrentState = GameStateEnum.cleanup;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        break;
+                    case GameStateEnum.cleanup:
+                        gameState.CurrentState = GameStateEnum.planning;
+                        m_Data.GameStateData[i] = gameState;
+                        break;
                     case GameStateEnum.game_over:
-
                         break;
                 }
 

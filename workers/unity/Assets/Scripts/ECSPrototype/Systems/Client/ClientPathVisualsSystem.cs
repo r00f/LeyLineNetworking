@@ -6,6 +6,7 @@ using Unity.Entities;
 using Unit;
 using Generic;
 using Player;
+using Improbable.Gdk.ReactiveComponents;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ClientPathVisualsSystem : ComponentSystem

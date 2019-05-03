@@ -21,6 +21,7 @@ enum GameStateEnum {
 	spawning = 4;
 	attacking = 5;
 	moving = 6;
-	game_over = 7;
+	cleanup = 7;
+	game_over = 8;
 
 }

@@ -34,6 +34,6 @@ public static class WorkerUtils
         world.GetOrCreateManager<VisionSystem_Server>();
         world.GetOrCreateManager<ResourceSystem>();
         world.GetOrCreateManager<ExecuteActionsSystem>();
+        world.GetOrCreateManager<CleanupSystem>();
     }
-
 }

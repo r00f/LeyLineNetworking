@@ -7,6 +7,7 @@ using Unit;
 using Player;
 using Generic;
 using Improbable.Gdk.Core;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
@@ -20,7 +21,6 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
             public readonly ComponentArray<Transform> TransformData;
             public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
-            //public readonly ComponentArray<BoxCollider> ColliderData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
             public readonly ComponentDataArray<IsVisible> IsVisibleData;

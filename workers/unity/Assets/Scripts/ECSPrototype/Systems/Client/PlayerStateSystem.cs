@@ -3,6 +3,7 @@ using Improbable.Gdk.Core;
 using Generic;
 using Player;
 using Unit;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
@@ -54,7 +55,6 @@ namespace LeyLineHybridECS
                 {
                     if (gameState.CurrentState == GameStateEnum.planning)
                     {
-
                         for (int ui = 0; ui < m_UnitData.Length; ui++)
                         {
                             var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
@@ -69,21 +69,18 @@ namespace LeyLineHybridECS
                                     //if selected unit is waiting for target set playerstate to waitingForTarget
                                     if (actions.CurrentSelected.Targets.Count != 0 && actions.LockedAction.Targets.Count == 0)
                                     {
-                                        SetPlayerState(PlayerStateEnum.waiting_for_target);
+                                        if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                                            SetPlayerState(PlayerStateEnum.waiting_for_target);
                                     }
                                     else
                                     {
-                                        SetPlayerState(PlayerStateEnum.unit_selected);
+                                        if (playerState.CurrentState != PlayerStateEnum.unit_selected)
+                                            SetPlayerState(PlayerStateEnum.unit_selected);
                                     }
 
                                     if (!unitComponentReferences.SelectionCircleGO.activeSelf)
                                         unitComponentReferences.SelectionCircleGO.SetActive(true);
-                                    /*
-                                    else if (!AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.waiting)
-                                    {
-                                        SetPlayerState(PlayerStateEnum.waiting);
-                                    }
-                                    */
+
                                 }
                                 else if (playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                                 {

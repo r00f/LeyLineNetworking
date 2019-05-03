@@ -4,6 +4,7 @@ using Generic;
 using Unit;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
+using Improbable.Gdk.ReactiveComponents;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : ComponentSystem

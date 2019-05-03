@@ -154,7 +154,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Player(string workerId, Vector3f position)
+    public static EntityTemplate Player(string workerId, byte[] serializedArguments)
     {
         var client = $"workerId:{workerId}";
 
@@ -179,8 +179,7 @@ public static class LeyLineEntityTemplates {
 
         var wIndex = new WorldIndex.Snapshot();
 
-
-        var pos = new Position.Snapshot { Coords = position.ToUnityVector().ToSpatialCoordinates() };
+        var pos = new Position.Snapshot { Coords = new Coordinates() };
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
         var owningComponent = new OwningWorker.Snapshot { WorkerId = client };

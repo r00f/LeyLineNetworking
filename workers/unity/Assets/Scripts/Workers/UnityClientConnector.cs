@@ -2,7 +2,7 @@
 using Improbable.Gdk.Core;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Worker.CInterop;
-using Improbable.Gdk.GameObjectRepresentation;
+//using Improbable.Gdk.GameObjectRepresentation;
 using Improbable.Gdk.GameObjectCreation;
 using Unity.Entities;
 
@@ -25,7 +25,7 @@ namespace BlankProject
             Worlds.ClientWorld = Worker.World.GetOrCreateManager<EntityManager>();
             WorkerUtils.AddClientSystems(Worker.World);
             World.Active.GetOrCreateManager<LeyLineHybridECS.MeshColorLerpSystem>();
-            GameObjectRepresentationHelper.AddSystems(Worker.World);
+            //GameObjectRepresentationHelper.AddSystems(Worker.World);
             var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer, fallback), gameObject);
             PlayerLifecycleHelper.AddClientSystems(Worker.World);

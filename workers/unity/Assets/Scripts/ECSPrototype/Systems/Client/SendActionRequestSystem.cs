@@ -6,6 +6,7 @@ using Unit;
 using Cell;
 using Player;
 using UnityEngine;
+using Improbable.Gdk.ReactiveComponents;
 
 //Update after playerState selected unit has been set
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UISystem))]
@@ -112,7 +113,7 @@ public class SendActionRequestSystem : ComponentSystem
 
                         if (cellMousestate.ClickEvent == 1)
                         {
-                            var request = Actions.SetTargetCommand.CreateRequest
+                            var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
                                 new SetTargetRequest(cellEntityId)
@@ -134,7 +135,7 @@ public class SendActionRequestSystem : ComponentSystem
                         if (unitMousestate.ClickEvent == 1)
                         {
                             Debug.Log("Send SelectUnitRequest: " + targetUnitEntityId);
-                            var request = Actions.SetTargetCommand.CreateRequest
+                            var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
                                 new SetTargetRequest(targetUnitEntityId)
@@ -163,7 +164,7 @@ public class SendActionRequestSystem : ComponentSystem
 
             if (idCompomnent.Id == entityId)
             {
-                var request = Actions.SelectActionCommand.CreateRequest
+                var request = new Actions.SelectActionCommand.Request
                 (
                 idCompomnent,
                 new SelectActionRequest(actionIndex)

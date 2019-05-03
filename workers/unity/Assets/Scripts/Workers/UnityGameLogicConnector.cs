@@ -2,7 +2,7 @@
 using Improbable.Gdk.Core;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Gdk.TransformSynchronization;
-using Improbable.Gdk.GameObjectRepresentation;
+//using Improbable.Gdk.GameObjectRepresentation;
 using Improbable.Gdk.GameObjectCreation;
 
 namespace BlankProject
@@ -20,7 +20,7 @@ namespace BlankProject
         {
             Worker.World.GetOrCreateManager<MetricSendSystem>();
             WorkerUtils.AddGameLogicSystems(Worker.World);
-            GameObjectRepresentationHelper.AddSystems(Worker.World);
+            //GameObjectRepresentationHelper.AddSystems(Worker.World);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, gameObject);
             PlayerLifecycleHelper.AddServerSystems(Worker.World);
         }

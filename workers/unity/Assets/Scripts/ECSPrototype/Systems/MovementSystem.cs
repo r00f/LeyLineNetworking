@@ -6,6 +6,7 @@ using Generic;
 using Unit;
 using Cell;
 using Improbable;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {

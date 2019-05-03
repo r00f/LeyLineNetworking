@@ -5,6 +5,7 @@ using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Generic;
 using Cell;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
@@ -83,7 +84,7 @@ namespace LeyLineHybridECS
                                             var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
                                             var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction, worldIndex, Stats);
 
-                                            requestSender.RequestsToSend.Add(WorldCommands.CreateEntity.CreateRequest
+                                            requestSender.RequestsToSend.Add(new WorldCommands.CreateEntity.Request
                                             (
                                                 entity
                                             ));

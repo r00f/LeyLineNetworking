@@ -7,43 +7,6 @@ public class AnimationEvents : MonoBehaviour
     [SerializeField]
     SphereCollider WeaponCollider;
 
-    [SerializeField]
-    List<Rigidbody> RagdollRigidBodies;
-
-    [SerializeField]
-    Animator anim;
-
-    [SerializeField]
-    bool die;
-
-    public void Start()
-    {
-        /*
-        foreach (Rigidbody r in RagdollRigidBodies)
-        {
-            r.isKinematic = true;
-        }
-        */
-    }
-
-    public void Update()
-    {
-        if(die)
-        {
-            Die();
-        }
-    }
-
-    public void Die()
-    {
-        anim.enabled = false;
-        foreach (Rigidbody r in RagdollRigidBodies)
-        {
-            r.isKinematic = false;
-        }
-        die = false;
-    }
-
     public void EnableWeaponCollider()
     {
         Debug.Log("EnableWeaponCollider");

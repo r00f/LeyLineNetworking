@@ -5,6 +5,7 @@ using LeyLineHybridECS;
 using Generic;
 using Unit;
 using Cell;
+using Improbable.Gdk.ReactiveComponents;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]

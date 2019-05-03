@@ -94,6 +94,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
             actionData.LockedAction = actionData.NullAction;
 
+            Debug.Log("Recieved Select Action Request");
+
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -112,7 +114,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     else if(index == -2)
                     {
                         actionData.CurrentSelected = actionData.BasicMove;
-
                     }
                     else if(index == -1)
                     {

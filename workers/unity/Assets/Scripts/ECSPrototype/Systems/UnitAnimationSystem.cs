@@ -53,8 +53,29 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     if(animatorComponent.TriggerEnter)
                     {
-                        Debug.Log("LostHealth");
-                        animatorComponent.Animator.SetTrigger("GetHit");
+                        if(healthComponent.CurrentHealth == 0)
+                        {
+                            Debug.Log("Death");
+                            //disable animator
+                            animatorComponent.Animator.enabled = false;
+
+                            //move props out of skeleton
+                            foreach (Transform t in animatorComponent.Props)
+                            {
+                                t.parent = transform;
+                            }
+
+                            //set all rigidbodies to non kinematic
+                            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+                            {
+                                r.isKinematic = false;
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log("LostHealth");
+                            animatorComponent.Animator.SetTrigger("GetHit");
+                        }
                         animatorComponent.TriggerEnter = false;
                         animatorComponent.LastHealth = healthComponent.CurrentHealth;
                     }
