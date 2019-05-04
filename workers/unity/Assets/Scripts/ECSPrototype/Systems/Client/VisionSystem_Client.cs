@@ -1,16 +1,15 @@
-﻿using UnityEngine;
-using Unity.Entities;
-using Improbable.Gdk.Core;
+﻿using Cell;
 using Generic;
-using Player;
-using Cell;
+using Improbable.Gdk.Core;
 using Improbable.Gdk.ReactiveComponents;
-using System.Collections.Generic;
+using Player;
+using Unity.Entities;
+using UnityEngine;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation]
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(VisionSystem_Server))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class VisionSystem_Client : ComponentSystem
     {
         struct PlayerData
@@ -20,7 +19,15 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<Vision.Component> VisionData;
         }
 
-        [Inject] PlayerData m_Player;
+        [Inject] PlayerData m_PlayerData;
+
+        struct UpdateVisionRequestData
+        {
+            public readonly int Length;
+            public ComponentDataArray<Vision.CommandRequests.UpdateClientVisionCommand> UpdateClientVisionRequests;
+        }
+
+        [Inject] UpdateVisionRequestData m_UpdateVisionRequestData;
 
         struct IsVisibleData
         {
@@ -32,12 +39,17 @@ namespace LeyLineHybridECS
 
         [Inject] IsVisibleData m_IsVisible;
 
-        //List<CellAttributes> lastVisible = new List<CellAttributes>();
+
 
         protected override void OnUpdate()
         {
-            var playerVision = m_Player.VisionData[0];
-            
+            for (int i = 0; i < m_UpdateVisionRequestData.Length; i++)
+            {
+                Debug.Log("updateClientVisionRequest");
+            }
+
+            var playerVision = m_PlayerData.VisionData[0];
+
             for (int i = 0; i < m_IsVisible.Length; i++)
             {
                 var isVisibleComp = m_IsVisible.Visible[i];
@@ -46,25 +58,34 @@ namespace LeyLineHybridECS
                 byte isVisible = m_IsVisible.Visible[i].Value;
                 var coord = m_IsVisible.Coordinate[i];
 
-                foreach(CellAttributes c in playerVision.Positives)
+                if (isVisibleComp.RequireUpdate == 0)
                 {
-                    if(c.Cell.CubeCoordinate == coord.CubeCoordinate && isVisible == 0)
+                    //only compare when serverSide playerVision is updated
+                    if (isVisible == 0)
                     {
-                        isVisible = 1;
-                        isVisibleComp.RequireUpdate = 1;
+                        foreach (CellAttributes c in playerVision.Positives)
+                        {
+                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            {
+                                isVisibleComp.Value = 1;
+                                isVisibleComp.RequireUpdate = 1;
+                            }
+                        }
                     }
-                }
-                foreach (CellAttributes c in playerVision.Negatives)
-                {
-                    if (c.Cell.CubeCoordinate == coord.CubeCoordinate && isVisible == 1)
+                    else
                     {
-                        Debug.Log("Ayaya");
-                        isVisible = 0;
-                        isVisibleComp.RequireUpdate = 1;
+                        foreach (CellAttributes c in playerVision.Negatives)
+                        {
+                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            {
+                                isVisibleComp.Value = 0;
+                                isVisibleComp.RequireUpdate = 1;
+                            }
+                        }
                     }
+                    m_IsVisible.Visible[i] = isVisibleComp;
                 }
-
-                if (isVisibleComp.RequireUpdate == 1)
+                else
                 {
                     Color color = meshRenderer.material.color;
 
@@ -109,6 +130,47 @@ namespace LeyLineHybridECS
                             go.SetActive(true);
                         }
                     }
+                    m_IsVisible.Visible[i] = isVisibleComp;
+                }
+            }
+        }
+
+        public void UpdateVision()
+        {
+            var playerVision = m_PlayerData.VisionData[0];
+
+            for (int i = 0; i < m_IsVisible.Length; i++)
+            {
+                var isVisibleComp = m_IsVisible.Visible[i];
+                byte isVisible = m_IsVisible.Visible[i].Value;
+                var coord = m_IsVisible.Coordinate[i];
+
+                if (isVisibleComp.RequireUpdate == 0)
+                {
+                    //only compare when serverSide playerVision is updated
+                    if (isVisible == 0)
+                    {
+                        foreach (CellAttributes c in playerVision.Positives)
+                        {
+                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            {
+                                isVisibleComp.Value = 1;
+                                isVisibleComp.RequireUpdate = 1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (CellAttributes c in playerVision.Negatives)
+                        {
+                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            {
+                                isVisibleComp.Value = 0;
+                                isVisibleComp.RequireUpdate = 1;
+                            }
+                        }
+                    }
+                    m_IsVisible.Visible[i] = isVisibleComp;
                 }
             }
         }

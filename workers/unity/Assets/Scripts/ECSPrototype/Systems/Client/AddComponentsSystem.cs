@@ -109,7 +109,7 @@ public class AddComponentsSystem : ComponentSystem
 
                 IsVisible isVisible = new IsVisible
                 {
-                    Value = 0,
+                    Value = 1,
                     RequireUpdate = 1,
                     LerpSpeed = 0f,
                 };

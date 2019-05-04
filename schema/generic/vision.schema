@@ -12,5 +12,13 @@ component Vision {
 	list<cell.CellAttributes> positives = 4;
 	list<cell.CellAttributes> negatives = 5;
 	bool require_update = 6;
-	
+	command UpdateClientVisionResponse update_client_vision_command(UpdateClientVisionRequest);
+}
+
+type UpdateClientVisionRequest {
+
+}
+
+type UpdateClientVisionResponse {
+
 }

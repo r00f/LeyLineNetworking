@@ -25,8 +25,10 @@ public class VisionSystem_Server : ComponentSystem
     public struct PlayerData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<PlayerAttributes.Component> PlayerAttributes;
         public readonly ComponentDataArray<FactionComponent.Component> FactionComponent;
+        public ComponentDataArray<Vision.CommandSenders.UpdateClientVisionCommand> UpdateClientVisionCommands;
         public ComponentDataArray<Vision.Component> VisionComponent;
     }
 
@@ -47,6 +49,10 @@ public class VisionSystem_Server : ComponentSystem
 
     [Inject]
     private HandleCellGridRequestsSystem GridSys;
+
+    //[Inject]
+    //private VisionSystem_Client m_VisionSystem_Client;
+
 
     bool Init = true;
     bool firstTime = true;
@@ -77,6 +83,8 @@ public class VisionSystem_Server : ComponentSystem
             {
                 var p_Vision = m_PlayerData.VisionComponent[i];
                 var p_Faction = m_PlayerData.FactionComponent[i];
+                var p_id = m_PlayerData.EntityIds[i].EntityId;
+                var updateClientVisionRequest = m_PlayerData.UpdateClientVisionCommands[i];
 
                 if (p_Vision.RequireUpdate == true)
                 {
@@ -87,7 +95,20 @@ public class VisionSystem_Server : ComponentSystem
                     p_Vision.Negatives = p_Vision.Negatives;
                     p_Vision.Lastvisible = p_Vision.Lastvisible;
                     m_PlayerData.VisionComponent[i] = p_Vision;
-                    
+
+                    //Send clientSide updateVision command
+
+                    var request = new Vision.UpdateClientVisionCommand.Request
+                    (
+                        p_id,
+                        new UpdateClientVisionRequest()
+                    );
+
+                    updateClientVisionRequest.RequestsToSend.Add(request);
+                    m_PlayerData.UpdateClientVisionCommands[i] = updateClientVisionRequest;
+
+                    //Debug.Log("SendUpdateClientVisionRequest, count = " + updateClientVisionRequest.RequestsToSend.Count + ", " + m_PlayerData.UpdateClientVisionCommands[i].RequestsToSend.Count);
+  
                 }
             }
         }
@@ -187,7 +208,6 @@ public class VisionSystem_Server : ComponentSystem
 
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, FactionComponent.Component inFaction)
     {
-
         //Debug.Log(inVision.CellsInVisionrange.Count);
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
@@ -375,7 +395,7 @@ public class VisionSystem_Server : ComponentSystem
             }
         }
 
-        Debug.Log(specialcase);
+        //Debug.Log(specialcase);
 
         #region normal case
         if (!specialcase)

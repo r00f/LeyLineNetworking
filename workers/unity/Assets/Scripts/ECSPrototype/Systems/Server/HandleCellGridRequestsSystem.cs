@@ -94,8 +94,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
             actionData.LockedAction = actionData.NullAction;
 
-            Debug.Log("Recieved Select Action Request");
-
+            //Debug.Log("Recieved Select Action Request");
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -161,7 +160,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
             var faction = m_SetTargetRequestData.Faction[i];
 
-            Debug.Log("SetTargetRequest to TargetId: " + setTargetRequest.Requests[0].Payload.TargetId);
+            //Debug.Log("SetTargetRequest to TargetId: " + setTargetRequest.Requests[0].Payload.TargetId);
 
             foreach (var str in setTargetRequest.Requests)
             {
