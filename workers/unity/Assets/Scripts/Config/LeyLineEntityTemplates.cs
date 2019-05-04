@@ -174,7 +174,11 @@ public static class LeyLineEntityTemplates {
 
         var playerVision = new Vision.Snapshot
         {
-            CellsInVisionrange = new List<CellAttributes>()
+            CellsInVisionrange = new List<CellAttributes>(),
+            Lastvisible = new List<CellAttributes>(),
+            Positives = new List<CellAttributes>(),
+            Negatives = new List<CellAttributes>()
+            
         };
 
         var wIndex = new WorldIndex.Snapshot();
@@ -241,6 +245,9 @@ public static class LeyLineEntityTemplates {
         var unitVision = new Vision.Snapshot
         {
             CellsInVisionrange = new List<CellAttributes>(),
+            Lastvisible = new List<CellAttributes>(),
+            Positives = new List<CellAttributes>(),
+            Negatives = new List<CellAttributes>(),
             RequireUpdate = true,
             VisionRange = Stats.VisionRange
         };

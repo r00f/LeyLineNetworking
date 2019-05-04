@@ -5,6 +5,7 @@ using Generic;
 using Player;
 using Cell;
 using Improbable.Gdk.ReactiveComponents;
+using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
@@ -31,34 +32,37 @@ namespace LeyLineHybridECS
 
         [Inject] IsVisibleData m_IsVisible;
 
+        //List<CellAttributes> lastVisible = new List<CellAttributes>();
+
         protected override void OnUpdate()
         {
             var playerVision = m_Player.VisionData[0];
-
-            for (int e = m_IsVisible.Length - 1; e >= 0; e--)
-            {
-                var coordinate = m_IsVisible.Coordinate[e];
-                var visible = m_IsVisible.Visible[e];
-
-                visible.Value = 0;
-                foreach (CellAttributes c in playerVision.CellsInVisionrange)
-                {
-                    if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
-                    {
-                        visible.Value = 1;
-                    }
-                }
-                //visible.RequireUpdate = 1;
-                m_IsVisible.Visible[e] = visible;
-
-            }
-
+            
             for (int i = 0; i < m_IsVisible.Length; i++)
             {
                 var isVisibleComp = m_IsVisible.Visible[i];
                 MeshRenderer meshRenderer = m_IsVisible.VisibleRef[i].MeshRenderer;
                 GameObject go = m_IsVisible.VisibleRef[i].GO;
                 byte isVisible = m_IsVisible.Visible[i].Value;
+                var coord = m_IsVisible.Coordinate[i];
+
+                foreach(CellAttributes c in playerVision.Positives)
+                {
+                    if(c.Cell.CubeCoordinate == coord.CubeCoordinate && isVisible == 0)
+                    {
+                        isVisible = 1;
+                        isVisibleComp.RequireUpdate = 1;
+                    }
+                }
+                foreach (CellAttributes c in playerVision.Negatives)
+                {
+                    if (c.Cell.CubeCoordinate == coord.CubeCoordinate && isVisible == 1)
+                    {
+                        Debug.Log("Ayaya");
+                        isVisible = 0;
+                        isVisibleComp.RequireUpdate = 1;
+                    }
+                }
 
                 if (isVisibleComp.RequireUpdate == 1)
                 {
@@ -76,7 +80,7 @@ namespace LeyLineHybridECS
                             else
                             {
                                 go.SetActive(false);
-                                //isVisibleComp.RequireUpdate = 0;
+                                isVisibleComp.RequireUpdate = 0;
                             }
                         }
                         else
@@ -90,7 +94,7 @@ namespace LeyLineHybridECS
                             }
                             else
                             {
-                                //isVisibleComp.RequireUpdate = 0;
+                                isVisibleComp.RequireUpdate = 0;
                             }
                         }
                     }

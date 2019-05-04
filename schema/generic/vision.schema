@@ -1,3 +1,4 @@
+
 package generic;
 
 import "cell/cell_attributes.schema";
@@ -7,6 +8,9 @@ component Vision {
     id = 111;
 	uint32 vision_range = 1;
 	list<cell.CellAttributes> cells_in_visionrange = 2;
-	bool require_update = 3;
+	list<cell.CellAttributes> lastvisible = 3;
+	list<cell.CellAttributes> positives = 4;
+	list<cell.CellAttributes> negatives = 5;
+	bool require_update = 6;
 	
 }

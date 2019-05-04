@@ -83,7 +83,11 @@ public class VisionSystem_Server : ComponentSystem
                     p_Vision = UpdatePlayerVision(p_Vision, p_Faction);
                     p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
                     p_Vision.RequireUpdate = p_Vision.RequireUpdate;
+                    p_Vision.Positives = p_Vision.Positives;
+                    p_Vision.Negatives = p_Vision.Negatives;
+                    p_Vision.Lastvisible = p_Vision.Lastvisible;
                     m_PlayerData.VisionComponent[i] = p_Vision;
+                    
                 }
             }
         }
@@ -184,7 +188,12 @@ public class VisionSystem_Server : ComponentSystem
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, FactionComponent.Component inFaction)
     {
 
-            inVision.CellsInVisionrange.Clear();
+        //Debug.Log(inVision.CellsInVisionrange.Count);
+        inVision.Lastvisible.Clear();
+        inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
+        inVision.CellsInVisionrange.Clear();
+        inVision.Positives.Clear();
+        inVision.Negatives.Clear();
 
             for(int e = m_UnitData.Length-1; e>=0; e--)
             {
@@ -200,6 +209,40 @@ public class VisionSystem_Server : ComponentSystem
                 }
 
             }
+        //Debug.Log(inVision.CellsInVisionrange.Count);
+        //Debug.Log(inVision.Lastvisible.Count);
+
+        foreach (CellAttributes c in inVision.Lastvisible)
+        {
+            bool cont = false;
+            foreach(CellAttributes a in inVision.CellsInVisionrange)
+            {
+                if(c.Cell.CubeCoordinate == a.Cell.CubeCoordinate)
+                {
+                    cont = true;
+                }
+            }
+            if (!cont)
+            {
+                inVision.Negatives.Add(c);
+            }
+        }
+        foreach (CellAttributes c in inVision.CellsInVisionrange)
+        {
+            bool cont = false;
+            foreach (CellAttributes a in inVision.Lastvisible)
+            {
+                if (c.Cell.CubeCoordinate == a.Cell.CubeCoordinate)
+                {
+                    cont = true;
+                }
+            }
+            if (!cont)
+            {
+                inVision.Positives.Add(c);
+            }
+        }
+        //Debug.Log(inVision.Positives.Count);
         inVision.RequireUpdate = false;
         return inVision;
     }
