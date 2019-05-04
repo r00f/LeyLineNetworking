@@ -37,38 +37,35 @@ public class MouseStateSystem : JobComponentSystem
 
         public void Execute(int index)
         {
-            Vector3 pos = Positons[index].Coords.ToUnityVector();
             MouseState state = MouseStates[index];
+            Vector3 pos = Positons[index].Coords.ToUnityVector() + new Vector3(0, state.yOffset, 0);
 
-            if (Vector3.Distance(hit.point, pos) < .8f)
+            Vector3 hitDist = hit.point - pos;
+            float hitSquared = hitDist.sqrMagnitude;
+
+            if (hitSquared < state.Distance * state.Distance)
             {
                 //set its MouseState to Clicked if we click
                 if (mouseButtonDown)
                 {
-                    MouseStates[index] = new MouseState
-                    {
-                        CurrentState = MouseState.State.Clicked,
-                        ClickEvent = 1
-                    };
+                    state.CurrentState = MouseState.State.Clicked;
+                    state.ClickEvent = 1;
+                    MouseStates[index] = state;
                 }
                 //set its MouseState to Hovered if we hover
                 else if (state.CurrentState != MouseState.State.Clicked)
                 {
                     if (state.CurrentState != MouseState.State.Hovered)
                     {
-                        MouseStates[index] = new MouseState
-                        {
-                            CurrentState = MouseState.State.Hovered
-                        };
+                        state.CurrentState = MouseState.State.Hovered;
+                        MouseStates[index] = state;
                     }
                 }
-                else if (MouseStates[index].ClickEvent == 1)
+                else if (state.ClickEvent == 1)
                 {
-                    MouseStates[index] = new MouseState
-                    {
-                        CurrentState = MouseState.State.Clicked,
-                        ClickEvent = 0
-                    };
+                    state.CurrentState = MouseState.State.Clicked;
+                    state.ClickEvent = 0;
+                    MouseStates[index] = state;
                 }
             }
             //if the mouse is anywhere but over the collider 
@@ -80,10 +77,8 @@ public class MouseStateSystem : JobComponentSystem
                     //set it to Neutral if we click
                     if (mouseButtonDown)
                     {
-                        MouseStates[index] = new MouseState
-                        {
-                            CurrentState = MouseState.State.Neutral
-                        };
+                        state.CurrentState = MouseState.State.Neutral;
+                        MouseStates[index] = state;
                     }
 
                 }
@@ -92,10 +87,8 @@ public class MouseStateSystem : JobComponentSystem
                 {
                     if (state.CurrentState != MouseState.State.Neutral)
                     {
-                        MouseStates[index] = new MouseState
-                        {
-                            CurrentState = MouseState.State.Neutral
-                        };
+                        state.CurrentState = MouseState.State.Neutral;
+                        MouseStates[index] = state;
                     }
                 }
             }

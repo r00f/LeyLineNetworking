@@ -156,6 +156,7 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
+        UpdateInjectedComponentGroups();
         //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {

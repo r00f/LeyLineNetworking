@@ -16,8 +16,9 @@ namespace LeyLineHybridECS
             Clicked = 2
         }
 
+        public float Distance;
         public State CurrentState;
-
+        public float yOffset;
         public byte ClickEvent;
     }
 

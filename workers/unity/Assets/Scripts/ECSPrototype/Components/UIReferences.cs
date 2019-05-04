@@ -15,8 +15,7 @@ public class UIReferences : MonoBehaviour
     [Header("EnergyBarPanel")]
     public Image EnergyIncomeFill;
     public Image CurrentEnergyFill;
-    public Image HeroPortrait;
-    public Image HeroPortraitTeamColour;
+    public Text HeroEnergyText;
 
     [Header("HealthBars")]
     public float HealthBarYOffset;
@@ -24,8 +23,8 @@ public class UIReferences : MonoBehaviour
 
     [Header("ReadyPanel")]
     public Button ReadyButton;
-    public Image RedReady;
-    public Image BlueReady;
+    public GameObject RedReady;
+    public GameObject BlueReady;
     public Image RopeBar;
 
     [Header("UnitPortrait")]
@@ -39,10 +38,7 @@ public class UIReferences : MonoBehaviour
     [Header("BottomBars")]
     public Text HealthText;
     public Image HealthFill;
-    public GameObject HeroEnergyPanel;
-    public Text HeroEnergyText;
-    public Image HeroCurrentEnergyFill;
-    public Image HeroEnergyIncomeFill;
+    //public GameObject HeroEnergyPanel;
 
     [Header("ButtonLists")]
     public List<ActionButton> Actions;

@@ -109,11 +109,11 @@ namespace LeyLineHybridECS
                         switch (m_AuthoritativePlayerData.FactionData[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
-                                UIRef.HeroPortraitTeamColour.color = Color.blue;
+                                //UIRef.HeroPortraitTeamColour.color = Color.blue;
                                 UIRef.CurrentEnergyFill.color = Color.blue;
                                 break;
                             case TeamColorEnum.red:
-                                UIRef.HeroPortraitTeamColour.color = Color.red;
+                                //UIRef.HeroPortraitTeamColour.color = Color.red;
                                 UIRef.CurrentEnergyFill.color = Color.red;
                                 break;
                         }
@@ -232,22 +232,23 @@ namespace LeyLineHybridECS
                         unitInfoPanel.SetActive(false);
                 }
 
+
+
                 if (unitId == playerState.SelectedUnitId)
                 {
+                    /*
                     if(stats.IsHero)
                     {
                         if (!UIRef.HeroEnergyPanel.activeSelf)
                             UIRef.HeroEnergyPanel.SetActive(true);
 
-                        
+
 
                         //get player with faction
-
-                        for(int pi = 0; pi < m_PlayerData.Length; pi++)
-                        {
-                            var playerEnergy = m_PlayerData.PlayerEnergyData[pi];
-                            var playerFaction = m_PlayerData.FactionData[pi];
-
+                        
+                            var playerEnergy = m_PlayerData.PlayerEnergyData[0];
+                            var playerFaction = m_PlayerData.FactionData[0];
+                            
                             if(faction.Faction == playerFaction.Faction)
                             {
                                 switch(playerFaction.TeamColor)
@@ -268,14 +269,14 @@ namespace LeyLineHybridECS
                                 UIRef.HeroEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
 
                             }
-
-                        }
+                            
                     }
                     else
                     {
                         if (!UIRef.HeroEnergyPanel.activeSelf)
                             UIRef.HeroEnergyPanel.SetActive(false);
                     }
+                    */
 
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
                         UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
@@ -326,14 +327,17 @@ namespace LeyLineHybridECS
                 float energyIncome = m_AuthoritativePlayerData.PlayerEnergyData[i].Income;
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
+                Text energyText = UIRef.HeroEnergyText;
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
 
+                 energyText.text = currentEnergy + " / " + maxEnergy;
 
-                if(playerState.CurrentState != PlayerStateEnum.unit_selected && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+
+                if (playerState.CurrentState != PlayerStateEnum.unit_selected && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                 {
                     for (int bi = 0; bi < UIRef.Actions.Count; bi++)
                     {
@@ -355,24 +359,24 @@ namespace LeyLineHybridECS
 
                 if (faction.TeamColor == TeamColorEnum.blue)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueReady.enabled)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueReady.activeSelf)
                     {
-                        UIRef.BlueReady.enabled = true;
+                        UIRef.BlueReady.SetActive(true);
                     }
                     else if(playerState != PlayerStateEnum.ready)
                     {
-                        UIRef.BlueReady.enabled = false;
+                        UIRef.BlueReady.SetActive(false);
                     }
                 }
                 else if(faction.TeamColor == TeamColorEnum.red)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.RedReady.enabled)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.RedReady.activeSelf)
                     {
-                        UIRef.RedReady.enabled = true;
+                        UIRef.RedReady.SetActive(true);
                     }
                     else if(playerState != PlayerStateEnum.ready)
                     {
-                        UIRef.RedReady.enabled = false;
+                        UIRef.RedReady.SetActive(false);
                     }
                 }
             }

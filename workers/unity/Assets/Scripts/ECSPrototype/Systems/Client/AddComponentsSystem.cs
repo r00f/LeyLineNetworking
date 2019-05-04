@@ -20,7 +20,6 @@ public class AddComponentsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly EntityArray Entities;
-
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Transform> Transform;
         public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributesData;
@@ -33,7 +32,6 @@ public class AddComponentsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly EntityArray Entities;
-
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Transform> Transform;
         public readonly ComponentDataArray<Health.Component> UnitAttributeData;
@@ -77,7 +75,8 @@ public class AddComponentsSystem : ComponentSystem
 
                 MouseState mouseState = new MouseState
                 {
-                    CurrentState = MouseState.State.Neutral
+                    CurrentState = MouseState.State.Neutral,
+                    Distance = 0.865f
                 };
 
                 MarkerState markerState = new MarkerState
@@ -102,7 +101,10 @@ public class AddComponentsSystem : ComponentSystem
             {
                 MouseState mouseState = new MouseState
                 {
-                    CurrentState = MouseState.State.Neutral
+                    CurrentState = MouseState.State.Neutral,
+                    yOffset = 1f,
+                    ClickEvent = 0,
+                    Distance = 1.2f
                 };
 
                 IsVisible isVisible = new IsVisible
