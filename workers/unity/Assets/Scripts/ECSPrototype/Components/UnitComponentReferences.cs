@@ -1,7 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using cakeslice;
+    
 public class UnitComponentReferences : MonoBehaviour
 {
     [Header("UnitVisuals")]
@@ -16,7 +17,8 @@ public class UnitComponentReferences : MonoBehaviour
     public GameObject HealthbarPrefab;
     public GameObject HealthBarInstance;
 
-    [Header("SelectionCircle")]
+    [Header("UnitVIsuals")]
     public GameObject SelectionCircleGO;
     public MeshRenderer SelectionMeshRenderer;
+    public Outline Outline;
 }

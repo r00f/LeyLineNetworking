@@ -115,13 +115,13 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            m_ExecuteSystem.ClearAllLockedActions(gameStateWorldIndex);
                             gameState.CurrentPlanningTime = gameState.PlanningTime;
                             gameState.CurrentState = GameStateEnum.cleanup;
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.cleanup:
+                        m_ExecuteSystem.ClearAllLockedActions(gameStateWorldIndex);
                         gameState.CurrentState = GameStateEnum.planning;
                         m_Data.GameStateData[i] = gameState;
                         break;

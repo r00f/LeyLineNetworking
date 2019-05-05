@@ -17,18 +17,68 @@ MonoBehaviour:
     ScenesForWorker:
     - {fileID: 102900000, guid: 06a38ee898699934ab16e0cf62e99070, type: 3}
     LocalBuildConfig:
-      BuildPlatforms: 1
-      BuildOptions: 1
+      BuildTargets:
+      - Options: 0
+        Enabled: 1
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
     CloudBuildConfig:
-      BuildPlatforms: 20
-      BuildOptions: 0
+      BuildTargets:
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 1
+        Required: 0
+      - Options: 16384
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
   - WorkerType: UnityGameLogic
     ScenesForWorker:
     - {fileID: 102900000, guid: aaa9e72f9f3224639850bd7b630960be, type: 3}
     LocalBuildConfig:
-      BuildPlatforms: 1
-      BuildOptions: 1
+      BuildTargets:
+      - Options: 0
+        Enabled: 1
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
     CloudBuildConfig:
-      BuildPlatforms: 8
-      BuildOptions: 16384
+      BuildTargets:
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 1
+        Required: 0
+      - Options: 16384
+        Enabled: 1
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
+      - Options: 0
+        Enabled: 0
+        Required: 0
   isInitialised: 1

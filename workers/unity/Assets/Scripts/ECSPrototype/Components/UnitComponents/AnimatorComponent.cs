@@ -5,15 +5,15 @@ using UnityEngine;
 public class AnimatorComponent : MonoBehaviour
 {
 
-
-
     [Header("GenericAnimation")]
     public Animator Animator;
     public bool ExecuteTriggerSet;
+    public bool InitialValuesSet;
 
     [Header("Movement")]
     public Transform RotateTransform;
     public bool DestinationReachTriggerSet;
+    public Vector3 RotationTarget;
     public Vector3 DestinationPosition;
     
     [Header("GetHit")]

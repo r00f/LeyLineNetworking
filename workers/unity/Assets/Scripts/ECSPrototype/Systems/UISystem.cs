@@ -26,6 +26,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<IsVisible> IsVisibleData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentArray<AnimatedPortraitReference> PortraitData;
+            public ComponentArray<UnitComponentReferences> ComponentReferences;
             public ComponentArray<Healthbar> HealthbarData;
         }
 
@@ -128,6 +129,7 @@ namespace LeyLineHybridECS
                 GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
                 var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
                 var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
+                var outline = m_UnitData.ComponentReferences[i].Outline;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var position = m_UnitData.TransformData[i].position;
                 float currentHealth = m_UnitData.HealthData[i].CurrentHealth;
@@ -139,13 +141,47 @@ namespace LeyLineHybridECS
                 var faction = m_UnitData.FactionData[i];
                 var factionColor = m_UnitData.FactionData[i].TeamColor;
                 var stats = m_UnitData.BaseDataSets[i];
-
                 int actionCount = stats.Actions.Count + 2;
                 int spawnActionCount = stats.SpawnActions.Count;
-                //var portraitPlayerColor = ;
+
+                if(gameState == GameStateEnum.planning)
+                {
+                    if (mouseState == MouseState.State.Hovered)
+                    {
+                        if (!outline.enabled)
+                            outline.enabled = true;
+                    }
+                    else
+                    {
+                        if (outline.enabled)
+                            outline.enabled = false;
+                    }
+                }
+                else
+                {
+                    if (outline.enabled)
+                        outline.enabled = false;
+                }
 
                 if(playerState.SelectedUnitId == unitId)
                 {
+                    if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
+                        UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
+
+                    UIRef.HealthText.text = currentHealth + " / " + maxHealth;
+                    UIRef.HealthFill.fillAmount = Mathf.Lerp(UIRef.HealthFill.fillAmount, currentHealth / maxHealth, 0.1f);
+
+                    if (factionColor == TeamColorEnum.blue)
+                    {
+                        if (UIRef.PortraitPlayerColor.color != Color.blue)
+                            UIRef.PortraitPlayerColor.color = Color.blue;
+                    }
+                    else if (factionColor == TeamColorEnum.red)
+                    {
+                        if (UIRef.PortraitPlayerColor.color != Color.red)
+                            UIRef.PortraitPlayerColor.color = Color.red;
+                    }
+
                     if (faction.Faction == authPlayerFaction)
                     {
                         if(stats.SpawnActions.Count == 0)
@@ -226,74 +262,11 @@ namespace LeyLineHybridECS
                     if (!unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(true);
                 }
+
                 else
                 {
                     if (unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(false);
-                }
-
-
-
-                if (unitId == playerState.SelectedUnitId)
-                {
-                    /*
-                    if(stats.IsHero)
-                    {
-                        if (!UIRef.HeroEnergyPanel.activeSelf)
-                            UIRef.HeroEnergyPanel.SetActive(true);
-
-
-
-                        //get player with faction
-                        
-                            var playerEnergy = m_PlayerData.PlayerEnergyData[0];
-                            var playerFaction = m_PlayerData.FactionData[0];
-                            
-                            if(faction.Faction == playerFaction.Faction)
-                            {
-                                switch(playerFaction.TeamColor)
-                                {
-                                    case TeamColorEnum.blue:
-                                        UIRef.HeroCurrentEnergyFill.color = Color.blue;
-                                        break;
-                                    case TeamColorEnum.red:
-                                        UIRef.HeroCurrentEnergyFill.color = Color.red;
-                                        break;
-                                }
-
-                                UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, .1f);
-
-                                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
-                                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, .1f);
-
-                                UIRef.HeroEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
-
-                            }
-                            
-                    }
-                    else
-                    {
-                        if (!UIRef.HeroEnergyPanel.activeSelf)
-                            UIRef.HeroEnergyPanel.SetActive(false);
-                    }
-                    */
-
-                    if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
-                        UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
-
-                    UIRef.HealthText.text = currentHealth + " / " + maxHealth;
-                    UIRef.HealthFill.fillAmount = Mathf.Lerp(UIRef.HealthFill.fillAmount, currentHealth / maxHealth, 0.1f);
-
-                    if (factionColor == TeamColorEnum.blue)
-                    {
-                        if (UIRef.PortraitPlayerColor.color != Color.blue)
-                            UIRef.PortraitPlayerColor.color = Color.blue;
-                    }
-                    else if (factionColor == TeamColorEnum.red)
-                    {
-                        if (UIRef.PortraitPlayerColor.color != Color.red)
-                            UIRef.PortraitPlayerColor.color = Color.red;
-                    }
                 }
 
                 //if there is no healthbar, instantiate it into healthBarParent
@@ -328,6 +301,22 @@ namespace LeyLineHybridECS
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
                 Text energyText = UIRef.HeroEnergyText;
+
+                if(gameState != GameStateEnum.planning)
+                {
+                    if(UIRef.ReadyButton.interactable)
+                    {
+                        UIRef.ReadyButton.interactable = false;
+                    }
+                }
+                else
+                {
+                    if (!UIRef.ReadyButton.interactable)
+                    {
+                        UIRef.ReadyButton.interactable = true;
+                    }
+
+                }
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 

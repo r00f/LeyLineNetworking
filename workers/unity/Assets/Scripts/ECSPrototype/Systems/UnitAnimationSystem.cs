@@ -4,7 +4,9 @@ using Unit;
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
+using LeyLineHybridECS;
 
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class UnitAnimationSystem : ComponentSystem
 {
     public struct UnitData
@@ -96,32 +98,43 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if(actions.LockedAction.Index != -3)
                 {
-                    Vector3 rotateTarget;
-
-                    if (animatorComponent.DestinationPosition != GetTargetPosition(actions.LockedAction.Targets[0].TargetId))
-                        animatorComponent.DestinationPosition = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
-
                     if (!animatorComponent.ExecuteTriggerSet)
                     {
                         animatorComponent.Animator.SetTrigger("Execute");
                         animatorComponent.ExecuteTriggerSet = true;
                     }
 
-                    if(actions.LockedAction.Index == -2)
+                    //set Initial Target Positions
+                    if (!animatorComponent.InitialValuesSet)
                     {
-                        rotateTarget = serverPosition.Coords.ToUnityVector();
-                    }
-                    else
-                    {
-                        rotateTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+                        Debug.Log("Set OneTime anim vars");
+
+                        if (actions.LockedAction.Index != -2)
+                        {
+                            animatorComponent.RotationTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+                        }
+
+                        animatorComponent.DestinationPosition = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+                        animatorComponent.InitialValuesSet = true;
                     }
 
-                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, rotateTarget, 3);
+                    if (actions.LockedAction.Index == -2)
+                    {
+                        if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
+                            animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
+                    }
+
+                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, 3);
                     animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                 }
             }
             else
             {
+                if (animatorComponent.InitialValuesSet)
+                {
+                    animatorComponent.InitialValuesSet = false;
+                }
+
                 if (animatorComponent.DestinationReachTriggerSet)
                 {
                     animatorComponent.Animator.ResetTrigger("DestinationReached");

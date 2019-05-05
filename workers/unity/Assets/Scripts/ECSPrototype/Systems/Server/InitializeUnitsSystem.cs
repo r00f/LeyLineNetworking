@@ -2,6 +2,8 @@
 using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
+using LeyLineHybridECS;
+using cakeslice;
 
 public class InitializeUnitsSystem : ComponentSystem
 {
@@ -12,6 +14,8 @@ public class InitializeUnitsSystem : ComponentSystem
         public readonly ComponentArray<Transform> Transforms;
         public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
         public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
+        public ComponentArray<UnitComponentReferences> ComponentReferences;
+        public ComponentArray<LineRendererComponent> LineRenderers;
         public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
     }
 
@@ -32,24 +36,38 @@ public class InitializeUnitsSystem : ComponentSystem
         {
             var unitFactionComp = m_UnitData.FactionData[i];
             var teamColorMeshes = m_UnitData.TeamColorMeshesData[i];
+            var componentReferences = m_UnitData.ComponentReferences[i];
+            var lineRenderer = m_UnitData.LineRenderers[i];
             var unitTransform = m_UnitData.Transforms[i];
 
-            foreach(MeshRenderer r in teamColorMeshes.meshRenderers)
+
+            Color factionColor = new Color();
+
+            switch (unitFactionComp.TeamColor)
             {
-                switch(unitFactionComp.TeamColor)
-                {
-                    case Generic.TeamColorEnum.blue:
-                        r.material.color = new Color(Color.blue.r, Color.blue.g, Color.blue.b, r.material.color.a);
-                        break;
-                    case Generic.TeamColorEnum.red:
-                        r.material.color = new Color(Color.red.r, Color.red.g, Color.red.b, r.material.color.a);
-                        break;
-                }
+                case Generic.TeamColorEnum.blue:
+                    componentReferences.Outline.color = 1;
+                    factionColor = Color.blue;
+                    break;
+                case Generic.TeamColorEnum.red:
+                    componentReferences.Outline.color = 2;
+                    factionColor = Color.red;
+                    break;
             }
+
+            //lineRenderer.lineRenderer.startColor = factionColor;
+            //lineRenderer.lineRenderer.endColor = factionColor;
+
+            foreach (MeshRenderer r in teamColorMeshes.meshRenderers)
+            {
+                r.material.color = factionColor;
+            }
+
+
 
             //Debug.Log(m_PlayerData.Length);
 
-            for(int pi = 0; pi < m_PlayerData.Length; pi++)
+            for (int pi = 0; pi < m_PlayerData.Length; pi++)
             {
 
                 var playerFactionComp = m_PlayerData.FactionData[pi];

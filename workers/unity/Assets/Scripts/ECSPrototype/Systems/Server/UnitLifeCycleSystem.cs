@@ -18,10 +18,10 @@ public class UnitLifeCycleSystem : ComponentSystem
     private struct UnitAddedData
     {
         public readonly int Length;
+        public readonly EntityArray Entities;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Health.Component> HealthData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly EntityArray Entities;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public SubtractiveComponent<UnitStateData> UnitState;
     }

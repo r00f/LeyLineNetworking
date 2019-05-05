@@ -83,9 +83,6 @@ public class ExecuteActionsSystem : ComponentSystem
 
                                 }
                                 break;
-                            case GameStateEnum.calculate_energy:
-
-                                break;
                         }
                     }
                 }
@@ -102,7 +99,10 @@ public class ExecuteActionsSystem : ComponentSystem
 
             if(unitWorldIndex == worldIndex)
             {
+                //Debug.Log("ClearAllLockedActions");
                 //clear locked action
+                actions.LastSelected = actions.NullAction;
+                actions.CurrentSelected = actions.NullAction;
                 actions.LockedAction = actions.NullAction;
                 m_UnitData.ActionData[i] = actions;
             }
