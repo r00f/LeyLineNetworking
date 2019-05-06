@@ -9,13 +9,14 @@ using UnityEngine;
 using Improbable.Gdk.ReactiveComponents;
 
 //Update after playerState selected unit has been set
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UISystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(MouseStateSystem))]
 public class SendActionRequestSystem : ComponentSystem
 {
     public struct SelectActionRequestData
     {
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthorativeData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<ClientPath.Component> ClientPathData;
@@ -31,6 +32,7 @@ public class SendActionRequestSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
@@ -61,10 +63,12 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
         public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
-        public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+        public ComponentDataArray<PlayerState.Component> PlayerStateData;
     }
 
     [Inject] private PlayerData m_PlayerData;
+
+    //[Inject] private PlayerStateSystem m_PlayerStateSystem;
 
     protected override void OnUpdate()
     {
@@ -77,7 +81,7 @@ public class SendActionRequestSystem : ComponentSystem
             var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
             var actionsData = m_SelectActionRequestData.ActionsData[i];
             var playerState = m_PlayerData.PlayerStateData[0];
-
+            var unitCoord = m_SelectActionRequestData.Coordinates[i].CubeCoordinate;
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
@@ -102,7 +106,7 @@ public class SendActionRequestSystem : ComponentSystem
 
             #region targetting
             //check if unit is the selected unit in playerState and if current selected action is not empty
-            if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Targets.Count != 0)
+            if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Index != -3)
             {
                 if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
                 {
@@ -110,15 +114,16 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         var cellMousestate = m_CellData.MouseStateData[ci];
                         var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
+                        var cellCoord = m_CellData.Coordinates[ci].CubeCoordinate;
 
-                        if (cellMousestate.ClickEvent == 1)
+                        if (cellMousestate.ClickEvent == 1 && cellCoord != unitCoord)
                         {
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
                                 new SetTargetRequest(cellEntityId)
                             );
-
+                            //Debug.Log("Send setTarget request for Cell with id: " + cellEntityId);
                             setTargetRequest.RequestsToSend.Add(request);
                             m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                         }
@@ -126,7 +131,6 @@ public class SendActionRequestSystem : ComponentSystem
                 }
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
-
                     for (int ci = 0; ci < m_UnitData.Length; ci++)
                     {
                         var unitMousestate = m_UnitData.MouseStateData[ci];
@@ -134,7 +138,7 @@ public class SendActionRequestSystem : ComponentSystem
 
                         if (unitMousestate.ClickEvent == 1)
                         {
-                            Debug.Log("Send SelectUnitRequest: " + targetUnitEntityId);
+                            //Debug.Log("Send SelectUnitRequest: " + targetUnitEntityId);
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
@@ -146,10 +150,7 @@ public class SendActionRequestSystem : ComponentSystem
                         }
                     }
                 }
-
             }
-
-
             #endregion
         }
     }
@@ -157,6 +158,8 @@ public class SendActionRequestSystem : ComponentSystem
     public void SelectActionCommand(int actionIndex, long entityId)
     {
         UpdateInjectedComponentGroups();
+
+        var playerState = m_PlayerData.PlayerStateData[0];
         //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
@@ -171,7 +174,10 @@ public class SendActionRequestSystem : ComponentSystem
                 new SelectActionRequest(actionIndex)
                 );
 
-                selectActionSender.RequestsToSend.Add(request);
+                if(selectActionSender.RequestsToSend.Count == 0)
+                {
+                    selectActionSender.RequestsToSend.Add(request);
+                }
                 m_SelectActionRequestData.SelectActionSenders[i] = selectActionSender;
             }
         }

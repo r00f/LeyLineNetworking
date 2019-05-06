@@ -107,7 +107,7 @@ public class UnitAnimationSystem : ComponentSystem
                     //set Initial Target Positions
                     if (!animatorComponent.InitialValuesSet)
                     {
-                        Debug.Log("Set OneTime anim vars");
+                        //Debug.Log("Set OneTime anim vars");
 
                         if (actions.LockedAction.Index != -2)
                         {

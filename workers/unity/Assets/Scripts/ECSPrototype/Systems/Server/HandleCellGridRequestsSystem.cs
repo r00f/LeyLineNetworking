@@ -35,7 +35,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<FactionComponent.Component> Faction;
-
     }
 
     [Inject] private SetTargetRequestData m_SetTargetRequestData;
@@ -94,7 +93,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
             actionData.LockedAction = actionData.NullAction;
 
-            //Debug.Log("Recieved Select Action Request");
+            //Debug.Log("Recieved Select Action Requests length: " + selectActionRequest.Requests.Count);
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -160,100 +159,105 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
             var faction = m_SetTargetRequestData.Faction[i];
 
-            //Debug.Log("SetTargetRequest to TargetId: " + setTargetRequest.Requests[0].Payload.TargetId);
+            
 
             foreach (var str in setTargetRequest.Requests)
             {
                 long id = str.Payload.TargetId;
-                switch (actionData.CurrentSelected.Targets[0].TargetType)
+
+                if (actionData.CurrentSelected.Index != -3 && actionData.LockedAction.Index == -3)
                 {
-                    case TargetTypeEnum.cell:
-                        for(int ci = 0; ci < m_CellData.Length; ci++)
-                        {
-                            var cellId = m_CellData.EntityIds[ci].EntityId.Id;
-                            var cell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
+                    //Debug.Log("SetTargetRequest to TargetId: " + setTargetRequest.Requests[0].Payload.TargetId);
 
-                            if (cellId == id)
+                    switch (actionData.CurrentSelected.Targets[0].TargetType)
+                    {
+                        case TargetTypeEnum.cell:
+                            for (int ci = 0; ci < m_CellData.Length; ci++)
                             {
-                                //check if in range
-                                
-                                actionData.LockedAction = actionData.CurrentSelected;
-                                var locked = actionData.LockedAction;
-                                var t = actionData.LockedAction.Targets[0];
-                                t.TargetId = id;
-                                actionData.LockedAction.Targets[0] = t;
-                                uint costToSubtract = t.EnergyCost;
+                                var cellId = m_CellData.EntityIds[ci].EntityId.Id;
+                                var cell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
 
-                                for(int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
+                                if (cellId == id)
                                 {
-                                    var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+                                    //check if in range
 
-                                    if (modType == ModTypeEnum.aoe)
-                                    {
+                                    actionData.LockedAction = actionData.CurrentSelected;
+                                    var locked = actionData.LockedAction;
+                                    var t = actionData.LockedAction.Targets[0];
+                                    t.TargetId = id;
+                                    actionData.LockedAction.Targets[0] = t;
+                                    uint costToSubtract = t.EnergyCost;
 
-                                    }
-                                    if (modType == ModTypeEnum.path)
+                                    for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                     {
-                                        var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                        mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
-                                        actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                        costToSubtract += (uint)mod.CellAttributes.CellAttributes.Count;
+                                        var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+
+                                        if (modType == ModTypeEnum.aoe)
+                                        {
+
+                                        }
+                                        if (modType == ModTypeEnum.path)
+                                        {
+                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                            mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+                                            actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                            costToSubtract += (uint)mod.CellAttributes.CellAttributes.Count;
+                                        }
                                     }
+
+                                    locked.CombinedCost = costToSubtract;
+                                    actionData.LockedAction = locked;
+                                    m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+
                                 }
-
-                                locked.CombinedCost = costToSubtract;
-                                actionData.LockedAction = locked;
-                                m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
-
                             }
-                        }
-                        break;
-                    case TargetTypeEnum.unit:
-                        for (int ci = 0; ci < m_UnitData.Length; ci++)
-                        {
-                            var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
-                            if (unitId == id)
+                            break;
+                        case TargetTypeEnum.unit:
+                            for (int ci = 0; ci < m_UnitData.Length; ci++)
                             {
-                                actionData.LockedAction = actionData.CurrentSelected;
-                                var locked = actionData.LockedAction;
-                                var t = actionData.LockedAction.Targets[0];
-                                t.TargetId = id;
-                                actionData.LockedAction.Targets[0] = t;
-                                uint costToSubtract = t.EnergyCost;
-
-                                for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
+                                var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
+                                if (unitId == id)
                                 {
-                                    var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+                                    actionData.LockedAction = actionData.CurrentSelected;
+                                    var locked = actionData.LockedAction;
+                                    var t = actionData.LockedAction.Targets[0];
+                                    t.TargetId = id;
+                                    actionData.LockedAction.Targets[0] = t;
+                                    uint costToSubtract = t.EnergyCost;
 
-                                    if (modType == ModTypeEnum.aoe)
+                                    for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                     {
+                                        var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
 
-                                    }
-                                    if (modType == ModTypeEnum.path)
-                                    {
-                                        /*
-                                        var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                        mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
-                                        actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                        if (modType == ModTypeEnum.aoe)
+                                        {
 
-                                        */
+                                        }
+                                        if (modType == ModTypeEnum.path)
+                                        {
+                                            /*
+                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                            mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+                                            actionData.LockedAction.Targets[0].Mods[0] = mod;
+
+                                            */
+                                        }
                                     }
+                                    locked.CombinedCost = costToSubtract;
+                                    actionData.LockedAction = locked;
+                                    m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+
                                 }
-                                locked.CombinedCost = costToSubtract;
-                                actionData.LockedAction = locked;
-                                m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
-
                             }
-                        }
 
                             break;
-                }
+                    }
 
-                actionData.CurrentSelected = actionData.NullAction;
+                    actionData.CurrentSelected = actionData.NullAction;
+                }
             }
             m_SetTargetRequestData.ActionsData[i] = actionData;
         }
-
         #endregion
 
     }

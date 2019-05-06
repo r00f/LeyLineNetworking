@@ -48,7 +48,7 @@ public class MouseStateSystem : JobComponentSystem
                 //set its MouseState to Clicked if we click
                 if (mouseButtonDown)
                 {
-                    state.CurrentState = MouseState.State.Clicked;
+                    //state.CurrentState = MouseState.State.Clicked;
                     state.ClickEvent = 1;
                     MouseStates[index] = state;
                 }
@@ -60,12 +60,6 @@ public class MouseStateSystem : JobComponentSystem
                         state.CurrentState = MouseState.State.Hovered;
                         MouseStates[index] = state;
                     }
-                }
-                else if (state.ClickEvent == 1)
-                {
-                    state.CurrentState = MouseState.State.Clicked;
-                    state.ClickEvent = 0;
-                    MouseStates[index] = state;
                 }
             }
             //if the mouse is anywhere but over the collider 
@@ -91,6 +85,13 @@ public class MouseStateSystem : JobComponentSystem
                         MouseStates[index] = state;
                     }
                 }
+            }
+
+            if (state.ClickEvent == 1 && !mouseButtonDown)
+            {
+                state.CurrentState = MouseState.State.Clicked;
+                state.ClickEvent = 0;
+                MouseStates[index] = state;
             }
         }
     }

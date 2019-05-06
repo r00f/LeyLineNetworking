@@ -66,21 +66,19 @@ namespace LeyLineHybridECS
                             {
                                 if (unitId == playerState.SelectedUnitId)
                                 {
-                                    //if selected unit is waiting for target set playerstate to waitingForTarget
-                                    if (actions.CurrentSelected.Targets.Count != 0 && actions.LockedAction.Targets.Count == 0)
+                                    if(actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
                                     {
-                                        if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                                        if(playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                                             SetPlayerState(PlayerStateEnum.waiting_for_target);
                                     }
                                     else
                                     {
-                                        if (playerState.CurrentState != PlayerStateEnum.unit_selected)
+                                        if(playerState.CurrentState != PlayerStateEnum.unit_selected)
                                             SetPlayerState(PlayerStateEnum.unit_selected);
                                     }
-
+                                    
                                     if (!unitComponentReferences.SelectionCircleGO.activeSelf)
                                         unitComponentReferences.SelectionCircleGO.SetActive(true);
-
                                 }
                                 else if (playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                                 {
@@ -113,7 +111,6 @@ namespace LeyLineHybridECS
 
         public void SetPlayerState(PlayerStateEnum state)
         {
-            UpdateInjectedComponentGroups();
             var playerState = m_PlayerData.PlayerStateData[0];
             playerState.CurrentState = state;
             m_PlayerData.PlayerStateData[0] = playerState;

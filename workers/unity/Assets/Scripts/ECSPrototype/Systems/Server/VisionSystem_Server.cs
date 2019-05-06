@@ -564,7 +564,6 @@ public class VisionSystem_Server : ComponentSystem
 }
 
 
-
 #region ClusterDef
 public struct ObstructVisionCluster
 {

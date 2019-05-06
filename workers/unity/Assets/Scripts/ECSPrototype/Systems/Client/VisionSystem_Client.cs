@@ -93,6 +93,8 @@ namespace LeyLineHybridECS
                     }
 
                     visible.RequireUpdate = 1;
+
+                    m_UnitData.Visible[i] = visible;
                 }
             }
 
