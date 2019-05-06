@@ -50,7 +50,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4431655576780276
 Transform:
   m_ObjectHideFlags: 0
@@ -156,8 +156,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Collider: {fileID: 0}
   MeshRenderer: {fileID: 23109104164007716}
-  GO: {fileID: 1426537842077086}
+  GameObjects:
+  - {fileID: 1426537842077086}
 --- !u!114 &8157832631591596192
 MonoBehaviour:
   m_ObjectHideFlags: 0

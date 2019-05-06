@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class IsVisibleReferences : MonoBehaviour
 {
+    public Collider Collider;
     public MeshRenderer MeshRenderer;
-    public GameObject GO;
+    public List<GameObject> GameObjects;
 }

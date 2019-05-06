@@ -32,6 +32,7 @@ public class AddComponentsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly EntityArray Entities;
+        public readonly ComponentDataArray<FactionComponent.Component> Factions;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Transform> Transform;
         public readonly ComponentDataArray<Health.Component> UnitAttributeData;
@@ -44,6 +45,7 @@ public class AddComponentsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public readonly ComponentDataArray<FactionComponent.Component> Factions;
         public readonly ComponentDataArray<Authoritative<Player.PlayerState.Component>> AuthorativeData;
     }
 
@@ -55,6 +57,7 @@ public class AddComponentsSystem : ComponentSystem
             return;
 
         var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+        var playerFaction = m_PlayerData.Factions[0].Faction;
 
         if (playerWorldIndex == 0)
             return;
@@ -69,7 +72,7 @@ public class AddComponentsSystem : ComponentSystem
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
-                    RequireUpdate = 1,
+                    RequireUpdate = 0,
                     LerpSpeed = 0.5f,
                 };
 
@@ -96,6 +99,7 @@ public class AddComponentsSystem : ComponentSystem
         {
             var unitWorldIndex = m_UnitAddedData.WorldIndexData[i];
             var entity = m_UnitAddedData.Entities[i];
+            var faction = m_UnitAddedData.Factions[i].Faction;
 
             if (unitWorldIndex.Value == playerWorldIndex)
             {
@@ -107,12 +111,19 @@ public class AddComponentsSystem : ComponentSystem
                     Distance = 1.2f
                 };
 
-                IsVisible isVisible = new IsVisible
+                IsVisible isVisible = new IsVisible();
+
+                if (faction == playerFaction)
                 {
-                    Value = 1,
-                    RequireUpdate = 1,
-                    LerpSpeed = 0f,
-                };
+                    isVisible.Value = 1;
+                    isVisible.RequireUpdate = 1;
+                }
+                else
+                {
+                    isVisible.Value = 0;
+                    isVisible.RequireUpdate = 1;
+                }
+
 
                 PostUpdateCommands.AddComponent(entity, mouseState);
                 PostUpdateCommands.AddComponent(entity, isVisible);

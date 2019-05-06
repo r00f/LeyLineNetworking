@@ -268,8 +268,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Animator: {fileID: 6716478511864004344}
   ExecuteTriggerSet: 0
+  InitialValuesSet: 0
   RotateTransform: {fileID: 6716478511871447312}
   DestinationReachTriggerSet: 0
+  RotationTarget: {x: 0, y: 0, z: 0}
   DestinationPosition: {x: 0, y: 0, z: 0}
   LastHealth: 0
   TriggerEnter: 0
@@ -323,8 +325,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Collider: {fileID: 771660692032844721}
   MeshRenderer: {fileID: 8894037239879066281}
-  GO: {fileID: 8108814016297623155}
+  GameObjects:
+  - {fileID: 6716478511871413566}
+  - {fileID: 6716478511871413574}
 --- !u!114 &3289465276142304449
 MonoBehaviour:
   m_ObjectHideFlags: 0

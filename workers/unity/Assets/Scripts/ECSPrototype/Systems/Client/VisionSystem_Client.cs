@@ -3,19 +3,22 @@ using Generic;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.ReactiveComponents;
 using Player;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
+using Unit;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation]
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(VisionSystem_Server))]
     public class VisionSystem_Client : ComponentSystem
     {
         struct PlayerData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public readonly ComponentDataArray<FactionComponent.Component> Factions;
             public readonly ComponentDataArray<Vision.Component> VisionData;
         }
 
@@ -32,12 +35,22 @@ namespace LeyLineHybridECS
         struct IsVisibleData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<CubeCoordinate.Component> Coordinate;
+            public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
             public ComponentDataArray<IsVisible> Visible;
             public ComponentArray<IsVisibleReferences> VisibleRef;
         }
 
         [Inject] IsVisibleData m_IsVisible;
+
+        struct UnitData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
+            public readonly ComponentDataArray<FactionComponent.Component> Factions;
+            public ComponentDataArray<IsVisible> Visible;
+        }
+
+        [Inject] UnitData m_UnitData;
 
 
 
@@ -49,14 +62,49 @@ namespace LeyLineHybridECS
             }
 
             var playerVision = m_PlayerData.VisionData[0];
+            var playerFaction = m_PlayerData.Factions[0].Faction;
+
+            //set opposing unit visibilty values when they enter / leave a players visionRange
+            for (int i = 0; i < m_UnitData.Length; i++)
+            {
+                var faction = m_UnitData.Factions[i].Faction;
+                var coord = m_UnitData.Coordinates[i];
+                var visible = m_UnitData.Visible[i];
+
+                if (faction != playerFaction && visible.RequireUpdate == 0)
+                {
+                    bool inVisionRange = false;
+
+                    foreach (CellAttributes c in playerVision.CellsInVisionrange)
+                    {
+                        if(coord.CubeCoordinate == c.Cell.CubeCoordinate)
+                        {
+                            inVisionRange = true;
+                        }
+                    }
+
+                    if (inVisionRange)
+                    {
+                        visible.Value = 1;
+                    }
+                    else
+                    {
+                        visible.Value = 0;
+                    }
+
+                    visible.RequireUpdate = 1;
+                }
+            }
+
 
             for (int i = 0; i < m_IsVisible.Length; i++)
             {
                 var isVisibleComp = m_IsVisible.Visible[i];
                 MeshRenderer meshRenderer = m_IsVisible.VisibleRef[i].MeshRenderer;
-                GameObject go = m_IsVisible.VisibleRef[i].GO;
+                List<GameObject> gameObjects = m_IsVisible.VisibleRef[i].GameObjects;
+                Collider collider = m_IsVisible.VisibleRef[i].Collider;
                 byte isVisible = m_IsVisible.Visible[i].Value;
-                var coord = m_IsVisible.Coordinate[i];
+                var coord = m_IsVisible.Coordinates[i];
 
                 if (isVisibleComp.RequireUpdate == 0)
                 {
@@ -100,13 +148,19 @@ namespace LeyLineHybridECS
                             }
                             else
                             {
-                                go.SetActive(false);
+                                foreach (GameObject g in gameObjects)
+                                {
+                                    g.SetActive(false);
+                                }
                                 isVisibleComp.RequireUpdate = 0;
                             }
                         }
                         else
                         {
-                            go.SetActive(true);
+                            foreach (GameObject g in gameObjects)
+                            {
+                                g.SetActive(true);
+                            }
 
                             if (meshRenderer.material.color.a < 1)
                             {
@@ -123,11 +177,21 @@ namespace LeyLineHybridECS
                     {
                         if (isVisible == 0)
                         {
-                            go.SetActive(false);
+                            foreach (GameObject g in gameObjects)
+                            {
+                                g.SetActive(false);
+                            }
+                            collider.enabled = false;
+                            isVisibleComp.RequireUpdate = 0;
                         }
                         else
                         {
-                            go.SetActive(true);
+                            foreach (GameObject g in gameObjects)
+                            {
+                                g.SetActive(true);
+                            }
+                            collider.enabled = true;
+                            isVisibleComp.RequireUpdate = 0;
                         }
                     }
                     m_IsVisible.Visible[i] = isVisibleComp;
@@ -143,7 +207,7 @@ namespace LeyLineHybridECS
             {
                 var isVisibleComp = m_IsVisible.Visible[i];
                 byte isVisible = m_IsVisible.Visible[i].Value;
-                var coord = m_IsVisible.Coordinate[i];
+                var coord = m_IsVisible.Coordinates[i];
 
                 if (isVisibleComp.RequireUpdate == 0)
                 {
