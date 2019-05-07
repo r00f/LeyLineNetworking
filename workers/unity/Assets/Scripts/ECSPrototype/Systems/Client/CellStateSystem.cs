@@ -54,8 +54,9 @@ namespace LeyLineHybridECS
 
         [Inject] private PlayerData m_PlayerData;
 
-        protected override void OnUpdate()
+         protected override void OnUpdate()
         {
+            /*
             if(m_PlayerData.PlayerStateData.Length == 0)
             {
                 return;
@@ -64,7 +65,7 @@ namespace LeyLineHybridECS
 
             ResetCellVisuals();
 
-            if (playerState.CurrentState == PlayerStateEnum.waiting_for_target)
+           if (playerState.CurrentState == PlayerStateEnum.waiting_for_target)
             {
                 for (int ui = 0; ui < m_UnitData.Length; ui++)
                 {
@@ -119,6 +120,7 @@ namespace LeyLineHybridECS
 
 
             }
+            */
         }
 
         public void ResetCellVisuals()
@@ -161,7 +163,7 @@ namespace LeyLineHybridECS
                     };
                 }
             }
+            
         }
     }
 }
-

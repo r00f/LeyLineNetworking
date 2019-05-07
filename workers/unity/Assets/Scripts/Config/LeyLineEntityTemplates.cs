@@ -181,6 +181,12 @@ public static class LeyLineEntityTemplates {
             
         };
 
+        var playerState = new PlayerState.Snapshot
+        {
+            CellsInRange = new List<CellAttributes>(),
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
+        };
+
         var wIndex = new WorldIndex.Snapshot();
 
         var pos = new Position.Snapshot { Coords = new Coordinates() };
@@ -197,7 +203,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new PlayerState.Snapshot(), client);
+        template.AddComponent(playerState, client);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);

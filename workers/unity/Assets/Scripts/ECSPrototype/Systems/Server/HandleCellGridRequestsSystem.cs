@@ -330,6 +330,42 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return cachedPaths;
 
     }
+    public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
+    {
+        CellAttribute origin = new CellAttribute();
+        for(int i = 0; i< m_CellData.Length; i++)
+        {
+            var coordinate = m_CellData.CoordinateData[i].CubeCoordinate;
+            var cellAttribute = m_CellData.CellAttributes[i].CellAttributes.Cell;
+            if(coordinate == originCoord)
+            {
+                origin = cellAttribute;
+            }
+        }
+        var paths = CachePaths(cellsInRange, origin);
+        var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
+
+        foreach (var key in paths.Keys)
+        {
+            var path = paths[key];
+
+            int pathCost;
+
+            if (key.IsTaken)
+                continue;
+
+            pathCost = path.CellAttributes.Sum(c => c.MovementCost);
+
+            if (pathCost <= radius)
+            {
+                path.CellAttributes.Reverse();
+                cachedPaths.Add(key, path);
+            }
+        }
+
+        return cachedPaths;
+
+    }
 
     public Dictionary<CellAttribute, CellAttributeList> CachePaths(List<CellAttributes> cellsInRange, CellAttribute origin)
     {
@@ -372,6 +408,25 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public CellAttributeList FindPath(CellAttribute destination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
     {
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new CellAttributeList(new List<CellAttribute>());
+    }
+    public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
+    {
+        CellAttribute destination = new CellAttribute();
+        for (int i = 0; i < m_CellData.Length; i++)
+        {
+            var coordinate = m_CellData.CoordinateData[i].CubeCoordinate;
+            var cellAttribute = m_CellData.CellAttributes[i].CellAttributes.Cell;
+            if (coordinate == inDestination)
+            {
+                destination = cellAttribute;
+            }
+        }
         if (cachedPaths.ContainsKey(destination))
         {
             return cachedPaths[destination];
