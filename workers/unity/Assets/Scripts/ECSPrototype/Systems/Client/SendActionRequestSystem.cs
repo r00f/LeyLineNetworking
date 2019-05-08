@@ -160,8 +160,12 @@ public class SendActionRequestSystem : ComponentSystem
     public void SelectActionCommand(int actionIndex, long entityId)
     {
         UpdateInjectedComponentGroups();
-        m_HighlightingSystem.ClearPlayerState();
         var playerState = m_PlayerData.PlayerStateData[0];
+        playerState.SelectedActionId = actionIndex;
+        m_PlayerData.PlayerStateData[0] = playerState;
+        m_HighlightingSystem.ClearPlayerState();
+
+
         //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {

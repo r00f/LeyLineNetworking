@@ -20,14 +20,18 @@ public class HighlightingSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthorativeData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Actions.Component> ActionsData;
+        //public readonly ComponentDataArray<Actions.Component> ActionsData;
+        public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
         public readonly ComponentDataArray<SpatialEntityId> IDs;
         public readonly ComponentDataArray<MouseState> MouseStates;
 
+
     }
     [Inject]
     ActiveUnitData m_ActiveUnitData;
+
+
 
     public struct PlayerStateData
     {
@@ -67,6 +71,8 @@ public class HighlightingSystem : ComponentSystem
     [Inject]
     HandleCellGridRequestsSystem m_CellGrid;
 
+    ECSActionTarget Target = null;
+
     protected override void OnUpdate()
     {
         var playerState = m_PlayerStateData.PlayerState[0];
@@ -87,24 +93,53 @@ public class HighlightingSystem : ComponentSystem
             for(int i = 0; i < m_ActiveUnitData.Length; i++)
             {
                 var iD = m_ActiveUnitData.IDs[i].EntityId.Id;
-                var actions = m_ActiveUnitData.ActionsData[i];
+                var actions = m_ActiveUnitData.BaseDataSets[i];
                 var occCoord = m_ActiveUnitData.Coords[i].CubeCoordinate;
                 var worldIndex = m_ActiveUnitData.WorldIndexData[i].Value;
                 var mouseStateClick = m_ActiveUnitData.MouseStates[i].ClickEvent;
-
+                int actionID = playerState.SelectedActionId;
 
 
                 if (iD == playerState.SelectedUnitId)
                 {
 
-
+                    
+                    if (Target == null)
+                    {
+                        if (actionID < 0)
+                        {
+                            switch (actionID)
+                            {
+                                case -3:
+                                    break;
+                                case -2:
+                                    Target = actions.BasicMove.Targets[0];
+                                    break;
+                                case -1:
+                                    Target = actions.BasicAttack.Targets[0];
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            if (actionID < actions.Actions.Count)
+                            {
+                                Target = actions.Actions[actionID].Targets[0];
+                            }
+                            else
+                            {
+                                Target = actions.SpawnActions[actionID - actions.Actions.Count].Targets[0];
+                            }
+                        }
+                    }
+                    //ECSActionTarget Target = actions[actionID + 2].Targets[0];
                     CellAttributeList Path = new CellAttributeList();
                     List<CellAttributes> Area = new List<CellAttributes>();
-                    uint targettingRange = (uint)actions.CurrentSelected.Targets[0].Targettingrange;
-                    switch (actions.CurrentSelected.Targets[0].Higlighter)
+                    uint targettingRange = (uint)Target.targettingRange;
+                    switch (Target.HighlighterToUse)
                     {
 
-                        case UseHighlighterEnum.no_pathing:
+                        case ECSActionTarget.HighlightDef.Radius:
 
                             if (playerState.CellsInRange.Count == 0)
                             {
@@ -118,7 +153,7 @@ public class HighlightingSystem : ComponentSystem
                             }
                             //use arcing linerenderer
                             break;
-                        case UseHighlighterEnum.pathing:
+                        case ECSActionTarget.HighlightDef.Path:
 
                             if (playerState.CellsInRange.Count == 0)
                             {
@@ -135,7 +170,7 @@ public class HighlightingSystem : ComponentSystem
                             break;
 
                     }
-                    HandleMods(occCoord, hoveredCoord, actions.CurrentSelected.Targets[0].Mods, out Path, out Area, worldIndex);
+                    HandleMods(occCoord, hoveredCoord, Target.SecondaryTargets, out Path, out Area, worldIndex);
 
                     /*for (int a = 0; a < m_CellData.Length; a++)
                     {
@@ -193,14 +228,23 @@ public class HighlightingSystem : ComponentSystem
     }
 
 
-    public void HandleMods(Vector3f occupiedCoord, Vector3f hoveringCoord, List<TargetMod> inMods, out CellAttributeList Path, out List<CellAttributes> Radius, uint windex)
+    public void HandleMods(Vector3f occupiedCoord, Vector3f hoveringCoord, List<ECSActionSecondaryTargets> inMods, out CellAttributeList Path, out List<CellAttributes> Radius, uint windex)
     {
         Path = new CellAttributeList();
         Radius = new List<CellAttributes>();
 
-        foreach(TargetMod t in inMods)
+        foreach(ECSActionSecondaryTargets t in inMods)
         {
-            switch (t.ModType)
+            if(t is SecondaryAoE)
+            {
+                SecondaryAoE go = t as SecondaryAoE;
+                Radius = m_CellGrid.GetRadius(hoveringCoord, (uint)go.areaSize, windex);
+            }
+            if(t is SecondaryPath)
+            {
+                Path = m_CellGrid.FindPath(hoveringCoord, m_PlayerStateData.PlayerState[0].CachedPaths);
+            }
+            /*switch (t.ModType)
             {
                 case ModTypeEnum.aoe:
                     Radius = m_CellGrid.GetRadius(hoveringCoord, (uint)t.AoeNested.Radius, windex);
@@ -208,7 +252,7 @@ public class HighlightingSystem : ComponentSystem
                 case ModTypeEnum.path:
                     Path = m_CellGrid.FindPath(hoveringCoord, m_PlayerStateData.PlayerState[0].CachedPaths);
                     break;
-            }
+            }*/
         }
 
     }
@@ -253,12 +297,13 @@ public class HighlightingSystem : ComponentSystem
     }
     public void ClearPlayerState()
     {
-
+        UpdateInjectedComponentGroups();
         var playerstate = m_PlayerStateData.PlayerState[0];
         ResetHighlights();
         playerstate.CellsInRange.Clear();
         playerstate.CachedPaths.Clear();
         m_PlayerStateData.PlayerState[0] = playerstate;
+        Target = null;
     }
 }
 
