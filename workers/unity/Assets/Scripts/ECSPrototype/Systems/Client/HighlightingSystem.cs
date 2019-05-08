@@ -25,6 +25,7 @@ public class HighlightingSystem : ComponentSystem
         public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
         public readonly ComponentDataArray<SpatialEntityId> IDs;
         public readonly ComponentDataArray<MouseState> MouseStates;
+        public ComponentArray<LineRendererComponent> LineRenderers;
 
 
     }
@@ -98,6 +99,7 @@ public class HighlightingSystem : ComponentSystem
                 var worldIndex = m_ActiveUnitData.WorldIndexData[i].Value;
                 var mouseStateClick = m_ActiveUnitData.MouseStates[i].ClickEvent;
                 int actionID = playerState.SelectedActionId;
+                var lineRendererComp = m_ActiveUnitData.LineRenderers[i];
 
 
                 if (iD == playerState.SelectedUnitId)
@@ -171,7 +173,20 @@ public class HighlightingSystem : ComponentSystem
 
                     }
                     HandleMods(occCoord, hoveredCoord, Target.SecondaryTargets, out Path, out Area, worldIndex);
+                    //update Linerenderer
+                    if (!Path.Equals(new CellAttributeList()))
+                    {
+                        Debug.Log("ayaya" + Path.CellAttributes.Count);
 
+                        lineRendererComp.lineRenderer.enabled = true;
+                        lineRendererComp.lineRenderer.positionCount = Path.CellAttributes.Count + 1;
+                        lineRendererComp.lineRenderer.SetPosition(0, lineRendererComp.transform.position + lineRendererComp.offset);
+
+                        for (int pi = 1; pi <= Path.CellAttributes.Count; pi++)
+                        {
+                            lineRendererComp.lineRenderer.SetPosition(pi, Path.CellAttributes[pi - 1].Position.ToUnityVector() + lineRendererComp.offset);
+                        }
+                    }
                     /*for (int a = 0; a < m_CellData.Length; a++)
                     {
                         var cellMarker = m_CellData.MarkerStateData[a];

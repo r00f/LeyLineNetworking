@@ -17,7 +17,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<SendActionRequestSystem>();
         world.GetOrCreateManager<UnitAnimationSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
-        world.GetOrCreateManager<ClientPathVisualsSystem>();
+        //world.GetOrCreateManager<ClientPathVisualsSystem>();
         world.GetOrCreateManager<VisionSystem_Client>();
         world.GetOrCreateManager<UISystem>();
         world.GetOrCreateManager<HighlightingSystem>();
