@@ -1,5 +1,6 @@
 ﻿using Unity.Entities;
 using Improbable.Gdk.Core;
+using UnityEngine;
 
 namespace LeyLineHybridECS
 {
@@ -21,14 +22,24 @@ namespace LeyLineHybridECS
             for(int i = 0; i < m_Data.Length; i++)
             {
                 int isSet = m_Data.MarkerStateData[i].IsSet;
+                MarkerState markerState = m_Data.MarkerStateData[i];
+                MarkerGameObjects markerGameObject = m_Data.MarkerGameObjectsData[i];
 
-                if(isSet == 0)
+                if(markerState.IsTarget == 1)
                 {
-                    MarkerState markerState = m_Data.MarkerStateData[i];
-                    MarkerGameObjects markerGameObject = m_Data.MarkerGameObjectsData[i];
+                    if(!markerGameObject.HoveredMarker.activeSelf)
+                        markerGameObject.HoveredMarker.SetActive(true);
+                }
+                else
+                {
+                    if (markerGameObject.HoveredMarker.activeSelf)
+                        markerGameObject.HoveredMarker.SetActive(false);
+                }
+
+                if (isSet == 0)
+                {
                     if (markerState.CurrentState == MarkerState.State.Neutral)
                     {
-
                         if (markerGameObject.ClickedMarker.activeSelf)
                             markerGameObject.ClickedMarker.SetActive(false);
                         if (markerGameObject.HoveredMarker.activeSelf)
@@ -36,27 +47,21 @@ namespace LeyLineHybridECS
                         if (markerGameObject.ReachableMarker.activeSelf)
                             markerGameObject.ReachableMarker.SetActive(false);
 
-                        m_Data.MarkerStateData[i] = new MarkerState
-                        {
-                            CurrentState = MarkerState.State.Neutral,
-                            IsSet = 1
-                        };
+                        markerState.CurrentState = MarkerState.State.Neutral;
+                        markerState.IsSet = 1;
 
                     }
                     else if (markerState.CurrentState == MarkerState.State.Clicked)
                     {
-                        if (!markerGameObject.ClickedMarker.activeSelf)
+                        if (!markerGameObject.ClickedMarker.activeSelf && markerState.IsTarget == 0)
                             markerGameObject.ClickedMarker.SetActive(true);
                         if (markerGameObject.HoveredMarker.activeSelf)
                             markerGameObject.HoveredMarker.SetActive(false);
                         if (markerGameObject.ReachableMarker.activeSelf)
                             markerGameObject.ReachableMarker.SetActive(false);
 
-                        m_Data.MarkerStateData[i] = new MarkerState
-                        {
-                            CurrentState = MarkerState.State.Clicked,
-                            IsSet = 1
-                        };
+                        markerState.CurrentState = MarkerState.State.Clicked;
+                        markerState.IsSet = 1;
 
                     }
                     else if (markerState.CurrentState == MarkerState.State.Hovered)
@@ -68,11 +73,9 @@ namespace LeyLineHybridECS
                         if (markerGameObject.ReachableMarker.activeSelf)
                             markerGameObject.ReachableMarker.SetActive(false);
 
-                        m_Data.MarkerStateData[i] = new MarkerState
-                        {
-                            CurrentState = MarkerState.State.Hovered,
-                            IsSet = 1
-                        };
+                        markerState.CurrentState = MarkerState.State.Hovered;
+                        markerState.IsSet = 1;
+
                     }
                     else if (markerState.CurrentState == MarkerState.State.Reachable)
                     {
@@ -83,80 +86,15 @@ namespace LeyLineHybridECS
                         if (!markerGameObject.ReachableMarker.activeSelf)
                             markerGameObject.ReachableMarker.SetActive(true);
 
-                        m_Data.MarkerStateData[i] = new MarkerState
-                        {
-                            CurrentState = MarkerState.State.Reachable,
-                            IsSet = 1
-                        };
+                        markerState.CurrentState = MarkerState.State.Reachable;
+                        markerState.IsSet = 1;
+
                     }
 
-
-                }
-
-
-                //var marker = EntityManager.Instantiate()
-
-            }
-            /*
-            foreach (var entity in GetEntities<Data>())
-            {
-                var state = entity.MarkerState;
-                
-                if(state.CurrentState == MarkerState.State.Neutral)
-                {
-                    if (state.ClickedMarker.activeSelf)
-                        state.ClickedMarker.SetActive(false);
-                    if (state.HoveredMarker.activeSelf)
-                        state.HoveredMarker.SetActive(false);
-                    if (state.ReachableMarker.activeSelf)
-                        state.ReachableMarker.SetActive(false);
-                }
-                else if (state.CurrentState == MarkerState.State.Hovered)
-                {
-                    if (state.ClickedMarker.activeSelf)
-                        state.ClickedMarker.SetActive(false);
-                    if (!state.HoveredMarker.activeSelf)
-                        state.HoveredMarker.SetActive(true);
-                    if (state.ReachableMarker.activeSelf)
-                        state.ReachableMarker.SetActive(false);
-                }
-                else if (state.CurrentState == MarkerState.State.Clicked)
-                {
-                    //Debug.Log("CLICKED");
-                    if (!state.ClickedMarker.activeSelf)
-                        state.ClickedMarker.SetActive(true);
-                    if (state.HoveredMarker.activeSelf)
-                        state.HoveredMarker.SetActive(false);
-                    if (state.ReachableMarker.activeSelf)
-                        state.ReachableMarker.SetActive(false);
-                }
-                else if (state.CurrentState == MarkerState.State.Reachable)
-                {
-                    if (state.ClickedMarker.activeSelf)
-                        state.ClickedMarker.SetActive(false);
-                    if (state.HoveredMarker.activeSelf)
-                        state.HoveredMarker.SetActive(false);
-                    if (!state.ReachableMarker.activeSelf)
-                        state.ReachableMarker.SetActive(true);
-                }
-                
-            /*
-            for (int i = 0; i < state.MarkerObjects.Count; i++)
-            {
-                if (i == stateInt - 1)
-                {
-                    if (!state.MarkerObjects[i].activeSelf)
-                        state.MarkerObjects[i].SetActive(true);
-                }
-                else
-                {
-                    if (state.MarkerObjects[i].activeSelf)
-                        state.MarkerObjects[i].SetActive(false);
+                    m_Data.MarkerStateData[i] = markerState;
                 }
             }
-            */
         }
-        
     }
 }
 

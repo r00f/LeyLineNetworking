@@ -71,8 +71,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     }
 
     [Inject] private GameStateData m_GameStateData;
+
     [Inject] private ResourceSystem m_ResourceSystem;
-    [Inject] private CellStateSystem m_CellStateSystem;
 
     protected override void OnUpdate()
     {

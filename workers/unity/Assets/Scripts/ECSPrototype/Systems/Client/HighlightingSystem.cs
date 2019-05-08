@@ -12,7 +12,7 @@ using Player;
 using Improbable.Gdk.ReactiveComponents;
 using Improbable;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(PlayerStateSystem)), UpdateAfter(typeof(SendActionRequestSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(PlayerStateSystem)), UpdateAfter(typeof(SendActionRequestSystem)), UpdateAfter(typeof(GameStateSystem))]
 public class HighlightingSystem : ComponentSystem
 {
     public struct ActiveUnitData
@@ -37,11 +37,23 @@ public class HighlightingSystem : ComponentSystem
     public struct PlayerStateData
     {
         public readonly int Length;
-        public ComponentDataArray<PlayerState.Component> PlayerState;
         public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
+        public ComponentDataArray<PlayerState.Component> PlayerState;
     }
+
     [Inject]
     PlayerStateData m_PlayerStateData;
+
+    public struct GameStateData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
+        public readonly ComponentDataArray<GameState.Component> GameState;
+
+    }
+    [Inject]
+    GameStateData m_GameStateData;
 
     public struct CellData
     {
@@ -51,7 +63,6 @@ public class HighlightingSystem : ComponentSystem
         public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
         public ComponentDataArray<MarkerState> MarkerStateData;
-
     }
 
     [Inject]
@@ -77,18 +88,68 @@ public class HighlightingSystem : ComponentSystem
     protected override void OnUpdate()
     {
         var playerState = m_PlayerStateData.PlayerState[0];
+        var playerWorldIndex = m_PlayerStateData.WorldIndex[0].Value;
+
+        for (int i = 0; i < m_GameStateData.Length; i++)
+        {
+            var gameStateWorldIndex = m_GameStateData.WorldIndex[i].Value;
+            var gameState = m_GameStateData.GameState[i].CurrentState;
+
+            if(playerWorldIndex == gameStateWorldIndex)
+            {
+                if(gameState != GameStateEnum.planning)
+                {
+                    for (int c = 0; c < m_CellData.Length; c++)
+                    {
+                        var cellMarkerState = m_CellData.MarkerStateData[c];
+
+                        if (cellMarkerState.IsTarget == 1)
+                            cellMarkerState.IsTarget = 0;
+
+                        m_CellData.MarkerStateData[c] = cellMarkerState;
+                    }
+
+                    for (int u = 0; u < m_ActiveUnitData.Length; u++)
+                    {
+                        var lineRenderer = m_ActiveUnitData.LineRenderers[u];
+                        ClearLineRenderer(lineRenderer);
+                    }
+                }
+            }
+        }
+
         if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
         {
-            
             Vector3f hoveredCoord = new Vector3f();
-            for (int i = 0; i< m_CellData.Length; i++)
+
+            for (int c = 0; c < m_CellData.Length; c++)
             {
-                var cellCoord = m_CellData.Coords[i].CubeCoordinate;
-                var cellmouseState = m_CellData.MouseStates[i].CurrentState;
-                if(cellmouseState == MouseState.State.Hovered)
+                var cellCoord = m_CellData.Coords[c].CubeCoordinate;
+                var cellmouseState = m_CellData.MouseStates[c].CurrentState;
+                var cellMarkerState = m_CellData.MarkerStateData[c];
+
+                if (cellmouseState == MouseState.State.Hovered)
                 {
                     hoveredCoord = cellCoord;
                 }
+
+                if (cellMarkerState.CurrentState == MarkerState.State.Reachable)
+                {
+                    if(cellmouseState == MouseState.State.Hovered)
+                    {
+                        if (cellMarkerState.IsTarget == 0)
+                            cellMarkerState.IsTarget = 1;
+                    }
+                    else if (cellmouseState != MouseState.State.Clicked)
+                    {
+                        if (cellMarkerState.IsTarget == 1)
+                        {
+                            Debug.Log("IsTarget set to 0");
+                            cellMarkerState.IsTarget = 0;
+                        }
+                    }
+                }
+                m_CellData.MarkerStateData[c] = cellMarkerState;
             }
 
             for(int i = 0; i < m_ActiveUnitData.Length; i++)
@@ -101,11 +162,11 @@ public class HighlightingSystem : ComponentSystem
                 int actionID = playerState.SelectedActionId;
                 var lineRendererComp = m_ActiveUnitData.LineRenderers[i];
 
-
                 if (iD == playerState.SelectedUnitId)
                 {
+                    if (!lineRendererComp.lineRenderer.enabled)
+                        lineRendererComp.lineRenderer.enabled = true;
 
-                    
                     if (Target == null)
                     {
                         if (actionID < 0)
@@ -134,13 +195,10 @@ public class HighlightingSystem : ComponentSystem
                             }
                         }
                     }
-                    //ECSActionTarget Target = actions[actionID + 2].Targets[0];
-                    CellAttributeList Path = new CellAttributeList();
                     List<CellAttributes> Area = new List<CellAttributes>();
                     uint targettingRange = (uint)Target.targettingRange;
                     switch (Target.HighlighterToUse)
                     {
-
                         case ECSActionTarget.HighlightDef.Radius:
 
                             if (playerState.CellsInRange.Count == 0)
@@ -172,69 +230,8 @@ public class HighlightingSystem : ComponentSystem
                             break;
 
                     }
-                    HandleMods(occCoord, hoveredCoord, Target.SecondaryTargets, out Path, out Area, worldIndex);
-                    //update Linerenderer
-                    if (!Path.Equals(new CellAttributeList()))
-                    {
-                        Debug.Log("ayaya" + Path.CellAttributes.Count);
-
-                        lineRendererComp.lineRenderer.enabled = true;
-                        lineRendererComp.lineRenderer.positionCount = Path.CellAttributes.Count + 1;
-                        lineRendererComp.lineRenderer.SetPosition(0, lineRendererComp.transform.position + lineRendererComp.offset);
-
-                        for (int pi = 1; pi <= Path.CellAttributes.Count; pi++)
-                        {
-                            lineRendererComp.lineRenderer.SetPosition(pi, Path.CellAttributes[pi - 1].Position.ToUnityVector() + lineRendererComp.offset);
-                        }
-                    }
-                    /*for (int a = 0; a < m_CellData.Length; a++)
-                    {
-                        var cellMarker = m_CellData.MarkerStateData[a];
-                        var cellCoord = m_CellData.Coords[a].CubeCoordinate;
-                        var mouseState = m_CellData.MouseStates[a];
-                        /*if (cellMarker.CurrentState != MarkerState.State.Reachable)
-                        {
-                            foreach (CellAttributes c in playerState.CellsInRange)
-                            {
-                                if (cellCoord == c.Cell.CubeCoordinate)
-                                {
-                                    if (cellCoord == hoveredCoord)
-                                    {
-                                        //Debug.Log("AyayaHoverd");
-                                        cellMarker.CurrentState = MarkerState.State.Hovered;
-                                        cellMarker.IsSet = 0;
-                                    }
-                                    else {
-                                        //Debug.Log("AyayaReachable");
-                                        cellMarker.CurrentState = MarkerState.State.Reachable;
-                                        cellMarker.IsSet = 0;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        foreach (CellAttributes c in Area)
-                        {
-                            if (cellCoord == c.Cell.CubeCoordinate)
-                            {
-                                cellMarker.CurrentState = MarkerState.State.Hovered;
-                                cellMarker.IsSet = 0;
-                            }
-                        }
-                        /*if (cellMarker.CurrentState != (MarkerState.State)(int)mouseState.CurrentState && cellMarker.IsSet != 0)
-                        {
-                            Debug.Log("ayaya");
-                            m_CellData.MarkerStateData[a] = new MarkerState
-                            {
-                                CurrentState = (MarkerState.State)(int)mouseState.CurrentState,
-                                IsSet = 0
-                            };
-                        }
-                        
-                        m_CellData.MarkerStateData[a] = cellMarker;
-                     }*/
+                    HandleMods(occCoord, hoveredCoord, Target.SecondaryTargets, out Area, worldIndex, lineRendererComp);
                 }
-
             }
         }
         else {
@@ -242,10 +239,9 @@ public class HighlightingSystem : ComponentSystem
         }
     }
 
-
-    public void HandleMods(Vector3f occupiedCoord, Vector3f hoveringCoord, List<ECSActionSecondaryTargets> inMods, out CellAttributeList Path, out List<CellAttributes> Radius, uint windex)
+    public void HandleMods(Vector3f occupiedCoord, Vector3f hoveringCoord, List<ECSActionSecondaryTargets> inMods, out List<CellAttributes> Radius, uint windex, LineRendererComponent inLineRendererComp)
     {
-        Path = new CellAttributeList();
+        CellAttributeList Path = new CellAttributeList();
         Radius = new List<CellAttributes>();
 
         foreach(ECSActionSecondaryTargets t in inMods)
@@ -258,20 +254,48 @@ public class HighlightingSystem : ComponentSystem
             if(t is SecondaryPath)
             {
                 Path = m_CellGrid.FindPath(hoveringCoord, m_PlayerStateData.PlayerState[0].CachedPaths);
+                UpdateLineRenderer(Path, inLineRendererComp);
             }
-            /*switch (t.ModType)
-            {
-                case ModTypeEnum.aoe:
-                    Radius = m_CellGrid.GetRadius(hoveringCoord, (uint)t.AoeNested.Radius, windex);
-                    break;
-                case ModTypeEnum.path:
-                    Path = m_CellGrid.FindPath(hoveringCoord, m_PlayerStateData.PlayerState[0].CachedPaths);
-                    break;
-            }*/
         }
 
     }
-    //public void HighlightOnSelect()
+
+    void UpdateLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
+    {
+        if(inPath.CellAttributes.Count > 0)
+        {
+            inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
+            inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.offset);
+
+            for (int pi = 1; pi <= inPath.CellAttributes.Count; pi++)
+            {
+                inLineRendererComp.lineRenderer.SetPosition(pi, inPath.CellAttributes[pi - 1].Position.ToUnityVector() + inLineRendererComp.offset);
+            }
+        }
+    }
+
+    void UpdateLineRenderer(Vector3 inTarget, LineRendererComponent inLineRendererComp)
+    {
+        /*
+        inLineRendererComp.lineRenderer.enabled = true;
+        inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
+        inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.offset);
+
+        for (int pi = 1; pi <= inPath.CellAttributes.Count; pi++)
+        {
+            inLineRendererComp.lineRenderer.SetPosition(pi, inPath.CellAttributes[pi - 1].Position.ToUnityVector() + inLineRendererComp.offset);
+        }
+        */
+    }
+
+    void ClearLineRenderer(LineRendererComponent inLineRendererComp)
+    {
+        if (inLineRendererComp.lineRenderer.enabled)
+        {
+            inLineRendererComp.lineRenderer.positionCount = 0;
+            inLineRendererComp.lineRenderer.enabled = false;
+        }
+    }
 
     public void ResetHighlights()
     {
@@ -279,16 +303,16 @@ public class HighlightingSystem : ComponentSystem
         {
             var markerState = m_CellData.MarkerStateData[i];
             var cellMouseState = m_CellData.MouseStates[i];
+
             if (markerState.CurrentState != (MarkerState.State)(int)cellMouseState.CurrentState)
             {
-                m_CellData.MarkerStateData[i] = new MarkerState
-                {
-                    CurrentState = (MarkerState.State)(int)cellMouseState.CurrentState,
-                    IsSet = 0
-                };
+                markerState.CurrentState = (MarkerState.State)(int)cellMouseState.CurrentState;
+                markerState.IsSet = 0;
+                m_CellData.MarkerStateData[i] = markerState;
             }
         }
     }
+
     public void HighlightReachable()
     {
         for (int a = 0; a < m_CellData.Length; a++)
@@ -296,6 +320,13 @@ public class HighlightingSystem : ComponentSystem
             var playerState = m_PlayerStateData.PlayerState[0];
             var cellMarker = m_CellData.MarkerStateData[a];
             var cellCoord = m_CellData.Coords[a].CubeCoordinate;
+
+            
+            if (cellMarker.IsTarget == 1)
+            {
+                Debug.Log("AyayaReachable IsTarget 0?!");
+                cellMarker.IsTarget = 0;
+            }
 
             foreach (CellAttribute c in playerState.CellsInRange)
             {
@@ -306,14 +337,25 @@ public class HighlightingSystem : ComponentSystem
                     cellMarker.IsSet = 0;
                 }
             }
-
             m_CellData.MarkerStateData[a] = cellMarker;
         }
     }
+
     public void ClearPlayerState()
     {
         UpdateInjectedComponentGroups();
         var playerstate = m_PlayerStateData.PlayerState[0];
+
+        for (int i = 0; i < m_ActiveUnitData.Length; i++)
+        {
+            var iD = m_ActiveUnitData.IDs[i].EntityId.Id;
+            var lineRendererComp = m_ActiveUnitData.LineRenderers[i];
+
+            if(iD == playerstate.SelectedUnitId)
+            {
+                ClearLineRenderer(lineRendererComp);
+            }
+        }
         ResetHighlights();
         playerstate.CellsInRange.Clear();
         playerstate.CachedPaths.Clear();

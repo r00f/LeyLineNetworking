@@ -10,14 +10,12 @@ public static class WorkerUtils
     public static void AddClientSystems(World world)
     {
         world.GetOrCreateManager<MouseStateSystem>();
-        //world.GetOrCreateManager<CellStateSystem>();
         world.GetOrCreateManager<CellMarkerSystem>();
         world.GetOrCreateManager<AddComponentsSystem>();
         world.GetOrCreateManager<PlayerStateSystem>();
         world.GetOrCreateManager<SendActionRequestSystem>();
         world.GetOrCreateManager<UnitAnimationSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
-        //world.GetOrCreateManager<ClientPathVisualsSystem>();
         world.GetOrCreateManager<VisionSystem_Client>();
         world.GetOrCreateManager<UISystem>();
         world.GetOrCreateManager<HighlightingSystem>();
