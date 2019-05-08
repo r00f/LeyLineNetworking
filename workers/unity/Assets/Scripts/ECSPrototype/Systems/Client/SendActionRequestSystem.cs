@@ -68,6 +68,8 @@ public class SendActionRequestSystem : ComponentSystem
 
     [Inject] private PlayerData m_PlayerData;
 
+    [Inject]
+    private HighlightingSystem m_HighlightingSystem;
     //[Inject] private PlayerStateSystem m_PlayerStateSystem;
 
     protected override void OnUpdate()
@@ -158,7 +160,7 @@ public class SendActionRequestSystem : ComponentSystem
     public void SelectActionCommand(int actionIndex, long entityId)
     {
         UpdateInjectedComponentGroups();
-
+        m_HighlightingSystem.ClearPlayerState();
         var playerState = m_PlayerData.PlayerStateData[0];
         //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)

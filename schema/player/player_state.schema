@@ -6,7 +6,7 @@ component PlayerState {
     id = 104;
 	PlayerStateEnum current_state = 1;
 	int64 selected_unit_id = 2;
-	list<cell.CellAttributes> cells_in_range = 3;
+	list<cell.CellAttribute> cells_in_range = 3;
 	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 4;
 	
 }

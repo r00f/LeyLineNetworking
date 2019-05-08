@@ -21,6 +21,8 @@ namespace LeyLineHybridECS
 
         public int IsSet;
 
+        public byte IsTarget;
+
         //public List<GameObject> MarkerObjects;
         /*
         public GameObject ClickedMarker;

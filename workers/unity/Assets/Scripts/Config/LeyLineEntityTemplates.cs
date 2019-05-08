@@ -183,7 +183,7 @@ public static class LeyLineEntityTemplates {
 
         var playerState = new PlayerState.Snapshot
         {
-            CellsInRange = new List<CellAttributes>(),
+            CellsInRange = new List<CellAttribute>(),
             CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
         };
 
