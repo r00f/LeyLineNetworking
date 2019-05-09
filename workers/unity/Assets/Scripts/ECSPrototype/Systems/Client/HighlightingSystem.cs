@@ -120,7 +120,8 @@ public class HighlightingSystem : ComponentSystem
 
         if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
         {
-            Vector3f hoveredCoord = new Vector3f();
+            //set coord to something that can never be a cubeCooord on the map
+            Vector3f hoveredCoord = new Vector3f(999,999,999);
 
             for (int c = 0; c < m_CellData.Length; c++)
             {
@@ -128,15 +129,11 @@ public class HighlightingSystem : ComponentSystem
                 var cellmouseState = m_CellData.MouseStates[c].CurrentState;
                 var cellMarkerState = m_CellData.MarkerStateData[c];
 
-                if (cellmouseState == MouseState.State.Hovered)
-                {
-                    hoveredCoord = cellCoord;
-                }
-
                 if (cellMarkerState.CurrentState == MarkerState.State.Reachable)
                 {
                     if(cellmouseState == MouseState.State.Hovered)
                     {
+                        hoveredCoord = cellCoord;
                         if (cellMarkerState.IsTarget == 0)
                             cellMarkerState.IsTarget = 1;
                     }
@@ -144,7 +141,6 @@ public class HighlightingSystem : ComponentSystem
                     {
                         if (cellMarkerState.IsTarget == 1)
                         {
-                            Debug.Log("IsTarget set to 0");
                             cellMarkerState.IsTarget = 0;
                         }
                     }
@@ -164,9 +160,6 @@ public class HighlightingSystem : ComponentSystem
 
                 if (iD == playerState.SelectedUnitId)
                 {
-                    if (!lineRendererComp.lineRenderer.enabled)
-                        lineRendererComp.lineRenderer.enabled = true;
-
                     if (Target == null)
                     {
                         if (actionID < 0)
@@ -228,7 +221,6 @@ public class HighlightingSystem : ComponentSystem
                             }
                             //use path linerenderer
                             break;
-
                     }
                     HandleMods(occCoord, hoveredCoord, Target.SecondaryTargets, out Area, worldIndex, lineRendererComp);
                 }
@@ -254,7 +246,12 @@ public class HighlightingSystem : ComponentSystem
             if(t is SecondaryPath)
             {
                 Path = m_CellGrid.FindPath(hoveringCoord, m_PlayerStateData.PlayerState[0].CachedPaths);
-                UpdateLineRenderer(Path, inLineRendererComp);
+                
+                if(Path.CellAttributes.Count > 0)
+                {
+                    Debug.Log(Path.CellAttributes[Path.CellAttributes.Count - 1].CubeCoordinate);
+                    UpdateLineRenderer(Path, inLineRendererComp);
+                }
             }
         }
 
@@ -262,15 +259,12 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdateLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
     {
-        if(inPath.CellAttributes.Count > 0)
-        {
-            inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
-            inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.offset);
+        inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
+        inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.offset);
 
-            for (int pi = 1; pi <= inPath.CellAttributes.Count; pi++)
-            {
-                inLineRendererComp.lineRenderer.SetPosition(pi, inPath.CellAttributes[pi - 1].Position.ToUnityVector() + inLineRendererComp.offset);
-            }
+        for (int pi = 1; pi <= inPath.CellAttributes.Count; pi++)
+        {
+            inLineRendererComp.lineRenderer.SetPosition(pi, inPath.CellAttributes[pi - 1].Position.ToUnityVector() + inLineRendererComp.offset);
         }
     }
 
@@ -290,11 +284,7 @@ public class HighlightingSystem : ComponentSystem
 
     void ClearLineRenderer(LineRendererComponent inLineRendererComp)
     {
-        if (inLineRendererComp.lineRenderer.enabled)
-        {
-            inLineRendererComp.lineRenderer.positionCount = 0;
-            inLineRendererComp.lineRenderer.enabled = false;
-        }
+        inLineRendererComp.lineRenderer.positionCount = 0;
     }
 
     public void ResetHighlights()
@@ -321,10 +311,9 @@ public class HighlightingSystem : ComponentSystem
             var cellMarker = m_CellData.MarkerStateData[a];
             var cellCoord = m_CellData.Coords[a].CubeCoordinate;
 
-            
+            //TODO: save unit / targets dictionary on player and use that to set IsTarget on cellMarkers
             if (cellMarker.IsTarget == 1)
             {
-                Debug.Log("AyayaReachable IsTarget 0?!");
                 cellMarker.IsTarget = 0;
             }
 
@@ -332,7 +321,6 @@ public class HighlightingSystem : ComponentSystem
             {
                 if (cellCoord == c.CubeCoordinate)
                 {
-                    //Debug.Log("AyayaReachable");
                     cellMarker.CurrentState = MarkerState.State.Reachable;
                     cellMarker.IsSet = 0;
                 }

@@ -84,7 +84,7 @@ public class UnitAnimationSystem : ComponentSystem
                 }
                 else
                 {
-                    Debug.Log("Gained Health");
+                    //Debug.Log("Gained Health");
                     animatorComponent.LastHealth = healthComponent.CurrentHealth;
                 }
             }

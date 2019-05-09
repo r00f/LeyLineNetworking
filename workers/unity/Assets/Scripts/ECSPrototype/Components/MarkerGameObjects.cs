@@ -8,6 +8,7 @@ namespace LeyLineHybridECS
         public GameObject HoveredMarker;
         public GameObject ClickedMarker;
         public GameObject ReachableMarker;
+        public GameObject TargetMarker;
     }
 
 }
