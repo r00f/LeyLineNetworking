@@ -253,7 +253,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lineRenderer: {fileID: 1839120082220000135}
-  offset: {x: 0, y: 0.2, z: 0}
+  pathOffset: {x: 0, y: 0.2, z: 0}
+  arcOffset: {x: 0, y: 2, z: 0}
 --- !u!114 &8950170168944560130
 MonoBehaviour:
   m_ObjectHideFlags: 0

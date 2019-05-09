@@ -1,5 +1,6 @@
 package player;
 import "cell/cell_attributes.schema";
+import "improbable/vector3.schema";
 
 component PlayerState {
 	
@@ -9,7 +10,14 @@ component PlayerState {
 	list<cell.CellAttribute> cells_in_range = 3;
 	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 4;
 	int32 selected_action_id = 5;
+	map<int64, CubeCoordinateList> unit_targets = 6;
 	
+}
+
+type CubeCoordinateList {
+
+	list<improbable.Vector3f> cube_coordinates = 1;
+
 }
 
 enum PlayerStateEnum {

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HighlightingSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(HighlightingSystem))]
     public class CellMarkerSystem : ComponentSystem
     {
         struct Data
@@ -38,7 +38,6 @@ namespace LeyLineHybridECS
 
                 if (isSet == 0)
                 {
-
                     switch (markerState.CurrentState)
                     {
                         case MarkerState.State.Neutral:

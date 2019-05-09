@@ -184,7 +184,8 @@ public static class LeyLineEntityTemplates {
         var playerState = new PlayerState.Snapshot
         {
             CellsInRange = new List<CellAttribute>(),
-            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>(),
+            UnitTargets = new Dictionary<long, CubeCoordinateList>()
         };
 
         var wIndex = new WorldIndex.Snapshot();
