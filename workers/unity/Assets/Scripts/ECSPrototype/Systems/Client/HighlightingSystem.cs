@@ -226,60 +226,63 @@ public class HighlightingSystem : ComponentSystem
 
                             //if (cellMarkerState.CurrentState == MarkerState.State.Reachable)
                             //{
-                                if (unitMouseState == MouseState.State.Hovered)
-                                {
-                                    hoveredCoord = unitCoord;
-                                    hoveredPosition = position;
+                            if (unitMouseState == MouseState.State.Hovered)
+                            {
+                                hoveredCoord = unitCoord;
+                                hoveredPosition = position;
+                                hoveredOffset = hoveredLineRendererComp.arcOffset.y;
+                                UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
                                 /*
                                     if (cellMarkerState.IsTarget == 0)
                                         cellMarkerState.IsTarget = 1;
                                         */
-                                }
-                                else if (unitMouseState != MouseState.State.Clicked)
-                                {
-                                    //check if cell to reset is not a target of another unit
-                                    bool contains = false;
+                            }
+                            else if (unitMouseState != MouseState.State.Clicked)
+                            {
+                                //check if cell to reset is not a target of another unit
+                                bool contains = false;
 
-                                    foreach (long l in playerState.UnitTargets.Keys)
+                                foreach (long l in playerState.UnitTargets.Keys)
+                                {
+                                    if (l != playerState.SelectedUnitId)
                                     {
-                                        if (l != playerState.SelectedUnitId)
+                                        foreach (Vector3f coord in playerState.UnitTargets[l].CubeCoordinates)
                                         {
-                                            foreach (Vector3f coord in playerState.UnitTargets[l].CubeCoordinates)
+                                            if (unitCoord == coord)
                                             {
-                                                if (unitCoord == coord)
-                                                {
-                                                    contains = true;
-                                                }
+                                                contains = true;
                                             }
                                         }
                                     }
+                                }
+                                /*
+                                if (cellMarkerState.IsTarget == 1 && !contains)
+                                {
+                                    cellMarkerState.IsTarget = 0;
+                                }
+                                */
+                            }
+                            else if (unitClickEvent == 1)
+                            {
+                                hoveredCoord = unitCoord;
+                                hoveredPosition = position;
+                                hoveredOffset = hoveredLineRendererComp.arcOffset.y;
+                                UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
+                                var targetList = new CubeCoordinateList(new List<Vector3f>());
+                                targetList.CubeCoordinates.Add(hoveredCoord);
 
-                                    /*
-                                    if (cellMarkerState.IsTarget == 1 && !contains)
-                                    {
-                                        cellMarkerState.IsTarget = 0;
-                                    }
-                                    */
+                                if (!playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+                                {
+                                    playerState.UnitTargets.Add(playerState.SelectedUnitId, targetList);
                                 }
 
-                                if (unitClickEvent == 1)
+                                playerState.UnitTargets = playerState.UnitTargets;
+                                m_PlayerStateData.PlayerState[0] = playerState;
+
+                                foreach (CubeCoordinateList l in playerState.UnitTargets.Values)
                                 {
-                                    hoveredCoord = unitCoord;
-                                    var targetList = new CubeCoordinateList(new List<Vector3f>());
-                                    targetList.CubeCoordinates.Add(hoveredCoord);
-
-                                    if (!playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+                                    foreach (Vector3f v in l.CubeCoordinates)
                                     {
-                                        playerState.UnitTargets.Add(playerState.SelectedUnitId, targetList);
-                                    }
-
-                                    playerState.UnitTargets = playerState.UnitTargets;
-                                    m_PlayerStateData.PlayerState[0] = playerState;
-
-                                    foreach (CubeCoordinateList l in playerState.UnitTargets.Values)
-                                    {
-                                        foreach (Vector3f v in l.CubeCoordinates)
-                                        {
                                         /*
                                             if (v == unitCoord && cellMarkerState.IsTarget == 0)
                                             {
@@ -290,12 +293,10 @@ public class HighlightingSystem : ComponentSystem
                                     }
                                 }
                             }
-                            if (unitCoord == hoveredCoord)
+                            else
                             {
-                                hoveredOffset = hoveredLineRendererComp.arcOffset.y;
-
+                                //lineRendererComp.lineRenderer.positionCount = 0;
                             }
-                            //m_CellData.MarkerStateData[c] = cellMarkerState;
                         }
                     //}
                     }
@@ -318,6 +319,7 @@ public class HighlightingSystem : ComponentSystem
                                 {
                                     hoveredCoord = cellCoord;
                                     hoveredPosition = position;
+                                    UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
                                     if (cellMarkerState.IsTarget == 0)
                                         cellMarkerState.IsTarget = 1;
                                 }
@@ -349,6 +351,7 @@ public class HighlightingSystem : ComponentSystem
                                 if (cellClickEvent == 1)
                                 {
                                     hoveredCoord = cellCoord;
+                                    UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
                                     var targetList = new CubeCoordinateList(new List<Vector3f>());
                                     targetList.CubeCoordinates.Add(hoveredCoord);
 
@@ -376,10 +379,11 @@ public class HighlightingSystem : ComponentSystem
                         }
                     }
 
-                    if (hoveredPosition != new Vector3(0, 0, 0))
-                    {
-                        UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
-                    }
+                    //if (hoveredPosition != new Vector3(0, 0, 0))
+                    //{
+                        
+                    //}
+
 
                     #endregion
 
@@ -420,9 +424,10 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdatePathLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
     {
-        inLineRendererComp.lineRenderer.endColor = new Color(0,1,0,0.1f);
-        inLineRendererComp.lineRenderer.startColor = Color.green;
-        
+        Color pathColorFaded = new Color(inLineRendererComp.pathColor.r, inLineRendererComp.pathColor.g, inLineRendererComp.pathColor.b, 0.1f);
+        inLineRendererComp.lineRenderer.startColor = inLineRendererComp.pathColor;
+        inLineRendererComp.lineRenderer.endColor = pathColorFaded;
+
         inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
         inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.pathOffset);
 
@@ -434,14 +439,15 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdateArcLineRenderer(float targetYOffset, Vector3 inTarget, LineRendererComponent inLineRendererComp)
     {
-        inLineRendererComp.lineRenderer.endColor = Color.red;
-        inLineRendererComp.lineRenderer.startColor = new Color(1, 0, 0, 0.1f);
+        Color arcColorFaded = new Color(inLineRendererComp.arcColor.r, inLineRendererComp.arcColor.g, inLineRendererComp.arcColor.b, 0.1f);
+        inLineRendererComp.lineRenderer.startColor = inLineRendererComp.arcColor;
+        inLineRendererComp.lineRenderer.endColor = arcColorFaded;
 
         Vector3 distance = ((inTarget + new Vector3 (0, targetYOffset, 0)) - (inLineRendererComp.transform.position + inLineRendererComp.arcOffset));
         uint numberOfSmoothPoints = 6 + (2*(uint)Mathf.RoundToInt(distance.magnitude)/2);
         float zenithHeight = 1;
         inLineRendererComp.lineRenderer.positionCount = 3 + (int)numberOfSmoothPoints;
-        float[] ypositions = CalculateSmoothPoints(inLineRendererComp.lineRenderer.positionCount);
+        float[] ypositions = CalculateSinusPoints(inLineRendererComp.lineRenderer.positionCount);
         float xstep = 1.0f / inLineRendererComp.lineRenderer.positionCount;
 
         for (int i = 0; i < ypositions.Length; i++)
@@ -539,9 +545,8 @@ public class HighlightingSystem : ComponentSystem
         Target = null;
     }
 
-    public float[] CalculateSmoothPoints(int numberOfPositions)
+    public float[] CalculateSinusPoints(int numberOfPositions)
     {
-
         float[] yPosArray = new float[numberOfPositions];
         float xStep = 1.0f / numberOfPositions;
         int i = 0;
@@ -549,19 +554,10 @@ public class HighlightingSystem : ComponentSystem
         {
             if (i < yPosArray.Length)
             {
-                yPosArray[i] = (float)Math.Sin(x * Math.PI); // Since you want 2*PI to be at 1
+                yPosArray[i] = (float)Math.Sin(x * Math.PI);
                 i++;
             }
         }
-
-        /*  inLineRenderer.lineRenderer.SetPosition(where+1, )
-
-           if(remainingSmoothPoints-1 > 0)
-           {
-               SetSmoothPoints(inLineRenderer, remainingSmoothPoints - 1, height / 2, where+1);
-           }*/
-
-
         return yPosArray;
     }
 

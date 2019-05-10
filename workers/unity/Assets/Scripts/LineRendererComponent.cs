@@ -10,4 +10,10 @@ public class LineRendererComponent : MonoBehaviour
     public Vector3 pathOffset;
     [SerializeField]
     public Vector3 arcOffset;
+    [SerializeField]
+    public Color pathColor;
+    [SerializeField]
+    public Color arcColor;
+
+
 }
