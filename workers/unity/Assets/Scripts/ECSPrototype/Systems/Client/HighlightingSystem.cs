@@ -271,8 +271,10 @@ public class HighlightingSystem : ComponentSystem
                             break;
                     }
 
-                    if(hoveredPosition != new Vector3(0,0,0))
+                    if (hoveredPosition != new Vector3(0, 0, 0))
+                    {
                         UpdateArcLineRenderer(2f, hoveredPosition, lineRendererComp);
+                    }
                     HandleMods(occCoord, hoveredCoord, Target.SecondaryTargets, out Area, worldIndex, lineRendererComp);
                 }
             }
@@ -310,8 +312,9 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdatePathLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
     {
+        inLineRendererComp.lineRenderer.endColor = new Color(0,1,0,0.1f);
         inLineRendererComp.lineRenderer.startColor = Color.green;
-        inLineRendererComp.lineRenderer.endColor = Color.green;
+        
         inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
         inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.pathOffset);
 
@@ -321,13 +324,26 @@ public class HighlightingSystem : ComponentSystem
         }
     }
 
-    void UpdateArcLineRenderer(float yOffset, Vector3 inTarget, LineRendererComponent inLineRendererComp)
+    void UpdateArcLineRenderer(float targetYOffset, Vector3 inTarget, LineRendererComponent inLineRendererComp)
     {
-        inLineRendererComp.lineRenderer.startColor = Color.red;
         inLineRendererComp.lineRenderer.endColor = Color.red;
-        inLineRendererComp.lineRenderer.positionCount = 2;
-        inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.arcOffset);
-        inLineRendererComp.lineRenderer.SetPosition(inLineRendererComp.lineRenderer.positionCount - 1, inTarget  + new Vector3(0, yOffset, 0));
+        inLineRendererComp.lineRenderer.startColor = new Color(1, 0, 0, 0.1f);
+
+        Vector3 distance = ((inTarget + new Vector3 (0, targetYOffset, 0)) - (inLineRendererComp.transform.position + inLineRendererComp.arcOffset));
+        Vector3 direction = distance.normalized;
+        uint numberOfSmoothPoints = 6 + (2*(uint)Mathf.RoundToInt(distance.magnitude)/2);
+        
+        float zenithHeight = 1;
+
+        inLineRendererComp.lineRenderer.positionCount = 3 + (int)numberOfSmoothPoints;
+        float[] ypositions = CalculateSmoothPoints(inLineRendererComp.lineRenderer.positionCount);
+        float xstep = 1.0f / inLineRendererComp.lineRenderer.positionCount;
+
+        for (int i = 0; i<ypositions.Length; i++)
+        {
+            inLineRendererComp.lineRenderer.SetPosition(i, inLineRendererComp.transform.position + new Vector3(distance.x * (xstep * i), (ypositions[i] * zenithHeight) + (inLineRendererComp.arcOffset.y + (targetYOffset * (xstep * i)) - (inLineRendererComp.arcOffset.y*(xstep*i))), distance.z * (xstep * i)));
+
+        }
     }
 
     void ClearLineRenderer(LineRendererComponent inLineRendererComp)
@@ -417,5 +433,32 @@ public class HighlightingSystem : ComponentSystem
         m_PlayerStateData.PlayerState[0] = playerstate;
         Target = null;
     }
+
+    public float[] CalculateSmoothPoints(int numberOfPositions)
+    {
+
+        float[] yPosArray = new float[numberOfPositions];
+        float xStep = 1.0f / numberOfPositions;
+        int i = 0;
+        for (float x = 0.0f; x < 1.0f; x += xStep)
+        {
+            if (i < yPosArray.Length)
+            {
+                yPosArray[i] = (float)Math.Sin(x * Math.PI); // Since you want 2*PI to be at 1
+                i++;
+            }
+        }
+
+        /*  inLineRenderer.lineRenderer.SetPosition(where+1, )
+
+           if(remainingSmoothPoints-1 > 0)
+           {
+               SetSmoothPoints(inLineRenderer, remainingSmoothPoints - 1, height / 2, where+1);
+           }*/
+
+
+        return yPosArray;
+    }
+
 }
 
