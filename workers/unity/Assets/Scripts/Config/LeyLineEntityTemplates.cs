@@ -393,9 +393,9 @@ public static class LeyLineEntityTemplates {
                 }
                 foreach (ECSActionSecondaryTargets t in go.SecondaryTargets)
                 {
-                    if (t is SecondaryAoE)
+                    if (t is SecondaryArea)
                     {
-                        SecondaryAoE go1 = t as SecondaryAoE;
+                        SecondaryArea go1 = t as SecondaryArea;
                         TargetMod mod = new TargetMod();
                         mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
                         mod.ModType = ModTypeEnum.aoe;
@@ -452,9 +452,9 @@ public static class LeyLineEntityTemplates {
                 }
                 foreach (ECSActionSecondaryTargets t in go.SecondaryTargets)
                 {
-                    if (t is SecondaryAoE)
+                    if (t is SecondaryArea)
                     {
-                        SecondaryAoE go1 = t as SecondaryAoE;
+                        SecondaryArea go1 = t as SecondaryArea;
                         TargetMod mod = new TargetMod();
                         mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
                         mod.ModType = ModTypeEnum.aoe;
