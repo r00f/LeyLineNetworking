@@ -35,6 +35,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
+        public readonly ComponentDataArray<MarkerState> MarkerStateData;
     }
 
     [Inject] private CellData m_CellData;
@@ -98,15 +99,13 @@ public class SendActionRequestSystem : ComponentSystem
 
             //if the current selected unit wants an unitTarget
 
-
-
             //set unit action to basic move it is clicked
             if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
                 SelectActionCommand(-2, unitEntityId.Id);
             }
 
-            #region targetting
+            #region Set Target Command
             //check if unit is the selected unit in playerState and if current selected action is not empty
             if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Index != -3)
             {
@@ -117,6 +116,7 @@ public class SendActionRequestSystem : ComponentSystem
                         var cellMousestate = m_CellData.MouseStateData[ci];
                         var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
                         var cellCoord = m_CellData.Coordinates[ci].CubeCoordinate;
+                        var cellMarkerState = m_CellData.MarkerStateData[ci].CurrentState;
 
                         if (cellMousestate.ClickEvent == 1 && cellCoord != unitCoord)
                         {
@@ -164,6 +164,7 @@ public class SendActionRequestSystem : ComponentSystem
         playerState.SelectedActionId = actionIndex;
         m_PlayerData.PlayerStateData[0] = playerState;
         m_HighlightingSystem.ClearPlayerState();
+        m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
 
 
         //Debug.Log(actionIndex + ", " + entityId);

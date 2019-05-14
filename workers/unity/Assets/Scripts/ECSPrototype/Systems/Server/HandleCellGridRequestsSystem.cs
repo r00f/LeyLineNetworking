@@ -175,40 +175,55 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                             for (int ci = 0; ci < m_CellData.Length; ci++)
                             {
                                 var cellId = m_CellData.EntityIds[ci].EntityId.Id;
+                                var cellAtts = m_CellData.CellAttributes[ci].CellAttributes;
                                 var cell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
 
                                 if (cellId == id)
                                 {
-                                    //check if in range
-
-                                    actionData.LockedAction = actionData.CurrentSelected;
-                                    var locked = actionData.LockedAction;
-                                    var t = actionData.LockedAction.Targets[0];
-                                    t.TargetId = id;
-                                    actionData.LockedAction.Targets[0] = t;
-                                    uint costToSubtract = t.EnergyCost;
-
-                                    for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
+                                    bool isValidTarget = false;
+                                    if(cellsToMark.CachedPaths.ContainsKey(cell) && cellsToMark.CachedPaths.Count != 0)
                                     {
-                                        var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
-
-                                        if (modType == ModTypeEnum.aoe)
-                                        {
-
-                                        }
-                                        if (modType == ModTypeEnum.path)
-                                        {
-                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                            mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
-                                            actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                            costToSubtract += (uint)mod.CellAttributes.CellAttributes.Count;
-                                        }
+                                        isValidTarget = true;
+                                    }
+                                    else if(cellsToMark.CellsInRange.Contains(cellAtts))
+                                    {
+                                        isValidTarget = true;
                                     }
 
-                                    locked.CombinedCost = costToSubtract;
-                                    actionData.LockedAction = locked;
-                                    m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+                                    if(isValidTarget)
+                                    {
+                                        actionData.LockedAction = actionData.CurrentSelected;
+                                        var locked = actionData.LockedAction;
+                                        var t = actionData.LockedAction.Targets[0];
+                                        t.TargetId = id;
+                                        actionData.LockedAction.Targets[0] = t;
+                                        uint costToSubtract = t.EnergyCost;
 
+                                        for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
+                                        {
+                                            var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+
+                                            if (modType == ModTypeEnum.aoe)
+                                            {
+
+                                            }
+                                            if (modType == ModTypeEnum.path)
+                                            {
+                                                var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                                mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+                                                actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                                costToSubtract += (uint)mod.CellAttributes.CellAttributes.Count;
+                                            }
+                                        }
+
+                                        locked.CombinedCost = costToSubtract;
+                                        actionData.LockedAction = locked;
+                                        m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+                                    }
+                                    else
+                                    {
+                                        actionData.LockedAction = actionData.NullAction;
+                                    }
                                 }
                             }
                             break;
@@ -330,6 +345,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return cachedPaths;
 
     }
+
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
     {
         CellAttribute origin = new CellAttribute();
@@ -415,6 +431,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         else
             return new CellAttributeList(new List<CellAttribute>());
     }
+
     public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
     {
         CellAttribute destination = new CellAttribute();
