@@ -231,36 +231,53 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                             for (int ci = 0; ci < m_UnitData.Length; ci++)
                             {
                                 var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
+                                var unitCoord = m_UnitData.CoordinateData[ci].CubeCoordinate;
                                 if (unitId == id)
                                 {
-                                    actionData.LockedAction = actionData.CurrentSelected;
-                                    var locked = actionData.LockedAction;
-                                    var t = actionData.LockedAction.Targets[0];
-                                    t.TargetId = id;
-                                    actionData.LockedAction.Targets[0] = t;
-                                    uint costToSubtract = t.EnergyCost;
+                                    bool isValidTarget = false;
+                                        foreach (CellAttributes c in cellsToMark.CellsInRange)
+                                        {
+                                            if (c.Cell.CubeCoordinate == unitCoord)
+                                            {
+                                                isValidTarget = true;
+                                            }
+                                        }
 
-                                    for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
+                                    if (isValidTarget)
                                     {
-                                        var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
+                                        actionData.LockedAction = actionData.CurrentSelected;
+                                        var locked = actionData.LockedAction;
+                                        var t = actionData.LockedAction.Targets[0];
+                                        t.TargetId = id;
+                                        actionData.LockedAction.Targets[0] = t;
+                                        uint costToSubtract = t.EnergyCost;
 
-                                        if (modType == ModTypeEnum.aoe)
+                                        for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                         {
+                                            var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
 
-                                        }
-                                        if (modType == ModTypeEnum.path)
-                                        {
-                                            /*
-                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                            mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
-                                            actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                            if (modType == ModTypeEnum.aoe)
+                                            {
 
-                                            */
+                                            }
+                                            if (modType == ModTypeEnum.path)
+                                            {
+                                                /*
+                                                var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                                mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+                                                actionData.LockedAction.Targets[0].Mods[0] = mod;
+
+                                                */
+                                            }
                                         }
+                                        locked.CombinedCost = costToSubtract;
+                                        actionData.LockedAction = locked;
+                                        m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
                                     }
-                                    locked.CombinedCost = costToSubtract;
-                                    actionData.LockedAction = locked;
-                                    m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+                                    else
+                                    {
+                                        actionData.LockedAction = actionData.NullAction;
+                                    }
 
                                 }
                             }

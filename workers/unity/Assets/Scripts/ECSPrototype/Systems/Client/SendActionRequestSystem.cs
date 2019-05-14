@@ -133,6 +133,7 @@ public class SendActionRequestSystem : ComponentSystem
                 }
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
+                    bool sent = false;
                     for (int ci = 0; ci < m_UnitData.Length; ci++)
                     {
                         var unitMousestate = m_UnitData.MouseStateData[ci];
@@ -147,8 +148,31 @@ public class SendActionRequestSystem : ComponentSystem
                                 new SetTargetRequest(targetUnitEntityId)
                             );
 
+                            sent = true;
                             setTargetRequest.RequestsToSend.Add(request);
                             m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                        }
+                    }
+                    if (!sent)
+                    {
+                        for (int ci = 0; ci < m_CellData.Length; ci++)
+                        {
+                            var cellMousestate = m_CellData.MouseStateData[ci];
+                            var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
+                            var cellCoord = m_CellData.Coordinates[ci].CubeCoordinate;
+                            var cellMarkerState = m_CellData.MarkerStateData[ci].CurrentState;
+
+                            if (cellMousestate.ClickEvent == 1 && cellCoord != unitCoord)
+                            {
+                                var request = new Actions.SetTargetCommand.Request
+                                (
+                                    unitEntityId,
+                                    new SetTargetRequest(cellEntityId)
+                                );
+                                //Debug.Log("Send setTarget request for Cell with id: " + cellEntityId);
+                                setTargetRequest.RequestsToSend.Add(request);
+                                m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                            }
                         }
                     }
                 }
