@@ -165,17 +165,38 @@ public class HighlightingSystem : ComponentSystem
 
                     if (playerHighlightingData.AoERadius > 0)
                     {
-                        List<CellAttributes> Area = new List<CellAttributes>();
-                        //aoe highlighting code stuff
-                        Area = m_CellGrid.GetRadius(hoveredCoord, playerHighlightingData.AoERadius, worldIndex);
-                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
+                        List<Vector3f> area = new List<Vector3f>();
+                        area = m_CellGrid.GetCoordRadius(hoveredCoord, playerHighlightingData.AoERadius);
+                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
 
-                        foreach (CellAttributes cell in Area)
-                        {
-                            cubeCoordList.CubeCoordinates.Add(cell.Cell.CubeCoordinate);
-                        }
                         //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-                        if (cubeCoordList.CubeCoordinates.Count != 1)
+                        if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoord != new Vector3f(999, 999, 999))
+                        {
+                            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                            playerState.UnitTargets = playerState.UnitTargets;
+                            m_PlayerStateData.PlayerState[0] = playerState;
+                        }
+                    }
+                    else if (playerHighlightingData.RingRadius > 0)
+                    {
+                        List<Vector3f> ring = new List<Vector3f>();
+                        ring = m_CellGrid.RingDraw(hoveredCoord, playerHighlightingData.RingRadius);
+                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring);
+
+                        //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
+                        if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoord != new Vector3f(999, 999, 999))
+                        {
+                            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                            playerState.UnitTargets = playerState.UnitTargets;
+                            m_PlayerStateData.PlayerState[0] = playerState;
+                        }
+                    }
+                    else if(playerHighlightingData.StraightLine == 1)
+                    {
+                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
+                        cubeCoordList.CubeCoordinates = m_CellGrid.LineDraw(occCoord, hoveredCoord);
+                        //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
+                        if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoord != new Vector3f(999, 999, 999))
                         {
                             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
                             playerState.UnitTargets = playerState.UnitTargets;
@@ -188,13 +209,12 @@ public class HighlightingSystem : ComponentSystem
                         cubeCoordList.CubeCoordinates.Add(hoveredCoord);
 
                         //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-                        if (hoveredCoord != new Vector3f(999,999,999))
+                        if (hoveredCoord != new Vector3f(999, 999, 999))
                         {
                             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
                             playerState.UnitTargets = playerState.UnitTargets;
                             m_PlayerStateData.PlayerState[0] = playerState;
                         }
-
                     }
 
                     if (playerHighlightingData.PathingRange == 1)
@@ -334,11 +354,15 @@ public class HighlightingSystem : ComponentSystem
                             UpdatePathLineRenderer(Path, lineRendererComp);
                         }
                     }
-                    else
+                    else if(playerHighlightingData.StraightLine == 0)
                     {
                         //use Arc Line
-                        if(hoveredPosition != Vector3.zero)
+                        if (hoveredPosition != Vector3.zero)
                             UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
+                    }
+                    else
+                    {
+                        lineRendererComp.lineRenderer.positionCount = 0;
                     }
 
                     #endregion
@@ -420,8 +444,10 @@ public class HighlightingSystem : ComponentSystem
 
     void HandleMods(List<ECSActionSecondaryTargets> inMods, ref HighlightingDataComponent highLightingData)
     {
+        highLightingData.StraightLine = 0;
         highLightingData.PathLine = 0;
         highLightingData.AoERadius = 0;
+        highLightingData.RingRadius = 0;
 
         foreach (ECSActionSecondaryTargets t in inMods)
         {
@@ -434,6 +460,15 @@ public class HighlightingSystem : ComponentSystem
                 SecondaryArea secAoE = t as SecondaryArea;
                 highLightingData.AoERadius = (uint)secAoE.areaSize;
             } 
+            else if( t is SecondaryLine)
+            {
+                highLightingData.StraightLine = 1;
+            }
+            else if (t is SecondaryRing)
+            {
+                SecondaryRing secRing = t as SecondaryRing;
+                highLightingData.RingRadius = secRing.radius;
+            }
         }
     }
 

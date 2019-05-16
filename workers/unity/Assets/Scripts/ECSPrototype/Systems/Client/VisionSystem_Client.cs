@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 using Unit;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
@@ -75,9 +76,9 @@ namespace LeyLineHybridECS
                 {
                     bool inVisionRange = false;
 
-                    foreach (CellAttributes c in playerVision.CellsInVisionrange)
+                    foreach (Vector3f c in playerVision.CellsInVisionrange)
                     {
-                        if(coord.CubeCoordinate == c.Cell.CubeCoordinate)
+                        if(coord.CubeCoordinate == c)
                         {
                             inVisionRange = true;
                         }
@@ -113,9 +114,9 @@ namespace LeyLineHybridECS
                     //only compare when serverSide playerVision is updated
                     if (isVisible == 0)
                     {
-                        foreach (CellAttributes c in playerVision.Positives)
+                        foreach (Vector3f c in playerVision.Positives)
                         {
-                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            if (c == coord.CubeCoordinate)
                             {
                                 isVisibleComp.Value = 1;
                                 isVisibleComp.RequireUpdate = 1;
@@ -124,9 +125,9 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        foreach (CellAttributes c in playerVision.Negatives)
+                        foreach (Vector3f c in playerVision.Negatives)
                         {
-                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            if (c == coord.CubeCoordinate)
                             {
                                 isVisibleComp.Value = 0;
                                 isVisibleComp.RequireUpdate = 1;
@@ -216,9 +217,9 @@ namespace LeyLineHybridECS
                     //only compare when serverSide playerVision is updated
                     if (isVisible == 0)
                     {
-                        foreach (CellAttributes c in playerVision.Positives)
+                        foreach (Vector3f c in playerVision.Positives)
                         {
-                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            if (c == coord.CubeCoordinate)
                             {
                                 isVisibleComp.Value = 1;
                                 isVisibleComp.RequireUpdate = 1;
@@ -227,9 +228,9 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        foreach (CellAttributes c in playerVision.Negatives)
+                        foreach (Vector3f c in playerVision.Negatives)
                         {
-                            if (c.Cell.CubeCoordinate == coord.CubeCoordinate)
+                            if (c == coord.CubeCoordinate)
                             {
                                 isVisibleComp.Value = 0;
                                 isVisibleComp.RequireUpdate = 1;

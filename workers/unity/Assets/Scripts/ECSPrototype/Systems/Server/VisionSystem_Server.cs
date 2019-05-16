@@ -8,6 +8,7 @@ using Generic;
 using Cell;
 using Player;
 using Unit;
+using System.Linq;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ResourceSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class VisionSystem_Server : ComponentSystem
@@ -64,6 +65,9 @@ public class VisionSystem_Server : ComponentSystem
         else {
             if (Init) BuildRawClusters();
 
+            //if any unit requires an update, update player aswell
+            bool anyUnitReqUpdate = false;
+
             for (int i = 0; i < m_UnitData.Length; i++)
             {
                 var u_worldIndex = m_UnitData.WordIndexData[i].Value;
@@ -75,29 +79,31 @@ public class VisionSystem_Server : ComponentSystem
                 {
                     u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex);
                     m_UnitData.VisionComponent[i] = u_Vision;
+                    anyUnitReqUpdate = true;
                 }
-
             }
 
             for (int i = m_PlayerData.Length - 1; i >= 0; i--)
             {
                 var p_Vision = m_PlayerData.VisionComponent[i];
                 var p_Faction = m_PlayerData.FactionComponent[i];
-                var p_id = m_PlayerData.EntityIds[i].EntityId;
-                var updateClientVisionRequest = m_PlayerData.UpdateClientVisionCommands[i];
+                //var p_id = m_PlayerData.EntityIds[i].EntityId;
+                //var updateClientVisionRequest = m_PlayerData.UpdateClientVisionCommands[i];
 
-                if (p_Vision.RequireUpdate == true)
+                if (anyUnitReqUpdate)
                 {
-                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction);
+                    //Debug.Log("UpdatePlayerVision");
+                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
                     p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                    p_Vision.RequireUpdate = p_Vision.RequireUpdate;
+                    //p_Vision.RequireUpdate = p_Vision.RequireUpdate;
                     p_Vision.Positives = p_Vision.Positives;
                     p_Vision.Negatives = p_Vision.Negatives;
                     p_Vision.Lastvisible = p_Vision.Lastvisible;
                     m_PlayerData.VisionComponent[i] = p_Vision;
 
                     //Send clientSide updateVision command
-
+                    /*
+                    
                     var request = new Vision.UpdateClientVisionCommand.Request
                     (
                         p_id,
@@ -107,16 +113,22 @@ public class VisionSystem_Server : ComponentSystem
                     updateClientVisionRequest.RequestsToSend.Add(request);
                     m_PlayerData.UpdateClientVisionCommands[i] = updateClientVisionRequest;
 
+                    */
+                    
                     //Debug.Log("SendUpdateClientVisionRequest, count = " + updateClientVisionRequest.RequestsToSend.Count + ", " + m_PlayerData.UpdateClientVisionCommands[i].RequestsToSend.Count);
   
                 }
+            
             }
+            
         }
     }
 
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
-        List<CellAttributes> sight = GridSys.GetRadius(coor.CubeCoordinate, inVision.VisionRange, inWorldIndex);
+        List<Vector3f> sight = GridSys.GetCoordRadius(coor.CubeCoordinate, inVision.VisionRange);
+
+        /*
         List<CellAttributes> Obstructive = new List<CellAttributes>();
         List<List<CellAttributesComponent.Component>> RelevantClusters = new List<List<CellAttributesComponent.Component>>();
 
@@ -185,12 +197,14 @@ public class VisionSystem_Server : ComponentSystem
             }
         }
         //Debug.Log("Sightlength after subtraction:" + sight.Count);
-        
+
+        */
+
         inVision.CellsInVisionrange = sight;
-        
         inVision.RequireUpdate = false;
-    
         
+        //every unit sets player reqUpdate to true ?!
+        /*
         for (int i = m_PlayerData.Length - 1; i >= 0; i--)
         {
             var Factiondata = m_PlayerData.FactionComponent[i];
@@ -202,68 +216,62 @@ public class VisionSystem_Server : ComponentSystem
                 m_PlayerData.VisionComponent[i] = Visiondata;
             }
         }
-        
+        */
         return inVision;
     }
 
-    private Vision.Component UpdatePlayerVision(Vision.Component inVision, FactionComponent.Component inFaction)
+    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
     {
         //Debug.Log(inVision.CellsInVisionrange.Count);
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
-        inVision.CellsInVisionrange.Clear();
+
         inVision.Positives.Clear();
         inVision.Negatives.Clear();
+        inVision.CellsInVisionrange.Clear();
 
-            for(int e = m_UnitData.Length-1; e>=0; e--)
-            {
-                var UnitVision = m_UnitData.VisionComponent[e];
-                var UnitFaction = m_UnitData.FactionComponent[e];
+        var lastVision = new HashSet<Vector3f>();
 
-                if(inFaction.Faction == UnitFaction.Faction)
-                {
-                    foreach(CellAttributes c in UnitVision.CellsInVisionrange)
-                    {
-                        if (!inVision.CellsInVisionrange.Contains(c)) inVision.CellsInVisionrange.Add(c);
-                    }
-                }
-
-            }
-        //Debug.Log(inVision.CellsInVisionrange.Count);
-        //Debug.Log(inVision.Lastvisible.Count);
-
-        foreach (CellAttributes c in inVision.Lastvisible)
+        foreach(Vector3f v in inVision.Lastvisible)
         {
-            bool cont = false;
-            foreach(CellAttributes a in inVision.CellsInVisionrange)
+            lastVision.Add(v);
+        }
+
+        var currentVision = new HashSet<Vector3f>();
+
+        for (int e = m_UnitData.Length - 1; e >= 0; e--)
+        {
+            var UnitVision = m_UnitData.VisionComponent[e];
+            var UnitFaction = m_UnitData.FactionComponent[e];
+
+            if (faction == UnitFaction.Faction)
             {
-                if(c.Cell.CubeCoordinate == a.Cell.CubeCoordinate)
+                //use a hashSet to increase performance of contains calls (O(1) vs. O(n))
+                foreach (Vector3f v in UnitVision.CellsInVisionrange)
                 {
-                    cont = true;
+                    currentVision.Add(v);
                 }
-            }
-            if (!cont)
-            {
-                inVision.Negatives.Add(c);
             }
         }
-        foreach (CellAttributes c in inVision.CellsInVisionrange)
+
+        inVision.CellsInVisionrange = currentVision.ToList();
+
+        foreach (Vector3f v in lastVision)
         {
-            bool cont = false;
-            foreach (CellAttributes a in inVision.Lastvisible)
+            if(!currentVision.Contains(v))
             {
-                if (c.Cell.CubeCoordinate == a.Cell.CubeCoordinate)
-                {
-                    cont = true;
-                }
-            }
-            if (!cont)
-            {
-                inVision.Positives.Add(c);
+                inVision.Negatives.Add(v);
             }
         }
-        //Debug.Log(inVision.Positives.Count);
-        inVision.RequireUpdate = false;
+
+        foreach(Vector3f v in currentVision)
+        {
+            if(!lastVision.Contains(v))
+            {
+                inVision.Positives.Add(v);
+            }
+        }
+
         return inVision;
     }
 

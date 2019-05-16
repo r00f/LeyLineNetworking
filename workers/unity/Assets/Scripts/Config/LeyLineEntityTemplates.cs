@@ -174,10 +174,10 @@ public static class LeyLineEntityTemplates {
 
         var playerVision = new Vision.Snapshot
         {
-            CellsInVisionrange = new List<CellAttributes>(),
-            Lastvisible = new List<CellAttributes>(),
-            Positives = new List<CellAttributes>(),
-            Negatives = new List<CellAttributes>()
+            CellsInVisionrange = new List<Vector3f>(),
+            Lastvisible = new List<Vector3f>(),
+            Positives = new List<Vector3f>(),
+            Negatives = new List<Vector3f>()
             
         };
 
@@ -251,10 +251,10 @@ public static class LeyLineEntityTemplates {
 
         var unitVision = new Vision.Snapshot
         {
-            CellsInVisionrange = new List<CellAttributes>(),
-            Lastvisible = new List<CellAttributes>(),
-            Positives = new List<CellAttributes>(),
-            Negatives = new List<CellAttributes>(),
+            CellsInVisionrange = new List<Vector3f>(),
+            Lastvisible = new List<Vector3f>(),
+            Positives = new List<Vector3f>(),
+            Negatives = new List<Vector3f>(),
             RequireUpdate = true,
             VisionRange = Stats.VisionRange
         };
@@ -397,7 +397,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryArea go1 = t as SecondaryArea;
                         TargetMod mod = new TargetMod();
-                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
+                        mod.Coordinates = new List<Vector3f>();
                         mod.ModType = ModTypeEnum.aoe;
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
@@ -406,9 +406,25 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryPath go1 = t as SecondaryPath;
                         TargetMod mod = new TargetMod();
-                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
+                        mod.Coordinates = new List<Vector3f>();
                         mod.ModType = ModTypeEnum.path;
                         mod.PathNested.Costpertile = go1.costPerTile;
+                        newAT.Mods.Add(mod);
+                    }
+                    if (t is SecondaryLine)
+                    {
+                        SecondaryLine go1 = t as SecondaryLine;
+                        TargetMod mod = new TargetMod();
+                        mod.Coordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.line;
+                        newAT.Mods.Add(mod);
+                    }
+                    if (t is SecondaryRing)
+                    {
+                        SecondaryRing go1 = t as SecondaryRing;
+                        TargetMod mod = new TargetMod();
+                        mod.Coordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.ring;
                         newAT.Mods.Add(mod);
                     }
                 }
@@ -456,7 +472,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryArea go1 = t as SecondaryArea;
                         TargetMod mod = new TargetMod();
-                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
+                        mod.Coordinates = new List<Vector3f>();
                         mod.ModType = ModTypeEnum.aoe;
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
@@ -465,10 +481,26 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryPath go1 = t as SecondaryPath;
                         TargetMod mod = new TargetMod();
-                        mod.CellAttributes = new CellAttributeList(new List<CellAttribute>());
+                        mod.Coordinates = new List<Vector3f>();
                         mod.ModType = ModTypeEnum.path;
                         newAT.Mods.Add(mod);
 
+                    }
+                    if (t is SecondaryLine)
+                    {
+                        SecondaryLine go1 = t as SecondaryLine;
+                        TargetMod mod = new TargetMod();
+                        mod.Coordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.line;
+                        newAT.Mods.Add(mod);
+                    }
+                    if (t is SecondaryRing)
+                    {
+                        SecondaryRing go1 = t as SecondaryRing;
+                        TargetMod mod = new TargetMod();
+                        mod.Coordinates = new List<Vector3f>();
+                        mod.ModType = ModTypeEnum.ring;
+                        newAT.Mods.Add(mod);
                     }
                 }
             }

@@ -205,18 +205,14 @@ namespace LeyLineHybridECS
 
                     if(lockedAction.Index == -2)
                     {
-                        if (lockedAction.Targets[0].Mods[0].CellAttributes.CellAttributes.Count != 0)
+                        if (lockedAction.Targets[0].Mods[0].Coordinates.Count != 0)
                             return false;
                     }
                 }
             }
             return true;
-
         }
-
     }
-
-
 }
 
 

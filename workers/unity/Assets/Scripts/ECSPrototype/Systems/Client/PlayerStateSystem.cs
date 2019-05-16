@@ -111,6 +111,7 @@ namespace LeyLineHybridECS
 
         public void SetPlayerState(PlayerStateEnum state)
         {
+            UpdateInjectedComponentGroups();
             var playerState = m_PlayerData.PlayerStateData[0];
             playerState.CurrentState = state;
             m_PlayerData.PlayerStateData[0] = playerState;

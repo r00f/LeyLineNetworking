@@ -18,7 +18,6 @@ component Actions{
 }
 
 
-
 type Action {
 	string name = 1;
 	uint32 combined_cost = 2;
@@ -55,11 +54,14 @@ type TargetMod {
 	type Path {
 		int32 costpertile = 1;
 	}
-	cell.CellAttributeList cell_attributes = 1;
+	type Ring {
+	
+		uint32 radius = 1;
+	}
+	list<improbable.Vector3f> coordinates = 1;
 	AoE aoe_nested = 2;
 	Path path_nested = 3;
 	ModTypeEnum mod_type = 4;
-
 }
 
 enum UnitRequisitesEnum {
@@ -78,6 +80,8 @@ unit = 1;
 enum ModTypeEnum {
 aoe = 0;
 path = 1;
+line = 2;
+ring = 3;
 }
 
 enum UseHighlighterEnum {

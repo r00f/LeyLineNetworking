@@ -159,8 +159,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
             var faction = m_SetTargetRequestData.Faction[i];
 
-            
-
             foreach (var str in setTargetRequest.Requests)
             {
                 long id = str.Payload.TargetId;
@@ -210,9 +208,14 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                             if (modType == ModTypeEnum.path)
                                             {
                                                 var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                                mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
+
+                                                foreach(CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
+                                                {
+                                                    mod.Coordinates.Add(c.CubeCoordinate);
+                                                }
+                                                
                                                 actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                                costToSubtract += (uint)mod.CellAttributes.CellAttributes.Count;
+                                                costToSubtract += (uint)mod.Coordinates.Count;
                                             }
                                         }
 
@@ -290,8 +293,55 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             }
             m_SetTargetRequestData.ActionsData[i] = actionData;
         }
+
         #endregion
 
+    }
+
+
+    Vector3f[] DirectionsArray = new Vector3f[]{
+          new Vector3f(+1, -1, 0), new Vector3f(+1, 0, -1), new Vector3f(0, +1, -1),
+            new Vector3f(-1, +1, 0), new Vector3f(-1, 0, +1), new Vector3f(0, -1, +1)
+    };
+
+    Vector3f CubeDirection(uint direction)
+    {
+        if (direction < 6)
+            return DirectionsArray[direction];
+        else
+            return new Vector3f();
+    }
+    
+    Vector3f CubeNeighbour(Vector3f origin, uint direction)
+    {
+        return origin + CubeDirection(direction);
+    }
+
+    Vector3f CubeScale(Vector3f direction, uint scale)
+    {
+        return direction * scale;
+    }
+
+    public Vector3f CoordinateDirection(Vector3f origin, Vector3f destination)
+    {
+        var direction = destination - origin;
+        return direction;
+    }
+
+    public List<Vector3f> RingDraw(Vector3f origin, uint radius)
+    {
+        var ring = new List<Vector3f>();
+        var coord = origin + CubeScale(DirectionsArray[4], radius);
+
+        for(int i = 0; i < 6; i++)
+        {
+            for(int j = 0; j < radius; j++)
+            {
+                ring.Add(coord);
+                coord = CubeNeighbour(coord, (uint)i);
+            }
+        }
+        return ring;
     }
 
     public int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
@@ -307,32 +357,111 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return Angle;
     }
 
+    public float LineLerp(float a, float b, float t)
+    {
+        return a + (b - a) * t;
+    }
+
+    public Vector3f CubeLerp(Vector3f a, Vector3f b, float t)
+    {
+        return CubeRound(new Vector3f(LineLerp(a.X, b.X, t), LineLerp(a.Y, b.Y, t), LineLerp(a.Z, b.Z, t)));
+    }
+
+    public List<Vector3f> LineDraw(Vector3f origin, Vector3f destination)
+    {
+        List<Vector3f> line = new List<Vector3f>();
+        var n = GetDistance(origin, destination);
+
+        for(int i = 0; i <= n; i++)
+        {
+            line.Add(CubeLerp(origin, destination, 1f / n * i));
+        }
+
+        return line;
+    }
+
+    public Vector3f CubeRound(Vector3f cubeFloat)
+    {
+
+        var rx = Mathf.Round(cubeFloat.X);
+        var ry = Mathf.Round(cubeFloat.Y);
+        var rz = Mathf.Round(cubeFloat.Z);
+
+        var x_diff = Mathf.Abs(rx - cubeFloat.X);
+        var y_diff = Mathf.Abs(ry - cubeFloat.Y);
+        var z_diff = Mathf.Abs(rz - cubeFloat.Z);
+
+        if(x_diff > y_diff && x_diff > z_diff)
+        {
+            rx = -ry - rz;
+        }
+        else if(y_diff > z_diff)
+        {
+            ry = -rx - rz;
+
+        }
+        else
+        {
+            rz = -rx - ry;
+        }
+
+        return new Vector3f(rx, ry, rz);
+    }
+
+    public List<Vector3f> GetCoordRadius(Vector3f originCellCubeCoordinate, uint radius)
+    {
+        var results = new List<Vector3f>();
+        results.Add(originCellCubeCoordinate);
+
+        for (int x = (int)(-radius); x <= radius; x++)
+        {
+            for (int y = (int)(Mathf.Max(-(float)radius, -x - (float)radius)); y <= (int)(Mathf.Min((float)radius, -x + radius)); y++)
+            {
+                var z = -x - y;
+                results.Add(originCellCubeCoordinate + new Vector3f(x, y, z));
+            }
+        }
+        return results;
+    }
+
     public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
         //returns a list of offsetCoordinates
         var cellsInRadius = new List<CellAttributes>();
         //reserve first index for origin
-        cellsInRadius.Add(new CellAttributes());
+        cellsInRadius.Add(new CellAttributes{Neighbours = new CellAttributeList(new List<CellAttribute>())});
+
+        //get all cubeCordinates within range
+        var coordList = GetCoordRadius(originCellCubeCoordinate, radius);
+
+        HashSet<Vector3f> coordHash = new HashSet<Vector3f>();
+
+        foreach(Vector3f v in coordList)
+        {
+            coordHash.Add(v);
+        }
+
+        //use a hashset instead of a list to improve contains performance
 
         for (int i = 0; i < m_CellData.Length; i++)
         {
             uint cellWorldIndex = m_CellData.WorldIndexData[i].Value;
+            Vector3f cubeCoordinate = m_CellData.CoordinateData[i].CubeCoordinate;
+            var cellAttributes = m_CellData.CellAttributes[i].CellAttributes;
 
             if (cellWorldIndex == unitWorldIndex)
             {
-                Vector3f cubeCoordinate = m_CellData.CoordinateData[i].CubeCoordinate;
-
-                if (GetDistance(originCellCubeCoordinate, cubeCoordinate) <= radius)
+                if (cubeCoordinate == originCellCubeCoordinate)
                 {
-                    if (m_CellData.CellAttributes[i].CellAttributes.Cell.CubeCoordinate == originCellCubeCoordinate)
-                    {
-                        cellsInRadius[0] = m_CellData.CellAttributes[i].CellAttributes;
-                    }
-                    else
-                        cellsInRadius.Add(m_CellData.CellAttributes[i].CellAttributes);
+                    cellsInRadius[0] = cellAttributes;
+                }
+                else if (coordHash.Contains(cubeCoordinate))
+                {
+                    cellsInRadius.Add(cellAttributes);
                 }
             }
         }
+        
         return cellsInRadius;
     }
 
@@ -430,10 +559,15 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             if (!isTaken || cell.Cell.CubeCoordinate == origin.CubeCoordinate)
             {
-                foreach (var neighbour in neighbours)
+                if(neighbours != null)
                 {
-                    ret[cell.Cell][neighbour] = neighbour.MovementCost;
+                    foreach (var neighbour in neighbours)
+                    {
+                        ret[cell.Cell][neighbour] = neighbour.MovementCost;
+                    }
+
                 }
+
             }
         }
         return ret;
