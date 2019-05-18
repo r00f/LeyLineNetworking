@@ -630,21 +630,14 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, EntityId entityId, uint worldIndex)
     {
+        var cell = cellAttributes.Cell;
+        cell.IsTaken = isTaken;
+        cell.UnitOnCellId = entityId;
+
         CellAttributes cellAtt = new CellAttributes
         {
             Neighbours = cellAttributes.Neighbours,
-
-            Cell = new CellAttribute
-            {
-                IsTaken = isTaken,
-                UnitOnCellId = entityId,
-
-                MovementCost = cellAttributes.Cell.MovementCost,
-                Position = cellAttributes.Cell.Position,
-                CubeCoordinate = cellAttributes.Cell.CubeCoordinate,
-
-            }
-
+            Cell = cell
         };
 
         UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours, worldIndex);
@@ -668,13 +661,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         {
                             if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
                             {
-                                cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = new CellAttribute
-                                {
-                                    IsTaken = cell.IsTaken,
-                                    CubeCoordinate = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate,
-                                    Position = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].Position,
-                                    MovementCost = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].MovementCost
-                                };
+                                var isTaken = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].IsTaken;
+                                isTaken = cell.IsTaken;
                                 m_CellData.CellAttributes[ci] = cellAtt;
                             }
                         }
