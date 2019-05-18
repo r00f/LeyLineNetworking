@@ -95,8 +95,6 @@ namespace LeyLineHybridECS
                                         }
                                     }
 
-                                    //set timeleft to TravelTime oneTime
-
                                     //instead of lerping towards next pos in path, set pos and wait for client to catch up
                                     if (movementVariables.TimeLeft > 0)
                                     {
@@ -114,7 +112,6 @@ namespace LeyLineHybridECS
 
                                         if (currentPath.Count == 1)
                                         {
-                                            movementVariables.TimeLeft = 0;
                                             for (int ci = 0; ci < m_CellData.Length; ci++)
                                             {
                                                 var cellAtt = m_CellData.CellAttributes[ci];
@@ -127,12 +124,17 @@ namespace LeyLineHybridECS
                                                     m_CellData.CellAttributes[ci] = cellAtt;
                                                 }
                                             }
+                                            movementVariables.TimeLeft = 0;
                                         }
+                                        else
+                                        {
+                                            movementVariables.TimeLeft = movementVariables.TravelTime;
+                                        }
+
                                         coord.CubeCoordinate = currentPath[0];
                                         vision.RequireUpdate = true;
                                         m_UnitData.Vision[i] = vision;
                                         m_UnitData.CubeCoordinates[i] = coord;
-                                        movementVariables.TimeLeft = movementVariables.TravelTime;
                                         m_UnitData.MovementVariables[i] = movementVariables;
                                         currentPath.RemoveAt(0);
                                     }

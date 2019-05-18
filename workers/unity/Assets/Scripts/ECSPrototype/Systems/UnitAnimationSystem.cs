@@ -38,6 +38,8 @@ public class UnitAnimationSystem : ComponentSystem
 
     [Inject] private GameStateData m_GameStateData;
 
+    [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
+
 
     protected override void OnUpdate()
     {
@@ -114,7 +116,13 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.RotationTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
                         }
 
-                        animatorComponent.DestinationPosition = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+                        //convert cube Coordinate to position
+                        Vector2 XZPos = m_CellGridSystem.CubeCoordToXZ(actions.LockedAction.Targets[0].TargetCoordinate);
+                        //Find correct YPos
+                        float YPos = 3;
+                        animatorComponent.DestinationPosition = new Vector3(XZPos.x, YPos, XZPos.y);
+                            
+                        //GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
                         animatorComponent.InitialValuesSet = true;
                     }
 

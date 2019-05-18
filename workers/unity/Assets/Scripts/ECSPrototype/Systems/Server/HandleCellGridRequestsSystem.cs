@@ -193,6 +193,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         actionData.LockedAction = actionData.CurrentSelected;
                                         var locked = actionData.LockedAction;
                                         var t = actionData.LockedAction.Targets[0];
+                                        t.TargetCoordinate = cell.CubeCoordinate;
                                         t.TargetId = id;
                                         actionData.LockedAction.Targets[0] = t;
                                         uint costToSubtract = t.EnergyCost;
@@ -212,6 +213,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                                 foreach(CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
                                                 {
                                                     mod.Coordinates.Add(c.CubeCoordinate);
+
                                                 }
                                                 
                                                 actionData.LockedAction.Targets[0].Mods[0] = mod;
@@ -251,6 +253,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         actionData.LockedAction = actionData.CurrentSelected;
                                         var locked = actionData.LockedAction;
                                         var t = actionData.LockedAction.Targets[0];
+                                        t.TargetCoordinate = unitCoord;
                                         t.TargetId = id;
                                         actionData.LockedAction.Targets[0] = t;
                                         uint costToSubtract = t.EnergyCost;

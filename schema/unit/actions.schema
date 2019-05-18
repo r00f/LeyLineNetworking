@@ -29,20 +29,22 @@ type Action {
 type ActionTarget {
 	type UnitTarget {
 
-		UnitRequisitesEnum unit_req = 2;
+		UnitRequisitesEnum unit_req = 1;
 	}
 	type CellTarget {
-		bool require_empty = 2;
-		bool require_visible = 3;
+		bool require_empty = 1;
+		bool require_visible = 2;
 	}
+
 	int64 target_id = 1;
-	int32 targettingrange = 2;
-	uint32 energy_cost = 3;
-	UseHighlighterEnum higlighter = 4;
-	TargetTypeEnum target_type = 5;
-	CellTarget cell_target_nested = 6;
-	UnitTarget unit_target_nested = 7;
-	list<TargetMod> mods = 8;
+	improbable.Vector3f target_coordinate = 2;
+	int32 targettingrange = 3;
+	uint32 energy_cost = 4;
+	UseHighlighterEnum higlighter = 5;
+	TargetTypeEnum target_type = 6;
+	CellTarget cell_target_nested = 7;
+	UnitTarget unit_target_nested = 8;
+	list<TargetMod> mods = 9;
 	
 	
 }
