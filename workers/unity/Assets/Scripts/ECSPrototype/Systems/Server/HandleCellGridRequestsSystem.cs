@@ -295,6 +295,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         }
 
         #endregion
+        //Debug.Log(CubeCoordToXZ(new Vector3f(-14, 0, 14)));
 
     }
 
@@ -303,6 +304,29 @@ public class HandleCellGridRequestsSystem : ComponentSystem
           new Vector3f(+1, -1, 0), new Vector3f(+1, 0, -1), new Vector3f(0, +1, -1),
             new Vector3f(-1, +1, 0), new Vector3f(-1, 0, +1), new Vector3f(0, -1, +1)
     };
+
+    Vector2 CubeToAxial(Vector3f cube)
+    {
+        return new Vector2(cube.X, cube.Y);
+    }
+
+    Vector3f AxialToCube(Vector2 axial)
+    {
+        return new Vector3f(axial.x, axial.y, -axial.x -axial.y);
+    }
+
+    //size equals width of a hexagon / 2
+    public Vector2 CubeCoordToXZ(Vector3f coord)
+    {
+        Vector2 axial = CubeToAxial(coord);
+        var x = 1.5f * (3 / 2 * axial.x);
+        var y = 1.73f * ((axial.x * 0.5f) + axial.y);
+        //var y = 1.5f * (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
+
+        //center cell + coordinate offset = XZ coordinate in world space - offset X by (worldindex - 1) * 100?
+        return new Vector2(50, 55.22f) + new Vector2(x, y);
+    }
+
 
     Vector3f CubeDirection(uint direction)
     {
@@ -371,6 +395,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     {
         List<Vector3f> line = new List<Vector3f>();
         var n = GetDistance(origin, destination);
+        //nudge destination
+        destination += new Vector3f(1e-6f, 2e-6f, -3e-6f);
 
         for(int i = 0; i <= n; i++)
         {
@@ -398,7 +424,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         else if(y_diff > z_diff)
         {
             ry = -rx - rz;
-
         }
         else
         {
