@@ -127,96 +127,71 @@ public class VisionSystem_Server : ComponentSystem
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
         List<Vector3f> sight = GridSys.GetCoordRadius(coor.CubeCoordinate, inVision.VisionRange);
-
-        /*
-        List<CellAttributes> Obstructive = new List<CellAttributes>();
-        List<List<CellAttributesComponent.Component>> RelevantClusters = new List<List<CellAttributesComponent.Component>>();
-
-        foreach (CellAttributes c in sight)
+        
+        var sightHash = new HashSet<Vector3f>();
+        foreach (Vector3f v in sight)
         {
-            if (c.Cell.ObstructVision)
+            sightHash.Add(v);
+        }
+
+
+        List<ObstructVisionCluster> RelevantClusters = new List<ObstructVisionCluster>();
+
+
+
+        foreach(RawCluster c in FixClusters)
+        {
+            bool isRelevant = false;
+            HashSet<Vector3f> set = new HashSet<Vector3f>();
+            foreach (CellAttributesComponent.Component a in c.cluster)
             {
-                Obstructive.Add(c);
+                if (sightHash.Contains(a.CellAttributes.Cell.CubeCoordinate)) isRelevant = true;
+                set.Add(a.CellAttributes.Cell.CubeCoordinate);
+            }
+
+            if (isRelevant)
+            {
+                RelevantClusters.Add(new ObstructVisionCluster(set, coor.CubeCoordinate));            
             }
         }
 
-        RelevantClusters.Clear();
-
-        for (int i = 0; i < Obstructive.Count; i++)
+        if (RelevantClusters.Count != 0)
         {
-            List<CellAttributesComponent.Component> Cluster = new List<CellAttributesComponent.Component>();
-            foreach (RawCluster lc in FixClusters)
+            List<Vector3f> Ring = GridSys.RingDraw(coor.CubeCoordinate, inVision.VisionRange);
+            List<List<Vector3f>> Lines = new List<List<Vector3f>>();
+
+            foreach (Vector3f c in Ring)
             {
-                for (int e = lc.cluster.Count - 1; e >= 0; e--)
+                Lines.Add(GridSys.LineDraw(coor.CubeCoordinate, c));
+            }
+            foreach (List<Vector3f> l in Lines)
+            {
+                bool visible = true;
+                for (int i = 0; i < l.Count; i++)
                 {
-                    if (lc.cluster[e].CellAttributes.Cell.CubeCoordinate == Obstructive[i].Cell.CubeCoordinate)
+                    if (visible)
                     {
-                        Cluster = lc.cluster;
+                        foreach (ObstructVisionCluster o in RelevantClusters)
+                        {
+                            if (o.cluster.Contains(l[i]))
+                            {
+                                visible = false;
+                                sightHash.Remove(l[i]);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        sightHash.Remove(l[i]);
                     }
                 }
             }
-            if (Cluster.Count > 0)
-            {
-                List<CellAttributes> toRemove = new List<CellAttributes>();
-                foreach (CellAttributesComponent.Component c in Cluster)
-                {
-                    foreach (CellAttributes ca in sight)
-                    {
-                        if (ca.Cell.CubeCoordinate == c.CellAttributes.Cell.CubeCoordinate) toRemove.Add(ca);
-                    }
-                }
-                foreach (CellAttributes c in toRemove)
-                {
-                    sight.Remove(c);
-                    Obstructive.Remove(c);
-                }
-
-                RelevantClusters.Add(Cluster);
-            }
+            sight = new List<Vector3f>(sightHash);
         }
-
-        //Fetch watcher out of all the cells
-        CellAttributesComponent.Component Watcher = new CellAttributesComponent.Component();
-        bool isSet = false;
-        for(int i = m_CellData.Length-1; i>=0; i--)
-        {
-            if(m_CellData.CellCoordinateData[i].CubeCoordinate == coor.CubeCoordinate)
-            {
-                Watcher = m_CellData.CellsData[i];
-                isSet = true;
-            }
-        }
-        if (isSet)
-        {
-            for (int i = RelevantClusters.Count - 1; i >= 0; i--)
-            {
-
-                ObstructVisionCluster OVC = new ObstructVisionCluster(RelevantClusters[i], Watcher);
-                Cluster_DetermineAngles(OVC);
-                sight = Cluster_UseAngles(OVC, sight);
-            }
-        }
-        //Debug.Log("Sightlength after subtraction:" + sight.Count);
-
-        */
 
         inVision.CellsInVisionrange = sight;
         inVision.RequireUpdate = false;
-        
-        //every unit sets player reqUpdate to true ?!
-        /*
-        for (int i = m_PlayerData.Length - 1; i >= 0; i--)
-        {
-            var Factiondata = m_PlayerData.FactionComponent[i];
-            var Visiondata = m_PlayerData.VisionComponent[i];
-            if (Factiondata.Faction == inFaction.Faction)
-            {
-                Visiondata.RequireUpdate = true;
-                Visiondata.RequireUpdate = Visiondata.RequireUpdate;
-                m_PlayerData.VisionComponent[i] = Visiondata;
-            }
-        }
-        */
+
         return inVision;
     }
 
@@ -364,7 +339,7 @@ public class VisionSystem_Server : ComponentSystem
     }
 
     private void Cluster_DetermineAngles(ObstructVisionCluster inCluster)
-    {
+    {/*
         foreach (CellAttributesComponent.Component c in inCluster.cluster)
         {
 
@@ -379,8 +354,9 @@ public class VisionSystem_Server : ComponentSystem
         //print("Relevant angles Count: " + inCluster.RelevantAngles.Count());
 
     }
-
-    private List<CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<CellAttributes> watching)
+    */
+    }
+    /*private List<CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<CellAttributes> watching)
     {
         int count = inCluster.RelevantAngles.Count;
         //Debug.Log(count);
@@ -567,7 +543,7 @@ public class VisionSystem_Server : ComponentSystem
         }
         #endregion
         
-    }
+    }*/
 
 }
 
@@ -575,21 +551,21 @@ public class VisionSystem_Server : ComponentSystem
 #region ClusterDef
 public struct ObstructVisionCluster
 {
-    public List<CellAttributesComponent.Component> cluster;
+    public HashSet<Vector3f> cluster;
     public List<Angle> RelevantAngles;
-    public CellAttributesComponent.Component watcher;
-    public ObstructVisionCluster(List<CellAttributesComponent.Component> inCluster, CellAttributesComponent.Component inWatcher)
+    public Vector3f watcherCoor;
+    public ObstructVisionCluster(HashSet<Vector3f> inCluster, Vector3f inWatcher)
 
     {
-        watcher = inWatcher;
+        watcherCoor = inWatcher;
         cluster = inCluster;
         RelevantAngles = new List<Angle>();
     }
 
-    public ObstructVisionCluster(CellAttributesComponent.Component start, CellAttributesComponent.Component inWatcher)
+    public ObstructVisionCluster(Vector3f start, Vector3f inWatcher)
     {
-        watcher = inWatcher;
-        cluster = new List<CellAttributesComponent.Component>();
+        watcherCoor = inWatcher;
+        cluster = new HashSet<Vector3f>();
         cluster.Add(start);
         RelevantAngles = new List<Angle>();
     }
@@ -597,6 +573,7 @@ public struct ObstructVisionCluster
 public struct RawCluster
 {
     public List<CellAttributesComponent.Component> cluster;
+    
     public RawCluster(List<CellAttributesComponent.Component> inCluster)
     {
         cluster = inCluster;
