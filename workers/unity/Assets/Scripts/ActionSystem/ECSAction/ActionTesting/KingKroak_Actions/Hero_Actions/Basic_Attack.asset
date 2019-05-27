@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
+  m_Name: Basic_Attack
+  m_EditorClassIdentifier: 
+  TargetToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114249741597100966}
+  EffectToAdd: {fileID: 0}
+  Effects:
+  - {fileID: 114207454664786502}
+  ActionName: 
+  ActionIcon: {fileID: 0}
+--- !u!114 &114207454664786502
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
+  m_Name: Base_Effect_DealDamage(Clone)
+  m_EditorClassIdentifier: 
+  applyTo: 0
+  specificTargetIdentifier: 0
+  damageAmount: 5
+--- !u!114 &114249741597100966
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72c707e3d66097a4195aca654657c5db, type: 3}
+  m_Name: Base_Target_Unit(Clone)
+  m_EditorClassIdentifier: 
+  HighlighterToUse: 1
+  targettingRange: 4
+  energyCost: 2
+  ModToAdd: {fileID: 0}
+  SecondaryTargets: []
+  Restrictions: 3
+  Coordinate:
+    X: 0
+    Y: 0
+    Z: 0

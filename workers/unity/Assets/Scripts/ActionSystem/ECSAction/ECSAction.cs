@@ -21,7 +21,11 @@ namespace LeyLineHybridECS
     }
     public MultiTarget MultiTargetting = MultiTarget.No;
     */
+        public ECSActionTarget TargetToAdd;
+        [HideInInspector]
         public List<ECSActionTarget> Targets;
+        public ECSActionEffect EffectToAdd;
+        [HideInInspector]
         public List<ECSActionEffect> Effects;
         public string ActionName;
         public Sprite ActionIcon;
