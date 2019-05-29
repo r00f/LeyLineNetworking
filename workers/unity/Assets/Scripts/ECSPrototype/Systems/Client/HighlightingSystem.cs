@@ -1,16 +1,15 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using Unity.Entities;
-using Improbable.Gdk.Core;
-using System;
-using LeyLineHybridECS;
+﻿using Cell;
 using Generic;
-using Unit;
-using Cell;
-using Player;
-using Improbable.Gdk.ReactiveComponents;
 using Improbable;
+using Improbable.Gdk.Core;
+using Improbable.Gdk.ReactiveComponents;
+using LeyLineHybridECS;
+using Player;
+using System;
+using System.Collections.Generic;
+using Unit;
+using Unity.Entities;
+using UnityEngine;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(PlayerStateSystem)), UpdateAfter(typeof(SendActionRequestSystem)), UpdateAfter(typeof(GameStateSystem))]
 public class HighlightingSystem : ComponentSystem
@@ -29,6 +28,7 @@ public class HighlightingSystem : ComponentSystem
 
 
     }
+
     [Inject]
     ActiveUnitData m_ActiveUnitData;
 
@@ -85,6 +85,17 @@ public class HighlightingSystem : ComponentSystem
     [Inject]
     private UnitData m_UnitData;
 
+    public struct MarkerStateData
+    {
+        public readonly int Length;
+        public ComponentDataArray<MarkerState> MarkerStates;
+        public readonly ComponentDataArray<MouseState> MouseStates;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
+    }
+
+    [Inject]
+    private MarkerStateData m_MarkerStateData;
+
     [Inject]
     HandleCellGridRequestsSystem m_CellGrid;
 
@@ -95,6 +106,14 @@ public class HighlightingSystem : ComponentSystem
         var playerState = m_PlayerStateData.PlayerState[0];
         var playerWorldIndex = m_PlayerStateData.WorldIndex[0].Value;
         var playerHighlightingData = m_PlayerStateData.HighlightingData[0];
+        int actionID = playerState.SelectedActionId;
+
+        HashSet<Vector3f> coordsInRangeHash = new HashSet<Vector3f>();
+
+        foreach(CellAttribute c in playerState.CellsInRange)
+        {
+            coordsInRangeHash.Add(c.CubeCoordinate);
+        }
 
         for (int i = 0; i < m_GameStateData.Length; i++)
         {
@@ -103,22 +122,22 @@ public class HighlightingSystem : ComponentSystem
 
             if(playerWorldIndex == gameStateWorldIndex)
             {
-                if(gameState != GameStateEnum.planning)
+                if (gameState != GameStateEnum.planning)
                 {
-                    for (int c = 0; c < m_CellData.Length; c++)
+                    for (int m = 0; m < m_MarkerStateData.Length; m++)
                     {
-                        var cellMarkerState = m_CellData.MarkerStateData[c];
+                        var markerState = m_MarkerStateData.MarkerStates[m];
 
-                        if (cellMarkerState.IsTarget == 1)
-                            cellMarkerState.IsTarget = 0;
+                        if (markerState.IsTarget == 1)
+                            markerState.IsTarget = 0;
 
-                        m_CellData.MarkerStateData[c] = cellMarkerState;
+                        m_MarkerStateData.MarkerStates[m] = markerState;
                     }
 
                     for (int u = 0; u < m_ActiveUnitData.Length; u++)
                     {
                         var lineRenderer = m_ActiveUnitData.LineRenderers[u];
-                        ClearLineRenderer(lineRenderer);
+                        lineRenderer.lineRenderer.positionCount = 0;
                     }
                 }
             }
@@ -126,10 +145,91 @@ public class HighlightingSystem : ComponentSystem
 
         if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
         {
-            //set coord to something that can never be a cubeCooord on the map
-            Vector3f hoveredCoord = new Vector3f(999,999,999);
-            Vector3 hoveredPosition = new Vector3();
             float hoveredOffset = 0;
+            playerHighlightingData.HoveredCoordinate = new Vector3f(999, 999, 999);
+            playerHighlightingData.HoveredPosition = new Vector3(0, 0, 0);
+            //set hovered position / cubeCoordinate
+
+            for (int m = 0; m < m_MarkerStateData.Length; m++)
+            {
+                var coord = m_MarkerStateData.Coords[m].CubeCoordinate;
+                var markerState = m_MarkerStateData.MarkerStates[m];
+                var mouseState = m_MarkerStateData.MouseStates[m].CurrentState;
+
+                if (coordsInRangeHash.Contains(coord))
+                {
+                    if (mouseState == MouseState.State.Hovered && coord != playerHighlightingData.HoveredCoordinate)
+                    {
+                        Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
+                        playerHighlightingData.HoveredCoordinate = coord;
+                        playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
+                    }
+                    /*
+                    if(playerHighlightingData.IsUnitTarget == 1)
+                    {
+                        
+                        if(markerState.IsUnit == 1)
+                        {
+                            if (mouseState == MouseState.State.Hovered && coord != playerHighlightingData.HoveredCoordinate)
+                            {
+                                Debug.Log("IsUnit");
+                                Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
+                                playerHighlightingData.HoveredCoordinate = coord;
+                                playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (markerState.IsUnit == 0)
+                        {
+                            if (mouseState == MouseState.State.Hovered && coord != playerHighlightingData.HoveredCoordinate)
+                            {
+                                Debug.Log("IsCell");
+                                Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
+                                playerHighlightingData.HoveredCoordinate = coord;
+                                playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
+                            }
+                        }
+                    }
+                    */
+                }
+
+                bool otherUnitTarget = false;
+
+                foreach (long l in playerState.UnitTargets.Keys)
+                {
+                    HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[l].CubeCoordinates);
+                    if (l != playerState.SelectedUnitId)
+                    {
+                        if (targetCoordsHash.Contains(coord))
+                        {
+                            otherUnitTarget = true;
+                        }
+                    }
+                }
+
+                foreach (long l in playerState.UnitTargets.Keys)
+                {
+                    HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[l].CubeCoordinates);
+
+                    if (l == playerState.SelectedUnitId)
+                    {
+                        if (targetCoordsHash.Contains(coord))
+                        {
+                            markerState.IsTarget = 1;
+                        }
+                        else if (otherUnitTarget == false)
+                        {
+                            markerState.IsTarget = 0;
+                        }
+                    }
+                }
+
+                m_MarkerStateData.MarkerStates[m] = markerState;
+                m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
+            }
+
 
             for (int i = 0; i < m_ActiveUnitData.Length; i++)
             {
@@ -137,100 +237,28 @@ public class HighlightingSystem : ComponentSystem
                 var actions = m_ActiveUnitData.BaseDataSets[i];
                 var occCoord = m_ActiveUnitData.Coords[i].CubeCoordinate;
                 var worldIndex = m_ActiveUnitData.WorldIndexData[i].Value;
-                var mouseStateClick = m_ActiveUnitData.MouseStates[i].ClickEvent;
-                int actionID = playerState.SelectedActionId;
+                var mouseState = m_ActiveUnitData.MouseStates[i];
                 var lineRendererComp = m_ActiveUnitData.LineRenderers[i];
 
                 if (iD == playerState.SelectedUnitId)
                 {
-                    #region Execute with gathered Data
-
-                    //set hovered position / cubeCoordinate
-                    for (int c = 0; c < m_CellData.Length; c++)
-                    {
-                        var position = m_CellData.Transforms[c].position;
-                        var cellCoord = m_CellData.Coords[c].CubeCoordinate;
-                        var cellmouseState = m_CellData.MouseStates[c].CurrentState;
-                        var cellMarkerState = m_CellData.MarkerStateData[c];
-
-                        if (cellMarkerState.CurrentState == MarkerState.State.Reachable)
-                        {
-                            if (cellmouseState == MouseState.State.Hovered)
-                            {
-                                hoveredCoord = cellCoord;
-                                hoveredPosition = position;
-                            }
-                        }
-                    }
-
-                    if (playerHighlightingData.AoERadius > 0)
-                    {
-                        List<Vector3f> area = new List<Vector3f>();
-                        area = m_CellGrid.GetCoordRadius(hoveredCoord, playerHighlightingData.AoERadius);
-                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
-
-                        //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-                        if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoord != new Vector3f(999, 999, 999))
-                        {
-                            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                            playerState.UnitTargets = playerState.UnitTargets;
-                            m_PlayerStateData.PlayerState[0] = playerState;
-                        }
-                    }
-                    else if (playerHighlightingData.RingRadius > 0)
-                    {
-                        List<Vector3f> ring = new List<Vector3f>();
-                        ring = m_CellGrid.RingDraw(hoveredCoord, playerHighlightingData.RingRadius);
-                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring);
-
-                        //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-                        if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoord != new Vector3f(999, 999, 999))
-                        {
-                            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                            playerState.UnitTargets = playerState.UnitTargets;
-                            m_PlayerStateData.PlayerState[0] = playerState;
-                        }
-                    }
-                    else if(playerHighlightingData.StraightLine == 1)
-                    {
-                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
-                        cubeCoordList.CubeCoordinates = m_CellGrid.LineDraw(occCoord, hoveredCoord);
-                        //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-                        if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoord != new Vector3f(999, 999, 999))
-                        {
-                            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                            playerState.UnitTargets = playerState.UnitTargets;
-                            m_PlayerStateData.PlayerState[0] = playerState;
-                        }
-                    }
-                    else
-                    {
-                        CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
-                        cubeCoordList.CubeCoordinates.Add(hoveredCoord);
-
-                        //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-                        if (hoveredCoord != new Vector3f(999, 999, 999))
-                        {
-                            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                            playerState.UnitTargets = playerState.UnitTargets;
-                            m_PlayerStateData.PlayerState[0] = playerState;
-                        }
-                    }
-
+                    #region Highlight Reachable
                     if (playerHighlightingData.PathingRange == 1)
                     {
                         if (playerState.CellsInRange.Count == 0)
                         {
                             List<CellAttributes> go = m_CellGrid.GetRadius(occCoord, playerHighlightingData.Range, worldIndex);
                             playerState.CachedPaths = m_CellGrid.GetAllPathsInRadius(playerHighlightingData.Range, go, occCoord);
+
                             foreach (CellAttribute key in playerState.CachedPaths.Keys)
                             {
                                 playerState.CellsInRange.Add(key);
                             }
+
+                            playerState.CellsInRange = playerState.CellsInRange;
                             m_PlayerStateData.PlayerState[0] = playerState;
                             HighlightReachable();
                         }
-                        //use path linerenderer
                     }
                     else
                     {
@@ -244,132 +272,112 @@ public class HighlightingSystem : ComponentSystem
                             m_PlayerStateData.PlayerState[0] = playerState;
                             HighlightReachable();
                         }
-                        //use arcing linerenderer
                     }
+                    #endregion
 
-                    if (playerHighlightingData.IsUnitTarget == 1)
+                    #region Update Visuals
+                    if (playerHighlightingData.HoveredCoordinate != playerHighlightingData.LastHoveredCoordinate)
                     {
-                        //if target wants a Unit, loop over units to find which one is hovered
-                        for (int u = 0; u < m_UnitData.Length; u++)
+                        if (playerHighlightingData.AoERadius > 0)
                         {
-                            var position = m_UnitData.Transforms[u].position;
-                            var unitCoord = m_UnitData.Coords[u].CubeCoordinate;
-                            var unitMouseState = m_UnitData.MouseStates[u].CurrentState;
-                            var unitClickEvent = m_UnitData.MouseStates[u].ClickEvent;
-                            var hoveredLineRendererComp = m_UnitData.LineRenderers[u];
+                            List<Vector3f> area = new List<Vector3f>();
+                            area = m_CellGrid.GetCoordRadius(playerHighlightingData.HoveredCoordinate, playerHighlightingData.AoERadius);
+                            CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
 
-                            if (unitMouseState == MouseState.State.Hovered)
+                            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
+                            if (cubeCoordList.CubeCoordinates.Count != 1 && playerHighlightingData.HoveredCoordinate != new Vector3f(999, 999, 999))
                             {
-                                hoveredCoord = unitCoord;
-                                hoveredPosition = position;
-                                hoveredOffset = hoveredLineRendererComp.arcOffset.y;
+                                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                                playerState.UnitTargets = playerState.UnitTargets;
                             }
+                        }
+                        else if (playerHighlightingData.RingRadius > 0)
+                        {
+                            List<Vector3f> ring = new List<Vector3f>();
+                            ring = m_CellGrid.RingDraw(playerHighlightingData.HoveredCoordinate, playerHighlightingData.RingRadius);
+                            CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring);
 
-                            bool contains = false;
-
-                            foreach (long l in playerState.UnitTargets.Keys)
+                            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
+                            if (cubeCoordList.CubeCoordinates.Count != 1 && playerHighlightingData.HoveredCoordinate != new Vector3f(999, 999, 999))
                             {
-                                if (l != playerState.SelectedUnitId)
-                                {
-                                    foreach (Vector3f coord in playerState.UnitTargets[l].CubeCoordinates)
-                                    {
-                                        if (unitCoord == coord)
-                                        {
-                                            contains = true;
-                                        }
-                                    }
-                                }
+                                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                                playerState.UnitTargets = playerState.UnitTargets;
                             }
-
-                            foreach (CubeCoordinateList l in playerState.UnitTargets.Values)
+                        }
+                        else if (playerHighlightingData.LineAoE == 1)
+                        {
+                            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
+                            cubeCoordList.CubeCoordinates = m_CellGrid.LineDraw(occCoord, playerHighlightingData.HoveredCoordinate);
+                            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
+                            if (cubeCoordList.CubeCoordinates.Count != 1 && playerHighlightingData.HoveredCoordinate != new Vector3f(999, 999, 999))
                             {
-                                foreach (Vector3f v in l.CubeCoordinates)
+                                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                                playerState.UnitTargets = playerState.UnitTargets;
+                            }
+                        }
+                        else
+                        {
+                            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
+                            cubeCoordList.CubeCoordinates.Add(playerHighlightingData.HoveredCoordinate);
+
+                            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
+                            if (playerHighlightingData.HoveredCoordinate != new Vector3f(999, 999, 999))
+                            {
+                                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                                playerState.UnitTargets = playerState.UnitTargets;
+                            }
+                        }
+
+                        if (playerHighlightingData.IsUnitTarget == 1)
+                        {
+                            //if target wants a Unit, loop over units to find which one is hovered
+                            for (int u = 0; u < m_UnitData.Length; u++)
+                            {
+                                var unitCoord = m_UnitData.Coords[u].CubeCoordinate;
+                                var hoveredLineRendererComp = m_UnitData.LineRenderers[u];
+
+                                if (unitCoord == playerHighlightingData.HoveredCoordinate)
                                 {
-                                    /*
-                                        if (v == unitCoord && cellMarkerState.IsTarget == 0)
-                                        {
-                                            cellMarkerState.IsTarget = 1;
-                                        }
-                                    }
-                                    */
+                                    hoveredOffset = hoveredLineRendererComp.arcOffset.y;
                                 }
                             }
                         }
-                    }
-                    else
-                    {
-                        //if target wants a Cell, loop over cells to find which one is hovered
-                        for (int c = 0; c < m_CellData.Length; c++)
+
+                        if (playerHighlightingData.PathLine == 1)
                         {
-                            var cellCoord = m_CellData.Coords[c].CubeCoordinate;
-                            var cellMarkerState = m_CellData.MarkerStateData[c];
+                            CellAttributeList Path = new CellAttributeList();
+                            Path = m_CellGrid.FindPath(playerHighlightingData.HoveredCoordinate, m_PlayerStateData.PlayerState[0].CachedPaths);
 
-                            foreach (long l in playerState.UnitTargets.Keys)
+                            if (Path.CellAttributes.Count > 0)
                             {
-                                if (l == playerState.SelectedUnitId)
-                                {
-                                    foreach (Vector3f coord in playerState.UnitTargets[l].CubeCoordinates)
-                                    {
-                                        if (cellCoord == coord)
-                                        {
-                                            if (cellMarkerState.IsTarget == 0)
-                                                cellMarkerState.IsTarget = 1;
-                                        }
-                                    }
-                                }
+                                UpdatePathLineRenderer(Path, lineRendererComp);
                             }
-
-                            //check if cell to reset is not a target of another unit
-                            bool contains = false;
-
-                            foreach (long l in playerState.UnitTargets.Keys)
-                            {
-                                foreach (Vector3f coord in playerState.UnitTargets[l].CubeCoordinates)
-                                {
-                                    if (cellCoord == coord)
-                                    {
-                                        contains = true;
-                                    }
-                                }
-                            }
-
-                            if (cellMarkerState.IsTarget == 1 && !contains)
-                            {
-                                cellMarkerState.IsTarget = 0;
-                            }
-
-                            m_CellData.MarkerStateData[c] = cellMarkerState;
                         }
-                    }
 
-                    if(playerHighlightingData.PathLine == 1)
-                    {
-                        //use path Line
-                        CellAttributeList Path = new CellAttributeList();
-                        Path = m_CellGrid.FindPath(hoveredCoord, m_PlayerStateData.PlayerState[0].CachedPaths);
-
-                        if (Path.CellAttributes.Count > 0)
+                        else if (playerHighlightingData.LineAoE == 0)
                         {
-                            //Debug.Log(Path.CellAttributes[Path.CellAttributes.Count - 1].CubeCoordinate);
-                            UpdatePathLineRenderer(Path, lineRendererComp);
+                            //use Arc Line
+                            if (playerHighlightingData.HoveredPosition != Vector3.zero)
+                                UpdateArcLineRenderer(hoveredOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
+                            else if(mouseState.CurrentState != MouseState.State.Neutral)
+                                lineRendererComp.lineRenderer.positionCount = 0;
                         }
-                    }
-                    else if(playerHighlightingData.StraightLine == 0)
-                    {
-                        //use Arc Line
-                        if (hoveredPosition != Vector3.zero)
-                            UpdateArcLineRenderer(hoveredOffset, hoveredPosition, lineRendererComp);
-                    }
-                    else
-                    {
-                        lineRendererComp.lineRenderer.positionCount = 0;
-                    }
 
+                        else
+                        {
+                            lineRendererComp.lineRenderer.positionCount = 0;
+                        }
+
+                        playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
+                        m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
+                        m_PlayerStateData.PlayerState[0] = playerState;
+                    }
                     #endregion
                 }
             }
         }
-        else {
+        else
+        {
             ResetHighlights();
         }
     }
@@ -444,7 +452,7 @@ public class HighlightingSystem : ComponentSystem
 
     void HandleMods(List<ECSActionSecondaryTargets> inMods, ref HighlightingDataComponent highLightingData)
     {
-        highLightingData.StraightLine = 0;
+        highLightingData.LineAoE = 0;
         highLightingData.PathLine = 0;
         highLightingData.AoERadius = 0;
         highLightingData.RingRadius = 0;
@@ -462,7 +470,7 @@ public class HighlightingSystem : ComponentSystem
             } 
             else if( t is SecondaryLine)
             {
-                highLightingData.StraightLine = 1;
+                highLightingData.LineAoE = 1;
             }
             else if (t is SecondaryRing)
             {
@@ -497,20 +505,39 @@ public class HighlightingSystem : ComponentSystem
         uint numberOfSmoothPoints = 6 + (2*(uint)Mathf.RoundToInt(distance.magnitude)/2);
         float zenithHeight = 1;
         inLineRendererComp.lineRenderer.positionCount = 3 + (int)numberOfSmoothPoints;
-        float[] ypositions = CalculateSinusPoints(inLineRendererComp.lineRenderer.positionCount);
-        float xstep = 1.0f / inLineRendererComp.lineRenderer.positionCount;
+        float[] ypositions = CalculateSinusPoints(inLineRendererComp.lineRenderer.positionCount - 1);
+        float xstep = 1.0f / (inLineRendererComp.lineRenderer.positionCount - 1);
 
-        for (int i = 0; i < ypositions.Length; i++)
+        for (int i = 0; i <= ypositions.Length; i++)
         {
-            float sinYpos = ypositions[i] * zenithHeight + (inLineRendererComp.arcOffset.y + (targetYOffset * (xstep * i)) - (inLineRendererComp.arcOffset.y * (xstep * i)));
-            inLineRendererComp.lineRenderer.SetPosition(i, inLineRendererComp.transform.position + new Vector3(distance.x * (xstep * i), sinYpos, distance.z * (xstep * i)));
-
+            if(i == ypositions.Length)
+            {
+                inLineRendererComp.lineRenderer.SetPosition(i, inTarget + new Vector3(0, targetYOffset, 0));
+            }
+            else
+            {
+                float sinYpos = ypositions[i] * zenithHeight + (inLineRendererComp.arcOffset.y + (targetYOffset * (xstep * i)) - (inLineRendererComp.arcOffset.y * (xstep * i)));
+                inLineRendererComp.lineRenderer.SetPosition(i, inLineRendererComp.transform.position + new Vector3(distance.x * (xstep * i), sinYpos, distance.z * (xstep * i)));
+            }
         }
     }
 
-    void ClearLineRenderer(LineRendererComponent inLineRendererComp)
+    public float[] CalculateSinusPoints(int numberOfPositions)
     {
-        inLineRendererComp.lineRenderer.positionCount = 0;
+        float[] yPosArray = new float[numberOfPositions];
+        float xStep = 1.0f / numberOfPositions;
+        int i = 0;
+
+        for (float x = 0.0f; x <= 1.0f; x += xStep)
+        {
+            if (i < yPosArray.Length)
+            {
+                yPosArray[i] = (float)Math.Sin(x * Math.PI);
+                i++;
+            }
+        }
+
+        return yPosArray;
     }
 
     public void ResetHighlights()
@@ -528,37 +555,6 @@ public class HighlightingSystem : ComponentSystem
                 if (playerState.UnitTargets.ContainsKey(unitId))
                 {
                     lineRenderer.positionCount = 0;
-                    for (int ci = 0; ci < m_CellData.Length; ci++)
-                    {
-                        var cellMarkerState = m_CellData.MarkerStateData[ci];
-                        var cellCoord = m_CellData.Coords[ci].CubeCoordinate;
-
-                        //make a method?
-                        bool contains = false;
-
-                        foreach (long l in playerState.UnitTargets.Keys)
-                        {
-                            if(l != unitId)
-                            {
-                                foreach (Vector3f coord in playerState.UnitTargets[l].CubeCoordinates)
-                                {
-                                    if (cellCoord == coord)
-                                    {
-                                        contains = true;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (cellMarkerState.IsTarget == 1 && !contains)
-                        {
-                            cellMarkerState.IsTarget = 0;
-                        }
-
-                        m_CellData.MarkerStateData[ci] = cellMarkerState;
-                    }
-
-
                     playerState.UnitTargets.Remove(unitId);
                     playerState.UnitTargets = playerState.UnitTargets;
                     m_PlayerStateData.PlayerState[0] = playerState;
@@ -566,17 +562,16 @@ public class HighlightingSystem : ComponentSystem
             }
         }
 
-        for (int i = 0; i< m_CellData.Length; i++)
+        for (int i = 0; i < m_MarkerStateData.Length; i++)
         {
-            var markerState = m_CellData.MarkerStateData[i];
-            var cellMouseState = m_CellData.MouseStates[i];
-            var cubeCoord = m_CellData.Coords[i].CubeCoordinate;
+            var markerState = m_MarkerStateData.MarkerStates[i];
+            var mouseState = m_MarkerStateData.MouseStates[i];
 
-            if (markerState.CurrentState != (MarkerState.State)(int)cellMouseState.CurrentState)
+            if (markerState.CurrentState != (MarkerState.State)(int)mouseState.CurrentState)
             {
-                markerState.CurrentState = (MarkerState.State)(int)cellMouseState.CurrentState;
+                markerState.CurrentState = (MarkerState.State)(int)mouseState.CurrentState;
                 markerState.IsSet = 0;
-                m_CellData.MarkerStateData[i] = markerState;
+                m_MarkerStateData.MarkerStates[i] = markerState;
             }
         }
     }
@@ -595,35 +590,37 @@ public class HighlightingSystem : ComponentSystem
             m_PlayerStateData.PlayerState[0] = playerState;
         }
 
-        for (int a = 0; a < m_CellData.Length; a++)
+        for (int i = 0; i < m_MarkerStateData.Length; i++)
         {
-            var cellMarker = m_CellData.MarkerStateData[a];
-            var cellCoord = m_CellData.Coords[a].CubeCoordinate;
+            var marker = m_MarkerStateData.MarkerStates[i];
+            var coord = m_MarkerStateData.Coords[i].CubeCoordinate;
 
-            if(cellMarker.CurrentState == MarkerState.State.Hovered || cellMarker.CurrentState == MarkerState.State.Clicked)
+            if(marker.CurrentState == MarkerState.State.Hovered || marker.CurrentState == MarkerState.State.Clicked)
             {
-                cellMarker.CurrentState = MarkerState.State.Neutral;
-                cellMarker.IsSet = 0;
+                marker.CurrentState = MarkerState.State.Neutral;
+                marker.IsSet = 0;
             }
+
             //reset IsTarget if this unit had one
 
-            foreach (Vector3f coord in targetsToClear)
+            foreach (Vector3f c in targetsToClear)
             {
-                if (cellCoord == coord)
+                if (coord == c)
                 {
-                    cellMarker.IsTarget = 0;
+                    marker.IsTarget = 0;
                 }
             }
 
             foreach (CellAttribute c in playerState.CellsInRange)
             {
-                if (cellCoord == c.CubeCoordinate)
+                if (coord == c.CubeCoordinate)
                 {
-                    cellMarker.CurrentState = MarkerState.State.Reachable;
-                    cellMarker.IsSet = 0;
+                    marker.CurrentState = MarkerState.State.Reachable;
+                    marker.IsSet = 0;
                 }
             }
-            m_CellData.MarkerStateData[a] = cellMarker;
+
+            m_MarkerStateData.MarkerStates[i] = marker;
         }
     }
 
@@ -639,7 +636,7 @@ public class HighlightingSystem : ComponentSystem
 
             if(iD == playerstate.SelectedUnitId)
             {
-                ClearLineRenderer(lineRendererComp);
+                lineRendererComp.lineRenderer.positionCount = 0;
             }
         }
         ResetHighlights();
@@ -648,22 +645,5 @@ public class HighlightingSystem : ComponentSystem
         m_PlayerStateData.PlayerState[0] = playerstate;
         Target = null;
     }
-
-    public float[] CalculateSinusPoints(int numberOfPositions)
-    {
-        float[] yPosArray = new float[numberOfPositions];
-        float xStep = 1.0f / numberOfPositions;
-        int i = 0;
-        for (float x = 0.0f; x < 1.0f; x += xStep)
-        {
-            if (i < yPosArray.Length)
-            {
-                yPosArray[i] = (float)Math.Sin(x * Math.PI);
-                i++;
-            }
-        }
-        return yPosArray;
-    }
-
 }
 

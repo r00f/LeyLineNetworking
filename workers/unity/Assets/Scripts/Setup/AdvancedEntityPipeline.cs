@@ -39,6 +39,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     typeof(Transform),
     typeof(HeroTransform),
     typeof(MarkerGameObjects),
+    typeof(UnitMarkerGameObjects),
     typeof(Unit_BaseDataSet),
     typeof(LineRendererComponent),
     typeof(AnimatorComponent),

@@ -65,26 +65,20 @@ namespace LeyLineHybridECS
             var playerVision = m_PlayerData.VisionData[0];
             var playerFaction = m_PlayerData.Factions[0].Faction;
 
+            HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
+            HashSet<Vector3f> positivesHash = new HashSet<Vector3f>(playerVision.Positives);
+            HashSet<Vector3f> negativessHash = new HashSet<Vector3f>(playerVision.Negatives);
+
             //set opposing unit visibilty values when they enter / leave a players visionRange
             for (int i = 0; i < m_UnitData.Length; i++)
             {
                 var faction = m_UnitData.Factions[i].Faction;
-                var coord = m_UnitData.Coordinates[i];
+                var coord = m_UnitData.Coordinates[i].CubeCoordinate;
                 var visible = m_UnitData.Visible[i];
 
                 if (faction != playerFaction && visible.RequireUpdate == 0)
                 {
-                    bool inVisionRange = false;
-
-                    foreach (Vector3f c in playerVision.CellsInVisionrange)
-                    {
-                        if(coord.CubeCoordinate == c)
-                        {
-                            inVisionRange = true;
-                        }
-                    }
-
-                    if (inVisionRange)
+                    if(visionCoordsHash.Contains(coord))
                     {
                         visible.Value = 1;
                     }
@@ -92,7 +86,6 @@ namespace LeyLineHybridECS
                     {
                         visible.Value = 0;
                     }
-
                     visible.RequireUpdate = 1;
 
                     m_UnitData.Visible[i] = visible;
@@ -107,31 +100,25 @@ namespace LeyLineHybridECS
                 List<GameObject> gameObjects = m_IsVisible.VisibleRef[i].GameObjects;
                 Collider collider = m_IsVisible.VisibleRef[i].Collider;
                 byte isVisible = m_IsVisible.Visible[i].Value;
-                var coord = m_IsVisible.Coordinates[i];
+                var coord = m_IsVisible.Coordinates[i].CubeCoordinate;
 
                 if (isVisibleComp.RequireUpdate == 0)
                 {
                     //only compare when serverSide playerVision is updated
                     if (isVisible == 0)
                     {
-                        foreach (Vector3f c in playerVision.Positives)
+                        if(positivesHash.Contains(coord))
                         {
-                            if (c == coord.CubeCoordinate)
-                            {
-                                isVisibleComp.Value = 1;
-                                isVisibleComp.RequireUpdate = 1;
-                            }
+                            isVisibleComp.Value = 1;
+                            isVisibleComp.RequireUpdate = 1;
                         }
                     }
                     else
                     {
-                        foreach (Vector3f c in playerVision.Negatives)
+                        if (negativessHash.Contains(coord))
                         {
-                            if (c == coord.CubeCoordinate)
-                            {
-                                isVisibleComp.Value = 0;
-                                isVisibleComp.RequireUpdate = 1;
-                            }
+                            isVisibleComp.Value = 0;
+                            isVisibleComp.RequireUpdate = 1;
                         }
                     }
                     m_IsVisible.Visible[i] = isVisibleComp;

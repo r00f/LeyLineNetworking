@@ -302,7 +302,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     }
 
-
     Vector3f[] DirectionsArray = new Vector3f[]{
           new Vector3f(+1, -1, 0), new Vector3f(+1, 0, -1), new Vector3f(0, +1, -1),
             new Vector3f(-1, +1, 0), new Vector3f(-1, 0, +1), new Vector3f(0, -1, +1)
@@ -522,8 +521,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
     {
+
         CellAttribute origin = new CellAttribute();
-        for(int i = 0; i< m_CellData.Length; i++)
+        for(int i = 0; i < m_CellData.Length; i++)
         {
             var coordinate = m_CellData.CoordinateData[i].CubeCoordinate;
             var cellAttribute = m_CellData.CellAttributes[i].CellAttributes.Cell;
@@ -532,6 +532,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 origin = cellAttribute;
             }
         }
+
         var paths = CachePaths(cellsInRange, origin);
         var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
 
@@ -548,9 +549,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             if (pathCost <= radius)
             {
-                path.CellAttributes.Reverse();
                 cachedPaths.Add(key, path);
             }
+
+            path.CellAttributes.Reverse();
         }
 
         return cachedPaths;
@@ -664,8 +666,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         {
                             if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
                             {
-                                var isTaken = cellAtt.CellAttributes.Neighbours.CellAttributes[cn].IsTaken;
-                                isTaken = cell.IsTaken;
+                                cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = cell;
+                                cellAtt.CellAttributes = cellAtt.CellAttributes;
                                 m_CellData.CellAttributes[ci] = cellAtt;
                             }
                         }

@@ -9,7 +9,7 @@ using Unity.Entities;
 using UnityEngine;
 
 [DisableAutoCreation]
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(SpawnUnitsSystem))]
 public class AddComponentsSystem : ComponentSystem
 {
     public struct WorldIndexStateData : ISystemStateComponentData
@@ -105,14 +105,24 @@ public class AddComponentsSystem : ComponentSystem
                 MouseState mouseState = new MouseState
                 {
                     CurrentState = MouseState.State.Neutral,
+                };
+
+                MouseVariables mouseVars = new MouseVariables
+                {
                     Distance = 0.865f
                 };
 
                 MarkerState markerState = new MarkerState
                 {
-                    CurrentState = MarkerState.State.Neutral
+                    CurrentTargetType = MarkerState.TargetType.Neutral,
+                    IsSet = 0,
+                    IsTarget = 0,
+                    TargetTypeSet = 0,
+                    CurrentState = MarkerState.State.Neutral,
+                    IsUnit = 0
                 };
 
+                PostUpdateCommands.AddComponent(entity, mouseVars);
                 PostUpdateCommands.AddComponent(entity, mouseState);
                 PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, isVisible);
@@ -132,8 +142,12 @@ public class AddComponentsSystem : ComponentSystem
                 MouseState mouseState = new MouseState
                 {
                     CurrentState = MouseState.State.Neutral,
+                    ClickEvent = 0
+                };
+
+                MouseVariables mouseVars = new MouseVariables
+                {
                     yOffset = 1f,
-                    ClickEvent = 0,
                     Distance = 1.2f
                 };
 
@@ -150,7 +164,18 @@ public class AddComponentsSystem : ComponentSystem
                     isVisible.RequireUpdate = 1;
                 }
 
+                MarkerState markerState = new MarkerState
+                {
+                    CurrentTargetType = MarkerState.TargetType.Neutral,
+                    IsSet = 0,
+                    IsTarget = 0,
+                    TargetTypeSet = 0,
+                    CurrentState = MarkerState.State.Neutral,
+                    IsUnit = 1
+                };
 
+                PostUpdateCommands.AddComponent(entity, mouseVars);
+                PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, mouseState);
                 PostUpdateCommands.AddComponent(entity, isVisible);
             }

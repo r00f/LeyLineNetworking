@@ -129,7 +129,6 @@ namespace LeyLineHybridECS
                 GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
                 var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
                 var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
-                var outline = m_UnitData.ComponentReferences[i].Outline;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var position = m_UnitData.TransformData[i].position;
                 float currentHealth = m_UnitData.HealthData[i].CurrentHealth;
@@ -143,25 +142,6 @@ namespace LeyLineHybridECS
                 var stats = m_UnitData.BaseDataSets[i];
                 int actionCount = stats.Actions.Count + 2;
                 int spawnActionCount = stats.SpawnActions.Count;
-
-                if(gameState == GameStateEnum.planning)
-                {
-                    if (mouseState == MouseState.State.Hovered)
-                    {
-                        if (!outline.enabled)
-                            outline.enabled = true;
-                    }
-                    else
-                    {
-                        if (outline.enabled)
-                            outline.enabled = false;
-                    }
-                }
-                else
-                {
-                    if (outline.enabled)
-                        outline.enabled = false;
-                }
 
                 if(playerState.SelectedUnitId == unitId)
                 {

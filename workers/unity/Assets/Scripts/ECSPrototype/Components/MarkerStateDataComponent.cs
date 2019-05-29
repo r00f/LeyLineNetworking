@@ -23,13 +23,18 @@ namespace LeyLineHybridECS
 
         public byte IsTarget;
 
-        //public List<GameObject> MarkerObjects;
-        /*
-        public GameObject ClickedMarker;
-        public GameObject HoveredMarker;
-        public GameObject ReachableMarker;
-        */
-    }
+        public byte TargetTypeSet;
 
-    public class MarkerStateDataComponent : ComponentDataWrapper<MarkerState> { }
+        public byte IsUnit;
+
+        public enum TargetType
+        {
+            Neutral = 0,
+            AttackTarget = 1,
+            DefenseTarget = 2,
+            HealTarget = 3
+        }
+
+        public TargetType CurrentTargetType;
+    }
 }
