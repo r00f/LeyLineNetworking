@@ -23,6 +23,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<MouseState> MouseStateData;
             public ComponentDataArray<MarkerState> MarkerStateData;
             public ComponentArray<UnitMarkerGameObjects> MarkerGameObjectsData;
         }
@@ -132,6 +133,7 @@ namespace LeyLineHybridECS
                         {
                             int isSet = m_UnitData.MarkerStateData[i].IsSet;
                             MarkerState markerState = m_UnitData.MarkerStateData[i];
+                            MouseState mouseState = m_UnitData.MouseStateData[i];
                             UnitMarkerGameObjects markerGameObject = m_UnitData.MarkerGameObjectsData[i];
                             var teamColor = m_UnitData.FactionData[i].TeamColor;
                             int colorIndex = 0;
@@ -202,7 +204,14 @@ namespace LeyLineHybridECS
                                         break;
                                     case MarkerState.State.Reachable:
                                         markerGameObject.Outline.enabled = true;
-                                        markerGameObject.Outline.color = 0;
+                                        if(mouseState.CurrentState == MouseState.State.Hovered)
+                                        {
+                                            markerGameObject.Outline.color = colorIndex;
+                                        }
+                                        else
+                                        {
+                                            markerGameObject.Outline.color = 0;
+                                        }
                                         break;
                                 }
                                 markerState.IsSet = 1;
