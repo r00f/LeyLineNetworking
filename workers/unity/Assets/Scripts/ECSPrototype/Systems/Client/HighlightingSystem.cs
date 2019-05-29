@@ -23,7 +23,7 @@ public class HighlightingSystem : ComponentSystem
         public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
         public readonly ComponentDataArray<SpatialEntityId> IDs;
-        public readonly ComponentDataArray<MouseState> MouseStates;
+        public ComponentDataArray<MouseState> MouseStates;
         public ComponentArray<LineRendererComponent> LineRenderers;
 
 
@@ -89,7 +89,7 @@ public class HighlightingSystem : ComponentSystem
     {
         public readonly int Length;
         public ComponentDataArray<MarkerState> MarkerStates;
-        public readonly ComponentDataArray<MouseState> MouseStates;
+        public ComponentDataArray<MouseState> MouseStates;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
     }
 
@@ -164,12 +164,10 @@ public class HighlightingSystem : ComponentSystem
                             {
                                 if (playerHighlightingData.IsUnitTarget == 1)
                                 {
-
                                     if (markerState.IsUnit == 1)
                                     {
-                                        if (mouseState == MouseState.State.Hovered && coord != playerHighlightingData.HoveredCoordinate)
+                                        if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
                                         {
-                                            
                                             Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
                                             playerHighlightingData.HoveredCoordinate = coord;
                                             playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
@@ -180,9 +178,8 @@ public class HighlightingSystem : ComponentSystem
                                 {
                                     if (markerState.IsUnit == 0)
                                     {
-                                        if (mouseState == MouseState.State.Hovered && coord != playerHighlightingData.HoveredCoordinate)
+                                        if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
                                         {
-                                           
                                             Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
                                             playerHighlightingData.HoveredCoordinate = coord;
                                             playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
@@ -239,6 +236,12 @@ public class HighlightingSystem : ComponentSystem
 
                             if (iD == playerState.SelectedUnitId)
                             {
+                                if(mouseState.CurrentState == MouseState.State.Clicked)
+                                {
+                                    mouseState.CurrentState = MouseState.State.Neutral;
+                                    m_ActiveUnitData.MouseStates[i] = mouseState;
+                                }
+
                                 #region Highlight Reachable
                                 if (playerHighlightingData.PathingRange == 1)
                                 {
@@ -323,6 +326,11 @@ public class HighlightingSystem : ComponentSystem
                                             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
                                             playerState.UnitTargets = playerState.UnitTargets;
                                         }
+                                        else if(playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+                                        {
+                                            playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Clear();
+                                            playerState.UnitTargets = playerState.UnitTargets;
+                                        }
                                     }
 
                                     if (playerHighlightingData.IsUnitTarget == 1)
@@ -356,7 +364,7 @@ public class HighlightingSystem : ComponentSystem
                                         //use Arc Line
                                         if (playerHighlightingData.HoveredPosition != Vector3.zero)
                                             UpdateArcLineRenderer(hoveredOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
-                                        else if (mouseState.CurrentState != MouseState.State.Neutral)
+                                        else// if (mouseState.CurrentState != MouseState.State.Neutral)
                                             lineRendererComp.lineRenderer.positionCount = 0;
                                     }
 
@@ -568,6 +576,12 @@ public class HighlightingSystem : ComponentSystem
         {
             var markerState = m_MarkerStateData.MarkerStates[i];
             var mouseState = m_MarkerStateData.MouseStates[i];
+
+            if (mouseState.CurrentState == MouseState.State.Clicked)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+                m_MarkerStateData.MouseStates[i] = mouseState;
+            }
 
             if (markerState.CurrentState != (MarkerState.State)(int)mouseState.CurrentState)
             {

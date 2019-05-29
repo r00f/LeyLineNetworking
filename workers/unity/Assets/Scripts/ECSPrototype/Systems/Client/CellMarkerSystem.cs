@@ -7,7 +7,7 @@ using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(HighlightingSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HighlightingSystem))]
     public class CellMarkerSystem : ComponentSystem
     {
         struct Data
