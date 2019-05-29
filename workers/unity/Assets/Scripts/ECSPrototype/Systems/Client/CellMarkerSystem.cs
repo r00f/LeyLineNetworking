@@ -2,6 +2,8 @@
 using Improbable.Gdk.Core;
 using UnityEngine;
 using Generic;
+using Player;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
@@ -27,17 +29,48 @@ namespace LeyLineHybridECS
 
         [Inject] private UnitData m_UnitData;
 
+        public struct GameStateData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
+            public readonly ComponentDataArray<GameState.Component> GameState;
+
+        }
+        [Inject]
+        GameStateData m_GameStateData;
+
+        public struct PlayerStateData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
+        }
+
+        [Inject]
+        PlayerStateData m_PlayerStateData;
+
         protected override void OnUpdate()
         {
-            for(int i = 0; i < m_Data.Length; i++)
+            var playerWorldIndex = m_PlayerStateData.WorldIndex[0].Value;
+            for (int j = 0; j < m_GameStateData.Length; j++)
+            {
+                var gameStateWorldIndex = m_GameStateData.WorldIndex[j].Value;
+                var gameState = m_GameStateData.GameState[j].CurrentState;
+
+                if (gameStateWorldIndex == playerWorldIndex && gameState != GameStateEnum.planning)
+                {
+                        return;
+                }
+            }
+            for (int i = 0; i < m_Data.Length; i++)
             {
                 int isSet = m_Data.MarkerStateData[i].IsSet;
                 MarkerState markerState = m_Data.MarkerStateData[i];
                 MarkerGameObjects markerGameObject = m_Data.MarkerGameObjectsData[i];
 
-                if(markerState.IsTarget == 1)
+                if (markerState.IsTarget == 1)
                 {
-                    if(!markerGameObject.TargetMarker.activeSelf)
+                    if (!markerGameObject.TargetMarker.activeSelf)
                         markerGameObject.TargetMarker.SetActive(true);
                 }
                 else
@@ -51,25 +84,25 @@ namespace LeyLineHybridECS
                     switch (markerState.CurrentState)
                     {
                         case MarkerState.State.Neutral:
-                                markerGameObject.ClickedMarker.SetActive(false);
-                                markerGameObject.HoveredMarker.SetActive(false);
-                                markerGameObject.ReachableMarker.SetActive(false);
+                            markerGameObject.ClickedMarker.SetActive(false);
+                            markerGameObject.HoveredMarker.SetActive(false);
+                            markerGameObject.ReachableMarker.SetActive(false);
                             break;
                         case MarkerState.State.Clicked:
                             if (markerState.IsTarget == 0)
                                 markerGameObject.ClickedMarker.SetActive(true);
-                                markerGameObject.HoveredMarker.SetActive(false);
-                                markerGameObject.ReachableMarker.SetActive(false);
+                            markerGameObject.HoveredMarker.SetActive(false);
+                            markerGameObject.ReachableMarker.SetActive(false);
                             break;
                         case MarkerState.State.Hovered:
-                                markerGameObject.ClickedMarker.SetActive(false);
-                                markerGameObject.HoveredMarker.SetActive(true);
-                                markerGameObject.ReachableMarker.SetActive(false);
+                            markerGameObject.ClickedMarker.SetActive(false);
+                            markerGameObject.HoveredMarker.SetActive(true);
+                            markerGameObject.ReachableMarker.SetActive(false);
                             break;
                         case MarkerState.State.Reachable:
-                                markerGameObject.ClickedMarker.SetActive(false);
-                                markerGameObject.HoveredMarker.SetActive(false);
-                                markerGameObject.ReachableMarker.SetActive(true);
+                            markerGameObject.ClickedMarker.SetActive(false);
+                            markerGameObject.HoveredMarker.SetActive(false);
+                            markerGameObject.ReachableMarker.SetActive(true);
                             break;
                     }
 
