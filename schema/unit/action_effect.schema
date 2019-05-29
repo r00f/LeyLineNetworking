@@ -15,10 +15,19 @@ type ActionEffect {
 	SpawnUnit spawn_unit_nested = 2;
 	DealDamage deal_damage_nested = 3;
 	MoveAlongPath move_along_path_nested = 4;
+	int32 target_specification = 5;
+	ApplyToTargetsEnum apply_to_target = 6;
 }
 
 enum EffectTypeEnum {
 spawn_unit = 0;
 deal_damage = 1;
 move_along_path = 2;
+}
+
+enum ApplyToTargetsEnum
+{
+primary = 0;
+secondary= 1;
+both = 2;
 }

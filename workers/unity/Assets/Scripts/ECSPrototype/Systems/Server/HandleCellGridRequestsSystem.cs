@@ -32,6 +32,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly int Length;
         public ComponentDataArray<Actions.CommandRequests.SetTargetCommand> ReceivedSetTargetRequests;
         public ComponentDataArray<Actions.Component> ActionsData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
         public readonly ComponentDataArray<FactionComponent.Component> Faction;
@@ -158,6 +159,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var unitWorldIndex = m_SetTargetRequestData.WorldIndexData[i].Value;
             var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
             var faction = m_SetTargetRequestData.Faction[i];
+            var originCoord = m_SetTargetRequestData.CoordinateData[i].CubeCoordinate;
 
             foreach (var str in setTargetRequest.Requests)
             {
@@ -200,24 +202,36 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                                         for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                         {
+                                            
                                             var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
-
-                                            if (modType == ModTypeEnum.aoe)
+                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                            switch (modType)
                                             {
 
-                                            }
-                                            if (modType == ModTypeEnum.path)
-                                            {
-                                                var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                                case ModTypeEnum.aoe:
+                                                    mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
+                                                    break;
 
-                                                foreach(CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
-                                                {
-                                                    mod.Coordinates.Add(c.CubeCoordinate);
 
-                                                }
-                                                
-                                                actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                                costToSubtract += (uint)mod.Coordinates.Count;
+                                                case ModTypeEnum.path:
+
+                                                    foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
+                                                    {
+                                                        mod.Coordinates.Add(c.CubeCoordinate);
+
+                                                    }
+
+                                                    actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                                    costToSubtract += (uint)mod.Coordinates.Count;
+                                                    break;
+                                                case ModTypeEnum.line:
+                                                    mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
+                                                    break;
+                                                case ModTypeEnum.ring:
+                                                    mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
+
+
+                                                    break;
                                             }
                                         }
 
@@ -435,7 +449,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return new Vector3f(rx, ry, rz);
     }
 
-    public List<Vector3f> GetCoordRadius(Vector3f originCellCubeCoordinate, uint radius)
+    public List<Vector3f> CircleDraw(Vector3f originCellCubeCoordinate, uint radius)
     {
         var results = new List<Vector3f>();
         results.Add(originCellCubeCoordinate);
@@ -459,7 +473,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         cellsInRadius.Add(new CellAttributes{Neighbours = new CellAttributeList(new List<CellAttribute>())});
 
         //get all cubeCordinates within range
-        var coordList = GetCoordRadius(originCellCubeCoordinate, radius);
+        var coordList = CircleDraw(originCellCubeCoordinate, radius);
 
         HashSet<Vector3f> coordHash = new HashSet<Vector3f>();
 

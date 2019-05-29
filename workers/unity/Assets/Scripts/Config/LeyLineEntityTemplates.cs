@@ -425,6 +425,7 @@ public static class LeyLineEntityTemplates {
                         TargetMod mod = new TargetMod();
                         mod.Coordinates = new List<Vector3f>();
                         mod.ModType = ModTypeEnum.ring;
+                        mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);
                     }
                 }
@@ -500,6 +501,7 @@ public static class LeyLineEntityTemplates {
                         TargetMod mod = new TargetMod();
                         mod.Coordinates = new List<Vector3f>();
                         mod.ModType = ModTypeEnum.ring;
+                        mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);
                     }
                 }
@@ -528,6 +530,19 @@ public static class LeyLineEntityTemplates {
                 AF.EffectType = EffectTypeEnum.deal_damage;
                 AF.DealDamageNested.DamageAmount = go.damageAmount;
             }
+            switch (inAction.Effects[i].applyTo)
+            {
+                case ECSActionEffect.ApplyTo.All:
+                    AF.ApplyToTarget = ApplyToTargetsEnum.both;
+                    break;
+                case ECSActionEffect.ApplyTo.AllPrimary:
+                    AF.ApplyToTarget = ApplyToTargetsEnum.primary;
+                    break;
+                case ECSActionEffect.ApplyTo.AllSecondary:
+                    AF.ApplyToTarget = ApplyToTargetsEnum.secondary;
+                    break;
+            }
+            AF.TargetSpecification = inAction.Effects[i].specificTargetIdentifier;
             newAction.Effects.Add(AF);
         }
       return newAction;

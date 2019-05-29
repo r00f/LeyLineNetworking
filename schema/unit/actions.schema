@@ -63,7 +63,8 @@ type TargetMod {
 	list<improbable.Vector3f> coordinates = 1;
 	AoE aoe_nested = 2;
 	Path path_nested = 3;
-	ModTypeEnum mod_type = 4;
+	Ring ring_nested = 4;
+	ModTypeEnum mod_type = 5;
 }
 
 enum UnitRequisitesEnum {

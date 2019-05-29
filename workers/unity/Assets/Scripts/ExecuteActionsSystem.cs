@@ -5,6 +5,8 @@ using Generic;
 using Cell;
 using LeyLineHybridECS;
 using UnityEngine;
+using System.Collections.Generic;
+using Improbable;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem)), UpdateBefore(typeof(PlayerStateSystem)), UpdateBefore(typeof(GameStateSystem)), UpdateBefore(typeof(SpawnUnitsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
@@ -72,9 +74,43 @@ public class ExecuteActionsSystem : ComponentSystem
                                 }
                                 break;
                             case GameStateEnum.attacking:
-                                if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.deal_damage)
+                                
+                                for (int j = 0; j < actions.LockedAction.Effects.Count; j++)
                                 {
-                                    Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].TargetId);
+                                    
+                                    if (actions.LockedAction.Effects[j].EffectType == EffectTypeEnum.deal_damage)
+                                    {
+                                        switch (actions.LockedAction.Effects[j].ApplyToTarget)
+                                        {
+                                            case ApplyToTargetsEnum.primary:
+                                                
+                                                //Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].TargetId);
+                                                m_ResourceSystem.DealDamage(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
+                                                break;
+                                            case ApplyToTargetsEnum.secondary:
+                                                
+                                                if (actions.LockedAction.Targets[0].Mods.Count != 0)
+                                                {
+                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates))
+                                                    {
+                                                        Debug.Log(id);
+                                                        m_ResourceSystem.DealDamage(id, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
+                                                    }
+                                                }
+                                                break;
+                                            case ApplyToTargetsEnum.both:
+                                                m_ResourceSystem.DealDamage(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
+                                                if (actions.LockedAction.Targets[0].Mods.Count != 0)
+                                                {
+                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates))
+                                                    {
+                                                        m_ResourceSystem.DealDamage(id, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
+                                                    }
+                                                }
+                                                break;
+                                        }
+
+                                    }
                                 }
                                 break;
                             case GameStateEnum.moving:
@@ -150,4 +186,22 @@ public class ExecuteActionsSystem : ComponentSystem
 
         m_ResourceSystem.DealDamage(targetUnitId, damage);
     }
+    
+    public List<long> AreaToUnitIDConversion(List<Vector3f> inCoords)
+    {
+        
+        HashSet<Vector3f> Coords = new HashSet<Vector3f>(inCoords);
+        List<long> unitIds = new List<long>();
+        for(int i = 0; i < m_UnitData.Length; i++)
+        {
+            var unitCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
+            var unitID = m_UnitData.EntityIds[i].EntityId.Id;
+            if (Coords.Contains(unitCoord))
+            {
+                unitIds.Add(unitID);
+            }
+        }
+        return unitIds;
+    }
+
 }

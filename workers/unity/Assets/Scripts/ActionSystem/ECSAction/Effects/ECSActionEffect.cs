@@ -11,8 +11,7 @@ namespace LeyLineHybridECS
         {
             AllPrimary,
             AllSecondary,
-            All,
-            Specific
+            All
         }
         public ApplyTo applyTo;
         public int specificTargetIdentifier = 0;

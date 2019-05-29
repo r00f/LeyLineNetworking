@@ -126,7 +126,7 @@ public class VisionSystem_Server : ComponentSystem
 
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
-        List<Vector3f> sight = GridSys.GetCoordRadius(coor.CubeCoordinate, inVision.VisionRange);
+        List<Vector3f> sight = GridSys.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
         
         var sightHash = new HashSet<Vector3f>();
         foreach (Vector3f v in sight)

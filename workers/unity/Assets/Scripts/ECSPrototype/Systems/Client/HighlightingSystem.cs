@@ -281,7 +281,7 @@ public class HighlightingSystem : ComponentSystem
                                     if (playerHighlightingData.AoERadius > 0)
                                     {
                                         List<Vector3f> area = new List<Vector3f>();
-                                        area = m_CellGrid.GetCoordRadius(playerHighlightingData.HoveredCoordinate, playerHighlightingData.AoERadius);
+                                        area = m_CellGrid.CircleDraw(playerHighlightingData.HoveredCoordinate, playerHighlightingData.AoERadius);
                                         CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
 
                                         //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
