@@ -214,7 +214,6 @@ public class HighlightingSystem : ComponentSystem
                                 {
                                     if (targetCoordsHash.Contains(coord))
                                     {
-                                        Debug.Log("Ayaya");
                                         markerState.IsTarget = 1;
                                     }
                                     else if (otherUnitTarget == false)
