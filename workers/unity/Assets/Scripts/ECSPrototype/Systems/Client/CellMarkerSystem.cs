@@ -10,14 +10,14 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HighlightingSystem))]
     public class CellMarkerSystem : ComponentSystem
     {
-        struct Data
+        struct CellData
         {
             public readonly int Length;
             public ComponentDataArray<MarkerState> MarkerStateData;
             public ComponentArray<MarkerGameObjects> MarkerGameObjectsData;
         }
 
-        [Inject] private Data m_Data;
+        [Inject] private CellData m_CellData;
 
         struct UnitData
         {
@@ -63,9 +63,9 @@ namespace LeyLineHybridECS
                 {
                     if (gameState != GameStateEnum.planning)
                     {
-                        for (int i = 0; i < m_Data.Length; i++)
+                        for (int i = 0; i < m_CellData.Length; i++)
                         {
-                            MarkerGameObjects markerGameObject = m_Data.MarkerGameObjectsData[i];
+                            MarkerGameObjects markerGameObject = m_CellData.MarkerGameObjectsData[i];
                             markerGameObject.TargetMarker.SetActive(false);
                             markerGameObject.ClickedMarker.SetActive(false);
                             markerGameObject.HoveredMarker.SetActive(false);
@@ -80,11 +80,11 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        for (int i = 0; i < m_Data.Length; i++)
+                        for (int i = 0; i < m_CellData.Length; i++)
                         {
-                            int isSet = m_Data.MarkerStateData[i].IsSet;
-                            MarkerState markerState = m_Data.MarkerStateData[i];
-                            MarkerGameObjects markerGameObject = m_Data.MarkerGameObjectsData[i];
+                            int isSet = m_CellData.MarkerStateData[i].IsSet;
+                            MarkerState markerState = m_CellData.MarkerStateData[i];
+                            MarkerGameObjects markerGameObject = m_CellData.MarkerGameObjectsData[i];
 
                             if (markerState.IsTarget == 1)
                             {
@@ -125,7 +125,7 @@ namespace LeyLineHybridECS
                                 }
 
                                 markerState.IsSet = 1;
-                                m_Data.MarkerStateData[i] = markerState;
+                                m_CellData.MarkerStateData[i] = markerState;
                             }
                         }
 
@@ -147,43 +147,47 @@ namespace LeyLineHybridECS
                                 colorIndex = 2;
                             }
 
-                            if (markerState.TargetTypeSet == 0)
+                            if (markerState.IsTarget == 1 && markerState.TargetTypeSet == 0)
                             {
-                                if (markerState.IsTarget == 1)
+                                switch (markerState.CurrentTargetType)
                                 {
-                                    switch (markerState.CurrentTargetType)
-                                    {
-                                        case MarkerState.TargetType.Neutral:
-                                            markerGameObject.AttackTargetMarker.SetActive(false);
-                                            markerGameObject.DefenseMarker.SetActive(false);
-                                            markerGameObject.HealTargetMarker.SetActive(false);
-                                            break;
-                                        case MarkerState.TargetType.AttackTarget:
-                                            markerGameObject.AttackTargetMarker.SetActive(true);
-                                            markerGameObject.DefenseMarker.SetActive(false);
-                                            markerGameObject.HealTargetMarker.SetActive(false);
-                                            break;
-                                        case MarkerState.TargetType.DefenseTarget:
-                                            markerGameObject.AttackTargetMarker.SetActive(false);
-                                            markerGameObject.DefenseMarker.SetActive(true);
-                                            markerGameObject.HealTargetMarker.SetActive(false);
-                                            break;
-                                        case MarkerState.TargetType.HealTarget:
-                                            markerGameObject.AttackTargetMarker.SetActive(false);
-                                            markerGameObject.DefenseMarker.SetActive(false);
-                                            markerGameObject.HealTargetMarker.SetActive(true);
-                                            break;
-                                    }
-
-                                    if (!markerGameObject.AttackTargetMarker.activeSelf)
+                                    case MarkerState.TargetType.Neutral:
+                                        //change when we implement other target types
                                         markerGameObject.AttackTargetMarker.SetActive(true);
-                                }
-                                else
-                                {
-                                    if (markerGameObject.AttackTargetMarker.activeSelf)
+                                        markerGameObject.DefenseMarker.SetActive(false);
+                                        markerGameObject.HealTargetMarker.SetActive(false);
+                                        break;
+                                    case MarkerState.TargetType.AttackTarget:
+                                        markerGameObject.AttackTargetMarker.SetActive(true);
+                                        markerGameObject.DefenseMarker.SetActive(false);
+                                        markerGameObject.HealTargetMarker.SetActive(false);
+                                        break;
+                                    case MarkerState.TargetType.DefenseTarget:
                                         markerGameObject.AttackTargetMarker.SetActive(false);
+                                        markerGameObject.DefenseMarker.SetActive(true);
+                                        markerGameObject.HealTargetMarker.SetActive(false);
+                                        break;
+                                    case MarkerState.TargetType.HealTarget:
+                                        markerGameObject.AttackTargetMarker.SetActive(false);
+                                        markerGameObject.DefenseMarker.SetActive(false);
+                                        markerGameObject.HealTargetMarker.SetActive(true);
+                                        break;
                                 }
                                 markerState.TargetTypeSet = 1;
+                            }
+                            else
+                            {
+                                if (markerState.TargetTypeSet == 1)
+                                {
+                                    markerState.TargetTypeSet = 0;
+                                }
+
+                                if(markerState.IsTarget == 0)
+                                {
+                                    markerGameObject.AttackTargetMarker.SetActive(false);
+                                    markerGameObject.DefenseMarker.SetActive(false);
+                                    markerGameObject.HealTargetMarker.SetActive(false);
+                                }
                             }
 
                             if (isSet == 0)
@@ -192,15 +196,18 @@ namespace LeyLineHybridECS
                                 {
                                     case MarkerState.State.Neutral:
                                         markerGameObject.Outline.enabled = false;
+                                        markerState.IsSet = 1;
                                         break;
                                     case MarkerState.State.Clicked:
                                         markerGameObject.Outline.enabled = false;
                                         //markerGameObject.Outline.enabled = true;
                                         //markerGameObject.Outline.color = colorIndex;
+                                        markerState.IsSet = 1;
                                         break;
                                     case MarkerState.State.Hovered:
                                         markerGameObject.Outline.enabled = true;
                                         markerGameObject.Outline.color = colorIndex;
+                                        markerState.IsSet = 1;
                                         break;
                                     case MarkerState.State.Reachable:
                                         markerGameObject.Outline.enabled = true;
@@ -214,7 +221,6 @@ namespace LeyLineHybridECS
                                         }
                                         break;
                                 }
-                                markerState.IsSet = 1;
                             }
                             m_UnitData.MarkerStateData[i] = markerState;
                         }
