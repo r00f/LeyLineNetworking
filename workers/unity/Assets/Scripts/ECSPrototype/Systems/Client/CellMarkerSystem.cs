@@ -216,7 +216,7 @@ namespace LeyLineHybridECS
                                 }
                                 markerState.IsSet = 1;
                             }
-                            m_Data.MarkerStateData[i] = markerState;
+                            m_UnitData.MarkerStateData[i] = markerState;
                         }
                     }
                 }

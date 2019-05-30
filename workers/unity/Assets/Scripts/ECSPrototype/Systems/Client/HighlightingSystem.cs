@@ -25,14 +25,10 @@ public class HighlightingSystem : ComponentSystem
         public readonly ComponentDataArray<SpatialEntityId> IDs;
         public ComponentDataArray<MouseState> MouseStates;
         public ComponentArray<LineRendererComponent> LineRenderers;
-
-
     }
 
     [Inject]
     ActiveUnitData m_ActiveUnitData;
-
-
 
     public struct PlayerStateData
     {
