@@ -437,7 +437,7 @@ public static class LeyLineEntityTemplates {
                 switch (go.Restrictions)
                 {
                     case ECSATarget_Unit.UnitRestrictions.Any:
-                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.all;
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.any;
                         break;
                     case ECSATarget_Unit.UnitRestrictions.Enemy:
                         newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.enemy;
@@ -449,6 +449,9 @@ public static class LeyLineEntityTemplates {
                         newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.self;
                         break;
                     case ECSATarget_Unit.UnitRestrictions.FriendlyOther:
+                        newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.friendly_other;
+                        break;
+                    case ECSATarget_Unit.UnitRestrictions.Other:
                         newAT.UnitTargetNested.UnitReq = UnitRequisitesEnum.other;
                         break;
                 }

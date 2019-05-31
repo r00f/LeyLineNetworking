@@ -14,6 +14,7 @@ namespace LeyLineHybridECS
             FriendlyOther,
             Self,
             Enemy,
+            Other,
             Any            
         }
         //public Unit MainTarget;

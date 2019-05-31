@@ -32,6 +32,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly int Length;
         public ComponentDataArray<Actions.CommandRequests.SetTargetCommand> ReceivedSetTargetRequests;
         public ComponentDataArray<Actions.Component> ActionsData;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
@@ -154,6 +155,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
         for (int i = 0; i < m_SetTargetRequestData.Length; i++)
         {
+            var usingId = m_SetTargetRequestData.EntityIds[i].EntityId.Id;
             var actionData = m_SetTargetRequestData.ActionsData[i];
             var setTargetRequest = m_SetTargetRequestData.ReceivedSetTargetRequests[i];
             var unitWorldIndex = m_SetTargetRequestData.WorldIndexData[i].Value;
@@ -251,6 +253,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                             {
                                 var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
                                 var unitCoord = m_UnitData.CoordinateData[ci].CubeCoordinate;
+                                
                                 if (unitId == id)
                                 {
                                     bool isValidTarget = false;
@@ -258,7 +261,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         {
                                             if (c.Cell.CubeCoordinate == unitCoord)
                                             {
-                                                isValidTarget = true;
+                                                isValidTarget = ValidateUnitTarget(unitId, usingId, faction.Faction, actionData.CurrentSelected.Targets[0].UnitTargetNested.UnitReq);
                                             }
                                         }
 
@@ -274,20 +277,36 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                                         for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                         {
+
                                             var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
-
-                                            if (modType == ModTypeEnum.aoe)
+                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
+                                            switch (modType)
                                             {
 
-                                            }
-                                            if (modType == ModTypeEnum.path)
-                                            {
-                                                /*
-                                                var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                                mod.CellAttributes = FindPath(cell, cellsToMark.CachedPaths);
-                                                actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                                case ModTypeEnum.aoe:
+                                                    mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
+                                                    break;
 
-                                                */
+
+                                                case ModTypeEnum.path:
+
+                                                    /*foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
+                                                    {
+                                                        mod.Coordinates.Add(c.CubeCoordinate);
+
+                                                    }
+
+                                                    actionData.LockedAction.Targets[0].Mods[0] = mod;
+                                                    costToSubtract += (uint)mod.Coordinates.Count;*/
+                                                    break;
+                                                case ModTypeEnum.line:
+                                                    mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
+                                                    break;
+                                                case ModTypeEnum.ring:
+                                                    mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
+
+
+                                                    break;
                                             }
                                         }
                                         locked.CombinedCost = costToSubtract;
@@ -690,4 +709,62 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             }
         }
     }
+
+    public bool ValidateUnitTarget(long targetUnitId, long usingUnitId, uint inFaction, UnitRequisitesEnum restrictions)
+    {
+        bool valid = false;
+
+        for(int i = 0; i < m_UnitData.Length; i++)
+        {
+            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
+            var faction = m_UnitData.FactionData[i].Faction;
+
+            if(targetUnitId == unitId)
+            {
+                switch (restrictions)
+                {
+                    case UnitRequisitesEnum.any:
+                        valid = true;
+                        break;
+                    case UnitRequisitesEnum.enemy:
+                        if(faction != inFaction)
+                        {
+                            valid = true;
+                        }
+                        break;
+                    case UnitRequisitesEnum.friendly:
+                        if (faction == inFaction)
+                        {
+                            valid = true;
+                        }
+                        break;
+                    case UnitRequisitesEnum.friendly_other:
+                        if(faction == inFaction && usingUnitId != unitId)
+                        {
+                            valid = true;
+                        }
+                        break;
+                    case UnitRequisitesEnum.other:
+                        if(usingUnitId != unitId)
+                        {
+                            valid = true;
+                        }
+                        break;
+                    case UnitRequisitesEnum.self:
+                        //maybe selfstate becomes irrelevant once a self-target is implemented.
+                        if (usingUnitId == unitId)
+                        {
+                            valid = true;
+                        }
+                        break;
+                        
+                    default:
+                        break;
+                }
+            }
+
+        }
+        return valid;
+    }
+
 }

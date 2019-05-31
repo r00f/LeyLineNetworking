@@ -35,8 +35,10 @@ public class HighlightingSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
+        public readonly ComponentDataArray<FactionComponent.Component> Faction;
         public ComponentDataArray<HighlightingDataComponent> HighlightingData;
         public ComponentDataArray<PlayerState.Component> PlayerState;
+
     }
 
     [Inject]
@@ -87,6 +89,7 @@ public class HighlightingSystem : ComponentSystem
         public ComponentDataArray<MarkerState> MarkerStates;
         public ComponentDataArray<MouseState> MouseStates;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIDs;
     }
 
     [Inject]
@@ -102,6 +105,7 @@ public class HighlightingSystem : ComponentSystem
         var playerState = m_PlayerStateData.PlayerState[0];
         var playerWorldIndex = m_PlayerStateData.WorldIndex[0].Value;
         var playerHighlightingData = m_PlayerStateData.HighlightingData[0];
+        var playerFaction = m_PlayerStateData.Faction[0].Faction;
         int actionID = playerState.SelectedActionId;
 
         HashSet<Vector3f> coordsInRangeHash = new HashSet<Vector3f>();
@@ -155,6 +159,7 @@ public class HighlightingSystem : ComponentSystem
                             var coord = m_MarkerStateData.Coords[m].CubeCoordinate;
                             var markerState = m_MarkerStateData.MarkerStates[m];
                             var mouseState = m_MarkerStateData.MouseStates[m].CurrentState;
+                            var entityID = m_MarkerStateData.EntityIDs[m].EntityId.Id;
 
                             if (coordsInRangeHash.Contains(coord))
                             {
@@ -162,11 +167,14 @@ public class HighlightingSystem : ComponentSystem
                                 {
                                     if (markerState.IsUnit == 1)
                                     {
-                                        if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
+                                        if (m_CellGrid.ValidateUnitTarget(entityID, playerState.SelectedUnitId, playerFaction, (UnitRequisitesEnum)playerHighlightingData.RestrictionIndex))
                                         {
-                                            Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
-                                            playerHighlightingData.HoveredCoordinate = coord;
-                                            playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
+                                            if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
+                                            {
+                                                Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
+                                                playerHighlightingData.HoveredCoordinate = coord;
+                                                playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
+                                            }
                                         }
                                     }
                                 }
@@ -442,7 +450,9 @@ public class HighlightingSystem : ComponentSystem
 
                 if (Target is ECSATarget_Unit)
                 {
+                    ECSATarget_Unit unitTarget = Target as ECSATarget_Unit;
                     playerHighlightingData.IsUnitTarget = 1;
+                    playerHighlightingData.RestrictionIndex = (uint)unitTarget.Restrictions;
                 }
                 else if (Target is ECSATarget_Tile)
                 {
@@ -657,5 +667,7 @@ public class HighlightingSystem : ComponentSystem
         m_PlayerStateData.PlayerState[0] = playerstate;
         Target = null;
     }
+
+
 }
 

@@ -28,8 +28,8 @@ type Action {
 
 type ActionTarget {
 	type UnitTarget {
-
 		UnitRequisitesEnum unit_req = 1;
+		
 	}
 	type CellTarget {
 		bool require_empty = 1;
@@ -68,11 +68,13 @@ type TargetMod {
 }
 
 enum UnitRequisitesEnum {
-	all = 0;
-	friendly = 1;
-	enemy = 2;
-	other = 3;
-	self = 4;
+
+	friendly = 0;
+	friendly_other = 1;
+	self = 2;
+	enemy = 3;
+	other = 4;
+	any = 5;
 }
 
 enum TargetTypeEnum {
