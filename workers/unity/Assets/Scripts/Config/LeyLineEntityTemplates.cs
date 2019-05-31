@@ -533,7 +533,7 @@ public static class LeyLineEntityTemplates {
                 AF.EffectType = EffectTypeEnum.deal_damage;
                 AF.DealDamageNested.DamageAmount = go.damageAmount;
             }
-            switch (inAction.Effects[i].applyTo)
+            switch (inAction.Effects[i].ApplyToTargets)
             {
                 case ECSActionEffect.ApplyTo.All:
                     AF.ApplyToTarget = ApplyToTargetsEnum.both;
@@ -546,6 +546,27 @@ public static class LeyLineEntityTemplates {
                     break;
             }
             AF.TargetSpecification = inAction.Effects[i].specificTargetIdentifier;
+            switch (inAction.Effects[i].ApplyToRestrictions)
+            {
+                case ECSActionEffect.applyRestrictions.Any:
+                    AF.ApplyToRestrictions = ApplyToRestrictionsEnum.any;
+                    break;
+                case ECSActionEffect.applyRestrictions.Enemy:
+                    AF.ApplyToRestrictions = ApplyToRestrictionsEnum.enemy;
+                    break;
+                case ECSActionEffect.applyRestrictions.Friendly:
+                    AF.ApplyToRestrictions = ApplyToRestrictionsEnum.friendly;
+                    break;
+                case ECSActionEffect.applyRestrictions.FriendlyOther:
+                    AF.ApplyToRestrictions = ApplyToRestrictionsEnum.friendly_other;
+                    break;
+                case ECSActionEffect.applyRestrictions.Other:
+                    AF.ApplyToRestrictions = ApplyToRestrictionsEnum.other;
+                    break;
+                case ECSActionEffect.applyRestrictions.Self:
+                    AF.ApplyToRestrictions = ApplyToRestrictionsEnum.self;
+                    break;
+            }
             newAction.Effects.Add(AF);
         }
       return newAction;

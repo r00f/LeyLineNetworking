@@ -42,6 +42,8 @@ public class ExecuteActionsSystem : ComponentSystem
 
     [Inject] private GameStateData m_GameStateData;
 
+    [Inject] private HandleCellGridRequestsSystem m_HandleCellGridSystem;
+
     [Inject] private ResourceSystem m_ResourceSystem;
 
 
@@ -80,6 +82,7 @@ public class ExecuteActionsSystem : ComponentSystem
                                     
                                     if (actions.LockedAction.Effects[j].EffectType == EffectTypeEnum.deal_damage)
                                     {
+                                        
                                         switch (actions.LockedAction.Effects[j].ApplyToTarget)
                                         {
                                             case ApplyToTargetsEnum.primary:
@@ -91,7 +94,8 @@ public class ExecuteActionsSystem : ComponentSystem
                                                 
                                                 if (actions.LockedAction.Targets[0].Mods.Count != 0)
                                                 {
-                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates))
+                                                    Debug.Log("Ayaya");
+                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates, actions.LockedAction.Effects[j].ApplyToRestrictions, unitId,faction.Faction))
                                                     {
                                                         Debug.Log(id);
                                                         m_ResourceSystem.DealDamage(id, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
@@ -102,7 +106,8 @@ public class ExecuteActionsSystem : ComponentSystem
                                                 m_ResourceSystem.DealDamage(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
                                                 if (actions.LockedAction.Targets[0].Mods.Count != 0)
                                                 {
-                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates))
+                                                    Debug.Log("Ayaya");
+                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates, actions.LockedAction.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
                                                     {
                                                         m_ResourceSystem.DealDamage(id, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
                                                     }
@@ -186,10 +191,10 @@ public class ExecuteActionsSystem : ComponentSystem
 
         m_ResourceSystem.DealDamage(targetUnitId, damage);
     }
-    
-    public List<long> AreaToUnitIDConversion(List<Vector3f> inCoords)
+
+    public List<long> AreaToUnitIDConversion(List<Vector3f> inCoords, ApplyToRestrictionsEnum restricitons, long usingID, uint usingFaction)
     {
-        
+        Debug.Log("Restriction: " + restricitons + "ID: " + usingID + "Faction: " + usingFaction);
         HashSet<Vector3f> Coords = new HashSet<Vector3f>(inCoords);
         List<long> unitIds = new List<long>();
         for(int i = 0; i < m_UnitData.Length; i++)
@@ -198,7 +203,11 @@ public class ExecuteActionsSystem : ComponentSystem
             var unitID = m_UnitData.EntityIds[i].EntityId.Id;
             if (Coords.Contains(unitCoord))
             {
-                unitIds.Add(unitID);
+                
+                if(m_HandleCellGridSystem.ValidateUnitTarget(unitID, usingID, usingFaction, (UnitRequisitesEnum)(int)restricitons))
+                {
+                    unitIds.Add(unitID);
+                }
             }
         }
         return unitIds;

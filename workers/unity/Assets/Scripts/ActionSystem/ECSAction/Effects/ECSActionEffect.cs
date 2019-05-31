@@ -13,7 +13,18 @@ namespace LeyLineHybridECS
             AllSecondary,
             All
         }
-        public ApplyTo applyTo;
+        public ApplyTo ApplyToTargets;
         public int specificTargetIdentifier = 0;
+        public enum applyRestrictions
+        {
+            Friendly,
+            FriendlyOther,
+            Self,
+            Enemy,
+            Other,
+            Any
+        }
+        public applyRestrictions ApplyToRestrictions;
     }
+
 }

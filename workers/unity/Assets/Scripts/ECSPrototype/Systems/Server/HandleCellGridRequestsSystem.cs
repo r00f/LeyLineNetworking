@@ -712,6 +712,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public bool ValidateUnitTarget(long targetUnitId, long usingUnitId, uint inFaction, UnitRequisitesEnum restrictions)
     {
+        UpdateInjectedComponentGroups();
         bool valid = false;
 
         for(int i = 0; i < m_UnitData.Length; i++)
