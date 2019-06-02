@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c9c9e7d61ba2144f825394b112ca3e1, type: 3}
-  m_Name: Base_Modification_Area
+  m_Script: {fileID: 11500000, guid: 43cb690f53afba849bd1b6d695e07014, type: 3}
+  m_Name: E_Spawn
   m_EditorClassIdentifier: 
-  MySecondaryTargetCoordinates: []
-  areaSize: 0
-  wtf: 0
+  ApplyToTargets: 0
+  specificTargetIdentifier: 0
+  ApplyToRestrictions: 0
+  UnitNameToSpawn: 

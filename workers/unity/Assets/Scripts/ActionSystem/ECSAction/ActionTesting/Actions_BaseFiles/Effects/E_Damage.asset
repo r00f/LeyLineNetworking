@@ -9,9 +9,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de0a185141324145b2ae99c63cb763a, type: 3}
-  m_Name: Base_Modification_Ring
+  m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
+  m_Name: E_Damage
   m_EditorClassIdentifier: 
-  MySecondaryTargetCoordinates: []
-  radius: 0
-  wtf: 0
+  ApplyToTargets: 0
+  specificTargetIdentifier: 0
+  ApplyToRestrictions: 0
+  damageAmount: 0

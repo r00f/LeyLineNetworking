@@ -9,16 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02066dac5f91c724b94b937f8f18aa46, type: 3}
-  m_Name: Base_Target_Cell
+  m_Script: {fileID: 11500000, guid: 2c9c9e7d61ba2144f825394b112ca3e1, type: 3}
+  m_Name: M_Circle
   m_EditorClassIdentifier: 
-  HighlighterToUse: 0
-  targettingRange: 0
-  energyCost: 0
-  ModToAdd: {fileID: 0}
-  SecondaryTargets: []
-  requireEmpty: 0
-  MainTargetCoordinate:
-    X: 0
-    Y: 0
-    Z: 0
+  MySecondaryTargetCoordinates: []
+  areaSize: 0
+  wtf: 0

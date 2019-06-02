@@ -10,32 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
-  m_Name: AoECircle_test
+  m_Name: Attack
   m_EditorClassIdentifier: 
   TargetToAdd: {fileID: 0}
   Targets:
-  - {fileID: 114976917362230532}
+  - {fileID: 114273308848104638}
   EffectToAdd: {fileID: 0}
   Effects:
-  - {fileID: 114141495291652124}
-  ActionName: 
-  ActionIcon: {fileID: 0}
---- !u!114 &114039703397925322
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2c9c9e7d61ba2144f825394b112ca3e1, type: 3}
-  m_Name: Base_Modification_Area(Clone)
-  m_EditorClassIdentifier: 
-  MySecondaryTargetCoordinates: []
-  areaSize: 2
-  wtf: 0
---- !u!114 &114141495291652124
+  - {fileID: 114062705790130200}
+  ActionName: Attack
+  ActionIcon: {fileID: 21300000, guid: 5041f3c82626a1f4bacee1b01e209b77, type: 3}
+--- !u!114 &114062705790130200
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -45,12 +30,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
-  m_Name: Base_Effect_DealDamage(Clone)
+  m_Name: E_Damage(Clone)
   m_EditorClassIdentifier: 
-  applyTo: 2
+  ApplyToTargets: 0
   specificTargetIdentifier: 0
-  damageAmount: 2
---- !u!114 &114976917362230532
+  ApplyToRestrictions: 4
+  damageAmount: 3
+--- !u!114 &114273308848104638
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -59,17 +45,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 02066dac5f91c724b94b937f8f18aa46, type: 3}
-  m_Name: Base_Target_Cell(Clone)
+  m_Script: {fileID: 11500000, guid: 72c707e3d66097a4195aca654657c5db, type: 3}
+  m_Name: T_Unit(Clone)
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
-  targettingRange: 5
+  targettingRange: 3
   energyCost: 2
   ModToAdd: {fileID: 0}
-  SecondaryTargets:
-  - {fileID: 114039703397925322}
-  requireEmpty: 0
-  MainTargetCoordinate:
+  SecondaryTargets: []
+  Restrictions: 4
+  Coordinate:
     X: 0
     Y: 0
     Z: 0

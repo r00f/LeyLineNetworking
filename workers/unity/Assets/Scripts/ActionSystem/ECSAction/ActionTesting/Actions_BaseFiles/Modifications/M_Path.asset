@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 43cb690f53afba849bd1b6d695e07014, type: 3}
-  m_Name: Base_Effect_Spawn
+  m_Script: {fileID: 11500000, guid: 4ebd07a332ad6844fb6f4f1b9a021ac1, type: 3}
+  m_Name: M_Path
   m_EditorClassIdentifier: 
-  applyTo: 0
-  specificTargetIdentifier: 0
-  UnitNameToSpawn: 
+  MySecondaryTargetCoordinates: []
+  respectTaken: 0
+  costPerTile: 0

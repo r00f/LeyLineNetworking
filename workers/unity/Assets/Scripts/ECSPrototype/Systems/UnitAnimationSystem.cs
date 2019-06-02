@@ -40,6 +40,13 @@ public class UnitAnimationSystem : ComponentSystem
 
     [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
+    GameObject GarbageCollection;
+
+    protected override void OnStartRunning()
+    {
+        base.OnStartRunning();
+        GarbageCollection = GameObject.FindGameObjectWithTag("GarbageCollection");
+    }
 
     protected override void OnUpdate()
     {
@@ -60,14 +67,21 @@ public class UnitAnimationSystem : ComponentSystem
                         if(healthComponent.CurrentHealth == 0)
                         {
                             Debug.Log("Death");
-                            //disable animator
-                            animatorComponent.Animator.enabled = false;
+
+                            //move all Ragdoll GOs into GarbageCollection
+
 
                             //move props out of skeleton
                             foreach (Transform t in animatorComponent.Props)
                             {
-                                t.parent = transform;
+                                t.parent = animatorComponent.Animator.transform;
                             }
+
+                            animatorComponent.Animator.transform.parent = GarbageCollection.transform;
+
+                            //disable animator
+                            animatorComponent.Animator.enabled = false;
+
 
                             //set all rigidbodies to non kinematic
                             foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)

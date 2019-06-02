@@ -9,9 +9,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6261edbc46eae5440a0e86c9cd5a4020, type: 3}
-  m_Name: Base_Modification_Line
+  m_Script: {fileID: 11500000, guid: 72c707e3d66097a4195aca654657c5db, type: 3}
+  m_Name: T_Unit
   m_EditorClassIdentifier: 
-  MySecondaryTargetCoordinates: []
-  wtf: 0
-  wtf2: 0
+  HighlighterToUse: 0
+  targettingRange: 0
+  energyCost: 0
+  ModToAdd: {fileID: 0}
+  SecondaryTargets: []
+  Restrictions: 0
+  Coordinate:
+    X: 0
+    Y: 0
+    Z: 0

@@ -10,18 +10,17 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
-  m_Name: AoE_Testing
+  m_Name: Ring
   m_EditorClassIdentifier: 
   TargetToAdd: {fileID: 0}
   Targets:
-  - {fileID: 114621617946503710}
+  - {fileID: 114304481399510448}
   EffectToAdd: {fileID: 0}
   Effects:
-  - {fileID: 114288477268859574}
-  - {fileID: 114473542112712812}
-  ActionName: TestAoE
+  - {fileID: 114211694197889926}
+  ActionName: Ring
   ActionIcon: {fileID: 0}
---- !u!114 &114288477268859574
+--- !u!114 &114211694197889926
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -31,42 +30,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
-  m_Name: Base_Effect_DealDamage(Clone)
+  m_Name: E_Damage(Clone)
   m_EditorClassIdentifier: 
-  applyTo: 1
+  ApplyToTargets: 2
   specificTargetIdentifier: 0
-  damageAmount: 1
---- !u!114 &114389093721737392
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2de0a185141324145b2ae99c63cb763a, type: 3}
-  m_Name: Base_Modification_Ring(Clone)
-  m_EditorClassIdentifier: 
-  MySecondaryTargetCoordinates: []
-  radius: 1
-  wtf: 0
---- !u!114 &114473542112712812
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
-  m_Name: Base_Effect_DealDamage(Clone)
-  m_EditorClassIdentifier: 
-  applyTo: 0
-  specificTargetIdentifier: 0
-  damageAmount: 3
---- !u!114 &114621617946503710
+  ApplyToRestrictions: 3
+  damageAmount: 2
+--- !u!114 &114304481399510448
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -76,16 +46,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 02066dac5f91c724b94b937f8f18aa46, type: 3}
-  m_Name: Base_Target_Cell(Clone)
+  m_Name: T_Cell(Clone)
   m_EditorClassIdentifier: 
-  HighlighterToUse: 0
+  HighlighterToUse: 1
   targettingRange: 4
-  energyCost: 2
+  energyCost: 3
   ModToAdd: {fileID: 0}
   SecondaryTargets:
-  - {fileID: 114389093721737392}
+  - {fileID: 114495838725495748}
   requireEmpty: 0
   MainTargetCoordinate:
     X: 0
     Y: 0
     Z: 0
+--- !u!114 &114495838725495748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2de0a185141324145b2ae99c63cb763a, type: 3}
+  m_Name: M_Ring(Clone)
+  m_EditorClassIdentifier: 
+  MySecondaryTargetCoordinates: []
+  radius: 2
+  wtf: 0

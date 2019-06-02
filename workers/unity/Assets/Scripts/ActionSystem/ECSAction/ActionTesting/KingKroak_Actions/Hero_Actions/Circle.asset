@@ -10,17 +10,32 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
-  m_Name: Basic_Move
+  m_Name: Circle
   m_EditorClassIdentifier: 
   TargetToAdd: {fileID: 0}
   Targets:
-  - {fileID: 114271086264709076}
+  - {fileID: 114171488469952200}
   EffectToAdd: {fileID: 0}
   Effects:
-  - {fileID: 114429964156715824}
-  ActionName: Move
-  ActionIcon: {fileID: 21300000, guid: 5b76f7ce06cccad4cbfa36d4f44328a1, type: 3}
---- !u!114 &114271086264709076
+  - {fileID: 114317003263369948}
+  ActionName: Circle
+  ActionIcon: {fileID: 21300000, guid: a406273484d01d84bba1d84097853e54, type: 3}
+--- !u!114 &114066145638716482
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2c9c9e7d61ba2144f825394b112ca3e1, type: 3}
+  m_Name: M_Circle(Clone)
+  m_EditorClassIdentifier: 
+  MySecondaryTargetCoordinates: []
+  areaSize: 2
+  wtf: 0
+--- !u!114 &114171488469952200
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -30,20 +45,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 02066dac5f91c724b94b937f8f18aa46, type: 3}
-  m_Name: Base_Target_Cell(Clone)
+  m_Name: T_Cell(Clone)
   m_EditorClassIdentifier: 
-  HighlighterToUse: 0
-  targettingRange: 5
-  energyCost: 1
+  HighlighterToUse: 1
+  targettingRange: 4
+  energyCost: 2
   ModToAdd: {fileID: 0}
   SecondaryTargets:
-  - {fileID: 114980574231060756}
+  - {fileID: 114066145638716482}
   requireEmpty: 0
   MainTargetCoordinate:
     X: 0
     Y: 0
     Z: 0
---- !u!114 &114429964156715824
+--- !u!114 &114317003263369948
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -52,25 +67,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99672f68792f4574aa56aa11453f08c1, type: 3}
-  m_Name: Base_Effect_MoveAlongPath(Clone)
+  m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
+  m_Name: E_Damage(Clone)
   m_EditorClassIdentifier: 
-  applyTo: 0
+  ApplyToTargets: 2
   specificTargetIdentifier: 0
-  MovementSpeed: 0
-  pathIndex: 0
---- !u!114 &114980574231060756
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ebd07a332ad6844fb6f4f1b9a021ac1, type: 3}
-  m_Name: Base_Modification_Path(Clone)
-  m_EditorClassIdentifier: 
-  MySecondaryTargetCoordinates: []
-  respectTaken: 0
-  costPerTile: 0
+  ApplyToRestrictions: 0
+  damageAmount: 2

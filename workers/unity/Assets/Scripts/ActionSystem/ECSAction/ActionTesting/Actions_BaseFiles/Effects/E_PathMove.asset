@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 99672f68792f4574aa56aa11453f08c1, type: 3}
-  m_Name: Base_Effect_MoveAlongPath
+  m_Name: E_PathMove
   m_EditorClassIdentifier: 
-  applyTo: 0
+  ApplyToTargets: 0
   specificTargetIdentifier: 0
+  ApplyToRestrictions: 0
   MovementSpeed: 0
   pathIndex: 0
