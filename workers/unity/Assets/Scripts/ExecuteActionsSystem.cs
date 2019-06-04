@@ -203,7 +203,6 @@ public class ExecuteActionsSystem : ComponentSystem
             var unitID = m_UnitData.EntityIds[i].EntityId.Id;
             if (Coords.Contains(unitCoord))
             {
-                
                 if(m_HandleCellGridSystem.ValidateUnitTarget(unitID, usingID, usingFaction, (UnitRequisitesEnum)(int)restricitons))
                 {
                     unitIds.Add(unitID);

@@ -116,7 +116,6 @@ public class AddComponentsSystem : ComponentSystem
                 {
                     CurrentTargetType = MarkerState.TargetType.Neutral,
                     IsSet = 0,
-                    IsTarget = 0,
                     TargetTypeSet = 0,
                     CurrentState = MarkerState.State.Neutral,
                     IsUnit = 0
@@ -168,7 +167,6 @@ public class AddComponentsSystem : ComponentSystem
                 {
                     CurrentTargetType = MarkerState.TargetType.Neutral,
                     IsSet = 0,
-                    IsTarget = 0,
                     TargetTypeSet = 0,
                     CurrentState = MarkerState.State.Neutral,
                     IsUnit = 1

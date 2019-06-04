@@ -34,6 +34,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
             public readonly ComponentDataArray<Actions.Component> ActionsData;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
@@ -58,6 +59,7 @@ namespace LeyLineHybridECS
                         for (int ui = 0; ui < m_UnitData.Length; ui++)
                         {
                             var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
+                            var unitCoord = m_UnitData.CoordinateData[ui].CubeCoordinate;
                             var actions = m_UnitData.ActionsData[ui];
                             var unitComponentReferences = m_UnitData.UnitCompReferences[ui];
                             var mouseState = m_UnitData.MouseStateData[ui];
@@ -82,6 +84,7 @@ namespace LeyLineHybridECS
                                 }
                                 else if (playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                                 {
+                                    playerState.SelectedUnitCoordinate = unitCoord;
                                     playerState.SelectedUnitId = unitId;
                                     m_PlayerData.PlayerStateData[0] = playerState;
                                 }

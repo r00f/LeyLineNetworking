@@ -7,10 +7,11 @@ component PlayerState {
     id = 104;
 	PlayerStateEnum current_state = 1;
 	int64 selected_unit_id = 2;
-	list<cell.CellAttribute> cells_in_range = 3;
-	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 4;
-	int32 selected_action_id = 5;
-	map<int64, CubeCoordinateList> unit_targets = 6;
+	improbable.Vector3f selected_unit_coordinate = 3;
+	list<cell.CellAttribute> cells_in_range = 4;
+	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 5;
+	int32 selected_action_id = 6;
+	map<int64, CubeCoordinateList> unit_targets = 7;
 	
 }
 

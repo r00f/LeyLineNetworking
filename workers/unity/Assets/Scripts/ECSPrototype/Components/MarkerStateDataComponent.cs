@@ -21,7 +21,7 @@ namespace LeyLineHybridECS
 
         public int IsSet;
 
-        public byte IsTarget;
+        public uint NumberOfTargets;
 
         public byte TargetTypeSet;
 

@@ -86,6 +86,7 @@ namespace LeyLineHybridECS
                             MarkerState markerState = m_CellData.MarkerStateData[i];
                             MarkerGameObjects markerGameObject = m_CellData.MarkerGameObjectsData[i];
 
+                            /*
                             if (markerState.IsTarget == 1)
                             {
                                 if (!markerGameObject.TargetMarker.activeSelf)
@@ -95,6 +96,30 @@ namespace LeyLineHybridECS
                             {
                                 if (markerGameObject.TargetMarker.activeSelf)
                                     markerGameObject.TargetMarker.SetActive(false);
+                            }
+                            */
+
+                            switch(markerState.NumberOfTargets)
+                            {
+                                case 0:
+                                    if (markerGameObject.TargetMarker.activeSelf)
+                                        markerGameObject.TargetMarker.SetActive(false);
+                                    break;
+                                case 1:
+                                    if (!markerGameObject.TargetMarker.activeSelf)
+                                        markerGameObject.TargetMarker.SetActive(true);
+
+                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[0];
+                                    break;
+                                case 2:
+                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[1];
+                                    break;
+                                case 3:
+                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[2];
+                                    break;
+                                case 4:
+                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[3];
+                                    break;
                             }
 
                             if (isSet == 0)
@@ -107,7 +132,7 @@ namespace LeyLineHybridECS
                                         markerGameObject.ReachableMarker.SetActive(false);
                                         break;
                                     case MarkerState.State.Clicked:
-                                        if (markerState.IsTarget == 0)
+                                        if (markerState.NumberOfTargets == 0)
                                             markerGameObject.ClickedMarker.SetActive(true);
                                         markerGameObject.HoveredMarker.SetActive(false);
                                         markerGameObject.ReachableMarker.SetActive(false);
@@ -147,7 +172,7 @@ namespace LeyLineHybridECS
                                 colorIndex = 2;
                             }
 
-                            if (markerState.IsTarget == 1 && markerState.TargetTypeSet == 0)
+                            if (markerState.NumberOfTargets > 0 && markerState.TargetTypeSet == 0)
                             {
                                 switch (markerState.CurrentTargetType)
                                 {
@@ -175,19 +200,15 @@ namespace LeyLineHybridECS
                                 }
                                 markerState.TargetTypeSet = 1;
                             }
-                            else
+                            else if (markerState.NumberOfTargets == 0)
                             {
                                 if (markerState.TargetTypeSet == 1)
                                 {
                                     markerState.TargetTypeSet = 0;
                                 }
-
-                                if(markerState.IsTarget == 0)
-                                {
-                                    markerGameObject.AttackTargetMarker.SetActive(false);
-                                    markerGameObject.DefenseMarker.SetActive(false);
-                                    markerGameObject.HealTargetMarker.SetActive(false);
-                                }
+                                markerGameObject.AttackTargetMarker.SetActive(false);
+                                markerGameObject.DefenseMarker.SetActive(false);
+                                markerGameObject.HealTargetMarker.SetActive(false);
                             }
 
                             if (isSet == 0)

@@ -15,9 +15,8 @@ public struct HighlightingDataComponent : IComponentData
     public Vector3f HoveredCoordinate;
     public Vector3f LastHoveredCoordinate;
     public Vector3 HoveredPosition;
-    public uint RestrictionIndex;
-
-
+    public uint TargetRestrictionIndex;
+    public uint EffectRestrictionIndex;
 }
 
 
