@@ -19,9 +19,10 @@ enum GameStateEnum {
 	calculate_energy = 2;
 	planning = 3;
 	spawning = 4;
-	attacking = 5;
-	moving = 6;
-	cleanup = 7;
-	game_over = 8;
+	defending = 5;
+	attacking = 6;
+	moving = 7;
+	cleanup = 8;
+	game_over = 9;
 
 }

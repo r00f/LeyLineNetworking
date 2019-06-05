@@ -8,7 +8,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Improbable;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem)), UpdateBefore(typeof(PlayerStateSystem)), UpdateBefore(typeof(GameStateSystem)), UpdateBefore(typeof(SpawnUnitsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
 {
     public struct UnitData
@@ -22,7 +22,7 @@ public class ExecuteActionsSystem : ComponentSystem
         public ComponentDataArray<Actions.Component> ActionData;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct CellData
     {
@@ -31,7 +31,7 @@ public class ExecuteActionsSystem : ComponentSystem
         public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
     }
 
-    [Inject] private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
     public struct GameStateData
     {
@@ -40,11 +40,13 @@ public class ExecuteActionsSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
-    [Inject] private HandleCellGridRequestsSystem m_HandleCellGridSystem;
+    [Inject] HandleCellGridRequestsSystem m_HandleCellGridSystem;
 
-    [Inject] private ResourceSystem m_ResourceSystem;
+    [Inject] ResourceSystem m_ResourceSystem;
+
+    [Inject] TimerSystem m_TimerSystem;
 
 
     protected override void OnUpdate()
@@ -75,14 +77,18 @@ public class ExecuteActionsSystem : ComponentSystem
                                     SetUnitSpawn(actions.LockedAction.Effects[0].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].TargetId);
                                 }
                                 break;
+                            case GameStateEnum.defending:
+                                //add generic defense action effect type
+                                if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.gain_armor)
+                                {
+                                    m_TimerSystem.AddTimedEffect(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[0]);
+                                }
+                                break;
                             case GameStateEnum.attacking:
-                                
                                 for (int j = 0; j < actions.LockedAction.Effects.Count; j++)
                                 {
-                                    
                                     if (actions.LockedAction.Effects[j].EffectType == EffectTypeEnum.deal_damage)
                                     {
-                                        
                                         switch (actions.LockedAction.Effects[j].ApplyToTarget)
                                         {
                                             case ApplyToTargetsEnum.primary:

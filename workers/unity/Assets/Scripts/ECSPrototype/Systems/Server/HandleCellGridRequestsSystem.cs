@@ -25,7 +25,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<FactionComponent.Component> Faction;
     }
 
-    [Inject] private SelectActionRequestData m_SelectActionRequestData;
+    [Inject] SelectActionRequestData m_SelectActionRequestData;
 
     public struct SetTargetRequestData
     {
@@ -39,7 +39,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<FactionComponent.Component> Faction;
     }
 
-    [Inject] private SetTargetRequestData m_SetTargetRequestData;
+    [Inject] SetTargetRequestData m_SetTargetRequestData;
 
     public struct CellData
     {
@@ -50,7 +50,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
     }
 
-    [Inject] private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
     public struct UnitData
     {
@@ -62,8 +62,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<FactionComponent.Component> FactionData;
     }
 
-    [Inject]
-    private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct GameStateData
     {
@@ -72,9 +71,11 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         public readonly ComponentDataArray<GameState.Component> GameState;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
-    [Inject] private ResourceSystem m_ResourceSystem;
+    [Inject] ResourceSystem m_ResourceSystem;
+
+    [Inject] TimerSystem m_TimerSystem;
 
     protected override void OnUpdate()
     {
@@ -93,9 +94,16 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
 
             m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
-            actionData.LockedAction = actionData.NullAction;
 
-            //Debug.Log("Recieved Select Action Requests length: " + selectActionRequest.Requests.Count);
+            if(actionData.LockedAction.Effects.Count != 0)
+            {
+                if (actionData.LockedAction.Effects[0].EffectType == EffectTypeEnum.gain_armor)
+                {
+                    m_ResourceSystem.RemoveArmor(actionData.LockedAction.Targets[0].TargetId, actionData.LockedAction.Effects[0].GainArmorNested.ArmorAmount);
+                }
+            }
+
+            actionData.LockedAction = actionData.NullAction;
 
             foreach (var sar in selectActionRequest.Requests)
             {
@@ -169,8 +177,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                 if (actionData.CurrentSelected.Index != -3 && actionData.LockedAction.Index == -3)
                 {
-                    //Debug.Log("SetTargetRequest to TargetId: " + setTargetRequest.Requests[0].Payload.TargetId);
-
                     switch (actionData.CurrentSelected.Targets[0].TargetType)
                     {
                         case TargetTypeEnum.cell:
@@ -311,6 +317,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         }
                                         locked.CombinedCost = costToSubtract;
                                         actionData.LockedAction = locked;
+
+
+                                        m_ResourceSystem.AddArmor(actionData.LockedAction.Targets[0].TargetId, actionData.LockedAction.Effects[0].GainArmorNested.ArmorAmount);
+
                                         m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
                                     }
                                     else

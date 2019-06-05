@@ -24,7 +24,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<WorldCommands.CreateEntity.CommandSender> CreateEntitySender;
         }
 
-        [Inject] private CellData m_Data;
+        [Inject] CellData m_Data;
 
         public struct GameStateData
         {
@@ -34,7 +34,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<GameState.Component> GameState;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
 
         public struct PlayerData
@@ -46,7 +46,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<OwningWorker.Component> OwningWorker;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         protected override void OnUpdate()
         {

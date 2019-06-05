@@ -9,21 +9,27 @@ type ActionEffect {
 	type DealDamage {
 	uint32 damage_amount = 1;
 	}
+	type GainArmor {
+	uint32 armor_amount = 1;
+	}
 	type MoveAlongPath{
 	uint32 movement_speed = 1;
 	}
 	SpawnUnit spawn_unit_nested = 2;
 	DealDamage deal_damage_nested = 3;
-	MoveAlongPath move_along_path_nested = 4;
-	int32 target_specification = 5;
-	ApplyToTargetsEnum apply_to_target = 6;
-	ApplyToRestrictionsEnum apply_to_restrictions = 7;
+	GainArmor gain_armor_nested = 4;
+	MoveAlongPath move_along_path_nested = 5;
+	int32 target_specification = 6;
+	uint32 turn_duration = 7;
+	ApplyToTargetsEnum apply_to_target = 8;
+	ApplyToRestrictionsEnum apply_to_restrictions = 9;
 }
 
 enum EffectTypeEnum {
 spawn_unit = 0;
 deal_damage = 1;
-move_along_path = 2;
+gain_armor = 2;
+move_along_path = 3;
 }
 
 enum ApplyToTargetsEnum

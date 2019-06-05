@@ -27,7 +27,7 @@ public class AddComponentsSystem : ComponentSystem
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
-    [Inject] private CellAddedData m_CellAddedData;
+    [Inject] CellAddedData m_CellAddedData;
 
     private struct UnitAddedData
     {
@@ -40,7 +40,7 @@ public class AddComponentsSystem : ComponentSystem
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
-    [Inject] private UnitAddedData m_UnitAddedData;
+    [Inject] UnitAddedData m_UnitAddedData;
 
     private struct PlayerAddedData
     {
@@ -51,7 +51,7 @@ public class AddComponentsSystem : ComponentSystem
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
-    [Inject] private PlayerAddedData m_PlayerAddedData;
+    [Inject] PlayerAddedData m_PlayerAddedData;
 
     public struct PlayerData
     {
@@ -61,7 +61,7 @@ public class AddComponentsSystem : ComponentSystem
         public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
     }
 
-    [Inject] private PlayerData m_PlayerData;
+    [Inject] PlayerData m_PlayerData;
 
     protected override void OnUpdate()
     {

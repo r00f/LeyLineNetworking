@@ -34,5 +34,6 @@ public static class WorkerUtils
         world.GetOrCreateManager<ResourceSystem>();
         world.GetOrCreateManager<ExecuteActionsSystem>();
         world.GetOrCreateManager<CleanupSystem>();
+        world.GetOrCreateManager<TimerSystem>();
     }
 }

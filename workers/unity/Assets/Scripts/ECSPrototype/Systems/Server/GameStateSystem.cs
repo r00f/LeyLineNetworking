@@ -20,7 +20,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
-        [Inject] private Data m_Data;
+        [Inject] Data m_Data;
 
         public struct PlayerData
         {
@@ -30,7 +30,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         public struct UnitData
         {
@@ -50,11 +50,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
         }
 
-        [Inject] private SpawnCellData m_SpawnCellData;
-
-        [Inject] ResourceSystem m_ResourceSystem;
-
-        [Inject] ExecuteActionsSystem m_ExecuteSystem;
+        [Inject] SpawnCellData m_SpawnCellData;
 
         protected override void OnUpdate()
         {
@@ -93,6 +89,10 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.spawning:
+                        gameState.CurrentState = GameStateEnum.defending;
+                        m_Data.GameStateData[i] = gameState;
+                        break;
+                    case GameStateEnum.defending:
                         gameState.CurrentState = GameStateEnum.attacking;
                         m_Data.GameStateData[i] = gameState;
                         break;
@@ -121,7 +121,6 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.cleanup:
-                        m_ExecuteSystem.ClearAllLockedActions(gameStateWorldIndex);
                         gameState.CurrentState = GameStateEnum.planning;
                         m_Data.GameStateData[i] = gameState;
                         break;

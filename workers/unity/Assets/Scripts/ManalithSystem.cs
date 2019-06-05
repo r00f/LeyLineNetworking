@@ -17,7 +17,7 @@ public class ManalithSystem : ComponentSystem
         public ComponentDataArray<FactionComponent.Component> Factions;
     }
 
-    [Inject] private ManalithData m_ManaLithData;
+    [Inject] ManalithData m_ManaLithData;
 
     public struct CellData
     {
@@ -28,7 +28,7 @@ public class ManalithSystem : ComponentSystem
         public readonly ComponentDataArray<IsCircleCell.Component> IsCircleCellData;
     }
 
-    [Inject] private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
     public struct UnitData
     {
@@ -40,7 +40,7 @@ public class ManalithSystem : ComponentSystem
         public ComponentDataArray<Energy.Component> EnergyData;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct GameStateData
     {
@@ -50,7 +50,7 @@ public class ManalithSystem : ComponentSystem
         public readonly ComponentDataArray<GameState.Component> GameStates;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
     protected override void OnUpdate()
     {

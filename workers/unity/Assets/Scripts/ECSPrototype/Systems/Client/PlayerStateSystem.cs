@@ -17,7 +17,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<GameState.Component> GameState;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
         public struct PlayerData
         {
@@ -27,7 +27,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         public struct UnitData
         {
@@ -41,7 +41,7 @@ namespace LeyLineHybridECS
             public ComponentArray<UnitComponentReferences> UnitCompReferences;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         protected override void OnUpdate()
         {

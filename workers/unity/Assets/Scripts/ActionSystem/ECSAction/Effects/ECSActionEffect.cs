@@ -15,6 +15,7 @@ namespace LeyLineHybridECS
         }
         public ApplyTo ApplyToTargets;
         public int specificTargetIdentifier = 0;
+        public uint TurnDuration = 0;
         public enum applyRestrictions
         {
             Friendly,

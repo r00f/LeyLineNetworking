@@ -1,0 +1,16 @@
+package unit;
+import "unit/action_effect.schema";
+		
+component TurnTimer {
+	
+    id = 124;
+    list<Timer> timers = 1;
+
+}
+
+type Timer{
+
+	uint32 turn_duration = 1;
+	unit.ActionEffect effect = 2;
+
+}

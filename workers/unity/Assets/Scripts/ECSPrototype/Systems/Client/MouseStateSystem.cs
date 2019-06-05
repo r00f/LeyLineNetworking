@@ -19,7 +19,7 @@ public class MouseStateSystem : JobComponentSystem
         public ComponentDataArray<MouseState> MouseStateData;
     }
 
-    [Inject] private Data m_Data;
+    [Inject] Data m_Data;
 
     EventSystem eventSystem;
 

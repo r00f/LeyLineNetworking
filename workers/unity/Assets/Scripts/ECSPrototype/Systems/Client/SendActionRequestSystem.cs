@@ -26,7 +26,7 @@ public class SendActionRequestSystem : ComponentSystem
         public ComponentDataArray<Actions.CommandSenders.SetTargetCommand> SetTargetSenders;
     }
 
-    [Inject] private SelectActionRequestData m_SelectActionRequestData;
+    [Inject] SelectActionRequestData m_SelectActionRequestData;
     
     public struct CellData
     {
@@ -38,7 +38,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<MarkerState> MarkerStateData;
     }
 
-    [Inject] private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
     public struct UnitData
     {
@@ -48,7 +48,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<Health.Component> HealthAttributes;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct GameStateData
     {
@@ -57,7 +57,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
     public struct PlayerData
     {
@@ -67,11 +67,9 @@ public class SendActionRequestSystem : ComponentSystem
         public ComponentDataArray<PlayerState.Component> PlayerStateData;
     }
 
-    [Inject] private PlayerData m_PlayerData;
+    [Inject] PlayerData m_PlayerData;
 
-    [Inject]
-    private HighlightingSystem m_HighlightingSystem;
-    //[Inject] private PlayerStateSystem m_PlayerStateSystem;
+    [Inject] HighlightingSystem m_HighlightingSystem;
 
     protected override void OnUpdate()
     {

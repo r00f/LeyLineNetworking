@@ -18,7 +18,7 @@ namespace LeyLineHybridECS
             public ComponentArray<MeshColor> MeshColorData;
         }
 
-        [Inject] private CircleData m_CircleData;
+        [Inject] CircleData m_CircleData;
 
         public struct LineData
         {
@@ -26,7 +26,7 @@ namespace LeyLineHybridECS
             public ComponentArray<MeshGradientColor> MeshGradientColorData;
         }
 
-        [Inject] private LineData m_LineData;
+        [Inject] LineData m_LineData;
 
         private struct ProjectorAddedData
         {
@@ -35,12 +35,11 @@ namespace LeyLineHybridECS
             public readonly ComponentArray<Projector> Projectors;
         }
 
-        [Inject] private ProjectorAddedData m_ProjectorAddedData;
+        [Inject] ProjectorAddedData m_ProjectorAddedData;
 
-
-        private ComponentGroup manalithGroup;
-        private ComponentGroup playerGroup;
-        private ComponentGroup gameControllerGroup;
+        ComponentGroup manalithGroup;
+        ComponentGroup playerGroup;
+        ComponentGroup gameControllerGroup;
 
         protected override void OnCreateManager()
         {

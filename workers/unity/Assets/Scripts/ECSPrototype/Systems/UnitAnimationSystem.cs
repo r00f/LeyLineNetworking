@@ -20,7 +20,7 @@ public class UnitAnimationSystem : ComponentSystem
         public ComponentArray<Transform> Transforms;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct TransformData
     {
@@ -29,14 +29,14 @@ public class UnitAnimationSystem : ComponentSystem
         public readonly ComponentArray<Transform> Transforms;
     }
 
-    [Inject] private TransformData m_TransformData;
+    [Inject] TransformData m_TransformData;
 
     public struct GameStateData
     {
         public readonly ComponentDataArray<GameState.Component> GameState;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
     [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 

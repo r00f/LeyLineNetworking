@@ -26,7 +26,7 @@ public class UnitLifeCycleSystem : ComponentSystem
         public SubtractiveComponent<UnitStateData> UnitState;
     }
 
-    [Inject] private UnitAddedData m_UnitAddedData;
+    [Inject] UnitAddedData m_UnitAddedData;
 
     private struct UnitChangedData
     {
@@ -37,7 +37,7 @@ public class UnitLifeCycleSystem : ComponentSystem
         public ComponentDataArray<UnitStateData> UnitState;
     }
 
-    [Inject] private UnitChangedData m_UnitChangedData;
+    [Inject] UnitChangedData m_UnitChangedData;
 
     public struct UnitRemovedData
     {
@@ -47,7 +47,7 @@ public class UnitLifeCycleSystem : ComponentSystem
         public readonly ComponentDataArray<UnitStateData> UnitState;
     }
 
-    [Inject] private UnitRemovedData m_UnitRemovedData;
+    [Inject] UnitRemovedData m_UnitRemovedData;
 
     public struct CellData
     {
@@ -57,9 +57,9 @@ public class UnitLifeCycleSystem : ComponentSystem
         public readonly ComponentDataArray<CubeCoordinate.Component> CubeCoordinateData;
     }
 
-    [Inject] private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
-    [Inject] private HandleCellGridRequestsSystem m_CellGridSystem;
+    [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
     protected override void OnUpdate()
     {

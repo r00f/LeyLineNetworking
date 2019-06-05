@@ -38,6 +38,7 @@ public class UIReferences : MonoBehaviour
     [Header("BottomBars")]
     public Text HealthText;
     public Image HealthFill;
+    public Image ArmorFill;
     //public GameObject HeroEnergyPanel;
 
     [Header("ButtonLists")]

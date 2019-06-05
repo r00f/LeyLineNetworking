@@ -217,6 +217,11 @@ public static class LeyLineEntityTemplates {
     {
         var client = workerId;
 
+        var turnTimer = new TurnTimer.Snapshot
+        {
+            Timers = new List<Timer>()
+        };
+
         var pos = new Position.Snapshot
         {
             Coords = position.Coords
@@ -300,6 +305,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientPathSnapshot, client);
         template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
+        template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
@@ -533,6 +539,14 @@ public static class LeyLineEntityTemplates {
                 AF.EffectType = EffectTypeEnum.deal_damage;
                 AF.DealDamageNested.DamageAmount = go.damageAmount;
             }
+            if (inAction.Effects[i] is ECS_ArmorEffect)
+            {
+                ECS_ArmorEffect go = inAction.Effects[i] as ECS_ArmorEffect;
+                AF.EffectType = EffectTypeEnum.gain_armor;
+                AF.GainArmorNested.ArmorAmount = go.ArmorAmount;
+            }
+            AF.TurnDuration = inAction.Effects[i].TurnDuration;
+
             switch (inAction.Effects[i].ApplyToTargets)
             {
                 case ECSActionEffect.ApplyTo.All:

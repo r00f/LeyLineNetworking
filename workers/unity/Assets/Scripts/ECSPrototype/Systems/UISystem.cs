@@ -30,7 +30,7 @@ namespace LeyLineHybridECS
             public ComponentArray<Healthbar> HealthbarData;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         struct GameStateData
         {
@@ -38,7 +38,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<GameState.Component> GameStates;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
         public struct AuthoritativePlayerData
         {
@@ -49,7 +49,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
-        [Inject] private AuthoritativePlayerData m_AuthoritativePlayerData;
+        [Inject] AuthoritativePlayerData m_AuthoritativePlayerData;
 
         public struct PlayerData
         {
@@ -59,11 +59,11 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
-        [Inject] private PlayerStateSystem m_PlayerStateSystem;
+        [Inject] PlayerStateSystem m_PlayerStateSystem;
 
-        [Inject] private SendActionRequestSystem m_SendActionRequestSystem;
+        [Inject] SendActionRequestSystem m_SendActionRequestSystem;
 
         UIReferences UIRef;
 
@@ -131,8 +131,7 @@ namespace LeyLineHybridECS
                 var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var position = m_UnitData.TransformData[i].position;
-                float currentHealth = m_UnitData.HealthData[i].CurrentHealth;
-                float maxHealth = m_UnitData.HealthData[i].MaxHealth;
+                var health = m_UnitData.HealthData[i];
                 var healthbar = m_UnitData.HealthbarData[i];
                 var isVisible = m_UnitData.IsVisibleData[i];
                 var animatedPortrait = m_UnitData.PortraitData[i].PortraitClip;
@@ -148,8 +147,19 @@ namespace LeyLineHybridECS
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
                         UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
 
-                    UIRef.HealthText.text = currentHealth + " / " + maxHealth;
-                    UIRef.HealthFill.fillAmount = Mathf.Lerp(UIRef.HealthFill.fillAmount, currentHealth / maxHealth, 0.1f);
+                    string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
+
+                    if(health.Armor > 0)
+                    {
+                        UIRef.HealthText.text = currentMaxHealth + " +" + health.Armor;
+                    }
+                    else
+                    {
+                        UIRef.HealthText.text = currentMaxHealth;
+                    }
+                    
+
+                    SetHealthBarFillAmounts(UIRef.HealthFill, UIRef.ArmorFill, health);
 
                     if (factionColor == TeamColorEnum.blue)
                     {
@@ -252,7 +262,6 @@ namespace LeyLineHybridECS
                 //if there is no healthbar, instantiate it into healthBarParent
                 if(!healthbar.HealthBarInstance)
                 {
-                    currentHealth = maxHealth;
                     healthbar.HealthBarInstance = Object.Instantiate(healthbar.HealthBarPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
                 }
                 else
@@ -265,9 +274,10 @@ namespace LeyLineHybridECS
                     {
                         healthbar.HealthBarInstance.SetActive(false);
                     }
+
                     
                     healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
-                    healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, currentHealth / maxHealth, 0.1f);
+                    healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, health.CurrentHealth / health.MaxHealth, 0.1f);
                 }
             }
 
@@ -372,7 +382,22 @@ namespace LeyLineHybridECS
             return parentCanvas.transform.TransformPoint(movePos);
         }
 
-    }
+        public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health)
+        {
 
+            uint combinedHealth = health.CurrentHealth + health.Armor;
+            uint combinedMaxHealth = health.MaxHealth + health.Armor;
+            float healthPercentage = 1 - (float)health.Armor / (float)combinedMaxHealth;
+            float combinedPercentage = 1;
+
+            if(combinedHealth < health.MaxHealth)
+            {
+                combinedPercentage = (float)combinedHealth / (float)combinedMaxHealth;
+            }
+
+            inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, combinedPercentage * healthPercentage, 0.1f);
+            inArmorFill.fillAmount = Mathf.Lerp(inArmorFill.fillAmount, combinedPercentage, 0.1f);
+        }
+    }
 }
 

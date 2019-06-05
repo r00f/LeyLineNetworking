@@ -26,7 +26,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<Vision.Component> Vision;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         public struct CellData
         {
@@ -36,7 +36,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
         }
 
-        [Inject] private CellData m_CellData;
+        [Inject] CellData m_CellData;
 
         public struct GameStateData
         {
@@ -46,9 +46,9 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<GameState.Component> GameState;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
-        [Inject] private HandleCellGridRequestsSystem m_CellGridSystem;
+        [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
         protected override void OnStartRunning()
         {

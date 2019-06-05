@@ -5,6 +5,7 @@ using Improbable.Gdk.Core.Commands;
 using Unit;
 using Generic;
 
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(ExecuteActionsSystem))]
 public class CleanupSystem : ComponentSystem
 {
     public struct UnitData
@@ -27,6 +28,12 @@ public class CleanupSystem : ComponentSystem
 
     [Inject] GameStateData m_GameStateData;
 
+    [Inject] ExecuteActionsSystem m_ExecuteSystem;
+
+    [Inject] TimerSystem m_TimerSystem;
+
+    [Inject] ResourceSystem m_ResourceSystem;
+
     protected override void OnUpdate()
     {
         for (var i = 0; i < m_GameStateData.Length; i++)
@@ -37,6 +44,9 @@ public class CleanupSystem : ComponentSystem
             if (gameState == GameStateEnum.cleanup)
             {
                 DeleteDeadUnits(worldIndex);
+                m_TimerSystem.SubstractTurnDurations(worldIndex);
+                m_ExecuteSystem.ClearAllLockedActions(worldIndex);
+                m_ResourceSystem.ResetArmor(worldIndex);
             }
         }
     }

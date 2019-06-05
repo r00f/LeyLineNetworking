@@ -19,7 +19,7 @@ public class InitializeUnitsSystem : ComponentSystem
         public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct PlayerData
     {
@@ -28,7 +28,7 @@ public class InitializeUnitsSystem : ComponentSystem
         public ComponentArray<HeroTransform> HeroTransforms;
     }
 
-    [Inject] private PlayerData m_PlayerData;
+    [Inject] PlayerData m_PlayerData;
 
     protected override void OnUpdate()
     {

@@ -25,7 +25,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<FactionComponent.Component> FactionComponent;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         public struct CellData
         {
@@ -36,7 +36,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
         }
 
-        [Inject] private CellData m_CellData;
+        [Inject] CellData m_CellData;
 
         public struct GameStateData
         {
@@ -46,7 +46,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<GameState.Component> GameStates;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
         public struct PlayerStateData : ISystemStateComponentData
         {
@@ -64,7 +64,7 @@ namespace LeyLineHybridECS
             public SubtractiveComponent<PlayerStateData> WorldIndexState;
         }
 
-        [Inject] private PlayerAddedData m_PlayerAddedData;
+        [Inject] PlayerAddedData m_PlayerAddedData;
 
 
         public struct PlayerRemovedData
@@ -77,7 +77,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<PlayerStateData> WorldIndexState;
         }
 
-        [Inject] private PlayerRemovedData m_PlayerRemovedData;
+        [Inject] PlayerRemovedData m_PlayerRemovedData;
 
         protected override void OnUpdate()
         {

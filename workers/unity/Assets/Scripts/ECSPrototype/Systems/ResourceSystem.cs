@@ -18,18 +18,19 @@ public class ResourceSystem : ComponentSystem
         public ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
     }
 
-    [Inject] private PlayerData m_PlayerData;
+    [Inject] PlayerData m_PlayerData;
 
     public struct UnitData
     {
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Energy.Component> UnitEnergyData;
         public readonly ComponentDataArray<FactionComponent.Component> FactionData;
         public ComponentDataArray<Health.Component> HealthData;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     struct GameStateData
     {
@@ -38,7 +39,7 @@ public class ResourceSystem : ComponentSystem
         public readonly ComponentDataArray<GameState.Component> GameStates;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
     protected override void OnUpdate()
     {
@@ -182,10 +183,10 @@ public class ResourceSystem : ComponentSystem
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
-            var id = m_UnitData.EntityIdData[i].EntityId;
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
             var health = m_UnitData.HealthData[i];
 
-            if (unitID.Equals(id))
+            if (id == unitID)
             {
                 if (health.CurrentHealth + healAmount < health.MaxHealth)
                 {
@@ -201,6 +202,54 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
+    public void AddArmor(long unitID, uint armorAmount)
+    {
+        Debug.Log("Add armor to unit with id: " + armorAmount + ", " + unitID);
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
+            var health = m_UnitData.HealthData[i];
+
+            if (unitID == id)
+            {
+                health.Armor += armorAmount;
+                m_UnitData.HealthData[i] = health;
+                Debug.Log(m_UnitData.HealthData[i].Armor);
+            }
+        }
+    }
+
+    public void RemoveArmor(long unitID, uint armorAmount)
+    {
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
+            var health = m_UnitData.HealthData[i];
+
+            if (unitID == id)
+            {
+                health.Armor -= armorAmount;
+                m_UnitData.HealthData[i] = health;
+            }
+        }
+    }
+
+    public void ResetArmor(uint worldIndex)
+    {
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId;
+            var health = m_UnitData.HealthData[i];
+            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+
+            if(worldIndex == unitWorldIndex)
+            {
+                health.Armor = 0;
+                m_UnitData.HealthData[i] = health;
+            }
+        }
+    }
+
     public void DealDamage(long unitID, uint damageAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
@@ -211,16 +260,21 @@ public class ResourceSystem : ComponentSystem
             if(unitID == id)
             {
                 Debug.Log("Deal damage to unit: " + unitID + ", " + damageAmount);
-                if((int)health.CurrentHealth - (int)damageAmount > 0)
+                var combinedHealth = health.CurrentHealth + health.Armor;
+
+                if((int)combinedHealth - (int)damageAmount > 0)
                 {
-                    health.CurrentHealth -= damageAmount;
+                    combinedHealth -= damageAmount;
+                    if (health.CurrentHealth > combinedHealth)
+                        health.CurrentHealth = combinedHealth;
+                    else
+                        health.Armor = combinedHealth - health.CurrentHealth;
                 }
                 else
                 {
                     health.CurrentHealth = 0;
                     Die(unitID);
                 }
-
                 m_UnitData.HealthData[i] = health;
             }
         }

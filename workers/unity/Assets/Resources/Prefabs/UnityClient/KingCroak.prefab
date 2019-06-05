@@ -424,7 +424,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VisionRange: 6
-  BaseHealth: 6
+  BaseHealth: 10
   UpkeepCost: 0
   SpawnCost: 0
   MovementRange: 4
@@ -434,9 +434,10 @@ MonoBehaviour:
   BasicAttack: {fileID: 11400000, guid: a522648c58fd9b44fa672d200d7834a7, type: 2}
   IsHero: 1
   Actions:
+  - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
   - {fileID: 11400000, guid: 4c969be23f72a0141ad7603e23b902f6, type: 2}
-  - {fileID: 11400000, guid: 9749cfc90dc8c6d4e8b01821c832cdac, type: 2}
   - {fileID: 11400000, guid: 27b3d48f1ed403241a5cad6c22b854af, type: 2}
+  - {fileID: 11400000, guid: 9749cfc90dc8c6d4e8b01821c832cdac, type: 2}
   SpawnActions:
   - {fileID: 11400000, guid: 990555597dab8c74ba70b2349dab9666, type: 2}
 --- !u!114 &1130299993275380547
