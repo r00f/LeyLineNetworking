@@ -163,22 +163,22 @@ public class HighlightingSystem : ComponentSystem
                             {
                                 if (playerHighlightingData.IsUnitTarget == 1)
                                 {
-                                    if (markerState.IsUnit == 1)
+                                    if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
                                     {
-                                        if (m_CellGrid.ValidateUnitTarget(entityID, playerState.SelectedUnitId, playerFaction, (UnitRequisitesEnum)playerHighlightingData.TargetRestrictionIndex))
+                                        if (markerState.IsUnit == 1)
                                         {
-                                            if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
+                                            if (m_CellGrid.ValidateUnitTarget(entityID, playerState.SelectedUnitId, playerFaction, (UnitRequisitesEnum)playerHighlightingData.TargetRestrictionIndex))
                                             {
                                                 Vector2 XZ = m_CellGrid.CubeCoordToXZ(coord);
                                                 playerHighlightingData.HoveredCoordinate = coord;
                                                 playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
                                             }
                                         }
-                                    }
-                                    else
-                                    {
-                                        playerHighlightingData.HoveredCoordinate = new Vector3f(999, 999, 999);
-                                        playerHighlightingData.HoveredPosition = new Vector3(0, 0, 0);
+                                        else if (playerHighlightingData.HoveredPosition != Vector3.zero)
+                                        {
+                                            playerHighlightingData.HoveredCoordinate = new Vector3f(999, 999, 999);
+                                            playerHighlightingData.HoveredPosition = new Vector3(0, 0, 0);
+                                        }
                                     }
                                 }
                                 else
@@ -192,15 +192,8 @@ public class HighlightingSystem : ComponentSystem
                                             playerHighlightingData.HoveredPosition = new Vector3(XZ.x, 3, XZ.y);
                                         }
                                     }
-                                    else
-                                    {
-                                        playerHighlightingData.HoveredCoordinate = new Vector3f(999, 999, 999);
-                                        playerHighlightingData.HoveredPosition = new Vector3(0, 0, 0);
-                                    }
                                 }
                             }
-
-                            //m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
 
                             if (playerHighlightingData.HoveredCoordinate != playerHighlightingData.LastHoveredCoordinate)
                             {
@@ -278,48 +271,50 @@ public class HighlightingSystem : ComponentSystem
 
                                 #region Update Visuals
 
-                                    if (playerHighlightingData.IsUnitTarget == 1)
+                                if (playerHighlightingData.IsUnitTarget == 1)
+                                {
+                                    //if target wants a Unit, loop over units to find which one is hovered
+                                    for (int u = 0; u < m_UnitData.Length; u++)
                                     {
-                                        //if target wants a Unit, loop over units to find which one is hovered
-                                        for (int u = 0; u < m_UnitData.Length; u++)
-                                        {
-                                            var unitCoord = m_UnitData.Coords[u].CubeCoordinate;
-                                            var hoveredLineRendererComp = m_UnitData.LineRenderers[u];
+                                        var unitCoord = m_UnitData.Coords[u].CubeCoordinate;
+                                        var hoveredLineRendererComp = m_UnitData.LineRenderers[u];
 
-                                            if (unitCoord == playerHighlightingData.HoveredCoordinate)
-                                            {
-                                                hoveredOffset = hoveredLineRendererComp.arcOffset.y;
-                                            }
+                                        if (unitCoord == playerHighlightingData.HoveredCoordinate)
+                                        {
+                                            hoveredOffset = hoveredLineRendererComp.arcOffset.y;
                                         }
                                     }
-
-                                    if (playerHighlightingData.PathLine == 1)
-                                    {
-                                        CellAttributeList Path = new CellAttributeList();
-                                        Path = m_CellGrid.FindPath(playerHighlightingData.HoveredCoordinate, m_PlayerStateData.PlayerState[0].CachedPaths);
-
-                                        if (Path.CellAttributes.Count > 0)
-                                        {
-                                            UpdatePathLineRenderer(Path, lineRendererComp);
-                                        }
-                                    }
-
-                                    else if (playerHighlightingData.LineAoE == 0)
-                                    {
-                                        //use Arc Line
-                                        if (playerHighlightingData.HoveredPosition != Vector3.zero)
-                                            UpdateArcLineRenderer(hoveredOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
-                                        else// if (mouseState.CurrentState != MouseState.State.Neutral)
-                                            lineRendererComp.lineRenderer.positionCount = 0;
-                                    }
-
-                                    else
-                                    {
-                                        lineRendererComp.lineRenderer.positionCount = 0;
-                                    }
-
-                                    m_PlayerStateData.PlayerState[0] = playerState;
                                 }
+
+                                if (playerHighlightingData.PathLine == 1)
+                                {
+                                    CellAttributeList Path = new CellAttributeList();
+                                    Path = m_CellGrid.FindPath(playerHighlightingData.HoveredCoordinate, m_PlayerStateData.PlayerState[0].CachedPaths);
+
+                                    if (Path.CellAttributes.Count > 0)
+                                    {
+                                        UpdatePathLineRenderer(Path, lineRendererComp);
+                                    }
+                                }
+
+                                else if (playerHighlightingData.LineAoE == 0)
+                                {
+                                    //use Arc Line
+                                    if (playerHighlightingData.HoveredPosition != Vector3.zero)
+                                    {
+                                        UpdateArcLineRenderer(hoveredOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
+                                    }
+                                    else// if (mouseState.CurrentState != MouseState.State.Neutral)
+                                        lineRendererComp.lineRenderer.positionCount = 0;
+                                }
+
+                                else
+                                {
+                                    lineRendererComp.lineRenderer.positionCount = 0;
+                                }
+
+                                m_PlayerStateData.PlayerState[0] = playerState;
+                            }
                                 #endregion
                             }
                         }
@@ -585,6 +580,14 @@ public class HighlightingSystem : ComponentSystem
     public void ResetHighlights()
     {
         var playerState = m_PlayerStateData.PlayerState[0];
+        var playerHighlightingData = m_PlayerStateData.HighlightingData[0];
+
+        if (playerHighlightingData.HoveredPosition != Vector3.zero)
+        {
+            playerHighlightingData.HoveredCoordinate = new Vector3f(999, 999, 999);
+            playerHighlightingData.HoveredPosition = new Vector3(0, 0, 0);
+            m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
+        }
 
         for (int i = 0; i < m_ActiveUnitData.Length; i++)
         {

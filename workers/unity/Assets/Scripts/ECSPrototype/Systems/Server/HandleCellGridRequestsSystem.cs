@@ -17,6 +17,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct SelectActionRequestData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
@@ -89,6 +90,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var coord = m_SelectActionRequestData.CoordinateData[i].CubeCoordinate;
             var worldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
             var faction = m_SelectActionRequestData.Faction[i];
+            var unitId = m_SelectActionRequestData.EntityIds[i].EntityId.Id;
 
             cellsToMarkData.SetClientRange = false;
             m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
@@ -130,9 +132,20 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 }
             }
 
-            if(actionData.CurrentSelected.Targets.Count != 0)
+
+            if (actionData.CurrentSelected.Targets.Count != 0)
             {
-                if (!actionData.CurrentSelected.Equals(actionData.LastSelected) || cellsToMarkData.CellsInRange.Count == 0)
+                if(actionData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
+                {
+                    if(actionData.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    {
+                        Debug.Log("SelfTarget");
+                        //Set target instantly
+                        actionData.LockedAction = SetLockedAction(actionData.CurrentSelected, coord, coord, unitId, faction.Faction);
+                        actionData.CurrentSelected = actionData.NullAction;
+                    }
+                }
+                else if (!actionData.CurrentSelected.Equals(actionData.LastSelected) || cellsToMarkData.CellsInRange.Count == 0)
                 {
                     cellsToMarkData.CellsInRange = GetRadius(coord, (uint)actionData.CurrentSelected.Targets[0].Targettingrange, worldIndex);
 
@@ -148,7 +161,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     }
                 }
             }
-
 
             actionData.LastSelected = actionData.CurrentSelected;
             m_SelectActionRequestData.ActionsData[i] = actionData;
@@ -273,55 +285,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                                     if (isValidTarget)
                                     {
-                                        actionData.LockedAction = actionData.CurrentSelected;
-                                        var locked = actionData.LockedAction;
-                                        var t = actionData.LockedAction.Targets[0];
-                                        t.TargetCoordinate = unitCoord;
-                                        t.TargetId = id;
-                                        actionData.LockedAction.Targets[0] = t;
-                                        uint costToSubtract = t.EnergyCost;
-
-                                        for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
-                                        {
-
-                                            var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
-                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                            switch (modType)
-                                            {
-
-                                                case ModTypeEnum.aoe:
-                                                    mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
-                                                    break;
-
-
-                                                case ModTypeEnum.path:
-
-                                                    /*foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
-                                                    {
-                                                        mod.Coordinates.Add(c.CubeCoordinate);
-
-                                                    }
-
-                                                    actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                                    costToSubtract += (uint)mod.Coordinates.Count;*/
-                                                    break;
-                                                case ModTypeEnum.line:
-                                                    mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
-                                                    break;
-                                                case ModTypeEnum.ring:
-                                                    mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
-
-
-                                                    break;
-                                            }
-                                        }
-                                        locked.CombinedCost = costToSubtract;
-                                        actionData.LockedAction = locked;
-
-
-                                        m_ResourceSystem.AddArmor(actionData.LockedAction.Targets[0].TargetId, actionData.LockedAction.Effects[0].GainArmorNested.ArmorAmount);
-
-                                        m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+                                        actionData.LockedAction = SetLockedAction(actionData.CurrentSelected, originCoord, unitCoord, unitId, faction.Faction);
                                     }
                                     else
                                     {
@@ -341,8 +305,55 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         }
 
         #endregion
-        //Debug.Log(CubeCoordToXZ(new Vector3f(-14, 0, 14)));
+    }
 
+    public Action SetLockedAction(Action selectedAction, Vector3f originCoord, Vector3f unitCoord, long unitId, uint faction)
+    {
+        Action locked = selectedAction;
+        var t = locked.Targets[0];
+        t.TargetCoordinate = unitCoord;
+        t.TargetId = unitId;
+        locked.Targets[0] = t;
+        uint costToSubtract = t.EnergyCost;
+
+        for (int mi = 0; mi < locked.Targets[0].Mods.Count; mi++)
+        {
+            var modType = locked.Targets[0].Mods[mi].ModType;
+            var mod = locked.Targets[0].Mods[0];
+            switch (modType)
+            {
+
+                case ModTypeEnum.aoe:
+                    mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
+                    break;
+
+
+                case ModTypeEnum.path:
+
+                    /*foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
+                    {
+                        mod.Coordinates.Add(c.CubeCoordinate);
+
+                    }
+
+                    actionData.LockedAction.Targets[0].Mods[0] = mod;
+                    costToSubtract += (uint)mod.Coordinates.Count;*/
+                    break;
+                case ModTypeEnum.line:
+                    mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
+                    break;
+                case ModTypeEnum.ring:
+                    mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
+                    break;
+            }
+        }
+
+        locked.CombinedCost = costToSubtract;
+
+        m_ResourceSystem.AddArmor(locked.Targets[0].TargetId, locked.Effects[0].GainArmorNested.ArmorAmount);
+        m_ResourceSystem.SubstactEnergy(faction, locked.CombinedCost);
+
+        return locked;
     }
 
     Vector3f[] DirectionsArray = new Vector3f[]{
@@ -366,7 +377,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         Vector2 axial = CubeToAxial(coord);
         var x = 1.5f * (3 / 2 * axial.x);
         var y = 1.73f * ((axial.x * 0.5f) + axial.y);
-        //var y = 1.5f * (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
 
         //center cell + coordinate offset = XZ coordinate in world space - offset X by (worldindex - 1) * 100?
         return new Vector2(50, 55.22f) + new Vector2(x, y);

@@ -60,7 +60,6 @@ public class AnimatorComponent : MonoBehaviour
     {
         if(other.gameObject.CompareTag("DamageCollider") && other != WeaponCollider)
         {
-            Debug.Log("GameObject with name: " + other.name + " enters the trigger");
             TriggerEnter = true;
         }
     }

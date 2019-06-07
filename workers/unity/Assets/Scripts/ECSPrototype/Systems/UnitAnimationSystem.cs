@@ -91,7 +91,6 @@ public class UnitAnimationSystem : ComponentSystem
                         }
                         else
                         {
-                            Debug.Log("LostHealth");
                             animatorComponent.Animator.SetTrigger("GetHit");
                         }
                         animatorComponent.TriggerEnter = false;

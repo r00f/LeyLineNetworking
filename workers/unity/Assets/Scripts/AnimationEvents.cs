@@ -9,17 +9,11 @@ public class AnimationEvents : MonoBehaviour
 
     public void EnableWeaponCollider()
     {
-        Debug.Log("EnableWeaponCollider");
         WeaponCollider.enabled = true;
     }
 
     public void DisableWeaponCollider()
     {
-        Debug.Log("DisableWeaponCollider");
         WeaponCollider.enabled = false;
     }
-
-
-
-
 }

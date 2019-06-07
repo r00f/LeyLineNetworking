@@ -5,7 +5,7 @@ using Improbable.Gdk.Core.Commands;
 using Unit;
 using Generic;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(ExecuteActionsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class CleanupSystem : ComponentSystem
 {
     public struct UnitData
@@ -60,11 +60,8 @@ public class CleanupSystem : ComponentSystem
             var currentHealth = m_UnitData.HealthData[i].CurrentHealth;
             var entityId = m_UnitData.EntityIds[i].EntityId;
 
-            
             if(unitWorldIndex == worldIndex && currentHealth == 0)
             {
-                Debug.Log("Delete Unit with id: " + entityId.Id);
-
                 requestSender.RequestsToSend.Add(new WorldCommands.DeleteEntity.Request
                 (
                     entityId

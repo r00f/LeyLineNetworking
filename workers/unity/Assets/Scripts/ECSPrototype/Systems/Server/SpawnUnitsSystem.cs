@@ -9,7 +9,7 @@ using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(ExecuteActionsSystem))]
     public class SpawnUnitsSystem : ComponentSystem
     {
         public struct CellData
@@ -80,7 +80,6 @@ namespace LeyLineHybridECS
                                     {
                                         if (unitToSpawn.Faction == playerFaction.Faction)
                                         {
-                                            //Debug.Log("SPAWNUNIT");
                                             var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
                                             var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitToSpawn.UnitName, position, coord, playerFaction, worldIndex, Stats);
 
@@ -92,7 +91,6 @@ namespace LeyLineHybridECS
                                             m_Data.CreateEntitySender[i] = requestSender;
 
                                             unitToSpawn.UnitName = "";
-                                            //unitToSpawn.Faction = 0;
                                             m_Data.UnitToSpawn[i] = unitToSpawn;
                                         }
                                     }

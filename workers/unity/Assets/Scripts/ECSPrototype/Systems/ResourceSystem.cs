@@ -132,7 +132,6 @@ public class ResourceSystem : ComponentSystem
 
     public void AddEnergy(uint playerFaction, uint energyAmount)
     {
-        //Debug.Log("Add " + energyAmount + " energy to player " + playerFaction);
         for (int i = 0; i < m_PlayerData.Length; i++)
         {
             var faction = m_PlayerData.FactionData[i].Faction;
@@ -163,7 +162,6 @@ public class ResourceSystem : ComponentSystem
 
             if (playerFaction == faction)
             {
-                //Debug.Log(energyComp.Energy - energyAmount);
                 //since uint cant be negative and turns into a huge number convert to int to check
                 if ((int)energyComp.Energy - (int)energyAmount > 0)
                 {
@@ -204,7 +202,6 @@ public class ResourceSystem : ComponentSystem
 
     public void AddArmor(long unitID, uint armorAmount)
     {
-        Debug.Log("Add armor to unit with id: " + armorAmount + ", " + unitID);
         for (int i = 0; i < m_UnitData.Length; i++)
         {
             var id = m_UnitData.EntityIdData[i].EntityId.Id;
@@ -214,7 +211,6 @@ public class ResourceSystem : ComponentSystem
             {
                 health.Armor += armorAmount;
                 m_UnitData.HealthData[i] = health;
-                Debug.Log(m_UnitData.HealthData[i].Armor);
             }
         }
     }
@@ -236,6 +232,7 @@ public class ResourceSystem : ComponentSystem
 
     public void ResetArmor(uint worldIndex)
     {
+        UpdateInjectedComponentGroups();
         for (int i = 0; i < m_UnitData.Length; i++)
         {
             var id = m_UnitData.EntityIdData[i].EntityId;
@@ -259,7 +256,6 @@ public class ResourceSystem : ComponentSystem
 
             if(unitID == id)
             {
-                Debug.Log("Deal damage to unit: " + unitID + ", " + damageAmount);
                 var combinedHealth = health.CurrentHealth + health.Armor;
 
                 if((int)combinedHealth - (int)damageAmount > 0)

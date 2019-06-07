@@ -158,8 +158,7 @@ namespace LeyLineHybridECS
                         UIRef.HealthText.text = currentMaxHealth;
                     }
                     
-
-                    SetHealthBarFillAmounts(UIRef.HealthFill, UIRef.ArmorFill, health);
+                    SetHealthBarFillAmounts(UIRef.HealthFill, UIRef.ArmorFill, health, faction.Faction);
 
                     if (factionColor == TeamColorEnum.blue)
                     {
@@ -275,9 +274,8 @@ namespace LeyLineHybridECS
                         healthbar.HealthBarInstance.SetActive(false);
                     }
 
-                    
                     healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
-                    healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, health.CurrentHealth / health.MaxHealth, 0.1f);
+                    SetHealthBarFillAmounts(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
                 }
             }
 
@@ -382,21 +380,30 @@ namespace LeyLineHybridECS
             return parentCanvas.transform.TransformPoint(movePos);
         }
 
-        public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health)
+        public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health, uint unitFaction)
         {
+            var playerFaction = m_PlayerData.FactionData[0].Faction;
 
-            uint combinedHealth = health.CurrentHealth + health.Armor;
-            uint combinedMaxHealth = health.MaxHealth + health.Armor;
-            float healthPercentage = 1 - (float)health.Armor / (float)combinedMaxHealth;
-            float combinedPercentage = 1;
-
-            if(combinedHealth < health.MaxHealth)
+            if(unitFaction == playerFaction)
             {
-                combinedPercentage = (float)combinedHealth / (float)combinedMaxHealth;
-            }
+                uint combinedHealth = health.CurrentHealth + health.Armor;
+                uint combinedMaxHealth = health.MaxHealth + health.Armor;
+                float healthPercentage = 1 - (float)health.Armor / combinedMaxHealth;
+                float combinedPercentage = 1;
 
-            inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, combinedPercentage * healthPercentage, 0.1f);
-            inArmorFill.fillAmount = Mathf.Lerp(inArmorFill.fillAmount, combinedPercentage, 0.1f);
+                if (combinedHealth < health.MaxHealth)
+                {
+                    combinedPercentage = (float)combinedHealth / combinedMaxHealth;
+                }
+
+                inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, combinedPercentage * healthPercentage, 0.1f);
+                inArmorFill.fillAmount = Mathf.Lerp(inArmorFill.fillAmount, combinedPercentage, 0.1f);
+            }
+            else
+            {
+                inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, (float)health.CurrentHealth / health.MaxHealth, 0.1f);
+                inArmorFill.fillAmount = 0;
+            }
         }
     }
 }

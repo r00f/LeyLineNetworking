@@ -188,8 +188,6 @@ public class SendActionRequestSystem : ComponentSystem
         m_HighlightingSystem.ClearPlayerState();
         m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
 
-
-        //Debug.Log(actionIndex + ", " + entityId);
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
             var idCompomnent = m_SelectActionRequestData.EntityIds[i].EntityId;
