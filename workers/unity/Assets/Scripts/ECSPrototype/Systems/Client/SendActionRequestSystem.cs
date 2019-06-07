@@ -185,8 +185,10 @@ public class SendActionRequestSystem : ComponentSystem
         var playerState = m_PlayerData.PlayerStateData[0];
         playerState.SelectedActionId = actionIndex;
         m_PlayerData.PlayerStateData[0] = playerState;
-        m_HighlightingSystem.ClearPlayerState();
         m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
+        m_HighlightingSystem.ClearPlayerState();
+
+
 
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {

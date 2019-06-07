@@ -237,10 +237,11 @@ public class HighlightingSystem : ComponentSystem
                                 }
 
                                 #region Highlight Reachable
-                                if (playerHighlightingData.PathingRange == 1)
+                                if (playerState.CellsInRange.Count == 0 && playerHighlightingData.TargetRestrictionIndex != 2)
                                 {
-                                    if (playerState.CellsInRange.Count == 0)
+                                    if (playerHighlightingData.PathingRange == 1)
                                     {
+
                                         List<CellAttributes> go = m_CellGrid.GetRadius(occCoord, playerHighlightingData.Range, worldIndex);
                                         playerState.CachedPaths = m_CellGrid.GetAllPathsInRadius(playerHighlightingData.Range, go, occCoord);
 
@@ -251,13 +252,12 @@ public class HighlightingSystem : ComponentSystem
 
                                         playerState.CellsInRange = playerState.CellsInRange;
                                         m_PlayerStateData.PlayerState[0] = playerState;
+
                                         HighlightReachable();
                                     }
-                                }
-                                else
-                                {
-                                    if (playerState.CellsInRange.Count == 0)
+                                    else
                                     {
+
                                         List<CellAttributes> go = m_CellGrid.GetRadius(occCoord, playerHighlightingData.Range, worldIndex);
                                         foreach (CellAttributes c in go)
                                         {
@@ -313,6 +313,7 @@ public class HighlightingSystem : ComponentSystem
                                     lineRendererComp.lineRenderer.positionCount = 0;
                                 }
 
+                                playerState.UnitTargets = playerState.UnitTargets;
                                 m_PlayerStateData.PlayerState[0] = playerState;
                             }
                                 #endregion
@@ -331,17 +332,18 @@ public class HighlightingSystem : ComponentSystem
     {
         var playerState = m_PlayerStateData.PlayerState[0];
 
+
+
         if (inHinghlightningData.AoERadius > 0)
         {
             List<Vector3f> area = new List<Vector3f>();
             area = m_CellGrid.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius);
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
 
-            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            if (cubeCoordList.CubeCoordinates.Count != 1 && inHinghlightningData.HoveredCoordinate != new Vector3f(999, 999, 999))
+           if (cubeCoordList.CubeCoordinates.Count != 1 && inHinghlightningData.HoveredCoordinate != new Vector3f(999, 999, 999))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                playerState.UnitTargets = playerState.UnitTargets;
+                
             }
         }
         else if (inHinghlightningData.RingRadius > 0)
@@ -354,7 +356,7 @@ public class HighlightingSystem : ComponentSystem
             if (cubeCoordList.CubeCoordinates.Count != 1 && inHinghlightningData.HoveredCoordinate != new Vector3f(999, 999, 999))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                playerState.UnitTargets = playerState.UnitTargets;
+                
             }
         }
         else if (inHinghlightningData.LineAoE == 1)
@@ -365,10 +367,10 @@ public class HighlightingSystem : ComponentSystem
             if (cubeCoordList.CubeCoordinates.Count != 1 && inHinghlightningData.HoveredCoordinate != new Vector3f(999, 999, 999))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                playerState.UnitTargets = playerState.UnitTargets;
+                
             }
         }
-        else
+        else 
         {
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
             cubeCoordList.CubeCoordinates.Add(inHinghlightningData.HoveredCoordinate);
@@ -377,14 +379,23 @@ public class HighlightingSystem : ComponentSystem
             if (inHinghlightningData.HoveredCoordinate != new Vector3f(999, 999, 999))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-                playerState.UnitTargets = playerState.UnitTargets;
+                
             }
-            else if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+            else if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId) && inHinghlightningData.TargetRestrictionIndex != 2)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Clear();
-                playerState.UnitTargets = playerState.UnitTargets;
+                
             }
         }
+
+
+        if (inHinghlightningData.TargetRestrictionIndex == 2)
+        {
+            Debug.Log("set self target");
+            playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Add(playerState.SelectedUnitCoordinate);
+
+        }
+
 
         //loop over units to check if any effect restriction applies and remove unit if true
         for (int i = 0; i < m_UnitData.Length; i++)
@@ -406,11 +417,11 @@ public class HighlightingSystem : ComponentSystem
                 }
             }
         }
-
     }
 
     public void GatherHighlightingInformation(long unitID, int actionID)
     {
+        UpdateInjectedComponentGroups();
         var playerHighlightingData = m_PlayerStateData.HighlightingData[0];
         ECSActionTarget target = null;
         ECSActionEffect effect = null;
@@ -476,6 +487,7 @@ public class HighlightingSystem : ComponentSystem
                 else if (target is ECSATarget_Tile)
                 {
                     playerHighlightingData.IsUnitTarget = 0;
+                    playerHighlightingData.TargetRestrictionIndex = 999;
                 }
 
                 playerHighlightingData.EffectRestrictionIndex = (uint)effect.ApplyToRestrictions;
@@ -597,8 +609,9 @@ public class HighlightingSystem : ComponentSystem
 
             if (actions.LockedAction.Index == -3)
             {
-                if (playerState.UnitTargets.ContainsKey(unitId))
+                if (playerState.UnitTargets.ContainsKey(unitId) && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
+                    Debug.Log("ResetH ayaya");
                     lineRenderer.positionCount = 0;
                     playerState.UnitTargets.Remove(unitId);
                     playerState.UnitTargets = playerState.UnitTargets;
@@ -634,6 +647,7 @@ public class HighlightingSystem : ComponentSystem
         //remove selected unit target from player UnitTargets Dict 
         if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
         {
+            
             playerState.UnitTargets.Remove(playerState.SelectedUnitId);
             playerState.UnitTargets = playerState.UnitTargets;
             m_PlayerStateData.PlayerState[0] = playerState;
@@ -665,8 +679,10 @@ public class HighlightingSystem : ComponentSystem
 
     public void ClearPlayerState()
     {
+        Debug.Log("called clear playerstate");
         UpdateInjectedComponentGroups();
         var playerstate = m_PlayerStateData.PlayerState[0];
+        var playerHighlighting = m_PlayerStateData.HighlightingData[0];
 
         for (int i = 0; i < m_ActiveUnitData.Length; i++)
         {
@@ -683,7 +699,5 @@ public class HighlightingSystem : ComponentSystem
         playerstate.CachedPaths.Clear();
         m_PlayerStateData.PlayerState[0] = playerstate;
     }
-
-
 }
 
