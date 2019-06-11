@@ -146,7 +146,7 @@ public class HighlightingSystem : ComponentSystem
                 }
                 else
                 {
-                    if (playerState.CurrentState == PlayerStateEnum.waiting_for_target)
+                    if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                     {
                         #region GetHovered
                         float hoveredOffset = 0;
@@ -161,6 +161,7 @@ public class HighlightingSystem : ComponentSystem
 
                             if (coordsInRangeHash.Contains(coord))
                             {
+                                
                                 if (playerHighlightingData.IsUnitTarget == 1)
                                 {
                                     if ((mouseState == MouseState.State.Hovered || mouseState == MouseState.State.Clicked) && coord != playerHighlightingData.HoveredCoordinate)
@@ -319,7 +320,7 @@ public class HighlightingSystem : ComponentSystem
                                 #endregion
                             }
                         }
-                    else
+                    else if(playerHighlightingData.TargetRestrictionIndex != 2)
                     {
                         ResetHighlights();
                     }
@@ -389,12 +390,12 @@ public class HighlightingSystem : ComponentSystem
         }
 
 
-        if (inHinghlightningData.TargetRestrictionIndex == 2)
+        /*if (inHinghlightningData.TargetRestrictionIndex == 2)
         {
             Debug.Log("set self target");
             playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Add(playerState.SelectedUnitCoordinate);
 
-        }
+        }*/
 
 
         //loop over units to check if any effect restriction applies and remove unit if true
@@ -611,7 +612,6 @@ public class HighlightingSystem : ComponentSystem
             {
                 if (playerState.UnitTargets.ContainsKey(unitId) && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
-                    Debug.Log("ResetH ayaya");
                     lineRenderer.positionCount = 0;
                     playerState.UnitTargets.Remove(unitId);
                     playerState.UnitTargets = playerState.UnitTargets;
@@ -647,7 +647,7 @@ public class HighlightingSystem : ComponentSystem
         //remove selected unit target from player UnitTargets Dict 
         if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
         {
-            
+            Debug.Log("Removed selected unit from unitTargets by HighlightReachable method");
             playerState.UnitTargets.Remove(playerState.SelectedUnitId);
             playerState.UnitTargets = playerState.UnitTargets;
             m_PlayerStateData.PlayerState[0] = playerState;
@@ -698,6 +698,60 @@ public class HighlightingSystem : ComponentSystem
         playerstate.CellsInRange.Clear();
         playerstate.CachedPaths.Clear();
         m_PlayerStateData.PlayerState[0] = playerstate;
+    }
+
+    public void SetSelfTarget(long entityID)
+    {
+        UpdateInjectedComponentGroups();
+        var playerState = m_PlayerStateData.PlayerState[0];
+        var playerHighlighting = m_PlayerStateData.HighlightingData[0];
+        playerState.UnitTargets.Remove(entityID);
+
+
+        for (int i = 0; i < m_ActiveUnitData.Length; i++)
+        {
+            var iD = m_ActiveUnitData.IDs[i].EntityId.Id;
+            var lineRendererComp = m_ActiveUnitData.LineRenderers[i];
+            var coord = m_ActiveUnitData.Coords[i].CubeCoordinate;
+
+            if (iD == entityID)
+            {
+                lineRendererComp.lineRenderer.positionCount = 0;
+                CubeCoordinateList list = new CubeCoordinateList(new List<Vector3f>());
+                list.CubeCoordinates.Add(coord);
+                playerState.UnitTargets.Add(iD, list);
+            }
+        }
+        playerState.CellsInRange.Clear();
+        playerState.CachedPaths.Clear();
+        playerState.UnitTargets = playerState.UnitTargets;
+        m_PlayerStateData.PlayerState[0] = playerState;
+        ResetHighlights();
+        for (int m = 0; m < m_MarkerStateData.Length; m++)
+        {
+            var markerState = m_MarkerStateData.MarkerStates[m];
+            var coord = m_MarkerStateData.Coords[m];
+
+            if (markerState.NumberOfTargets > 0)
+            {
+                markerState.NumberOfTargets = 0;
+            }
+            uint nOfTargets = 0;
+
+            foreach (long l in playerState.UnitTargets.Keys)
+            {
+                
+                HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[l].CubeCoordinates);
+                if (targetCoordsHash.Contains(coord.CubeCoordinate))
+                {
+                    nOfTargets += 1;
+                }
+            }
+            markerState.NumberOfTargets = nOfTargets;
+
+            m_MarkerStateData.MarkerStates[m] = markerState;
+        }
+
     }
 }
 

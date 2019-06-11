@@ -64,6 +64,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
         public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
+        public ComponentDataArray<HighlightingDataComponent> HighlightingData;
         public ComponentDataArray<PlayerState.Component> PlayerStateData;
     }
 
@@ -181,12 +182,51 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
+       
+
         UpdateInjectedComponentGroups();
+        bool isSelfTarget = false;
+        long selftargetID = 0;
         var playerState = m_PlayerData.PlayerStateData[0];
+        var highlightingData = m_PlayerData.HighlightingData[0];
         playerState.SelectedActionId = actionIndex;
         m_PlayerData.PlayerStateData[0] = playerState;
-        m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
-        m_HighlightingSystem.ClearPlayerState();
+        
+
+        for (int i = 0; i < m_SelectActionRequestData.Length; i++)
+        {
+            var idCompomnent = m_SelectActionRequestData.EntityIds[i].EntityId;
+            var actions = m_SelectActionRequestData.ActionsData[i];
+            if (actionIndex >= 0)
+            {
+                Action act = actions.OtherActions[actionIndex];
+                if(act.Targets[0].TargetType == TargetTypeEnum.unit)
+                {
+                    if(act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    {
+                        selftargetID = idCompomnent.Id;
+                        isSelfTarget = true;
+                    }
+                }
+            }
+            
+        }
+
+
+        if (!isSelfTarget)
+        {
+            m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
+            m_HighlightingSystem.ClearPlayerState();
+
+        }
+        else
+        {
+
+            Debug.Log("setSelfTargetCall from SendActReqSys");
+            highlightingData.TargetRestrictionIndex = 2;
+            m_PlayerData.HighlightingData[0] = highlightingData;
+            m_HighlightingSystem.SetSelfTarget(selftargetID);
+        }
 
 
 
