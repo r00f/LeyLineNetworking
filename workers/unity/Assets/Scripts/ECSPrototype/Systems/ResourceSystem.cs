@@ -177,7 +177,7 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public int CheckPlayerEnergy(uint playerFaction, uint energyCost)
+    public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
     {
         int leftOverEnergy = 0;
 

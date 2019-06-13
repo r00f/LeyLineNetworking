@@ -23,6 +23,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<Health.Component> HealthData;
             public readonly ComponentDataArray<IsVisible> IsVisibleData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<Actions.Component> Actions;
             public readonly ComponentArray<AnimatedPortraitReference> PortraitData;
             public ComponentArray<UnitComponentReferences> ComponentReferences;
             public ComponentArray<Healthbar> HealthbarData;
@@ -130,6 +131,7 @@ namespace LeyLineHybridECS
                 GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
                 var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
+                var action = m_UnitData.Actions[i];
                 var position = m_UnitData.TransformData[i].position;
                 var health = m_UnitData.HealthData[i];
                 var healthbar = m_UnitData.HealthbarData[i];
@@ -216,7 +218,7 @@ namespace LeyLineHybridECS
                                 //disable if not enough energy
                                 if (bi == 0)
                                 {
-                                    if(stats.BasicMove.Targets[0].energyCost > playerEnergy.Energy)
+                                    if(playerEnergy.Energy == 0 && action.LockedAction.Index == -3)// && lockedAction.cost <= stats.BasicMove.cost
                                     {
                                         UIRef.Actions[bi].Button.interactable = false;
                                     }
@@ -231,7 +233,7 @@ namespace LeyLineHybridECS
                                 //basic attack
                                 else if (bi == 1)
                                 {
-                                    if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy)
+                                    if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
                                     {
                                         UIRef.Actions[bi].Button.interactable = false;
                                     }
@@ -246,7 +248,7 @@ namespace LeyLineHybridECS
                                 //all other actions
                                 else
                                 {
-                                    if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy)
+                                    if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
                                     {
                                         UIRef.Actions[bi].Button.interactable = false;
                                     }

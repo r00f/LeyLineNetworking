@@ -112,42 +112,46 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 int index = sar.Payload.ActionId;
                 Action actionToSelect = actionData.NullAction;
 
-                if (index >= 0)
+                if(m_ResourceSystem.CheckPlayerEnergy(faction.Faction) > 0)
                 {
-                    var a = actionData.OtherActions[index];
-                    a.CombinedCost = CalculateCombinedCost(actionData.OtherActions[index].Targets[0]);
-                    actionData.OtherActions[index] = a;
-
-                    if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.OtherActions[index].CombinedCost) >= 0)
+                    if (index >= 0)
                     {
-                        actionToSelect = actionData.OtherActions[index];
-                    }
-                }
-                else
-                {
-                    if(index == -2)
-                    {
-                        var a = actionData.BasicMove;
-                        a.CombinedCost = CalculateCombinedCost(actionData.BasicMove.Targets[0]);
-                        actionData.BasicMove = a;
+                        var a = actionData.OtherActions[index];
+                        a.CombinedCost = CalculateCombinedCost(actionData.OtherActions[index].Targets[0]);
+                        actionData.OtherActions[index] = a;
 
-                        if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicMove.CombinedCost) >= 0)
+                        if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.OtherActions[index].CombinedCost) >= 0)
                         {
-                            actionToSelect = actionData.BasicMove;
+                            actionToSelect = actionData.OtherActions[index];
                         }
                     }
-                    else if(index == -1)
+                    else
                     {
-                        var a = actionData.BasicAttack;
-                        a.CombinedCost = CalculateCombinedCost(actionData.BasicAttack.Targets[0]);
-                        actionData.BasicAttack = a;
-
-                        if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicAttack.CombinedCost) >= 0)
+                        if (index == -2)
                         {
-                            actionToSelect = actionData.BasicAttack;
+                            var a = actionData.BasicMove;
+                            a.CombinedCost = CalculateCombinedCost(actionData.BasicMove.Targets[0]);
+                            actionData.BasicMove = a;
+
+                            if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicMove.CombinedCost) >= 0)
+                            {
+                                actionToSelect = actionData.BasicMove;
+                            }
+                        }
+                        else if (index == -1)
+                        {
+                            var a = actionData.BasicAttack;
+                            a.CombinedCost = CalculateCombinedCost(actionData.BasicAttack.Targets[0]);
+                            actionData.BasicAttack = a;
+
+                            if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicAttack.CombinedCost) >= 0)
+                            {
+                                actionToSelect = actionData.BasicAttack;
+                            }
                         }
                     }
                 }
+
                 actionData.CurrentSelected = actionToSelect;
             }
 

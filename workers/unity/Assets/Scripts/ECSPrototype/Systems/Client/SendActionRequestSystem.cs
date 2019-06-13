@@ -74,6 +74,9 @@ public class SendActionRequestSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        var playerState = m_PlayerData.PlayerStateData[0];
+        var playerEnergy = m_PlayerData.PlayerEnergyData[0];
+
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
             var unitMouseState = m_SelectActionRequestData.MouseStateData[i];
@@ -82,7 +85,7 @@ public class SendActionRequestSystem : ComponentSystem
             var clientPath = m_SelectActionRequestData.ClientPathData[i];
             var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
             var actionsData = m_SelectActionRequestData.ActionsData[i];
-            var playerState = m_PlayerData.PlayerStateData[0];
+
             var unitCoord = m_SelectActionRequestData.Coordinates[i].CubeCoordinate;
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
@@ -98,7 +101,7 @@ public class SendActionRequestSystem : ComponentSystem
 
             //if the current selected unit wants an unitTarget
 
-            //set unit action to basic move it is clicked
+            //set unit action to basic move it is clicked and player has energy
             if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
                 SelectActionCommand(-2, unitEntityId.Id);
