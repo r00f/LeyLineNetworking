@@ -122,8 +122,6 @@ public class UnitAnimationSystem : ComponentSystem
                     //set Initial Target Positions
                     if (!animatorComponent.InitialValuesSet)
                     {
-                        //Debug.Log("Set OneTime anim vars");
-
                         if (actions.LockedAction.Index != -2)
                         {
                             animatorComponent.RotationTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);

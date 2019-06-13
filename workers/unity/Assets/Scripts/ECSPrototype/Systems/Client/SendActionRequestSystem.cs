@@ -124,7 +124,6 @@ public class SendActionRequestSystem : ComponentSystem
                                 unitEntityId,
                                 new SetTargetRequest(cellEntityId)
                             );
-                            //Debug.Log("Send setTarget request for Cell with id: " + cellEntityId);
                             setTargetRequest.RequestsToSend.Add(request);
                             m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                         }
@@ -140,7 +139,6 @@ public class SendActionRequestSystem : ComponentSystem
 
                         if (unitMousestate.ClickEvent == 1)
                         {
-                            //Debug.Log("Send SelectUnitRequest: " + targetUnitEntityId);
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
@@ -168,7 +166,6 @@ public class SendActionRequestSystem : ComponentSystem
                                     unitEntityId,
                                     new SetTargetRequest(cellEntityId)
                                 );
-                                //Debug.Log("Send setTarget request for Cell with id: " + cellEntityId);
                                 setTargetRequest.RequestsToSend.Add(request);
                                 m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                             }
@@ -182,56 +179,16 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
-       
-
         UpdateInjectedComponentGroups();
         bool isSelfTarget = false;
-        long selftargetID = 0;
         var playerState = m_PlayerData.PlayerStateData[0];
         var highlightingData = m_PlayerData.HighlightingData[0];
         playerState.SelectedActionId = actionIndex;
         m_PlayerData.PlayerStateData[0] = playerState;
         
-
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
-            var idCompomnent = m_SelectActionRequestData.EntityIds[i].EntityId;
             var actions = m_SelectActionRequestData.ActionsData[i];
-            if (actionIndex >= 0)
-            {
-                Action act = actions.OtherActions[actionIndex];
-                if(act.Targets[0].TargetType == TargetTypeEnum.unit)
-                {
-                    if(act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
-                    {
-                        selftargetID = idCompomnent.Id;
-                        isSelfTarget = true;
-                    }
-                }
-            }
-            
-        }
-
-
-        if (!isSelfTarget)
-        {
-            m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
-            m_HighlightingSystem.ClearPlayerState();
-
-        }
-        else
-        {
-
-            Debug.Log("setSelfTargetCall from SendActReqSys");
-            highlightingData.TargetRestrictionIndex = 2;
-            m_PlayerData.HighlightingData[0] = highlightingData;
-            m_HighlightingSystem.SetSelfTarget(selftargetID);
-        }
-
-
-
-        for (int i = 0; i < m_SelectActionRequestData.Length; i++)
-        {
             var idCompomnent = m_SelectActionRequestData.EntityIds[i].EntityId;
             var selectActionSender = m_SelectActionRequestData.SelectActionSenders[i];
 
@@ -243,12 +200,36 @@ public class SendActionRequestSystem : ComponentSystem
                 new SelectActionRequest(actionIndex)
                 );
 
-                if(selectActionSender.RequestsToSend.Count == 0)
+                if (selectActionSender.RequestsToSend.Count == 0)
                 {
                     selectActionSender.RequestsToSend.Add(request);
                 }
                 m_SelectActionRequestData.SelectActionSenders[i] = selectActionSender;
             }
+
+            if (actionIndex >= 0)
+            {
+                Action act = actions.OtherActions[actionIndex];
+                if(act.Targets[0].TargetType == TargetTypeEnum.unit)
+                {
+                    if(act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    {
+                        isSelfTarget = true;
+                    }
+                }
+            }
+        }
+
+        if (!isSelfTarget)
+        {
+            m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
+            m_HighlightingSystem.ClearPlayerState();
+        }
+        else
+        {
+            highlightingData.TargetRestrictionIndex = 2;
+            m_PlayerData.HighlightingData[0] = highlightingData;
+            m_HighlightingSystem.SetSelfTarget(entityId);
         }
     }
 }

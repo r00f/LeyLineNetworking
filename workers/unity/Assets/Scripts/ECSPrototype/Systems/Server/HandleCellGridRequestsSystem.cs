@@ -139,7 +139,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                 {
                     if(actionData.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
                     {
-                        Debug.Log("SelfTarget");
                         //Set target instantly
                         actionData.LockedAction = SetLockedAction(actionData.CurrentSelected, coord, coord, unitId, faction.Faction);
                         actionData.CurrentSelected = actionData.NullAction;

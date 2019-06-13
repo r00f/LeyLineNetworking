@@ -17,6 +17,7 @@ public struct HighlightingDataComponent : IComponentData
     public Vector3 HoveredPosition;
     public uint TargetRestrictionIndex;
     public uint EffectRestrictionIndex;
+    public float LineYOffset;
 }
 
 
