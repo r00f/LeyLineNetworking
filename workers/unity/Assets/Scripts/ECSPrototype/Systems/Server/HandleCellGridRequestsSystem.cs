@@ -110,28 +110,46 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             foreach (var sar in selectActionRequest.Requests)
             {
                 int index = sar.Payload.ActionId;
+                Action actionToSelect = actionData.NullAction;
 
-                if(index >= 0)
+                if (index >= 0)
                 {
-                    actionData.CurrentSelected = actionData.OtherActions[index];
+                    var a = actionData.OtherActions[index];
+                    a.CombinedCost = CalculateCombinedCost(actionData.OtherActions[index].Targets[0]);
+                    actionData.OtherActions[index] = a;
+
+                    if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.OtherActions[index].CombinedCost) >= 0)
+                    {
+                        actionToSelect = actionData.OtherActions[index];
+                    }
                 }
                 else
                 {
-                    if(index == -3)
+                    if(index == -2)
                     {
-                        actionData.CurrentSelected = actionData.NullAction;
-                    }
-                    else if(index == -2)
-                    {
-                        actionData.CurrentSelected = actionData.BasicMove;
+                        var a = actionData.BasicMove;
+                        a.CombinedCost = CalculateCombinedCost(actionData.BasicMove.Targets[0]);
+                        actionData.BasicMove = a;
+
+                        if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicMove.CombinedCost) >= 0)
+                        {
+                            actionToSelect = actionData.BasicMove;
+                        }
                     }
                     else if(index == -1)
                     {
-                        actionData.CurrentSelected = actionData.BasicAttack;
+                        var a = actionData.BasicAttack;
+                        a.CombinedCost = CalculateCombinedCost(actionData.BasicAttack.Targets[0]);
+                        actionData.BasicAttack = a;
+
+                        if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicAttack.CombinedCost) >= 0)
+                        {
+                            actionToSelect = actionData.BasicAttack;
+                        }
                     }
                 }
+                actionData.CurrentSelected = actionToSelect;
             }
-
 
             if (actionData.CurrentSelected.Targets.Count != 0)
             {
@@ -151,11 +169,17 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     switch (actionData.CurrentSelected.Targets[0].Higlighter)
                     {
                         case UseHighlighterEnum.pathing:
-                            cellsToMarkData.CachedPaths = GetAllPathsInRadius((uint)actionData.CurrentSelected.Targets[0].Targettingrange, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
+                            uint range = (uint)actionData.CurrentSelected.Targets[0].Targettingrange;
+                            if(actionData.CurrentSelected.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                            {
+                                if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0) < (uint)actionData.CurrentSelected.Targets[0].Targettingrange)
+                                {
+                                    range = (uint)m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0);
+                                }
+                            }
+                            cellsToMarkData.CachedPaths = GetAllPathsInRadius(range, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
                             break;
                         case UseHighlighterEnum.no_pathing:
-                            //do stuff
-
                             break;
                     }
                 }
@@ -217,46 +241,34 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         t.TargetCoordinate = cell.CubeCoordinate;
                                         t.TargetId = id;
                                         actionData.LockedAction.Targets[0] = t;
-                                        uint costToSubtract = t.EnergyCost;
 
                                         for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
                                         {
-                                            
                                             var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
                                             var mod = actionData.LockedAction.Targets[0].Mods[0];
                                             switch (modType)
                                             {
-
                                                 case ModTypeEnum.aoe:
                                                     mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
                                                     break;
-
-
                                                 case ModTypeEnum.path:
-
                                                     foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
                                                     {
                                                         mod.Coordinates.Add(c.CubeCoordinate);
-
                                                     }
-
                                                     actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                                    costToSubtract += (uint)mod.Coordinates.Count;
+                                                    locked.CombinedCost = CalculateCombinedCost(t);
                                                     break;
                                                 case ModTypeEnum.line:
                                                     mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
                                                     break;
                                                 case ModTypeEnum.ring:
                                                     mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
-
-
                                                     break;
                                             }
                                         }
-
-                                        locked.CombinedCost = costToSubtract;
                                         actionData.LockedAction = locked;
-                                        m_ResourceSystem.SubstactEnergy(faction.Faction, costToSubtract);
+                                        m_ResourceSystem.SubstactEnergy(faction.Faction, locked.CombinedCost);
                                     }
                                     else
                                     {
@@ -290,13 +302,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     {
                                         actionData.LockedAction = actionData.NullAction;
                                     }
-
                                 }
                             }
-
                             break;
                     }
-
                     actionData.CurrentSelected = actionData.NullAction;
                 }
             }
@@ -306,6 +315,23 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         #endregion
     }
 
+    public uint CalculateCombinedCost(ActionTarget inActionTarget)
+    {
+        uint combinedCost = 0;
+
+        combinedCost += inActionTarget.EnergyCost;
+
+        if (inActionTarget.Mods.Count != 0)
+        {
+            if(inActionTarget.Mods[0].ModType == ModTypeEnum.path)
+            {
+                combinedCost += (uint)inActionTarget.Mods[0].Coordinates.Count;
+            }
+        }
+
+        return combinedCost;
+    }
+
     public Action SetLockedAction(Action selectedAction, Vector3f originCoord, Vector3f unitCoord, long unitId, uint faction)
     {
         Action locked = selectedAction;
@@ -313,7 +339,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         t.TargetCoordinate = unitCoord;
         t.TargetId = unitId;
         locked.Targets[0] = t;
-        uint costToSubtract = t.EnergyCost;
 
         for (int mi = 0; mi < locked.Targets[0].Mods.Count; mi++)
         {
@@ -321,22 +346,11 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             var mod = locked.Targets[0].Mods[0];
             switch (modType)
             {
-
                 case ModTypeEnum.aoe:
                     mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
                     break;
-
-
                 case ModTypeEnum.path:
 
-                    /*foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
-                    {
-                        mod.Coordinates.Add(c.CubeCoordinate);
-
-                    }
-
-                    actionData.LockedAction.Targets[0].Mods[0] = mod;
-                    costToSubtract += (uint)mod.Coordinates.Count;*/
                     break;
                 case ModTypeEnum.line:
                     mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
@@ -346,8 +360,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     break;
             }
         }
-
-        locked.CombinedCost = costToSubtract;
 
         m_ResourceSystem.AddArmor(locked.Targets[0].TargetId, locked.Effects[0].GainArmorNested.ArmorAmount);
         m_ResourceSystem.SubstactEnergy(faction, locked.CombinedCost);

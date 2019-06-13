@@ -15,7 +15,6 @@ public static class LeyLineEntityTemplates {
     private static readonly List<string> AllWorkerAttributes =
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
-
     public static EntityTemplate GameState(Vector3f position, uint worldIndex)
     {
         var gameState = new GameState.Snapshot
@@ -160,9 +159,9 @@ public static class LeyLineEntityTemplates {
 
         var energy = new PlayerEnergy.Snapshot
         {
-            MaxEnergy = 20,
-            Energy = 20,
-            BaseIncome = 1
+            MaxEnergy = 15,
+            Energy = 15,
+            BaseIncome = 3
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
@@ -585,4 +584,5 @@ public static class LeyLineEntityTemplates {
         }
       return newAction;
     }
+
 }

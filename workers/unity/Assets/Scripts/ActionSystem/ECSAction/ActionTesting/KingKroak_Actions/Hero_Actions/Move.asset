@@ -34,7 +34,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 0
   targettingRange: 5
-  energyCost: 1
+  energyCost: 0
   ModToAdd: {fileID: 0}
   SecondaryTargets:
   - {fileID: 114881820163587974}
@@ -57,6 +57,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ApplyToTargets: 0
   specificTargetIdentifier: 0
+  TurnDuration: 0
   ApplyToRestrictions: 0
   MovementSpeed: 0
   pathIndex: 0

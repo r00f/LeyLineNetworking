@@ -177,6 +177,23 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
+    public int CheckPlayerEnergy(uint playerFaction, uint energyCost)
+    {
+        int leftOverEnergy = 0;
+
+        for (int i = 0; i < m_PlayerData.Length; i++)
+        {
+            var faction = m_PlayerData.FactionData[i].Faction;
+            var energyComp = m_PlayerData.PlayerEnergyData[i];
+
+            if(playerFaction == faction)
+            {
+                leftOverEnergy = (int)energyComp.Energy - (int)energyCost;
+            }
+        }
+        return leftOverEnergy;
+    }
+
     public void Heal(long unitID, uint healAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)

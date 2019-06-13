@@ -19,6 +19,7 @@ public class HighlightingSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Actions.Component> ActionsData;
+        public readonly ComponentDataArray<FactionComponent.Component> Factions;
         public readonly ComponentDataArray<Authoritative<ClientPath.Component>> AuthorativeData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
@@ -65,8 +66,7 @@ public class HighlightingSystem : ComponentSystem
         public ComponentDataArray<MarkerState> MarkerStateData;
     }
 
-    [Inject]
-    private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
     public struct UnitData
     {
@@ -80,8 +80,7 @@ public class HighlightingSystem : ComponentSystem
         public readonly ComponentArray<Transform> Transforms;
     }
 
-    [Inject]
-    private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct MarkerStateData
     {
@@ -92,11 +91,11 @@ public class HighlightingSystem : ComponentSystem
         public readonly ComponentDataArray<SpatialEntityId> EntityIDs;
     }
 
-    [Inject]
-    private MarkerStateData m_MarkerStateData;
+    [Inject] MarkerStateData m_MarkerStateData;
 
-    [Inject]
-    HandleCellGridRequestsSystem m_CellGrid;
+    [Inject] HandleCellGridRequestsSystem m_CellGrid;
+
+    [Inject] ResourceSystem m_ResourceSystem;
 
     protected override void OnUpdate()
     {
@@ -430,6 +429,7 @@ public class HighlightingSystem : ComponentSystem
             var worldIndex = m_ActiveUnitData.WorldIndexData[i].Value;
             var mouseState = m_ActiveUnitData.MouseStates[i];
             var lineRendererComp = m_ActiveUnitData.LineRenderers[i];
+            var faction = m_ActiveUnitData.Factions[i];
 
             if (iD == playerState.SelectedUnitId)
             {
@@ -439,12 +439,21 @@ public class HighlightingSystem : ComponentSystem
                     m_ActiveUnitData.MouseStates[i] = mouseState;
                 }
 
-                if (playerState.CellsInRange.Count == 0 && playerHighlightingData.TargetRestrictionIndex != 2)
+                if (playerState.CellsInRange.Count == 0)
                 {
                     if (playerHighlightingData.PathingRange == 1)
                     {
-                        List<CellAttributes> go = m_CellGrid.GetRadius(occCoord, playerHighlightingData.Range, worldIndex);
-                        playerState.CachedPaths = m_CellGrid.GetAllPathsInRadius(playerHighlightingData.Range, go, occCoord);
+                        uint range = playerHighlightingData.Range;
+                        if (playerHighlightingData.PathLine == 1)
+                        {
+                            if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0) < playerHighlightingData.Range)
+                            {
+                                range = (uint)m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0);
+                            }
+                        }
+
+                        List<CellAttributes> go = m_CellGrid.GetRadius(occCoord, range, worldIndex);
+                        playerState.CachedPaths = m_CellGrid.GetAllPathsInRadius(range, go, occCoord);
 
                         foreach (CellAttribute key in playerState.CachedPaths.Keys)
                         {

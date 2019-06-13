@@ -1,13 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Entities;
-using Unity.Mathematics;
-using UnityEngine.UI;
-using Unit;
-using Player;
-using Generic;
+﻿using Generic;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.ReactiveComponents;
+using Player;
+using Unit;
+using Unity.Entities;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace LeyLineHybridECS
 {
@@ -124,10 +122,12 @@ namespace LeyLineHybridECS
                 }
             }
 
+            var authPlayerState = m_AuthoritativePlayerData.PlayerStateData[0];
+            var playerEnergy = m_AuthoritativePlayerData.PlayerEnergyData[0];
+
             for (int i = 0; i < m_UnitData.Length; i++)
             {
                 GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
-                var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
                 var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var position = m_UnitData.TransformData[i].position;
@@ -142,7 +142,7 @@ namespace LeyLineHybridECS
                 int actionCount = stats.Actions.Count + 2;
                 int spawnActionCount = stats.SpawnActions.Count;
 
-                if(playerState.SelectedUnitId == unitId)
+                if(authPlayerState.SelectedUnitId == unitId)
                 {
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
                         UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
@@ -186,6 +186,14 @@ namespace LeyLineHybridECS
                         {
                             if (si < spawnActionCount)
                             {
+                                if (stats.SpawnActions[si].Targets[0].energyCost > playerEnergy.Energy)
+                                {
+                                    UIRef.SpawnActions[si].Button.interactable = false;
+                                }
+                                else
+                                {
+                                    UIRef.SpawnActions[si].Button.interactable = true;
+                                }
                                 UIRef.SpawnActions[si].Visuals.SetActive(true);
                                 UIRef.SpawnActions[si].ActionName = stats.SpawnActions[si].ActionName;
                                 UIRef.SpawnActions[si].Icon.sprite = stats.SpawnActions[si].ActionIcon;
@@ -205,8 +213,17 @@ namespace LeyLineHybridECS
                                 UIRef.Actions[bi].Visuals.SetActive(true);
                                 UIRef.Actions[bi].UnitId = (int)unitId;
                                 //basic move
+                                //disable if not enough energy
                                 if (bi == 0)
                                 {
+                                    if(stats.BasicMove.Targets[0].energyCost > playerEnergy.Energy)
+                                    {
+                                        UIRef.Actions[bi].Button.interactable = false;
+                                    }
+                                    else
+                                    {
+                                        UIRef.Actions[bi].Button.interactable = true;
+                                    }
                                     UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
                                     UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
                                     UIRef.Actions[bi].ActionIndex = -2;
@@ -214,6 +231,14 @@ namespace LeyLineHybridECS
                                 //basic attack
                                 else if (bi == 1)
                                 {
+                                    if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy)
+                                    {
+                                        UIRef.Actions[bi].Button.interactable = false;
+                                    }
+                                    else
+                                    {
+                                        UIRef.Actions[bi].Button.interactable = true;
+                                    }
                                     UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
                                     UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
                                     UIRef.Actions[bi].ActionIndex = -1;
@@ -221,6 +246,14 @@ namespace LeyLineHybridECS
                                 //all other actions
                                 else
                                 {
+                                    if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy)
+                                    {
+                                        UIRef.Actions[bi].Button.interactable = false;
+                                    }
+                                    else
+                                    {
+                                        UIRef.Actions[bi].Button.interactable = true;
+                                    }
                                     UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
                                     UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
                                     UIRef.Actions[bi].ActionIndex = bi - 2;
@@ -246,7 +279,7 @@ namespace LeyLineHybridECS
                     }
                 }
 
-                if (playerState.SelectedUnitId != 0)
+                if (authPlayerState.SelectedUnitId != 0)
                 {
                     if (!unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(true);
@@ -282,7 +315,6 @@ namespace LeyLineHybridECS
             //this clients player
             for (int i = 0; i < m_AuthoritativePlayerData.Length; i++)
             {
-                var playerState = m_AuthoritativePlayerData.PlayerStateData[i];
                 float maxEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].MaxEnergy;
                 float currentEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].Energy;
                 float energyIncome = m_AuthoritativePlayerData.PlayerEnergyData[i].Income;
@@ -314,7 +346,7 @@ namespace LeyLineHybridECS
                  energyText.text = currentEnergy + " / " + maxEnergy;
 
 
-                if (playerState.CurrentState != PlayerStateEnum.unit_selected && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
                 {
                     for (int bi = 0; bi < UIRef.Actions.Count; bi++)
                     {
