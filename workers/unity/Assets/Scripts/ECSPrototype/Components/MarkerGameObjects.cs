@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Unit;
 
 namespace LeyLineHybridECS
 {
@@ -12,6 +13,7 @@ namespace LeyLineHybridECS
         public GameObject TargetMarker;
         public MeshRenderer TargetMarkerRenderer;
         public List<Color> TargetColors;
+        public EffectTypeEnum EffectType;
     }
 
 }

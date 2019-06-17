@@ -238,15 +238,8 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.4764398
-        functionName: EnableWeaponCollider
-        data: 
-        objectReferenceParameter: {instanceID: 0}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.66909975
-        functionName: DisableWeaponCollider
+      - time: 0.64310646
+        functionName: TriggerEvent
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

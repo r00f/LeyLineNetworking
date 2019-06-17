@@ -45,6 +45,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public struct CellData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<Position.Component> PositionData;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
@@ -387,6 +388,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     }
 
     //size equals width of a hexagon / 2
+    /*
     public Vector2 CubeCoordToXZ(Vector3f coord)
     {
         Vector2 axial = CubeToAxial(coord);
@@ -396,7 +398,28 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         //center cell + coordinate offset = XZ coordinate in world space - offset X by (worldindex - 1) * 100?
         return new Vector2(50, 55.22f) + new Vector2(x, y);
     }
+    */
 
+    public Vector3 CoordinateToWorldPosition(uint inWorldIndex, Vector3f inCubeCoordinate)
+    {
+        UpdateInjectedComponentGroups();
+
+        Vector3 worldPos = new Vector3();
+
+        for(int i = 0; i < m_CellData.Length; i++)
+        {
+            var worldIndex = m_CellData.WorldIndexData[i].Value;
+            var position = m_CellData.PositionData[i].Coords;
+            var cubeCoord = m_CellData.CoordinateData[i].CubeCoordinate;
+
+            if(worldIndex == inWorldIndex && inCubeCoordinate == cubeCoord)
+            {
+                worldPos = position.ToUnityVector();
+            }
+        }
+
+        return worldPos;
+    }
 
     Vector3f CubeDirection(uint direction)
     {

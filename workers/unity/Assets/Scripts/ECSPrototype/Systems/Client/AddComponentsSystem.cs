@@ -33,10 +33,12 @@ public class AddComponentsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly EntityArray Entities;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates; 
         public readonly ComponentDataArray<FactionComponent.Component> Factions;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentArray<Transform> Transform;
         public readonly ComponentDataArray<Health.Component> UnitAttributeData;
+        public ComponentArray<AnimatorComponent> AnimatorData;
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
@@ -48,6 +50,7 @@ public class AddComponentsSystem : ComponentSystem
         public readonly EntityArray Entities;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
@@ -98,7 +101,7 @@ public class AddComponentsSystem : ComponentSystem
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
-                    RequireUpdate = 0,
+                    RequireUpdate = 1,
                     LerpSpeed = 0.5f,
                 };
 
@@ -135,6 +138,10 @@ public class AddComponentsSystem : ComponentSystem
             var unitWorldIndex = m_UnitAddedData.WorldIndexData[i];
             var entity = m_UnitAddedData.Entities[i];
             var faction = m_UnitAddedData.Factions[i].Faction;
+            var coord = m_UnitAddedData.Coordinates[i].CubeCoordinate;
+            var anim = m_UnitAddedData.AnimatorData[i];
+
+            anim.LastStationaryCoordinate = coord;
 
             if (unitWorldIndex.Value == authPlayerWorldIndex)
             {

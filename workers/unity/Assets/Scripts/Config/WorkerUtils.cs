@@ -19,6 +19,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<VisionSystem_Client>();
         world.GetOrCreateManager<UISystem>();
         world.GetOrCreateManager<HighlightingSystem>();
+        world.GetOrCreateManager<ActionEffectsSystem>();
     }
 
     public static void AddGameLogicSystems(World world)

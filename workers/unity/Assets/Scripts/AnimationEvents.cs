@@ -4,16 +4,10 @@ using UnityEngine;
 
 public class AnimationEvents : MonoBehaviour
 {
-    [SerializeField]
-    SphereCollider WeaponCollider;
+    public bool EventTrigger;
 
-    public void EnableWeaponCollider()
+    public void TriggerEvent()
     {
-        WeaponCollider.enabled = true;
-    }
-
-    public void DisableWeaponCollider()
-    {
-        WeaponCollider.enabled = false;
+        EventTrigger = true;
     }
 }

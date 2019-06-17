@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Improbable;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,10 +8,12 @@ public class AnimatorComponent : MonoBehaviour
 
     [Header("GenericAnimation")]
     public Animator Animator;
+    public AnimationEvents AnimationEvents;
     public bool ExecuteTriggerSet;
     public bool InitialValuesSet;
 
     [Header("Movement")]
+    public Vector3f LastStationaryCoordinate;
     public Transform RotateTransform;
     public bool DestinationReachTriggerSet;
     public Vector3 RotationTarget;
@@ -19,9 +22,7 @@ public class AnimatorComponent : MonoBehaviour
     [Header("GetHit")]
     public uint LastHealth;
     [SerializeField]
-    public bool TriggerEnter;
-    [SerializeField]
-    Collider WeaponCollider;
+    public bool ActionEffectTrigger = false;
 
     [Header("RagdollHandling")]
     public List<Rigidbody> RagdollRigidBodies;
@@ -55,13 +56,4 @@ public class AnimatorComponent : MonoBehaviour
 
         die = false;
     }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject.CompareTag("DamageCollider") && other != WeaponCollider)
-        {
-            TriggerEnter = true;
-        }
-    }
-
 }

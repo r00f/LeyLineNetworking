@@ -177,12 +177,14 @@ MonoBehaviour:
   ClickedMarker: {fileID: 1807972948420492}
   ReachableMarker: {fileID: 1669076608269378}
   TargetMarker: {fileID: 2516876933227842347}
+  CellTrigger: {fileID: 0}
   TargetMarkerRenderer: {fileID: 2711016112724938963}
   TargetColors:
   - {r: 0.6147984, g: 1, b: 0.3537736, a: 1}
   - {r: 0.08549515, g: 0.8207547, b: 0, a: 1}
   - {r: 0.053844787, g: 0.5188679, b: 0, a: 1}
   - {r: 0.015944738, g: 0.2830189, b: 0, a: 1}
+  EffectType: 0
 --- !u!1 &1669076608269378
 GameObject:
   m_ObjectHideFlags: 0

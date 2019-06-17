@@ -104,10 +104,8 @@ namespace LeyLineHybridECS
                                     else
                                     {
                                         //convert cube Coordinate to position
-                                        Vector2 XZPos = m_CellGridSystem.CubeCoordToXZ(currentPath[0]);
-                                        //Find correct YPos
-                                        float YPos = 3;
-                                        position.Coords = new Coordinates(XZPos.x, YPos, XZPos.y);
+                                        Vector3 worldPos = m_CellGridSystem.CoordinateToWorldPosition(unitWorldIndex, currentPath[0]);
+                                        position.Coords = new Coordinates(worldPos.x, worldPos.y, worldPos.z);
                                         m_UnitData.Positions[i] = position;
 
                                         if (currentPath.Count == 1)

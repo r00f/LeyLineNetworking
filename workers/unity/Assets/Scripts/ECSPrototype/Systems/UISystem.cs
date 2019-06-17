@@ -69,6 +69,11 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            InitializeButtons();
+        }
+
+        public void InitializeButtons()
+        {
             UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
 
@@ -87,7 +92,7 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            if (m_GameStateData.GameStates.Length == 0)
+            if (m_GameStateData.GameStates.Length == 0 || m_AuthoritativePlayerData.Length == 0)
                 return;
 
             var gameState = m_GameStateData.GameStates[0].CurrentState;
@@ -294,23 +299,27 @@ namespace LeyLineHybridECS
                 }
 
                 //if there is no healthbar, instantiate it into healthBarParent
-                if(!healthbar.HealthBarInstance)
+                if(!healthbar.UnitHeadUIInstance)
                 {
-                    healthbar.HealthBarInstance = Object.Instantiate(healthbar.HealthBarPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
-                }
+                    healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);                }
                 else
                 {
-                    if (gameState == GameStateEnum.planning && !healthbar.HealthBarInstance.activeSelf && isVisible.Value == 1)
+
+                    //enable healthTextGO when health is changing
+
+                    GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
+
+                    if (gameState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
                     {
-                        healthbar.HealthBarInstance.SetActive(true);
+                        healthBarGO.SetActive(true);
                     }
                     else if(gameState != GameStateEnum.planning || isVisible.Value == 0)
                     {
-                        healthbar.HealthBarInstance.SetActive(false);
+                        healthBarGO.SetActive(false);
                     }
 
-                    healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
-                    SetHealthBarFillAmounts(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
+                    healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
+                    SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
                 }
             }
 
@@ -437,6 +446,40 @@ namespace LeyLineHybridECS
             {
                 inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, (float)health.CurrentHealth / health.MaxHealth, 0.1f);
                 inArmorFill.fillAmount = 0;
+            }
+        }
+
+        public void SetHealthFloatText(long inUnitId, uint inHealthAmount, bool isHeal = false)
+        {
+            UpdateInjectedComponentGroups();
+            for (int i = 0; i < m_UnitData.Length; i++)
+            {
+                var unitId = m_UnitData.EntityIdData[i].EntityId.Id;
+                var healthbar = m_UnitData.HealthbarData[i];
+
+                if(inUnitId == unitId)
+                {
+                    GameObject healthTextGO = healthbar.UnitHeadUIInstance.transform.GetChild(1).gameObject;
+                    Text healthText = healthTextGO.GetComponent<Text>();
+                    Animator anim = healthTextGO.GetComponent<Animator>();
+                    healthText.text = inHealthAmount.ToString();
+                    Color healthColor = healthText.color;
+
+                    if (isHeal)
+                    {
+                        healthColor.r = Color.green.r;
+                        healthColor.g = Color.green.g;
+                        healthColor.b = Color.green.b;
+                    }
+                    else
+                    {
+                        healthColor.r = Color.red.r;
+                        healthColor.g = Color.red.g;
+                        healthColor.b = Color.red.b;
+                    }
+                    Debug.Log("PlayFloatingHealthAnim");
+                    anim.Play("HealthText", 0, 0);
+                }
             }
         }
     }

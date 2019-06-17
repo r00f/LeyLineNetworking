@@ -45,10 +45,15 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
+            if (m_PlayerData.Length == 0)
+                return;
+
+            var playerState = m_PlayerData.PlayerStateData[0];
+            var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
-                var playerState = m_PlayerData.PlayerStateData[0];
-                var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+
                 var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
                 var gameState = m_GameStateData.GameState[gi];
 
@@ -115,6 +120,8 @@ namespace LeyLineHybridECS
         public void SetPlayerState(PlayerStateEnum state)
         {
             UpdateInjectedComponentGroups();
+            if (m_PlayerData.Length == 0)
+                return;
             var playerState = m_PlayerData.PlayerStateData[0];
             playerState.CurrentState = state;
             m_PlayerData.PlayerStateData[0] = playerState;

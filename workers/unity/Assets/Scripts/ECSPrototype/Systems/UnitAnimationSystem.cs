@@ -5,6 +5,7 @@ using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
+using System.Collections.Generic;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class UnitAnimationSystem : ComponentSystem
@@ -12,10 +13,12 @@ public class UnitAnimationSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Health.Component> HealthData;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Actions.Component> ActionsData;
         public readonly ComponentDataArray<Position.Component> Positions;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
         public ComponentArray<AnimatorComponent> AnimatorComponents;
         public ComponentArray<Transform> Transforms;
     }
@@ -33,12 +36,18 @@ public class UnitAnimationSystem : ComponentSystem
 
     public struct GameStateData
     {
+        public readonly int Length;
         public readonly ComponentDataArray<GameState.Component> GameState;
     }
 
     [Inject] GameStateData m_GameStateData;
 
+
+    [Inject] ActionEffectsSystem m_ActionEffectsSystem;
+
     [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
+
+    [Inject] UISystem m_UISystem;
 
     GameObject GarbageCollection;
 
@@ -50,6 +59,9 @@ public class UnitAnimationSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_GameStateData.Length == 0)
+            return;
+
         for(int i = 0; i < m_UnitData.Length; i++)
         {
             var serverPosition = m_UnitData.Positions[i];
@@ -57,19 +69,36 @@ public class UnitAnimationSystem : ComponentSystem
             var animatorComponent = m_UnitData.AnimatorComponents[i];
             var actions = m_UnitData.ActionsData[i];
             var healthComponent = m_UnitData.HealthData[i];
+            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
+            var worldIndex = m_UnitData.WorldIndexData[i].Value;
+            var coord = m_UnitData.Coordinates[i].CubeCoordinate;
+
+            if (animatorComponent.AnimationEvents.EventTrigger)
+            {
+                HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+
+                if(actions.LockedAction.Targets[0].Mods.Count != 0)
+                {
+                    foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                    {
+                        coordsToTrigger.Add(c);
+                    }
+                }
+
+                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                animatorComponent.AnimationEvents.EventTrigger = false;
+            }
 
             if(animatorComponent.LastHealth != healthComponent.CurrentHealth)
             {
                 if(animatorComponent.LastHealth > healthComponent.CurrentHealth)
                 {
-                    if(animatorComponent.TriggerEnter)
+                    if(animatorComponent.ActionEffectTrigger)
                     {
+                        Debug.Log("ActionEffectTrigger");
                         if(healthComponent.CurrentHealth == 0)
                         {
                             Debug.Log("Death");
-
-                            //move all Ragdoll GOs into GarbageCollection
-
 
                             //move props out of skeleton
                             foreach (Transform t in animatorComponent.Props)
@@ -89,12 +118,14 @@ public class UnitAnimationSystem : ComponentSystem
                                 r.isKinematic = false;
                             }
                         }
+                        //iterate on when healthchange feedback is being triggered: right now only works with basic attack when in meelee range
                         else
                         {
+                            m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
                             animatorComponent.Animator.SetTrigger("GetHit");
                         }
-                        animatorComponent.TriggerEnter = false;
                         animatorComponent.LastHealth = healthComponent.CurrentHealth;
+                        animatorComponent.ActionEffectTrigger = false;
                     }
                 }
                 else
@@ -102,7 +133,10 @@ public class UnitAnimationSystem : ComponentSystem
                     //Debug.Log("Gained Health");
                     animatorComponent.LastHealth = healthComponent.CurrentHealth;
                 }
+
             }
+
+
             if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
@@ -124,15 +158,11 @@ public class UnitAnimationSystem : ComponentSystem
                     {
                         if (actions.LockedAction.Index != -2)
                         {
-                            animatorComponent.RotationTarget = GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+                            animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
                         }
 
-                        //convert cube Coordinate to position
-                        Vector2 XZPos = m_CellGridSystem.CubeCoordToXZ(actions.LockedAction.Targets[0].TargetCoordinate);
-                        //Find correct YPos
-                        float YPos = 3;
-                        animatorComponent.DestinationPosition = new Vector3(XZPos.x, YPos, XZPos.y);
-                            
+                        animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+
                         //GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
                         animatorComponent.InitialValuesSet = true;
                     }
@@ -176,27 +206,13 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
+                    animatorComponent.LastStationaryCoordinate = coord;
                     animatorComponent.Animator.SetTrigger("DestinationReached");
                     animatorComponent.DestinationPosition = Vector3.zero;
                     animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
         }
-    }
-
-    public Vector3 GetTargetPosition(long Id)
-    {
-        for (int i = 0; i < m_TransformData.Length; i++)
-        {
-            var transform = m_TransformData.Transforms[i];
-            var id = m_TransformData.EntityIds[i].EntityId.Id;
-
-            if (Id == id)
-            {
-                return transform.position;
-            }
-        }
-        return new Vector3();
     }
 
     public Vector3 RotateTowardsDirection(Transform originTransform, Vector3 targetPosition, float rotationSpeed)

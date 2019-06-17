@@ -74,6 +74,9 @@ public class SendActionRequestSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_PlayerData.Length == 0)
+            return;
+
         var playerState = m_PlayerData.PlayerStateData[0];
         var playerEnergy = m_PlayerData.PlayerEnergyData[0];
 
@@ -188,6 +191,8 @@ public class SendActionRequestSystem : ComponentSystem
         var highlightingData = m_PlayerData.HighlightingData[0];
         playerState.SelectedActionId = actionIndex;
         m_PlayerData.PlayerStateData[0] = playerState;
+
+        //Debug.Log("SelectActionCommand");
         
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
