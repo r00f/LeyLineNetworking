@@ -9,6 +9,7 @@ using Cell;
 using Generic;
 using Unit;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 public class ActionEffectsSystem : ComponentSystem
 {
@@ -77,10 +78,12 @@ public class ActionEffectsSystem : ComponentSystem
 
     }
 
-    public void LaunchProjectile()
+    public void LaunchProjectile(Projectile projectileFab, EffectTypeEnum inEffectOnDetonation, HashSet<Vector3f> coordsToTrigger, Vector3 startPos, Vector3 targetPos)
     {
-
-
+        Projectile go = GameObject.Instantiate(projectileFab, startPos, Quaternion.identity);
+        go.effectonDetonation = inEffectOnDetonation;
+        go.travellingCurve = new List<Vector3> { startPos, targetPos };
+        go.CoordinatesToTrigger = coordsToTrigger;
+        go.isTravelling = true;
     }
-
 }

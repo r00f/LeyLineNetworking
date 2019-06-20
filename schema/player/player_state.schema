@@ -12,7 +12,7 @@ component PlayerState {
 	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 5;
 	int32 selected_action_id = 6;
 	map<int64, CubeCoordinateList> unit_targets = 7;
-	
+	bool end_step_ready = 8;
 }
 
 type CubeCoordinateList {

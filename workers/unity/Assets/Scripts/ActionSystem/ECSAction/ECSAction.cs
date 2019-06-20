@@ -29,5 +29,6 @@ namespace LeyLineHybridECS
         public List<ECSActionEffect> Effects;
         public string ActionName;
         public Sprite ActionIcon;
+        public Projectile ProjectileFab;
     }
 }

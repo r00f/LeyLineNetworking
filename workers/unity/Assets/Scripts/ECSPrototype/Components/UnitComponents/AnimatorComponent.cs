@@ -11,6 +11,7 @@ public class AnimatorComponent : MonoBehaviour
     public AnimationEvents AnimationEvents;
     public bool ExecuteTriggerSet;
     public bool InitialValuesSet;
+    public Transform ProjectileSpawnOrigin;
 
     [Header("Movement")]
     public Vector3f LastStationaryCoordinate;

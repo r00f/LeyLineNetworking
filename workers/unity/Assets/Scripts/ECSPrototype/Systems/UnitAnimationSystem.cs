@@ -19,6 +19,7 @@ public class UnitAnimationSystem : ComponentSystem
         public readonly ComponentDataArray<Actions.Component> ActionsData;
         public readonly ComponentDataArray<Position.Component> Positions;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
+        public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
         public ComponentArray<AnimatorComponent> AnimatorComponents;
         public ComponentArray<Transform> Transforms;
     }
@@ -72,20 +73,62 @@ public class UnitAnimationSystem : ComponentSystem
             var unitId = m_UnitData.EntityIds[i].EntityId.Id;
             var worldIndex = m_UnitData.WorldIndexData[i].Value;
             var coord = m_UnitData.Coordinates[i].CubeCoordinate;
+            var basedata = m_UnitData.BaseDataSets[i];
+
+            ECSAction currentlockedAction = null;
+
+            if(actions.LockedAction.Index >= 0)
+            {
+                if (actions.LockedAction.Index < basedata.Actions.Count)
+                {
+                    currentlockedAction = basedata.Actions[actions.LockedAction.Index];
+                }
+                else {
+                    currentlockedAction = basedata.SpawnActions[actions.LockedAction.Index - basedata.Actions.Count];
+                        }
+            }
+            else
+            {
+                switch(actions.LockedAction.Index)
+                {
+                    case -3:
+                        break;
+                    case -2:
+                        currentlockedAction = basedata.BasicMove;
+                        break;
+                    case -1:
+                        currentlockedAction = basedata.BasicAttack;
+                        break;
+                }
+
+                    
+            }
+
 
             if (animatorComponent.AnimationEvents.EventTrigger)
             {
                 HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+                Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
 
-                if(actions.LockedAction.Targets[0].Mods.Count != 0)
+                if (actions.LockedAction.Targets[0].Mods.Count != 0)
                 {
                     foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
                     {
                         coordsToTrigger.Add(c);
                     }
                 }
-
-                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                if (currentlockedAction)
+                {
+                    var actionEffectType = actions.LockedAction.Effects[0].EffectType;
+                    if (currentlockedAction.ProjectileFab)
+                    {
+                        m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin.position, targetPos);
+                    }
+                    else
+                    {
+                        m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                    }
+                }
                 animatorComponent.AnimationEvents.EventTrigger = false;
             }
 

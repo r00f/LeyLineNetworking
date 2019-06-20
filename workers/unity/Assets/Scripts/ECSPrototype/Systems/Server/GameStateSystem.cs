@@ -121,8 +121,11 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.cleanup:
-                        gameState.CurrentState = GameStateEnum.planning;
-                        m_Data.GameStateData[i] = gameState;
+                        if (AllPlayersEndTurnReady(gameStateWorldIndex))
+                        {
+                            gameState.CurrentState = GameStateEnum.planning;
+                            m_Data.GameStateData[i] = gameState;
+                        }
                         break;
                     case GameStateEnum.game_over:
                         break;
@@ -172,6 +175,22 @@ namespace LeyLineHybridECS
                 }
             }
             return false;
+        }
+
+        private bool AllPlayersEndTurnReady(uint gameStateWorldIndex)
+        {
+            for (int i = 0; i < m_PlayerData.Length; i++)
+            {
+                var playerWorldIndex = m_PlayerData.WorldIndexData[i].Value;
+
+                if (playerWorldIndex == gameStateWorldIndex)
+                {
+                    var playerState = m_PlayerData.PlayerStateData[i];
+                    if (!playerState.EndStepReady)
+                        return false;
+                }
+            }
+            return true;
         }
 
 
