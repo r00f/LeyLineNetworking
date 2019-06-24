@@ -107,22 +107,29 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (animatorComponent.AnimationEvents.EventTrigger)
             {
-                HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
-                Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-
-                if (actions.LockedAction.Targets[0].Mods.Count != 0)
-                {
-                    foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
-                    {
-                        coordsToTrigger.Add(c);
-                    }
-                }
                 if (currentlockedAction)
                 {
                     var actionEffectType = actions.LockedAction.Effects[0].EffectType;
+
+                    HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+                    Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+
+                    if (actions.LockedAction.Targets[0].Mods.Count != 0)
+                    {
+                        foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                        {
+                            coordsToTrigger.Add(c);
+                        }
+                    }
+
                     if (currentlockedAction.ProjectileFab)
                     {
-                        m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin.position, targetPos);
+                        float targetYoffset = 0;
+                        if(currentlockedAction.Targets[0] is ECSATarget_Unit)
+                        {
+                            targetYoffset = 1.3f;
+                        }
+                        m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin.position, targetPos, targetYoffset);
                     }
                     else
                     {

@@ -24,6 +24,7 @@ public class ProjectileSystem : ComponentSystem
     {
         public readonly int Length;
         public ComponentArray<Projectile> Projectiles;
+        public ComponentArray<Transform> Transforms;
         public EntityArray Entities;
     }
 
@@ -70,24 +71,44 @@ public class ProjectileSystem : ComponentSystem
         {
             var projectile = m_ProjectileData.Projectiles[i];
             var entity = m_ProjectileData.Entities[i];
+            var transform = m_ProjectileData.Transforms[i];
 
-            if (projectile.isTravelling)
+
+            if (projectile.IsTravelling)
             {
-                if (projectile.currentTargetId < projectile.travellingCurve.Count)
+                if (projectile.CurrentTargetId < projectile.TravellingCurve.Count -1)
                 {
-                    if (projectile.transform.position != projectile.travellingCurve[projectile.currentTargetId])
+                    //use distance as well
+                    float dist = Vector3.Distance(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1]);
+                    projectile.MovementPercentage += Time.deltaTime * projectile.TravellingSpeed / dist;
+
+                    if (projectile.MovementPercentage >= 1f)
                     {
-                        projectile.transform.position = Vector3.MoveTowards(projectile.transform.position, projectile.travellingCurve[projectile.currentTargetId], Time.deltaTime * projectile.travellingSpeed);
+                        projectile.MovementPercentage = 0;
+                        projectile.CurrentTargetId++;
                     }
                     else
                     {
-                        projectile.currentTargetId++;
+                        transform.position = Vector3.Lerp(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1], projectile.MovementPercentage);
                     }
                 }
                 else
                 {
                     Debug.Log("Reached Destination");
-                    m_ActionEffectSystem.TriggerActionEffect(projectile.effectonDetonation, projectile.CoordinatesToTrigger);
+                    m_ActionEffectSystem.TriggerActionEffect(projectile.EffectOnDetonation, projectile.CoordinatesToTrigger);
+
+                    //Stop looping Particlesystems and emit explosion burst
+
+                    ParticleSystem bodyPs = projectile.BodyParticleSystem;
+                    bodyPs.Stop();
+
+                    ParticleSystem trailPs = projectile.TrailParticleSystem;
+                    trailPs.Stop();
+
+                    ParticleSystem explosionPs = projectile.ExplosionParticleSystem;
+                    explosionPs.Emit(100);
+
+                    GameObject.Destroy(projectile.gameObject, 1);
                     PostUpdateCommands.DestroyEntity(entity);
                 }
             }

@@ -579,25 +579,34 @@ public class HighlightingSystem : ComponentSystem
         inLineRendererComp.lineRenderer.startColor = arcColorFaded;
         inLineRendererComp.lineRenderer.endColor = inLineRendererComp.arcColor;
 
-        Vector3 distance = ((inTarget + new Vector3(0, targetYOffset, 0)) - (inLineRendererComp.transform.position + inLineRendererComp.arcOffset));
-        uint numberOfSmoothPoints = 6 + (2 * (uint)Mathf.RoundToInt(distance.magnitude) / 2);
-        float zenithHeight = 1;
-        inLineRendererComp.lineRenderer.positionCount = 3 + (int)numberOfSmoothPoints;
-        float[] ypositions = CalculateSinusPoints(inLineRendererComp.lineRenderer.positionCount - 1);
-        float xstep = 1.0f / (inLineRendererComp.lineRenderer.positionCount - 1);
+        Vector3 arcOrigin = inLineRendererComp.transform.position + inLineRendererComp.arcOffset;
+        Vector3 arcTarget = new Vector3(inTarget.x, inTarget.y + targetYOffset, inTarget.z);
 
-        for (int i = 0; i <= ypositions.Length; i++)
+        Vector3[] arcPath = CalculateSinusPath(arcOrigin, arcTarget, 1);
+        inLineRendererComp.lineRenderer.positionCount = arcPath.Length;
+
+        inLineRendererComp.lineRenderer.SetPositions(arcPath);
+    }
+
+    public Vector3[] CalculateSinusPath(Vector3 origin, Vector3 target, float zenitHeight)
+    {
+        Vector3 distance = target - origin;
+        int numberOfPositions = 6 + (2 * Mathf.RoundToInt(distance.magnitude) / 2);
+
+        Vector3[] sinusPath = new Vector3[numberOfPositions + 1];
+        float heightDifference = origin.y - target.y;
+        float[] ypositions = CalculateSinusPoints(numberOfPositions);
+        float xstep = 1.0f / numberOfPositions;
+
+        for (int i = 0; i < ypositions.Length; i++)
         {
-            if (i == ypositions.Length)
-            {
-                inLineRendererComp.lineRenderer.SetPosition(i, inTarget + new Vector3(0, targetYOffset, 0));
-            }
-            else
-            {
-                float sinYpos = ypositions[i] * zenithHeight + (inLineRendererComp.arcOffset.y + (targetYOffset * (xstep * i)) - (inLineRendererComp.arcOffset.y * (xstep * i)));
-                inLineRendererComp.lineRenderer.SetPosition(i, inLineRendererComp.transform.position + new Vector3(distance.x * (xstep * i), sinYpos, distance.z * (xstep * i)));
-            }
+            float sinYpos = ypositions[i] * zenitHeight - heightDifference * (xstep * i);
+            sinusPath[i] = origin + new Vector3(distance.x * (xstep * i), sinYpos, distance.z * (xstep * i));
         }
+
+        sinusPath[numberOfPositions] = target;
+
+        return sinusPath;
     }
 
     public float[] CalculateSinusPoints(int numberOfPositions)

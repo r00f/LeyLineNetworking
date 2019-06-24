@@ -37,6 +37,8 @@ public class ActionEffectsSystem : ComponentSystem
 
     [Inject] UnitData m_UnitData;
 
+    [Inject] HighlightingSystem m_HighlightingSystem;
+
     protected override void OnUpdate()
     {
 
@@ -78,12 +80,27 @@ public class ActionEffectsSystem : ComponentSystem
 
     }
 
-    public void LaunchProjectile(Projectile projectileFab, EffectTypeEnum inEffectOnDetonation, HashSet<Vector3f> coordsToTrigger, Vector3 startPos, Vector3 targetPos)
+    public void LaunchProjectile(Projectile projectileFab, EffectTypeEnum inEffectOnDetonation, HashSet<Vector3f> coordsToTrigger, Vector3 startPos, Vector3 targetPos, float yOffset = 0)
     {
-        Projectile go = GameObject.Instantiate(projectileFab, startPos, Quaternion.identity);
-        go.effectonDetonation = inEffectOnDetonation;
-        go.travellingCurve = new List<Vector3> { startPos, targetPos };
+        //save targetPosition / targetYOffset on units?
+        Vector3 offSetTarget = new Vector3(targetPos.x, targetPos.y + yOffset, targetPos.z);
+
+        List<Vector3> travellingPoints = new List<Vector3>();
+
+        if(projectileFab.MaxHeight > 0)
+        {
+            travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(startPos, offSetTarget, projectileFab.MaxHeight));
+        }
+        else
+        {
+            travellingPoints.Add(startPos);
+            travellingPoints.Add(offSetTarget);
+        }
+
+        Projectile go = Object.Instantiate(projectileFab, startPos, Quaternion.identity);
+        go.EffectOnDetonation = inEffectOnDetonation;
+        go.TravellingCurve = travellingPoints;
         go.CoordinatesToTrigger = coordsToTrigger;
-        go.isTravelling = true;
+        go.IsTravelling = true;
     }
 }
