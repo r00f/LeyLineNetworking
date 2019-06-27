@@ -147,7 +147,6 @@ namespace LeyLineHybridECS
             {
                 var meshGradientColor = m_LineData.MeshGradientColorData[i];
 
-
                 if (meshGradientColor.ManalithColor.LerpColor != meshGradientColor.ManalithColor.Color || meshGradientColor.ConnectedManalithColor.LerpColor != meshGradientColor.ConnectedManalithColor.Color)
                 {
                     // Instead if vertex.y we use uv.x

@@ -20,7 +20,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<UISystem>();
         world.GetOrCreateManager<HighlightingSystem>();
         world.GetOrCreateManager<ActionEffectsSystem>();
-        world.GetOrCreateManager<ProjectileSystem>();
+        //world.GetOrCreateManager<ProjectileSystem>();
     }
 
     public static void AddGameLogicSystems(World world)

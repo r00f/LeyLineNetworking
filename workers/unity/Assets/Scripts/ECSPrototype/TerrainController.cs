@@ -25,6 +25,9 @@ namespace LeyLineHybridECS
         [SerializeField]
         int textureIndex;
 
+        [SerializeField]
+        Vector2 treeHeightMinMax;
+
         float[,] terrainHeights;
 
         List<TreeInstance> treeList = new List<TreeInstance>();
@@ -32,7 +35,7 @@ namespace LeyLineHybridECS
         public List<Vector3> leyLineCrackPositions = new List<Vector3>();
 
         [SerializeField]
-        Texture2D leyLineCrackBrush;
+        List<Texture2D> leyLineCrackBrushes;
 
         [SerializeField]
         public Vector3 leyLineCrackWorldPos;
@@ -80,19 +83,18 @@ namespace LeyLineHybridECS
             int xOffset = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * position.x) - totalXrange / 2;
             int yOffset = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * position.z) - totalYrange / 2;
 
+
+
+            int r = UnityEngine.Random.Range(0, leyLineCrackBrushes.Count);
+            Texture2D textureToUse = leyLineCrackBrushes[r];
+
             //generates a square
             for (int x = 0; x < totalXrange; x++)
             {
-
                 for (int y = 0; y < totalYrange; y++)
                 {
+                    strength[x, y] = 1 - textureToUse.GetPixelBilinear(x / (float)totalXrange, y / (float)totalYrange).a;
 
-                    strength[x, y] = 1 - leyLineCrackBrush.GetPixelBilinear(x / (float)totalXrange, y / (float)totalYrange).a;
-
-                    
-                    //print(strength[x, y]);
-                    //since I could not find MeshResolution -> Terrain Height access from code I hardcoded it
-                    //this converts height from worldspace to terrainspace
                     if(strength[x,y] == 0)
                         terrainHeights[x, y] = strength[x, y] + (position.y / 600);
                     else
@@ -101,21 +103,14 @@ namespace LeyLineHybridECS
                     }
                 }
             }
-
-            //convert offset where to raise to world coordinates
-
-
-
             terrain.terrainData.SetHeights(xOffset, yOffset, terrainHeights);
-
-
         }
 
         public void UpdateTerrainHeight()
         {
             foreach (Cell c in hexGridGenerator.hexagons)
             {
-                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Value, c.transform.position);
+                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Size, c.transform.position);
             }
         }
 
@@ -131,8 +126,8 @@ namespace LeyLineHybridECS
                     {
                         prototypeIndex = 0,
                         color = Color.black,
-                        heightScale = UnityEngine.Random.Range(.1f, .2f),
-                        widthScale = UnityEngine.Random.Range(.1f, .2f),
+                        heightScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
+                        widthScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
                     };
                     SpawnHexagonTree(c.transform.position, treeInstance);
                 }
@@ -187,236 +182,295 @@ namespace LeyLineHybridECS
             */
         }
 
-        public void SetHexagonTerrainHeight(float2 hexSize, Vector3 hexPos)
+        public Vector2 WorldToHeightMapPos(float size, Vector3 hexPos)
         {
-            //convert length of array to raise to world space units
-            int totalXrange = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * hexSize.x);
-            int totalYrange = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * hexSize.y);
+            Vector2 terrainPos = new Vector2();
+            Vector2 rectSize = new Vector2();
 
-            terrainHeights = new float[totalXrange, totalYrange];
+            float w = size * 2;
+            float h = size * Mathf.Sqrt(3);
+
+            //convert length of array to raise to world space units
+            rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
+
+
+            int width = (int)rectSize.x;
+            int height = (int)rectSize.y;
+
+            terrainPos.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * hexPos.x) - width / 2;
+            terrainPos.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * hexPos.z) - height / 2;
+
+            return terrainPos;
+        }
+
+        public Vector2 WorldToDetailMapMapPos(float size, Vector3 hexPos)
+        {
+            Vector2 detailPos = new Vector2();
+            Vector2 rectSize = new Vector2();
+
+            float w = size * 2;
+            float h = size * Mathf.Sqrt(3);
+
+            //convert length of array to raise to world space units
+            rectSize.x = (int)(terrain.terrainData.detailWidth / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.detailHeight / terrain.terrainData.size.z * h);
+
+
+            int width = (int)rectSize.x;
+            int height = (int)rectSize.y;
+
+            detailPos.x = (int)(terrain.terrainData.detailWidth / terrain.terrainData.size.x * hexPos.x) - width / 2;
+            detailPos.y = (int)(terrain.terrainData.detailHeight / terrain.terrainData.size.z * hexPos.z) - height / 2;
+
+            return detailPos;
+        }
+
+        public Vector2 WorldToAlphaMapMapPos(float size, Vector3 hexPos)
+        {
+            Vector2 alphaMapPos = new Vector2();
+            Vector2 rectSize = new Vector2();
+
+            float w = size * 2;
+            float h = size * Mathf.Sqrt(3);
+
+            //convert length of array to raise to world space units
+            rectSize.x = (int)(terrain.terrainData.alphamapWidth / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.alphamapHeight / terrain.terrainData.size.z * h);
+
+
+            int width = (int)rectSize.x;
+            int height = (int)rectSize.y;
+
+            alphaMapPos.x = (int)(terrain.terrainData.alphamapHeight / terrain.terrainData.size.x * hexPos.x) - width / 2;
+            alphaMapPos.y = (int)(terrain.terrainData.alphamapWidth / terrain.terrainData.size.z * hexPos.z) - height / 2;
+
+            return alphaMapPos;
+        }
+
+        public float[,] HeightPixelArray(float size, Vector3 hexPos)
+        {
+            Vector2 rectSize = new Vector2();
+            float w = size * 2;
+            float h = size * Mathf.Sqrt(3);
+            //convert length of array to raise to world space units
+            rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
+
+            float [,] pixelArray = new float[(int)rectSize.y, (int)rectSize.x];
+
+            int width = (int)rectSize.x;
+            int height = (int)rectSize.y;
 
             int xRange;
 
-            int xCenter = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * hexPos.x) - totalXrange / 2;
-            int yCenter = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * hexPos.z) - totalYrange / 2;
-
-            //sets size of xRange, yRange to height
-
-            for (int y = 0; y < totalYrange; y++)
+            for (int x = 0; x < width; x++)
             {
-                if (y < (int)(totalYrange / hexXrangeMultiplier))
+                if (x < (int)(width / hexXrangeMultiplier))
                 {
-                    xRange = (int)((y + 1) * hexXrangeMultiplier);
+                    xRange = (int)((x + 1) * hexXrangeMultiplier);
                 }
-                else if (y > (int)(totalYrange - totalYrange / hexXrangeMultiplier))
+                else if (x > (int)(width - width / hexXrangeMultiplier))
                 {
-                    xRange = (int)(hexXrangeMultiplier * (totalYrange - y));
+                    xRange = (int)(hexXrangeMultiplier * (width - x));
                 }
                 else
                 {
-                    xRange = totalYrange;
+                    xRange = width;
                 }
 
-                for (int x = 0; x < totalXrange; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    //since I could not find MeshResolution -> Terrain Height access from code I hardcoded it
-                    //this converts height from worldspace to terrainspace
-                    if (x >= (totalYrange / 2) - xRange / 2 && x <= (totalYrange / 2) + xRange / 2)
+                    if (y >= (height / 2) - xRange / 2 && y <= (height / 2) + xRange / 2)
                         //if the point to raise is not a part of the hex, set it to be the position it had before
-                        terrainHeights[x, y] = hexPos.y / 600;
-                    else
-                    {
-                        Vector3 offsetPos;
-                        if (x > totalXrange / 2)
-                        {
-                            if (y > totalYrange / 2)
-                            {
-                                //top
-                                offsetPos = new Vector3(hexSize.x / 2, 0, hexSize.y / 2);
-                            }
-                            else
-                            {
-                                offsetPos = new Vector3(-hexSize.x / 2, 0, hexSize.y / 2);
-
-                            }
-                            //right
-
-                            //print("right checkpos = " + checkPos.x);
-
-                        }
-                        else
-                        {
-                            if (y > totalYrange / 2)
-                            {
-                                //top
-                                offsetPos = new Vector3(hexSize.x / 2, 0, -hexSize.y / 2);
-                            }
-                            else
-                            {
-                                offsetPos = new Vector3(-hexSize.x / 2, 0, -hexSize.y / 2);
-
-                            }
-
-                        }
-
-                        terrainHeights[x, y] = terrain.SampleHeight(hexPos + offsetPos) / 600;
-                    }
-
-                }
-            }
-
-            terrain.terrainData.SetHeights(xCenter, yCenter, terrainHeights);
-
-        }
-        
-        public void SetHexagonTerrainTexture(float hexSize, Vector3 hexPos, int textureLayerIndex)
-        {
-            //convert length of array to raise to world space units
-            int totalXrange = (int)(terrain.terrainData.alphamapWidth / terrain.terrainData.size.x * hexSize);
-            int totalYrange = (int)(terrain.terrainData.alphamapHeight / terrain.terrainData.size.z * hexSize);
-
-            float[,,] alphaMap = new float[totalXrange, totalYrange, terrain.terrainData.alphamapLayers];
-
-            int xRange;
-
-            int xCenter = (int)(terrain.terrainData.alphamapWidth / terrain.terrainData.size.x * hexPos.x) - totalXrange / 2;
-            int yCenter = (int)(terrain.terrainData.alphamapHeight / terrain.terrainData.size.z * hexPos.z) - totalYrange / 2;
-
-            //sets size of xRange, yRange to height
-
-            for (int y = 0; y < totalYrange; y++)
-            {
-                if (y < (int)(totalYrange / hexXrangeMultiplier))
-                {
-                    xRange = (int)((y + 1) * hexXrangeMultiplier);
-                }
-                else if (y > (int)(totalYrange - totalYrange / hexXrangeMultiplier))
-                {
-                    xRange = (int)(hexXrangeMultiplier * (totalYrange - y));
-                }
-                else
-                {
-                    xRange = totalYrange;
-                }
-
-                for (int x = 0; x < totalXrange; x++)
-                {
-                    //since I could not find MeshResolution -> Terrain Height access from code I hardcoded it
-                    //this converts height from worldspace to terrainspace
-                    if (x >= (totalYrange / 2) - xRange / 2 && x <= (totalYrange / 2) + xRange / 2)
-                    {
-                        alphaMap[x, y, textureLayerIndex] = 1;
-
-
-                    }
-                    //if the point to raise is not a part of the hex, set it to be the position it had before
+                        pixelArray[y, x] = hexPos.y / 600;
                     else
                     {
 
                         Vector3 offsetPos;
-                        if (x > totalXrange / 2)
+                        if (x < width / 2)
                         {
-                            if (y > totalYrange / 2)
+                            if (y < height / 2)
                             {
                                 //top
-                                offsetPos = new Vector3(hexSize / 2, 0, hexSize / 2);
+                                offsetPos = new Vector3(-w / 2, 0, -h / 2);
                             }
                             else
                             {
-                                offsetPos = new Vector3(-hexSize / 2, 0, hexSize / 2);
-
+                                offsetPos = new Vector3(-w / 2, 0, h / 2);
                             }
-                            //right
-
-                            //print("right checkpos = " + checkPos.x);
 
                         }
                         else
                         {
-                            if (y > totalYrange / 2)
+                            if (y < height / 2)
                             {
                                 //top
-                                offsetPos = new Vector3(hexSize / 2, 0, -hexSize / 2);
+                                offsetPos = new Vector3(w / 2, 0, -h / 2);
                             }
                             else
                             {
-                                offsetPos = new Vector3(-hexSize / 2, 0, -hexSize / 2);
-
+                                offsetPos = new Vector3(w / 2, 0, h / 2);
                             }
-
                         }
-
-                        alphaMap[x, y, GetMainTextureAtWorldPos(hexPos + offsetPos)] = 1;
+                        pixelArray[y, x] = terrain.SampleHeight(hexPos + offsetPos) / 600;
                     }
 
                 }
             }
-
-            terrain.terrainData.SetAlphamaps(xCenter, yCenter, alphaMap);
+            return pixelArray;
         }
 
-        public void SetHexagonTerrainDetails(float hexSize, Vector3 hexPos, int detailLayerIndex, float spawnPercentage)
+        public int[,] DetailPixelArray(float size, Vector3 hexPos, float spawnPercentage)
         {
+            Vector2 rectSize = new Vector2();
+            float w = size * 2;
+            float h = size * Mathf.Sqrt(3);
             //convert length of array to raise to world space units
-            int totalXrange = (int)(terrain.terrainData.detailWidth / terrain.terrainData.size.x * hexSize);
-            int totalYrange = (int)(terrain.terrainData.detailHeight / terrain.terrainData.size.z * hexSize);
+            rectSize.x = (int)(terrain.terrainData.detailWidth / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.detailHeight / terrain.terrainData.size.z * h);
 
-            int[,] detailMap = new int[totalXrange, totalYrange];
+            int[,] pixelArray = new int[(int)rectSize.y, (int)rectSize.x];
+
+            int width = (int)rectSize.x;
+            int height = (int)rectSize.y;
 
             int xRange;
 
-            int xCenter = (int)(terrain.terrainData.detailWidth / terrain.terrainData.size.x * hexPos.x) - totalXrange / 2;
-            int yCenter = (int)(terrain.terrainData.detailHeight / terrain.terrainData.size.z * hexPos.z) - totalYrange / 2;
-
-            //sets size of xRange, yRange to height
-
-            for (int y = 0; y < totalYrange; y++)
+            for (int x = 0; x < width; x++)
             {
-                if (y < (int)(totalYrange / hexXrangeMultiplier))
+                if (x < (int)(width / hexXrangeMultiplier))
                 {
-                    xRange = (int)((y + 1) * hexXrangeMultiplier);
+                    xRange = (int)((x + 1) * hexXrangeMultiplier);
                 }
-                else if (y > (int)(totalYrange - totalYrange / hexXrangeMultiplier))
+                else if (x > (int)(width - width / hexXrangeMultiplier))
                 {
-                    xRange = (int)(hexXrangeMultiplier * (totalYrange - y));
+                    xRange = (int)(hexXrangeMultiplier * (width - x));
                 }
                 else
                 {
-                    xRange = totalYrange;
+                    xRange = width;
                 }
 
-                for (int x = 0; x < totalXrange; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    //since I could not find MeshResolution -> Terrain Height access from code I hardcoded it
-                    //this converts height from worldspace to terrainspace
-                    if (x >= (totalYrange / 2) - xRange / 2 && x <= (totalYrange / 2) + xRange / 2)
+                    if (y >= (height / 2) - xRange / 2 && y <= (height / 2) + xRange / 2)
                     {
                         float random = UnityEngine.Random.Range(0f, 1f);
 
                         if (random < spawnPercentage)
                         {
-                            detailMap[x, y] = 1;
+                            pixelArray[y, x] = 1;
                         }
                         else
                         {
-                            detailMap[x, y] = 0;
+                            pixelArray[y, x] = 0;
                         }
-
                     }
-                    //if the point to spawn detail is not a part of the hex, don't spawn any detail
                     else
                     {
-                        detailMap[x, y] = 0;
+                        pixelArray[y, x] = 0;
+                    }
+                }
+            }
+            return pixelArray;
+        }
+
+        public float[,,] AlphaMapPixelArray(float size, Vector3 hexPos, int textureLayerIndex)
+        {
+            Vector2 rectSize = new Vector2();
+            float w = size * 2;
+            float h = size * Mathf.Sqrt(3) + .1f;
+            //convert length of array to raise to world space units
+            rectSize.x = (int)(terrain.terrainData.alphamapWidth / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.alphamapHeight / terrain.terrainData.size.z * h);
+
+            int width = (int)rectSize.x;
+            int height = (int)rectSize.y;
+
+            float[,,] alphaMap = new float[height, width, terrain.terrainData.alphamapLayers];
+
+            int xRange;
+
+            for (int x = 0; x < width; x++)
+            {
+                if (x < (int)(width / hexXrangeMultiplier))
+                {
+                    xRange = (int)((x + 1) * hexXrangeMultiplier);
+                }
+                else if (x > (int)(width - width / hexXrangeMultiplier))
+                {
+                    xRange = (int)(hexXrangeMultiplier * (width - x));
+                }
+                else
+                {
+                    xRange = width;
+                }
+
+                for (int y = 0; y < height; y++)
+                {
+                    if (y >= (height / 2) - xRange / 2 && y <= (height / 2) + xRange / 2)
+                        //if the point to raise is not a part of the hex, set it to be the position it had before
+                        alphaMap[y, x, textureLayerIndex] = 1;
+                    else
+                    {
+
+                        Vector3 offsetPos;
+                        if (x < width / 2)
+                        {
+                            if (y < height / 2)
+                            {
+                                //top
+                                offsetPos = new Vector3(-w / 2, 0, -h / 2);
+                            }
+                            else
+                            {
+                                offsetPos = new Vector3(-w / 2, 0, h / 2);
+                            }
+
+                        }
+                        else
+                        {
+                            if (y < height / 2)
+                            {
+                                //top
+                                offsetPos = new Vector3(w / 2, 0, -h / 2);
+                            }
+                            else
+                            {
+                                offsetPos = new Vector3(w / 2, 0, h / 2);
+                            }
+                        }
+
+                        alphaMap[y, x, GetMainTextureAtWorldPos(hexPos + offsetPos)] = 1;
                     }
 
                 }
             }
-            terrain.terrainData.SetDetailLayer(xCenter, yCenter, detailLayerIndex, detailMap);
+
+            return alphaMap;
         }
 
+        public void SetHexagonTerrainHeight(float size, Vector3 hexPos)
+        {
+            Vector2 terrainPos = WorldToHeightMapPos(size, hexPos);
+            terrainHeights = HeightPixelArray(size, hexPos);
+            terrain.terrainData.SetHeights((int)terrainPos.x, (int)terrainPos.y, terrainHeights);
+        }
 
+        public void SetHexagonTerrainDetails(float size, Vector3 hexPos, int detailLayerIndex, float spawnPercentage)
+        {
+            Vector2 detailPos = WorldToDetailMapMapPos(size, hexPos);
+            int[,] detailMap = DetailPixelArray(size, hexPos, spawnPercentage);
+            terrain.terrainData.SetDetailLayer((int)detailPos.x, (int)detailPos.y, detailLayerIndex, detailMap);
+        }
 
-
+        public void SetHexagonTerrainTexture(float size, Vector3 hexPos, int textureLayerIndex)
+        {
+            Vector2 alphaPos = WorldToAlphaMapMapPos(size, hexPos);
+            float[,,] alphaMap = AlphaMapPixelArray(size, hexPos, textureLayerIndex);
+            terrain.terrainData.SetAlphamaps((int)alphaPos.x, (int)alphaPos.y, alphaMap);
+        }
 
         public void RemoveHexagonTree(TreeInstance treeInstance)
         {
@@ -430,7 +484,6 @@ namespace LeyLineHybridECS
 
         public void SetSlopeTexture()
         {
-
             float[,,] map = new float[terrain.terrainData.alphamapWidth, terrain.terrainData.alphamapHeight, terrain.terrainData.alphamapLayers];
 
             // For each point on the alphamap...
@@ -552,6 +605,96 @@ namespace LeyLineHybridECS
             return maxIndex;
         }
 
+        public void SmoothTerrainHeights()
+        {
+
+            float[,] smoothHeights = smooth(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight), new Vector2(terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight), 1);
+            terrain.terrainData.SetHeights(0, 0, smoothHeights);
+
+        }
+
+        private float[,] smooth(float[,] heightMap, Vector2 arraySize, int iterations)
+        {
+            int Tw = (int)arraySize.x;
+            int Th = (int)arraySize.y;
+            int xNeighbours;
+            int yNeighbours;
+            int xShift;
+            int yShift;
+            int xIndex;
+            int yIndex;
+            int Tx;
+            int Ty;
+            // Start iterations...
+            for (int iter = 0; iter < iterations; iter++)
+            {
+
+                for (Ty = 0; Ty < Th; Ty++)
+                {
+                    // y...
+                    if (Ty == 0)
+                    {
+                        yNeighbours = 2;
+                        yShift = 0;
+                        yIndex = 0;
+                    }
+                    else if (Ty == Th - 1)
+                    {
+                        yNeighbours = 2;
+                        yShift = -1;
+                        yIndex = 1;
+                    }
+                    else
+                    {
+                        yNeighbours = 3;
+                        yShift = -1;
+                        yIndex = 1;
+                    }
+                    for (Tx = 0; Tx < Tw; Tx++)
+                    {
+                        // x...
+                        if (Tx == 0)
+                        {
+                            xNeighbours = 2;
+                            xShift = 0;
+                            xIndex = 0;
+                        }
+                        else if (Tx == Tw - 1)
+                        {
+                            xNeighbours = 2;
+                            xShift = -1;
+                            xIndex = 1;
+                        }
+                        else
+                        {
+                            xNeighbours = 3;
+                            xShift = -1;
+                            xIndex = 1;
+                        }
+                        int Ny;
+                        int Nx;
+                        float hCumulative = 0.0f;
+                        int nNeighbours = 0;
+                        for (Ny = 0; Ny < yNeighbours; Ny++)
+                        {
+                            for (Nx = 0; Nx < xNeighbours; Nx++)
+                            {
+                                if (Nx == xIndex || Ny == yIndex)
+                                {
+                                    float heightAtPoint = heightMap[Tx + Nx + xShift, Ty + Ny + yShift]; // Get height at point
+                                    hCumulative += heightAtPoint;
+                                    nNeighbours++;
+                                }
+                            }
+                        }
+                        float hAverage = hCumulative / nNeighbours;
+                        heightMap[Tx + xIndex + xShift, Ty + yIndex + yShift] = hAverage;
+                    }
+                }
+            }
+            return heightMap;
+        }
+
         #endregion
 
         public void SetWholeTerrainHeight()
@@ -595,6 +738,6 @@ namespace LeyLineHybridECS
             terrain.terrainData.SetAlphamaps(0, 0, alphaMap);
         }
 
-#endif
+        #endif
     }
 }

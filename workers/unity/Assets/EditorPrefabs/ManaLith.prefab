@@ -163,7 +163,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.3028679
+        value: 0.25286376
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -5050,7 +5050,7 @@ LineRenderer:
       m_Curve:
       - serializedVersion: 3
         time: 0
-        value: 0.3489821
+        value: 0.24184251
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -9889,11 +9889,12 @@ MonoBehaviour:
   leyLineCircleMeshRenderer: {fileID: 1117199391049767067}
   circlePs: {fileID: 1484804398595048160}
   pathPs: {fileID: 2120174005218378684}
+  leyLinePath: []
   leyLineCircle: []
   connectedLeyLineRenderers: []
   connectedManaLith: {fileID: 0}
   otherManaliths: []
-  circleSegments: 32
+  circleSegments: 40
   lineSegments: 20
   offset: {x: 0, y: -0.4, z: 0}
   circleSize: 0

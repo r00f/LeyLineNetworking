@@ -121,11 +121,11 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.cleanup:
-                        if (AllPlayersEndTurnReady(gameStateWorldIndex))
-                        {
+                        //if (AllPlayersEndTurnReady(gameStateWorldIndex))
+                        //{
                             gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;
-                        }
+                        //}
                         break;
                     case GameStateEnum.game_over:
                         break;

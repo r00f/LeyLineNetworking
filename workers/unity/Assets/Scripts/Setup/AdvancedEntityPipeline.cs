@@ -48,7 +48,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     typeof(Healthbar),
     typeof(AnimatedPortraitReference),
     typeof(UnitComponentReferences)
-};
+    };
 
     public AdvancedEntityPipeline(Worker worker, string authPlayer, string nonAuthPlayer,
         IEntityGameObjectCreator fallback)

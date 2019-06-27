@@ -1,25 +1,13 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.Events;
-using Player;
-using Generic;
-using Improbable.Gdk.ReactiveComponents;
+using Unit;
+using Improbable;
+using LeyLineHybridECS;
 
+[DisableAutoCreation]
 public class ProjectileSystem : ComponentSystem
 {
-    struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<GameState.Component> GameStatesData;
-        public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
-    }
-
-    [Inject]
-    GameStateData m_GameStateData;
-
     struct ProjectileData
     {
         public readonly int Length;
@@ -31,6 +19,8 @@ public class ProjectileSystem : ComponentSystem
     [Inject]
     ProjectileData m_ProjectileData;
 
+    /*
+
     struct PlayerData
     {
         public readonly int Length;
@@ -41,38 +31,47 @@ public class ProjectileSystem : ComponentSystem
     [Inject]
     PlayerData m_PlayerData;
 
+    public struct UnitData
+    {
+        public readonly int Length;
+        public ComponentArray<AnimatorComponent> AnimatorComponents;
+    }
+
+    [Inject] UnitData m_UnitData;
+
+    struct GameStateData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<GameState.Component> GameStatesData;
+        public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
+    }
+
     [Inject]
-    ActionEffectsSystem m_ActionEffectSystem;
+    GameStateData m_GameStateData;
+
+    */
+
+
+    ComponentGroup unitGroup;
+
+    protected override void OnCreateManager()
+    {
+        base.OnCreateManager();
+
+        unitGroup = Worlds.ClientWorld.CreateComponentGroup(
+        ComponentType.Create<AnimatorComponent>()
+        );
+
+    }
 
 
     protected override void OnUpdate()
     {
-        
-        if (m_PlayerData.Length != 0 && m_GameStateData.Length != 0)
-        {
-            var gameState = m_GameStateData.GameStatesData[0].CurrentState;
-            if (gameState != GameStateEnum.planning)
-            {
-                var playerstate = m_PlayerData.PlayerStateData[0];
-                var endStepReady = playerstate.EndStepReady;
-                if (m_ProjectileData.Length == 0)
-                {
-                    endStepReady = true;
-                }
-                else {
-                    endStepReady = false;
-                }
-
-                playerstate.EndStepReady = endStepReady;
-                m_PlayerData.PlayerStateData[0] = playerstate;
-            }
-        }
         for (int i = 0; i < m_ProjectileData.Length; i++)
         {
             var projectile = m_ProjectileData.Projectiles[i];
             var entity = m_ProjectileData.Entities[i];
             var transform = m_ProjectileData.Transforms[i];
-
 
             if (projectile.IsTravelling)
             {
@@ -95,7 +94,7 @@ public class ProjectileSystem : ComponentSystem
                 else
                 {
                     Debug.Log("Reached Destination");
-                    m_ActionEffectSystem.TriggerActionEffect(projectile.EffectOnDetonation, projectile.CoordinatesToTrigger);
+                    TriggerUnitActionEffect(projectile.EffectOnDetonation, projectile.CoordinatesToTrigger);
 
                     //Stop looping Particlesystems and emit explosion burst
 
@@ -116,4 +115,17 @@ public class ProjectileSystem : ComponentSystem
     }
 
 
+    void TriggerUnitActionEffect(EffectTypeEnum inEffectType, HashSet<Vector3f> inCubeCoordinates)
+    {
+        for (int i = 0; i < unitGroup.GetEntityArray().Length; i++)
+        {
+            var animatorComponent = unitGroup.GetComponentArray<AnimatorComponent>()[i];
+
+            if (inCubeCoordinates.Contains(animatorComponent.LastStationaryCoordinate))
+            {
+                Debug.Log("Set Unit actionEffectTrigger");
+                animatorComponent.ActionEffectTrigger = true;
+            }
+        }
+    }
 }

@@ -44,13 +44,24 @@ public class AddComponentsSystem : ComponentSystem
 
     [Inject] UnitAddedData m_UnitAddedData;
 
+    /*
+    private struct ProjectileAddedData
+    {
+        public readonly int Length;
+        public readonly EntityArray Entities;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
+    }
+
+    [Inject] ProjectileAddedData m_ProjectileAddedData;
+
+    */
     private struct PlayerAddedData
     {
         public readonly int Length;
         public readonly EntityArray Entities;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
-
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }
 
@@ -187,5 +198,18 @@ public class AddComponentsSystem : ComponentSystem
 
             PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         }
+
+        /*
+        for(int i = 0; i < m_ProjectileAddedData.Length; i++)
+        {
+            var projectileWorldIndex = m_ProjectileAddedData.WorldIndexData[i];
+            var entity = m_ProjectileAddedData.Entities[i];
+
+            if (projectileWorldIndex.Value == authPlayerWorldIndex)
+            {
+
+            }
+        }
+        */
     }
 }

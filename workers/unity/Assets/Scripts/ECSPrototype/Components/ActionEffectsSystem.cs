@@ -1,16 +1,13 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Improbable;
 using Improbable.Gdk.Core;
-using Improbable.Gdk.ReactiveComponents;
 using LeyLineHybridECS;
 using Unity.Entities;
-using Cell;
 using Generic;
 using Unit;
 using System.Collections.Generic;
-using UnityEngine.Events;
 
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
 public class ActionEffectsSystem : ComponentSystem
 {
     public struct CellData
@@ -27,11 +24,6 @@ public class ActionEffectsSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Actions.Component> ActionsData;
-        public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
-        public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
         public ComponentArray<AnimatorComponent> AnimatorComponents;
     }
 
@@ -42,26 +34,23 @@ public class ActionEffectsSystem : ComponentSystem
     protected override void OnUpdate()
     {
 
+        //Debug.Log(m_UnitData.Length);
 
-        
     }
 
     public void TriggerActionEffect(EffectTypeEnum inEffectType, HashSet<Vector3f> inCubeCoordinates)
     {
-
-        foreach (Vector3f v in inCubeCoordinates)
-        {
-            Debug.Log("Activate Cells with Effect: " + v + ", " + inEffectType);
-        }
-
+        UpdateInjectedComponentGroups();
 
         for (int i = 0; i < m_UnitData.Length; i++)
         {
-            var coord = m_UnitData.Coords[i].CubeCoordinate;
             var animatorComp = m_UnitData.AnimatorComponents[i];
+
+            Debug.Log(animatorComp.LastStationaryCoordinate);
 
             if (inCubeCoordinates.Contains(animatorComp.LastStationaryCoordinate))
             {
+                Debug.Log("Set Unit actionEffectTrigger");
                 animatorComp.ActionEffectTrigger = true;
             }
         }

@@ -25,6 +25,7 @@ namespace BlankProject
             Worlds.ClientWorld = Worker.World.GetOrCreateManager<EntityManager>();
             WorkerUtils.AddClientSystems(Worker.World);
             World.Active.GetOrCreateManager<LeyLineHybridECS.MeshColorLerpSystem>();
+            World.Active.GetOrCreateManager<ProjectileSystem>();
             //GameObjectRepresentationHelper.AddSystems(Worker.World);
             var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer, fallback), gameObject);

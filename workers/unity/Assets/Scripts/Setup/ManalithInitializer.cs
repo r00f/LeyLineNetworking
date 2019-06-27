@@ -39,6 +39,7 @@ namespace LeyLineHybridECS
         [SerializeField]
         ParticleSystem pathPs;
 
+        [SerializeField]
         List<Cell> leyLinePath = new List<Cell>();
 
         public List<Cell> leyLineCircle = new List<Cell>();
@@ -57,7 +58,7 @@ namespace LeyLineHybridECS
         int circleSegments = 128;
 
         [SerializeField]
-        int lineSegments = 20;
+        int lineSegments = 10;
 
         [SerializeField]
         Vector3 offset;

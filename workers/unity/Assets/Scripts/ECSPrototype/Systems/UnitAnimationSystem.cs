@@ -139,44 +139,40 @@ public class UnitAnimationSystem : ComponentSystem
                 animatorComponent.AnimationEvents.EventTrigger = false;
             }
 
-            if(animatorComponent.LastHealth != healthComponent.CurrentHealth)
+            if (animatorComponent.ActionEffectTrigger)
             {
-                if(animatorComponent.LastHealth > healthComponent.CurrentHealth)
+                if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
                 {
-                    if(animatorComponent.ActionEffectTrigger)
+                    if (healthComponent.CurrentHealth == 0)
                     {
-                        Debug.Log("ActionEffectTrigger");
-                        if(healthComponent.CurrentHealth == 0)
+                        Debug.Log("Death");
+
+                        //move props out of skeleton
+                        foreach (Transform t in animatorComponent.Props)
                         {
-                            Debug.Log("Death");
-
-                            //move props out of skeleton
-                            foreach (Transform t in animatorComponent.Props)
-                            {
-                                t.parent = animatorComponent.Animator.transform;
-                            }
-
-                            animatorComponent.Animator.transform.parent = GarbageCollection.transform;
-
-                            //disable animator
-                            animatorComponent.Animator.enabled = false;
-
-
-                            //set all rigidbodies to non kinematic
-                            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-                            {
-                                r.isKinematic = false;
-                            }
+                            t.parent = animatorComponent.Animator.transform;
                         }
-                        //iterate on when healthchange feedback is being triggered: right now only works with basic attack when in meelee range
-                        else
+
+                        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
+
+                        //disable animator
+                        animatorComponent.Animator.enabled = false;
+
+
+                        //set all rigidbodies to non kinematic
+                        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
                         {
-                            m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
-                            animatorComponent.Animator.SetTrigger("GetHit");
+                            r.isKinematic = false;
                         }
-                        animatorComponent.LastHealth = healthComponent.CurrentHealth;
-                        animatorComponent.ActionEffectTrigger = false;
                     }
+                    //iterate on when healthchange feedback is being triggered: right now only works with basic attack when in meelee range
+                    else
+                    {
+                        m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
+                        animatorComponent.Animator.SetTrigger("GetHit");
+                    }
+
+                    animatorComponent.LastHealth = healthComponent.CurrentHealth;
                 }
                 else
                 {
@@ -184,8 +180,8 @@ public class UnitAnimationSystem : ComponentSystem
                     animatorComponent.LastHealth = healthComponent.CurrentHealth;
                 }
 
+                animatorComponent.ActionEffectTrigger = false;
             }
-
 
             if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
