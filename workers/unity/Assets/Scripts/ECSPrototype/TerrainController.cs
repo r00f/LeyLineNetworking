@@ -190,7 +190,7 @@ namespace LeyLineHybridECS
             float w = size * 2;
             float h = size * Mathf.Sqrt(3);
 
-            //convert length of array to raise to world space units
+            //convert length of array to raise to world space unit
             rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
             rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
 
@@ -255,7 +255,7 @@ namespace LeyLineHybridECS
             float h = size * Mathf.Sqrt(3);
             //convert length of array to raise to world space units
             rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
-            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
+            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h + 1);
 
             float [,] pixelArray = new float[(int)rectSize.y, (int)rectSize.x];
 
@@ -266,9 +266,10 @@ namespace LeyLineHybridECS
 
             for (int x = 0; x < width; x++)
             {
+                
                 if (x < (int)(width / hexXrangeMultiplier))
                 {
-                    xRange = (int)((x + 1) * hexXrangeMultiplier);
+                    xRange = (int)((x + 2) * hexXrangeMultiplier);
                 }
                 else if (x > (int)(width - width / hexXrangeMultiplier))
                 {
@@ -278,12 +279,14 @@ namespace LeyLineHybridECS
                 {
                     xRange = width;
                 }
+                
 
                 for (int y = 0; y < height; y++)
                 {
                     if (y >= (height / 2) - xRange / 2 && y <= (height / 2) + xRange / 2)
-                        //if the point to raise is not a part of the hex, set it to be the position it had before
-                        pixelArray[y, x] = hexPos.y / 600;
+                    //if the point to raise is not a part of the hex, set it to be the position it had before
+                    pixelArray[y, x] = hexPos.y / 600;
+                    
                     else
                     {
 
@@ -315,10 +318,10 @@ namespace LeyLineHybridECS
                         }
                         pixelArray[y, x] = terrain.SampleHeight(hexPos + offsetPos) / 600;
                     }
-
+                    
                 }
             }
-            return pixelArray;
+                return pixelArray;
         }
 
         public int[,] DetailPixelArray(float size, Vector3 hexPos, float spawnPercentage)

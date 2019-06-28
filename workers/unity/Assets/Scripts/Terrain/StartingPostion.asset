@@ -15,14 +15,14 @@ MonoBehaviour:
   spawnTree: 0
   treeIndex: 0
   detailSpawnPercentage: 0
-  textureIndex: 0
+  textureIndex: 4
   detailIndex: 0
   terrain_Name: StartingPosition
   additionalCost: 0
-  yOffset: 0
+  yOffset: 0.2
   Walkable: 1
   spawnAllAssets: 0
-  probabilityToSpawnAsset: 0
+  probabilityToSpawnAsset: 100
   obstructVision: 0
   assets_to_Spawn:
-  - {fileID: 0}
+  - {fileID: 2782584667604165875, guid: d01cf1f03c88c92488b173858d5f239f, type: 3}

@@ -40,7 +40,7 @@ namespace LeyLineHybridECS
                     //GameObject hexagon = PrefabUtility.InstantiatePrefab(HexagonPrefab as GameObject) as GameObject;
                     //Vector2 hexSize = hexagon.GetComponent<CellDimensions>().Value;
 
-                    hexagon.transform.position = transform.position + new Vector3((i * w * 0.75f), 0, (i * h * 0.5f) + (j * (h - 0.03f)));
+                    hexagon.transform.position = transform.position + new Vector3((i * w * 0.75f), 0, (i * h * 0.5f) + (j * h));
                     hexagon.GetComponent<Position3DDataComponent>().Value = new Position3D
                     {
                         Value = hexagon.transform.position
@@ -66,7 +66,7 @@ namespace LeyLineHybridECS
                     GameObject hexagon2 = Instantiate(HexagonPrefab);
                     //GameObject hexagon2 = PrefabUtility.InstantiatePrefab(HexagonPrefab as GameObject) as GameObject;
 
-                    hexagon2.transform.position = transform.position + new Vector3((-i * w * 0.75f), 0, (i * h * 0.5f) + (j * (h - 0.03f)));
+                    hexagon2.transform.position = transform.position + new Vector3((-i * w * 0.75f), 0, (i * h * 0.5f) + (j * h));
                     hexagon2.GetComponent<Position3DDataComponent>().Value = new Position3D
                     {
                         Value = hexagon2.transform.position
