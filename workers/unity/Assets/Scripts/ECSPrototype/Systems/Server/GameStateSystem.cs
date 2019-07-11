@@ -6,6 +6,8 @@ using Player;
 using Cell;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.ReactiveComponents;
+using System.Collections.Generic;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
@@ -35,6 +37,8 @@ namespace LeyLineHybridECS
         public struct UnitData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<Actions.Component> ActionsData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
@@ -44,6 +48,7 @@ namespace LeyLineHybridECS
         public struct SpawnCellData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
             public readonly ComponentDataArray<IsSpawn.Component> IsSpawnData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
@@ -51,6 +56,20 @@ namespace LeyLineHybridECS
         }
 
         [Inject] SpawnCellData m_SpawnCellData;
+
+
+        public struct CellData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CubeCoordinateData;
+            public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
+
+        }
+
+        [Inject] CellData m_CellData;
+
+        [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
         protected override void OnUpdate()
         {
@@ -121,11 +140,10 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.cleanup:
-                        //if (AllPlayersEndTurnReady(gameStateWorldIndex))
-                        //{
+                            UpdateIsTaken(gameStateWorldIndex);
                             gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;
-                        //}
+
                         break;
                     case GameStateEnum.game_over:
                         break;
@@ -145,6 +163,46 @@ namespace LeyLineHybridECS
             }
 
         }
+
+        private void UpdateIsTaken(uint gameStateWorldIndex)
+        {
+            Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
+
+            for (int i = 0; i < m_UnitData.Length; i++)
+            {
+                var worldIndex = m_UnitData.WorldIndexData[i].Value;
+                var cubeCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
+                var entityId = m_UnitData.EntityIds[i].EntityId.Id;
+
+                if(gameStateWorldIndex == worldIndex)
+                {
+                    if (unitDict.ContainsKey(cubeCoord))
+                        unitDict.Remove(cubeCoord);
+
+                    unitDict.Add(cubeCoord, entityId);
+                }
+            }
+
+            for (int i = 0; i < m_CellData.Length; i++)
+            {
+                var worldIndex = m_CellData.WorldIndexData[i].Value;
+                var cellCubeCoordinate = m_CellData.CubeCoordinateData[i];
+                var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
+                var cellAtt = m_CellData.CellAttributes[i];
+
+                if (gameStateWorldIndex == worldIndex)
+                {
+                    if (unitDict.ContainsKey(cellCubeCoordinate.CubeCoordinate))
+                    {
+                        long id = unitDict[cellCubeCoordinate.CubeCoordinate];
+                        cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex);
+                        m_CellData.CellAttributes[i] = cellAtt;
+                    }
+                }
+            }
+        }
+
+
         private bool AllSpawnsInitialized(uint gameStateWorldIndex)
         {
             for (int i = 0; i < m_SpawnCellData.Length; i++)

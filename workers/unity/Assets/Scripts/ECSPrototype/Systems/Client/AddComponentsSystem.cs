@@ -36,8 +36,8 @@ public class AddComponentsSystem : ComponentSystem
         public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates; 
         public readonly ComponentDataArray<FactionComponent.Component> Factions;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentArray<Transform> Transform;
         public readonly ComponentDataArray<Health.Component> UnitAttributeData;
+        public readonly ComponentArray<Transform> Transform;
         public ComponentArray<AnimatorComponent> AnimatorData;
         public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
     }

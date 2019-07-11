@@ -4,6 +4,7 @@ using Generic;
 using Player;
 using Unit;
 using Improbable.Gdk.ReactiveComponents;
+using UnityEngine;
 
 namespace LeyLineHybridECS
 {
@@ -24,6 +25,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public ComponentArray<Moba_Camera> CameraScripts;
             public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
@@ -38,6 +40,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
+            public readonly ComponentArray<Transform> Transforms;
             public ComponentArray<UnitComponentReferences> UnitCompReferences;
         }
 
@@ -50,6 +53,7 @@ namespace LeyLineHybridECS
 
             var playerState = m_PlayerData.PlayerStateData[0];
             var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+            var playerCam = m_PlayerData.CameraScripts[0];
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
@@ -63,6 +67,7 @@ namespace LeyLineHybridECS
                     {
                         for (int ui = 0; ui < m_UnitData.Length; ui++)
                         {
+                            var transform = m_UnitData.Transforms[ui];
                             var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
                             var unitCoord = m_UnitData.CoordinateData[ui].CubeCoordinate;
                             var actions = m_UnitData.ActionsData[ui];
@@ -73,6 +78,8 @@ namespace LeyLineHybridECS
                             {
                                 if (unitId == playerState.SelectedUnitId)
                                 {
+                                    playerCam.SetTargetTransform(transform);
+
                                     if(actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
                                     {
                                         if(playerState.CurrentState != PlayerStateEnum.waiting_for_target)
@@ -113,6 +120,15 @@ namespace LeyLineHybridECS
                         SetPlayerState(PlayerStateEnum.waiting);
                         return;
                     }
+                    
+                    else if(playerState.UnitTargets.Count != 0)
+                    {
+                        Debug.Log("ClearUnitTargets");
+                        playerState.UnitTargets.Clear();
+                        playerState.UnitTargets = playerState.UnitTargets;
+                        m_PlayerData.PlayerStateData[0] = playerState;
+                    }
+                    
                 }
             }
         }

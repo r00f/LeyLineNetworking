@@ -6,6 +6,7 @@ using Cell;
 using Generic;
 using Player;
 using Improbable.Gdk.ReactiveComponents;
+using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
@@ -41,10 +42,15 @@ namespace LeyLineHybridECS
         ComponentGroup playerGroup;
         ComponentGroup gameControllerGroup;
 
+        Settings settings;
+
         protected override void OnCreateManager()
         {
             
             base.OnCreateManager();
+
+            //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+            settings = Resources.Load<Settings>("Settings");
 
             playerGroup = Worlds.ClientWorld.CreateComponentGroup(
 
@@ -108,18 +114,8 @@ namespace LeyLineHybridECS
 
                     if (position == circlePos)
                     {
-                        switch (faction.Faction)
-                        {
-                            case 0:
-                                circleColor = Color.yellow;
-                                break;
-                            case 1:
-                                circleColor = Color.blue;
-                                break;
-                            case 2:
-                                circleColor = Color.red;
-                                break;
-                        }
+                        circleColor = settings.FactionColors[(int)faction.Faction];
+
                         m_CircleData.MeshColorData[ci].Color = circleColor;
                     }
                 }
@@ -127,14 +123,13 @@ namespace LeyLineHybridECS
 
             for (int i = 0; i < m_CircleData.Length; i++)
             {
-                //Debug.Log("??");
                 var meshColor = m_CircleData.MeshColorData[i];
 
                 if (meshColor.LerpColor != meshColor.Color)
                     meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
 
-                if (meshColor.MeshRenderer.material.color != meshColor.LerpColor)
-                    meshColor.MeshRenderer.material.color = meshColor.LerpColor;
+                Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
+                meshColor.MeshRenderer.material.color = emissionColor;
 
                 ParticleSystem pPs = meshColor.ParticleSystem;
                 var mainModule = pPs.main;
@@ -147,16 +142,37 @@ namespace LeyLineHybridECS
             {
                 var meshGradientColor = m_LineData.MeshGradientColorData[i];
 
-                if (meshGradientColor.ManalithColor.LerpColor != meshGradientColor.ManalithColor.Color || meshGradientColor.ConnectedManalithColor.LerpColor != meshGradientColor.ConnectedManalithColor.Color)
+                Color emissiveColor1 = meshGradientColor.ManalithColor.LerpColor * meshGradientColor.EmissionMultiplier;
+                Color emissiveColor2 = meshGradientColor.ConnectedManalithColor.LerpColor * meshGradientColor.EmissionMultiplier;
+
+                for (int li = 0; li < meshGradientColor.colors.Length; li++)
                 {
-                    // Instead if vertex.y we use uv.x
-                    for (int li = 0; li < meshGradientColor.uv.Length; li++)
+
+                    if(li < 2)
                     {
-                        meshGradientColor.colors[li] = Color.Lerp(meshGradientColor.ManalithColor.LerpColor, meshGradientColor.ConnectedManalithColor.LerpColor, meshGradientColor.uv[li].x / meshGradientColor.uv[meshGradientColor.uv.Length - 1].x);
+                        meshGradientColor.colors[li] = emissiveColor1;
+                    }
+                    else if(li > meshGradientColor.colors.Length - 3)
+                    {
+                        meshGradientColor.colors[li] = emissiveColor2;
+                    }
+                    else
+                    {
+                        if (li % 2 == 0)
+                        {
+                            meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li / (meshGradientColor.colors.Length - 3));
+                        }
+                        else
+                        {
+                            meshGradientColor.colors[li] = meshGradientColor.colors[li - 1];
+                        }
+
                     }
 
-                    meshGradientColor.mesh.colors = meshGradientColor.colors;
                 }
+
+                meshGradientColor.mesh.colors = meshGradientColor.colors;
+                //}
             }
         }
     }

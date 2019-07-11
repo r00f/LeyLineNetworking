@@ -4443,7 +4443,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5292584932281435203
 RectTransform:
   m_ObjectHideFlags: 0
@@ -8511,7 +8511,9 @@ MonoBehaviour:
   - {fileID: 1015696432085276797}
   - {fileID: 5464473134134683661}
   - {fileID: 6295759860146299322}
-  SpawnToggle: {fileID: 6909536701225566475}
+  SpawnToggleGO: {fileID: 6909536701225566475}
+  ActionsToggle: {fileID: 2349779281143129763}
+  SpawnActionsToggle: {fileID: 1035180735362887933}
 --- !u!1 &7926929094423171271
 GameObject:
   m_ObjectHideFlags: 0

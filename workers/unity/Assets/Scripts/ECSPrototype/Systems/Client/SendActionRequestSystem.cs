@@ -95,7 +95,7 @@ public class SendActionRequestSystem : ComponentSystem
             {
                 var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
 
-                if(unitWorldIndex == gameStateWorldIndex)
+                if (unitWorldIndex == gameStateWorldIndex)
                 {
                     if (m_GameStateData.GameState[gi].CurrentState != GameStateEnum.planning)
                         return;
@@ -107,7 +107,14 @@ public class SendActionRequestSystem : ComponentSystem
             //set unit action to basic move it is clicked and player has energy
             if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
-                SelectActionCommand(-2, unitEntityId.Id);
+                if(actionsData.BasicMove.Index != -3)
+                {
+                    SelectActionCommand(-2, unitEntityId.Id);
+                }
+                else
+                {
+                    //SelectActionCommand(0, unitEntityId.Id);
+                }
             }
 
             #region Set Target Command
@@ -213,31 +220,32 @@ public class SendActionRequestSystem : ComponentSystem
                     selectActionSender.RequestsToSend.Add(request);
                 }
                 m_SelectActionRequestData.SelectActionSenders[i] = selectActionSender;
-            }
 
-            if (actionIndex >= 0)
-            {
-                Action act = actions.OtherActions[actionIndex];
-                if(act.Targets[0].TargetType == TargetTypeEnum.unit)
+
+                if (actionIndex >= 0)
                 {
-                    if(act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    Action act = actions.OtherActions[actionIndex];
+                    if (act.Targets[0].TargetType == TargetTypeEnum.unit)
                     {
-                        isSelfTarget = true;
+                        if (act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                        {
+                            isSelfTarget = true;
+                        }
                     }
                 }
-            }
-        }
 
-        if (!isSelfTarget)
-        {
-            m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
-            m_HighlightingSystem.ClearPlayerState();
-        }
-        else
-        {
-            highlightingData.TargetRestrictionIndex = 2;
-            m_PlayerData.HighlightingData[0] = highlightingData;
-            m_HighlightingSystem.SetSelfTarget(entityId);
+                if (!isSelfTarget)
+                {
+                    m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
+                    m_HighlightingSystem.ClearPlayerState();
+                }
+                else
+                {
+                    highlightingData.TargetRestrictionIndex = 2;
+                    m_PlayerData.HighlightingData[0] = highlightingData;
+                    m_HighlightingSystem.SetSelfTarget(entityId);
+                }
+            }
         }
     }
 }

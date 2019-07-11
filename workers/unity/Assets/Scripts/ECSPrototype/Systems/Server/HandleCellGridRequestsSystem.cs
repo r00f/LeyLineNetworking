@@ -724,8 +724,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             return new CellAttributeList(new List<CellAttribute>());
     }
 
-    public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, EntityId entityId, uint worldIndex)
+    public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, long entityId, uint worldIndex)
     {
+        UpdateInjectedComponentGroups();
         var cell = cellAttributes.Cell;
         cell.IsTaken = isTaken;
         cell.UnitOnCellId = entityId;
@@ -737,12 +738,12 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         };
 
         UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours, worldIndex);
-
         return cellAtt;
     }
 
     public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours, uint worldIndex)
     {
+        UpdateInjectedComponentGroups();
         for (int ci = 0; ci < m_CellData.Length; ci++)
         {
             var cellWordlIndex = m_CellData.WorldIndexData[ci].Value;

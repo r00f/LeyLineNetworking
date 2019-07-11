@@ -104,158 +104,160 @@ public class UnitAnimationSystem : ComponentSystem
                     
             }
 
-
-            if (animatorComponent.AnimationEvents.EventTrigger)
+            if(animatorComponent.Animator != null)
             {
-                if (currentlockedAction)
+                if (animatorComponent.AnimationEvents.EventTrigger)
                 {
-                    var actionEffectType = actions.LockedAction.Effects[0].EffectType;
-
-                    HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
-                    Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-
-                    if (actions.LockedAction.Targets[0].Mods.Count != 0)
+                    if (currentlockedAction)
                     {
-                        foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                        var actionEffectType = actions.LockedAction.Effects[0].EffectType;
+
+                        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+                        Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+
+                        if (actions.LockedAction.Targets[0].Mods.Count != 0)
                         {
-                            coordsToTrigger.Add(c);
+                            foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                            {
+                                coordsToTrigger.Add(c);
+                            }
+                        }
+
+                        if (currentlockedAction.ProjectileFab)
+                        {
+                            float targetYoffset = 0;
+                            if (currentlockedAction.Targets[0] is ECSATarget_Unit)
+                            {
+                                targetYoffset = 1.3f;
+                            }
+                            m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin.position, targetPos, targetYoffset);
+                        }
+                        else
+                        {
+                            m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
                         }
                     }
-
-                    if (currentlockedAction.ProjectileFab)
-                    {
-                        float targetYoffset = 0;
-                        if(currentlockedAction.Targets[0] is ECSATarget_Unit)
-                        {
-                            targetYoffset = 1.3f;
-                        }
-                        m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin.position, targetPos, targetYoffset);
-                    }
-                    else
-                    {
-                        m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
-                    }
+                    animatorComponent.AnimationEvents.EventTrigger = false;
                 }
-                animatorComponent.AnimationEvents.EventTrigger = false;
-            }
 
-            if (animatorComponent.ActionEffectTrigger)
-            {
-                if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
+                if (animatorComponent.ActionEffectTrigger)
                 {
-                    if (healthComponent.CurrentHealth == 0)
+                    if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
                     {
-                        Debug.Log("Death");
-
-                        //move props out of skeleton
-                        foreach (Transform t in animatorComponent.Props)
+                        if (healthComponent.CurrentHealth == 0)
                         {
-                            t.parent = animatorComponent.Animator.transform;
+                            Debug.Log("Death");
+
+                            //move props out of skeleton
+                            foreach (Transform t in animatorComponent.Props)
+                            {
+                                t.parent = animatorComponent.Animator.transform;
+                            }
+
+                            animatorComponent.Animator.transform.parent = GarbageCollection.transform;
+
+                            //disable animator
+                            animatorComponent.Animator.enabled = false;
+
+
+                            //set all rigidbodies to non kinematic
+                            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+                            {
+                                r.isKinematic = false;
+                            }
+                        }
+                        //iterate on when healthchange feedback is being triggered: right now only works with basic attack when in meelee range
+                        else
+                        {
+                            m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
+                            animatorComponent.Animator.SetTrigger("GetHit");
                         }
 
-                        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
-
-                        //disable animator
-                        animatorComponent.Animator.enabled = false;
-
-
-                        //set all rigidbodies to non kinematic
-                        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-                        {
-                            r.isKinematic = false;
-                        }
+                        animatorComponent.LastHealth = healthComponent.CurrentHealth;
                     }
-                    //iterate on when healthchange feedback is being triggered: right now only works with basic attack when in meelee range
                     else
                     {
-                        m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
-                        animatorComponent.Animator.SetTrigger("GetHit");
+                        //Debug.Log("Gained Health");
+                        animatorComponent.LastHealth = healthComponent.CurrentHealth;
                     }
 
-                    animatorComponent.LastHealth = healthComponent.CurrentHealth;
+                    animatorComponent.ActionEffectTrigger = false;
+                }
+
+                if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
+                    animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
+
+                if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
+                    animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
+
+                if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
+                {
+                    if (actions.LockedAction.Index != -3)
+                    {
+                        if (!animatorComponent.ExecuteTriggerSet)
+                        {
+                            animatorComponent.Animator.SetTrigger("Execute");
+                            animatorComponent.ExecuteTriggerSet = true;
+                        }
+
+                        //set Initial Target Positions
+                        if (!animatorComponent.InitialValuesSet)
+                        {
+                            if (actions.LockedAction.Index != -2)
+                            {
+                                animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                            }
+
+                            animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+
+                            //GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
+                            animatorComponent.InitialValuesSet = true;
+                        }
+
+                        if (actions.LockedAction.Index == -2)
+                        {
+                            if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
+                                animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
+                        }
+
+                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, 3);
+                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+                    }
                 }
                 else
                 {
-                    //Debug.Log("Gained Health");
-                    animatorComponent.LastHealth = healthComponent.CurrentHealth;
-                }
-
-                animatorComponent.ActionEffectTrigger = false;
-            }
-
-            if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
-                animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
-
-            if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
-                animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
-
-            if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
-            {
-                if(actions.LockedAction.Index != -3)
-                {
-                    if (!animatorComponent.ExecuteTriggerSet)
+                    if (animatorComponent.InitialValuesSet)
                     {
-                        animatorComponent.Animator.SetTrigger("Execute");
-                        animatorComponent.ExecuteTriggerSet = true;
+                        animatorComponent.InitialValuesSet = false;
                     }
 
-                    //set Initial Target Positions
-                    if (!animatorComponent.InitialValuesSet)
+                    if (animatorComponent.DestinationReachTriggerSet)
                     {
-                        if (actions.LockedAction.Index != -2)
-                        {
-                            animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-                        }
-
-                        animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-
-                        //GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
-                        animatorComponent.InitialValuesSet = true;
+                        animatorComponent.Animator.ResetTrigger("DestinationReached");
+                        animatorComponent.DestinationReachTriggerSet = false;
                     }
-
-                    if (actions.LockedAction.Index == -2)
+                    if (animatorComponent.ExecuteTriggerSet)
                     {
-                        if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
-                            animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
+                        animatorComponent.Animator.ResetTrigger("Execute");
+                        animatorComponent.ExecuteTriggerSet = false;
                     }
-
-                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, 3);
-                    animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
-                }
-            }
-            else
-            {
-                if (animatorComponent.InitialValuesSet)
-                {
-                    animatorComponent.InitialValuesSet = false;
                 }
 
-                if (animatorComponent.DestinationReachTriggerSet)
+                if (transform.position != serverPosition.Coords.ToUnityVector())
                 {
-                    animatorComponent.Animator.ResetTrigger("DestinationReached");
-                    animatorComponent.DestinationReachTriggerSet = false;
+                    //move
+                    transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
                 }
-                if (animatorComponent.ExecuteTriggerSet)
-                {
-                    animatorComponent.Animator.ResetTrigger("Execute");
-                    animatorComponent.ExecuteTriggerSet = false;
-                }
-            }
 
-            if (transform.position != serverPosition.Coords.ToUnityVector())
-            {
-                //move
-                transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
-            }
-
-            if (transform.position == animatorComponent.DestinationPosition)
-            {
-                if (!animatorComponent.DestinationReachTriggerSet)
+                if (transform.position == animatorComponent.DestinationPosition)
                 {
-                    animatorComponent.LastStationaryCoordinate = coord;
-                    animatorComponent.Animator.SetTrigger("DestinationReached");
-                    animatorComponent.DestinationPosition = Vector3.zero;
-                    animatorComponent.DestinationReachTriggerSet = true;
+                    if (!animatorComponent.DestinationReachTriggerSet)
+                    {
+                        animatorComponent.LastStationaryCoordinate = coord;
+                        animatorComponent.Animator.SetTrigger("DestinationReached");
+                        animatorComponent.DestinationPosition = Vector3.zero;
+                        animatorComponent.DestinationReachTriggerSet = true;
+                    }
                 }
             }
         }

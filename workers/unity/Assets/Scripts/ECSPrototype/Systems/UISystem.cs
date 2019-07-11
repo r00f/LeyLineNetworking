@@ -182,11 +182,13 @@ namespace LeyLineHybridECS
                     {
                         if(stats.SpawnActions.Count == 0)
                         {
-                            UIRef.SpawnToggle.SetActive(false);
+                            UIRef.SpawnActionsToggle.isOn = false;
+                            UIRef.ActionsToggle.isOn = true;
+                            UIRef.SpawnToggleGO.SetActive(false);
                         }
                         else
                         {
-                            UIRef.SpawnToggle.SetActive(true);
+                            UIRef.SpawnToggleGO.SetActive(true);
                         }
 
                         for (int si = 0; si < UIRef.SpawnActions.Count; si++)
@@ -221,49 +223,75 @@ namespace LeyLineHybridECS
                                 UIRef.Actions[bi].UnitId = (int)unitId;
                                 //basic move
                                 //disable if not enough energy
-                                if (bi == 0)
+
+                                if(stats.BasicMove != null && stats.BasicAttack != null)
                                 {
-                                    if(playerEnergy.Energy == 0 && action.LockedAction.Index == -3)// && lockedAction.cost <= stats.BasicMove.cost
+                                    if (bi == 0)
                                     {
-                                        UIRef.Actions[bi].Button.interactable = false;
+                                        if (playerEnergy.Energy == 0 && action.LockedAction.Index == -3)// && lockedAction.cost <= stats.BasicMove.cost
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = -2;
                                     }
+                                    //basic attack
+                                    else if (bi == 1)
+                                    {
+                                        if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = -1;
+                                    }
+                                    //all other actions
                                     else
                                     {
-                                        UIRef.Actions[bi].Button.interactable = true;
+                                        if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = bi - 2;
                                     }
-                                    UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
-                                    UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
-                                    UIRef.Actions[bi].ActionIndex = -2;
                                 }
-                                //basic attack
-                                else if (bi == 1)
-                                {
-                                    if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
-                                    {
-                                        UIRef.Actions[bi].Button.interactable = false;
-                                    }
-                                    else
-                                    {
-                                        UIRef.Actions[bi].Button.interactable = true;
-                                    }
-                                    UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
-                                    UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
-                                    UIRef.Actions[bi].ActionIndex = -1;
-                                }
-                                //all other actions
+
                                 else
                                 {
-                                    if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                    if (bi < actionCount - 2)
                                     {
-                                        UIRef.Actions[bi].Button.interactable = false;
+                                        if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.Actions[bi].ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.Actions[bi].ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = bi;
                                     }
                                     else
                                     {
-                                        UIRef.Actions[bi].Button.interactable = true;
+                                        UIRef.Actions[bi].Visuals.SetActive(false);
                                     }
-                                    UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
-                                    UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
-                                    UIRef.Actions[bi].ActionIndex = bi - 2;
                                 }
                             }
                             else

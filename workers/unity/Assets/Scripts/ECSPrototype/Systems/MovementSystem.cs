@@ -90,7 +90,7 @@ namespace LeyLineHybridECS
 
                                         if (cellsToMark.CellsInRange[0].Cell.CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellAtt.CellAttributes.Cell.IsTaken && cellWorldIndex == unitWorldIndex)
                                         {
-                                            cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
+                                            cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, 0, cellWorldIndex);
                                             m_CellData.CellAttributes[ci] = cellAtt;
                                         }
                                     }
@@ -117,8 +117,7 @@ namespace LeyLineHybridECS
 
                                                 if (currentPath[0] == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
                                                 {
-                                                    cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId, cellWorldIndex);
-
+                                                    cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId.Id, cellWorldIndex);
                                                     m_CellData.CellAttributes[ci] = cellAtt;
                                                 }
                                             }

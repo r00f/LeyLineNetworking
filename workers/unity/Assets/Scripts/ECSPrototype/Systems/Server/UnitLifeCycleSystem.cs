@@ -4,6 +4,9 @@ using Unit;
 using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
+using Player;
+using Improbable.Gdk.ReactiveComponents;
+using UnityEngine;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
@@ -13,7 +16,6 @@ public class UnitLifeCycleSystem : ComponentSystem
         public CubeCoordinate.Component CubeCoordState;
         public WorldIndex.Component WorldIndexState;
     }
-   
 
     private struct UnitAddedData
     {
@@ -77,8 +79,8 @@ public class UnitLifeCycleSystem : ComponentSystem
 
                 if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex)
                 {
-                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, unitEntityId.EntityId, cellWorldIndex);
-                    m_CellData.CellAttributes[ci] = cellAtt;
+                    //cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, unitEntityId.EntityId, cellWorldIndex);
+                    //m_CellData.CellAttributes[ci] = cellAtt;
                 }
             }
             PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitAddedData.CoordinateData[i], WorldIndexState = m_UnitAddedData.WorldIndexData[i] });
@@ -97,7 +99,7 @@ public class UnitLifeCycleSystem : ComponentSystem
             var unitCubeCoordinate = m_UnitRemovedData.UnitState[i].CubeCoordState.CubeCoordinate;
             var unitWorldIndex = m_UnitRemovedData.UnitState[i].WorldIndexState.Value;
 
-            for (int ci = 0; ci <m_CellData.Length; ci++)
+            for (int ci = 0; ci < m_CellData.Length; ci++)
             {
                 var cellCubeCoordinate = m_CellData.CubeCoordinateData[ci];
                 var cellAtt = m_CellData.CellAttributes[ci];
@@ -105,8 +107,8 @@ public class UnitLifeCycleSystem : ComponentSystem
 
                 if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex)
                 {
-                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
-                    m_CellData.CellAttributes[ci] = cellAtt;
+                    //cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
+                    //m_CellData.CellAttributes[ci] = cellAtt;
                 }
             }
             PostUpdateCommands.RemoveComponent<UnitStateData>(m_UnitRemovedData.Entities[i]);

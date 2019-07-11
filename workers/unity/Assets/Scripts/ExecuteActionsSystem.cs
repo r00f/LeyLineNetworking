@@ -28,6 +28,7 @@ public class ExecuteActionsSystem : ComponentSystem
     {
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
+        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
     }
 
@@ -70,9 +71,12 @@ public class ExecuteActionsSystem : ComponentSystem
                         switch (gameState)
                         {
                             case GameStateEnum.spawning:
-                                if(actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
+                                for (int j = 0; j < actions.LockedAction.Effects.Count; j++)
                                 {
-                                    SetUnitSpawn(actions.LockedAction.Effects[0].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].TargetId);
+                                    if (actions.LockedAction.Effects[j].EffectType == EffectTypeEnum.spawn_unit)
+                                    {
+                                        SetUnitSpawn(actions.LockedAction.Effects[j].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].TargetCoordinate);
+                                    }
                                 }
                                 break;
                             case GameStateEnum.defending:
@@ -149,15 +153,16 @@ public class ExecuteActionsSystem : ComponentSystem
         }
     }
 
-    public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, long cellId)
+    public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, Vector3f cubeCoord)
     {
         for (int i = 0; i < m_CellData.Length; i++)
         {
-            var id = m_CellData.EntityIds[i].EntityId.Id;
+            var coord = m_CellData.CoordinateData[i].CubeCoordinate;
             var unitToSpawn = m_CellData.UnitToSpawnData[i];
 
-            if (cellId == id)
+            if (coord == cubeCoord)
             {
+                Debug.Log("SetUnitSpawn at coordinate: " + cubeCoord);
                 unitToSpawn.Faction = unitFaction.Faction;
                 unitToSpawn.TeamColor = unitFaction.TeamColor;
                 unitToSpawn.UnitName = unitName;

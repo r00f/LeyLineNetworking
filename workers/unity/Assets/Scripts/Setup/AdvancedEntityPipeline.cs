@@ -47,7 +47,8 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     typeof(TeamColorMeshes),
     typeof(Healthbar),
     typeof(AnimatedPortraitReference),
-    typeof(UnitComponentReferences)
+    typeof(UnitComponentReferences),
+    typeof(Moba_Camera)
     };
 
     public AdvancedEntityPipeline(Worker worker, string authPlayer, string nonAuthPlayer,

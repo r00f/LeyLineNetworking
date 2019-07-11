@@ -160,7 +160,7 @@ public class ManalithSystem : ComponentSystem
                 var unitId = m_UnitData.Ids[ui];
                 var unitFaction = m_UnitData.Factions[ui];
 
-                if (unitId.EntityId == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
+                if (unitId.EntityId.Id == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
                 {
                     if (unitFaction.Faction == (worldIndex - 1) * 2 + 1)
                     {
@@ -188,7 +188,7 @@ public class ManalithSystem : ComponentSystem
         }
     }
 
-    public void UpdateUnit(EntityId inUnitId, uint faction)
+    public void UpdateUnit(long inUnitId, uint faction)
     {
         for (int ui = 0; ui < m_UnitData.Length; ui++)
         {
@@ -196,7 +196,7 @@ public class ManalithSystem : ComponentSystem
             var unitId = m_UnitData.Ids[ui].EntityId;
             var unitFaction = m_UnitData.Factions[ui];
 
-            if (unitId == inUnitId)
+            if (unitId.Id == inUnitId)
             {
                 if (unitFaction.Faction == faction)
                     energy.Harvesting = true;

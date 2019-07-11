@@ -44,5 +44,7 @@ public class UIReferences : MonoBehaviour
     [Header("ButtonLists")]
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
-    public GameObject SpawnToggle;
+    public GameObject SpawnToggleGO;
+    public Toggle ActionsToggle;
+    public Toggle SpawnActionsToggle;
 }

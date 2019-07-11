@@ -21,8 +21,8 @@ public static class LeyLineEntityTemplates {
         {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
-            CalculateWaitTime = 1.7f,
-            CurrentWaitTime = 1.7f,
+            CalculateWaitTime = 5f,
+            CurrentWaitTime = 5f,
             PlanningTime = 60f,
             CurrentPlanningTime = 60f,
             RopeDisplayTime = 30f
@@ -331,13 +331,21 @@ public static class LeyLineEntityTemplates {
         {
             myBasicMove = SetAction(inStats.BasicMove, -2);
         }
+        else
+        {
+            myBasicMove = myNullableAction;
+        }
 
         if (inStats.BasicAttack != null)
         {
             myBasicAttack = SetAction(inStats.BasicAttack, -1);
         }
+        else
+        {
+            myBasicAttack = myNullableAction;
+        }
 
-        for(int i = 0; i < inStats.Actions.Count; i++)
+        for (int i = 0; i < inStats.Actions.Count; i++)
         {
             myOtherActions.Add(SetAction(inStats.Actions[i], i));
         }
