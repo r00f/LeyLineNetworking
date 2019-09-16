@@ -4,13 +4,33 @@ using UnityEngine;
 using UnityEngine.Events;
 using Unit;
 using Improbable;
+using UnityEngine.Animations;
 
 public class Projectile : MonoBehaviour
 {
 
-    public List<Vector3> TravellingCurve;
+    public bool DestroyAtDestination;
+    public bool DestinationReached;
+    public bool FlagForDestruction;
+
+    public Transform TransformToMove;
+    public Transform TransformToRotate;
+    public Transform PhysicsExplosionOrigin;
     public float TravellingSpeed;
     public float MaxHeight;
+
+    [Header("Tounge")]
+    public Rigidbody ToungeEnd;
+    public Rigidbody ToungeBase;
+    public int LaunchForce;
+    public int ContractSpeed;
+    public bool Launched;
+    public Joint BaseJoint;
+    public List<SpringJoint> SpringJoints;
+
+    [Header("Impact Physics Explosion")]
+    public float ExplosionRadius;
+    public int ExplosionForce;
 
 
     public ParticleSystem BodyParticleSystem;
@@ -18,6 +38,10 @@ public class Projectile : MonoBehaviour
     public ParticleSystem ExplosionParticleSystem;
 
 
+
+    public Transform SpawnTransform;
+    [HideInInspector]
+    public List<Vector3> TravellingCurve;
     [HideInInspector]
     public int CurrentTargetId = 0;
     [HideInInspector]

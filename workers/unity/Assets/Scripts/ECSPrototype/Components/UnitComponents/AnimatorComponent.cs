@@ -12,9 +12,12 @@ public class AnimatorComponent : MonoBehaviour
     public bool ExecuteTriggerSet;
     public bool InitialValuesSet;
     public Transform ProjectileSpawnOrigin;
+    public List<GameObject> Visuals;
+    public float EnableVisualsDelay;
 
     [Header("Movement")]
     public Vector3f LastStationaryCoordinate;
+    public int RotationSpeed;
     public Transform RotateTransform;
     public bool DestinationReachTriggerSet;
     public Vector3 RotationTarget;
@@ -25,36 +28,16 @@ public class AnimatorComponent : MonoBehaviour
     [SerializeField]
     public bool ActionEffectTrigger = false;
 
-    [Header("RagdollHandling")]
+
+    [Header("Death")]
+    public bool Dead;
+    public List<GameObject> ObjectsToDisable;
     public List<Rigidbody> RagdollRigidBodies;
     public List<Transform> Props;
-    public bool die;
+    public ParticleSystem DeathParticleSystem;
+    public int DeathParticlesCount;
+    public Transform DeathExplosionPos;
+    public int DeathExplosionForce;
+    public float DeathExplosionRadius;
 
-    public void Update()
-    {
-        if (die)
-        {
-            Die();
-        }
-    }
-
-    public void Die()
-    {
-        //disable animator
-        Animator.enabled = false;
-
-        //move props out of skeleton
-        foreach (Transform t in Props)
-        {
-            t.parent = transform;
-        }
-
-        //set all rigidbodies to non kinematic
-        foreach (Rigidbody r in RagdollRigidBodies)
-        {
-            r.isKinematic = false;
-        }
-
-        die = false;
-    }
 }

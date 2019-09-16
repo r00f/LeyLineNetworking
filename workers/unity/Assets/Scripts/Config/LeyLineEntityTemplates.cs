@@ -21,8 +21,8 @@ public static class LeyLineEntityTemplates {
         {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
-            CalculateWaitTime = 5f,
-            CurrentWaitTime = 5f,
+            CalculateWaitTime = 4f,
+            CurrentWaitTime = 4f,
             PlanningTime = 60f,
             CurrentPlanningTime = 60f,
             RopeDisplayTime = 30f
@@ -273,14 +273,14 @@ public static class LeyLineEntityTemplates {
 
         var energy = new Energy.Snapshot
         {
-            SpawnCost = Stats.SpawnCost,
-            EnergyUpkeep = Stats.EnergyUpkeep,
+            //SpawnCost = Stats.SpawnCost,
+            //EnergyUpkeep = Stats.EnergyUpkeep,
             EnergyIncome = Stats.EnergyIncome
         };
 
         var movementVariables = new MovementVariables.Snapshot
         {
-            MovementRange = Stats.MovementRange,
+            //MovementRange = Stats.MovementRange,
             TravelTime = 1.7f
         };
 

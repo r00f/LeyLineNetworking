@@ -329,25 +329,31 @@ namespace LeyLineHybridECS
                 //if there is no healthbar, instantiate it into healthBarParent
                 if(!healthbar.UnitHeadUIInstance)
                 {
-                    healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);                }
+                    if(health.CurrentHealth != 0)
+                        healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
+                }
                 else
                 {
-
-                    //enable healthTextGO when health is changing
-
-                    GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
-
-                    if (gameState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
+                    if(health.CurrentHealth == 0)
                     {
-                        healthBarGO.SetActive(true);
+                        Object.Destroy(healthbar.UnitHeadUIInstance);
                     }
-                    else if(gameState != GameStateEnum.planning || isVisible.Value == 0)
+                    else
                     {
-                        healthBarGO.SetActive(false);
-                    }
+                        GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
 
-                    healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
-                    SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
+                        if (gameState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
+                        {
+                            healthBarGO.SetActive(true);
+                        }
+                        else if (gameState != GameStateEnum.planning || isVisible.Value == 0)
+                        {
+                            healthBarGO.SetActive(false);
+                        }
+
+                        healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
+                        SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
+                    }
                 }
             }
 

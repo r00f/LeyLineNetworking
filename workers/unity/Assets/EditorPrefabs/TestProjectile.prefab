@@ -4792,12 +4792,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  TravellingCurve: []
-  TravellingSpeed: 8
-  MaxHeight: 2.5
+  DestroyAtDestination: 1
+  DestinationReached: 0
+  FlagForDestruction: 0
+  TransformToMove: {fileID: 5341185222269292129}
+  TransformToRotate: {fileID: 5341185222269292129}
+  PhysicsExplosionOrigin: {fileID: 5341185222269292129}
+  TravellingSpeed: 10
+  MaxHeight: 1.5
+  ToungeEnd: {fileID: 0}
+  ToungeBase: {fileID: 0}
+  LaunchForce: 0
+  ContractSpeed: 0
+  Launched: 0
+  BaseJoint: {fileID: 0}
+  SpringJoints: []
+  ExplosionRadius: 1
+  ExplosionForce: 100
   BodyParticleSystem: {fileID: 3589144075304049518}
   TrailParticleSystem: {fileID: 1516924642074438649}
   ExplosionParticleSystem: {fileID: 1731113839523245827}
+  SpawnTransform: {fileID: 0}
+  TravellingCurve: []
   CurrentTargetId: 0
   EffectOnDetonation: 0
   IsTravelling: 0

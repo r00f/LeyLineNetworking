@@ -71,6 +71,8 @@ namespace LeyLineHybridECS
 
         [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
+        [Inject] CleanupSystem m_CleanUpSystem;
+
         protected override void OnUpdate()
         {
             for (int i = 0; i < m_Data.Length; i++)
@@ -127,6 +129,7 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.calculate_energy:
+
                         if (gameState.CurrentWaitTime > 0)
                         {
                             gameState.CurrentWaitTime -= Time.deltaTime;
@@ -134,13 +137,15 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
+
                             gameState.CurrentPlanningTime = gameState.PlanningTime;
                             gameState.CurrentState = GameStateEnum.cleanup;
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.cleanup:
-                            UpdateIsTaken(gameStateWorldIndex);
+                            m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex);
+                            //UpdateIsTaken(gameStateWorldIndex);
                             gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;
 
@@ -183,6 +188,13 @@ namespace LeyLineHybridECS
                 }
             }
 
+            Debug.Log("unitDictCount: " + unitDict.Count);
+
+            foreach(long id in unitDict.Values)
+            {
+                Debug.Log(id);
+            }
+
             for (int i = 0; i < m_CellData.Length; i++)
             {
                 var worldIndex = m_CellData.WorldIndexData[i].Value;
@@ -197,6 +209,7 @@ namespace LeyLineHybridECS
                         long id = unitDict[cellCubeCoordinate.CubeCoordinate];
                         cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex);
                         m_CellData.CellAttributes[i] = cellAtt;
+                        Debug.Log("SetTaken: " + id + ", " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
                     }
                 }
             }

@@ -162,7 +162,7 @@ public class ExecuteActionsSystem : ComponentSystem
 
             if (coord == cubeCoord)
             {
-                Debug.Log("SetUnitSpawn at coordinate: " + cubeCoord);
+                //Debug.Log("SetUnitSpawn at coordinate: " + cubeCoord);
                 unitToSpawn.Faction = unitFaction.Faction;
                 unitToSpawn.TeamColor = unitFaction.TeamColor;
                 unitToSpawn.UnitName = unitName;

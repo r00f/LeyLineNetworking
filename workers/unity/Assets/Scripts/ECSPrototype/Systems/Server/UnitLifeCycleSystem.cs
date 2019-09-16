@@ -15,6 +15,7 @@ public class UnitLifeCycleSystem : ComponentSystem
     {
         public CubeCoordinate.Component CubeCoordState;
         public WorldIndex.Component WorldIndexState;
+        public long EntityId;
     }
 
     private struct UnitAddedData
@@ -34,6 +35,7 @@ public class UnitLifeCycleSystem : ComponentSystem
     {
         public readonly int Length;
         public EntityArray Entities;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
         public ComponentDataArray<UnitStateData> UnitState;
@@ -79,18 +81,19 @@ public class UnitLifeCycleSystem : ComponentSystem
 
                 if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex)
                 {
-                    //cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, unitEntityId.EntityId, cellWorldIndex);
-                    //m_CellData.CellAttributes[ci] = cellAtt;
+                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, unitEntityId.EntityId.Id, cellWorldIndex);
+                    m_CellData.CellAttributes[ci] = cellAtt;
                 }
             }
-            PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitAddedData.CoordinateData[i], WorldIndexState = m_UnitAddedData.WorldIndexData[i] });
+            PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitAddedData.CoordinateData[i], WorldIndexState = m_UnitAddedData.WorldIndexData[i], EntityId = unitEntityId.EntityId.Id});
         }
 
         for (int i = 0; i < m_UnitChangedData.Length; i++)
         {
+            var unitEntityId = m_UnitChangedData.EntityIds[i];
             if (m_UnitChangedData.UnitState[i].CubeCoordState.CubeCoordinate != m_UnitChangedData.CoordinateData[i].CubeCoordinate || m_UnitChangedData.UnitState[i].WorldIndexState.Value != m_UnitChangedData.WorldIndexData[i].Value)
             {
-                PostUpdateCommands.SetComponent(m_UnitChangedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitChangedData.CoordinateData[i], WorldIndexState = m_UnitChangedData.WorldIndexData[i] });
+                PostUpdateCommands.SetComponent(m_UnitChangedData.Entities[i], new UnitStateData { CubeCoordState = m_UnitChangedData.CoordinateData[i], WorldIndexState = m_UnitChangedData.WorldIndexData[i], EntityId = unitEntityId.EntityId.Id});
             }
         }
 
@@ -98,6 +101,7 @@ public class UnitLifeCycleSystem : ComponentSystem
         {
             var unitCubeCoordinate = m_UnitRemovedData.UnitState[i].CubeCoordState.CubeCoordinate;
             var unitWorldIndex = m_UnitRemovedData.UnitState[i].WorldIndexState.Value;
+            var unitState = m_UnitRemovedData.UnitState[i];
 
             for (int ci = 0; ci < m_CellData.Length; ci++)
             {
@@ -105,10 +109,11 @@ public class UnitLifeCycleSystem : ComponentSystem
                 var cellAtt = m_CellData.CellAttributes[ci];
                 var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
 
-                if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex)
+                if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex && cellAtt.CellAttributes.Cell.UnitOnCellId == unitState.EntityId)
                 {
-                    //cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
-                    //m_CellData.CellAttributes[ci] = cellAtt;
+                    Debug.Log("CleanUpUnit with id: " + unitState.EntityId);
+                    cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, 0, cellWorldIndex);
+                    m_CellData.CellAttributes[ci] = cellAtt;
                 }
             }
             PostUpdateCommands.RemoveComponent<UnitStateData>(m_UnitRemovedData.Entities[i]);

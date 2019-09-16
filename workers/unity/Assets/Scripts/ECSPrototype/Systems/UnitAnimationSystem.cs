@@ -52,10 +52,21 @@ public class UnitAnimationSystem : ComponentSystem
 
     GameObject GarbageCollection;
 
+    ComponentGroup GarbageCollectionGroup;
+
+    protected override void OnCreateManager()
+    {
+        base.OnCreateManager();
+
+    }
+
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
-        GarbageCollection = GameObject.FindGameObjectWithTag("GarbageCollection");
+        GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
+        GarbageCollectionGroup = Worlds.DefaultWorld.CreateComponentGroup(
+        ComponentType.Create<GarbageCollectorComponent>()
+        );
     }
 
     protected override void OnUpdate()
@@ -104,80 +115,87 @@ public class UnitAnimationSystem : ComponentSystem
                     
             }
 
+            if (animatorComponent.Visuals.Count != 0)
+            {
+                if (animatorComponent.EnableVisualsDelay >= 0)
+                {
+                    animatorComponent.EnableVisualsDelay -= Time.deltaTime;
+                }
+                else if(!animatorComponent.Dead)
+                {
+                    foreach(GameObject g in animatorComponent.Visuals)
+                    {
+                        g.SetActive(true);
+                    }
+                }
+            }
+
             if(animatorComponent.Animator != null)
             {
-                if (animatorComponent.AnimationEvents.EventTrigger)
+                
+                if(currentlockedAction)
                 {
-                    if (currentlockedAction)
+                    var actionEffectType = actions.LockedAction.Effects[0].EffectType;
+                    HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+                    Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+
+                    if (animatorComponent.AnimationEvents)
                     {
-                        var actionEffectType = actions.LockedAction.Effects[0].EffectType;
-
-                        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
-                        Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-
-                        if (actions.LockedAction.Targets[0].Mods.Count != 0)
+                        if (animatorComponent.AnimationEvents.EventTrigger)
                         {
-                            foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                            if (actions.LockedAction.Targets[0].Mods.Count != 0)
                             {
-                                coordsToTrigger.Add(c);
+                                foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                                {
+                                    coordsToTrigger.Add(c);
+                                }
                             }
-                        }
 
-                        if (currentlockedAction.ProjectileFab)
-                        {
-                            float targetYoffset = 0;
-                            if (currentlockedAction.Targets[0] is ECSATarget_Unit)
+                            if (currentlockedAction.ProjectileFab)
                             {
-                                targetYoffset = 1.3f;
+                                float targetYoffset = 0;
+                                if (currentlockedAction.Targets[0] is ECSATarget_Unit)
+                                {
+                                    targetYoffset = 1.3f;
+                                }
+                                m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin, targetPos, targetYoffset);
                             }
-                            m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin.position, targetPos, targetYoffset);
-                        }
-                        else
-                        {
-                            m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                            else
+                            {
+                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                            }
+                            animatorComponent.AnimationEvents.EventTrigger = false;
                         }
                     }
-                    animatorComponent.AnimationEvents.EventTrigger = false;
+                    else if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning && animatorComponent.LastHealth != 0)
+                    {
+                        Debug.Log("TriggerHatchActionEffect");
+                        m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                    }
                 }
 
+                //FeedBack to incoming Attacks / Heals
                 if (animatorComponent.ActionEffectTrigger)
                 {
-                    if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
+                    if(animatorComponent.LastHealth != healthComponent.CurrentHealth)
                     {
-                        if (healthComponent.CurrentHealth == 0)
+                        if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
                         {
-                            Debug.Log("Death");
-
-                            //move props out of skeleton
-                            foreach (Transform t in animatorComponent.Props)
+                            //damage feedback
+                            if (healthComponent.CurrentHealth == 0)
                             {
-                                t.parent = animatorComponent.Animator.transform;
+                                Death(animatorComponent);
                             }
-
-                            animatorComponent.Animator.transform.parent = GarbageCollection.transform;
-
-                            //disable animator
-                            animatorComponent.Animator.enabled = false;
-
-
-                            //set all rigidbodies to non kinematic
-                            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+                            else
                             {
-                                r.isKinematic = false;
+                                m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
+                                animatorComponent.Animator.SetTrigger("GetHit");
                             }
                         }
-                        //iterate on when healthchange feedback is being triggered: right now only works with basic attack when in meelee range
                         else
                         {
-                            m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
-                            animatorComponent.Animator.SetTrigger("GetHit");
+                            //healing feedback
                         }
-
-                        animatorComponent.LastHealth = healthComponent.CurrentHealth;
-                    }
-                    else
-                    {
-                        //Debug.Log("Gained Health");
                         animatorComponent.LastHealth = healthComponent.CurrentHealth;
                     }
 
@@ -220,7 +238,7 @@ public class UnitAnimationSystem : ComponentSystem
                                 animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
                         }
 
-                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, 3);
+                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
                         animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                     }
                 }
@@ -259,6 +277,49 @@ public class UnitAnimationSystem : ComponentSystem
                         animatorComponent.DestinationReachTriggerSet = true;
                     }
                 }
+            }
+        }
+    }
+
+    public void Death(AnimatorComponent animatorComponent)
+    {
+        var garbageCollector = GarbageCollectionGroup.GetComponentArray<GarbageCollectorComponent>()[0];
+
+        Debug.Log("Death");
+
+        animatorComponent.Dead = true;
+
+        if (animatorComponent.DeathParticleSystem)
+        {
+            ParticleSystem ps = animatorComponent.DeathParticleSystem;
+            ps.Emit(animatorComponent.DeathParticlesCount);
+        }
+
+        foreach(GameObject go in animatorComponent.ObjectsToDisable)
+        {
+            go.SetActive(false);
+        }
+
+        foreach (Transform t in animatorComponent.Props)
+        {
+            t.parent = animatorComponent.Animator.transform;
+        }
+
+        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
+        animatorComponent.Animator.enabled = false;
+        garbageCollector.GarbageObjects.Add(animatorComponent.Animator.gameObject);
+
+        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+        {
+            garbageCollector.GarbageRigidbodies.Add(r);
+            r.isKinematic = false;
+        }
+
+        if(animatorComponent.DeathExplosionPos)
+        {
+            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+            {
+                r.AddExplosionForce(animatorComponent.DeathExplosionForce, animatorComponent.DeathExplosionPos.position, animatorComponent.DeathExplosionRadius);
             }
         }
     }

@@ -69,7 +69,7 @@ public class ActionEffectsSystem : ComponentSystem
 
     }
 
-    public void LaunchProjectile(Projectile projectileFab, EffectTypeEnum inEffectOnDetonation, HashSet<Vector3f> coordsToTrigger, Vector3 startPos, Vector3 targetPos, float yOffset = 0)
+    public void LaunchProjectile(Projectile projectileFab, EffectTypeEnum inEffectOnDetonation, HashSet<Vector3f> coordsToTrigger, Transform spawnTransform, Vector3 targetPos, float yOffset = 0)
     {
         //save targetPosition / targetYOffset on units?
         Vector3 offSetTarget = new Vector3(targetPos.x, targetPos.y + yOffset, targetPos.z);
@@ -78,18 +78,37 @@ public class ActionEffectsSystem : ComponentSystem
 
         if(projectileFab.MaxHeight > 0)
         {
-            travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(startPos, offSetTarget, projectileFab.MaxHeight));
+            travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
         }
         else
         {
-            travellingPoints.Add(startPos);
+            travellingPoints.Add(spawnTransform.position);
             travellingPoints.Add(offSetTarget);
         }
 
-        Projectile go = Object.Instantiate(projectileFab, startPos, Quaternion.identity);
-        go.EffectOnDetonation = inEffectOnDetonation;
-        go.TravellingCurve = travellingPoints;
-        go.CoordinatesToTrigger = coordsToTrigger;
-        go.IsTravelling = true;
+        //Quaternion lookRotation = new Quaternion();
+        Vector3 distance = offSetTarget - spawnTransform.position;
+        //lookRotation.SetLookRotation(distance);
+
+        /*
+
+        if (projectileFab.BaseJoint)
+        {
+            projectileFab.BaseJoint.connectedBody = spawnTransform.GetComponent<Rigidbody>();
+        }
+        */
+
+        foreach (SpringJoint s in projectileFab.SpringJoints)
+        {
+            s.maxDistance = distance.magnitude / projectileFab.SpringJoints.Count;
+        }
+
+        Projectile projectile = Object.Instantiate(projectileFab, spawnTransform.position, spawnTransform.rotation, spawnTransform.root);
+
+        projectile.SpawnTransform = spawnTransform;
+        projectile.EffectOnDetonation = inEffectOnDetonation;
+        projectile.TravellingCurve = travellingPoints;
+        projectile.CoordinatesToTrigger = coordsToTrigger;
+        projectile.IsTravelling = true;
     }
 }

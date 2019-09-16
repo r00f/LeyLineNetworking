@@ -20,6 +20,7 @@ public static class WorkerUtils
         world.GetOrCreateManager<UISystem>();
         world.GetOrCreateManager<HighlightingSystem>();
         world.GetOrCreateManager<ActionEffectsSystem>();
+        //world.GetOrCreateManager<ClientCleanupSystem>();
         //world.GetOrCreateManager<ProjectileSystem>();
     }
 

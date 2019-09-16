@@ -17,6 +17,7 @@ public class InitializeUnitsSystem : ComponentSystem
         public ComponentArray<UnitComponentReferences> ComponentReferences;
         public ComponentArray<LineRendererComponent> LineRenderers;
         public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
+        public ComponentArray<UnitMarkerGameObjects> MarkerGameObjects;
     }
 
     [Inject] UnitData m_UnitData;
@@ -39,6 +40,7 @@ public class InitializeUnitsSystem : ComponentSystem
             var componentReferences = m_UnitData.ComponentReferences[i];
             var lineRenderer = m_UnitData.LineRenderers[i];
             var unitTransform = m_UnitData.Transforms[i];
+            var markerObjects = m_UnitData.MarkerGameObjects[i];
 
 
             Color factionColor = new Color();
@@ -46,24 +48,30 @@ public class InitializeUnitsSystem : ComponentSystem
             switch (unitFactionComp.TeamColor)
             {
                 case Generic.TeamColorEnum.blue:
-                    componentReferences.Outline.color = 1;
+                    markerObjects.Outline.color = 1;
                     factionColor = Color.blue;
+                    foreach (Renderer r in teamColorMeshes.detailColorMeshes)
+                    {
+                        r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0, 0.5f));
+                    }
                     break;
                 case Generic.TeamColorEnum.red:
-                    componentReferences.Outline.color = 2;
+                    markerObjects.Outline.color = 2;
                     factionColor = Color.red;
+                    foreach (Renderer r in teamColorMeshes.detailColorMeshes)
+                    {
+                        r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0.5f, 0.5f));
+                    }
                     break;
             }
 
             //lineRenderer.lineRenderer.startColor = factionColor;
             //lineRenderer.lineRenderer.endColor = factionColor;
 
-            foreach (MeshRenderer r in teamColorMeshes.meshRenderers)
+            foreach (MeshRenderer r in teamColorMeshes.fullColorMeshes)
             {
                 r.material.color = factionColor;
             }
-
-
 
             //Debug.Log(m_PlayerData.Length);
 

@@ -4,8 +4,9 @@ using Improbable.Gdk.Core;
 using Improbable.Gdk.Core.Commands;
 using Unit;
 using Generic;
+using LeyLineHybridECS;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class CleanupSystem : ComponentSystem
 {
     public struct UnitData
@@ -43,7 +44,7 @@ public class CleanupSystem : ComponentSystem
 
             if (gameState == GameStateEnum.cleanup)
             {
-                DeleteDeadUnits(worldIndex);
+
                 m_TimerSystem.SubstractTurnDurations(worldIndex);
                 m_ExecuteSystem.ClearAllLockedActions(worldIndex);
                 m_ResourceSystem.ResetArmor(worldIndex);
