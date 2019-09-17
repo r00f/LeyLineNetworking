@@ -312,6 +312,7 @@ MonoBehaviour:
   Visuals:
   - {fileID: 8108814016297623155}
   EnableVisualsDelay: 2
+  CharacterEffects: []
   LastStationaryCoordinate:
     X: 0
     Y: 0
@@ -917,6 +918,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EventTrigger: 0
+  EffectGameObjectIndex: -1
 --- !u!54 &6226199053014689015
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1048,20 +1050,20 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5548772758455220403}
     m_Modifications:
-    - target: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
-      propertyPath: m_Name
-      value: SelectionCircle
-      objectReference: {fileID: 0}
-    - target: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_CastShadows
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2300000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_ReceiveShadows
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
+      propertyPath: m_Name
+      value: SelectionCircle
+      objectReference: {fileID: 0}
+    - target: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 51c255269242ba748954e29d496625c5, type: 3}

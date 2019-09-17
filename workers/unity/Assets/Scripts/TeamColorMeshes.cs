@@ -5,7 +5,7 @@ using UnityEngine;
 public class TeamColorMeshes : MonoBehaviour
 {
     [SerializeField]
-    public List<MeshRenderer> fullColorMeshes = new List<MeshRenderer>();
+    public List<Renderer> fullColorMeshes = new List<Renderer>();
     [SerializeField]
     public Color color;
     [SerializeField]

@@ -68,9 +68,21 @@ public class InitializeUnitsSystem : ComponentSystem
             //lineRenderer.lineRenderer.startColor = factionColor;
             //lineRenderer.lineRenderer.endColor = factionColor;
 
-            foreach (MeshRenderer r in teamColorMeshes.fullColorMeshes)
+            foreach (Renderer r in teamColorMeshes.fullColorMeshes)
             {
                 r.material.color = factionColor;
+                if(r is TrailRenderer)
+                {
+                    TrailRenderer tr = r as TrailRenderer;
+                    float alpha = 1.0f;
+                    Gradient gradient = new Gradient();
+                    gradient.SetKeys(
+                        new GradientColorKey[] { new GradientColorKey(factionColor, 0.0f), new GradientColorKey(factionColor, 1.0f) },
+                        new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha, 1.0f) }
+                    );
+                    tr.colorGradient = gradient;
+
+                }
             }
 
             //Debug.Log(m_PlayerData.Length);
