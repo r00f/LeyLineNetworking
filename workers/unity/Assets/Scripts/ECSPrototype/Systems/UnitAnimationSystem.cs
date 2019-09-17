@@ -141,6 +141,12 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (animatorComponent.AnimationEvents)
                     {
+                        if(animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
+                        {
+                            animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
+                            animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
+                        }
+
                         if (animatorComponent.AnimationEvents.EventTrigger)
                         {
                             if (actions.LockedAction.Targets[0].Mods.Count != 0)

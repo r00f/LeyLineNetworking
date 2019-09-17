@@ -591,7 +591,7 @@ public class HighlightingSystem : ComponentSystem
     public Vector3[] CalculateSinusPath(Vector3 origin, Vector3 target, float zenitHeight)
     {
         Vector3 distance = target - origin;
-        int numberOfPositions = 6 + (2 * Mathf.RoundToInt(distance.magnitude) / 2);
+        int numberOfPositions = 8 + (2 * Mathf.RoundToInt(distance.magnitude) / 2);
 
         Vector3[] sinusPath = new Vector3[numberOfPositions + 1];
         float heightDifference = origin.y - target.y;

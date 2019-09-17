@@ -75,7 +75,7 @@ public class ProjectileSystem : ComponentSystem
 
             if (projectile.IsTravelling)
             {
-                if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 1)
+                if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 2)
                 {
                     float dist = Vector3.Distance(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1]);
                     projectile.MovementPercentage += Time.deltaTime * projectile.TravellingSpeed / dist;
@@ -87,7 +87,6 @@ public class ProjectileSystem : ComponentSystem
                     }
                     else
                     {
-
                         if (projectile.ToungeEnd)
                         {
                             if (!projectile.Launched)
@@ -129,10 +128,11 @@ public class ProjectileSystem : ComponentSystem
                         ParticleSystem trailPs = projectile.TrailParticleSystem;
                         trailPs.Stop();
                     }
-                    if (projectile.ExplosionParticleSystem)
+
+                    if (projectile.ExplosionParticleSystem && !projectile.FlagForDestruction)
                     {
                         ParticleSystem explosionPs = projectile.ExplosionParticleSystem;
-                        explosionPs.Emit(100);
+                        explosionPs.Play();
                     }
 
                     //Add ExplosionForce to all Rigidbodies in N range
@@ -158,7 +158,7 @@ public class ProjectileSystem : ComponentSystem
             if (projectile.FlagForDestruction)
             {
                 Debug.Log("DestroyProjectile");
-                GameObject.Destroy(projectile.gameObject);
+                GameObject.Destroy(projectile.gameObject, 0.3f);
                 UpdateInjectedComponentGroups();
                 //PostUpdateCommands.DestroyEntity(entity);
             }

@@ -14,6 +14,7 @@ public class AnimatorComponent : MonoBehaviour
     public Transform ProjectileSpawnOrigin;
     public List<GameObject> Visuals;
     public float EnableVisualsDelay;
+    public List<GameObject> CharacterEffects;
 
     [Header("Movement")]
     public Vector3f LastStationaryCoordinate;
