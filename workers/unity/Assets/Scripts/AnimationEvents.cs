@@ -6,7 +6,7 @@ public class AnimationEvents : MonoBehaviour
 {
     public bool EventTrigger;
 
-    public void TriggerEvent()
+    public void TriggerEvent(int eventIndex = 0)
     {
         EventTrigger = true;
     }

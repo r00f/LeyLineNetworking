@@ -33,7 +33,7 @@ public class ClientCleanupSystem : ComponentSystem
     {
         if (GameStateGroup.CalculateLength() == 0 || m_GarbageCollectorData.Length == 0)
         {
-            Debug.Log("no GameState or GarbageCollector found");
+            //Debug.Log("no GameState or GarbageCollector found");
             return;
         }
 
