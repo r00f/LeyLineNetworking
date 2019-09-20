@@ -137,7 +137,6 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-
                             gameState.CurrentPlanningTime = gameState.PlanningTime;
                             gameState.CurrentState = GameStateEnum.cleanup;
                             m_Data.GameStateData[i] = gameState;

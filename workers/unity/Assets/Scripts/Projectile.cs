@@ -12,12 +12,16 @@ public class Projectile : MonoBehaviour
     public bool DestroyAtDestination;
     public bool DestinationReached;
     public bool FlagForDestruction;
+    public bool QueuedForDestruction;
+    public bool ArriveInstantly;
 
     public Transform TransformToMove;
     public Transform TransformToRotate;
     public Transform PhysicsExplosionOrigin;
     public float TravellingSpeed;
     public float MaxHeight;
+    public float MovementDelay;
+    public float Acceleration;
 
     [Header("Tounge")]
     public Rigidbody ToungeEnd;

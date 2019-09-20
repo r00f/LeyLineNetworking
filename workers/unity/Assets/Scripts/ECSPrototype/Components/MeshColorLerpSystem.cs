@@ -142,17 +142,41 @@ namespace LeyLineHybridECS
             {
                 var meshGradientColor = m_LineData.MeshGradientColorData[i];
 
-                Color emissiveColor1 = meshGradientColor.ManalithColor.LerpColor * meshGradientColor.EmissionMultiplier;
-                Color emissiveColor2 = meshGradientColor.ConnectedManalithColor.LerpColor * meshGradientColor.EmissionMultiplier;
+                Color c1 = meshGradientColor.ManalithColor.LerpColor;
+                Color c2 = meshGradientColor.ConnectedManalithColor.LerpColor;
+
+                
+                // Populate the color keys at the relative time 0 and 1 (0 and 100%)
+                var colorKey = new GradientColorKey[4];
+                colorKey[0].color = c1;
+                colorKey[0].time = 0.0f;
+                colorKey[1].color = c1;
+                colorKey[1].time = .25f;
+                colorKey[2].color = c2;
+                colorKey[2].time = .75f;
+                colorKey[3].color = c2;
+                colorKey[3].time = 1.0f;
+
+                var alphaKey = new GradientAlphaKey[2];
+                alphaKey[0].alpha = 1.0f;
+                alphaKey[0].time = 0.0f;
+                alphaKey[1].alpha = 1.0f;
+                alphaKey[1].time = 1.0f;
+
+                meshGradientColor.Gradient.SetKeys(colorKey, alphaKey);
+                
 
                 for (int li = 0; li < meshGradientColor.colors.Length; li++)
                 {
-
-                    if(li < 2)
+                    //Debug.Log((float)li / meshGradientColor.colors.Length);
+                    //meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li / meshGradientColor.colors.Length);
+                    meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float)li/meshGradientColor.colors.Length) * meshGradientColor.EmissionMultiplier;
+                    /*
+                    if (li < 3)
                     {
                         meshGradientColor.colors[li] = emissiveColor1;
                     }
-                    else if(li > meshGradientColor.colors.Length - 3)
+                    else if(li > meshGradientColor.colors.Length - 4)
                     {
                         meshGradientColor.colors[li] = emissiveColor2;
                     }
@@ -160,7 +184,7 @@ namespace LeyLineHybridECS
                     {
                         if (li % 2 == 0)
                         {
-                            meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li / (meshGradientColor.colors.Length - 3));
+                            meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li);
                         }
                         else
                         {
@@ -168,7 +192,7 @@ namespace LeyLineHybridECS
                         }
 
                     }
-
+                                    */
                 }
 
                 meshGradientColor.mesh.colors = meshGradientColor.colors;

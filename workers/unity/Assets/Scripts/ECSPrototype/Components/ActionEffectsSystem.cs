@@ -76,15 +76,18 @@ public class ActionEffectsSystem : ComponentSystem
 
         List<Vector3> travellingPoints = new List<Vector3>();
 
-        if(projectileFab.MaxHeight > 0)
-        {
-            travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
-        }
-        else
-        {
-            travellingPoints.Add(spawnTransform.position);
-            travellingPoints.Add(offSetTarget);
-        }
+        //if(projectileFab.MaxHeight > 0)
+        //{
+
+        //THIS USES SINUS CALC FOR STRAIGHT LINES -- CHANGE METHOD TO HANDLE STRAIGHT LINES WHITOUT CALCULATING SINUS STUFF
+        travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
+        Debug.Log(travellingPoints.Count);
+        //}
+        //else
+        //{
+            //travellingPoints.Add(spawnTransform.position);
+            //travellingPoints.Add(offSetTarget);
+        //}
 
         //Quaternion lookRotation = new Quaternion();
         Vector3 distance = offSetTarget - spawnTransform.position;

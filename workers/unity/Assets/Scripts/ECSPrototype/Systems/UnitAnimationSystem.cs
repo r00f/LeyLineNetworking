@@ -285,6 +285,7 @@ public class UnitAnimationSystem : ComponentSystem
                 }
             }
         }
+
     }
 
     public void Death(AnimatorComponent animatorComponent)

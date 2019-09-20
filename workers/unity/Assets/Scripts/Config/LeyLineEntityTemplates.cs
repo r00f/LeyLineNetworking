@@ -21,8 +21,8 @@ public static class LeyLineEntityTemplates {
         {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
-            CalculateWaitTime = 4f,
-            CurrentWaitTime = 4f,
+            CalculateWaitTime = 7f,
+            CurrentWaitTime = 0f,
             PlanningTime = 60f,
             CurrentPlanningTime = 60f,
             RopeDisplayTime = 30f
@@ -159,9 +159,9 @@ public static class LeyLineEntityTemplates {
 
         var energy = new PlayerEnergy.Snapshot
         {
-            MaxEnergy = 15,
-            Energy = 15,
-            BaseIncome = 3
+            MaxEnergy = 20,
+            Energy = 20,
+            BaseIncome = 2
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot

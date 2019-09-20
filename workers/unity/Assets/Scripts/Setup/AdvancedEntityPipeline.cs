@@ -43,6 +43,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     typeof(Unit_BaseDataSet),
     typeof(LineRendererComponent),
     typeof(AnimatorComponent),
+    typeof(MovementAnimComponent),
     typeof(IsVisibleReferences),
     typeof(TeamColorMeshes),
     typeof(Healthbar),

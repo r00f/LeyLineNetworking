@@ -10,7 +10,9 @@ namespace LeyLineHybridECS
     [Serializable]
     public struct GridCoordinates : IComponentData
     {
+        //[HideInInspector]
         public float2 OffsetCoordinate;
+        //[HideInInspector]
         public float3 CubeCoordinate;
     }
 

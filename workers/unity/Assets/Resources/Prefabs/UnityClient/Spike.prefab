@@ -160,7 +160,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4344008158697921793
 Transform:
   m_ObjectHideFlags: 0
@@ -736,8 +736,7 @@ MonoBehaviour:
   Actions:
   - {fileID: 11400000, guid: a96a44df607be8f4788a3988c567db88, type: 2}
   - {fileID: 11400000, guid: 34500273954a8db4fa63e5b5c96d0cc6, type: 2}
-  SpawnActions:
-  - {fileID: 11400000, guid: 06d8c3eca471abd4197edf42c50687ac, type: 2}
+  SpawnActions: []
 --- !u!114 &930118610718755571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2495,14 +2494,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Spike
       objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: a5801b3d4f938534fa25ac1ad714363a, type: 2}
-    - target: {fileID: 9500000, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 400198, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -2545,6 +2536,14 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400198, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: a5801b3d4f938534fa25ac1ad714363a, type: 2}
+    - target: {fileID: 9500000, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
+      propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100094, guid: 122089b5c4c4ce2428e8a3866ed5cb31, type: 3}
