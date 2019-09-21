@@ -107,7 +107,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a78da3f00f3328541b4526c0b0b5ec5c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lineThickness: 2
+  lineThickness: 1.5
   lineIntensity: 1
   fillAmount: 0.2
   lineColor0: {r: 1, g: 0.97120583, b: 0, a: 1}
@@ -294,7 +294,7 @@ MonoBehaviour:
     zoom:
       invertZoom: 0
       defaultZoom: 10
-      minZoom: 5
+      minZoom: 7
       maxZoom: 15
       zoomRate: 10
       constZoomRate: 1

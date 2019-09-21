@@ -48,15 +48,20 @@ MonoBehaviour:
   DestroyAtDestination: 0
   DestinationReached: 0
   FlagForDestruction: 0
+  QueuedForDestruction: 0
+  ArriveInstantly: 1
   TransformToMove: {fileID: 0}
   TransformToRotate: {fileID: 1199834125490395627}
   PhysicsExplosionOrigin: {fileID: 4265137128855466386}
-  TravellingSpeed: 20
+  TravellingSpeed: 0
   MaxHeight: 0
+  MovementDelay: 0.1
+  Acceleration: 0
   ToungeEnd: {fileID: 4688949177296653295}
   ToungeBase: {fileID: 7703656456084220977}
-  LaunchForce: 30
-  ContractSpeed: 20
+  LaunchForce: 35
+  ContractSpeed: 35
+  ContractUpForce: 100
   Launched: 0
   BaseJoint: {fileID: 0}
   SpringJoints:
@@ -64,8 +69,9 @@ MonoBehaviour:
   - {fileID: 5043565909834758946}
   - {fileID: 6313709426211851775}
   - {fileID: 2591146601566630127}
-  ExplosionRadius: 0.8
-  ExplosionForce: 300
+  ExplosionWaitTime: 0.05
+  ExplosionRadius: 1
+  ExplosionForce: 3500
   BodyParticleSystem: {fileID: 0}
   TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 0}

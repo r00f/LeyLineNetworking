@@ -9714,9 +9714,11 @@ MonoBehaviour:
   ToungeBase: {fileID: 0}
   LaunchForce: 0
   ContractSpeed: 0
+  ContractUpForce: 0
   Launched: 0
   BaseJoint: {fileID: 0}
   SpringJoints: []
+  ExplosionWaitTime: 0
   ExplosionRadius: 1
   ExplosionForce: 300
   BodyParticleSystem: {fileID: 0}

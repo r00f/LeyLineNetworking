@@ -28,11 +28,13 @@ public class Projectile : MonoBehaviour
     public Rigidbody ToungeBase;
     public int LaunchForce;
     public int ContractSpeed;
+    public int ContractUpForce;
     public bool Launched;
     public Joint BaseJoint;
     public List<SpringJoint> SpringJoints;
 
     [Header("Impact Physics Explosion")]
+    public float ExplosionWaitTime;
     public float ExplosionRadius;
     public int ExplosionForce;
 

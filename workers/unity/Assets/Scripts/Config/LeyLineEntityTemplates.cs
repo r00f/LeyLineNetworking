@@ -21,7 +21,7 @@ public static class LeyLineEntityTemplates {
         {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
-            CalculateWaitTime = 7f,
+            CalculateWaitTime = 5f,
             CurrentWaitTime = 0f,
             PlanningTime = 60f,
             CurrentPlanningTime = 60f,
