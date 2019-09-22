@@ -111,7 +111,7 @@ public class UnitLifeCycleSystem : ComponentSystem
 
                 if (unitCubeCoordinate == cellCubeCoordinate.CubeCoordinate && unitWorldIndex == cellWorldIndex && cellAtt.CellAttributes.Cell.UnitOnCellId == unitState.EntityId)
                 {
-                    Debug.Log("CleanUpUnit with id: " + unitState.EntityId);
+                    //Debug.Log("CleanUpUnit with id: " + unitState.EntityId);
                     cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, 0, cellWorldIndex);
                     m_CellData.CellAttributes[ci] = cellAtt;
                 }
