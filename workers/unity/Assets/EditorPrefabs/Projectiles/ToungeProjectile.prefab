@@ -60,7 +60,7 @@ MonoBehaviour:
   TargetYOffset: -0.3
   ToungeEnd: {fileID: 4688949177296653295}
   ToungeBase: {fileID: 7703656456084220977}
-  LaunchForce: 55
+  LaunchForce: 45
   ContractSpeed: 35
   ContractUpForce: 100
   Launched: 0
@@ -71,8 +71,8 @@ MonoBehaviour:
   - {fileID: 6313709426211851775}
   - {fileID: 2591146601566630127}
   ExplosionWaitTime: 0.03
-  ExplosionRadius: 1.5
-  ExplosionForce: 3000
+  ExplosionRadius: 1.25
+  ExplosionForce: 2500
   BodyParticleSystem: {fileID: 0}
   TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 0}

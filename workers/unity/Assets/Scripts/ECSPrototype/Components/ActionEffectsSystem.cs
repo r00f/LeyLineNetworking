@@ -81,7 +81,7 @@ public class ActionEffectsSystem : ComponentSystem
 
         //THIS USES SINUS CALC FOR STRAIGHT LINES -- CHANGE METHOD TO HANDLE STRAIGHT LINES WHITOUT CALCULATING SINUS STUFF
         travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
-        Debug.Log(travellingPoints.Count);
+        //Debug.Log(travellingPoints.Count);
         //}
         //else
         //{

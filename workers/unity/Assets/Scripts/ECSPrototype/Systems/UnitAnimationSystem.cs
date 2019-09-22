@@ -177,7 +177,7 @@ public class UnitAnimationSystem : ComponentSystem
                     }
                     else if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning && animatorComponent.LastHealth != 0)
                     {
-                        Debug.Log("TriggerHatchActionEffect");
+                        //Debug.Log("TriggerHatchActionEffect");
                         m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
                     }
                 }

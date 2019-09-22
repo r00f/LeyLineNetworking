@@ -123,7 +123,7 @@ namespace LeyLineHybridECS
                     
                     else if(playerState.UnitTargets.Count != 0)
                     {
-                        Debug.Log("ClearUnitTargets");
+                        //Debug.Log("ClearUnitTargets");
                         playerState.UnitTargets.Clear();
                         playerState.UnitTargets = playerState.UnitTargets;
                         m_PlayerData.PlayerStateData[0] = playerState;

@@ -536,7 +536,7 @@ namespace LeyLineHybridECS
                         healthColor.g = Color.red.g;
                         healthColor.b = Color.red.b;
                     }
-                    Debug.Log("PlayFloatingHealthAnim");
+                    //Debug.Log("PlayFloatingHealthAnim");
                     anim.Play("HealthText", 0, 0);
                 }
             }

@@ -10,7 +10,7 @@ namespace LeyLineHybridECS
 
         void Start()
         {
-            pathPs = GetComponent<ParticleSystem>();
+            pathPs = GetComponentInChildren<ParticleSystem>();
             mesh = GetComponent<MeshFilter>().mesh;
 
             ParticleSystem pPs = pathPs;
