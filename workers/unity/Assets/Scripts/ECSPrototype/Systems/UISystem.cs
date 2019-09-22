@@ -66,10 +66,30 @@ namespace LeyLineHybridECS
 
         UIReferences UIRef;
 
+        Settings settings;
+
+        protected override void OnCreateManager()
+        {
+
+            base.OnCreateManager();
+
+            //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+            settings = Resources.Load<Settings>("Settings");
+
+        }
+
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
             InitializeButtons();
+            SetUIElementsToPlayerColor();
+        }
+
+        public void SetUIElementsToPlayerColor()
+        {
+
+
+
         }
 
         public void InitializeButtons()
@@ -115,13 +135,18 @@ namespace LeyLineHybridECS
                         {
                             case TeamColorEnum.blue:
                                 //UIRef.HeroPortraitTeamColour.color = Color.blue;
-                                UIRef.CurrentEnergyFill.color = Color.blue;
+                                UIRef.CurrentEnergyFill.color = settings.FactionColors[1];
+                                
                                 break;
                             case TeamColorEnum.red:
                                 //UIRef.HeroPortraitTeamColour.color = Color.red;
-                                UIRef.CurrentEnergyFill.color = Color.red;
+                                UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
+                                
                                 break;
                         }
+
+                        UIRef.BlueColor.color = settings.FactionColors[1];
+                        UIRef.RedColor.color = settings.FactionColors[2];
 
                         UIRef.StartupPanel.SetActive(false);
                     }
@@ -169,13 +194,13 @@ namespace LeyLineHybridECS
 
                     if (factionColor == TeamColorEnum.blue)
                     {
-                        if (UIRef.PortraitPlayerColor.color != Color.blue)
-                            UIRef.PortraitPlayerColor.color = Color.blue;
+                        if (UIRef.PortraitPlayerColor.color != settings.FactionColors[1])
+                            UIRef.PortraitPlayerColor.color = settings.FactionColors[1];
                     }
                     else if (factionColor == TeamColorEnum.red)
                     {
-                        if (UIRef.PortraitPlayerColor.color != Color.red)
-                            UIRef.PortraitPlayerColor.color = Color.red;
+                        if (UIRef.PortraitPlayerColor.color != settings.FactionColors[2])
+                            UIRef.PortraitPlayerColor.color = settings.FactionColors[2];
                     }
 
                     if (faction.Faction == authPlayerFaction)

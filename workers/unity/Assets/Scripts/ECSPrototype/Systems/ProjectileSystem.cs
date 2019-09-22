@@ -87,7 +87,8 @@ public class ProjectileSystem : ComponentSystem
             {
                 if (!projectile.Launched && projectile.TravellingCurve.Count != 0)
                 {
-                    Vector3 direction = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] - projectile.ToungeEnd.position;
+                    projectile.MovementDelay *= Vector3.Distance(projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset, projectile.ToungeEnd.position);
+                    Vector3 direction = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset - projectile.ToungeEnd.position;
                     projectile.ToungeEnd.AddForce(direction * projectile.LaunchForce, ForceMode.Impulse);
                     projectile.Launched = true;
                 }
@@ -102,7 +103,8 @@ public class ProjectileSystem : ComponentSystem
                 if(projectile.ArriveInstantly)
                 {
                     if (!projectile.ToungeEnd)
-                        transform.position = projectile.TravellingCurve[projectile.TravellingCurve.Count -1];
+                        transform.position = projectile.TravellingCurve[projectile.TravellingCurve.Count -1] + Vector3.up * projectile.TargetYOffset;
+
                     projectile.DestinationReached = true;
                 }
                 else if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 2)
@@ -177,13 +179,13 @@ public class ProjectileSystem : ComponentSystem
                         {
                             if (col.attachedRigidbody != null && !rigidbodies.Contains(col.attachedRigidbody) && col.gameObject.layer == 11 && !col.attachedRigidbody.isKinematic)
                             {
-                                Debug.Log(col.name);
+                                //Debug.Log(col.name);
                                 rigidbodies.Add(col.attachedRigidbody);
                             }
                         }
                         foreach (Rigidbody r in rigidbodies)
                         {
-                            Debug.Log("RigidBodyInExplosionRange");
+                            //Debug.Log("RigidBodyInExplosionRange");
                             r.AddExplosionForce(projectile.ExplosionForce, projectile.PhysicsExplosionOrigin.position, projectile.ExplosionRadius);
                         }
 
@@ -239,7 +241,7 @@ public class ProjectileSystem : ComponentSystem
 
             if (inCubeCoordinates.Contains(animatorComponent.LastStationaryCoordinate) && !animatorComponent.ActionEffectTrigger)
             {
-                Debug.Log("Set Unit actionEffectTrigger");
+                //Debug.Log("Set Unit actionEffectTrigger");
                 animatorComponent.ActionEffectTrigger = true;
             }
         }

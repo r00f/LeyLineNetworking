@@ -46,11 +46,11 @@ public class ActionEffectsSystem : ComponentSystem
         {
             var animatorComp = m_UnitData.AnimatorComponents[i];
 
-            Debug.Log(animatorComp.LastStationaryCoordinate);
+            //Debug.Log(animatorComp.LastStationaryCoordinate);
 
             if (inCubeCoordinates.Contains(animatorComp.LastStationaryCoordinate))
             {
-                Debug.Log("Set Unit actionEffectTrigger");
+                //Debug.Log("Set Unit actionEffectTrigger");
                 animatorComp.ActionEffectTrigger = true;
             }
         }

@@ -17,6 +17,7 @@ public class UnitAnimationSystem : ComponentSystem
         public readonly ComponentDataArray<Health.Component> HealthData;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<Actions.Component> ActionsData;
+        public readonly ComponentDataArray<Energy.Component> EnergyData;
         public readonly ComponentDataArray<Position.Component> Positions;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
         public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
@@ -80,6 +81,7 @@ public class UnitAnimationSystem : ComponentSystem
             var transform = m_UnitData.Transforms[i];
             var animatorComponent = m_UnitData.AnimatorComponents[i];
             var actions = m_UnitData.ActionsData[i];
+            var energy = m_UnitData.EnergyData[i];
             var healthComponent = m_UnitData.HealthData[i];
             var unitId = m_UnitData.EntityIds[i].EntityId.Id;
             var worldIndex = m_UnitData.WorldIndexData[i].Value;
@@ -208,6 +210,8 @@ public class UnitAnimationSystem : ComponentSystem
                     animatorComponent.ActionEffectTrigger = false;
                 }
 
+                animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
+
                 if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
                     animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
@@ -292,7 +296,7 @@ public class UnitAnimationSystem : ComponentSystem
     {
         var garbageCollector = GarbageCollectionGroup.GetComponentArray<GarbageCollectorComponent>()[0];
 
-        Debug.Log("Death");
+        //Debug.Log("Death");
 
         animatorComponent.Dead = true;
 

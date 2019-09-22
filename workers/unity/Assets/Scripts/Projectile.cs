@@ -22,6 +22,7 @@ public class Projectile : MonoBehaviour
     public float MaxHeight;
     public float MovementDelay;
     public float Acceleration;
+    public float TargetYOffset;
 
     [Header("Tounge")]
     public Rigidbody ToungeEnd;

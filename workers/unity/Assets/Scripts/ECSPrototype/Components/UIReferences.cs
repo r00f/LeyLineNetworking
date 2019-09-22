@@ -25,6 +25,8 @@ public class UIReferences : MonoBehaviour
     public Button ReadyButton;
     public GameObject RedReady;
     public GameObject BlueReady;
+    public Image BlueColor;
+    public Image RedColor;
     public Image RopeBar;
 
     [Header("UnitPortrait")]

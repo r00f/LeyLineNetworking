@@ -87,7 +87,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
 
@@ -111,13 +111,14 @@ public static class LeyLineEntityTemplates {
         {
             CellAttributes = new CellAttributes
             {
+                CellMapColorIndex = mapColorIndex,
                 Cell = new CellAttribute
                 {
                     Position = position,
                     CubeCoordinate = cubeCoordinate,
                     IsTaken = isTaken,
                     MovementCost = 1,
-                    ObstructVision = inObstruction
+                    ObstructVision = inObstruction,
                 },
                 Neighbours = neighbours
             }

@@ -4,6 +4,8 @@ using UnityEngine;
 using Generic;
 using Player;
 using Improbable.Gdk.ReactiveComponents;
+using Cell;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
@@ -18,6 +20,15 @@ namespace LeyLineHybridECS
         }
 
         [Inject] CellData m_CellData;
+
+        struct NewCellData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntityData;
+            public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
+            public ComponentArray<MarkerGameObjects> MarkerGameObjectsData;
+        }
+        [Inject] NewCellData m_NewCellData;
 
         struct UnitData
         {
@@ -48,8 +59,28 @@ namespace LeyLineHybridECS
 
         [Inject] PlayerStateData m_PlayerStateData;
 
+        Settings settings;
+
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            settings = Resources.Load<Settings>("Settings");
+
+        }
+
         protected override void OnUpdate()
         {
+            
+            for (int i = 0; i < m_NewCellData.Length; i++)
+            {
+                MarkerGameObjects markerGameObject = m_NewCellData.MarkerGameObjectsData[i];
+                var cellAtt = m_NewCellData.CellAttributes[i];
+                int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
+                markerGameObject.MapMarkerRenderer.material.color = settings.MapCellColors[colorIndex];
+                //Debug.Log("AssignMapColor");
+            }
+            
+
             var playerWorldIndex = m_PlayerStateData.WorldIndex[0].Value;
 
             for (int j = 0; j < m_GameStateData.Length; j++)

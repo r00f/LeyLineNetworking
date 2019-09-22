@@ -92,6 +92,8 @@ namespace cakeslice
         [HideInInspector]
         public RenderTexture extraRenderTexture;
 
+        Settings Settings;
+
         CommandBuffer commandBuffer;
 
         Material GetMaterialFromID(int ID)
@@ -123,10 +125,16 @@ namespace cakeslice
             m_instance = this;
         }
 
+        
+
         void Start()
         {
             CreateMaterialsIfNeeded();
             UpdateMaterialsPublicProperties();
+            Settings = Resources.Load<Settings>("Settings");
+            lineColor0 = Settings.FactionColors[0];
+            lineColor1 = Settings.FactionColors[1];
+            lineColor2 = Settings.FactionColors[2];
 
             if(sourceCamera == null)
             {

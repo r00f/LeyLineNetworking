@@ -6,4 +6,5 @@ using UnityEngine;
 public class Settings : ScriptableObject
 {
     public List<Color> FactionColors;
+    public List<Color> MapCellColors;
 }

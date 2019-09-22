@@ -11,7 +11,7 @@ public class ProjectileCollision : MonoBehaviour
     {
         if (projectile.DestinationReached && other.transform == transform.root)
         {
-            Debug.Log("Entering own Trigger after reaching dest");
+            //Debug.Log("Entering own Trigger after reaching dest");
             projectile.FlagForDestruction = true;
         }
     }

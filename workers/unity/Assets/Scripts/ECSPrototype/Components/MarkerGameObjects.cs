@@ -12,6 +12,8 @@ namespace LeyLineHybridECS
         public GameObject ReachableMarker;
         public GameObject TargetMarker;
         public MeshRenderer TargetMarkerRenderer;
+        public Renderer MapMarkerRenderer;
+        public SpriteRenderer MapIconRenderer;
         public List<Color> TargetColors;
         public EffectTypeEnum EffectType;
     }

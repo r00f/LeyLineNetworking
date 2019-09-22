@@ -31,6 +31,18 @@ public class InitializeUnitsSystem : ComponentSystem
 
     [Inject] PlayerData m_PlayerData;
 
+    Settings settings;
+
+    protected override void OnCreateManager()
+    {
+
+        base.OnCreateManager();
+
+        //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+        settings = Resources.Load<Settings>("Settings");
+
+    }
+
     protected override void OnUpdate()
     {
         for(int i = 0; i < m_UnitData.Length; i++)
@@ -49,7 +61,7 @@ public class InitializeUnitsSystem : ComponentSystem
             {
                 case Generic.TeamColorEnum.blue:
                     markerObjects.Outline.color = 1;
-                    factionColor = Color.blue;
+                    factionColor = settings.FactionColors[1];
                     foreach (Renderer r in teamColorMeshes.detailColorMeshes)
                     {
                         r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0, 0.5f));
@@ -57,7 +69,7 @@ public class InitializeUnitsSystem : ComponentSystem
                     break;
                 case Generic.TeamColorEnum.red:
                     markerObjects.Outline.color = 2;
-                    factionColor = Color.red;
+                    factionColor = settings.FactionColors[2];
                     foreach (Renderer r in teamColorMeshes.detailColorMeshes)
                     {
                         r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0.5f, 0.5f));
@@ -68,7 +80,7 @@ public class InitializeUnitsSystem : ComponentSystem
             //lineRenderer.lineRenderer.startColor = factionColor;
             //lineRenderer.lineRenderer.endColor = factionColor;
 
-            foreach (Renderer r in teamColorMeshes.fullColorMeshes)
+            foreach (Renderer r in teamColorMeshes.FullColorMeshes)
             {
                 r.material.color = factionColor;
                 if(r is TrailRenderer)
