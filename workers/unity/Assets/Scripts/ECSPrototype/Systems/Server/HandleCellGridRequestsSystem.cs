@@ -158,18 +158,22 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
             if (actionData.CurrentSelected.Targets.Count != 0)
             {
+                bool self = false;
                 if(actionData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
                     if(actionData.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
                     {
                         //Set target instantly
+                        self = true;
                         actionData.LockedAction = SetLockedAction(actionData.CurrentSelected, coord, coord, unitId, faction.Faction);
                         actionData.CurrentSelected = actionData.NullAction;
                     }
                 }
-                else if (!actionData.CurrentSelected.Equals(actionData.LastSelected) || cellsToMarkData.CellsInRange.Count == 0)
+                if ((!actionData.CurrentSelected.Equals(actionData.LastSelected) || cellsToMarkData.CellsInRange.Count == 0) && !self)
                 {
                     cellsToMarkData.CellsInRange = GetRadius(coord, (uint)actionData.CurrentSelected.Targets[0].Targettingrange, worldIndex);
+                    cellsToMarkData.CachedPaths.Clear();
+                    
 
                     switch (actionData.CurrentSelected.Targets[0].Higlighter)
                     {
@@ -183,6 +187,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 }
                             }
                             cellsToMarkData.CachedPaths = GetAllPathsInRadius(range, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
+                            
                             break;
                         case UseHighlighterEnum.no_pathing:
                             break;
@@ -194,6 +199,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             m_SelectActionRequestData.ActionsData[i] = actionData;
 
             cellsToMarkData.SetClientRange = true;
+            cellsToMarkData.CachedPaths = cellsToMarkData.CachedPaths;
             m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
         }
 
@@ -229,13 +235,24 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 if (cellId == id)
                                 {
                                     bool isValidTarget = false;
-                                    if(cellsToMark.CachedPaths.ContainsKey(cell) && cellsToMark.CachedPaths.Count != 0)
+                                    if(cellsToMark.CachedPaths.Count != 0 && cellsToMark.CachedPaths.ContainsKey(cell) )
                                     {
                                         isValidTarget = true;
                                     }
-                                    else if(cellsToMark.CellsInRange.Contains(cellAtts))
+                                    else 
                                     {
-                                        isValidTarget = true;
+                                        bool valid = false;
+                                        foreach(CellAttributes ca in cellsToMark.CellsInRange)
+                                        {
+                                            if(ca.Cell.CubeCoordinate == cell.CubeCoordinate)
+                                            {
+                                                valid = true;
+                                            
+                                            }
+                                        }
+
+                                        isValidTarget = valid;
+                                        
                                     }
 
                                     if(isValidTarget)
@@ -278,6 +295,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     else
                                     {
                                         actionData.LockedAction = actionData.NullAction;
+                     
                                     }
                                 }
                             }

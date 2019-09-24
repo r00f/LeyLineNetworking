@@ -187,12 +187,12 @@ namespace LeyLineHybridECS
                 }
             }
 
-            Debug.Log("unitDictCount: " + unitDict.Count);
+            /*Debug.Log("unitDictCount: " + unitDict.Count);
 
             foreach(long id in unitDict.Values)
             {
                 Debug.Log(id);
-            }
+            }*/
 
             for (int i = 0; i < m_CellData.Length; i++)
             {

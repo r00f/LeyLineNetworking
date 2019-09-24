@@ -7,6 +7,7 @@ using Cell;
 using Player;
 using UnityEngine;
 using Improbable.Gdk.ReactiveComponents;
+using Improbable;
 
 //Update after playerState selected unit has been set
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(MouseStateSystem))]
@@ -46,6 +47,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<Health.Component> HealthAttributes;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
     }
 
     [Inject] UnitData m_UnitData;
@@ -121,8 +123,26 @@ public class SendActionRequestSystem : ComponentSystem
             //check if unit is the selected unit in playerState and if current selected action is not empty
             if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Index != -3)
             {
+                
                 if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
                 {
+                    Vector3f TargetCoord = new Vector3f(999,999,999);
+
+                    if (!actionsData.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
+                    {
+                        for (int ui = 0; ui < m_UnitData.Length; ui++)
+                        {
+                            var unitMousestate = m_UnitData.MouseStateData[ui];
+                            var targetUnitEntityId = m_UnitData.EntityIds[ui].EntityId.Id;
+                            var coord = m_UnitData.Coordinates[ui].CubeCoordinate;
+
+                            if (unitMousestate.ClickEvent == 1)
+                            {
+                                TargetCoord = coord;
+                            }
+                        }
+
+                    }
                     for (int ci = 0; ci < m_CellData.Length; ci++)
                     {
                         var cellMousestate = m_CellData.MouseStateData[ci];
@@ -130,7 +150,7 @@ public class SendActionRequestSystem : ComponentSystem
                         var cellCoord = m_CellData.Coordinates[ci].CubeCoordinate;
                         var cellMarkerState = m_CellData.MarkerStateData[ci].CurrentState;
 
-                        if (cellMousestate.ClickEvent == 1 && cellCoord != unitCoord)
+                        if ((cellMousestate.ClickEvent == 1 && cellCoord != unitCoord) || TargetCoord == cellCoord)
                         {
                             var request = new Actions.SetTargetCommand.Request
                             (
@@ -145,10 +165,10 @@ public class SendActionRequestSystem : ComponentSystem
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
                     bool sent = false;
-                    for (int ci = 0; ci < m_UnitData.Length; ci++)
+                    for (int ui = 0; ui < m_UnitData.Length; ui++)
                     {
-                        var unitMousestate = m_UnitData.MouseStateData[ci];
-                        var targetUnitEntityId = m_UnitData.EntityIds[ci].EntityId.Id;
+                        var unitMousestate = m_UnitData.MouseStateData[ui];
+                        var targetUnitEntityId = m_UnitData.EntityIds[ui].EntityId.Id;
 
                         if (unitMousestate.ClickEvent == 1)
                         {
