@@ -731,8 +731,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VisionRange: 5
-  BaseHealth: 7
-  EnergyIncome: 4
+  BaseHealth: 15
+  EnergyIncome: 0
   BasicMove: {fileID: 11400000, guid: 82744cfe9643d2a46aa70b15293eede3, type: 2}
   BasicAttack: {fileID: 11400000, guid: 66605e5bd7ae0354cb6dd5699143dd60, type: 2}
   IsHero: 0
@@ -2563,11 +2563,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 936332934090514712, guid: 81c764ddb50a71a43882288cd09d1a20,
-        type: 3}
-      propertyPath: m_Layer
-      value: 11
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 81c764ddb50a71a43882288cd09d1a20, type: 3}

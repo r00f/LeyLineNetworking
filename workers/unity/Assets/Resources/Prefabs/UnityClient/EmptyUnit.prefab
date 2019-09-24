@@ -365,13 +365,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   VisionRange: 5
   BaseHealth: 10
-  EnergyIncome: 4
+  EnergyIncome: 0
   BasicMove: {fileID: 11400000, guid: 8fa6cd2aaaa8e02459cc97c4cf951ae2, type: 2}
   BasicAttack: {fileID: 11400000, guid: a522648c58fd9b44fa672d200d7834a7, type: 2}
   IsHero: 1
   Actions:
   - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
-  - {fileID: 11400000, guid: 4c969be23f72a0141ad7603e23b902f6, type: 2}
+  - {fileID: 0}
   SpawnActions:
   - {fileID: 11400000, guid: 06d8c3eca471abd4197edf42c50687ac, type: 2}
 --- !u!114 &1130299993275380547
