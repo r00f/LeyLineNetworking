@@ -235,9 +235,12 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 if (cellId == id)
                                 {
                                     bool isValidTarget = false;
-                                    if(cellsToMark.CachedPaths.Count != 0 && cellsToMark.CachedPaths.ContainsKey(cell) )
+                                    if(cellsToMark.CachedPaths.Count != 0)
                                     {
-                                        isValidTarget = true;
+                                        if (cellsToMark.CachedPaths.ContainsKey(cell))
+                                        {
+                                            isValidTarget = true;
+                                        }
                                     }
                                     else 
                                     {
@@ -246,9 +249,17 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         {
                                             if(ca.Cell.CubeCoordinate == cell.CubeCoordinate)
                                             {
-                                                valid = true;
-                                            
-                                            }
+
+                                                    if (actionData.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
+                                                    {
+                                                        if (!cell.IsTaken) valid = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        valid = true;
+                                                    }
+                                                }
+
                                         }
 
                                         isValidTarget = valid;
