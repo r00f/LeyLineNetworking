@@ -38,7 +38,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  damageAmount: 3
+  damageAmount: 5
 --- !u!114 &114489467121559340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,7 +68,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
   targettingRange: 5
-  energyCost: 10
+  energyCost: 12
   ModToAdd: {fileID: 0}
   SecondaryTargets:
   - {fileID: 114489467121559340}

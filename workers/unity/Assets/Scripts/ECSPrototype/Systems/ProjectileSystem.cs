@@ -220,7 +220,7 @@ public class ProjectileSystem : ComponentSystem
                     if (moveAnim.DegreesPerSecond != 0)
                     {
                         float smooth = Time.deltaTime * moveAnim.DegreesPerSecond;
-                        t.RotateAround(t.position, moveAnim.RotationAxis, smooth);
+                        t.Rotate(moveAnim.RotationAxis, smooth);
                     }
                 }
                 else

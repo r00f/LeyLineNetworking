@@ -90,13 +90,13 @@ namespace LeyLineHybridECS
 
                     if (gameControllerWorldIndex == playerWorldIndex)
                     {
-
+                        /*
                         if (m_ProjectorAddedData.Transforms[0].position != position + new Vector3(17, 10, 17))
                         {
                             //Debug.Log("SetProjectorPosition");
-                            m_ProjectorAddedData.Transforms[0].position = position + new Vector3(17, 10, 17);
+                            //m_ProjectorAddedData.Transforms[0].position = position + new Vector3(17, 10, 17);
                         }
-
+                        */
                     }
                 }
             }

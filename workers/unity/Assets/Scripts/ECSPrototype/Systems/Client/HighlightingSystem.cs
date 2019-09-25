@@ -639,6 +639,8 @@ public class HighlightingSystem : ComponentSystem
             m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
         }
 
+        var coordToReset = new Vector3f(999, 999, 999);
+
         for (int i = 0; i < m_ActiveUnitData.Length; i++)
         {
             var actions = m_ActiveUnitData.ActionsData[i];
@@ -650,6 +652,8 @@ public class HighlightingSystem : ComponentSystem
                 if (playerState.UnitTargets.ContainsKey(unitId) && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
                     lineRenderer.positionCount = 0;
+                    if(playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
+                        coordToReset = playerState.UnitTargets[unitId].CubeCoordinates[0];
                     playerState.UnitTargets.Remove(unitId);
                     playerState.UnitTargets = playerState.UnitTargets;
                     m_PlayerStateData.PlayerState[0] = playerState;
@@ -661,13 +665,20 @@ public class HighlightingSystem : ComponentSystem
         {
             var markerState = m_MarkerStateData.MarkerStates[i];
             var mouseState = m_MarkerStateData.MouseStates[i];
+            var coords = m_MarkerStateData.Coords[i].CubeCoordinate;
 
+            if (coords == coordToReset)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+                m_MarkerStateData.MouseStates[i] = mouseState;
+                markerState.NumberOfTargets = 0;
+                m_MarkerStateData.MarkerStates[i] = markerState;
+            }
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
                 mouseState.CurrentState = MouseState.State.Neutral;
                 m_MarkerStateData.MouseStates[i] = mouseState;
             }
-
             if (markerState.CurrentState != (MarkerState.State)(int)mouseState.CurrentState)
             {
                 markerState.CurrentState = (MarkerState.State)(int)mouseState.CurrentState;
