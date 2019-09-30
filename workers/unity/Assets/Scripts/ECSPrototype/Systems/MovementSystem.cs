@@ -18,7 +18,7 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<SpatialEntityId> EntityIDs;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<Actions.Component> ActionsData;
+            public ComponentDataArray<Actions.Component> ActionsData;
             public ComponentDataArray<MovementVariables.Component> MovementVariables;
             public ComponentDataArray<CellsToMark.Component> CellsToMark;
             public ComponentDataArray<CubeCoordinate.Component> CubeCoordinates;
@@ -60,6 +60,7 @@ namespace LeyLineHybridECS
         {
             for (int i = 0; i < m_UnitData.Length; ++i)
             {
+                var unitId = m_UnitData.EntityIDs[i].EntityId.Id;
                 var actionsData = m_UnitData.ActionsData[i];
                 var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
                 var position = m_UnitData.Positions[i];
@@ -79,7 +80,13 @@ namespace LeyLineHybridECS
                         {
                             var cellsToMark = m_UnitData.CellsToMark[i];
 
-                            if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.move)
+                            if(m_GameStateData.GameState[gi].CurrentState == GameStateEnum.interrupt)
+                            {
+                                //PATH CULLING
+                                actionsData = CompareCullableActions(actionsData, gameStateWorldIndex, unitId);
+                                m_UnitData.ActionsData[i] = actionsData;
+                            }
+                            else if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.move)
                             {
                                 if (currentPath.Count != 0 && cellsToMark.CellsInRange.Count != 0)
                                 {
@@ -147,6 +154,69 @@ namespace LeyLineHybridECS
                     }
                 }
             }
+        }
+
+        private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)
+        {
+            for (int i = 0; i < m_UnitData.Length; ++i)
+            {
+                var otherUnitId = m_UnitData.EntityIDs[i].EntityId.Id;
+                var otherUnitActions = m_UnitData.ActionsData[i];
+                var otherUnitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+
+                if (worldIndex == otherUnitWorldIndex && unitId != otherUnitId)
+                {
+                    if (otherUnitActions.LockedAction.Index != -3 && otherUnitActions.LockedAction.Targets[0].TargetCoordinate == unitActions.LockedAction.Targets[0].TargetCoordinate)
+                    {
+                        if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                        {
+                            //Decide which path to cull
+                            float unitMoveTime = unitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * unitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
+                            float otherUnitMoveTime = otherUnitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * otherUnitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
+                            if (unitMoveTime == otherUnitMoveTime)
+                            {
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    unitActions = CullPath(unitActions);
+                                }
+                                Debug.Log("MoveTimesTheSame");
+                            }
+                            else if (unitMoveTime > otherUnitMoveTime)
+                            {
+                                unitActions = CullPath(unitActions);
+                                Debug.Log("UnitSlower, Cull path");
+                            }
+                        }
+                        else if(otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
+                        {
+                            Debug.Log("SpawnCullPath");
+                            unitActions = CullPath(unitActions);
+                        }
+                    }
+                }
+            }
+            return unitActions;
+        }
+
+        private Actions.Component CullPath(Actions.Component unitActions)
+        {
+            var coordCount = unitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
+            unitActions.LockedAction.Targets[0].Mods[0].Coordinates.RemoveAt(coordCount - 1);
+            coordCount = unitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
+
+            if(coordCount != 0)
+            {
+                Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].Coordinates[coordCount - 1];
+                var t = unitActions.LockedAction.Targets[0];
+                t.TargetCoordinate = newTarget;
+                unitActions.LockedAction.Targets[0] = t;
+                unitActions.LockedAction = unitActions.LockedAction;
+            }
+            else
+            {
+                unitActions.LockedAction = unitActions.NullAction;
+            }
+            return unitActions;
         }
     }
 }

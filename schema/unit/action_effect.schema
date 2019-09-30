@@ -13,7 +13,7 @@ type ActionEffect {
 	uint32 armor_amount = 1;
 	}
 	type MoveAlongPath{
-	uint32 movement_speed = 1;
+	float time_per_cell = 1;
 	}
 	SpawnUnit spawn_unit_nested = 2;
 	DealDamage deal_damage_nested = 3;

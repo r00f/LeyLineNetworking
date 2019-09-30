@@ -275,24 +275,14 @@ public class UnitAnimationSystem : ComponentSystem
 
     public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameStateEnum gameState, uint worldIndex)
     {
-        if (!animatorComponent.InitialValuesSet)
+        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState - 2)
         {
-            if (actions.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
-            {
-                animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-                animatorComponent.InitialValuesSet = true;
-            }
-            else
+            if (!animatorComponent.InitialValuesSet)
             {
                 animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
                 animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
                 animatorComponent.InitialValuesSet = true;
             }
-        }
-        
-        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState - 2)
-        {
-            Debug.Log("SetExecuteTrigger");
             animatorComponent.Animator.SetTrigger("Execute");
             animatorComponent.ExecuteTriggerSet = true;
         }

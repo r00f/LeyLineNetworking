@@ -9,7 +9,7 @@ namespace LeyLineHybridECS
     [System.Serializable]
     public class ECS_MoveAlongPathEffect : ECSActionEffect
     {
-        public uint MovementSpeed;
+        public float TimePerCell;
         public int pathIndex;
     }
 }

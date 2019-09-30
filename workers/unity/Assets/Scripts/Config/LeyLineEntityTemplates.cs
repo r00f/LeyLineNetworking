@@ -544,7 +544,7 @@ public static class LeyLineEntityTemplates {
             {
                 ECS_MoveAlongPathEffect go = inAction.Effects[i] as ECS_MoveAlongPathEffect;
                 AF.EffectType = EffectTypeEnum.move_along_path;
-                AF.MoveAlongPathNested.MovementSpeed = go.MovementSpeed;
+                AF.MoveAlongPathNested.TimePerCell = go.TimePerCell;
             }
             if (inAction.Effects[i] is ECS_DealDamageEffect)
             {
