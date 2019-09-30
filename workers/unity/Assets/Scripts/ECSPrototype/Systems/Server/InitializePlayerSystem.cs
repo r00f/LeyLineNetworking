@@ -15,7 +15,6 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class InitializePlayerSystem : ComponentSystem
     {
-        
         public struct PlayerData
         {
             public readonly int Length;
@@ -31,6 +30,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<IsSpawn.Component> IsSpawnData;
             public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
@@ -78,6 +78,8 @@ namespace LeyLineHybridECS
         }
 
         [Inject] PlayerRemovedData m_PlayerRemovedData;
+
+        [Inject] SpawnUnitsSystem m_SpawnSystem;
 
         protected override void OnUpdate()
         {
@@ -146,14 +148,18 @@ namespace LeyLineHybridECS
                     {
                         var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
                         var unitToSpawn = m_CellData.UnitToSpawnData[ci];
+                        var coord = m_CellData.CoordinateData[ci];
 
                         if (cellWorldIndex == worldIndex.WorldIndexState.Value)
                         {
-                            if (unitToSpawn.Faction == factionComp.Faction)
+                            if (unitToSpawn.Faction == factionComp.Faction && unitToSpawn.IsSpawn)
                             {
-                                unitToSpawn.UnitName = playerAttributes.HeroName;
-                                unitToSpawn.TeamColor = factionComp.TeamColor;
-                                m_CellData.UnitToSpawnData[ci] = unitToSpawn;
+                                //unitToSpawn.UnitName = playerAttributes.HeroName;
+                                //unitToSpawn.TeamColor = factionComp.TeamColor;
+                                //m_CellData.UnitToSpawnData[ci] = unitToSpawn;
+                                //unitToSpawn.UnitName = "";
+                                //m_CellData.UnitToSpawnData[i] = unitToSpawn;
+                                m_SpawnSystem.SpawnUnit(cellWorldIndex, playerAttributes.HeroName, unitToSpawn.Faction, coord.CubeCoordinate);
                             }
                         }
                     }

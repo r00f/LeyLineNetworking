@@ -12,16 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: AxaWaterSpear
   m_EditorClassIdentifier: 
-  TargetToAdd: {fileID: 0}
-  Targets:
-  - {fileID: 114809254356784796}
-  EffectToAdd: {fileID: 0}
-  Effects:
-  - {fileID: 114309532747066126}
-  ActionName: Line
+  ActionExecuteStep: 3
   ActionIcon: {fileID: 0}
   ProjectileFab: {fileID: 93931158904744250, guid: 20f3c249e764c1646b735f8e3247b951,
     type: 3}
+  ActionName: Line
+  ToolTip: 
+  TimeToExecute: 5
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114809254356784796}
+  Effects:
+  - {fileID: 114309532747066126}
 --- !u!114 &114309532747066126
 MonoBehaviour:
   m_ObjectHideFlags: 0

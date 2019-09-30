@@ -9,6 +9,7 @@ using Player;
 using Cell;
 using Unit;
 using LeyLineHybridECS;
+using static LeyLineHybridECS.ECSAction;
 
 public static class LeyLineEntityTemplates {
 
@@ -373,6 +374,8 @@ public static class LeyLineEntityTemplates {
     static Action SetAction (ECSAction inAction, int index)
     {
         Action newAction = new Action();
+        newAction.TimeToExecute = inAction.TimeToExecute;
+        newAction.ActionExecuteStep = (ExecuteStepEnum)(int)inAction.ActionExecuteStep;
         newAction.Name = inAction.name;
         newAction.Index = index;
         newAction.Targets = new List<ActionTarget>();

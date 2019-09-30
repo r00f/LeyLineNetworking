@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: SpikeMove
   m_EditorClassIdentifier: 
-  TargetToAdd: {fileID: 0}
-  Targets:
-  - {fileID: 114066121104570278}
-  EffectToAdd: {fileID: 0}
-  Effects:
-  - {fileID: 114600061119232222}
-  ActionName: Move
+  ActionExecuteStep: 2
   ActionIcon: {fileID: 21300000, guid: 5b76f7ce06cccad4cbfa36d4f44328a1, type: 3}
   ProjectileFab: {fileID: 0}
+  ActionName: Move
+  ToolTip: 
+  TimeToExecute: 3
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114066121104570278}
+  Effects:
+  - {fileID: 114600061119232222}
 --- !u!114 &114066121104570278
 MonoBehaviour:
   m_ObjectHideFlags: 0

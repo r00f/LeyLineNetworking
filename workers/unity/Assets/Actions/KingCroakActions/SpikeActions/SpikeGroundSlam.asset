@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: SpikeGroundSlam
   m_EditorClassIdentifier: 
-  TargetToAdd: {fileID: 0}
-  Targets:
-  - {fileID: 114768247395070860}
-  EffectToAdd: {fileID: 0}
-  Effects:
-  - {fileID: 114937063207025496}
-  ActionName: GroundSlam
+  ActionExecuteStep: 1
   ActionIcon: {fileID: 0}
   ProjectileFab: {fileID: 0}
+  ActionName: GroundSlam
+  ToolTip: 
+  TimeToExecute: 3
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114768247395070860}
+  Effects:
+  - {fileID: 114937063207025496}
 --- !u!114 &114105971380555592
 MonoBehaviour:
   m_ObjectHideFlags: 0

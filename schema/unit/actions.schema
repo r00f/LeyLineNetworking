@@ -13,6 +13,7 @@ component Actions{
 	Action last_selected = 5;
 	Action locked_action = 6;
 	Action null_action = 7;
+	bool executed = 8;
 	command SelectActionResponse select_action_command(SelectActionRequest);
 	command SetTargetResponse set_target_command(SetTargetRequest);
 }
@@ -24,6 +25,8 @@ type Action {
 	int32 index = 3;
 	list<ActionTarget> targets = 4;
 	list<unit.ActionEffect> effects = 5;
+	ExecuteStepEnum action_execute_step = 6;
+	float time_to_execute = 7;
 }
 
 type ActionTarget {
@@ -65,6 +68,14 @@ type TargetMod {
 	Path path_nested = 3;
 	Ring ring_nested = 4;
 	ModTypeEnum mod_type = 5;
+}
+
+enum ExecuteStepEnum {
+    interrupt = 0;
+    attack = 1;
+    move = 2;
+    skillshot = 3;
+    cleanup = 4;
 }
 
 enum UnitRequisitesEnum {

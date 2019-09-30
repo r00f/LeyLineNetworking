@@ -15,6 +15,7 @@ public class CleanupSystem : ComponentSystem
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Health.Component> HealthData;
+        public ComponentDataArray<Actions.Component> ActionData;
         public ComponentDataArray<WorldCommands.DeleteEntity.CommandSender> DeleteEntitySenders;
     }
 
@@ -44,16 +45,41 @@ public class CleanupSystem : ComponentSystem
 
             if (gameState == GameStateEnum.cleanup)
             {
-
                 m_TimerSystem.SubstractTurnDurations(worldIndex);
-                m_ExecuteSystem.ClearAllLockedActions(worldIndex);
+                ClearAllLockedActions(worldIndex);
                 m_ResourceSystem.ResetArmor(worldIndex);
             }
         }
     }
 
+
+    public void ClearAllLockedActions(uint worldIndex)
+    {
+        UpdateInjectedComponentGroups();
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+            var actions = m_UnitData.ActionData[i];
+
+            if (unitWorldIndex == worldIndex)
+            {
+                m_UnitData.ActionData[i] = ClearLockedActions(actions);
+            }
+        }
+    }
+
+    public Actions.Component ClearLockedActions(Actions.Component actions)
+    {
+        actions.LastSelected = actions.NullAction;
+        actions.CurrentSelected = actions.NullAction;
+        actions.LockedAction = actions.NullAction;
+        actions.Executed = false;
+        return actions;
+    }
+
     public void DeleteDeadUnits(uint worldIndex)
     {
+        UpdateInjectedComponentGroups();
         for (var i = 0; i < m_UnitData.Length; i++)
         {
             var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
@@ -72,4 +98,5 @@ public class CleanupSystem : ComponentSystem
             
         }
     }
+
 }

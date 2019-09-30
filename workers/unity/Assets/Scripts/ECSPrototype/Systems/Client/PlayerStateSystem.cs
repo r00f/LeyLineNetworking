@@ -115,7 +115,7 @@ namespace LeyLineHybridECS
                             }
                         }
                     }
-                    else if (gameState.CurrentState == GameStateEnum.calculate_energy)
+                    else if (gameState.CurrentState == GameStateEnum.interrupt)
                     {
                         SetPlayerState(PlayerStateEnum.waiting);
                         return;
@@ -136,11 +136,19 @@ namespace LeyLineHybridECS
         public void SetPlayerState(PlayerStateEnum state)
         {
             UpdateInjectedComponentGroups();
+
             if (m_PlayerData.Length == 0)
+            {
                 return;
+            }
+
             var playerState = m_PlayerData.PlayerStateData[0];
-            playerState.CurrentState = state;
-            m_PlayerData.PlayerStateData[0] = playerState;
+
+            if(playerState.CurrentState != state)
+            {
+                playerState.CurrentState = state;
+                m_PlayerData.PlayerStateData[0] = playerState;
+            }
         }
 
         private bool AnyUnitClicked()

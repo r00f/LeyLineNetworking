@@ -49,4 +49,5 @@ public class UIReferences : MonoBehaviour
     public GameObject SpawnToggleGO;
     public Toggle ActionsToggle;
     public Toggle SpawnActionsToggle;
+    public List<Toggle> TurnStateToggles;
 }

@@ -53,6 +53,7 @@ public class TimerSystem : ComponentSystem
 
     public void AddTimedEffect(long inId, ActionEffect inEffect)
     {
+        UpdateInjectedComponentGroups();
         for (int i = 0; i < m_TimerData.Length; i++)
         {
             var timer = m_TimerData.Timers[i];

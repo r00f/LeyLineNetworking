@@ -117,6 +117,7 @@ namespace LeyLineHybridECS
 
             var gameState = m_GameStateData.GameStates[0].CurrentState;
 
+
             if (gameState != GameStateEnum.waiting_for_players)
             {
                 if (UIRef.StartupPanel.activeSelf)
@@ -151,6 +152,9 @@ namespace LeyLineHybridECS
                         UIRef.StartupPanel.SetActive(false);
                     }
                 }
+
+                if((int)gameState <= UIRef.TurnStateToggles.Count && !UIRef.TurnStateToggles[(int)gameState - 1].isOn)
+                    UIRef.TurnStateToggles[(int)gameState - 1].isOn = true;
             }
 
             var authPlayerState = m_AuthoritativePlayerData.PlayerStateData[0];

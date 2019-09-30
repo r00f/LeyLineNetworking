@@ -28,7 +28,7 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<PlayerAttributes.Component> AttributesData;
-            public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+            public ComponentDataArray<PlayerState.Component> PlayerStateData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
@@ -48,11 +48,12 @@ namespace LeyLineHybridECS
         public struct SpawnCellData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
             public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
             public readonly ComponentDataArray<IsSpawn.Component> IsSpawnData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
+            public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
         }
 
         [Inject] SpawnCellData m_SpawnCellData;
@@ -73,6 +74,8 @@ namespace LeyLineHybridECS
 
         [Inject] CleanupSystem m_CleanUpSystem;
 
+        [Inject] SpawnUnitsSystem m_SpawnSystem;
+
         protected override void OnUpdate()
         {
             for (int i = 0; i < m_Data.Length; i++)
@@ -83,24 +86,25 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
-                        #if UNITY_EDITOR
-
-                        gameState.CurrentState = GameStateEnum.spawning;
-                        m_Data.GameStateData[i] = gameState;
-
-                        #else
-                        if (AllSpawnsInitialized(gameStateWorldIndex))
+#if UNITY_EDITOR
+                        if (gameState.PlayersOnMapCount == 1)
                         {
-                            gameState.CurrentState = GameStateEnum.spawning;
+                            gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;
                         }
-                        #endif
+#else
+                        if (gameState.PlayersOnMapCount == 2)
+                        {
+                            gameState.CurrentState = GameStateEnum.planning;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+#endif
                         break;
                     case GameStateEnum.planning:
                         if (AllPlayersReady(gameStateWorldIndex) || gameState.CurrentPlanningTime <= 0)
                         {
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-                            gameState.CurrentState = GameStateEnum.spawning;
+                            gameState.CurrentState = GameStateEnum.interrupt;
                             m_Data.GameStateData[i] = gameState;
                         }
                         else if(AnyPlayerReady(gameStateWorldIndex))
@@ -109,45 +113,79 @@ namespace LeyLineHybridECS
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
-                    case GameStateEnum.spawning:
-                        gameState.CurrentState = GameStateEnum.defending;
-                        m_Data.GameStateData[i] = gameState;
-                        break;
-                    case GameStateEnum.defending:
-                        gameState.CurrentState = GameStateEnum.attacking;
-                        m_Data.GameStateData[i] = gameState;
-                        break;
-                    case GameStateEnum.attacking:
-                        gameState.CurrentState = GameStateEnum.moving;
-                        m_Data.GameStateData[i] = gameState;
-                        break;
-                    case GameStateEnum.moving:
-                        if (NoUnitMoving(gameStateWorldIndex))
+                    case GameStateEnum.interrupt:
+                        
+                        if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.CurrentState = GameStateEnum.calculate_energy;
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex);
+                            m_Data.GameStateData[i] = gameState;
+                        }
+
+                        else
+                        {
+                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            if(gameState.HighestExecuteTime <= .1f)
+                            {
+                                gameState.CurrentState = GameStateEnum.attack;
+                                gameState.HighestExecuteTime = 0;
+                            }
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
-                    case GameStateEnum.calculate_energy:
-
-                        if (gameState.CurrentWaitTime > 0)
+                    case GameStateEnum.attack:
+                        if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.CurrentWaitTime -= Time.deltaTime;
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex);
+                            m_Data.GameStateData[i] = gameState;
+                        }
+
+                        else
+                        {
+                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            if (gameState.HighestExecuteTime <= .1f)
+                            {
+                                gameState.CurrentState = GameStateEnum.move;
+                                gameState.HighestExecuteTime = 0;
+                            }
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        break;
+                    case GameStateEnum.move:
+                        if (NoUnitMoving(gameStateWorldIndex))
+                        {
+                            gameState.CurrentState = GameStateEnum.skillshot;
+                            gameState.HighestExecuteTime = 0;
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        break;
+                    case GameStateEnum.skillshot:
+                        if (gameState.HighestExecuteTime == 0)
+                        {
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex);
                             m_Data.GameStateData[i] = gameState;
                         }
                         else
                         {
-                            gameState.CurrentPlanningTime = gameState.PlanningTime;
-                            gameState.CurrentState = GameStateEnum.cleanup;
+                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            if (gameState.HighestExecuteTime <= .1f)
+                            {
+                                gameState.CurrentState = GameStateEnum.calculate_energy;
+                                gameState.HighestExecuteTime = 0;
+                            }
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
+                    case GameStateEnum.calculate_energy:
+                        gameState.CurrentPlanningTime = gameState.PlanningTime;
+                        gameState.CurrentState = GameStateEnum.cleanup;
+                        m_Data.GameStateData[i] = gameState;
+                        break;
                     case GameStateEnum.cleanup:
+                            //check if any hero is dead to go into gameOver
                             m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex);
                             //UpdateIsTaken(gameStateWorldIndex);
                             gameState.CurrentState = GameStateEnum.planning;
                             m_Data.GameStateData[i] = gameState;
-
                         break;
                     case GameStateEnum.game_over:
                         break;
@@ -214,22 +252,25 @@ namespace LeyLineHybridECS
             }
         }
 
-
+        /*
         private bool AllSpawnsInitialized(uint gameStateWorldIndex)
         {
             for (int i = 0; i < m_SpawnCellData.Length; i++)
             {
                 var cellWorldIndex = m_SpawnCellData.WorldIndexData[i].Value;
                 var unitToSpawn = m_SpawnCellData.UnitToSpawnData[i];
+                var coord = m_SpawnCellData.CoordinateData[i];
+                var cellAtt = m_SpawnCellData.CellAttributes[i].CellAttributes.Cell;
 
                 if (cellWorldIndex == gameStateWorldIndex)
                 {
-                    if (unitToSpawn.UnitName.Length == 0)
+                    if (unitToSpawn.IsSpawn && !cellAtt.IsTaken)
                         return false;
                 }
             }
             return true;
         }
+        */
 
         private bool AnyPlayerReady(uint gameStateWorldIndex)
         {
@@ -247,6 +288,7 @@ namespace LeyLineHybridECS
             return false;
         }
 
+        /*
         private bool AllPlayersEndTurnReady(uint gameStateWorldIndex)
         {
             for (int i = 0; i < m_PlayerData.Length; i++)
@@ -262,7 +304,29 @@ namespace LeyLineHybridECS
             }
             return true;
         }
+        */
 
+        private float HighestExecuteTime(GameStateEnum step, uint gameStateWorldIndex)
+        {
+            float highestTime = 0.3f;
+            for (int i = 0; i < m_UnitData.Length; i++)
+            {
+                var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+                var lockedAction = m_UnitData.ActionsData[i].LockedAction;
+
+                if(unitWorldIndex == gameStateWorldIndex)
+                {
+                    if ((int)lockedAction.ActionExecuteStep == (int)step - 2)
+                    {
+                        if (lockedAction.TimeToExecute > highestTime)
+                        {
+                            highestTime = lockedAction.TimeToExecute;
+                        }
+                    }
+                }
+            }
+            return highestTime;
+        }
 
         private bool AllPlayersReady(uint gameStateWorldIndex)
         {

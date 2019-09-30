@@ -68,7 +68,7 @@ public class ManalithSystem : ComponentSystem
 
                 if (gameStateWorldIndex == unitWorldIndex)
                 {
-                    if (gameState == GameStateEnum.moving && energy.Harvesting && lockedAction.Index == -2)
+                    if (gameState == GameStateEnum.move && energy.Harvesting && lockedAction.Index == -2)
                     {
                         energy.Harvesting = false;
                         m_UnitData.EnergyData[ui] = energy;

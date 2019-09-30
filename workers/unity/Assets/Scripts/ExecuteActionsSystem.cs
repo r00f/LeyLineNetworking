@@ -49,6 +49,8 @@ public class ExecuteActionsSystem : ComponentSystem
 
     [Inject] TimerSystem m_TimerSystem;
 
+    [Inject] SpawnUnitsSystem m_SpawnSystem;
+
 
     protected override void OnUpdate()
     {
@@ -70,62 +72,44 @@ public class ExecuteActionsSystem : ComponentSystem
                     {
                         switch (gameState)
                         {
-                            case GameStateEnum.spawning:
-                                for (int j = 0; j < actions.LockedAction.Effects.Count; j++)
+                            case GameStateEnum.interrupt:
+                                if((int)actions.LockedAction.ActionExecuteStep == 0 && !actions.Executed)
                                 {
-                                    if (actions.LockedAction.Effects[j].EffectType == EffectTypeEnum.spawn_unit)
-                                    {
-                                        SetUnitSpawn(actions.LockedAction.Effects[j].SpawnUnitNested.UnitName, faction, actions.LockedAction.Targets[0].TargetCoordinate);
-                                    }
+                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
+                                    actions.Executed = true;
+                                    m_UnitData.ActionData[i] = actions;
                                 }
                                 break;
-                            case GameStateEnum.defending:
-                                if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.gain_armor)
+                            case GameStateEnum.attack:
+                                if ((int)actions.LockedAction.ActionExecuteStep == 1 && !actions.Executed)
                                 {
-                                    m_TimerSystem.AddTimedEffect(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[0]);
+                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
+                                    actions.Executed = true;
+                                    m_UnitData.ActionData[i] = actions;
                                 }
                                 break;
-                            case GameStateEnum.attacking:
-                                for (int j = 0; j < actions.LockedAction.Effects.Count; j++)
+                            case GameStateEnum.move:
+                                if ((int)actions.LockedAction.ActionExecuteStep == 2 && !actions.Executed)
                                 {
-                                    if (actions.LockedAction.Effects[j].EffectType == EffectTypeEnum.deal_damage)
-                                    {
-                                        switch (actions.LockedAction.Effects[j].ApplyToTarget)
-                                        {
-                                            case ApplyToTargetsEnum.primary:
-                                                
-                                                //Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].TargetId);
-                                                m_ResourceSystem.DealDamage(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
-                                                break;
-                                            case ApplyToTargetsEnum.secondary:
-                                                
-                                                if (actions.LockedAction.Targets[0].Mods.Count != 0)
-                                                {
-                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates, actions.LockedAction.Effects[j].ApplyToRestrictions, unitId,faction.Faction))
-                                                    {
-                                                        m_ResourceSystem.DealDamage(id, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
-                                                    }
-                                                }
-                                                break;
-                                            case ApplyToTargetsEnum.both:
-                                                m_ResourceSystem.DealDamage(actions.LockedAction.Targets[0].TargetId, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
-                                                if (actions.LockedAction.Targets[0].Mods.Count != 0)
-                                                {
-                                                    foreach (long id in AreaToUnitIDConversion(actions.LockedAction.Targets[0].Mods[0].Coordinates, actions.LockedAction.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
-                                                    {
-                                                        m_ResourceSystem.DealDamage(id, actions.LockedAction.Effects[j].DealDamageNested.DamageAmount);
-                                                    }
-                                                }
-                                                break;
-                                        }
-
-                                    }
+                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
+                                    //actions.LockedAction = actions.NullAction;
+                                    //m_UnitData.ActionData[i] = actions;
                                 }
                                 break;
-                            case GameStateEnum.moving:
-                                if (actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                            case GameStateEnum.skillshot:
+                                if ((int)actions.LockedAction.ActionExecuteStep == 3 && !actions.Executed)
                                 {
-
+                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
+                                    actions.Executed = true;
+                                    m_UnitData.ActionData[i] = actions;
+                                }
+                                break;
+                            case GameStateEnum.cleanup:
+                                if ((int)actions.LockedAction.ActionExecuteStep == 4 && !actions.Executed)
+                                {
+                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
+                                    actions.Executed = true;
+                                    m_UnitData.ActionData[i] = actions;
                                 }
                                 break;
                         }
@@ -135,24 +119,55 @@ public class ExecuteActionsSystem : ComponentSystem
         }
     }
 
-    public void ClearAllLockedActions(uint worldIndex)
+    public void ExecuteAction(uint worldIndex, Action action, FactionComponent.Component faction, long unitId)
     {
-        UpdateInjectedComponentGroups();
-        for (int i = 0; i < m_UnitData.Length; i++)
+        for (int j = 0; j < action.Effects.Count; j++)
         {
-            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
-            var actions = m_UnitData.ActionData[i];
-
-            if(unitWorldIndex == worldIndex)
+            switch (action.Effects[j].EffectType)
             {
-                actions.LastSelected = actions.NullAction;
-                actions.CurrentSelected = actions.NullAction;
-                actions.LockedAction = actions.NullAction;
-                m_UnitData.ActionData[i] = actions;
+                case EffectTypeEnum.deal_damage:
+                    switch (action.Effects[j].ApplyToTarget)
+                    {
+                        case ApplyToTargetsEnum.primary:
+
+                            //Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].TargetId);
+                            m_ResourceSystem.DealDamage(action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                            break;
+                        case ApplyToTargetsEnum.secondary:
+
+                            if (action.Targets[0].Mods.Count != 0)
+                            {
+                                foreach (long id in AreaToUnitIDConversion(action.Targets[0].Mods[0].Coordinates, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
+                                {
+                                    m_ResourceSystem.DealDamage(id, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                                }
+                            }
+                            break;
+                        case ApplyToTargetsEnum.both:
+                            m_ResourceSystem.DealDamage(action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                            if (action.Targets[0].Mods.Count != 0)
+                            {
+                                foreach (long id in AreaToUnitIDConversion(action.Targets[0].Mods[0].Coordinates, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
+                                {
+                                    m_ResourceSystem.DealDamage(id, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                                }
+                            }
+                            break;
+                    }
+                    break;
+                case EffectTypeEnum.gain_armor:
+                    m_TimerSystem.AddTimedEffect(action.Targets[0].TargetId, action.Effects[0]);
+                    break;
+                case EffectTypeEnum.spawn_unit:
+                    //SetUnitSpawn(action.Effects[j].SpawnUnitNested.UnitName, faction, action.Targets[0].TargetCoordinate);
+                    m_SpawnSystem.SpawnUnit(worldIndex, action.Effects[j].SpawnUnitNested.UnitName, faction.Faction, action.Targets[0].TargetCoordinate);
+                    break;
+                case EffectTypeEnum.move_along_path:
+                    break;
             }
         }
     }
-
+    /*
     public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, Vector3f cubeCoord)
     {
         for (int i = 0; i < m_CellData.Length; i++)
@@ -170,6 +185,7 @@ public class ExecuteActionsSystem : ComponentSystem
             }
         }
     }
+    */
 
     public List<long> AreaToUnitIDConversion(List<Vector3f> inCoords, ApplyToRestrictionsEnum restricitons, long usingID, uint usingFaction)
     {

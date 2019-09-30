@@ -12,16 +12,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: LeechDefend
   m_EditorClassIdentifier: 
-  TargetToAdd: {fileID: 0}
-  Targets:
-  - {fileID: 114578424212294910}
-  EffectToAdd: {fileID: 0}
-  Effects:
-  - {fileID: 114035594301065256}
-  ActionName: Defend
+  ActionExecuteStep: 1
   ActionIcon: {fileID: 21300000, guid: 267ab9291cae3f14d814a63f36dc932c, type: 3}
   ProjectileFab: {fileID: 93931158904744250, guid: 3daa959709b1105418d1a0291feda0dc,
     type: 3}
+  ActionName: Defend
+  ToolTip: 
+  TimeToExecute: 3
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114578424212294910}
+  Effects:
+  - {fileID: 114035594301065256}
 --- !u!114 &114035594301065256
 MonoBehaviour:
   m_ObjectHideFlags: 0

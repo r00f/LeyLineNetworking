@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.UI;
 using Improbable;
 
-
 namespace LeyLineHybridECS
 {
     [CreateAssetMenu]
@@ -21,14 +20,28 @@ namespace LeyLineHybridECS
     }
     public MultiTarget MultiTargetting = MultiTarget.No;
     */
-        public ECSActionTarget TargetToAdd;
-        [HideInInspector]
-        public List<ECSActionTarget> Targets;
-        public ECSActionEffect EffectToAdd;
-        [HideInInspector]
-        public List<ECSActionEffect> Effects;
-        public string ActionName;
+        public enum ExecuteStep
+        {
+            Interrupt,
+            Attack,
+            Move,
+            Skillshot,
+            Cleanup
+        }
+
+        public ExecuteStep ActionExecuteStep = ExecuteStep.Attack;
+
+        [Header("Action Information")]
         public Sprite ActionIcon;
         public Projectile ProjectileFab;
+        public string ActionName;
+        public string ToolTip;
+        public float TimeToExecute;
+
+        [Header("Add Targets/Effects")]
+        public ECSActionTarget TargetToAdd;
+        public ECSActionEffect EffectToAdd;
+        public List<ECSActionTarget> Targets;
+        public List<ECSActionEffect> Effects;
     }
 }

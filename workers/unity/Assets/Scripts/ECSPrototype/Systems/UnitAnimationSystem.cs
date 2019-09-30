@@ -44,7 +44,6 @@ public class UnitAnimationSystem : ComponentSystem
 
     [Inject] GameStateData m_GameStateData;
 
-
     [Inject] ActionEffectsSystem m_ActionEffectsSystem;
 
     [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
@@ -96,9 +95,10 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     currentlockedAction = basedata.Actions[actions.LockedAction.Index];
                 }
-                else {
+                else
+                {
                     currentlockedAction = basedata.SpawnActions[actions.LockedAction.Index - basedata.Actions.Count];
-                        }
+                }
             }
             else
             {
@@ -113,8 +113,6 @@ public class UnitAnimationSystem : ComponentSystem
                         currentlockedAction = basedata.BasicAttack;
                         break;
                 }
-
-                    
             }
 
             if (animatorComponent.Visuals.Count != 0)
@@ -132,164 +130,172 @@ public class UnitAnimationSystem : ComponentSystem
                 }
             }
 
-            if(animatorComponent.Animator != null)
+            if (!animatorComponent.Animator)
             {
-                
-                if(currentlockedAction)
+                Debug.Log("Animator reference not set!");
+                return;
+            }
+            //check if action has the current step and set executeTrigger if true
+            if (actions.LockedAction.Index != -3 && m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
+            {
+                //set initial anim Values if in the right step and they are not set yet
+                if (!animatorComponent.ExecuteTriggerSet)
+                    ExecuteActionAnimation(actions, animatorComponent, m_GameStateData.GameState[0].CurrentState, worldIndex);
+                else
                 {
-                    var actionEffectType = actions.LockedAction.Effects[0].EffectType;
-                    HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
-                    Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-
-                    if (animatorComponent.AnimationEvents)
+                    //constantly rotate towards serverposition if moving
+                    if (m_GameStateData.GameState[0].CurrentState == GameStateEnum.move)
                     {
-                        if(animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
-                        {
-                            animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
-                            animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
-                        }
-
-                        if (animatorComponent.AnimationEvents.EventTrigger)
-                        {
-                            if (actions.LockedAction.Targets[0].Mods.Count != 0)
-                            {
-                                foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
-                                {
-                                    coordsToTrigger.Add(c);
-                                }
-                            }
-
-                            if (currentlockedAction.ProjectileFab)
-                            {
-                                float targetYoffset = 0;
-                                if (currentlockedAction.Targets[0] is ECSATarget_Unit)
-                                {
-                                    targetYoffset = 1.3f;
-                                }
-                                m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin, targetPos, targetYoffset);
-                            }
-                            else
-                            {
-                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
-                            }
-                            animatorComponent.AnimationEvents.EventTrigger = false;
-                        }
+                        if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
+                            animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
                     }
-                    else if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning && animatorComponent.LastHealth != 0)
-                    {
-                        //Debug.Log("TriggerHatchActionEffect");
-                        m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
-                    }
+                    //rotate animatorComponent.RotateTransform towards targetDirection
+                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
+                    animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+                }
+            }
+            else
+            {
+                if (animatorComponent.InitialValuesSet)
+                {
+                    animatorComponent.InitialValuesSet = false;
                 }
 
-                //FeedBack to incoming Attacks / Heals
-                if (animatorComponent.ActionEffectTrigger)
+                if (animatorComponent.DestinationReachTriggerSet)
                 {
-                    if(animatorComponent.LastHealth != healthComponent.CurrentHealth)
+                    animatorComponent.Animator.ResetTrigger("DestinationReached");
+                    animatorComponent.DestinationReachTriggerSet = false;
+                }
+                if (animatorComponent.ExecuteTriggerSet)
+                {
+                    animatorComponent.Animator.ResetTrigger("Execute");
+                    animatorComponent.ExecuteTriggerSet = false;
+                }
+            }
+
+            if (currentlockedAction)
+            {
+                var actionEffectType = actions.LockedAction.Effects[0].EffectType;
+                HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+                Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+
+                if (animatorComponent.AnimationEvents)
+                {
+                    if (animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
                     {
-                        if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
+                        animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
+                        animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
+                    }
+
+                    if (animatorComponent.AnimationEvents.EventTrigger)
+                    {
+                        if (actions.LockedAction.Targets[0].Mods.Count != 0)
                         {
-                            //damage feedback
-                            if (healthComponent.CurrentHealth == 0)
+                            foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
                             {
-                                Death(animatorComponent);
+                                coordsToTrigger.Add(c);
                             }
-                            else
+                        }
+
+                        if (currentlockedAction.ProjectileFab)
+                        {
+                            float targetYoffset = 0;
+                            if (currentlockedAction.Targets[0] is ECSATarget_Unit)
                             {
-                                m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
-                                animatorComponent.Animator.SetTrigger("GetHit");
+                                targetYoffset = 1.3f;
                             }
+                            m_ActionEffectsSystem.LaunchProjectile(currentlockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin, targetPos, targetYoffset);
                         }
                         else
                         {
-                            //healing feedback
+                            m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
                         }
-                        animatorComponent.LastHealth = healthComponent.CurrentHealth;
-                    }
-
-                    animatorComponent.ActionEffectTrigger = false;
-                }
-
-                animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
-
-                if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
-                    animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
-
-                if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
-                    animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
-
-                if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
-                {
-                    if (actions.LockedAction.Index != -3)
-                    {
-                        if (!animatorComponent.ExecuteTriggerSet)
-                        {
-                            animatorComponent.Animator.SetTrigger("Execute");
-                            animatorComponent.ExecuteTriggerSet = true;
-                        }
-
-                        //set Initial Target Positions
-                        if (!animatorComponent.InitialValuesSet)
-                        {
-                            if (actions.LockedAction.Index != -2)
-                            {
-                                animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-                            }
-
-                            animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-
-                            //GetTargetPosition(actions.LockedAction.Targets[0].TargetId);
-                            animatorComponent.InitialValuesSet = true;
-                        }
-
-                        if (actions.LockedAction.Index == -2)
-                        {
-                            if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
-                                animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
-                        }
-
-                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
-                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+                        animatorComponent.AnimationEvents.EventTrigger = false;
                     }
                 }
-                else
+                else if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning && animatorComponent.LastHealth != 0)
                 {
-                    if (animatorComponent.InitialValuesSet)
-                    {
-                        animatorComponent.InitialValuesSet = false;
-                    }
+                    //Debug.Log("TriggerHatchActionEffect");
+                    m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                }
+            }
 
-                    if (animatorComponent.DestinationReachTriggerSet)
+            //damage feedback
+
+            //FeedBack to incoming Attacks / Heals
+            if (animatorComponent.ActionEffectTrigger)
+            {
+                if (animatorComponent.LastHealth != healthComponent.CurrentHealth)
+                {
+                    if (healthComponent.CurrentHealth == 0)
                     {
-                        animatorComponent.Animator.ResetTrigger("DestinationReached");
-                        animatorComponent.DestinationReachTriggerSet = false;
+                        Death(animatorComponent);
                     }
-                    if (animatorComponent.ExecuteTriggerSet)
+                    else if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
                     {
-                        animatorComponent.Animator.ResetTrigger("Execute");
-                        animatorComponent.ExecuteTriggerSet = false;
+                        m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
+                        animatorComponent.Animator.SetTrigger("GetHit");
                     }
+                    else
+                    {
+                        //healing feedback
+                    }
+                    animatorComponent.LastHealth = healthComponent.CurrentHealth;
                 }
 
-                if (transform.position != serverPosition.Coords.ToUnityVector())
-                {
-                    //move
-                    transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
-                }
+                animatorComponent.ActionEffectTrigger = false;
+            }
 
-                if (transform.position == animatorComponent.DestinationPosition)
+            animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
+
+            if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
+                animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
+
+            if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
+                animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
+
+            if (transform.position != serverPosition.Coords.ToUnityVector())
+            {
+                //move
+                transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
+            }
+
+            if (transform.position == animatorComponent.DestinationPosition)
+            {
+                if (!animatorComponent.DestinationReachTriggerSet)
                 {
-                    if (!animatorComponent.DestinationReachTriggerSet)
-                    {
-                        animatorComponent.LastStationaryCoordinate = coord;
-                        animatorComponent.Animator.SetTrigger("DestinationReached");
-                        animatorComponent.DestinationPosition = Vector3.zero;
-                        animatorComponent.DestinationReachTriggerSet = true;
-                    }
+                    animatorComponent.LastStationaryCoordinate = coord;
+                    animatorComponent.Animator.SetTrigger("DestinationReached");
+                    animatorComponent.DestinationPosition = Vector3.zero;
+                    animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
         }
+    }
 
+    public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameStateEnum gameState, uint worldIndex)
+    {
+        if (!animatorComponent.InitialValuesSet)
+        {
+            if (actions.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
+            {
+                animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                animatorComponent.InitialValuesSet = true;
+            }
+            else
+            {
+                animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                animatorComponent.InitialValuesSet = true;
+            }
+        }
+        
+        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState - 2)
+        {
+            Debug.Log("SetExecuteTrigger");
+            animatorComponent.Animator.SetTrigger("Execute");
+            animatorComponent.ExecuteTriggerSet = true;
+        }
     }
 
     public void Death(AnimatorComponent animatorComponent)

@@ -61,7 +61,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 52
   orthographic: 0
   orthographic size: 100
   m_Depth: -1
@@ -282,21 +282,21 @@ MonoBehaviour:
       cameraMovementRate: 10
       edgeHoverMovement: 0
       edgeHoverOffset: 10
-      defualtHeight: 0
+      defualtHeight: 5.8
       useDefualtHeight: 1
       useLockTargetHeight: 1
     rotation:
       constRotationRate: 1
       lockRotationX: 1
       lockRotationY: 0
-      defualtRotation: {x: -40, y: 0}
+      defualtRotation: {x: -45, y: 0}
       cameraRotationRate: {x: 100, y: 100}
     zoom:
       invertZoom: 0
-      defaultZoom: 10
-      minZoom: 7
-      maxZoom: 13
-      zoomRate: 10
+      defaultZoom: 11
+      minZoom: 8
+      maxZoom: 14
+      zoomRate: 5
       constZoomRate: 1
 --- !u!114 &566376838980519233
 MonoBehaviour:
@@ -366,7 +366,7 @@ Camera:
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
-  field of view: 60
+  field of view: 52
   orthographic: 0
   orthographic size: 100
   m_Depth: -1

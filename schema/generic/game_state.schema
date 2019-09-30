@@ -5,24 +5,25 @@ component GameState {
     id = 105;
 	GameStateEnum current_state = 1;
 	uint32 players_on_map_count = 2;
-	float calculate_wait_time = 3;
-	float current_wait_time = 4;
-	float planning_time = 5;
-	float current_planning_time = 6;
-	float rope_display_time = 7;
+	float highest_execute_time = 3;
+	float calculate_wait_time = 4;
+	float current_wait_time = 5;
+	float planning_time = 6;
+	float current_planning_time = 7;
+	float rope_display_time = 8;
 	
 }
 
 enum GameStateEnum {
 	
-	waiting_for_players = 1;
-	calculate_energy = 2;
-	planning = 3;
-	spawning = 4;
-	defending = 5;
-	attacking = 6;
-	moving = 7;
-	cleanup = 8;
-	game_over = 9;
+	waiting_for_players = 0;
+	planning = 1;
+	interrupt = 2;
+	attack = 3;
+	move = 4;
+	skillshot = 5;
+	cleanup = 6;
+	calculate_energy = 7;
+	game_over = 8;
 
 }

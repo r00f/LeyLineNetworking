@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: SpikeBasicAttack
   m_EditorClassIdentifier: 
-  TargetToAdd: {fileID: 0}
-  Targets:
-  - {fileID: 114273308848104638}
-  EffectToAdd: {fileID: 0}
-  Effects:
-  - {fileID: 114062705790130200}
-  ActionName: Attack
+  ActionExecuteStep: 1
   ActionIcon: {fileID: 21300000, guid: 5041f3c82626a1f4bacee1b01e209b77, type: 3}
   ProjectileFab: {fileID: 0}
+  ActionName: Attack
+  ToolTip: 
+  TimeToExecute: 3
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114273308848104638}
+  Effects:
+  - {fileID: 114062705790130200}
 --- !u!114 &114062705790130200
 MonoBehaviour:
   m_ObjectHideFlags: 0

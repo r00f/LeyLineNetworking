@@ -79,7 +79,7 @@ namespace LeyLineHybridECS
                         {
                             var cellsToMark = m_UnitData.CellsToMark[i];
 
-                            if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.moving)
+                            if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.move)
                             {
                                 if (currentPath.Count != 0 && cellsToMark.CellsInRange.Count != 0)
                                 {

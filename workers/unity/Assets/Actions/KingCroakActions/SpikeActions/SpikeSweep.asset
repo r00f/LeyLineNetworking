@@ -12,15 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: SpikeSweep
   m_EditorClassIdentifier: 
-  TargetToAdd: {fileID: 0}
-  Targets:
-  - {fileID: 114621258815826642}
-  EffectToAdd: {fileID: 0}
-  Effects:
-  - {fileID: 114019173534326844}
-  ActionName: Sweep
+  ActionExecuteStep: 1
   ActionIcon: {fileID: 0}
   ProjectileFab: {fileID: 0}
+  ActionName: Sweep
+  ToolTip: 
+  TimeToExecute: 3
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114621258815826642}
+  Effects:
+  - {fileID: 114019173534326844}
 --- !u!114 &114019173534326844
 MonoBehaviour:
   m_ObjectHideFlags: 0

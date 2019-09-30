@@ -27,6 +27,7 @@ public class ResourceSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Energy.Component> UnitEnergyData;
         public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+        public ComponentDataArray<Actions.Component> ActionData;
         public ComponentDataArray<Health.Component> HealthData;
     }
 
@@ -40,6 +41,8 @@ public class ResourceSystem : ComponentSystem
     }
 
     [Inject] GameStateData m_GameStateData;
+
+    [Inject] CleanupSystem m_CleanupSystem;
 
     protected override void OnUpdate()
     {
@@ -264,7 +267,7 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void DealDamage(long unitID, uint damageAmount)
+    public void DealDamage(long unitID, uint damageAmount, ExecuteStepEnum executeStep)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
@@ -286,23 +289,24 @@ public class ResourceSystem : ComponentSystem
                 else
                 {
                     health.CurrentHealth = 0;
-                    Die(unitID);
+                    Die(unitID, executeStep);
                 }
                 m_UnitData.HealthData[i] = health;
             }
         }
     }
 
-    public void Die(long unitID)
+    public void Die(long unitID, ExecuteStepEnum executeStep)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
             var id = m_UnitData.EntityIdData[i].EntityId;
+            var actions = m_UnitData.ActionData[i];
 
-            if (unitID.Equals(id))
+            //clear dying unit actions if its lockedAction is in a different state then the killing action;
+            if (unitID == id.Id && executeStep != actions.LockedAction.ActionExecuteStep)
             {
-                //DEATH CODE
-
+                m_UnitData.ActionData[i] = m_CleanupSystem.ClearLockedActions(actions);
             }
         }
     }
