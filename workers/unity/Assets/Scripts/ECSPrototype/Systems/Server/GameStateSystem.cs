@@ -45,6 +45,7 @@ namespace LeyLineHybridECS
 
         [Inject] UnitData m_UnitData;
 
+        /*
         public struct SpawnCellData
         {
             public readonly int Length;
@@ -57,18 +58,19 @@ namespace LeyLineHybridECS
         }
 
         [Inject] SpawnCellData m_SpawnCellData;
+        */
 
-
+        /*
         public struct CellData
         {
             public readonly int Length;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<CubeCoordinate.Component> CubeCoordinateData;
             public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
-
         }
 
         [Inject] CellData m_CellData;
+        */
 
         [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
@@ -151,10 +153,19 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.move:
-                        if (NoUnitMoving(gameStateWorldIndex))
+                        if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.CurrentState = GameStateEnum.skillshot;
-                            gameState.HighestExecuteTime = 0;
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex);
+                            m_Data.GameStateData[i] = gameState;
+                        }
+                        else
+                        {
+                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            if (gameState.HighestExecuteTime <= .1f)
+                            {
+                                gameState.CurrentState = GameStateEnum.skillshot;
+                                gameState.HighestExecuteTime = 0;
+                            }
                             m_Data.GameStateData[i] = gameState;
                         }
                         break;
@@ -203,74 +214,7 @@ namespace LeyLineHybridECS
 
                 #endif
             }
-
         }
-
-        private void UpdateIsTaken(uint gameStateWorldIndex)
-        {
-            Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
-
-            for (int i = 0; i < m_UnitData.Length; i++)
-            {
-                var worldIndex = m_UnitData.WorldIndexData[i].Value;
-                var cubeCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
-                var entityId = m_UnitData.EntityIds[i].EntityId.Id;
-
-                if(gameStateWorldIndex == worldIndex)
-                {
-                    if (unitDict.ContainsKey(cubeCoord))
-                        unitDict.Remove(cubeCoord);
-
-                    unitDict.Add(cubeCoord, entityId);
-                }
-            }
-
-            /*Debug.Log("unitDictCount: " + unitDict.Count);
-
-            foreach(long id in unitDict.Values)
-            {
-                Debug.Log(id);
-            }*/
-
-            for (int i = 0; i < m_CellData.Length; i++)
-            {
-                var worldIndex = m_CellData.WorldIndexData[i].Value;
-                var cellCubeCoordinate = m_CellData.CubeCoordinateData[i];
-                var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
-                var cellAtt = m_CellData.CellAttributes[i];
-
-                if (gameStateWorldIndex == worldIndex)
-                {
-                    if (unitDict.ContainsKey(cellCubeCoordinate.CubeCoordinate))
-                    {
-                        long id = unitDict[cellCubeCoordinate.CubeCoordinate];
-                        cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex);
-                        m_CellData.CellAttributes[i] = cellAtt;
-                        Debug.Log("SetTaken: " + id + ", " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
-                    }
-                }
-            }
-        }
-
-        /*
-        private bool AllSpawnsInitialized(uint gameStateWorldIndex)
-        {
-            for (int i = 0; i < m_SpawnCellData.Length; i++)
-            {
-                var cellWorldIndex = m_SpawnCellData.WorldIndexData[i].Value;
-                var unitToSpawn = m_SpawnCellData.UnitToSpawnData[i];
-                var coord = m_SpawnCellData.CoordinateData[i];
-                var cellAtt = m_SpawnCellData.CellAttributes[i].CellAttributes.Cell;
-
-                if (cellWorldIndex == gameStateWorldIndex)
-                {
-                    if (unitToSpawn.IsSpawn && !cellAtt.IsTaken)
-                        return false;
-                }
-            }
-            return true;
-        }
-        */
 
         private bool AnyPlayerReady(uint gameStateWorldIndex)
         {
@@ -288,24 +232,6 @@ namespace LeyLineHybridECS
             return false;
         }
 
-        /*
-        private bool AllPlayersEndTurnReady(uint gameStateWorldIndex)
-        {
-            for (int i = 0; i < m_PlayerData.Length; i++)
-            {
-                var playerWorldIndex = m_PlayerData.WorldIndexData[i].Value;
-
-                if (playerWorldIndex == gameStateWorldIndex)
-                {
-                    var playerState = m_PlayerData.PlayerStateData[i];
-                    if (!playerState.EndStepReady)
-                        return false;
-                }
-            }
-            return true;
-        }
-        */
-
         private float HighestExecuteTime(GameStateEnum step, uint gameStateWorldIndex)
         {
             float highestTime = 0.3f;
@@ -318,9 +244,16 @@ namespace LeyLineHybridECS
                 {
                     if ((int)lockedAction.ActionExecuteStep == (int)step - 2)
                     {
-                        if (lockedAction.TimeToExecute > highestTime)
+                        if (step == GameStateEnum.move)
                         {
-                            highestTime = lockedAction.TimeToExecute;
+                            float unitMoveTime = lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].Coordinates.Count + 1);
+                            if (unitMoveTime > highestTime)
+                                highestTime = unitMoveTime;
+                        }
+                        else
+                        {
+                            if (lockedAction.TimeToExecute > highestTime)
+                                highestTime = lockedAction.TimeToExecute;
                         }
                     }
                 }
@@ -344,6 +277,49 @@ namespace LeyLineHybridECS
             return true;
         }
 
+        /*
+private void UpdateIsTaken(uint gameStateWorldIndex)
+{
+    Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
+
+    for (int i = 0; i < m_UnitData.Length; i++)
+    {
+        var worldIndex = m_UnitData.WorldIndexData[i].Value;
+        var cubeCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
+        var entityId = m_UnitData.EntityIds[i].EntityId.Id;
+
+        if(gameStateWorldIndex == worldIndex)
+        {
+            if (unitDict.ContainsKey(cubeCoord))
+                unitDict.Remove(cubeCoord);
+
+            unitDict.Add(cubeCoord, entityId);
+        }
+    }
+
+    for (int i = 0; i < m_CellData.Length; i++)
+    {
+        var worldIndex = m_CellData.WorldIndexData[i].Value;
+        var cellCubeCoordinate = m_CellData.CubeCoordinateData[i];
+        var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
+        var cellAtt = m_CellData.CellAttributes[i];
+
+        if (gameStateWorldIndex == worldIndex)
+        {
+            if (unitDict.ContainsKey(cellCubeCoordinate.CubeCoordinate))
+            {
+                long id = unitDict[cellCubeCoordinate.CubeCoordinate];
+                cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex);
+                m_CellData.CellAttributes[i] = cellAtt;
+                Debug.Log("SetTaken: " + id + ", " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
+            }
+        }
+    }
+}
+
+*/
+
+        /*
         private bool NoUnitMoving(uint gameStateWorldIndex)
         {
             //loop through all Units to check if idle
@@ -364,6 +340,46 @@ namespace LeyLineHybridECS
             }
             return true;
         }
+    */
+
+        /*
+private bool AllPlayersEndTurnReady(uint gameStateWorldIndex)
+{
+    for (int i = 0; i < m_PlayerData.Length; i++)
+    {
+        var playerWorldIndex = m_PlayerData.WorldIndexData[i].Value;
+
+        if (playerWorldIndex == gameStateWorldIndex)
+        {
+            var playerState = m_PlayerData.PlayerStateData[i];
+            if (!playerState.EndStepReady)
+                return false;
+        }
+    }
+    return true;
+}
+*/
+
+        /*
+private bool AllSpawnsInitialized(uint gameStateWorldIndex)
+{
+    for (int i = 0; i < m_SpawnCellData.Length; i++)
+    {
+        var cellWorldIndex = m_SpawnCellData.WorldIndexData[i].Value;
+        var unitToSpawn = m_SpawnCellData.UnitToSpawnData[i];
+        var coord = m_SpawnCellData.CoordinateData[i];
+        var cellAtt = m_SpawnCellData.CellAttributes[i].CellAttributes.Cell;
+
+        if (cellWorldIndex == gameStateWorldIndex)
+        {
+            if (unitToSpawn.IsSpawn && !cellAtt.IsTaken)
+                return false;
+        }
+    }
+    return true;
+}
+*/
+
     }
 }
 
