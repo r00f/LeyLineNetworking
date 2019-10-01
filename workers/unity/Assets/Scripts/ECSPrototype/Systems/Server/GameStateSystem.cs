@@ -60,7 +60,7 @@ namespace LeyLineHybridECS
         [Inject] SpawnCellData m_SpawnCellData;
         */
 
-        /*
+        
         public struct CellData
         {
             public readonly int Length;
@@ -70,7 +70,7 @@ namespace LeyLineHybridECS
         }
 
         [Inject] CellData m_CellData;
-        */
+        
 
         [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
@@ -146,6 +146,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.deltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                UpdateIsTaken(gameStateWorldIndex);
                                 gameState.CurrentState = GameStateEnum.move;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -163,6 +164,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.deltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                UpdateIsTaken(gameStateWorldIndex);
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -187,6 +189,7 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.calculate_energy:
+                        
                         gameState.CurrentPlanningTime = gameState.PlanningTime;
                         gameState.CurrentState = GameStateEnum.cleanup;
                         m_Data.GameStateData[i] = gameState;
@@ -246,7 +249,9 @@ namespace LeyLineHybridECS
                     {
                         if (step == GameStateEnum.move)
                         {
-                            float unitMoveTime = lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].Coordinates.Count + 1);
+                            //make sure move has enough time
+                            float addedTime = 2.5f;
+                            float unitMoveTime = addedTime + (lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1));
                             if (unitMoveTime > highestTime)
                                 highestTime = unitMoveTime;
                         }
@@ -277,48 +282,60 @@ namespace LeyLineHybridECS
             return true;
         }
 
-        /*
-private void UpdateIsTaken(uint gameStateWorldIndex)
-{
-    Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
-
-    for (int i = 0; i < m_UnitData.Length; i++)
-    {
-        var worldIndex = m_UnitData.WorldIndexData[i].Value;
-        var cubeCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
-        var entityId = m_UnitData.EntityIds[i].EntityId.Id;
-
-        if(gameStateWorldIndex == worldIndex)
+        private void UpdateIsTaken(uint gameStateWorldIndex)
         {
-            if (unitDict.ContainsKey(cubeCoord))
-                unitDict.Remove(cubeCoord);
+            Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
+            HashSet<Vector3f> unitCoordHash = new HashSet<Vector3f>();
 
-            unitDict.Add(cubeCoord, entityId);
-        }
-    }
-
-    for (int i = 0; i < m_CellData.Length; i++)
-    {
-        var worldIndex = m_CellData.WorldIndexData[i].Value;
-        var cellCubeCoordinate = m_CellData.CubeCoordinateData[i];
-        var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
-        var cellAtt = m_CellData.CellAttributes[i];
-
-        if (gameStateWorldIndex == worldIndex)
-        {
-            if (unitDict.ContainsKey(cellCubeCoordinate.CubeCoordinate))
+            for (int i = 0; i < m_UnitData.Length; i++)
             {
-                long id = unitDict[cellCubeCoordinate.CubeCoordinate];
-                cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex);
-                m_CellData.CellAttributes[i] = cellAtt;
-                Debug.Log("SetTaken: " + id + ", " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
+                var worldIndex = m_UnitData.WorldIndexData[i].Value;
+                var cubeCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
+                var entityId = m_UnitData.EntityIds[i].EntityId.Id;
+                var actions = m_UnitData.ActionsData[i];
+
+                if (gameStateWorldIndex == worldIndex)
+                {
+                    if(actions.LockedAction.Index != -3 && actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                    {
+                        if (!unitDict.ContainsKey(cubeCoord))
+                            unitDict.Add(cubeCoord, entityId);
+                        if (!unitCoordHash.Contains(cubeCoord))
+                            unitCoordHash.Add(cubeCoord);
+                    }
+                }
+            }
+
+            for (int i = 0; i < m_CellData.Length; i++)
+            {
+                var worldIndex = m_CellData.WorldIndexData[i].Value;
+                var cellCubeCoordinate = m_CellData.CubeCoordinateData[i];
+                var cellWorldIndex = m_CellData.WorldIndexData[i].Value;
+                var cellAtt = m_CellData.CellAttributes[i];
+
+                if (gameStateWorldIndex == worldIndex)
+                {
+                    //unitCoordHash is filled with unitCoords that have a move planned died
+                    if (unitCoordHash.Contains(cellCubeCoordinate.CubeCoordinate))
+                    {
+                        long id = unitDict[cellCubeCoordinate.CubeCoordinate];
+
+                        if(cellAtt.CellAttributes.Cell.UnitOnCellId != id)
+                        {
+                            cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex);
+                            m_CellData.CellAttributes[i] = cellAtt;
+                            //Debug.Log("SetTaken: " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
+                        }
+                        else if (cellAtt.CellAttributes.Cell.IsTaken && !cellAtt.CellAttributes.Cell.ObstructVision)
+                        {
+                            cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, 0, cellWorldIndex);
+                            m_CellData.CellAttributes[i] = cellAtt;
+                            //Debug.Log("ReSetTaken: " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
+                        }
+                    }
+                }
             }
         }
-    }
-}
-
-*/
-
         /*
         private bool NoUnitMoving(uint gameStateWorldIndex)
         {

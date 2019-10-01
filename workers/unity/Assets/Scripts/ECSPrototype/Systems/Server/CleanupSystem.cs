@@ -52,7 +52,6 @@ public class CleanupSystem : ComponentSystem
         }
     }
 
-
     public void ClearAllLockedActions(uint worldIndex)
     {
         UpdateInjectedComponentGroups();

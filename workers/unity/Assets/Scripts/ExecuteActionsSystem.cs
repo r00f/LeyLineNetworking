@@ -7,6 +7,7 @@ using LeyLineHybridECS;
 using UnityEngine;
 using System.Collections.Generic;
 using Improbable;
+using System.Linq;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
@@ -137,7 +138,13 @@ public class ExecuteActionsSystem : ComponentSystem
 
                             if (action.Targets[0].Mods.Count != 0)
                             {
-                                foreach (long id in AreaToUnitIDConversion(action.Targets[0].Mods[0].Coordinates, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
+                                List<Vector3f> coords = new List<Vector3f>();
+                                foreach(CoordinatePositionPair p in action.Targets[0].Mods[0].CoordinatePositionPairs)
+                                {
+                                    coords.Add(p.CubeCoordinate);
+                                }
+
+                                foreach (long id in AreaToUnitIDConversion(coords, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
                                 {
                                     m_ResourceSystem.DealDamage(id, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
                                 }
@@ -147,7 +154,13 @@ public class ExecuteActionsSystem : ComponentSystem
                             m_ResourceSystem.DealDamage(action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
                             if (action.Targets[0].Mods.Count != 0)
                             {
-                                foreach (long id in AreaToUnitIDConversion(action.Targets[0].Mods[0].Coordinates, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
+                                List<Vector3f> coords = new List<Vector3f>();
+                                foreach (CoordinatePositionPair p in action.Targets[0].Mods[0].CoordinatePositionPairs)
+                                {
+                                    coords.Add(p.CubeCoordinate);
+                                }
+
+                                foreach (long id in AreaToUnitIDConversion(coords, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
                                 {
                                     m_ResourceSystem.DealDamage(id, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
                                 }

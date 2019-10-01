@@ -191,9 +191,9 @@ public class UnitAnimationSystem : ComponentSystem
                     {
                         if (actions.LockedAction.Targets[0].Mods.Count != 0)
                         {
-                            foreach (Vector3f c in actions.LockedAction.Targets[0].Mods[0].Coordinates)
+                            foreach (CoordinatePositionPair p in actions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs)
                             {
-                                coordsToTrigger.Add(c);
+                                coordsToTrigger.Add(p.CubeCoordinate);
                             }
                         }
 
@@ -256,8 +256,9 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (transform.position != serverPosition.Coords.ToUnityVector())
             {
+                float step = Time.deltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                 //move
-                transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), Time.deltaTime);
+                transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), step);
             }
 
             if (transform.position == animatorComponent.DestinationPosition)

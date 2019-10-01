@@ -416,7 +416,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryArea go1 = t as SecondaryArea;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.aoe;
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
@@ -425,7 +425,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryPath go1 = t as SecondaryPath;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.path;
                         mod.PathNested.Costpertile = go1.costPerTile;
                         newAT.Mods.Add(mod);
@@ -434,7 +434,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryLine go1 = t as SecondaryLine;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.line;
                         newAT.Mods.Add(mod);
                     }
@@ -442,7 +442,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryRing go1 = t as SecondaryRing;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.ring;
                         mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);
@@ -495,7 +495,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryArea go1 = t as SecondaryArea;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.aoe;
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
@@ -504,7 +504,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryPath go1 = t as SecondaryPath;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.path;
                         newAT.Mods.Add(mod);
 
@@ -513,7 +513,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryLine go1 = t as SecondaryLine;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.line;
                         newAT.Mods.Add(mod);
                     }
@@ -521,7 +521,7 @@ public static class LeyLineEntityTemplates {
                     {
                         SecondaryRing go1 = t as SecondaryRing;
                         TargetMod mod = new TargetMod();
-                        mod.Coordinates = new List<Vector3f>();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.ring;
                         mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);

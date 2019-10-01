@@ -7,6 +7,7 @@ using Unit;
 using Cell;
 using Improbable;
 using Improbable.Gdk.ReactiveComponents;
+using System.Linq;
 
 namespace LeyLineHybridECS
 {
@@ -70,7 +71,7 @@ namespace LeyLineHybridECS
                 
                 if (actionsData.LockedAction.Index == -2)
                 {
-                    var currentPath = m_UnitData.ActionsData[i].LockedAction.Targets[0].Mods[0].Coordinates;
+                    var currentPath = m_UnitData.ActionsData[i].LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
 
                     for (int gi = 0; gi < m_GameStateData.Length; gi++)
                     {
@@ -90,6 +91,8 @@ namespace LeyLineHybridECS
                             {
                                 if (currentPath.Count != 0 && cellsToMark.CellsInRange.Count != 0)
                                 {
+                                    //STOP THE LOOPTHALOOP!!!!
+                                    /*
                                     for (int ci = 0; ci < m_CellData.Length; ci++)
                                     {
                                         var cellAtt = m_CellData.CellAttributes[ci];
@@ -101,9 +104,10 @@ namespace LeyLineHybridECS
                                             m_CellData.CellAttributes[ci] = cellAtt;
                                         }
                                     }
+                                    */
 
                                     //instead of lerping towards next pos in path, set pos and wait for client to catch up
-                                    if (movementVariables.TimeLeft > 0)
+                                    if (movementVariables.TimeLeft >= 0)
                                     {
                                         movementVariables.TimeLeft -= Time.deltaTime;
                                         m_UnitData.MovementVariables[i] = movementVariables;
@@ -111,36 +115,37 @@ namespace LeyLineHybridECS
                                     else
                                     {
                                         //convert cube Coordinate to position
-                                        Vector3 worldPos = m_CellGridSystem.CoordinateToWorldPosition(unitWorldIndex, currentPath[0]);
-                                        position.Coords = new Coordinates(worldPos.x, worldPos.y, worldPos.z);
+                                        position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
                                         m_UnitData.Positions[i] = position;
 
+                                        
                                         if (currentPath.Count == 1)
                                         {
+                                            /*
                                             for (int ci = 0; ci < m_CellData.Length; ci++)
                                             {
                                                 var cellAtt = m_CellData.CellAttributes[ci];
                                                 var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
 
-                                                if (currentPath[0] == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
+                                                if (currentPath[0].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
                                                 {
                                                     cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId.Id, cellWorldIndex);
                                                     m_CellData.CellAttributes[ci] = cellAtt;
                                                 }
                                             }
+                                            */
                                             movementVariables.TimeLeft = 0;
                                         }
                                         else
                                         {
-                                            movementVariables.TimeLeft = movementVariables.TravelTime;
+                                            movementVariables.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                                         }
-
-                                        coord.CubeCoordinate = currentPath[0];
+                                        coord.CubeCoordinate = currentPath[0].CubeCoordinate;
                                         vision.RequireUpdate = true;
                                         m_UnitData.Vision[i] = vision;
                                         m_UnitData.CubeCoordinates[i] = coord;
-                                        m_UnitData.MovementVariables[i] = movementVariables;
                                         currentPath.RemoveAt(0);
+                                        m_UnitData.MovementVariables[i] = movementVariables;
                                     }
                                 }
                             }
@@ -171,8 +176,8 @@ namespace LeyLineHybridECS
                         if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                         {
                             //Decide which path to cull
-                            float unitMoveTime = unitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * unitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
-                            float otherUnitMoveTime = otherUnitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * otherUnitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
+                            float unitMoveTime = unitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+                            float otherUnitMoveTime = otherUnitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * otherUnitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
                             if (unitMoveTime == otherUnitMoveTime)
                             {
                                 if (Random.Range(0, 2) == 0)
@@ -200,13 +205,13 @@ namespace LeyLineHybridECS
 
         private Actions.Component CullPath(Actions.Component unitActions)
         {
-            var coordCount = unitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
-            unitActions.LockedAction.Targets[0].Mods[0].Coordinates.RemoveAt(coordCount - 1);
-            coordCount = unitActions.LockedAction.Targets[0].Mods[0].Coordinates.Count;
+            var coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+            unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(coordCount - 1);
+            coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
 
             if(coordCount != 0)
             {
-                Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].Coordinates[coordCount - 1];
+                Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[coordCount - 1].CubeCoordinate;
                 var t = unitActions.LockedAction.Targets[0];
                 t.TargetCoordinate = newTarget;
                 unitActions.LockedAction.Targets[0] = t;

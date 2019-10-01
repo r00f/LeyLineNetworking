@@ -282,21 +282,30 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                             switch (modType)
                                             {
                                                 case ModTypeEnum.aoe:
-                                                    mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
+                                                    foreach (Vector3f v in CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius))
+                                                    {
+                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                                                    }
                                                     break;
                                                 case ModTypeEnum.path:
                                                     foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
                                                     {
-                                                        mod.Coordinates.Add(c.CubeCoordinate);
+                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
                                                     }
                                                     actionData.LockedAction.Targets[0].Mods[0] = mod;
                                                     locked.CombinedCost = CalculateCombinedCost(t);
                                                     break;
                                                 case ModTypeEnum.line:
-                                                    mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
+                                                    foreach(Vector3f v in LineDraw(originCoord, t.TargetCoordinate))
+                                                    {
+                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                                                    }
                                                     break;
                                                 case ModTypeEnum.ring:
-                                                    mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
+                                                    foreach (Vector3f v in RingDraw(t.TargetCoordinate, mod.RingNested.Radius))
+                                                    {
+                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                                                    }
                                                     break;
                                             }
                                         }
@@ -359,7 +368,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         {
             if(inActionTarget.Mods[0].ModType == ModTypeEnum.path)
             {
-                combinedCost += (uint)inActionTarget.Mods[0].Coordinates.Count;
+                combinedCost += (uint)inActionTarget.Mods[0].CoordinatePositionPairs.Count;
             }
         }
 
@@ -381,16 +390,25 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             switch (modType)
             {
                 case ModTypeEnum.aoe:
-                    mod.Coordinates.AddRange(CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius));
+                    foreach (Vector3f v in CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius))
+                    {
+                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                    }
                     break;
                 case ModTypeEnum.path:
 
                     break;
                 case ModTypeEnum.line:
-                    mod.Coordinates.AddRange(LineDraw(originCoord, t.TargetCoordinate));
+                    foreach (Vector3f v in LineDraw(originCoord, t.TargetCoordinate))
+                    {
+                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                    }
                     break;
                 case ModTypeEnum.ring:
-                    mod.Coordinates.AddRange(RingDraw(t.TargetCoordinate, mod.RingNested.Radius));
+                    foreach (Vector3f v in RingDraw(t.TargetCoordinate, mod.RingNested.Radius))
+                    {
+                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                    }
                     break;
             }
         }
