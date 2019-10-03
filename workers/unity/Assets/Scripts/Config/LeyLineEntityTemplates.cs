@@ -294,6 +294,8 @@ public static class LeyLineEntityTemplates {
         var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
 
         var template = new EntityTemplate();
+        if(Stats.IsHero)
+            template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);

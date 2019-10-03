@@ -22,7 +22,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
-        [Inject] Data m_Data;
+        [Inject] Data m_GameStateData;
 
         public struct PlayerData
         {
@@ -39,11 +39,24 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<SpatialEntityId> EntityIds;
             public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
+            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<Health.Component> HealthData;
             public readonly ComponentDataArray<Actions.Component> ActionsData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         }
 
         [Inject] UnitData m_UnitData;
+
+        public struct HeroData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<Hero.Component> HeroIdentifier;
+            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<Health.Component> HealthData;
+            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        }
+
+        [Inject] HeroData m_HeroData;
 
         /*
         public struct SpawnCellData
@@ -60,7 +73,7 @@ namespace LeyLineHybridECS
         [Inject] SpawnCellData m_SpawnCellData;
         */
 
-        
+
         public struct CellData
         {
             public readonly int Length;
@@ -80,10 +93,10 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            for (int i = 0; i < m_Data.Length; i++)
+            for (int i = 0; i < m_GameStateData.Length; i++)
             {
-                var gameState = m_Data.GameStateData[i];
-                var gameStateWorldIndex = m_Data.WorldIndexData[i].Value;
+                var gameState = m_GameStateData.GameStateData[i];
+                var gameStateWorldIndex = m_GameStateData.WorldIndexData[i].Value;
 
                 switch (gameState.CurrentState)
                 {
@@ -92,13 +105,13 @@ namespace LeyLineHybridECS
                         if (gameState.PlayersOnMapCount == 1)
                         {
                             gameState.CurrentState = GameStateEnum.planning;
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
 #else
                         if (gameState.PlayersOnMapCount == 2)
                         {
                             gameState.CurrentState = GameStateEnum.planning;
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
 #endif
                         break;
@@ -107,12 +120,12 @@ namespace LeyLineHybridECS
                         {
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.interrupt;
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         else if(AnyPlayerReady(gameStateWorldIndex))
                         {
                             gameState.CurrentPlanningTime -= Time.deltaTime;
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.interrupt:
@@ -120,7 +133,7 @@ namespace LeyLineHybridECS
                         if (gameState.HighestExecuteTime == 0)
                         {
                             gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex);
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
 
                         else
@@ -131,14 +144,14 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.attack;
                                 gameState.HighestExecuteTime = 0;
                             }
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.attack:
                         if (gameState.HighestExecuteTime == 0)
                         {
                             gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex);
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
 
                         else
@@ -150,14 +163,14 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.move;
                                 gameState.HighestExecuteTime = 0;
                             }
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.move:
                         if (gameState.HighestExecuteTime == 0)
                         {
                             gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex);
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         else
                         {
@@ -168,14 +181,14 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
                             }
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.skillshot:
                         if (gameState.HighestExecuteTime == 0)
                         {
                             gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex);
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         else
                         {
@@ -185,37 +198,49 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.calculate_energy;
                                 gameState.HighestExecuteTime = 0;
                             }
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
                         }
                         break;
                     case GameStateEnum.calculate_energy:
                         
                         gameState.CurrentPlanningTime = gameState.PlanningTime;
                         gameState.CurrentState = GameStateEnum.cleanup;
-                        m_Data.GameStateData[i] = gameState;
+                        m_GameStateData.GameStateData[i] = gameState;
                         break;
                     case GameStateEnum.cleanup:
-                            //check if any hero is dead to go into gameOver
-                            m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex);
+                        //check if any hero is dead to go into gameOver
+                        if (CheckAnyHeroDead(gameStateWorldIndex))
+                        {
+                            //UpdateIsTaken(gameStateWorldIndex);
+                            gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex);
+                            gameState.CurrentState = GameStateEnum.game_over;
+                            m_GameStateData.GameStateData[i] = gameState;
+                        }
+                        else
+                        {
                             //UpdateIsTaken(gameStateWorldIndex);
                             gameState.CurrentState = GameStateEnum.planning;
-                            m_Data.GameStateData[i] = gameState;
+                            m_GameStateData.GameStateData[i] = gameState;
+                        }
+                        m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex);
                         break;
                     case GameStateEnum.game_over:
+#if UNITY_EDITOR
+                        gameState.CurrentState = GameStateEnum.waiting_for_players;
+                        m_GameStateData.GameStateData[i] = gameState;
+#endif
                         break;
                 }
 
-                #if UNITY_EDITOR
+#if UNITY_EDITOR
+#else
 
-                #else
-
-                if(gameState.PlayersOnMapCount < 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
+                if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
                     gameState.CurrentState = GameStateEnum.waiting_for_players;
-                    m_Data.GameStateData[i] = gameState;
+                    m_GameStateData.GameStateData[i] = gameState;
                 }
-
-                #endif
+#endif
             }
         }
 
@@ -249,8 +274,8 @@ namespace LeyLineHybridECS
                     {
                         if (step == GameStateEnum.move)
                         {
-                            //make sure move has enough time
-                            float addedTime = 2.5f;
+                            //make sure move has enough time / if state switches to early this throws index out of range in Unitanim 259
+                            float addedTime = 1f;
                             float unitMoveTime = addedTime + (lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1));
                             if (unitMoveTime > highestTime)
                                 highestTime = unitMoveTime;
@@ -336,6 +361,39 @@ namespace LeyLineHybridECS
                 }
             }
         }
+
+        private uint FindWinnerFaction(uint gameStateWorldIndex)
+        {
+            for (int i = 0; i < m_HeroData.Length; i++)
+            {
+                var faction = m_HeroData.FactionData[i];
+                var worldIndex = m_HeroData.WorldIndexData[i].Value;
+                var health = m_HeroData.HealthData[i];
+
+                if (worldIndex == gameStateWorldIndex && health.CurrentHealth > 0)
+                {
+                    return faction.Faction;
+                }
+            }
+            return 0;
+        }
+
+        private bool CheckAnyHeroDead(uint gameStateWorldIndex)
+        {
+            for(int i = 0; i < m_HeroData.Length; i++)
+            {
+                var faction = m_HeroData.FactionData[i];
+                var worldIndex = m_HeroData.WorldIndexData[i].Value;
+                var health = m_HeroData.HealthData[i].CurrentHealth;
+
+                if(worldIndex == gameStateWorldIndex && health <= 0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
         /*
         private bool NoUnitMoving(uint gameStateWorldIndex)
         {

@@ -11,6 +11,7 @@ component GameState {
 	float planning_time = 6;
 	float current_planning_time = 7;
 	float rope_display_time = 8;
+	uint32 winner_faction = 9;
 	
 }
 

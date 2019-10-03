@@ -50,4 +50,10 @@ public class UIReferences : MonoBehaviour
     public Toggle ActionsToggle;
     public Toggle SpawnActionsToggle;
     public List<Toggle> TurnStateToggles;
+
+    [Header("GameOver")]
+    public GameObject GameOverPanel;
+    public GameObject VictoryPanel;
+    public GameObject DefeatPanel;
+    public GameObject DrawPanel;
 }

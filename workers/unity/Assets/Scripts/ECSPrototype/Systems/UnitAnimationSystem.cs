@@ -256,7 +256,7 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (transform.position != serverPosition.Coords.ToUnityVector())
             {
-                float step = Time.deltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
+                float step = (Time.deltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
                 //move
                 transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), step);
             }
@@ -280,7 +280,8 @@ public class UnitAnimationSystem : ComponentSystem
         {
             if (!animatorComponent.InitialValuesSet)
             {
-                animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                if (gameState != GameStateEnum.move)
+                    animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
                 animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
                 animatorComponent.InitialValuesSet = true;
             }

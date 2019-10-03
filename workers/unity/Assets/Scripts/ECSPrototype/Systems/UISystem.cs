@@ -115,10 +115,13 @@ namespace LeyLineHybridECS
             if (m_GameStateData.GameStates.Length == 0 || m_AuthoritativePlayerData.Length == 0)
                 return;
 
-            var gameState = m_GameStateData.GameStates[0].CurrentState;
+            var gameState = m_GameStateData.GameStates[0];
 
 
-            if (gameState != GameStateEnum.waiting_for_players)
+            if (gameState.CurrentState == GameStateEnum.waiting_for_players)
+            {
+            }
+            else
             {
                 if (UIRef.StartupPanel.activeSelf)
                 {
@@ -137,12 +140,12 @@ namespace LeyLineHybridECS
                             case TeamColorEnum.blue:
                                 //UIRef.HeroPortraitTeamColour.color = Color.blue;
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[1];
-                                
+
                                 break;
                             case TeamColorEnum.red:
                                 //UIRef.HeroPortraitTeamColour.color = Color.red;
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
-                                
+
                                 break;
                         }
 
@@ -153,17 +156,40 @@ namespace LeyLineHybridECS
                     }
                 }
 
-                if((int)gameState <= UIRef.TurnStateToggles.Count && !UIRef.TurnStateToggles[(int)gameState - 1].isOn)
-                    UIRef.TurnStateToggles[(int)gameState - 1].isOn = true;
+                if ((int)gameState.CurrentState <= UIRef.TurnStateToggles.Count && !UIRef.TurnStateToggles[(int)gameState.CurrentState - 1].isOn)
+                    UIRef.TurnStateToggles[(int)gameState.CurrentState - 1].isOn = true;
             }
 
+            var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
             var authPlayerState = m_AuthoritativePlayerData.PlayerStateData[0];
             var playerEnergy = m_AuthoritativePlayerData.PlayerEnergyData[0];
+            GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
+
+
+            if (gameState.CurrentState == GameStateEnum.game_over)
+            {
+                if (!UIRef.GameOverPanel.activeSelf)
+                {
+                    if(gameState.WinnerFaction == 0)
+                    {
+                        UIRef.DrawPanel.SetActive(true);
+                    }
+                    else if(gameState.WinnerFaction == authPlayerFaction)
+                    {
+                        UIRef.VictoryPanel.SetActive(true);
+                    }
+                    else
+                    {
+                        UIRef.DefeatPanel.SetActive(true);
+                    }
+
+                    UIRef.GameOverPanel.SetActive(true);
+                }
+
+            }
 
             for (int i = 0; i < m_UnitData.Length; i++)
             {
-                GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
-                var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
                 var action = m_UnitData.Actions[i];
                 var position = m_UnitData.TransformData[i].position;
@@ -185,7 +211,7 @@ namespace LeyLineHybridECS
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
 
-                    if(health.Armor > 0)
+                    if(health.Armor > 0 && faction.Faction == authPlayerFaction)
                     {
                         UIRef.HealthText.text = currentMaxHealth + " +" + health.Armor;
                     }
@@ -369,17 +395,18 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
+                        
                         GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
-
-                        if (gameState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
+                        
+                        if (gameState.CurrentState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
                         {
                             healthBarGO.SetActive(true);
                         }
-                        else if (gameState != GameStateEnum.planning || isVisible.Value == 0)
+                        else if (gameState.CurrentState != GameStateEnum.planning || isVisible.Value == 0)
                         {
                             healthBarGO.SetActive(false);
                         }
-
+                        
                         healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
                         SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
                     }
@@ -396,7 +423,7 @@ namespace LeyLineHybridECS
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
                 Text energyText = UIRef.HeroEnergyText;
 
-                if(gameState != GameStateEnum.planning)
+                if(gameState.CurrentState != GameStateEnum.planning)
                 {
                     if(UIRef.ReadyButton.interactable)
                     {
@@ -488,7 +515,7 @@ namespace LeyLineHybridECS
 
         public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health, uint unitFaction)
         {
-            var playerFaction = m_PlayerData.FactionData[0].Faction;
+            var playerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
 
             if(unitFaction == playerFaction)
             {

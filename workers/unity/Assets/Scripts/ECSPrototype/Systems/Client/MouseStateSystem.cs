@@ -6,20 +6,31 @@ using Improbable;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using UnityEngine.EventSystems;
-
+using Improbable.Gdk.ReactiveComponents;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class MouseStateSystem : JobComponentSystem
 {
-    public struct Data
+    public struct MouseStateData
     {
         public readonly int Length;
         public readonly ComponentDataArray<Position.Component> PositonData;
         public readonly ComponentDataArray<MouseVariables> MouseVariables;
-        public ComponentDataArray<MouseState> MouseStateData;
+        public ComponentDataArray<MouseState> MouseStates;
     }
 
-    [Inject] Data m_Data;
+    [Inject] MouseStateData m_MouseStateData;
+
+    public struct AuthoritativePlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+    }
+
+    [Inject] AuthoritativePlayerData m_AuthoritativePlayerData;
+
 
     EventSystem eventSystem;
 
@@ -36,6 +47,7 @@ public class MouseStateSystem : JobComponentSystem
         public ComponentDataArray<MouseState> MouseStates;
         [NativeDisableParallelForRestriction]
         public ComponentDataArray<MouseVariables> MouseVars;
+        public PlayerState.Component PlayerState;
         public RaycastHit hit;
         public bool mouseButtonDown;
 
@@ -44,13 +56,12 @@ public class MouseStateSystem : JobComponentSystem
             MouseState state = MouseStates[index];
             MouseVariables vars = MouseVars[index];
             Vector3 pos = Positons[index].Coords.ToUnityVector() + new Vector3(0, vars.yOffset, 0);
-
             Vector3 hitDist = hit.point - pos;
             float hitSquared = hitDist.sqrMagnitude;
 
             if (hitSquared < vars.Distance * vars.Distance)
             {
-                if (mouseButtonDown)
+                if (mouseButtonDown && PlayerState.CurrentState != PlayerStateEnum.ready)
                 {
                     state.ClickEvent = 1;
                     MouseStates[index] = state;
@@ -74,7 +85,6 @@ public class MouseStateSystem : JobComponentSystem
                         state.CurrentState = MouseState.State.Neutral;
                         MouseStates[index] = state;
                     }
-
                 }
                 else
                 {
@@ -104,11 +114,11 @@ public class MouseStateSystem : JobComponentSystem
             {
                 mouseButtonDown = Input.GetButtonDown("Fire1"),
                 hit = hit,
-                Positons = m_Data.PositonData,
-                MouseStates = m_Data.MouseStateData,
-                MouseVars = m_Data.MouseVariables
-
-            }.Schedule(m_Data.Length, 1, inputDeps);
+                Positons = m_MouseStateData.PositonData,
+                MouseStates = m_MouseStateData.MouseStates,
+                MouseVars = m_MouseStateData.MouseVariables,
+                PlayerState = m_AuthoritativePlayerData.PlayerStateData[0]
+            }.Schedule(m_MouseStateData.Length, 1, inputDeps);
 
             return mouseStateJob;
         }
