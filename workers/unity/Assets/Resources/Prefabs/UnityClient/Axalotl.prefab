@@ -414,7 +414,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: b679d83761469f14fabae96db96c52dc, type: 2}
+  PortraitClip: {fileID: 7400000, guid: 6298c96947f6ada438f5266be216caf4, type: 2}
 --- !u!114 &5764804077693253567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -458,7 +458,7 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.5
+  m_Radius: 0.4
   m_Height: 1.5
   m_Direction: 1
   m_Center: {x: 0, y: 0.75, z: 0}

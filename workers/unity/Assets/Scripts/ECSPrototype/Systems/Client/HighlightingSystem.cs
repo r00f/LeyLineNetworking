@@ -121,15 +121,21 @@ public class HighlightingSystem : ComponentSystem
             {
                 if (gameState == GameStateEnum.planning)
                 {
-                    if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
+                    if (playerHighlightingData.HoveredCoordinate != playerHighlightingData.LastHoveredCoordinate)
                     {
-                        UpdateHoveredCoordinates();
-                        SetNumberOfTargets();
-                        UpdateSelectedUnit();
-                    }
-                    else
-                    {
-                        ResetHighlights();
+                        if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
+                        {
+                            FillUnitTargetsList(playerHighlightingData);
+                            SetNumberOfTargets();
+                            UpdateSelectedUnit();
+                        }
+                        else
+                        {
+                            ResetHighlights();
+                        }
+
+                        playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
+                        m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
                     }
                 }
                 else
@@ -148,6 +154,7 @@ public class HighlightingSystem : ComponentSystem
 
                     for (int u = 0; u < m_ActiveUnitData.Length; u++)
                     {
+
                         var lineRenderer = m_ActiveUnitData.LineRenderers[u];
                         lineRenderer.lineRenderer.positionCount = 0;
                     }
@@ -200,19 +207,20 @@ public class HighlightingSystem : ComponentSystem
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
             cubeCoordList.CubeCoordinates.Add(inHinghlightningData.HoveredCoordinate);
 
+            HashSet<long> unitIds = new HashSet<long>(playerState.UnitTargets.Keys);
             //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
             if (inHinghlightningData.HoveredCoordinate != new Vector3f(999, 999, 999))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
 
             }
-            else if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId) && inHinghlightningData.TargetRestrictionIndex != 2)
+            else if (unitIds.Contains(playerState.SelectedUnitId) && inHinghlightningData.TargetRestrictionIndex != 2)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Clear();
-
             }
         }
 
+        /*
         //loop over units to check if any effect restriction applies and remove unit if true
         for (int i = 0; i < m_UnitData.Length; i++)
         {
@@ -232,6 +240,7 @@ public class HighlightingSystem : ComponentSystem
                 }
             }
         }
+        */
     }
 
     public void GatherHighlightingInformation(long unitID, int actionID)
@@ -314,6 +323,7 @@ public class HighlightingSystem : ComponentSystem
         }
     }
 
+    /*
     public void UpdateHoveredCoordinates()
     {
         var playerState = m_PlayerStateData.PlayerState[0];
@@ -370,17 +380,18 @@ public class HighlightingSystem : ComponentSystem
                     }
                 }
             }
-
-            if (playerHighlightingData.HoveredCoordinate != playerHighlightingData.LastHoveredCoordinate)
-            {
-                FillUnitTargetsList(playerHighlightingData);
-                playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
-            }
-
-            m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
         }
 
+        if (playerHighlightingData.HoveredCoordinate != playerHighlightingData.LastHoveredCoordinate)
+        {
+            FillUnitTargetsList(playerHighlightingData);
+            playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
+        }
+
+        m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
+        Debug.Log("update HoveredCoordinate");
     }
+    */
 
     public void SetNumberOfTargets()
     {
@@ -423,6 +434,8 @@ public class HighlightingSystem : ComponentSystem
 
     public void UpdateSelectedUnit()
     {
+        UpdateInjectedComponentGroups();
+
         var playerState = m_PlayerStateData.PlayerState[0];
         var playerHighlightingData = m_PlayerStateData.HighlightingData[0];
 
@@ -629,17 +642,15 @@ public class HighlightingSystem : ComponentSystem
 
     public void ResetHighlights()
     {
+        if (m_PlayerStateData.Length == 0)
+            return;
+
+        UpdateInjectedComponentGroups();
         var playerState = m_PlayerStateData.PlayerState[0];
         var playerHighlightingData = m_PlayerStateData.HighlightingData[0];
-        
-        if (playerHighlightingData.HoveredPosition != Vector3.zero)
-        {
-            playerHighlightingData.HoveredCoordinate = new Vector3f(999, 999, 999);
-            playerHighlightingData.HoveredPosition = new Vector3(0, 0, 0);
-            m_PlayerStateData.HighlightingData[0] = playerHighlightingData;
-        }
 
         var coordToReset = new Vector3f(999, 999, 999);
+        HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
         for (int i = 0; i < m_ActiveUnitData.Length; i++)
         {
@@ -647,9 +658,9 @@ public class HighlightingSystem : ComponentSystem
             var unitId = m_ActiveUnitData.EntityIds[i].EntityId.Id;
             var lineRenderer = m_ActiveUnitData.LineRenderers[i].lineRenderer;
 
-            if (actions.LockedAction.Index == -3)
+            if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3)
             {
-                if (playerState.UnitTargets.ContainsKey(unitId) && playerHighlightingData.TargetRestrictionIndex != 2)
+                if (unitIdHash.Contains(unitId) && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
                     lineRenderer.positionCount = 0;
                     if(playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
@@ -740,7 +751,6 @@ public class HighlightingSystem : ComponentSystem
                 lineRendererComp.lineRenderer.positionCount = 0;
             }
         }
-        ResetHighlights();
         playerstate.CellsInRange.Clear();
         playerstate.CachedPaths.Clear();
         m_PlayerStateData.PlayerState[0] = playerstate;

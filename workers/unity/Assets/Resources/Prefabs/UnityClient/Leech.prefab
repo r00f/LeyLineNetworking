@@ -422,7 +422,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: b679d83761469f14fabae96db96c52dc, type: 2}
+  PortraitClip: {fileID: 7400000, guid: 6e1397f7998428646844679058e5fd6f, type: 2}
 --- !u!114 &5764804077693253567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -466,10 +466,10 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 1.8
-  m_Direction: 1
-  m_Center: {x: 0, y: 1, z: 0}
+  m_Radius: 0.4
+  m_Height: 1.5
+  m_Direction: 2
+  m_Center: {x: 0, y: 0.3, z: 0}
 --- !u!1 &4434813160273581032
 GameObject:
   m_ObjectHideFlags: 0
@@ -1247,10 +1247,6 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: f3b933ea83085dc458feb74c304d3153, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: f6060c0b9d9af20438d89b9699ef0e92, type: 2}
     - target: {fileID: 400022, guid: f3b933ea83085dc458feb74c304d3153, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1295,6 +1291,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: f3b933ea83085dc458feb74c304d3153, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: f6060c0b9d9af20438d89b9699ef0e92, type: 2}
     - target: {fileID: 100004, guid: f3b933ea83085dc458feb74c304d3153, type: 3}
       propertyPath: m_Layer
       value: 11

@@ -1,4 +1,5 @@
 ﻿using Improbable;
+using LeyLineHybridECS;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,6 +8,7 @@ public class AnimatorComponent : MonoBehaviour
 {
 
     [Header("GenericAnimation")]
+    public ECSAction CurrentLockedAction;
     public Animator Animator;
     public AnimationEvents AnimationEvents;
     public bool ExecuteTriggerSet;

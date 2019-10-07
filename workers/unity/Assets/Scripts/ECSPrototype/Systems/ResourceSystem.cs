@@ -182,6 +182,7 @@ public class ResourceSystem : ComponentSystem
 
     public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
     {
+        UpdateInjectedComponentGroups();
         int leftOverEnergy = 0;
 
         for (int i = 0; i < m_PlayerData.Length; i++)

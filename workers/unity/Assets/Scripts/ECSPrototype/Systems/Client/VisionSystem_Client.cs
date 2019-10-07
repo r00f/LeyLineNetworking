@@ -54,9 +54,20 @@ namespace LeyLineHybridECS
         [Inject] UnitData m_UnitData;
 
 
+        public struct GameStateData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<GameState.Component> GameState;
+        }
+
+        [Inject] GameStateData m_GameStateData;
+
 
         protected override void OnUpdate()
         {
+            if (m_GameStateData.Length == 0 || m_GameStateData.GameState[0].CurrentState == GameStateEnum.planning)
+                return;
+
             for (int i = 0; i < m_UpdateVisionRequestData.Length; i++)
             {
                 Debug.Log("updateClientVisionRequest");

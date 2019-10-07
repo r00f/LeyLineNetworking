@@ -34,7 +34,7 @@ public class SendActionRequestSystem : ComponentSystem
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
-        public readonly ComponentDataArray<MouseState> MouseStateData;
+        public readonly ComponentDataArray<ClickEvent> ClickEvents;
         public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
         public readonly ComponentDataArray<MarkerState> MarkerStateData;
     }
@@ -44,8 +44,8 @@ public class SendActionRequestSystem : ComponentSystem
     public struct UnitData
     {
         public readonly int Length;
+        public readonly ComponentDataArray<ClickEvent> ClickEvents;
         public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<MouseState> MouseStateData;
         public readonly ComponentDataArray<Health.Component> HealthAttributes;
         public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
     }
@@ -90,7 +90,6 @@ public class SendActionRequestSystem : ComponentSystem
             var clientPath = m_SelectActionRequestData.ClientPathData[i];
             var setTargetRequest = m_SelectActionRequestData.SetTargetSenders[i];
             var actionsData = m_SelectActionRequestData.ActionsData[i];
-
             var unitCoord = m_SelectActionRequestData.Coordinates[i].CubeCoordinate;
 
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
@@ -106,7 +105,7 @@ public class SendActionRequestSystem : ComponentSystem
 
             //if the current selected unit wants an unitTarget
 
-            //set unit action to basic move it is clicked and player has energy
+            //set unit action to basic move if is clicked and player has energy
             if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
                 if(actionsData.BasicMove.Index != -3)
@@ -123,7 +122,6 @@ public class SendActionRequestSystem : ComponentSystem
             //check if unit is the selected unit in playerState and if current selected action is not empty
             if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Index != -3)
             {
-                
                 if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
                 {
                     Vector3f TargetCoord = new Vector3f(999,999,999);
@@ -132,25 +130,20 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         for (int ui = 0; ui < m_UnitData.Length; ui++)
                         {
-                            var unitMousestate = m_UnitData.MouseStateData[ui];
-                            var targetUnitEntityId = m_UnitData.EntityIds[ui].EntityId.Id;
                             var coord = m_UnitData.Coordinates[ui].CubeCoordinate;
-
-                            if (unitMousestate.ClickEvent == 1)
-                            {
-                                TargetCoord = coord;
-                            }
+                            TargetCoord = coord;
                         }
 
                     }
+                
+                    //Now only loops over the clicked cell (ClickEvent component)
                     for (int ci = 0; ci < m_CellData.Length; ci++)
                     {
-                        var cellMousestate = m_CellData.MouseStateData[ci];
                         var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
                         var cellCoord = m_CellData.Coordinates[ci].CubeCoordinate;
                         var cellMarkerState = m_CellData.MarkerStateData[ci].CurrentState;
 
-                        if ((cellMousestate.ClickEvent == 1 && cellCoord != unitCoord) || TargetCoord == cellCoord)
+                        if (cellCoord != unitCoord || TargetCoord == cellCoord)
                         {
                             var request = new Actions.SetTargetCommand.Request
                             (
@@ -160,6 +153,8 @@ public class SendActionRequestSystem : ComponentSystem
                             setTargetRequest.RequestsToSend.Add(request);
                             m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                         }
+
+                        m_HighlightingSystem.ResetHighlights();
                     }
                 }
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
@@ -167,32 +162,28 @@ public class SendActionRequestSystem : ComponentSystem
                     bool sent = false;
                     for (int ui = 0; ui < m_UnitData.Length; ui++)
                     {
-                        var unitMousestate = m_UnitData.MouseStateData[ui];
                         var targetUnitEntityId = m_UnitData.EntityIds[ui].EntityId.Id;
 
-                        if (unitMousestate.ClickEvent == 1)
-                        {
-                            var request = new Actions.SetTargetCommand.Request
-                            (
-                                unitEntityId,
-                                new SetTargetRequest(targetUnitEntityId)
-                            );
+                        var request = new Actions.SetTargetCommand.Request
+                        (
+                            unitEntityId,
+                            new SetTargetRequest(targetUnitEntityId)
+                        );
 
-                            sent = true;
-                            setTargetRequest.RequestsToSend.Add(request);
-                            m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
-                        }
+                        sent = true;
+                        setTargetRequest.RequestsToSend.Add(request);
+                        m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                        m_HighlightingSystem.ResetHighlights();
                     }
                     if (!sent)
                     {
                         for (int ci = 0; ci < m_CellData.Length; ci++)
                         {
-                            var cellMousestate = m_CellData.MouseStateData[ci];
                             var cellEntityId = m_CellData.EntityIds[ci].EntityId.Id;
                             var cellCoord = m_CellData.Coordinates[ci].CubeCoordinate;
                             var cellMarkerState = m_CellData.MarkerStateData[ci].CurrentState;
 
-                            if (cellMousestate.ClickEvent == 1 && cellCoord != unitCoord)
+                            if (cellCoord != unitCoord)
                             {
                                 var request = new Actions.SetTargetCommand.Request
                                 (
@@ -202,6 +193,7 @@ public class SendActionRequestSystem : ComponentSystem
                                 setTargetRequest.RequestsToSend.Add(request);
                                 m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                             }
+                            m_HighlightingSystem.ResetHighlights();
                         }
                     }
                 }
@@ -219,8 +211,9 @@ public class SendActionRequestSystem : ComponentSystem
         playerState.SelectedActionId = actionIndex;
         m_PlayerData.PlayerStateData[0] = playerState;
 
+
         //Debug.Log("SelectActionCommand");
-        
+
         for (int i = 0; i < m_SelectActionRequestData.Length; i++)
         {
             var actions = m_SelectActionRequestData.ActionsData[i];
@@ -254,10 +247,16 @@ public class SendActionRequestSystem : ComponentSystem
                     }
                 }
 
+                m_HighlightingSystem.ResetHighlights();
+
                 if (!isSelfTarget)
                 {
-                    m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
                     m_HighlightingSystem.ClearPlayerState();
+                    m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex);
+                    m_HighlightingSystem.FillUnitTargetsList(highlightingData);
+                    //m_HighlightingSystem.SetNumberOfTargets();
+                    m_HighlightingSystem.UpdateSelectedUnit();
+                    m_HighlightingSystem.HighlightReachable();
                 }
                 else
                 {

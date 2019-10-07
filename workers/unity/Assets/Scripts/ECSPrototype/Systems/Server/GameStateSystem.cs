@@ -84,7 +84,6 @@ namespace LeyLineHybridECS
 
         [Inject] CellData m_CellData;
         
-
         [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
         [Inject] CleanupSystem m_CleanUpSystem;
@@ -274,9 +273,7 @@ namespace LeyLineHybridECS
                     {
                         if (step == GameStateEnum.move)
                         {
-                            //make sure move has enough time / if state switches to early this throws index out of range in Unitanim 259
-                            float addedTime = 1f;
-                            float unitMoveTime = addedTime + (lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1));
+                            float unitMoveTime = lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1);
                             if (unitMoveTime > highestTime)
                                 highestTime = unitMoveTime;
                         }

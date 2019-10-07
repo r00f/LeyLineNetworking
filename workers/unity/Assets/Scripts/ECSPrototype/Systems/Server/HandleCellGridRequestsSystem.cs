@@ -591,6 +591,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
+        UpdateInjectedComponentGroups();
         //returns a list of offsetCoordinates
         var cellsInRadius = new List<CellAttributes>();
         //reserve first index for origin
