@@ -4,99 +4,123 @@ using Generic;
 using Unit;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
-using Improbable.Gdk.ReactiveComponents;
+using Unity.Collections;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : ComponentSystem
 {
-    public struct ManalithData
+    private EntityQuery m_ManalithData;
+    private EntityQuery m_CellData;
+    private EntityQuery m_UnitData;
+    private EntityQuery m_GameStateData;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public ComponentDataArray<CircleCells.Component> CircleCells;
-        public ComponentDataArray<FactionComponent.Component> Factions;
+        base.OnCreate();
+
+        m_ManalithData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadWrite<CircleCells.Component>(),
+            ComponentType.ReadWrite<FactionComponent.Component>()
+        );
+
+        m_CellData = GetEntityQuery(
+            ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<CellAttributesComponent.Component>(),
+            ComponentType.ReadOnly<IsCircleCell.Component>()
+        );
+
+        m_CellData.SetFilter(CellAttributesComponent.ComponentAuthority.Authoritative);
+
+
+        m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadOnly<Actions.Component>(),
+            ComponentType.ReadWrite<Energy.Component>()
+        );
+        m_GameStateData = GetEntityQuery(
+            ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<WorldIndex.Component>()
+        );
+
     }
 
-    [Inject] ManalithData m_ManaLithData;
-
-    public struct CellData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<CellAttributesComponent.Component> Cells;
-        public readonly ComponentDataArray<IsCircleCell.Component> IsCircleCellData;
-    }
-
-    [Inject] CellData m_CellData;
-
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<SpatialEntityId> Ids;
-        public readonly ComponentDataArray<FactionComponent.Component> Factions;
-        public readonly ComponentDataArray<Actions.Component> ActionsData;
-        public ComponentDataArray<Energy.Component> EnergyData;
-    }
-
-    [Inject] UnitData m_UnitData;
-
-    public struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<GameState.Component> GameStates;
-    }
-
-    [Inject] GameStateData m_GameStateData;
 
     protected override void OnUpdate()
     {
+
+        #region Deprecated Vars
+        /*
+        #region gameStateVars
+        var gameStateWorldIndexes = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+        #endregion
+
+        #region unitDataVars
+        var unitsWorldIndex = m_UnitData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+        var unitsID = m_UnitData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
+        var unitsFaction = m_UnitData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+        var unitsAction = m_UnitData.ToComponentDataArray<Actions.Component>(Allocator.TempJob);
+        var unitsEnergy = m_UnitData.ToComponentDataArray<Energy.Component>(Allocator.TempJob);
+        #endregion
+
+        #region manaLithDataVars
+        var manaLithsWorldIndex = m_ManalithData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+        var manaLithsCircle_Cells = m_ManalithData.ToComponentDataArray<CircleCells.Component>(Allocator.TempJob);
+        var manaLithsFaction = m_ManalithData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+        #endregion
+
+        #region cellDataVars
+        var cellsCircle_Cells = m_CellData.ToComponentDataArray<IsCircleCell.Component>(Allocator.TempJob);
+        var cellsWorldindex = m_CellData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+        var cellsAttributes = m_CellData.ToComponentDataArray<CellAttributesComponent.Component>(Allocator.TempJob);
+        #endregion
+        */
+        #endregion
+
         //reset unit harvesting if they have a locked moveaction
-        for (int i = 0; i < m_GameStateData.Length; i++)
+        Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
         {
-            var gameStateWorldIndex = m_GameStateData.WorldIndexData[i].Value;
-            var gameState = m_GameStateData.GameStates[i].CurrentState;
-
-            for (int ui = 0; ui < m_UnitData.Length; ui++)
+            var worldIndex = gameStateWorldIndex.Value;
+            var currentState = gameState.CurrentState;
+            Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Energy.Component energy, ref Actions.Component actions) =>
             {
-                var unitWorldIndex = m_UnitData.WorldIndexData[ui].Value;
-                var energy = m_UnitData.EnergyData[ui];
-                var lockedAction = m_UnitData.ActionsData[ui].LockedAction;
 
-                if (gameStateWorldIndex == unitWorldIndex)
+                var lockedAction = actions.LockedAction;
+
+                if (worldIndex == unitWorldIndex.Value)
                 {
-                    if (gameState == GameStateEnum.move && energy.Harvesting && lockedAction.Index == -2)
+                    if (currentState == GameStateEnum.move && energy.Harvesting && lockedAction.Index == -2)
                     {
                         energy.Harvesting = false;
-                        m_UnitData.EnergyData[ui] = energy;
                     }
                 }
-            }
-
-            for (int mi = 0; mi < m_ManaLithData.Length; mi++)
+            });
+            Entities.With(m_ManalithData).ForEach((ref CircleCells.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
             {
-                var circleCells = m_ManaLithData.CircleCells[mi];
-                var faction = m_ManaLithData.Factions[mi];
-                var manalithWorldIndex = m_ManaLithData.WorldIndexData[mi].Value;
+                var manalithWorldIndex = windex.Value;
+                var faction = factionref;
+                var circleCells = circleCellsref;
 
-                if (gameStateWorldIndex == manalithWorldIndex)
+                if (worldIndex == manalithWorldIndex)
                 {
-                    if (gameState == GameStateEnum.calculate_energy)
+                    if (currentState == GameStateEnum.calculate_energy)
                     {
                         //update CircleCells
-                        for (int ci = 0; ci < m_CellData.Length; ci++)
+                        Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWindex, ref CellAttributesComponent.Component cellAtt) =>
+
                         {
-                            var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
-                            var cellAtt = m_CellData.Cells[ci];
+                            var cellWorldIndex = cellWindex.Value;
+
 
                             if (manalithWorldIndex == cellWorldIndex)
                             {
                                 for (int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
                                 {
-                                    if (circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
+                                    if (Vector3fext.ToUnityVector(circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate) == Vector3fext.ToUnityVector(cellAtt.CellAttributes.Cell.CubeCoordinate))
                                     {
                                         if (circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
                                         {
@@ -108,8 +132,6 @@ public class ManalithSystem : ComponentSystem
 
                                             //workaround for a weird bug where inspector is not updated 
                                             circleCells.CircleAttributeList = circleCells.CircleAttributeList;
-
-                                            m_ManaLithData.CircleCells[mi] = circleCells;
 
                                             uint fact = UpdateFaction(circleCells, manalithWorldIndex);
                                             TeamColorEnum tColor = new TeamColorEnum();
@@ -133,19 +155,47 @@ public class ManalithSystem : ComponentSystem
                                                 Faction = fact,
                                                 TeamColor = tColor
                                             };
-
-                                            m_ManaLithData.Factions[mi] = faction;
                                         }
 
                                         UpdateUnit(cellAtt.CellAttributes.Cell.UnitOnCellId, faction.Faction);
                                     }
                                 }
                             }
-                        }
+                        });
                     }
                 }
-            }
-        }
+                factionref = faction;
+                circleCellsref = circleCells;
+            });
+        });
+        #region dispose
+        /*
+        #region gameStateVarsDispose
+        gameStateWorldIndexes.Dispose();
+        gameStates.Dispose();
+        #endregion
+
+        #region unitDataVarsDispose
+        unitsWorldIndex.Dispose();
+        unitsID.Dispose();
+        unitsFaction.Dispose();
+        unitsAction.Dispose();
+        unitsEnergy.Dispose();
+        #endregion
+
+        #region manaLithDataVarsDispose
+        manaLithsWorldIndex.Dispose();
+        manaLithsCircle_Cells.Dispose();
+        manaLithsFaction.Dispose();
+        #endregion
+
+        #region cellDataVarsDispose
+        cellsCircle_Cells.Dispose();
+        cellsWorldindex.Dispose();
+        cellsAttributes.Dispose();
+        #endregion
+        */
+        #endregion
     }
 
     public uint UpdateFaction(CircleCells.Component circleCells, uint worldIndex)
@@ -153,12 +203,12 @@ public class ManalithSystem : ComponentSystem
         int player1Units = 0;
         int player2Units = 0;
 
+
         for (int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
         {
-            for (int ui = 0; ui < m_UnitData.Length; ui++)
+            Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>
             {
-                var unitId = m_UnitData.Ids[ui];
-                var unitFaction = m_UnitData.Factions[ui];
+
 
                 if (unitId.EntityId.Id == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
                 {
@@ -171,7 +221,7 @@ public class ManalithSystem : ComponentSystem
                         player2Units++;
                     }
                 }
-            }
+            });
         }
 
         if (player1Units > player2Units)
@@ -190,22 +240,18 @@ public class ManalithSystem : ComponentSystem
 
     public void UpdateUnit(long inUnitId, uint faction)
     {
-        for (int ui = 0; ui < m_UnitData.Length; ui++)
+        Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
         {
-            var energy = m_UnitData.EnergyData[ui];
-            var unitId = m_UnitData.Ids[ui].EntityId;
-            var unitFaction = m_UnitData.Factions[ui];
 
-            if (unitId.Id == inUnitId)
+
+            if (unitId.EntityId.Id == inUnitId)
             {
                 if (unitFaction.Faction == faction)
                     energy.Harvesting = true;
                 else
                     energy.Harvesting = false;
             }
-
-            m_UnitData.EnergyData[ui] = energy;
-        }
+        });
     }
 
 }

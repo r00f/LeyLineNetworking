@@ -1,30 +1,38 @@
+using System.IO;
+using Cell;
+using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
-using Improbable.PlayerLifecycle;
+using Improbable.Gdk.PlayerLifecycle;
+using LeyLineHybridECS;
+using UnityEditor;
+using Unity.Entities;
 using UnityEngine;
 using Snapshot = Improbable.Gdk.Core.Snapshot;
-using LeyLineHybridECS;
 using System.Collections.Generic;
-using Cell;
 
 namespace BlankProject.Editor
 {
     internal static class SnapshotGenerator
     {
-        public struct Arguments
-        {
-            public string OutputPath;
-        }
+        private static string DefaultSnapshotPath = Path.GetFullPath(
+            Path.Combine(
+                Application.dataPath,
+                "..",
+                "..",
+                "..",
+                "snapshots",
+                "default.snapshot"));
 
-        public static void Generate(Arguments arguments)
+        [MenuItem("SpatialOS/Generate snapshot")]
+        public static void Generate()
         {
             Debug.Log("Generating snapshot.");
             var snapshot = CreateSnapshot();
 
-            Debug.Log($"Writing snapshot to: {arguments.OutputPath}");
-            snapshot.WriteToFile(arguments.OutputPath);
+            Debug.Log($"Writing snapshot to: {DefaultSnapshotPath}");
+            snapshot.WriteToFile(DefaultSnapshotPath);
         }
-
         private static Snapshot CreateSnapshot()
         {
             var snapshot = new Snapshot();
@@ -37,7 +45,7 @@ namespace BlankProject.Editor
 
         private static void AddGameState(Snapshot snapshot)
         {
-            foreach(EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
+            foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
             {
                 Vector3f pos = new Vector3f(wi.transform.position.x, wi.transform.position.y, wi.transform.position.z);
                 var gameState = LeyLineEntityTemplates.GameState(pos, wi.WorldIndex);
@@ -47,14 +55,14 @@ namespace BlankProject.Editor
 
         private static void AddManaliths(Snapshot snaphot)
         {
-            foreach(ManalithInitializer m in Object.FindObjectsOfType<ManalithInitializer>())
+            foreach (ManalithInitializer m in Object.FindObjectsOfType<ManalithInitializer>())
             {
                 var circle = new CellAttributeList
                 {
                     CellAttributes = new List<CellAttribute>()
                 };
 
-                
+
                 foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
                     circle.CellAttributes.Add(new CellAttribute
@@ -65,7 +73,7 @@ namespace BlankProject.Editor
                         MovementCost = n.GetComponent<MovementCost>().Value
                     });
                 }
-                
+
                 Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);
                 uint worldIndex = m.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
                 var manalith = LeyLineEntityTemplates.Manalith(pos, circle, worldIndex);
@@ -82,7 +90,7 @@ namespace BlankProject.Editor
                     CellAttributes = new List<CellAttribute>()
                 };
 
-                foreach(LeyLineHybridECS.Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                foreach (LeyLineHybridECS.Cell n in c.GetComponent<Neighbours>().NeighboursList)
                 {
                     neighbours.CellAttributes.Add(new CellAttribute
                     {
@@ -122,7 +130,7 @@ namespace BlankProject.Editor
             template.AddComponent(new Persistence.Snapshot(), serverAttribute);
             template.AddComponent(new PlayerCreator.Snapshot(), serverAttribute);
 
-            template.SetReadAccess(UnityClientConnector.WorkerType, UnityGameLogicConnector.WorkerType, AndroidClientWorkerConnector.WorkerType, iOSClientWorkerConnector.WorkerType);
+            template.SetReadAccess(UnityClientConnector.WorkerType, UnityGameLogicConnector.WorkerType);
             template.SetComponentWriteAccess(EntityAcl.ComponentId, serverAttribute);
 
             snapshot.AddEntity(template);

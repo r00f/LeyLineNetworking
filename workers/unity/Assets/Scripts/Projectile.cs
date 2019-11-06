@@ -5,6 +5,7 @@ using UnityEngine.Events;
 using Unit;
 using Improbable;
 using UnityEngine.Animations;
+using Generic;
 
 public class Projectile : MonoBehaviour
 {

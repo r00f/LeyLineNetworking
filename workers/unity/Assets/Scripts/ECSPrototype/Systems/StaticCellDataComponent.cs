@@ -16,4 +16,4 @@ public struct StaticCellData : IComponentData
     public float3 Position3D;
 }
 
-public class StaticCellDataComponent : ComponentDataWrapper<StaticCellData> { }
+public class StaticCellDataComponent : ComponentDataProxy<StaticCellData> { }

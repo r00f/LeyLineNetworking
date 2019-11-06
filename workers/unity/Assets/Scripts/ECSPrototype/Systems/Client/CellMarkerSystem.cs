@@ -3,63 +3,58 @@ using Improbable.Gdk.Core;
 using UnityEngine;
 using Generic;
 using Player;
-using Improbable.Gdk.ReactiveComponents;
 using Cell;
 using Improbable;
+using Unity.Collections;
 
 namespace LeyLineHybridECS
 {
     [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HighlightingSystem))]
     public class CellMarkerSystem : ComponentSystem
     {
-        struct CellData
-        {
-            public readonly int Length;
-            public ComponentDataArray<MarkerState> MarkerStateData;
-            public ComponentArray<MarkerGameObjects> MarkerGameObjectsData;
-        }
-
-        [Inject] CellData m_CellData;
-
-        struct NewCellData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntityData;
-            public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
-            public ComponentArray<MarkerGameObjects> MarkerGameObjectsData;
-        }
-        [Inject] NewCellData m_NewCellData;
-
-        struct UnitData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-            public readonly ComponentDataArray<MouseState> MouseStateData;
-            public ComponentDataArray<MarkerState> MarkerStateData;
-            public ComponentArray<UnitMarkerGameObjects> MarkerGameObjectsData;
-        }
-
-        [Inject] UnitData m_UnitData;
-
-        public struct GameStateData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
-            public readonly ComponentDataArray<GameState.Component> GameState;
-
-        }
-        [Inject] GameStateData m_GameStateData;
-
-        public struct PlayerStateData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
-            public readonly ComponentDataArray<WorldIndex.Component> WorldIndex;
-        }
-
-        [Inject] PlayerStateData m_PlayerStateData;
-
+        EntityQuery m_PlayerStateData;
+        EntityQuery m_GameStateData;
+        EntityQuery m_UnitData;
+        EntityQuery m_CellData;
+        EntityQuery m_NewCellData;
         Settings settings;
+
+        protected override void OnCreate()
+        {
+            base.OnCreate();
+
+            m_UnitData = GetEntityQuery(
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<MouseState>(),
+                ComponentType.ReadOnly<MarkerState>(),
+                ComponentType.ReadWrite<UnitMarkerGameObjects>()
+                );
+
+            m_CellData = GetEntityQuery(
+                ComponentType.ReadOnly<CellAttributesComponent.Component>(),
+                ComponentType.ReadWrite<MarkerState>(),
+                ComponentType.ReadWrite<MarkerGameObjects>()
+                );
+
+            m_NewCellData = GetEntityQuery(
+                ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
+                ComponentType.ReadOnly<CellAttributesComponent.Component>(),
+                ComponentType.ReadWrite<MarkerGameObjects>()
+                );
+
+            m_GameStateData = GetEntityQuery(
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<GameState.Component>()
+            );
+
+            m_PlayerStateData = GetEntityQuery(
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+            );
+
+            m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
+
+        }
 
         protected override void OnStartRunning()
         {
@@ -70,133 +65,110 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            
-            for (int i = 0; i < m_NewCellData.Length; i++)
+
+            if (m_PlayerStateData.CalculateEntityCount() == 0)
+                return;
+
+            Entities.With(m_NewCellData).ForEach((MarkerGameObjects markerGameObjects, ref CellAttributesComponent.Component cellAtt) =>
             {
-                MarkerGameObjects markerGameObject = m_NewCellData.MarkerGameObjectsData[i];
-                var cellAtt = m_NewCellData.CellAttributes[i];
                 int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-                markerGameObject.MapMarkerRenderer.material.color = settings.MapCellColors[colorIndex];
-                //Debug.Log("AssignMapColor");
-            }
-            
+                markerGameObjects.MapMarkerRenderer.material.color = settings.MapCellColors[colorIndex];
+            });
 
-            var playerWorldIndex = m_PlayerStateData.WorldIndex[0].Value;
+            var playerWorldIndexes = m_PlayerStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+            var playerWorldIndex = playerWorldIndexes[0];
 
-            for (int j = 0; j < m_GameStateData.Length; j++)
+            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState)=>
             {
-                var gameStateWorldIndex = m_GameStateData.WorldIndex[j].Value;
-                var gameState = m_GameStateData.GameState[j].CurrentState;
+                var g = gameState;
 
-                if(gameStateWorldIndex == playerWorldIndex)
+                if (gameStateWorldIndex.Value == playerWorldIndex.Value)
                 {
-                    if (gameState != GameStateEnum.planning)
+                    Entities.With(m_CellData).ForEach((MarkerGameObjects markerGameObjects, ref MarkerState markerState, ref CellAttributesComponent.Component cellAttributes) =>
                     {
-                        for (int i = 0; i < m_CellData.Length; i++)
+                        if (g.CurrentState != GameStateEnum.planning)
                         {
-                            MarkerGameObjects markerGameObject = m_CellData.MarkerGameObjectsData[i];
-                            markerGameObject.TargetMarker.SetActive(false);
-                            markerGameObject.ClickedMarker.SetActive(false);
-                            markerGameObject.HoveredMarker.SetActive(false);
+                            markerGameObjects.ReachableMarker.SetActive(false);
+                            markerGameObjects.TargetMarker.SetActive(false);
+                            markerGameObjects.ClickedMarker.SetActive(false);
+                            markerGameObjects.HoveredMarker.SetActive(false);
                         }
-                        for (int i = 0; i < m_UnitData.Length; i++)
+                        else
                         {
-                            UnitMarkerGameObjects markerGameObject = m_UnitData.MarkerGameObjectsData[i];
-                            markerGameObject.AttackTargetMarker.SetActive(false);
-                            markerGameObject.DefenseMarker.SetActive(false);
-                            markerGameObject.HealTargetMarker.SetActive(false);
-                        }
-                    }
-                    else
-                    {
-                        for (int i = 0; i < m_CellData.Length; i++)
-                        {
-                            int isSet = m_CellData.MarkerStateData[i].IsSet;
-                            MarkerState markerState = m_CellData.MarkerStateData[i];
-                            MarkerGameObjects markerGameObject = m_CellData.MarkerGameObjectsData[i];
-
-                            /*
-                            if (markerState.IsTarget == 1)
-                            {
-                                if (!markerGameObject.TargetMarker.activeSelf)
-                                    markerGameObject.TargetMarker.SetActive(true);
-                            }
-                            else
-                            {
-                                if (markerGameObject.TargetMarker.activeSelf)
-                                    markerGameObject.TargetMarker.SetActive(false);
-                            }
-                            */
-
-                            switch(markerState.NumberOfTargets)
+                            switch (markerState.NumberOfTargets)
                             {
                                 case 0:
-                                    if (markerGameObject.TargetMarker.activeSelf)
-                                        markerGameObject.TargetMarker.SetActive(false);
+                                    if (markerGameObjects.TargetMarker.activeSelf)
+                                        markerGameObjects.TargetMarker.SetActive(false);
                                     break;
                                 case 1:
-                                    if (!markerGameObject.TargetMarker.activeSelf)
-                                        markerGameObject.TargetMarker.SetActive(true);
+                                    if (!markerGameObjects.TargetMarker.activeSelf)
+                                        markerGameObjects.TargetMarker.SetActive(true);
 
-                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[0];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[0];
                                     break;
                                 case 2:
-                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[1];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[1];
                                     break;
                                 case 3:
-                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[2];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[2];
                                     break;
                                 case 4:
-                                    markerGameObject.TargetMarkerRenderer.material.color = markerGameObject.TargetColors[3];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[3];
                                     break;
                             }
 
-                            if (isSet == 0)
+                            if (markerState.IsSet == 0)
                             {
                                 switch (markerState.CurrentState)
                                 {
                                     case MarkerState.State.Neutral:
-                                        markerGameObject.ClickedMarker.SetActive(false);
-                                        markerGameObject.HoveredMarker.SetActive(false);
-                                        markerGameObject.ReachableMarker.SetActive(false);
+                                        markerGameObjects.ClickedMarker.SetActive(false);
+                                        markerGameObjects.HoveredMarker.SetActive(false);
+                                        markerGameObjects.ReachableMarker.SetActive(false);
                                         break;
                                     case MarkerState.State.Clicked:
                                         if (markerState.NumberOfTargets == 0)
-                                            markerGameObject.ClickedMarker.SetActive(true);
-                                        markerGameObject.HoveredMarker.SetActive(false);
-                                        markerGameObject.ReachableMarker.SetActive(false);
+                                            markerGameObjects.ClickedMarker.SetActive(true);
+                                        markerGameObjects.HoveredMarker.SetActive(false);
+                                        markerGameObjects.ReachableMarker.SetActive(false);
                                         break;
                                     case MarkerState.State.Hovered:
-                                        markerGameObject.ClickedMarker.SetActive(false);
-                                        markerGameObject.HoveredMarker.SetActive(true);
-                                        markerGameObject.ReachableMarker.SetActive(false);
+                                        if(!cellAttributes.CellAttributes.Cell.IsTaken)
+                                        {
+                                            markerGameObjects.ClickedMarker.SetActive(false);
+                                            markerGameObjects.HoveredMarker.SetActive(true);
+                                            markerGameObjects.ReachableMarker.SetActive(false);
+                                        }
                                         break;
                                     case MarkerState.State.Reachable:
-                                        markerGameObject.ClickedMarker.SetActive(false);
-                                        markerGameObject.HoveredMarker.SetActive(false);
-                                        markerGameObject.ReachableMarker.SetActive(true);
+                                        markerGameObjects.ClickedMarker.SetActive(false);
+                                        markerGameObjects.HoveredMarker.SetActive(false);
+                                        markerGameObjects.ReachableMarker.SetActive(true);
                                         break;
                                 }
-
                                 markerState.IsSet = 1;
-                                m_CellData.MarkerStateData[i] = markerState;
                             }
                         }
+                    });
 
-                        for (int i = 0; i < m_UnitData.Length; i++)
+                    Entities.With(m_UnitData).ForEach((UnitMarkerGameObjects unitMarkerGameObjects, ref MarkerState markerState, ref FactionComponent.Component faction, ref MouseState mouseState) =>
+                    {
+                        if (g.CurrentState != GameStateEnum.planning)
                         {
-                            int isSet = m_UnitData.MarkerStateData[i].IsSet;
-                            MarkerState markerState = m_UnitData.MarkerStateData[i];
-                            MouseState mouseState = m_UnitData.MouseStateData[i];
-                            UnitMarkerGameObjects markerGameObject = m_UnitData.MarkerGameObjectsData[i];
-                            var teamColor = m_UnitData.FactionData[i].TeamColor;
+                            unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
+                            unitMarkerGameObjects.DefenseMarker.SetActive(false);
+                            unitMarkerGameObjects.HealTargetMarker.SetActive(false);
+                        }
+                        else
+                        {
                             int colorIndex = 0;
 
-                            if (teamColor == TeamColorEnum.blue)
+                            if (faction.TeamColor == TeamColorEnum.blue)
                             {
                                 colorIndex = 1;
                             }
-                            else if (teamColor == TeamColorEnum.red)
+                            else if (faction.TeamColor == TeamColorEnum.red)
                             {
                                 colorIndex = 2;
                             }
@@ -207,24 +179,24 @@ namespace LeyLineHybridECS
                                 {
                                     case MarkerState.TargetType.Neutral:
                                         //change when we implement other target types
-                                        markerGameObject.AttackTargetMarker.SetActive(true);
-                                        markerGameObject.DefenseMarker.SetActive(false);
-                                        markerGameObject.HealTargetMarker.SetActive(false);
+                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(true);
+                                        unitMarkerGameObjects.DefenseMarker.SetActive(false);
+                                        unitMarkerGameObjects.HealTargetMarker.SetActive(false);
                                         break;
                                     case MarkerState.TargetType.AttackTarget:
-                                        markerGameObject.AttackTargetMarker.SetActive(true);
-                                        markerGameObject.DefenseMarker.SetActive(false);
-                                        markerGameObject.HealTargetMarker.SetActive(false);
+                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(true);
+                                        unitMarkerGameObjects.DefenseMarker.SetActive(false);
+                                        unitMarkerGameObjects.HealTargetMarker.SetActive(false);
                                         break;
                                     case MarkerState.TargetType.DefenseTarget:
-                                        markerGameObject.AttackTargetMarker.SetActive(false);
-                                        markerGameObject.DefenseMarker.SetActive(true);
-                                        markerGameObject.HealTargetMarker.SetActive(false);
+                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
+                                        unitMarkerGameObjects.DefenseMarker.SetActive(true);
+                                        unitMarkerGameObjects.HealTargetMarker.SetActive(false);
                                         break;
                                     case MarkerState.TargetType.HealTarget:
-                                        markerGameObject.AttackTargetMarker.SetActive(false);
-                                        markerGameObject.DefenseMarker.SetActive(false);
-                                        markerGameObject.HealTargetMarker.SetActive(true);
+                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
+                                        unitMarkerGameObjects.DefenseMarker.SetActive(false);
+                                        unitMarkerGameObjects.HealTargetMarker.SetActive(true);
                                         break;
                                 }
                                 markerState.TargetTypeSet = 1;
@@ -235,48 +207,49 @@ namespace LeyLineHybridECS
                                 {
                                     markerState.TargetTypeSet = 0;
                                 }
-                                markerGameObject.AttackTargetMarker.SetActive(false);
-                                markerGameObject.DefenseMarker.SetActive(false);
-                                markerGameObject.HealTargetMarker.SetActive(false);
+                                unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
+                                unitMarkerGameObjects.DefenseMarker.SetActive(false);
+                                unitMarkerGameObjects.HealTargetMarker.SetActive(false);
                             }
 
-                            if (isSet == 0)
+                            if (markerState.IsSet == 0)
                             {
                                 switch (markerState.CurrentState)
                                 {
                                     case MarkerState.State.Neutral:
-                                        markerGameObject.Outline.enabled = false;
+                                        unitMarkerGameObjects.Outline.enabled = false;
                                         markerState.IsSet = 1;
                                         break;
                                     case MarkerState.State.Clicked:
-                                        markerGameObject.Outline.enabled = false;
+                                        unitMarkerGameObjects.Outline.enabled = false;
                                         //markerGameObject.Outline.enabled = true;
                                         //markerGameObject.Outline.color = colorIndex;
                                         markerState.IsSet = 1;
                                         break;
                                     case MarkerState.State.Hovered:
-                                        markerGameObject.Outline.enabled = true;
-                                        markerGameObject.Outline.color = colorIndex;
+                                        unitMarkerGameObjects.Outline.enabled = true;
+                                        unitMarkerGameObjects.Outline.color = colorIndex;
                                         markerState.IsSet = 1;
                                         break;
                                     case MarkerState.State.Reachable:
-                                        markerGameObject.Outline.enabled = true;
-                                        if(mouseState.CurrentState == MouseState.State.Hovered)
+                                        unitMarkerGameObjects.Outline.enabled = true;
+                                        if (mouseState.CurrentState == MouseState.State.Hovered)
                                         {
-                                            markerGameObject.Outline.color = colorIndex;
+                                            unitMarkerGameObjects.Outline.color = colorIndex;
                                         }
                                         else
                                         {
-                                            markerGameObject.Outline.color = 0;
+                                            unitMarkerGameObjects.Outline.color = 0;
                                         }
                                         break;
                                 }
                             }
-                            m_UnitData.MarkerStateData[i] = markerState;
                         }
-                    }
+                    });
                 }
-            }
+            });
+
+            playerWorldIndexes.Dispose();
         }
     }
 }

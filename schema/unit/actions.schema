@@ -1,5 +1,5 @@
 package unit;
-import "improbable/vector3.schema";
+import "generic/vector3.schema";
 import "unit/action_effect.schema";
 import "cell/cell_attributes.schema";
 
@@ -40,7 +40,7 @@ type ActionTarget {
 	}
 
 	int64 target_id = 1;
-	improbable.Vector3f target_coordinate = 2;
+	generic.Vector3f target_coordinate = 2;
 	int32 targettingrange = 3;
 	uint32 energy_cost = 4;
 	UseHighlighterEnum higlighter = 5;
@@ -48,8 +48,6 @@ type ActionTarget {
 	CellTarget cell_target_nested = 7;
 	UnitTarget unit_target_nested = 8;
 	list<TargetMod> mods = 9;
-	
-	
 }
 type TargetMod {
 	
@@ -72,8 +70,8 @@ type TargetMod {
 
 type CoordinatePositionPair {
 
-	improbable.Vector3f cube_coordinate = 1;
-	improbable.Vector3f world_position = 2;
+	generic.Vector3f cube_coordinate = 1;
+	generic.Vector3f world_position = 2;
 
 }
 

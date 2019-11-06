@@ -11,5 +11,5 @@ public struct MovementData : IComponentData
     public int PathIndex;
 }
 
-public class MovementDataComponent : ComponentDataWrapper<MovementData> { }
+public class MovementDataComponent : ComponentDataProxy<MovementData> { }
 

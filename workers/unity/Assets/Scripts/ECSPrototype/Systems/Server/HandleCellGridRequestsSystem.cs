@@ -8,249 +8,227 @@ using System.Linq;
 using Generic;
 using Cell;
 using Unit;
+using Unity.Collections;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class HandleCellGridRequestsSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
 
-    public struct SelectActionRequestData
+    CommandSystem m_CommandSystem;
+    TimerSystem m_TimerSystem;
+    ResourceSystem m_ResourceSystem;
+
+    EntityQuery m_GameStateData;
+    EntityQuery m_UnitData;
+    EntityQuery m_CellData;
+    EntityQuery m_SetTargetRequestData;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public ComponentDataArray<CellsToMark.Component> CellsToMarkData;
-        public ComponentDataArray<Actions.CommandRequests.SelectActionCommand> ReceivedSelectActionRequests;
-        public ComponentDataArray<Actions.Component> ActionsData;
-        public readonly ComponentDataArray<FactionComponent.Component> Faction;
+        base.OnCreate();
+
+        m_GameStateData = GetEntityQuery(
+        ComponentType.ReadOnly<WorldIndex.Component>(),
+        ComponentType.ReadOnly<GameState.Component>()
+        );
+
+        m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<CubeCoordinate.Component>(),
+            ComponentType.ReadOnly<Health.Component>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadWrite<Actions.Component>(),
+            ComponentType.ReadWrite<CellsToMark.Component>()
+            );
+
+        m_CellData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<CubeCoordinate.Component>(),
+            ComponentType.ReadOnly<Position.Component>(),
+            ComponentType.ReadWrite<CellAttributesComponent.Component>()
+            );
     }
 
-    [Inject] SelectActionRequestData m_SelectActionRequestData;
-
-    public struct SetTargetRequestData
+    protected override void OnStartRunning()
     {
-        public readonly int Length;
-        public ComponentDataArray<Actions.CommandRequests.SetTargetCommand> ReceivedSetTargetRequests;
-        public ComponentDataArray<Actions.Component> ActionsData;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<CellsToMark.Component> CellsToMarkData;
-        public readonly ComponentDataArray<FactionComponent.Component> Faction;
+        base.OnStartRunning();
+        m_CommandSystem = World.GetExistingSystem<CommandSystem>();
+        m_TimerSystem = World.GetExistingSystem<TimerSystem>();
+        m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
     }
-
-    [Inject] SetTargetRequestData m_SetTargetRequestData;
-
-    public struct CellData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<Position.Component> PositionData;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
-    }
-
-    [Inject] CellData m_CellData;
-
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Health.Component> HealthData;
-        public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-    }
-
-    [Inject] UnitData m_UnitData;
-
-    public struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<GameState.Component> GameState;
-    }
-
-    [Inject] GameStateData m_GameStateData;
-
-    [Inject] ResourceSystem m_ResourceSystem;
-
-    [Inject] TimerSystem m_TimerSystem;
 
     protected override void OnUpdate()
     {
         #region select action
 
-        for (int i = 0; i < m_SelectActionRequestData.Length; i++)
+        var selectActionRequests = m_CommandSystem.GetRequests<Actions.SelectActionCommand.ReceivedRequest>();
+
+        for (int i = 0; i < selectActionRequests.Count; i++)
         {
-            var actionData = m_SelectActionRequestData.ActionsData[i];
-            var selectActionRequest = m_SelectActionRequestData.ReceivedSelectActionRequests[i];
-            var cellsToMarkData = m_SelectActionRequestData.CellsToMarkData[i];
-            var coord = m_SelectActionRequestData.CoordinateData[i].CubeCoordinate;
-            var worldIndex = m_SelectActionRequestData.WorldIndexData[i].Value;
-            var faction = m_SelectActionRequestData.Faction[i];
-            var unitId = m_SelectActionRequestData.EntityIds[i].EntityId.Id;
+            var selectActionRequest = selectActionRequests[i];
 
-            cellsToMarkData.SetClientRange = false;
-            m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
-
-            m_ResourceSystem.AddEnergy(faction.Faction, actionData.LockedAction.CombinedCost);
-
-            if(actionData.LockedAction.Effects.Count != 0)
+            Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitEntityId, ref WorldIndex.Component unitWorldIndex, ref Actions.Component unitActions, ref CubeCoordinate.Component unitCoord, ref FactionComponent.Component unitFaction, ref CellsToMark.Component unitCellsToMark) =>
             {
-                if (actionData.LockedAction.Effects[0].EffectType == EffectTypeEnum.gain_armor)
+                //if this unit has sent a selectActionCommand
+                if (unitEntityId.EntityId.Id == selectActionRequest.EntityId.Id)
                 {
-                    m_ResourceSystem.RemoveArmor(actionData.LockedAction.Targets[0].TargetId, actionData.LockedAction.Effects[0].GainArmorNested.ArmorAmount);
-                }
-            }
+                    unitCellsToMark.SetClientRange = false;
 
-            actionData.LockedAction = actionData.NullAction;
+                    m_ResourceSystem.AddEnergy(unitFaction.Faction, unitActions.LockedAction.CombinedCost);
 
-            foreach (var sar in selectActionRequest.Requests)
-            {
-                int index = sar.Payload.ActionId;
-                Action actionToSelect = actionData.NullAction;
-
-                if(m_ResourceSystem.CheckPlayerEnergy(faction.Faction) > 0)
-                {
-                    if (index >= 0)
+                    if (unitActions.LockedAction.Effects.Count != 0)
                     {
-                        var a = actionData.OtherActions[index];
-                        a.CombinedCost = CalculateCombinedCost(actionData.OtherActions[index].Targets[0]);
-                        actionData.OtherActions[index] = a;
-
-                        if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.OtherActions[index].CombinedCost) >= 0)
+                        if (unitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.gain_armor)
                         {
-                            actionToSelect = actionData.OtherActions[index];
+                            m_ResourceSystem.RemoveArmor(unitActions.LockedAction.Targets[0].TargetId, unitActions.LockedAction.Effects[0].GainArmorNested.ArmorAmount);
                         }
                     }
-                    else
-                    {
-                        if (index == -2)
-                        {
-                            var a = actionData.BasicMove;
-                            a.CombinedCost = CalculateCombinedCost(actionData.BasicMove.Targets[0]);
-                            actionData.BasicMove = a;
 
-                            if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicMove.CombinedCost) >= 0)
+                    unitActions.LockedAction = unitActions.NullAction;
+
+                    int index = selectActionRequest.Payload.ActionId;
+                    Action actionToSelect = unitActions.NullAction;
+
+                    if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction) > 0)
+                    {
+                        if (index >= 0)
+                        {
+                            var a = unitActions.OtherActions[index];
+                            a.CombinedCost = CalculateCombinedCost(unitActions.OtherActions[index].Targets[0]);
+                            unitActions.OtherActions[index] = a;
+
+                            if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.OtherActions[index].CombinedCost) >= 0)
                             {
-                                actionToSelect = actionData.BasicMove;
+                                actionToSelect = unitActions.OtherActions[index];
                             }
                         }
-                        else if (index == -1)
+                        else
                         {
-                            var a = actionData.BasicAttack;
-                            a.CombinedCost = CalculateCombinedCost(actionData.BasicAttack.Targets[0]);
-                            actionData.BasicAttack = a;
-
-                            if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, actionData.BasicAttack.CombinedCost) >= 0)
+                            if (index == -2)
                             {
-                                actionToSelect = actionData.BasicAttack;
-                            }
-                        }
-                    }
-                }
+                                var a = unitActions.BasicMove;
+                                a.CombinedCost = CalculateCombinedCost(unitActions.BasicMove.Targets[0]);
+                                unitActions.BasicMove = a;
 
-                actionData.CurrentSelected = actionToSelect;
-            }
-
-            if (actionData.CurrentSelected.Targets.Count != 0)
-            {
-                bool self = false;
-                if(actionData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
-                {
-                    if(actionData.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
-                    {
-                        //Set target instantly
-                        self = true;
-                        actionData.LockedAction = SetLockedAction(actionData.CurrentSelected, coord, coord, unitId, faction.Faction);
-                        actionData.CurrentSelected = actionData.NullAction;
-                    }
-                }
-                if ((!actionData.CurrentSelected.Equals(actionData.LastSelected) || cellsToMarkData.CellsInRange.Count == 0) && !self)
-                {
-                    cellsToMarkData.CellsInRange = GetRadius(coord, (uint)actionData.CurrentSelected.Targets[0].Targettingrange, worldIndex);
-                    cellsToMarkData.CachedPaths.Clear();
-                    
-
-                    switch (actionData.CurrentSelected.Targets[0].Higlighter)
-                    {
-                        case UseHighlighterEnum.pathing:
-                            uint range = (uint)actionData.CurrentSelected.Targets[0].Targettingrange;
-                            if(actionData.CurrentSelected.Effects[0].EffectType == EffectTypeEnum.move_along_path)
-                            {
-                                if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0) < (uint)actionData.CurrentSelected.Targets[0].Targettingrange)
+                                if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.BasicMove.CombinedCost) >= 0)
                                 {
-                                    range = (uint)m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0);
+                                    actionToSelect = unitActions.BasicMove;
                                 }
                             }
-                            cellsToMarkData.CachedPaths = GetAllPathsInRadius(range, cellsToMarkData.CellsInRange, cellsToMarkData.CellsInRange[0].Cell);
-                            
-                            break;
-                        case UseHighlighterEnum.no_pathing:
-                            break;
+                            else if (index == -1)
+                            {
+                                var a = unitActions.BasicAttack;
+                                a.CombinedCost = CalculateCombinedCost(unitActions.BasicAttack.Targets[0]);
+                                unitActions.BasicAttack = a;
+
+                                if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.BasicAttack.CombinedCost) >= 0)
+                                {
+                                    actionToSelect = unitActions.BasicAttack;
+                                }
+                            }
+                        }
                     }
+
+                    unitActions.CurrentSelected = actionToSelect;
+
+                    if (unitActions.CurrentSelected.Targets.Count != 0)
+                    {
+                        bool self = false;
+                        if (unitActions.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
+                        {
+                            if (unitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                            {
+                                //Set target instantly
+                                self = true;
+                                unitActions.LockedAction = SetLockedAction(unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitEntityId.EntityId.Id, unitFaction.Faction);
+                                unitActions.CurrentSelected = unitActions.NullAction;
+                            }
+                        }
+                        if ((!unitActions.CurrentSelected.Equals(unitActions.LastSelected) || unitCellsToMark.CellsInRange.Count == 0) && !self)
+                        {
+                            unitCellsToMark.CellsInRange = GetRadius(unitCoord.CubeCoordinate, (uint)unitActions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex.Value);
+                            unitCellsToMark.CachedPaths.Clear();
+
+
+                            switch (unitActions.CurrentSelected.Targets[0].Higlighter)
+                            {
+                                case UseHighlighterEnum.pathing:
+                                    uint range = (uint)unitActions.CurrentSelected.Targets[0].Targettingrange;
+                                    if (unitActions.CurrentSelected.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                                    {
+                                        if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, 0) < (uint)unitActions.CurrentSelected.Targets[0].Targettingrange)
+                                        {
+                                            range = (uint)m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, 0);
+                                        }
+                                    }
+                                    unitCellsToMark.CachedPaths = GetAllPathsInRadius(range, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
+
+                                    break;
+                                case UseHighlighterEnum.no_pathing:
+                                    break;
+                            }
+                        }
+                    }
+
+                    unitActions.LastSelected = unitActions.CurrentSelected;
+                    unitCellsToMark.SetClientRange = true;
+                    unitCellsToMark.CachedPaths = unitCellsToMark.CachedPaths;
                 }
-            }
-
-            actionData.LastSelected = actionData.CurrentSelected;
-            m_SelectActionRequestData.ActionsData[i] = actionData;
-
-            cellsToMarkData.SetClientRange = true;
-            cellsToMarkData.CachedPaths = cellsToMarkData.CachedPaths;
-            m_SelectActionRequestData.CellsToMarkData[i] = cellsToMarkData;
+            });
         }
 
         #endregion
 
         #region set target
+        var setTargetRequests = m_CommandSystem.GetRequests<Actions.SetTargetCommand.ReceivedRequest>();
 
-        for (int i = 0; i < m_SetTargetRequestData.Length; i++)
+        for (int i = 0; i < setTargetRequests.Count; i++)
         {
-            var usingId = m_SetTargetRequestData.EntityIds[i].EntityId.Id;
-            var actionData = m_SetTargetRequestData.ActionsData[i];
-            var setTargetRequest = m_SetTargetRequestData.ReceivedSetTargetRequests[i];
-            var unitWorldIndex = m_SetTargetRequestData.WorldIndexData[i].Value;
-            var cellsToMark = m_SetTargetRequestData.CellsToMarkData[i];
-            var faction = m_SetTargetRequestData.Faction[i];
-            var originCoord = m_SetTargetRequestData.CoordinateData[i].CubeCoordinate;
+            var setTargetRequest = setTargetRequests[i];
 
-            foreach (var str in setTargetRequest.Requests)
+            Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitEntityId, ref WorldIndex.Component unitWorldIndex, ref Actions.Component unitActions, ref CubeCoordinate.Component unitCoord, ref FactionComponent.Component unitFaction, ref CellsToMark.Component unitCellsToMark) =>
             {
-                long id = str.Payload.TargetId;
+                var requestingUnitId = unitEntityId;
+                var requestingUnitActions = unitActions;
+                var requestingUnitCoord = unitCoord;
+                var requestingUnitFaction = unitFaction;
+                var requestingUnitCellsToMark = unitCellsToMark;
 
-                if (actionData.CurrentSelected.Index != -3 && actionData.LockedAction.Index == -3)
+                if (unitEntityId.EntityId.Id == setTargetRequest.EntityId.Id)
                 {
-                    switch (actionData.CurrentSelected.Targets[0].TargetType)
+                    long id = setTargetRequest.Payload.TargetId;
+
+                    if (unitActions.CurrentSelected.Index != -3 && unitActions.LockedAction.Index == -3)
                     {
-                        case TargetTypeEnum.cell:
-                            for (int ci = 0; ci < m_CellData.Length; ci++)
-                            {
-                                var cellId = m_CellData.EntityIds[ci].EntityId.Id;
-                                var cellAtts = m_CellData.CellAttributes[ci].CellAttributes;
-                                var cell = m_CellData.CellAttributes[ci].CellAttributes.Cell;
+                        switch (unitActions.CurrentSelected.Targets[0].TargetType)
+                        {
+                            case TargetTypeEnum.cell:
 
-                                if (cellId == id)
+                                Entities.With(m_CellData).ForEach((ref SpatialEntityId cellId, ref CellAttributesComponent.Component cellAtts) =>
                                 {
-                                    bool isValidTarget = false;
-                                    if(cellsToMark.CachedPaths.Count != 0)
-                                    {
-                                        if (cellsToMark.CachedPaths.ContainsKey(cell))
-                                        {
-                                            isValidTarget = true;
-                                        }
-                                    }
-                                    else 
-                                    {
-                                        bool valid = false;
-                                        foreach(CellAttributes ca in cellsToMark.CellsInRange)
-                                        {
-                                            if(ca.Cell.CubeCoordinate == cell.CubeCoordinate)
-                                            {
+                                    var cell = cellAtts.CellAttributes.Cell;
 
-                                                    if (actionData.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
+                                    if (cellId.EntityId.Id == id)
+                                    {
+                                        bool isValidTarget = false;
+                                        if (requestingUnitCellsToMark.CachedPaths.Count != 0)
+                                        {
+                                            if (requestingUnitCellsToMark.CachedPaths.ContainsKey(cell))
+                                            {
+                                                isValidTarget = true;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            bool valid = false;
+                                            foreach (CellAttributes ca in requestingUnitCellsToMark.CellsInRange)
+                                            {
+                                                if (Vector3fext.ToUnityVector(ca.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(cell.CubeCoordinate))
+                                                {
+                                                    if (requestingUnitActions.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
                                                     {
                                                         if (!cell.IsTaken) valid = true;
                                                     }
@@ -260,101 +238,98 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                                     }
                                                 }
 
-                                        }
-
-                                        isValidTarget = valid;
-                                        
-                                    }
-
-                                    if(isValidTarget)
-                                    {
-                                        actionData.LockedAction = actionData.CurrentSelected;
-                                        var locked = actionData.LockedAction;
-                                        var t = actionData.LockedAction.Targets[0];
-                                        t.TargetCoordinate = cell.CubeCoordinate;
-                                        t.TargetId = id;
-                                        actionData.LockedAction.Targets[0] = t;
-
-                                        for (int mi = 0; mi < actionData.LockedAction.Targets[0].Mods.Count; mi++)
-                                        {
-                                            var modType = actionData.LockedAction.Targets[0].Mods[mi].ModType;
-                                            var mod = actionData.LockedAction.Targets[0].Mods[0];
-                                            switch (modType)
-                                            {
-                                                case ModTypeEnum.aoe:
-                                                    foreach (Vector3f v in CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius))
-                                                    {
-                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
-                                                    }
-                                                    break;
-                                                case ModTypeEnum.path:
-                                                    foreach (CellAttribute c in FindPath(cell, cellsToMark.CachedPaths).CellAttributes)
-                                                    {
-                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
-                                                    }
-                                                    actionData.LockedAction.Targets[0].Mods[0] = mod;
-                                                    locked.CombinedCost = CalculateCombinedCost(t);
-                                                    break;
-                                                case ModTypeEnum.line:
-                                                    foreach(Vector3f v in LineDraw(originCoord, t.TargetCoordinate))
-                                                    {
-                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
-                                                    }
-                                                    break;
-                                                case ModTypeEnum.ring:
-                                                    foreach (Vector3f v in RingDraw(t.TargetCoordinate, mod.RingNested.Radius))
-                                                    {
-                                                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
-                                                    }
-                                                    break;
                                             }
+
+                                            isValidTarget = valid;
+
                                         }
-                                        actionData.LockedAction = locked;
-                                        m_ResourceSystem.SubstactEnergy(faction.Faction, locked.CombinedCost);
+
+                                        if (isValidTarget)
+                                        {
+                                            requestingUnitActions.LockedAction = requestingUnitActions.CurrentSelected;
+                                            var locked = requestingUnitActions.LockedAction;
+                                            var t = requestingUnitActions.LockedAction.Targets[0];
+                                            t.TargetCoordinate = cell.CubeCoordinate;
+                                            t.TargetId = id;
+                                            requestingUnitActions.LockedAction.Targets[0] = t;
+
+                                            for (int mi = 0; mi < requestingUnitActions.LockedAction.Targets[0].Mods.Count; mi++)
+                                            {
+                                                var modType = requestingUnitActions.LockedAction.Targets[0].Mods[mi].ModType;
+                                                var mod = requestingUnitActions.LockedAction.Targets[0].Mods[0];
+                                                switch (modType)
+                                                {
+                                                    case ModTypeEnum.aoe:
+                                                        foreach (Vector3f v in CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius))
+                                                        {
+                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                                                        }
+                                                        break;
+                                                    case ModTypeEnum.path:
+                                                        foreach (CellAttribute c in FindPath(cell, requestingUnitCellsToMark.CachedPaths).CellAttributes)
+                                                        {
+                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
+                                                        }
+                                                        requestingUnitActions.LockedAction.Targets[0].Mods[0] = mod;
+                                                        locked.CombinedCost = CalculateCombinedCost(t);
+                                                        break;
+                                                    case ModTypeEnum.line:
+                                                        foreach (Vector3f v in LineDraw(requestingUnitCoord.CubeCoordinate, t.TargetCoordinate))
+                                                        {
+                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                                                        }
+                                                        break;
+                                                    case ModTypeEnum.ring:
+                                                        foreach (Vector3f v in RingDraw(t.TargetCoordinate, mod.RingNested.Radius))
+                                                        {
+                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                                                        }
+                                                        break;
+                                                }
+                                            }
+                                            requestingUnitActions.LockedAction = locked;
+                                            m_ResourceSystem.SubstactEnergy(requestingUnitFaction.Faction, locked.CombinedCost);
+                                        }
+                                        else
+                                        {
+                                            requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
+                                        }
                                     }
-                                    else
-                                    {
-                                        actionData.LockedAction = actionData.NullAction;
-                     
-                                    }
-                                }
-                            }
-                            break;
-                        case TargetTypeEnum.unit:
-                            for (int ci = 0; ci < m_UnitData.Length; ci++)
-                            {
-                                var unitId = m_UnitData.EntityIds[ci].EntityId.Id;
-                                var unitCoord = m_UnitData.CoordinateData[ci].CubeCoordinate;
-                                
-                                if (unitId == id)
+                                });
+                                break;
+                            case TargetTypeEnum.unit:
+                                Entities.With(m_UnitData).ForEach((ref SpatialEntityId targetUnitId, ref CubeCoordinate.Component targetUnitCoord) =>
                                 {
-                                    bool isValidTarget = false;
-                                        foreach (CellAttributes c in cellsToMark.CellsInRange)
+                                    if (targetUnitId.EntityId.Id == id)
+                                    {
+                                        bool isValidTarget = false;
+                                        foreach (CellAttributes c in requestingUnitCellsToMark.CellsInRange)
                                         {
-                                            if (c.Cell.CubeCoordinate == unitCoord)
+                                            if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
                                             {
-                                                isValidTarget = ValidateUnitTarget(unitId, usingId, faction.Faction, actionData.CurrentSelected.Targets[0].UnitTargetNested.UnitReq);
+                                                isValidTarget = ValidateUnitTarget(targetUnitId.EntityId.Id, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq);
                                             }
                                         }
+                                        if (isValidTarget)
+                                        {
+                                            requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, targetUnitId.EntityId.Id, requestingUnitFaction.Faction);
+                                        }
+                                        else
+                                        {
+                                            requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
+                                        }
+                                    }
+                                });
+                                break;
+                        }
 
-                                    if (isValidTarget)
-                                    {
-                                        actionData.LockedAction = SetLockedAction(actionData.CurrentSelected, originCoord, unitCoord, unitId, faction.Faction);
-                                    }
-                                    else
-                                    {
-                                        actionData.LockedAction = actionData.NullAction;
-                                    }
-                                }
-                            }
-                            break;
+                        unitActions = requestingUnitActions;
+                        unitActions.CurrentSelected = unitActions.NullAction;
                     }
-                    actionData.CurrentSelected = actionData.NullAction;
                 }
-            }
-            m_SetTargetRequestData.ActionsData[i] = actionData;
-        }
+            });
 
+        }
         #endregion
     }
 
@@ -447,27 +422,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     }
     */
 
-    public Vector3 CoordinateToWorldPosition(uint inWorldIndex, Vector3f inCubeCoordinate)
-    {
-        UpdateInjectedComponentGroups();
-
-        Vector3 worldPos = new Vector3();
-
-        for(int i = 0; i < m_CellData.Length; i++)
-        {
-            var worldIndex = m_CellData.WorldIndexData[i].Value;
-            var position = m_CellData.PositionData[i].Coords;
-            var cubeCoord = m_CellData.CoordinateData[i].CubeCoordinate;
-
-            if(worldIndex == inWorldIndex && inCubeCoordinate == cubeCoord)
-            {
-                worldPos = position.ToUnityVector();
-            }
-        }
-
-        return worldPos;
-    }
-
     Vector3f CubeDirection(uint direction)
     {
         if (direction < 6)
@@ -478,33 +432,39 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     
     Vector3f CubeNeighbour(Vector3f origin, uint direction)
     {
-        return origin + CubeDirection(direction);
+        var cubeDirection = CubeDirection(direction);
+        return new Vector3f(origin.X + cubeDirection.X, origin.Y + cubeDirection.Y, origin.Z + cubeDirection.Z);
     }
 
     Vector3f CubeScale(Vector3f direction, uint scale)
     {
-        return direction * scale;
+        return new Vector3f(direction.X * scale, direction.Y * scale, direction.Z * scale);
     }
 
     public Vector3f CoordinateDirection(Vector3f origin, Vector3f destination)
     {
-        var direction = destination - origin;
-        return direction;
+        return new Vector3f(destination.X - origin.X, destination.Y - origin.Y, destination.Z - origin.Z);
     }
 
     public List<Vector3f> RingDraw(Vector3f origin, uint radius)
     {
         var ring = new List<Vector3f>();
-        var coord = origin + CubeScale(DirectionsArray[4], radius);
+        var cubeScale = CubeScale(DirectionsArray[4], radius);
+        //Debug.Log("OriginCoord = " + origin.X + ", " + origin.Y + ", " + origin.Z);
+        //Debug.Log("CubeScale = " + cubeScale.X + ", " + cubeScale.Y + ", " + cubeScale.Z);
+        var coord = new Vector3f(origin.X + cubeScale.X, origin.Y + cubeScale.Y, origin.Z + cubeScale.Z);
 
         for(int i = 0; i < 6; i++)
         {
             for(int j = 0; j < radius; j++)
             {
+                //Debug.Log("RingCoord = " + coord.X + coord.Y + coord.Z);
                 ring.Add(coord);
                 coord = CubeNeighbour(coord, (uint)i);
             }
         }
+
+        //Debug.Log("RingCount = " + ring.Count);
         return ring;
     }
 
@@ -516,7 +476,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public float GetAngle(Vector3f originPos, Vector3f targetPos)
     {
-        Vector3f dir = targetPos - originPos;
+        Vector3f dir = CoordinateDirection(originPos, targetPos);
         float Angle = Mathf.Atan2(dir.X, dir.Z) * Mathf.Rad2Deg;
         return Angle;
     }
@@ -535,8 +495,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     {
         List<Vector3f> line = new List<Vector3f>();
         var n = GetDistance(origin, destination);
+
         //nudge destination
-        destination += new Vector3f(1e-6f, 2e-6f, -3e-6f);
+        //destination = new Vector3f(destination.X + 1e - 6f, destination.Y + 2e-6f, destination.Z + 3e-6f);
 
         for(int i = 0; i <= n; i++)
         {
@@ -583,7 +544,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             for (int y = (int)(Mathf.Max(-(float)radius, -x - (float)radius)); y <= (int)(Mathf.Min((float)radius, -x + radius)); y++)
             {
                 var z = -x - y;
-                results.Add(originCellCubeCoordinate + new Vector3f(x, y, z));
+                results.Add(new Vector3f(originCellCubeCoordinate.X + x, originCellCubeCoordinate.Y + y, originCellCubeCoordinate.Z + z));
             }
         }
         return results;
@@ -591,7 +552,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
-        UpdateInjectedComponentGroups();
         //returns a list of offsetCoordinates
         var cellsInRadius = new List<CellAttributes>();
         //reserve first index for origin
@@ -609,24 +569,20 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
         //use a hashset instead of a list to improve contains performance
 
-        for (int i = 0; i < m_CellData.Length; i++)
+        Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref CubeCoordinate.Component cubeCoordinate, ref CellAttributesComponent.Component cellAttributes) =>
         {
-            uint cellWorldIndex = m_CellData.WorldIndexData[i].Value;
-            Vector3f cubeCoordinate = m_CellData.CoordinateData[i].CubeCoordinate;
-            var cellAttributes = m_CellData.CellAttributes[i].CellAttributes;
-
-            if (cellWorldIndex == unitWorldIndex)
+            if (cellWorldIndex.Value == unitWorldIndex)
             {
-                if (cubeCoordinate == originCellCubeCoordinate)
+                if (Vector3fext.ToUnityVector(cubeCoordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCellCubeCoordinate))
                 {
-                    cellsInRadius[0] = cellAttributes;
+                    cellsInRadius[0] = cellAttributes.CellAttributes;
                 }
-                else if (coordHash.Contains(cubeCoordinate))
+                else if (coordHash.Contains(cubeCoordinate.CubeCoordinate))
                 {
-                    cellsInRadius.Add(cellAttributes);
+                    cellsInRadius.Add(cellAttributes.CellAttributes);
                 }
             }
-        }
+        });
         
         return cellsInRadius;
     }
@@ -660,17 +616,14 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
     {
-
         CellAttribute origin = new CellAttribute();
-        for(int i = 0; i < m_CellData.Length; i++)
+        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coordinate, ref CellAttributesComponent.Component cellAttribute) =>
         {
-            var coordinate = m_CellData.CoordinateData[i].CubeCoordinate;
-            var cellAttribute = m_CellData.CellAttributes[i].CellAttributes.Cell;
-            if(coordinate == originCoord)
+            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCoord))
             {
-                origin = cellAttribute;
+                origin = cellAttribute.CellAttributes.Cell;
             }
-        }
+        });
 
         var paths = CachePaths(cellsInRange, origin);
         var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
@@ -705,9 +658,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return paths;
     }
 
-    /// <summary>
-    /// Method returns graph representation of cell grid for pathfinding.
-    /// </summary>
     public Dictionary<CellAttribute, Dictionary<CellAttribute, int>> GetGraphEdges(List<CellAttributes> cellsInRange, CellAttribute origin)
     {
         Dictionary<CellAttribute, Dictionary<CellAttribute, int>> ret = new Dictionary<CellAttribute, Dictionary<CellAttribute, int>>();
@@ -726,7 +676,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             ret[cell.Cell] = new Dictionary<CellAttribute, int>();
 
 
-            if (!isTaken || cell.Cell.CubeCoordinate == origin.CubeCoordinate)
+            if (!isTaken || Vector3fext.ToUnityVector(cell.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(origin.CubeCoordinate))
             {
                 if(neighbours != null)
                 {
@@ -755,15 +705,15 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
     {
         CellAttribute destination = new CellAttribute();
-        for (int i = 0; i < m_CellData.Length; i++)
+
+        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coordinate, ref CellAttributesComponent.Component cellAttribute) =>
         {
-            var coordinate = m_CellData.CoordinateData[i].CubeCoordinate;
-            var cellAttribute = m_CellData.CellAttributes[i].CellAttributes.Cell;
-            if (coordinate == inDestination)
+            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
             {
-                destination = cellAttribute;
+                destination = cellAttribute.CellAttributes.Cell;
             }
-        }
+        });
+
         if (cachedPaths.ContainsKey(destination))
         {
             return cachedPaths[destination];
@@ -774,7 +724,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, long entityId, uint worldIndex)
     {
-        UpdateInjectedComponentGroups();
         var cell = cellAttributes.Cell;
         cell.IsTaken = isTaken;
         cell.UnitOnCellId = entityId;
@@ -791,43 +740,35 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
     public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours, uint worldIndex)
     {
-        UpdateInjectedComponentGroups();
-        for (int ci = 0; ci < m_CellData.Length; ci++)
+        Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWordlIndex, ref CellAttributesComponent.Component cellAtt) =>
         {
-            var cellWordlIndex = m_CellData.WorldIndexData[ci].Value;
-            if(worldIndex == cellWordlIndex)
+            if (worldIndex == cellWordlIndex.Value)
             {
-                var cellAtt = m_CellData.CellAttributes[ci];
                 for (int n = 0; n < neighbours.CellAttributes.Count; n++)
                 {
-                    if (neighbours.CellAttributes[n].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate)
+                    if (Vector3fext.ToUnityVector(neighbours.CellAttributes[n].CubeCoordinate) == Vector3fext.ToUnityVector(cellAtt.CellAttributes.Cell.CubeCoordinate))
                     {
                         for (int cn = 0; cn < cellAtt.CellAttributes.Neighbours.CellAttributes.Count; cn++)
                         {
-                            if (cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate == cell.CubeCoordinate)
+                            if (Vector3fext.ToUnityVector(cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate) == Vector3fext.ToUnityVector(cell.CubeCoordinate))
                             {
                                 cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = cell;
                                 cellAtt.CellAttributes = cellAtt.CellAttributes;
-                                m_CellData.CellAttributes[ci] = cellAtt;
                             }
                         }
                     }
                 }
             }
-        }
+        });
     }
 
     public bool ValidateUnitTarget(long targetUnitId, long usingUnitId, uint inFaction, UnitRequisitesEnum restrictions)
     {
-        UpdateInjectedComponentGroups();
         bool valid = false;
 
-        for(int i = 0; i < m_UnitData.Length; i++)
+        Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component faction) =>
         {
-            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
-            var faction = m_UnitData.FactionData[i].Faction;
-
-            if(targetUnitId == unitId)
+            if (targetUnitId == unitId.EntityId.Id)
             {
                 switch (restrictions)
                 {
@@ -835,43 +776,43 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         valid = true;
                         break;
                     case UnitRequisitesEnum.enemy:
-                        if(faction != inFaction)
+                        if (faction.Faction != inFaction)
                         {
                             valid = true;
                         }
                         break;
                     case UnitRequisitesEnum.friendly:
-                        if (faction == inFaction)
+                        if (faction.Faction == inFaction)
                         {
                             valid = true;
                         }
                         break;
                     case UnitRequisitesEnum.friendly_other:
-                        if(faction == inFaction && usingUnitId != unitId)
+                        if (faction.Faction == inFaction && usingUnitId != unitId.EntityId.Id)
                         {
                             valid = true;
                         }
                         break;
                     case UnitRequisitesEnum.other:
-                        if(usingUnitId != unitId)
+                        if (usingUnitId != unitId.EntityId.Id)
                         {
                             valid = true;
                         }
                         break;
                     case UnitRequisitesEnum.self:
                         //maybe selfstate becomes irrelevant once a self-target is implemented.
-                        if (usingUnitId == unitId)
+                        if (usingUnitId == unitId.EntityId.Id)
                         {
                             valid = true;
                         }
                         break;
-                        
+
                     default:
                         break;
                 }
             }
+        });
 
-        }
         return valid;
     }
 

@@ -1,10 +1,10 @@
 package generic;
 
-import "improbable/vector3.schema";
+import "generic/vector3.schema";
 
 component CubeCoordinate {
 	
     id = 108;
-    improbable.Vector3f cube_coordinate = 1;
+    generic.Vector3f cube_coordinate = 1;
 	
 }

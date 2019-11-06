@@ -5,71 +5,88 @@ using Improbable.Gdk.Core.Commands;
 using Unit;
 using Generic;
 using LeyLineHybridECS;
+using Unity.Collections;
 
-[DisableAutoCreation]
+//[DisableAutoCreation]
 public class ClientCleanupSystem : ComponentSystem
 {
-    public struct GarbageCollectorData
+    EntityQuery m_GarbageCollectorData;
+    EntityQuery m_GameStateData;
+    bool initialized;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public ComponentArray<GarbageCollectorComponent> GarbageData;
-    }
+        base.OnCreate();
 
-    [Inject] GarbageCollectorData m_GarbageCollectorData;
-
-    ComponentGroup GameStateGroup;
-
-    protected override void OnCreateManager()
-    {
-        base.OnCreateManager();
-
-        GameStateGroup = Worlds.ClientWorld.CreateComponentGroup(
-        ComponentType.Create<GameState.Component>()
+        m_GarbageCollectorData = GetEntityQuery(
+        ComponentType.ReadWrite<GarbageCollectorComponent>()
         );
 
     }
 
-    protected override void OnUpdate()
+    private bool WorldsInitialized()
     {
-        if (GameStateGroup.CalculateLength() == 0 || m_GarbageCollectorData.Length == 0)
+        if (Worlds.ClientWorld != null)
         {
-            //Debug.Log("no GameState or GarbageCollector found");
-            return;
+            if (!initialized)
+            {
+                m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
+                    ComponentType.ReadOnly<GameState.Component>()
+                );
+                initialized = true;
+            }
         }
 
-        var gameState = GameStateGroup.GetComponentDataArray<GameState.Component>()[0];
-        var garbageCollector = m_GarbageCollectorData.GarbageData[0];
+        return initialized;
+    }
 
-        if (gameState.CurrentState == GameStateEnum.planning)
+    protected override void OnUpdate()
+    {
+        if(WorldsInitialized())
         {
-            if(garbageCollector.CurrentSinkTime >= 0)
+            if (m_GameStateData.CalculateEntityCount() == 0 || m_GarbageCollectorData.CalculateEntityCount() == 0)
             {
-                garbageCollector.CurrentSinkTime -= Time.deltaTime;
-                foreach (Rigidbody r in garbageCollector.GarbageRigidbodies)
-                {
-                    if(!r.isKinematic)
-                        r.isKinematic = true;
-                }
+                //Debug.Log("no GameState or GarbageCollector found");
+                return;
+            }
 
-                foreach(GameObject g in garbageCollector.GarbageObjects)
+            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+            var gameState = gameStates[0];
+            var garbageCollector = m_GarbageCollectorData.ToComponentArray<GarbageCollectorComponent>()[0];
+
+            if (gameState.CurrentState == GameStateEnum.planning)
+            {
+                if (garbageCollector.CurrentSinkTime >= 0)
                 {
-                    g.transform.position -= new Vector3(0, garbageCollector.SinkSpeed * Time.deltaTime, 0);
+                    garbageCollector.CurrentSinkTime -= Time.deltaTime;
+                    foreach (Rigidbody r in garbageCollector.GarbageRigidbodies)
+                    {
+                        if (!r.isKinematic)
+                            r.isKinematic = true;
+                    }
+
+                    foreach (GameObject g in garbageCollector.GarbageObjects)
+                    {
+                        g.transform.position -= new Vector3(0, garbageCollector.SinkSpeed * Time.deltaTime, 0);
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < garbageCollector.GarbageObjects.Count; i++)
+                    {
+                        Object.Destroy(garbageCollector.GarbageObjects[i]);
+                    }
+                    garbageCollector.GarbageObjects.Clear();
+                    garbageCollector.GarbageRigidbodies.Clear();
                 }
             }
             else
             {
-                for(int i = 0; i < garbageCollector.GarbageObjects.Count; i++)
-                {
-                    Object.Destroy(garbageCollector.GarbageObjects[i]);
-                }
-                garbageCollector.GarbageObjects.Clear();
-                garbageCollector.GarbageRigidbodies.Clear();
+                if (garbageCollector.CurrentSinkTime != garbageCollector.MaxSinkTime)
+                    garbageCollector.CurrentSinkTime = garbageCollector.MaxSinkTime;
             }
-        }
-        else
-        {
-            if (garbageCollector.CurrentSinkTime != garbageCollector.MaxSinkTime)
-                garbageCollector.CurrentSinkTime = garbageCollector.MaxSinkTime;
+
+            gameStates.Dispose();
         }
     }
 }

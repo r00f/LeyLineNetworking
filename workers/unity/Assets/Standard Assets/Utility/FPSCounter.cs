@@ -1,9 +1,10 @@
 using System;
 using UnityEngine;
-using UnityEngine.UI;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace UnityStandardAssets.Utility
 {
+    /*
     [RequireComponent(typeof (Text))]
     public class FPSCounter : MonoBehaviour
     {
@@ -35,4 +36,5 @@ namespace UnityStandardAssets.Utility
             }
         }
     }
+    */
 }

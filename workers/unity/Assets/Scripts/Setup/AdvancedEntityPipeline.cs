@@ -4,7 +4,7 @@ using System.IO;
 using Improbable;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.GameObjectCreation;
-using Improbable.Gdk.StandardTypes;
+//using Improbable.Gdk.StandardTypes;
 using Improbable.Gdk.Subscriptions;
 using LeyLineHybridECS;
 using Unity.Entities;
@@ -88,7 +88,8 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
                     }
                 }
 
-                var position = worker.Origin;
+                //WORKERORIGIN IS BEING SET SOMEWHERE MAYBE?!
+                var position = workerOrigin;
                 var prefab = authority ? cachedAuthPlayer : cachedNonAuthPlayer;
                 var gameObject = Object.Instantiate(prefab, position, Quaternion.identity);
                 gameObject.name = GetGameObjectName(prefab, entity, worker);

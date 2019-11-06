@@ -3,6 +3,7 @@ using LeyLineHybridECS;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Generic;
 
 public class AnimatorComponent : MonoBehaviour
 {

@@ -16,7 +16,7 @@ namespace LeyLineHybridECS
         public float3 CubeCoordinate;
     }
 
-    public class CoordinateDataComponent : ComponentDataWrapper<GridCoordinates> { }
+    public class CoordinateDataComponent : ComponentDataProxy<GridCoordinates> { }
 
 }
 

@@ -2,6 +2,7 @@
 using Unity.Entities;
 using Unity.Mathematics;
 using Improbable;
+using Generic;
 
 public struct HighlightingDataComponent : IComponentData
 {

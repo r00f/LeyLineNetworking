@@ -7,23 +7,21 @@ namespace LeyLineHybridECS
 {
     public class EnergySystem : ComponentSystem
     {
-        public struct PlayerData
+        EntityQuery m_UnitData;
+        EntityQuery m_PlayerData;
+
+        protected override void OnCreate()
         {
-            public readonly int Length;
-            //public ComponentArray<PlayerEnergy> PlayerEnergyData;
-            public ComponentDataArray<Faction> FactionData;
+            base.OnCreate();
+            m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<UnitEnergy>(),
+            ComponentType.ReadWrite<Faction>()
+            );
+
+            m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<Faction>()
+            );
         }
-
-        [Inject] PlayerData m_PlayerData;
-
-        public struct UnitData
-        {
-            public readonly int Length;
-            public ComponentDataArray<UnitEnergy> UnitEnergyData;
-            public ComponentDataArray<Faction> FactionData;
-        }
-
-        [Inject] UnitData m_UnitData;
 
         protected override void OnUpdate()
         {

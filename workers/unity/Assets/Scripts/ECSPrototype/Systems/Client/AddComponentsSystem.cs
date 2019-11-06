@@ -1,15 +1,16 @@
 ﻿using Cell;
 using Generic;
 using Improbable.Gdk.Core;
-using Improbable.Gdk.ReactiveComponents;
+//using Improbable.Gdk.ReactiveComponents;
 using LeyLineHybridECS;
 using Player;
 using Unit;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
 [DisableAutoCreation]
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(SpawnUnitsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class AddComponentsSystem : ComponentSystem
 {
     public struct WorldIndexStateData : ISystemStateComponentData
@@ -17,98 +18,120 @@ public class AddComponentsSystem : ComponentSystem
         public WorldIndex.Component WorldIndexState;
     }
 
-    private struct CellAddedData
+    EntityQuery m_PlayerStateData;
+    EntityQuery m_PlayerAddedData;
+    EntityQuery m_ProjectileAddedData;
+    EntityQuery m_UnitAddedData;
+    EntityQuery m_CellAddedData;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public readonly EntityArray Entities;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentArray<Transform> Transform;
-        public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributesData;
-        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
+        base.OnCreateManager();
+
+        var projectileAddedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+            {
+                typeof(WorldIndexStateData)
+            },
+            All = new ComponentType[]
+            {
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<Projectile>()
+            }
+        };
+
+        m_ProjectileAddedData = GetEntityQuery(projectileAddedDesc);
+
+        var unitAddedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+            {
+                typeof(WorldIndexStateData)
+            },
+            All = new ComponentType[]
+            {
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<CubeCoordinate.Component>(),
+                ComponentType.ReadOnly<Health.Component>(),
+                ComponentType.ReadOnly<Transform>(),
+                ComponentType.ReadWrite<AnimatorComponent>()
+            }
+        };
+
+        m_UnitAddedData = GetEntityQuery(unitAddedDesc);
+
+        var cellAddedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+            {
+                typeof(WorldIndexStateData)
+            },
+            All = new ComponentType[]
+            {
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<CellAttributesComponent.Component>()
+            }
+        };
+
+        m_CellAddedData = GetEntityQuery(cellAddedDesc);
+
+        var playerAddedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[] 
+            {
+                typeof(WorldIndexStateData)
+            },
+            All = new ComponentType[]
+            {
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<PlayerState.Component>()
+            }
+        };
+
+        m_PlayerAddedData = GetEntityQuery(playerAddedDesc);
+
+        m_PlayerStateData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+            );
+
+        m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
+
     }
-
-    [Inject] CellAddedData m_CellAddedData;
-
-    private struct UnitAddedData
-    {
-        public readonly int Length;
-        public readonly EntityArray Entities;
-        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates; 
-        public readonly ComponentDataArray<FactionComponent.Component> Factions;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Health.Component> UnitAttributeData;
-        public readonly ComponentArray<Transform> Transform;
-        public ComponentArray<AnimatorComponent> AnimatorData;
-        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
-    }
-
-    [Inject] UnitAddedData m_UnitAddedData;
-
-    /*
-    private struct ProjectileAddedData
-    {
-        public readonly int Length;
-        public readonly EntityArray Entities;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
-    }
-
-    [Inject] ProjectileAddedData m_ProjectileAddedData;
-
-    */
-    private struct PlayerAddedData
-    {
-        public readonly int Length;
-        public readonly EntityArray Entities;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
-        public SubtractiveComponent<WorldIndexStateData> WorldIndexState;
-    }
-
-    [Inject] PlayerAddedData m_PlayerAddedData;
-
-    public struct PlayerData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<FactionComponent.Component> Factions;
-        public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
-    }
-
-    [Inject] PlayerData m_PlayerData;
 
     protected override void OnUpdate()
     {
-        if (m_PlayerData.Length == 0)
+        if (m_PlayerStateData.CalculateEntityCount() == 0)
             return;
 
-        var authPlayerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
-        var playerFaction = m_PlayerData.Factions[0].Faction;
+        var authPlayerWorldIndexes = m_PlayerStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+        var playerFactions = m_PlayerStateData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
 
-        if (authPlayerWorldIndex == 0)
-            return;
+        var playerFaction = playerFactions[0];
+        var authPlayerWorldIndex = authPlayerWorldIndexes[0].Value;
 
-        for (int i = 0; i < m_PlayerAddedData.Length; i++)
+        Entities.With(m_PlayerAddedData).ForEach((Entity entity, ref WorldIndex.Component pWorldIndex) =>
         {
-            var pWorldIndex = m_PlayerAddedData.WorldIndexData[i];
-            var entity = m_PlayerAddedData.Entities[i];
-
-            if (pWorldIndex.Value == authPlayerWorldIndex)
-            {
+            //if (pWorldIndex.Value == authPlayerWorldIndex)
+            //{
                 HighlightingDataComponent highlightingData = new HighlightingDataComponent();
                 PostUpdateCommands.AddComponent(entity, highlightingData);
-            }
+            //}
 
-            PostUpdateCommands.AddComponent(m_PlayerAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = pWorldIndex });
-        }
+            PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
+        });
 
-        for (int i = 0; i < m_CellAddedData.Length; i++)
+        Entities.With(m_CellAddedData).ForEach((Entity entity, ref WorldIndex.Component cellWorldIndex) =>
         {
-            var cellWorldIndex = m_CellAddedData.WorldIndexData[i];
-            var entity = m_CellAddedData.Entities[i];
+            //Debug.Log(authPlayerWorldIndex);
 
-            if (cellWorldIndex.Value == authPlayerWorldIndex)
-            {
+            //if (cellWorldIndex.Value == authPlayerWorldIndex)
+            //{
+                //Debug.Log("AddCellComponents");
+
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
@@ -139,23 +162,18 @@ public class AddComponentsSystem : ComponentSystem
                 PostUpdateCommands.AddComponent(entity, mouseState);
                 PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, isVisible);
-            }
+            //}
 
-            PostUpdateCommands.AddComponent(m_CellAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = cellWorldIndex });
-        }
-        
-        for (int i = 0; i < m_UnitAddedData.Length; i++)
+            PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
+
+        });
+
+        Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord) =>
         {
-            var unitWorldIndex = m_UnitAddedData.WorldIndexData[i];
-            var entity = m_UnitAddedData.Entities[i];
-            var faction = m_UnitAddedData.Factions[i].Faction;
-            var coord = m_UnitAddedData.Coordinates[i].CubeCoordinate;
-            var anim = m_UnitAddedData.AnimatorData[i];
+            anim.LastStationaryCoordinate = coord.CubeCoordinate;
 
-            anim.LastStationaryCoordinate = coord;
-
-            if (unitWorldIndex.Value == authPlayerWorldIndex)
-            {
+            //if (unitWorldIndex.Value == authPlayerWorldIndex)
+            //{
                 MouseState mouseState = new MouseState
                 {
                     CurrentState = MouseState.State.Neutral,
@@ -170,7 +188,7 @@ public class AddComponentsSystem : ComponentSystem
 
                 IsVisible isVisible = new IsVisible();
 
-                if (faction == playerFaction)
+                if (faction.Faction == playerFaction.Faction)
                 {
                     isVisible.Value = 1;
                     isVisible.RequireUpdate = 1;
@@ -194,10 +212,10 @@ public class AddComponentsSystem : ComponentSystem
                 PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, mouseState);
                 PostUpdateCommands.AddComponent(entity, isVisible);
-            }
+            //}
 
-            PostUpdateCommands.AddComponent(m_UnitAddedData.Entities[i], new WorldIndexStateData { WorldIndexState = unitWorldIndex });
-        }
+            PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
+        });
 
         /*
         for(int i = 0; i < m_ProjectileAddedData.Length; i++)
@@ -211,5 +229,8 @@ public class AddComponentsSystem : ComponentSystem
             }
         }
         */
+
+        authPlayerWorldIndexes.Dispose();
+        playerFactions.Dispose();
     }
 }

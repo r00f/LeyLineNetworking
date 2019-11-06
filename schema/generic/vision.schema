@@ -1,15 +1,15 @@
 
 package generic;
-import "improbable/vector3.schema";
+import "generic/vector3.schema";
 
 component Vision {
 	
     id = 111;
 	uint32 vision_range = 1;
-	list<improbable.Vector3f> cells_in_visionrange = 2;
-	list<improbable.Vector3f> lastvisible = 3;
-	list<improbable.Vector3f> positives = 4;
-	list<improbable.Vector3f> negatives = 5;
+	list<generic.Vector3f> cells_in_visionrange = 2;
+	list<generic.Vector3f> lastvisible = 3;
+	list<generic.Vector3f> positives = 4;
+	list<generic.Vector3f> negatives = 5;
 	bool require_update = 6;
 	command UpdateClientVisionResponse update_client_vision_command(UpdateClientVisionRequest);
 }

@@ -4,39 +4,54 @@ using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using cakeslice;
+using Generic;
+using Unity.Collections;
 
 public class InitializeUnitsSystem : ComponentSystem
 {
-
+    /*
     public struct UnitData
     {
         public readonly int Length;
-        public readonly ComponentArray<Transform> Transforms;
-        public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
+        public readonly ComponentArray<> Transforms;
+        public readonly ComponentDataArray<> NewEntity;
         public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
         public ComponentArray<UnitComponentReferences> ComponentReferences;
         public ComponentArray<LineRendererComponent> LineRenderers;
         public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
         public ComponentArray<UnitMarkerGameObjects> MarkerGameObjects;
     }
-
-    [Inject] UnitData m_UnitData;
-
     public struct PlayerData
     {
         public readonly int Length;
-        public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
+        public readonly ComponentDataArray<Generic.> FactionData;
         public ComponentArray<HeroTransform> HeroTransforms;
     }
 
-    [Inject] PlayerData m_PlayerData;
+    */
 
+    EntityQuery m_PlayerData;
+    EntityQuery m_UnitData;
     Settings settings;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
+        base.OnCreate();
 
-        base.OnCreateManager();
+        m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<Transform>(),
+            ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadWrite<UnitComponentReferences>(),
+            ComponentType.ReadWrite<LineRendererComponent>(),
+            ComponentType.ReadWrite<TeamColorMeshes>(),
+            ComponentType.ReadWrite<UnitMarkerGameObjects>()
+            );
+
+        m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<HeroTransform>(),
+            ComponentType.ReadOnly<FactionComponent.Component>()
+            );
 
         //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
         settings = Resources.Load<Settings>("Settings");
@@ -45,14 +60,21 @@ public class InitializeUnitsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        for(int i = 0; i < m_UnitData.Length; i++)
+        var unitFactionData = m_UnitData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+        var teamColorMesheData = m_UnitData.ToComponentArray<TeamColorMeshes>();
+        var componentReferenceData = m_UnitData.ToComponentArray<UnitComponentReferences>();
+        var lineRendererData = m_UnitData.ToComponentArray<LineRendererComponent>();
+        var unitTransformData = m_UnitData.ToComponentArray<Transform>();
+        var markerObjectData = m_UnitData.ToComponentArray<UnitMarkerGameObjects>();
+
+        for (int i = 0; i < unitFactionData.Length; i++)
         {
-            var unitFactionComp = m_UnitData.FactionData[i];
-            var teamColorMeshes = m_UnitData.TeamColorMeshesData[i];
-            var componentReferences = m_UnitData.ComponentReferences[i];
-            var lineRenderer = m_UnitData.LineRenderers[i];
-            var unitTransform = m_UnitData.Transforms[i];
-            var markerObjects = m_UnitData.MarkerGameObjects[i];
+            var unitFactionComp = unitFactionData[i];
+            var teamColorMeshes = teamColorMesheData[i];
+            var componentReferences = componentReferenceData[i];
+            var lineRenderer = lineRendererData[i];
+            var unitTransform = unitTransformData[i];
+            var markerObjects = markerObjectData[i];
 
 
             Color factionColor = new Color();
@@ -96,21 +118,16 @@ public class InitializeUnitsSystem : ComponentSystem
 
                 }
             }
-
-            //Debug.Log(m_PlayerData.Length);
-
-            for (int pi = 0; pi < m_PlayerData.Length; pi++)
+            Entities.With(m_PlayerData).ForEach((HeroTransform heroTransform, ref FactionComponent.Component playerFactionComp) =>
             {
-
-                var playerFactionComp = m_PlayerData.FactionData[pi];
-                var heroTransform = m_PlayerData.HeroTransforms[pi];
-
-                if(playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
+                if (playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
                 {
                     heroTransform.Transform = unitTransform;
                 }
-
-            }
+            });
         }
+        m_UnitData.CopyFromComponentDataArray(unitFactionData);
+        unitFactionData.Dispose();
+
     }
 }

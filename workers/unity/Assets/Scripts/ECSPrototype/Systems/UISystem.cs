@@ -1,8 +1,8 @@
 ﻿using Generic;
 using Improbable.Gdk.Core;
-using Improbable.Gdk.ReactiveComponents;
 using Player;
 using Unit;
+using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,86 +10,65 @@ using UnityEngine.UI;
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation]
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(PlayerStateSystem))]
+    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class UISystem : ComponentSystem
     {
-        struct UnitData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
-            public readonly ComponentArray<Transform> TransformData;
-            public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
-            public readonly ComponentDataArray<MouseState> MouseStateData;
-            public readonly ComponentDataArray<Health.Component> HealthData;
-            public readonly ComponentDataArray<IsVisible> IsVisibleData;
-            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-            public readonly ComponentDataArray<Actions.Component> Actions;
-            public readonly ComponentArray<AnimatedPortraitReference> PortraitData;
-            public ComponentArray<UnitComponentReferences> ComponentReferences;
-            public ComponentArray<Healthbar> HealthbarData;
-        }
-
-        [Inject] UnitData m_UnitData;
-
-        struct GameStateData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<GameState.Component> GameStates;
-        }
-
-        [Inject] GameStateData m_GameStateData;
-
-        public struct AuthoritativePlayerData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
-            public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
-            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-            public ComponentDataArray<PlayerState.Component> PlayerStateData;
-        }
-
-        [Inject] AuthoritativePlayerData m_AuthoritativePlayerData;
-
-        public struct PlayerData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
-            public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-            public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
-        }
-
-        [Inject] PlayerData m_PlayerData;
-
-        [Inject] PlayerStateSystem m_PlayerStateSystem;
-
-        [Inject] SendActionRequestSystem m_SendActionRequestSystem;
+        PlayerStateSystem m_PlayerStateSystem;
+        SendActionRequestSystem m_SendActionRequestSystem;
+        EntityQuery m_PlayerData;
+        EntityQuery m_AuthoritativePlayerData;
+        EntityQuery m_GameStateData;
+        EntityQuery m_UnitData;
 
         UIReferences UIRef;
 
         Settings settings;
 
-        protected override void OnCreateManager()
+        protected override void OnCreate()
         {
-
             base.OnCreateManager();
-
-            //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+            m_PlayerStateSystem = World.GetExistingSystem<PlayerStateSystem>();
+            m_SendActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             settings = Resources.Load<Settings>("Settings");
 
+            m_UnitData = Worlds.ClientWorld.CreateEntityQuery(
+                ComponentType.ReadOnly<SpatialEntityId>(),
+                ComponentType.ReadOnly<Transform>(),
+                ComponentType.ReadOnly<Unit_BaseDataSet>(),
+                ComponentType.ReadOnly<MouseState>(),
+                ComponentType.ReadOnly<Health.Component>(),
+                ComponentType.ReadOnly<IsVisible>(),
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<Actions.Component>(),
+                ComponentType.ReadOnly<AnimatedPortraitReference>(),
+                ComponentType.ReadWrite<UnitComponentReferences>(),
+                ComponentType.ReadWrite<Healthbar>()
+            );
+
+            m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
+                ComponentType.ReadOnly<GameState.Component>()
+                );
+
+            m_AuthoritativePlayerData = Worlds.ClientWorld.CreateEntityQuery(
+                ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+                ComponentType.ReadOnly<PlayerEnergy.Component>(),
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<PlayerState.Component>()
+                );
+
+            m_AuthoritativePlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
+
+            m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
+                ComponentType.ReadOnly<PlayerEnergy.Component>(),
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<PlayerState.Component>()
+                );
         }
 
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
             InitializeButtons();
-            SetUIElementsToPlayerColor();
-        }
-
-        public void SetUIElementsToPlayerColor()
-        {
-
-
-
         }
 
         public void InitializeButtons()
@@ -112,11 +91,20 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            if (m_GameStateData.GameStates.Length == 0 || m_AuthoritativePlayerData.Length == 0)
+            if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
                 return;
 
-            var gameState = m_GameStateData.GameStates[0];
+            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
+            #region authPlayerData
+            var authPlayersEnergy = m_AuthoritativePlayerData.ToComponentDataArray<PlayerEnergy.Component>(Allocator.TempJob);
+            var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+            var authPlayersState = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            #endregion
+
+
+
+            var gameState = gameStates[0];
 
             if (gameState.CurrentState == GameStateEnum.waiting_for_players)
             {
@@ -135,7 +123,7 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        switch (m_AuthoritativePlayerData.FactionData[0].TeamColor)
+                        switch (authPlayersFaction[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
                                 //UIRef.HeroPortraitTeamColour.color = Color.blue;
@@ -160,11 +148,12 @@ namespace LeyLineHybridECS
                     UIRef.TurnStateToggles[(int)gameState.CurrentState - 1].isOn = true;
             }
 
-            var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
-            var authPlayerState = m_AuthoritativePlayerData.PlayerStateData[0];
-            var playerEnergy = m_AuthoritativePlayerData.PlayerEnergyData[0];
+            var authPlayerFaction = authPlayersFaction[0].Faction;
+            var authPlayerState = authPlayersState[0];
+            var playerEnergy = authPlayersEnergy[0];
+            
             GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
-
+            
 
             if (gameState.CurrentState == GameStateEnum.game_over)
             {
@@ -187,31 +176,26 @@ namespace LeyLineHybridECS
                 }
 
             }
+            #region Unitloop
 
-            for (int i = 0; i < m_UnitData.Length; i++)
+            Entities.With(m_UnitData).ForEach((Entity e, Healthbar healthbar, ref Actions.Component action, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
             {
-                uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
-                var action = m_UnitData.Actions[i];
-                var position = m_UnitData.TransformData[i].position;
-                var health = m_UnitData.HealthData[i];
-                var healthbar = m_UnitData.HealthbarData[i];
-                var isVisible = m_UnitData.IsVisibleData[i];
-                var animatedPortrait = m_UnitData.PortraitData[i].PortraitClip;
-                var mouseState = m_UnitData.MouseStateData[i].CurrentState;
-                var faction = m_UnitData.FactionData[i];
-                var factionColor = m_UnitData.FactionData[i].TeamColor;
-                var stats = m_UnitData.BaseDataSets[i];
+                uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
+                var position = EntityManager.GetComponentObject<Transform>(e).position;
+                var animatedPortrait = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClip;
+                var factionColor = faction.TeamColor;
+                var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
                 int actionCount = stats.Actions.Count + 2;
                 int spawnActionCount = stats.SpawnActions.Count;
 
-                if(authPlayerState.SelectedUnitId == unitId)
+                if (authPlayerState.SelectedUnitId == unitId)
                 {
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
                         UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
 
-                    if(health.Armor > 0 && faction.Faction == authPlayerFaction)
+                    if (health.Armor > 0 && faction.Faction == authPlayerFaction)
                     {
                         UIRef.HealthText.text = currentMaxHealth + " +" + health.Armor;
                     }
@@ -219,7 +203,7 @@ namespace LeyLineHybridECS
                     {
                         UIRef.HealthText.text = currentMaxHealth;
                     }
-                    
+
                     SetHealthBarFillAmounts(UIRef.HealthFill, UIRef.ArmorFill, health, faction.Faction);
 
                     if (factionColor == TeamColorEnum.blue)
@@ -235,7 +219,7 @@ namespace LeyLineHybridECS
 
                     if (faction.Faction == authPlayerFaction)
                     {
-                        if(stats.SpawnActions.Count == 0)
+                        if (stats.SpawnActions.Count == 0)
                         {
                             UIRef.SpawnActionsToggle.isOn = false;
                             UIRef.ActionsToggle.isOn = true;
@@ -279,7 +263,7 @@ namespace LeyLineHybridECS
                                 //basic move
                                 //disable if not enough energy
 
-                                if(stats.BasicMove != null && stats.BasicAttack != null)
+                                if (stats.BasicMove != null && stats.BasicAttack != null)
                                 {
                                     if (bi == 0)
                                     {
@@ -382,22 +366,22 @@ namespace LeyLineHybridECS
                 }
 
                 //if there is no healthbar, instantiate it into healthBarParent
-                if(!healthbar.UnitHeadUIInstance)
+                if (!healthbar.UnitHeadUIInstance)
                 {
-                    if(health.CurrentHealth != 0)
+                    if (health.CurrentHealth != 0)
                         healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
                 }
                 else
                 {
-                    if(health.CurrentHealth == 0)
+                    if (health.CurrentHealth == 0)
                     {
                         Object.Destroy(healthbar.UnitHeadUIInstance);
                     }
                     else
                     {
-                        
+
                         GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
-                        
+
                         if (gameState.CurrentState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
                         {
                             healthBarGO.SetActive(true);
@@ -406,26 +390,26 @@ namespace LeyLineHybridECS
                         {
                             healthBarGO.SetActive(false);
                         }
-                        
+
                         healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
                         SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
                     }
                 }
-            }
-
+            });
+            #endregion
             //this clients player
-            for (int i = 0; i < m_AuthoritativePlayerData.Length; i++)
+            Entities.With(m_AuthoritativePlayerData).ForEach((ref PlayerEnergy.Component authPlayerEnergy) =>
             {
-                float maxEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].MaxEnergy;
-                float currentEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].Energy;
-                float energyIncome = m_AuthoritativePlayerData.PlayerEnergyData[i].Income;
+                float maxEnergy = authPlayerEnergy.MaxEnergy;
+                float currentEnergy = authPlayerEnergy.Energy;
+                float energyIncome = authPlayerEnergy.Income;
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
                 Text energyText = UIRef.HeroEnergyText;
 
-                if(gameState.CurrentState != GameStateEnum.planning)
+                if (gameState.CurrentState != GameStateEnum.planning)
                 {
-                    if(UIRef.ReadyButton.interactable)
+                    if (UIRef.ReadyButton.interactable)
                     {
                         UIRef.ReadyButton.interactable = false;
                     }
@@ -444,7 +428,7 @@ namespace LeyLineHybridECS
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
 
-                 energyText.text = currentEnergy + " / " + maxEnergy;
+                energyText.text = currentEnergy + " / " + maxEnergy;
 
 
                 if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
@@ -459,54 +443,65 @@ namespace LeyLineHybridECS
                         UIRef.SpawnActions[si].Visuals.SetActive(false);
                     }
                 }
-            }
+            });
 
             //all players
-            for(int i = 0; i < m_PlayerData.Length; i++)
+            Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
             {
-                var faction = m_PlayerData.FactionData[i];
-                var playerState = m_PlayerData.PlayerStateData[i].CurrentState;
+
 
                 if (faction.TeamColor == TeamColorEnum.blue)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueReady.activeSelf)
+                    if (playerState.CurrentState == PlayerStateEnum.ready && !UIRef.BlueReady.activeSelf)
                     {
                         UIRef.BlueReady.SetActive(true);
                     }
-                    else if(playerState != PlayerStateEnum.ready)
+                    else if (playerState.CurrentState != PlayerStateEnum.ready)
                     {
                         UIRef.BlueReady.SetActive(false);
                     }
                 }
-                else if(faction.TeamColor == TeamColorEnum.red)
+                else if (faction.TeamColor == TeamColorEnum.red)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.RedReady.activeSelf)
+                    if (playerState.CurrentState == PlayerStateEnum.ready && !UIRef.RedReady.activeSelf)
                     {
                         UIRef.RedReady.SetActive(true);
                     }
-                    else if(playerState != PlayerStateEnum.ready)
+                    else if (playerState.CurrentState != PlayerStateEnum.ready)
                     {
                         UIRef.RedReady.SetActive(false);
                     }
                 }
-            }
+            });
 
-            if(m_GameStateData.GameStates[0].CurrentPlanningTime <= m_GameStateData.GameStates[0].RopeDisplayTime)
+            if(gameStates[0].CurrentPlanningTime <= gameStates[0].RopeDisplayTime)
             {
                 UIRef.RopeBar.enabled = true;
-                UIRef.RopeBar.fillAmount = m_GameStateData.GameStates[0].CurrentPlanningTime / m_GameStateData.GameStates[0].RopeDisplayTime;
+                UIRef.RopeBar.fillAmount = gameStates[0].CurrentPlanningTime / gameStates[0].RopeDisplayTime;
             }
             else
             {
                 UIRef.RopeBar.enabled = false;
             }
+
+
+
+
+            gameStates.Dispose();
+
+            #region authPlayerData
+            authPlayersEnergy.Dispose();
+            authPlayersFaction.Dispose();
+            authPlayersState.Dispose();
+            #endregion
+
+
         }
 
         public Vector3 WorldToUISpace(Canvas parentCanvas, Vector3 worldPos)
         {
             //Convert the world for screen point so that it can be used with ScreenPointToLocalPointInRectangle function
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
-
             //Convert the screenpoint to ui rectangle local point
             RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, screenPos, parentCanvas.worldCamera, out Vector2 movePos);
             //Convert the local point to world point
@@ -515,7 +510,12 @@ namespace LeyLineHybridECS
 
         public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health, uint unitFaction)
         {
-            var playerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
+
+            #region authPlayerData
+            var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+            #endregion
+
+            var playerFaction = authPlayersFaction[0].Faction;
 
             if(unitFaction == playerFaction)
             {
@@ -537,17 +537,18 @@ namespace LeyLineHybridECS
                 inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, (float)health.CurrentHealth / health.MaxHealth, 0.1f);
                 inArmorFill.fillAmount = 0;
             }
+            authPlayersFaction.Dispose();
         }
 
         public void SetHealthFloatText(long inUnitId, uint inHealthAmount, bool isHeal = false)
         {
-            UpdateInjectedComponentGroups();
-            for (int i = 0; i < m_UnitData.Length; i++)
-            {
-                var unitId = m_UnitData.EntityIdData[i].EntityId.Id;
-                var healthbar = m_UnitData.HealthbarData[i];
 
-                if(inUnitId == unitId)
+            Entities.With(m_UnitData).ForEach((Healthbar healthbar, ref SpatialEntityId spatialId) =>
+
+            {
+                var unitId = spatialId.EntityId.Id;
+
+                if (inUnitId == unitId)
                 {
                     GameObject healthTextGO = healthbar.UnitHeadUIInstance.transform.GetChild(1).gameObject;
                     Text healthText = healthTextGO.GetComponent<Text>();
@@ -570,7 +571,7 @@ namespace LeyLineHybridECS
                     //Debug.Log("PlayFloatingHealthAnim");
                     anim.Play("HealthText", 0, 0);
                 }
-            }
+            });
         }
     }
 }

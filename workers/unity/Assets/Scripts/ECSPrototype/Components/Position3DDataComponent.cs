@@ -11,7 +11,7 @@ namespace LeyLineHybridECS
         public float3 Value;
     }
 
-    public class Position3DDataComponent : ComponentDataWrapper<Position3D> { }
+    public class Position3DDataComponent : ComponentDataProxy<Position3D> { }
 }
 
 

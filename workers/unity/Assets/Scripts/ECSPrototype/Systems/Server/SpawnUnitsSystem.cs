@@ -1,53 +1,54 @@
 ﻿using Unity.Entities;
 using UnityEngine;
 using Improbable.Gdk.Core.Commands;
-using Improbable.PlayerLifecycle;
 using Improbable.Gdk.Core;
 using Generic;
 using Cell;
-using Improbable.Gdk.ReactiveComponents;
 using Improbable;
+using Player;
+using Improbable.Gdk.PlayerLifecycle;
+using Unity.Collections;
 
 namespace LeyLineHybridECS
 {
     [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(ExecuteActionsSystem))]
     public class SpawnUnitsSystem : ComponentSystem
     {
-        public struct CellData
+        GameStateSystem m_GameStateSystem;
+        CommandSystem m_CommandSystem;
+        EntityQuery m_PlayerData;
+        EntityQuery m_CellData;
+        EntityQuery m_GameStateData;
+
+
+        protected override void OnCreate()
         {
-            public readonly int Length;
-            public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
-            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<Improbable.Position.Component> Position;
-            public readonly ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
-            public ComponentDataArray<UnitToSpawn.Component> UnitToSpawn;
-            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-            public ComponentDataArray<WorldCommands.CreateEntity.CommandSender> CreateEntitySender;
-        }
+            base.OnCreate();
 
-        [Inject] CellData m_Data;
-        /*
-        public struct GameStateData
+            m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<OwningWorker.Component>(),
+            ComponentType.ReadOnly<PlayerState.Component>(),
+            ComponentType.ReadOnly<FactionComponent.Component>()
+            );
+            m_CellData = GetEntityQuery(
+            ComponentType.ReadOnly<CellAttributesComponent.Component>(),
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<Position.Component>(),
+            ComponentType.ReadOnly<CubeCoordinate.Component>()
+            );
+            m_GameStateData = GetEntityQuery(
+            ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<WorldIndex.Component>()
+            );
+        }
+        
+        protected override void OnStartRunning()
         {
-            public readonly int Length;
-            public readonly ComponentDataArray<Authoritative<GameState.Component>> AuthorativeData;
-            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<GameState.Component> GameState;
+            base.OnStartRunning();
+            m_CommandSystem = World.GetExistingSystem<CommandSystem>();
+            m_GameStateSystem = World.GetExistingSystem<GameStateSystem>();
         }
-
-        [Inject] GameStateData m_GameStateData;
-        */
-
-        public struct PlayerData
-        {
-            public readonly int Length;
-            public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-            public readonly ComponentDataArray<FactionComponent.Component> Faction;
-            public readonly ComponentDataArray<Player.PlayerState.Component> Playerstate;
-            public readonly ComponentDataArray<OwningWorker.Component> OwningWorker;
-        }
-
-        [Inject] PlayerData m_PlayerData;
 
         protected override void OnUpdate()
         {
@@ -56,38 +57,32 @@ namespace LeyLineHybridECS
 
         public void SpawnUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord)
         {
-            UpdateInjectedComponentGroups();
-            for (int pi = 0; pi < m_PlayerData.Length; pi++)
+            Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component refPlayerFaction, ref OwningWorker.Component refOwningWorker) =>
             {
-                var playerFaction = m_PlayerData.Faction[pi];
-                var owningWorker = m_PlayerData.OwningWorker[pi];
+                var owningWorker = refOwningWorker;
+                var playerFaction = refPlayerFaction;
 
-                if(playerFaction.Faction == unitFaction)
+                //Debug.Log(playerFaction.Faction);
+
+                if (playerFaction.Faction == unitFaction)
                 {
-                    for (int i = 0; i < m_Data.Length; ++i)
+                    Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
                     {
-                        var coord = m_Data.CoordinateData[i].CubeCoordinate;
-                        var position = m_Data.Position[i];
-                        var requestSender = m_Data.CreateEntitySender[i];
-                        var cell = m_Data.CellAttributes[i];
-                        var unitToSpawn = m_Data.UnitToSpawn[i];
-                        var cellWorldIndex = m_Data.WorldIndexData[i].Value;
+                        var coord = cCord.CubeCoordinate;
 
-                        if (coord == cubeCoord)
+                        if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                         {
+                            //Debug.Log("CreateEntityRequest");
                             var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<Unit_BaseDataSet>();
                             var entity = LeyLineEntityTemplates.Unit(owningWorker.WorkerId, unitName, position, coord, playerFaction, worldIndex, Stats);
 
-                            requestSender.RequestsToSend.Add(new WorldCommands.CreateEntity.Request
-                            (
-                                entity
-                            ));
+                            var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
 
-                            m_Data.CreateEntitySender[i] = requestSender;
+                            m_CommandSystem.SendCommand(createEntitiyRequest);
                         }
-                    }
+                    });
                 }
-            }
+            });
         }
     }
 }

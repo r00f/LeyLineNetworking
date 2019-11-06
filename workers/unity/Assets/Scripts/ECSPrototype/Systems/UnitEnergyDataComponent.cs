@@ -14,5 +14,5 @@ namespace LeyLineHybridECS
         public int Income;
     }
 
-    public class UnitEnergyDataComponent : ComponentDataWrapper<UnitEnergy> { }
+    //public class UnitEnergyDataComponent : ComponentDataWrapper<UnitEnergy> { }
 }

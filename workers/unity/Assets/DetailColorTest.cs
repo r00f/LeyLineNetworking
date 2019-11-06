@@ -9,7 +9,7 @@ public class DetailColorTest : MonoBehaviour
     Vector2 colorTextureOffset;
 
     [SerializeField]
-    MeshRenderer renderer;
+    new MeshRenderer renderer;
     // Start is called before the first frame update
     void Start()
     {

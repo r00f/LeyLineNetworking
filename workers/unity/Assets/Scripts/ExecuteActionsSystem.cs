@@ -4,120 +4,107 @@ using Improbable.Gdk.Core;
 using Generic;
 using Cell;
 using LeyLineHybridECS;
-using UnityEngine;
 using System.Collections.Generic;
-using Improbable;
-using System.Linq;
+using Unity.Collections;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
 {
-    public struct UnitData
+    HandleCellGridRequestsSystem m_HandleCellGridSystem;
+    ResourceSystem m_ResourceSystem;
+    TimerSystem m_TimerSystem;
+    SpawnUnitsSystem m_SpawnSystem;
+
+    EntityQuery m_GameStateData;
+    EntityQuery m_CellData;
+    EntityQuery m_UnitData;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Health.Component> HealthData;
-        public readonly ComponentDataArray<FactionComponent.Component> FactionData;
-        public ComponentDataArray<Actions.Component> ActionData;
+        base.OnCreate();
+
+        m_CellData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadWrite<CubeCoordinate.Component>()
+        );
+
+        m_GameStateData = GetEntityQuery(
+        ComponentType.ReadOnly<WorldIndex.Component>(),
+        ComponentType.ReadOnly<GameState.Component>()
+        );
     }
 
-    [Inject] UnitData m_UnitData;
-
-    public struct CellData
+    protected override void OnStartRunning()
     {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
-        public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
+        base.OnStartRunning();
+        m_HandleCellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
+        m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
+        m_TimerSystem = World.GetExistingSystem<TimerSystem>();
+        m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
+
+        m_UnitData = GetEntityQuery(
+        EntityArchetypes.UnitArchetype.GetComponentTypes()
+        );
     }
-
-    [Inject] CellData m_CellData;
-
-    public struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<GameState.Component> GameStates;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-    }
-
-    [Inject] GameStateData m_GameStateData;
-
-    [Inject] HandleCellGridRequestsSystem m_HandleCellGridSystem;
-
-    [Inject] ResourceSystem m_ResourceSystem;
-
-    [Inject] TimerSystem m_TimerSystem;
-
-    [Inject] SpawnUnitsSystem m_SpawnSystem;
-
 
     protected override void OnUpdate()
     {
-        for(int i = 0; i < m_UnitData.Length; i++)
+        Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions, ref SpatialEntityId unitId, ref FactionComponent.Component faction) =>
         {
-            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
-            var actions = m_UnitData.ActionData[i];
-            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
-            var faction = m_UnitData.FactionData[i];
+            var uWi = unitWorldIndex.Value;
+            var a = actions;
+            var f = faction;
+            var id = unitId.EntityId.Id;
 
-            for(int gi = 0; gi < m_GameStateData.Length; gi++)
+            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gamestateWorldIndex, ref GameState.Component gameState) =>
             {
-                var gamestateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
-                var gameState = m_GameStateData.GameStates[gi].CurrentState;
-
-                if(unitWorldIndex == gamestateWorldIndex)
+                if (uWi == gamestateWorldIndex.Value)
                 {
-                    if(actions.LockedAction.Effects.Count != 0 && gameState != GameStateEnum.planning)
+                    if (a.LockedAction.Effects.Count != 0 && gameState.CurrentState != GameStateEnum.planning)
                     {
-                        switch (gameState)
+                        switch (gameState.CurrentState)
                         {
                             case GameStateEnum.interrupt:
-                                if((int)actions.LockedAction.ActionExecuteStep == 0 && !actions.Executed)
+                                if ((int)a.LockedAction.ActionExecuteStep == 0 && !a.Executed)
                                 {
-                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
-                                    actions.Executed = true;
-                                    m_UnitData.ActionData[i] = actions;
+                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
+                                    a.Executed = true;
                                 }
                                 break;
                             case GameStateEnum.attack:
-                                if ((int)actions.LockedAction.ActionExecuteStep == 1 && !actions.Executed)
+                                if ((int)a.LockedAction.ActionExecuteStep == 1 && !a.Executed)
                                 {
-                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
-                                    actions.Executed = true;
-                                    m_UnitData.ActionData[i] = actions;
+                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
+                                    a.Executed = true;
                                 }
                                 break;
                             case GameStateEnum.move:
-                                if ((int)actions.LockedAction.ActionExecuteStep == 2 && !actions.Executed)
+                                if ((int)a.LockedAction.ActionExecuteStep == 2 && !a.Executed)
                                 {
-                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
-                                    //actions.LockedAction = actions.NullAction;
-                                    //m_UnitData.ActionData[i] = actions;
+                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
                                 }
                                 break;
                             case GameStateEnum.skillshot:
-                                if ((int)actions.LockedAction.ActionExecuteStep == 3 && !actions.Executed)
+                                if ((int)a.LockedAction.ActionExecuteStep == 3 && !a.Executed)
                                 {
-                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
-                                    actions.Executed = true;
-                                    m_UnitData.ActionData[i] = actions;
+                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
+                                    a.Executed = true;
                                 }
                                 break;
                             case GameStateEnum.cleanup:
-                                if ((int)actions.LockedAction.ActionExecuteStep == 4 && !actions.Executed)
+                                if ((int)a.LockedAction.ActionExecuteStep == 4 && !a.Executed)
                                 {
-                                    ExecuteAction(gamestateWorldIndex, actions.LockedAction, faction, unitId);
-                                    actions.Executed = true;
-                                    m_UnitData.ActionData[i] = actions;
+                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
+                                    a.Executed = true;
                                 }
                                 break;
                         }
                     }
                 }
-            }
-        }
+            });
+
+            actions = a;
+        });
     }
 
     public void ExecuteAction(uint worldIndex, Action action, FactionComponent.Component faction, long unitId)
@@ -204,18 +191,18 @@ public class ExecuteActionsSystem : ComponentSystem
     {
         HashSet<Vector3f> Coords = new HashSet<Vector3f>(inCoords);
         List<long> unitIds = new List<long>();
-        for(int i = 0; i < m_UnitData.Length; i++)
+
+        Entities.With(m_UnitData).ForEach((ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId) =>
         {
-            var unitCoord = m_UnitData.CoordinateData[i].CubeCoordinate;
-            var unitID = m_UnitData.EntityIds[i].EntityId.Id;
-            if (Coords.Contains(unitCoord))
+            if (Coords.Contains(unitCoord.CubeCoordinate))
             {
-                if(m_HandleCellGridSystem.ValidateUnitTarget(unitID, usingID, usingFaction, (UnitRequisitesEnum)(int)restricitons))
+                if (m_HandleCellGridSystem.ValidateUnitTarget(unitId.EntityId.Id, usingID, usingFaction, (UnitRequisitesEnum)(int)restricitons))
                 {
-                    unitIds.Add(unitID);
+                    unitIds.Add(unitId.EntityId.Id);
                 }
             }
-        }
+        });
+
         return unitIds;
     }
 

@@ -6,16 +6,17 @@ using Generic;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class TimerSystem : ComponentSystem
 {
-    public struct TimerData
+    EntityQuery m_TimerData;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public ComponentDataArray<TurnTimer.Component> Timers;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+        base.OnCreate();
+        m_TimerData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<WorldIndex.Component>(),
+        ComponentType.ReadWrite<TurnTimer.Component>()
+        );
     }
-
-    [Inject] TimerData m_TimerData;
-
     protected override void OnUpdate()
     {
 
@@ -23,15 +24,11 @@ public class TimerSystem : ComponentSystem
 
     public void SubstractTurnDurations(uint worldIndex)
     {
-        UpdateInjectedComponentGroups();
-        for (int i = 0; i < m_TimerData.Length; i++)
+        Entities.With(m_TimerData).ForEach((ref TurnTimer.Component timer, ref WorldIndex.Component timerWorldIndex) =>
         {
-            var timer = m_TimerData.Timers[i];
-            var timerWorldIndex = m_TimerData.WorldIndexData[i].Value;
-
-            if(worldIndex == timerWorldIndex)
+            if (worldIndex == timerWorldIndex.Value)
             {
-                for(int t = 0; t < timer.Timers.Count; t++)
+                for (int t = 0; t < timer.Timers.Count; t++)
                 {
                     if (timer.Timers[t].TurnDuration > 1)
                     {
@@ -45,21 +42,19 @@ public class TimerSystem : ComponentSystem
                     }
                 }
 
-                timer.Timers = timer.Timers;
-                m_TimerData.Timers[i] = timer;
+                //timer.Timers = timer.Timers;
             }
-        }
+        });
     }
 
     public void AddTimedEffect(long inId, ActionEffect inEffect)
     {
-        UpdateInjectedComponentGroups();
-        for (int i = 0; i < m_TimerData.Length; i++)
-        {
-            var timer = m_TimerData.Timers[i];
-            var timerId = m_TimerData.EntityIds[i].EntityId.Id;
+        //UpdateInjectedComponentGroups();
 
-            if (timerId == inId)
+        Entities.With(m_TimerData).ForEach((ref TurnTimer.Component timer, ref SpatialEntityId timerId) =>
+        {
+
+            if (timerId.EntityId.Id == inId)
             {
                 var Timer = new Timer
                 {
@@ -68,11 +63,11 @@ public class TimerSystem : ComponentSystem
                 };
                 timer.Timers.Add(Timer);
 
-                timer.Timers = timer.Timers;
-                m_TimerData.Timers[i] = timer;
+                //timer.Timers = timer.Timers;
+
             }
 
-        }
+        });
     }
 
 }

@@ -6,92 +6,94 @@ using Improbable;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using System.Collections.Generic;
+using Unity.Collections;
+using Cell;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : ComponentSystem
 {
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Health.Component> HealthData;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<Actions.Component> ActionsData;
-        public readonly ComponentDataArray<Energy.Component> EnergyData;
-        public readonly ComponentDataArray<Position.Component> Positions;
-        public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
-        public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
-        public ComponentArray<AnimatorComponent> AnimatorComponents;
-        public ComponentArray<Transform> Transforms;
-    }
-
-    [Inject] UnitData m_UnitData;
-
-    public struct TransformData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentArray<Transform> Transforms;
-    }
-
-    [Inject] TransformData m_TransformData;
-
-    public struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<GameState.Component> GameState;
-    }
-
-    [Inject] GameStateData m_GameStateData;
-
-    [Inject] ActionEffectsSystem m_ActionEffectsSystem;
-
-    [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
-
-    [Inject] UISystem m_UISystem;
+    ActionEffectsSystem m_ActionEffectsSystem;
+    //ILLEGAL
+    //HandleCellGridRequestsSystem m_CellGridSystem;
+    UISystem m_UISystem;
+    EntityQuery m_GameStateData;
+    EntityQuery m_TransformData;
+    EntityQuery m_UnitData;
+    EntityQuery m_CellData;
 
     GameObject GarbageCollection;
 
-    ComponentGroup GarbageCollectionGroup;
+    EntityQuery m_GarbageCollection;
 
-    protected override void OnCreateManager()
+    protected override void OnCreate()
     {
-        base.OnCreateManager();
+        base.OnCreate();
 
+        m_CellData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<WorldIndex.Component>(),
+        ComponentType.ReadOnly<CubeCoordinate.Component>(),
+        ComponentType.ReadOnly<Position.Component>(),
+        ComponentType.ReadOnly<CellAttributesComponent.Component>()
+        );
+
+        m_GameStateData = GetEntityQuery(
+        ComponentType.ReadOnly<GameState.Component>()
+        );
+
+        m_TransformData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<Transform>()
+        );
+
+        m_UnitData = GetEntityQuery(
+        ComponentType.ReadOnly <WorldIndex.Component>(),
+        ComponentType.ReadOnly<Health.Component>(),
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<Actions.Component>(),
+        ComponentType.ReadOnly<Energy.Component>(),
+        ComponentType.ReadOnly<Position.Component>(),
+        ComponentType.ReadOnly<CubeCoordinate.Component>(),
+        ComponentType.ReadOnly<Unit_BaseDataSet>(),
+        ComponentType.ReadWrite<AnimatorComponent>(),
+        ComponentType.ReadWrite<Transform>()
+        );
     }
 
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_UISystem = World.GetExistingSystem<UISystem>();
+        m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
+        //m_CellGridSystem = Worlds.GameLogicWorld.World.GetExistingSystem<HandleCellGridRequestsSystem>();
         GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
-        GarbageCollectionGroup = Worlds.DefaultWorld.CreateComponentGroup(
-        ComponentType.Create<GarbageCollectorComponent>()
+
+        m_GarbageCollection = Worlds.DefaultWorld.CreateEntityQuery(
+        ComponentType.ReadWrite<GarbageCollectorComponent>()
         );
     }
 
     protected override void OnUpdate()
     {
-        if (m_GameStateData.Length == 0)
+        if (m_GameStateData.CalculateEntityCount() == 0)
             return;
 
-        for(int i = 0; i < m_UnitData.Length; i++)
-        {
-            var serverPosition = m_UnitData.Positions[i];
-            var transform = m_UnitData.Transforms[i];
-            var animatorComponent = m_UnitData.AnimatorComponents[i];
-            var actions = m_UnitData.ActionsData[i];
-            var energy = m_UnitData.EnergyData[i];
-            var healthComponent = m_UnitData.HealthData[i];
-            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
-            var worldIndex = m_UnitData.WorldIndexData[i].Value;
-            var coord = m_UnitData.Coordinates[i].CubeCoordinate;
-            var basedata = m_UnitData.BaseDataSets[i];
+        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
+        //Set animComp currentlockedAction
+        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
+        {
+
+            //Does this even work?
+            var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
+            var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
 
             if (actions.LockedAction.Index != -3)
             {
                 if (!animatorComponent.CurrentLockedAction)
                 {
+                    Unit_BaseDataSet basedata = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+
                     if (actions.LockedAction.Index >= 0)
                     {
                         if (actions.LockedAction.Index < basedata.Actions.Count)
@@ -118,21 +120,20 @@ public class UnitAnimationSystem : ComponentSystem
                         }
                     }
                 }
-                
-                else if (m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
+
+                else if (gameStates[0].CurrentState != GameStateEnum.planning)
                 {
                     var actionEffectType = actions.LockedAction.Effects[0].EffectType;
                     HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
 
                     if (animatorComponent.AnimationEvents)
                     {
-                        
                         if (animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
                         {
                             animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
                             animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
                         }
-                        
+
 
                         if (animatorComponent.AnimationEvents.EventTrigger)
                         {
@@ -147,7 +148,7 @@ public class UnitAnimationSystem : ComponentSystem
                             if (animatorComponent.CurrentLockedAction.ProjectileFab)
                             {
                                 //THIS METHOD SUCKS
-                                Vector3 targetPos = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                                Vector3 targetPos = CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
                                 float targetYoffset = 0;
                                 if (animatorComponent.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
                                 {
@@ -162,13 +163,13 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.AnimationEvents.EventTrigger = false;
                         }
                     }
-                    
+
                     if (animatorComponent.LastHealth != 0)
                     {
                         //Debug.Log("TriggerHatchActionEffect");
                         m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
                     }
-                    
+
                 }
             }
 
@@ -194,18 +195,18 @@ public class UnitAnimationSystem : ComponentSystem
                 return;
             }
             //check if action has the current step and set executeTrigger if true
-            if (actions.LockedAction.Index != -3 && m_GameStateData.GameState[0].CurrentState != GameStateEnum.planning)
+            if (actions.LockedAction.Index != -3 && gameStates[0].CurrentState != GameStateEnum.planning)
             {
                 //Debug.Log("Execute");
                 //set initial anim Values if in the right step and they are not set yet
                 if (!animatorComponent.ExecuteTriggerSet)
                 {
-                    ExecuteActionAnimation(actions, animatorComponent, m_GameStateData.GameState[0].CurrentState, worldIndex);
+                    ExecuteActionAnimation(actions, animatorComponent, gameStates[0].CurrentState, worldIndex.Value);
                 }
                 else
                 {
                     //constantly rotate towards serverposition if moving
-                    if (m_GameStateData.GameState[0].CurrentState == GameStateEnum.move)
+                    if (gameStates[0].CurrentState == GameStateEnum.move)
                     {
                         if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
                             animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
@@ -241,22 +242,22 @@ public class UnitAnimationSystem : ComponentSystem
             //FeedBack to incoming Attacks / Heals
             if (animatorComponent.ActionEffectTrigger)
             {
-                if (animatorComponent.LastHealth != healthComponent.CurrentHealth)
+                if (animatorComponent.LastHealth != health.CurrentHealth)
                 {
-                    if (healthComponent.CurrentHealth == 0)
+                    if (health.CurrentHealth == 0)
                     {
                         Death(animatorComponent);
                     }
-                    else if (animatorComponent.LastHealth > healthComponent.CurrentHealth)
+                    else if (animatorComponent.LastHealth > health.CurrentHealth)
                     {
-                        m_UISystem.SetHealthFloatText(unitId, animatorComponent.LastHealth - healthComponent.CurrentHealth);
+                        m_UISystem.SetHealthFloatText(id.EntityId.Id, animatorComponent.LastHealth - health.CurrentHealth);
                         animatorComponent.Animator.SetTrigger("GetHit");
                     }
                     else
                     {
                         //healing feedback
                     }
-                    animatorComponent.LastHealth = healthComponent.CurrentHealth;
+                    animatorComponent.LastHealth = health.CurrentHealth;
                 }
 
                 animatorComponent.ActionEffectTrigger = false;
@@ -269,29 +270,47 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
-            
-            if (transform.position != serverPosition.Coords.ToUnityVector())
+
+            if (animatorComponent.transform.position != serverPosition.Coords.ToUnityVector())
             {
                 float step;
                 if (actions.LockedAction.Index != -3)
                     step = (Time.deltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
                 else
                     step = Time.deltaTime * 1.732f;
+
                 //move
-                transform.position = Vector3.MoveTowards(transform.position, serverPosition.Coords.ToUnityVector(), step);
+                animatorComponent.transform.position = Vector3.MoveTowards(animatorComponent.transform.position, serverPosition.Coords.ToUnityVector(), step);
             }
-            
-            if (transform.position == animatorComponent.DestinationPosition)
+
+            if (animatorComponent.transform.position == animatorComponent.DestinationPosition)
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
-                    animatorComponent.LastStationaryCoordinate = coord;
+                    animatorComponent.LastStationaryCoordinate = coord.CubeCoordinate;
                     animatorComponent.Animator.SetTrigger("DestinationReached");
                     animatorComponent.DestinationPosition = Vector3.zero;
                     animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
-        }
+        });
+
+        gameStates.Dispose();
+    }
+
+    public Vector3 CoordinateToWorldPosition(uint inWorldIndex, Vector3f inCubeCoordinate)
+    {
+        Vector3 worldPos = new Vector3();
+
+        Entities.With(m_CellData).ForEach((ref WorldIndex.Component worldIndex, ref Position.Component position, ref CubeCoordinate.Component cubeCoord) =>
+        {
+            if (worldIndex.Value == inWorldIndex && Vector3fext.ToUnityVector(inCubeCoordinate) == Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate))
+            {
+                worldPos = position.Coords.ToUnityVector();
+            }
+        });
+
+        return worldPos;
     }
 
     public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameStateEnum gameState, uint worldIndex)
@@ -302,8 +321,8 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 //Debug.Log("SetInitialValues");
                 if (gameState != GameStateEnum.move)
-                    animatorComponent.RotationTarget = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-                animatorComponent.DestinationPosition = m_CellGridSystem.CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                    animatorComponent.RotationTarget = CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                animatorComponent.DestinationPosition = CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
                 animatorComponent.InitialValuesSet = true;
             }
             animatorComponent.Animator.SetTrigger("Execute");
@@ -313,7 +332,7 @@ public class UnitAnimationSystem : ComponentSystem
 
     public void Death(AnimatorComponent animatorComponent)
     {
-        var garbageCollector = GarbageCollectionGroup.GetComponentArray<GarbageCollectorComponent>()[0];
+        var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
 
         //Debug.Log("Death");
 

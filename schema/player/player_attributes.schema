@@ -4,6 +4,6 @@ component PlayerAttributes {
 	
     id = 110;
 	string hero_name = 1;
-	
+	bool hero_spawned = 2;
 	
 }

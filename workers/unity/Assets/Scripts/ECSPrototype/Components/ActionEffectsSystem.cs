@@ -6,30 +6,32 @@ using Unity.Entities;
 using Generic;
 using Unit;
 using System.Collections.Generic;
+using Unity.Collections;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
 public class ActionEffectsSystem : ComponentSystem
 {
-    public struct CellData
+    HighlightingSystem m_HighlightingSystem;
+    EntityQuery m_UnitData;
+    EntityQuery m_CellData;
+
+    protected override void OnCreate()
     {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
-        public readonly ComponentDataArray<MarkerState> MarkerStateData;
-        public ComponentArray<MarkerGameObjects> MarkerGameObjects;
+        base.OnCreate();
+        m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+
+
+        m_UnitData = GetEntityQuery(
+        ComponentType.ReadWrite<AnimatorComponent>()
+        );
+
+        m_CellData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<CubeCoordinate.Component>(),
+        ComponentType.ReadOnly<MarkerState>(),
+        ComponentType.ReadWrite<MarkerGameObjects>()
+        );
     }
-
-    [Inject] CellData m_CellData;
-
-    public struct UnitData
-    {
-        public readonly int Length;
-        public ComponentArray<AnimatorComponent> AnimatorComponents;
-    }
-
-    [Inject] UnitData m_UnitData;
-
-    [Inject] HighlightingSystem m_HighlightingSystem;
 
     protected override void OnUpdate()
     {
@@ -40,33 +42,22 @@ public class ActionEffectsSystem : ComponentSystem
 
     public void TriggerActionEffect(EffectTypeEnum inEffectType, HashSet<Vector3f> inCubeCoordinates)
     {
-        UpdateInjectedComponentGroups();
-
-        for (int i = 0; i < m_UnitData.Length; i++)
+        Entities.With(m_UnitData).ForEach((AnimatorComponent animatorComp) =>
         {
-            var animatorComp = m_UnitData.AnimatorComponents[i];
-
-            //Debug.Log(animatorComp.LastStationaryCoordinate);
-
             if (inCubeCoordinates.Contains(animatorComp.LastStationaryCoordinate))
             {
                 //Debug.Log("Set Unit actionEffectTrigger");
                 animatorComp.ActionEffectTrigger = true;
             }
-        }
+        });
 
-        //set effectType / instanciate particle effect on cell if action requires it
-        for(int i = 0; i < m_CellData.Length; i++)
+        Entities.With(m_CellData).ForEach((MarkerGameObjects references, ref CubeCoordinate.Component coord) =>
         {
-            var coord = m_CellData.Coords[i].CubeCoordinate;
-            var references = m_CellData.MarkerGameObjects[i];
-
-            if(inCubeCoordinates.Contains(coord))
+            if (inCubeCoordinates.Contains(coord.CubeCoordinate))
             {
                 references.EffectType = inEffectType;
             }
-        }
-
+        });
     }
 
     public void LaunchProjectile(Projectile projectileFab, EffectTypeEnum inEffectOnDetonation, HashSet<Vector3f> coordsToTrigger, Transform spawnTransform, Vector3 targetPos, float yOffset = 0)

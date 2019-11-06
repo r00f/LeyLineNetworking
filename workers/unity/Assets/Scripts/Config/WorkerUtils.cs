@@ -9,34 +9,34 @@ public static class WorkerUtils
 
     public static void AddClientSystems(World world)
     {
-        world.GetOrCreateManager<MouseStateSystem>();
-        world.GetOrCreateManager<CellMarkerSystem>();
-        world.GetOrCreateManager<AddComponentsSystem>();
-        world.GetOrCreateManager<PlayerStateSystem>();
-        world.GetOrCreateManager<SendActionRequestSystem>();
-        world.GetOrCreateManager<UnitAnimationSystem>();
-        world.GetOrCreateManager<InitializeUnitsSystem>();
-        world.GetOrCreateManager<VisionSystem_Client>();
-        world.GetOrCreateManager<UISystem>();
-        world.GetOrCreateManager<HighlightingSystem>();
-        world.GetOrCreateManager<ActionEffectsSystem>();
+        world.GetOrCreateSystem<MouseStateSystem>();
+        world.GetOrCreateSystem<CellMarkerSystem>();
+        world.GetOrCreateSystem<AddComponentsSystem>();
+        world.GetOrCreateSystem<PlayerStateSystem>();
+        world.GetOrCreateSystem<SendActionRequestSystem>();
+        world.GetOrCreateSystem<UnitAnimationSystem>();
+        world.GetOrCreateSystem<InitializeUnitsSystem>();
+        world.GetOrCreateSystem<VisionSystem_Client>();
+        world.GetOrCreateSystem<UISystem>();
+        world.GetOrCreateSystem<HighlightingSystem>();
+        world.GetOrCreateSystem<ActionEffectsSystem>();
         //world.GetOrCreateManager<ClientCleanupSystem>();
         //world.GetOrCreateManager<ProjectileSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
     {
-        world.GetOrCreateManager<InitializePlayerSystem>();
-        world.GetOrCreateManager<GameStateSystem>();
-        world.GetOrCreateManager<SpawnUnitsSystem>();
-        world.GetOrCreateManager<HandleCellGridRequestsSystem>();
-        world.GetOrCreateManager<MovementSystem>();
-        world.GetOrCreateManager<ManalithSystem>();
-        world.GetOrCreateManager<UnitLifeCycleSystem>();
-        world.GetOrCreateManager<VisionSystem_Server>();
-        world.GetOrCreateManager<ResourceSystem>();
-        world.GetOrCreateManager<ExecuteActionsSystem>();
-        world.GetOrCreateManager<CleanupSystem>();
-        world.GetOrCreateManager<TimerSystem>();
+        world.GetOrCreateSystem<InitializePlayerSystem>();
+        world.GetOrCreateSystem<GameStateSystem>();
+        world.GetOrCreateSystem<SpawnUnitsSystem>();
+        world.GetOrCreateSystem<HandleCellGridRequestsSystem>();
+        world.GetOrCreateSystem<MovementSystem>();
+        world.GetOrCreateSystem<ManalithSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystem>();
+        world.GetOrCreateSystem<VisionSystem_Server>();
+        world.GetOrCreateSystem<ResourceSystem>();
+        world.GetOrCreateSystem<ExecuteActionsSystem>();
+        world.GetOrCreateSystem<CleanupSystem>();
+        world.GetOrCreateSystem<TimerSystem>();
     }
 }

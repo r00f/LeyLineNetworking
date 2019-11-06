@@ -1,6 +1,6 @@
 package cell;
 
-import "improbable/vector3.schema";
+import "generic/vector3.schema";
 import "generic/faction.schema";
 
 component CellAttributesComponent 
@@ -19,8 +19,8 @@ type CellAttributes {
 
 type CellAttribute	{
 	
-	improbable.Vector3f position = 1;
-	improbable.Vector3f cube_coordinate = 2;
+	generic.Vector3f position = 1;
+	generic.Vector3f cube_coordinate = 2;
 	bool is_taken = 3;
 	int32 movement_cost = 4;
 	int64 unit_on_cell_id = 5;

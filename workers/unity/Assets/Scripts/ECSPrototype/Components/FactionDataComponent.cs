@@ -12,5 +12,5 @@ namespace LeyLineHybridECS
         public Vector3 Position;
     }
 
-    public class FactionDataComponent : ComponentDataWrapper<Faction> { }
+    public class FactionDataComponent : ComponentDataProxy<Faction> { }
 }

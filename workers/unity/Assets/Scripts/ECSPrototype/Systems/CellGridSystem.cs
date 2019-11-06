@@ -12,6 +12,7 @@ namespace LeyLineHybridECS
 
     public class CellGridSystem : ComponentSystem
     {
+        /*
         public struct Data
         {
             public readonly int Length;
@@ -20,11 +21,12 @@ namespace LeyLineHybridECS
         }
 
         [Inject] Data m_Data;
-
+        */
         protected override void OnUpdate()
         {
             //throw new NotImplementedException();
         }
+        /*
 
         public readonly float3[] _directions =  {
         new float3(+1, -1, 0), new float3(+1, 0, -1), new float3(0, +1, -1),
@@ -37,7 +39,6 @@ namespace LeyLineHybridECS
             return distance;
         }//Distance is given using Manhattan Norm.
 
-        /*
         public List<Vector3f> GetRadius(Vector3f originCellCubeCoordinate, int radius)
         {
             //returns a list of offsetCoordinates

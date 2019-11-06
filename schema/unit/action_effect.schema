@@ -1,5 +1,4 @@
 package unit;
-import "improbable/vector3.schema";
 
 type ActionEffect {
  EffectTypeEnum effect_type = 1;

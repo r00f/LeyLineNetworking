@@ -1,0 +1,16 @@
+package generic;
+		
+type Vector3f {
+	
+	float x = 1;
+	float y = 2;
+	float z = 3;
+
+}
+type Vector3i {
+	
+	int32 x = 1;
+	int32 y = 2;
+	int32 z = 3;
+
+}

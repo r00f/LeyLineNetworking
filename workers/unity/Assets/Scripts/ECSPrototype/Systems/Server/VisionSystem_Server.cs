@@ -9,55 +9,49 @@ using Cell;
 using Player;
 using Unit;
 using System.Linq;
+using Unity.Collections;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ResourceSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class VisionSystem_Server : ComponentSystem
 {
-    public struct CellData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<CubeCoordinate.Component> CellCoordinateData;
-        public readonly ComponentDataArray<CellAttributesComponent.Component> CellsData;
-    }
+    HandleCellGridRequestsSystem m_GridSystem;
 
-    [Inject]
-    private CellData m_CellData;
-
-    public struct PlayerData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<PlayerAttributes.Component> PlayerAttributes;
-        public readonly ComponentDataArray<FactionComponent.Component> FactionComponent;
-        public ComponentDataArray<Vision.CommandSenders.UpdateClientVisionCommand> UpdateClientVisionCommands;
-        public ComponentDataArray<Vision.Component> VisionComponent;
-    }
-
-    [Inject]
-    private PlayerData m_PlayerData;
-
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WordIndexData;
-        public readonly ComponentDataArray<CubeCoordinate.Component> UnitCoordinateData;
-        public readonly ComponentDataArray<FactionComponent.Component> FactionComponent;
-        public readonly ComponentDataArray<Health.Component> HealthData;
-        public ComponentDataArray<Vision.Component> VisionComponent;
-    }
-    [Inject]
-    private UnitData m_UnitData;
-
-    [Inject]
-    private HandleCellGridRequestsSystem GridSys;
-
-    //[Inject]
-    //private VisionSystem_Client m_VisionSystem_Client;
-
+    EntityQuery m_UnitData;
+    EntityQuery m_PlayerData;
+    EntityQuery m_CellData;
 
     bool Init = true;
     bool firstTime = true;
     private List<RawCluster> FixClusters = new List<RawCluster>();
+
+    protected override void OnCreate()
+    {
+        base.OnCreate();
+
+        //m_ClientVisionSystem = World.GetExistingSystem<VisionSystem_Client>();
+        m_GridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
+
+        m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadOnly<CubeCoordinate.Component>(),
+            ComponentType.ReadOnly<Health.Component>(),
+            ComponentType.ReadWrite<Vision.Component>()
+            );
+
+        m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadOnly<PlayerAttributes.Component>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadWrite<Vision.Component>()
+            );
+
+        m_CellData = GetEntityQuery(
+            ComponentType.ReadOnly<CubeCoordinate.Component>(),
+            ComponentType.ReadOnly<CellAttributesComponent.Component>()
+            );
+
+    }
 
     protected override void OnUpdate()
     {
@@ -68,28 +62,17 @@ public class VisionSystem_Server : ComponentSystem
             //if any unit requires an update, update player aswell
             bool anyUnitReqUpdate = false;
 
-            for (int i = 0; i < m_UnitData.Length; i++)
+            Entities.With(m_UnitData).ForEach((ref WorldIndex.Component u_worldIndex, ref Vision.Component u_Vision, ref CubeCoordinate.Component u_OccupiedCell, ref FactionComponent.Component u_Faction) =>
             {
-                var u_worldIndex = m_UnitData.WordIndexData[i].Value;
-                var u_Vision = m_UnitData.VisionComponent[i];
-                var u_OccupiedCell = m_UnitData.UnitCoordinateData[i];
-                var u_Faction = m_UnitData.FactionComponent[i];
-
                 if (u_Vision.RequireUpdate == true)
                 {
-                    u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex);
-                    m_UnitData.VisionComponent[i] = u_Vision;
+                    u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
                     anyUnitReqUpdate = true;
                 }
-            }
+            });
 
-            for (int i = m_PlayerData.Length - 1; i >= 0; i--)
+            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
             {
-                var p_Vision = m_PlayerData.VisionComponent[i];
-                var p_Faction = m_PlayerData.FactionComponent[i];
-                //var p_id = m_PlayerData.EntityIds[i].EntityId;
-                //var updateClientVisionRequest = m_PlayerData.UpdateClientVisionCommands[i];
-
                 if (anyUnitReqUpdate)
                 {
                     //Debug.Log("UpdatePlayerVision");
@@ -99,8 +82,6 @@ public class VisionSystem_Server : ComponentSystem
                     p_Vision.Positives = p_Vision.Positives;
                     p_Vision.Negatives = p_Vision.Negatives;
                     p_Vision.Lastvisible = p_Vision.Lastvisible;
-                    m_PlayerData.VisionComponent[i] = p_Vision;
-
                     //Send clientSide updateVision command
                     /*
                     
@@ -114,19 +95,17 @@ public class VisionSystem_Server : ComponentSystem
                     m_PlayerData.UpdateClientVisionCommands[i] = updateClientVisionRequest;
 
                     */
-                    
+
                     //Debug.Log("SendUpdateClientVisionRequest, count = " + updateClientVisionRequest.RequestsToSend.Count + ", " + m_PlayerData.UpdateClientVisionCommands[i].RequestsToSend.Count);
-  
+
                 }
-            
-            }
-            
+            });
         }
     }
 
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
-        List<Vector3f> sight = GridSys.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
+        List<Vector3f> sight = m_GridSystem.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
         
         var sightHash = new HashSet<Vector3f>();
         foreach (Vector3f v in sight)
@@ -157,12 +136,12 @@ public class VisionSystem_Server : ComponentSystem
 
         if (RelevantClusters.Count != 0)
         {
-            List<Vector3f> Ring = GridSys.RingDraw(coor.CubeCoordinate, inVision.VisionRange);
+            List<Vector3f> Ring = m_GridSystem.RingDraw(coor.CubeCoordinate, inVision.VisionRange);
             List<List<Vector3f>> Lines = new List<List<Vector3f>>();
 
             foreach (Vector3f c in Ring)
             {
-                Lines.Add(GridSys.LineDraw(coor.CubeCoordinate, c));
+                Lines.Add(m_GridSystem.LineDraw(coor.CubeCoordinate, c));
             }
             foreach (List<Vector3f> l in Lines)
             {
@@ -214,20 +193,18 @@ public class VisionSystem_Server : ComponentSystem
 
         var currentVision = new HashSet<Vector3f>();
 
-        for (int e = m_UnitData.Length - 1; e >= 0; e--)
+        Entities.With(m_UnitData).ForEach((ref Vision.Component unitVision, ref FactionComponent.Component unitFaction) =>
         {
-            var UnitVision = m_UnitData.VisionComponent[e];
-            var UnitFaction = m_UnitData.FactionComponent[e];
-
-            if (faction == UnitFaction.Faction)
+            if (faction == unitFaction.Faction)
             {
                 //use a hashSet to increase performance of contains calls (O(1) vs. O(n))
-                foreach (Vector3f v in UnitVision.CellsInVisionrange)
+                foreach (Vector3f v in unitVision.CellsInVisionrange)
                 {
                     currentVision.Add(v);
                 }
             }
-        }
+
+        });
 
         inVision.CellsInVisionrange = currentVision.ToList();
 
@@ -254,19 +231,13 @@ public class VisionSystem_Server : ComponentSystem
     {
         List<CellAttributesComponent.Component> obstructed = new List<CellAttributesComponent.Component>();
 
-        //Debug.Log(m_CellData.Length);
-        for (int i = m_CellData.Length - 1; i >= 0; i--)
+        Entities.With(m_CellData).ForEach((ref CellAttributesComponent.Component cellAttributes) =>
         {
-            var cell = m_CellData.CellsData[i];
-            var cor = m_CellData.CellsData[i];
-
-            if (cell.CellAttributes.Cell.ObstructVision)
+            if (cellAttributes.CellAttributes.Cell.ObstructVision)
             {
-                obstructed.Add(cell);
+                obstructed.Add(cellAttributes);
             }
-
-        }
-        //Debug.Log("ObstructedCount:" + obstructed.Count);
+        });
 
         List<RawCluster> raw = new List<RawCluster>();
         while (obstructed.Count > 0)
@@ -286,6 +257,7 @@ public class VisionSystem_Server : ComponentSystem
             }
         }
         //Debug.Log("NumberofClusters" + FixClusters.Count());
+
         Init = false;
     }
 
@@ -298,7 +270,7 @@ public class VisionSystem_Server : ComponentSystem
             {
                 foreach (CellAttributesComponent.Component c in obstructed)
                 {
-                    if (c.CellAttributes.Cell.CubeCoordinate == neighbours[i].CubeCoordinate)
+                    if (Vector3fext.ToUnityVector(c.CellAttributes.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate))
                     {
                         contains = true;
                     }
@@ -313,7 +285,7 @@ public class VisionSystem_Server : ComponentSystem
 
             foreach (CellAttributesComponent.Component c in cluster.cluster)
             {
-                if (c.CellAttributes.Cell.CubeCoordinate == neighbours[i].CubeCoordinate) contains = true;
+                if (Vector3fext.ToUnityVector(c.CellAttributes.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate)) contains = true;
             }
 
             if (!contains)
@@ -322,7 +294,7 @@ public class VisionSystem_Server : ComponentSystem
                 CellAttributesComponent.Component toRemove = new CellAttributesComponent.Component();
                 foreach (CellAttributesComponent.Component c in obstructed)
                 {
-                    if (c.CellAttributes.Cell.CubeCoordinate == neighbours[i].CubeCoordinate) toRemove = c;
+                    if (Vector3fext.ToUnityVector(c.CellAttributes.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate)) toRemove = c;
                     isSet = true;
                 }
 
@@ -356,6 +328,7 @@ public class VisionSystem_Server : ComponentSystem
     }
     */
     }
+
     /*private List<CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<CellAttributes> watching)
     {
         int count = inCluster.RelevantAngles.Count;
