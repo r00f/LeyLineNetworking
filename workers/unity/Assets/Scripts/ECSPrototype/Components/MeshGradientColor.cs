@@ -10,7 +10,10 @@ namespace LeyLineHybridECS
         public MeshColor ConnectedManalithColor;
         public Mesh mesh;
         public Vector2[] uv;
+        public Gradient Gradient;
+        [ColorUsage(true, true)]
         public Color[] colors;
+        public float EmissionMultiplier;
 
         void Start()
         {

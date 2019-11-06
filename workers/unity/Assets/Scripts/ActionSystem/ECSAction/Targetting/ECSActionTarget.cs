@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace LeyLineHybridECS
 {
+    [System.Serializable]
     public class ECSActionTarget : ScriptableObject
     {
         public enum HighlightDef
@@ -14,6 +15,9 @@ namespace LeyLineHybridECS
         }
         public HighlightDef HighlighterToUse;
         public int targettingRange;
+        public uint energyCost;
+        public ECSActionSecondaryTargets ModToAdd;
+        [HideInInspector]
         public List<ECSActionSecondaryTargets> SecondaryTargets = new List<ECSActionSecondaryTargets>();
 
     }

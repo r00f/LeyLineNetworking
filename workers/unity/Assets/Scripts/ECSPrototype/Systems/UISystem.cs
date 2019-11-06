@@ -1,12 +1,11 @@
-﻿using UnityEngine;
-using System.Collections;
-using Unity.Entities;
-using Unity.Mathematics;
-using UnityEngine.UI;
-using Unit;
-using Player;
-using Generic;
+﻿using Generic;
 using Improbable.Gdk.Core;
+using Improbable.Gdk.ReactiveComponents;
+using Player;
+using Unit;
+using Unity.Entities;
+using UnityEngine;
+using UnityEngine.UI;
 
 namespace LeyLineHybridECS
 {
@@ -20,16 +19,17 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
             public readonly ComponentArray<Transform> TransformData;
             public readonly ComponentArray<Unit_BaseDataSet> BaseDataSets;
-            //public readonly ComponentArray<BoxCollider> ColliderData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
             public readonly ComponentDataArray<IsVisible> IsVisibleData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+            public readonly ComponentDataArray<Actions.Component> Actions;
             public readonly ComponentArray<AnimatedPortraitReference> PortraitData;
+            public ComponentArray<UnitComponentReferences> ComponentReferences;
             public ComponentArray<Healthbar> HealthbarData;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         struct GameStateData
         {
@@ -37,7 +37,7 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<GameState.Component> GameStates;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
         public struct AuthoritativePlayerData
         {
@@ -48,7 +48,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
-        [Inject] private AuthoritativePlayerData m_AuthoritativePlayerData;
+        [Inject] AuthoritativePlayerData m_AuthoritativePlayerData;
 
         public struct PlayerData
         {
@@ -58,27 +58,70 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
-        [Inject] private PlayerStateSystem m_PlayerStateSystem;
+        [Inject] PlayerStateSystem m_PlayerStateSystem;
+
+        [Inject] SendActionRequestSystem m_SendActionRequestSystem;
 
         UIReferences UIRef;
+
+        Settings settings;
+
+        protected override void OnCreateManager()
+        {
+
+            base.OnCreateManager();
+
+            //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+            settings = Resources.Load<Settings>("Settings");
+
+        }
 
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            InitializeButtons();
+            SetUIElementsToPlayerColor();
+        }
+
+        public void SetUIElementsToPlayerColor()
+        {
+
+
+
+        }
+
+        public void InitializeButtons()
+        {
             UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
+
+            for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+            {
+                ActionButton ab = UIRef.Actions[bi];
+                ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
+            }
+
+            for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+            {
+                ActionButton ab = UIRef.SpawnActions[si];
+                ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
+            }
         }
 
         protected override void OnUpdate()
         {
-            if (m_GameStateData.GameStates.Length == 0)
+            if (m_GameStateData.GameStates.Length == 0 || m_AuthoritativePlayerData.Length == 0)
                 return;
 
-            var gameState = m_GameStateData.GameStates[0].CurrentState;
+            var gameState = m_GameStateData.GameStates[0];
 
-            if (gameState != GameStateEnum.waiting_for_players)
+
+            if (gameState.CurrentState == GameStateEnum.waiting_for_players)
+            {
+            }
+            else
             {
                 if (UIRef.StartupPanel.activeSelf)
                 {
@@ -95,28 +138,62 @@ namespace LeyLineHybridECS
                         switch (m_AuthoritativePlayerData.FactionData[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
-                                UIRef.HeroPortraitTeamColour.color = Color.blue;
-                                UIRef.CurrentEnergyFill.color = Color.blue;
+                                //UIRef.HeroPortraitTeamColour.color = Color.blue;
+                                UIRef.CurrentEnergyFill.color = settings.FactionColors[1];
+
                                 break;
                             case TeamColorEnum.red:
-                                UIRef.HeroPortraitTeamColour.color = Color.red;
-                                UIRef.CurrentEnergyFill.color = Color.red;
+                                //UIRef.HeroPortraitTeamColour.color = Color.red;
+                                UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
+
                                 break;
                         }
+
+                        UIRef.BlueColor.color = settings.FactionColors[1];
+                        UIRef.RedColor.color = settings.FactionColors[2];
 
                         UIRef.StartupPanel.SetActive(false);
                     }
                 }
+
+                if ((int)gameState.CurrentState <= UIRef.TurnStateToggles.Count && !UIRef.TurnStateToggles[(int)gameState.CurrentState - 1].isOn)
+                    UIRef.TurnStateToggles[(int)gameState.CurrentState - 1].isOn = true;
+            }
+
+            var authPlayerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
+            var authPlayerState = m_AuthoritativePlayerData.PlayerStateData[0];
+            var playerEnergy = m_AuthoritativePlayerData.PlayerEnergyData[0];
+            GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
+
+
+            if (gameState.CurrentState == GameStateEnum.game_over)
+            {
+                if (!UIRef.GameOverPanel.activeSelf)
+                {
+                    if(gameState.WinnerFaction == 0)
+                    {
+                        UIRef.DrawPanel.SetActive(true);
+                    }
+                    else if(gameState.WinnerFaction == authPlayerFaction)
+                    {
+                        UIRef.VictoryPanel.SetActive(true);
+                    }
+                    else
+                    {
+                        UIRef.DefeatPanel.SetActive(true);
+                    }
+
+                    UIRef.GameOverPanel.SetActive(true);
+                }
+
             }
 
             for (int i = 0; i < m_UnitData.Length; i++)
             {
-                GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
-                var playerState = m_AuthoritativePlayerData.PlayerStateData[0];
                 uint unitId = (uint)m_UnitData.EntityIdData[i].EntityId.Id;
+                var action = m_UnitData.Actions[i];
                 var position = m_UnitData.TransformData[i].position;
-                float currentHealth = m_UnitData.HealthData[i].CurrentHealth;
-                float maxHealth = m_UnitData.HealthData[i].MaxHealth;
+                var health = m_UnitData.HealthData[i];
                 var healthbar = m_UnitData.HealthbarData[i];
                 var isVisible = m_UnitData.IsVisibleData[i];
                 var animatedPortrait = m_UnitData.PortraitData[i].PortraitClip;
@@ -124,130 +201,264 @@ namespace LeyLineHybridECS
                 var faction = m_UnitData.FactionData[i];
                 var factionColor = m_UnitData.FactionData[i].TeamColor;
                 var stats = m_UnitData.BaseDataSets[i];
-                //var portraitPlayerColor = ;
+                int actionCount = stats.Actions.Count + 2;
+                int spawnActionCount = stats.SpawnActions.Count;
 
-                if(mouseState == MouseState.State.Clicked)
+                if(authPlayerState.SelectedUnitId == unitId)
                 {
-                    if(playerState.SelectedUnitId != unitId)
+                    if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
+                        UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
+
+                    string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
+
+                    if(health.Armor > 0 && faction.Faction == authPlayerFaction)
                     {
-                        playerState.SelectedUnitId = unitId;
-                        m_AuthoritativePlayerData.PlayerStateData[0] = playerState;
+                        UIRef.HealthText.text = currentMaxHealth + " +" + health.Armor;
+                    }
+                    else
+                    {
+                        UIRef.HealthText.text = currentMaxHealth;
+                    }
+                    
+                    SetHealthBarFillAmounts(UIRef.HealthFill, UIRef.ArmorFill, health, faction.Faction);
+
+                    if (factionColor == TeamColorEnum.blue)
+                    {
+                        if (UIRef.PortraitPlayerColor.color != settings.FactionColors[1])
+                            UIRef.PortraitPlayerColor.color = settings.FactionColors[1];
+                    }
+                    else if (factionColor == TeamColorEnum.red)
+                    {
+                        if (UIRef.PortraitPlayerColor.color != settings.FactionColors[2])
+                            UIRef.PortraitPlayerColor.color = settings.FactionColors[2];
+                    }
+
+                    if (faction.Faction == authPlayerFaction)
+                    {
+                        if(stats.SpawnActions.Count == 0)
+                        {
+                            UIRef.SpawnActionsToggle.isOn = false;
+                            UIRef.ActionsToggle.isOn = true;
+                            UIRef.SpawnToggleGO.SetActive(false);
+                        }
+                        else
+                        {
+                            UIRef.SpawnToggleGO.SetActive(true);
+                        }
+
+                        for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+                        {
+                            if (si < spawnActionCount)
+                            {
+                                if (stats.SpawnActions[si].Targets[0].energyCost > playerEnergy.Energy)
+                                {
+                                    UIRef.SpawnActions[si].Button.interactable = false;
+                                }
+                                else
+                                {
+                                    UIRef.SpawnActions[si].Button.interactable = true;
+                                }
+                                UIRef.SpawnActions[si].Visuals.SetActive(true);
+                                UIRef.SpawnActions[si].ActionName = stats.SpawnActions[si].ActionName;
+                                UIRef.SpawnActions[si].Icon.sprite = stats.SpawnActions[si].ActionIcon;
+                                UIRef.SpawnActions[si].ActionIndex = stats.Actions.Count + si;
+                                UIRef.SpawnActions[si].UnitId = (int)unitId;
+                            }
+                            else
+                            {
+                                UIRef.SpawnActions[si].Visuals.SetActive(false);
+                            }
+                        }
+
+                        for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+                        {
+                            if (bi < actionCount)
+                            {
+                                UIRef.Actions[bi].Visuals.SetActive(true);
+                                UIRef.Actions[bi].UnitId = (int)unitId;
+                                //basic move
+                                //disable if not enough energy
+
+                                if(stats.BasicMove != null && stats.BasicAttack != null)
+                                {
+                                    if (bi == 0)
+                                    {
+                                        if (playerEnergy.Energy == 0 && action.LockedAction.Index == -3)// && lockedAction.cost <= stats.BasicMove.cost
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = -2;
+                                    }
+                                    //basic attack
+                                    else if (bi == 1)
+                                    {
+                                        if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = -1;
+                                    }
+                                    //all other actions
+                                    else
+                                    {
+                                        if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = bi - 2;
+                                    }
+                                }
+
+                                else
+                                {
+                                    if (bi < actionCount - 2)
+                                    {
+                                        if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = false;
+                                        }
+                                        else
+                                        {
+                                            UIRef.Actions[bi].Button.interactable = true;
+                                        }
+                                        UIRef.Actions[bi].ActionName = stats.Actions[bi].ActionName;
+                                        UIRef.Actions[bi].Icon.sprite = stats.Actions[bi].ActionIcon;
+                                        UIRef.Actions[bi].ActionIndex = bi;
+                                    }
+                                    else
+                                    {
+                                        UIRef.Actions[bi].Visuals.SetActive(false);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                UIRef.Actions[bi].Visuals.SetActive(false);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+                        {
+                            UIRef.Actions[bi].Visuals.SetActive(false);
+                        }
+
+                        for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+                        {
+                            UIRef.SpawnActions[si].Visuals.SetActive(false);
+                        }
                     }
                 }
 
-                if (playerState.SelectedUnitId != 0)
+                if (authPlayerState.SelectedUnitId != 0)
                 {
                     if (!unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(true);
                 }
+
                 else
                 {
                     if (unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(false);
                 }
 
-                if (unitId == playerState.SelectedUnitId)
-                {
-                    if(stats.IsHero)
-                    {
-                        if (!UIRef.HeroEnergyPanel.activeSelf)
-                            UIRef.HeroEnergyPanel.SetActive(true);
-
-                        
-
-                        //get player with faction
-
-                        for(int pi = 0; pi < m_PlayerData.Length; pi++)
-                        {
-                            var playerEnergy = m_PlayerData.PlayerEnergyData[pi];
-                            var playerFaction = m_PlayerData.FactionData[pi];
-
-                            if(faction.Faction == playerFaction.Faction)
-                            {
-                                switch(playerFaction.TeamColor)
-                                {
-                                    case TeamColorEnum.blue:
-                                        UIRef.HeroCurrentEnergyFill.color = Color.blue;
-                                        break;
-                                    case TeamColorEnum.red:
-                                        UIRef.HeroCurrentEnergyFill.color = Color.red;
-                                        break;
-                                }
-
-                                UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, .1f);
-
-                                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
-                                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, .1f);
-
-                                UIRef.HeroEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
-
-                            }
-
-                        }
-
-
-                    }
-                    else
-                    {
-                        if (!UIRef.HeroEnergyPanel.activeSelf)
-                            UIRef.HeroEnergyPanel.SetActive(false);
-                    }
-
-                    if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
-                        UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
-
-                    UIRef.HealthText.text = currentHealth + " / " + maxHealth;
-                    UIRef.HealthFill.fillAmount = Mathf.Lerp(UIRef.HealthFill.fillAmount, currentHealth / maxHealth, 0.1f);
-
-                    if (factionColor == TeamColorEnum.blue)
-                    {
-                        if (UIRef.PortraitPlayerColor.color != Color.blue)
-                            UIRef.PortraitPlayerColor.color = Color.blue;
-                    }
-                    else if (factionColor == TeamColorEnum.red)
-                    {
-                        if (UIRef.PortraitPlayerColor.color != Color.red)
-                            UIRef.PortraitPlayerColor.color = Color.red;
-                    }
-                }
-
-
                 //if there is no healthbar, instantiate it into healthBarParent
-                if(!healthbar.HealthBarInstance)
+                if(!healthbar.UnitHeadUIInstance)
                 {
-                    currentHealth = maxHealth;
-                    healthbar.HealthBarInstance = Object.Instantiate(healthbar.HealthBarPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
+                    if(health.CurrentHealth != 0)
+                        healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
                 }
                 else
                 {
-                    if (gameState == GameStateEnum.planning && !healthbar.HealthBarInstance.activeSelf && isVisible.Value == 1)
+                    if(health.CurrentHealth == 0)
                     {
-                        healthbar.HealthBarInstance.SetActive(true);
+                        Object.Destroy(healthbar.UnitHeadUIInstance);
                     }
-                    else if(gameState != GameStateEnum.planning || isVisible.Value == 0)
+                    else
                     {
-                        healthbar.HealthBarInstance.SetActive(false);
+                        
+                        GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
+                        
+                        if (gameState.CurrentState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
+                        {
+                            healthBarGO.SetActive(true);
+                        }
+                        else if (gameState.CurrentState != GameStateEnum.planning || isVisible.Value == 0)
+                        {
+                            healthBarGO.SetActive(false);
+                        }
+                        
+                        healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
+                        SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
                     }
-                    
-                    healthbar.HealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
-                    healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount = Mathf.Lerp(healthbar.HealthBarInstance.transform.GetChild(0).GetChild(0).GetComponent<Image>().fillAmount, currentHealth / maxHealth, 0.1f);
                 }
             }
 
             //this clients player
             for (int i = 0; i < m_AuthoritativePlayerData.Length; i++)
             {
-                var playerState = m_AuthoritativePlayerData.PlayerStateData[i];
                 float maxEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].MaxEnergy;
                 float currentEnergy = m_AuthoritativePlayerData.PlayerEnergyData[i].Energy;
                 float energyIncome = m_AuthoritativePlayerData.PlayerEnergyData[i].Income;
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
+                Text energyText = UIRef.HeroEnergyText;
+
+                if(gameState.CurrentState != GameStateEnum.planning)
+                {
+                    if(UIRef.ReadyButton.interactable)
+                    {
+                        UIRef.ReadyButton.interactable = false;
+                    }
+                }
+                else
+                {
+                    if (!UIRef.ReadyButton.interactable)
+                    {
+                        UIRef.ReadyButton.interactable = true;
+                    }
+
+                }
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
+
+                 energyText.text = currentEnergy + " / " + maxEnergy;
+
+
+                if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                {
+                    for (int bi = 0; bi < UIRef.Actions.Count; bi++)
+                    {
+                        UIRef.Actions[bi].Visuals.SetActive(false);
+                    }
+
+                    for (int si = 0; si < UIRef.SpawnActions.Count; si++)
+                    {
+                        UIRef.SpawnActions[si].Visuals.SetActive(false);
+                    }
+                }
             }
 
             //all players
@@ -258,24 +469,24 @@ namespace LeyLineHybridECS
 
                 if (faction.TeamColor == TeamColorEnum.blue)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueReady.enabled)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.BlueReady.activeSelf)
                     {
-                        UIRef.BlueReady.enabled = true;
+                        UIRef.BlueReady.SetActive(true);
                     }
                     else if(playerState != PlayerStateEnum.ready)
                     {
-                        UIRef.BlueReady.enabled = false;
+                        UIRef.BlueReady.SetActive(false);
                     }
                 }
                 else if(faction.TeamColor == TeamColorEnum.red)
                 {
-                    if (playerState == PlayerStateEnum.ready && !UIRef.RedReady.enabled)
+                    if (playerState == PlayerStateEnum.ready && !UIRef.RedReady.activeSelf)
                     {
-                        UIRef.RedReady.enabled = true;
+                        UIRef.RedReady.SetActive(true);
                     }
                     else if(playerState != PlayerStateEnum.ready)
                     {
-                        UIRef.RedReady.enabled = false;
+                        UIRef.RedReady.SetActive(false);
                     }
                 }
             }
@@ -302,7 +513,65 @@ namespace LeyLineHybridECS
             return parentCanvas.transform.TransformPoint(movePos);
         }
 
-    }
+        public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health, uint unitFaction)
+        {
+            var playerFaction = m_AuthoritativePlayerData.FactionData[0].Faction;
 
+            if(unitFaction == playerFaction)
+            {
+                uint combinedHealth = health.CurrentHealth + health.Armor;
+                uint combinedMaxHealth = health.MaxHealth + health.Armor;
+                float healthPercentage = 1 - (float)health.Armor / combinedMaxHealth;
+                float combinedPercentage = 1;
+
+                if (combinedHealth < health.MaxHealth)
+                {
+                    combinedPercentage = (float)combinedHealth / combinedMaxHealth;
+                }
+
+                inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, combinedPercentage * healthPercentage, 0.1f);
+                inArmorFill.fillAmount = Mathf.Lerp(inArmorFill.fillAmount, combinedPercentage, 0.1f);
+            }
+            else
+            {
+                inHealthFill.fillAmount = Mathf.Lerp(inHealthFill.fillAmount, (float)health.CurrentHealth / health.MaxHealth, 0.1f);
+                inArmorFill.fillAmount = 0;
+            }
+        }
+
+        public void SetHealthFloatText(long inUnitId, uint inHealthAmount, bool isHeal = false)
+        {
+            UpdateInjectedComponentGroups();
+            for (int i = 0; i < m_UnitData.Length; i++)
+            {
+                var unitId = m_UnitData.EntityIdData[i].EntityId.Id;
+                var healthbar = m_UnitData.HealthbarData[i];
+
+                if(inUnitId == unitId)
+                {
+                    GameObject healthTextGO = healthbar.UnitHeadUIInstance.transform.GetChild(1).gameObject;
+                    Text healthText = healthTextGO.GetComponent<Text>();
+                    Animator anim = healthTextGO.GetComponent<Animator>();
+                    healthText.text = inHealthAmount.ToString();
+                    Color healthColor = healthText.color;
+
+                    if (isHeal)
+                    {
+                        healthColor.r = Color.green.r;
+                        healthColor.g = Color.green.g;
+                        healthColor.b = Color.green.b;
+                    }
+                    else
+                    {
+                        healthColor.r = Color.red.r;
+                        healthColor.g = Color.red.g;
+                        healthColor.b = Color.red.b;
+                    }
+                    //Debug.Log("PlayFloatingHealthAnim");
+                    anim.Play("HealthText", 0, 0);
+                }
+            }
+        }
+    }
 }
 

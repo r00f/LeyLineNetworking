@@ -6,9 +6,10 @@ namespace LeyLineHybridECS
 {
 
     [CreateAssetMenu]
+    [System.Serializable]
     public class ECS_MoveAlongPathEffect : ECSActionEffect
     {
-        public int MovementSpeed;
+        public float TimePerCell;
         public int pathIndex;
     }
 }

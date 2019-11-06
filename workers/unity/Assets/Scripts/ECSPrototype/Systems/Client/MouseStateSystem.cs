@@ -6,20 +6,47 @@ using Improbable;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using UnityEngine.EventSystems;
+using Improbable.Gdk.ReactiveComponents;
+using Player;
+using Cell;
+using Unit;
+using Generic;
+using System.Collections.Generic;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class MouseStateSystem : JobComponentSystem
 {
-    public struct Data
+    public struct MouseStateData
     {
         public readonly int Length;
+        public EntityArray EntityData;
+        public readonly ComponentDataArray<CubeCoordinate.Component> Coords;
+        public readonly ComponentDataArray<SpatialEntityId> EntityIDs;
+        public readonly ComponentDataArray<MarkerState> MarkerStates;
         public readonly ComponentDataArray<Position.Component> PositonData;
-        public ComponentDataArray<MouseState> MouseStateData;
+        public readonly ComponentDataArray<MouseVariables> MouseVariables;
+        public ComponentDataArray<MouseState> MouseStates;
     }
 
-    [Inject] private Data m_Data;
+    [Inject] MouseStateData m_MouseStateData;
+
+    public struct AuthoritativePlayerData
+    {
+        public readonly int Length;
+        public readonly ComponentDataArray<FactionComponent.Component> Faction;
+        public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+        public readonly ComponentDataArray<PlayerState.Component> PlayerStateData;
+        public ComponentDataArray<HighlightingDataComponent> HighlightingData;
+    }
+
+    [Inject] AuthoritativePlayerData m_AuthoritativePlayerData;
 
     EventSystem eventSystem;
+
+    public class EntityBarrier : BarrierSystem { }
+
+    [Inject] private EntityBarrier _EntityBarrier;
+
 
     protected override void OnCreateManager()
     {
@@ -28,93 +55,136 @@ public class MouseStateSystem : JobComponentSystem
 
     struct MouseStateJob : IJobParallelFor
     {
-        [NativeDisableParallelForRestriction]
         [ReadOnly] public ComponentDataArray<Position.Component> Positons;
-        [NativeDisableParallelForRestriction]
         public ComponentDataArray<MouseState> MouseStates;
+        public ComponentDataArray<MouseVariables> MouseVars;
+        public ComponentDataArray<MarkerState> MarkerStates;
+        public ComponentDataArray<SpatialEntityId> Ids;
+        public ComponentDataArray<CubeCoordinate.Component> Coords;
+        public EntityArray Entities;
+        public PlayerState.Component PlayerState;
+        [NativeDisableParallelForRestriction]
+        public ComponentDataArray<HighlightingDataComponent> HighlightingData;
         public RaycastHit hit;
         public bool mouseButtonDown;
+        //public HandleCellGridRequestsSystem CellGridSystem;
+        public FactionComponent.Component Faction;
+        [NativeDisableParallelForRestriction]
+        public EntityCommandBuffer CommandBuffer;
 
         public void Execute(int index)
         {
-            Vector3 pos = Positons[index].Coords.ToUnityVector();
+            var entity = Entities[index];
+            HighlightingDataComponent highLighting = HighlightingData[0];
+            CubeCoordinate.Component coord = Coords[index];
+            MarkerState markerState = MarkerStates[index];
             MouseState state = MouseStates[index];
-
-            if (Vector3.Distance(hit.point, pos) < .8f)
+            MouseVariables vars = MouseVars[index];
+            Vector3 pos = Positons[index].Coords.ToUnityVector() + new Vector3(0, vars.yOffset, 0);
+            Vector3 hitDist = hit.point - pos;
+            float hitSquared = hitDist.sqrMagnitude;
+            var id = Ids[index].EntityId.Id;
+           
+            if (hitSquared < vars.Distance * vars.Distance)
             {
-                //set its MouseState to Clicked if we click
-                if (mouseButtonDown)
+                if (mouseButtonDown && PlayerState.CurrentState != PlayerStateEnum.ready)
                 {
-                    MouseStates[index] = new MouseState
-                    {
-                        CurrentState = MouseState.State.Clicked,
-                        ClickEvent = 1
-                    };
+                    //add reactive component ClickEvent to flag this object as a clicked object
+                    //other arrays should be able to be culled to the clicked object
+                    CommandBuffer.AddComponent(entity, new ClickEvent());
+                    state.ClickEvent = 1;
+                    MouseStates[index] = state;
                 }
-                //set its MouseState to Hovered if we hover
                 else if (state.CurrentState != MouseState.State.Clicked)
                 {
+                    //when cell is occupied, over unit instead
                     if (state.CurrentState != MouseState.State.Hovered)
                     {
-                        MouseStates[index] = new MouseState
+                        if (highLighting.IsUnitTarget == 1)
                         {
-                            CurrentState = MouseState.State.Hovered
-                        };
+                            if (markerState.IsUnit == 1)
+                            {
+                                //if (CellGridSystem.ValidateUnitTarget(id, PlayerState.SelectedUnitId, Faction.Faction, (UnitRequisitesEnum)HighlightingData.TargetRestrictionIndex))
+                                //{
+                                highLighting.HoveredCoordinate = coord.CubeCoordinate;
+                                highLighting.HoveredPosition = pos - new Vector3(0, vars.yOffset, 0);
+                                //}
+                            }
+                            else if (highLighting.HoveredPosition != Vector3.zero)
+                            {
+                                highLighting.HoveredCoordinate = new Vector3f(999, 999, 999);
+                                highLighting.HoveredPosition = new Vector3(0, 0, 0);
+                            }
+                        }
+                        else
+                        {
+                            if (markerState.IsUnit == 0)
+                            {
+                                highLighting.HoveredCoordinate = coord.CubeCoordinate;
+                                highLighting.HoveredPosition = pos;
+                            }
+                        }
+
+                        HighlightingData[0] = highLighting;
+                        //Debug.Log(HighlightingData[0].HoveredCoordinate);
+                        state.CurrentState = MouseState.State.Hovered;
+                        MouseStates[index] = state;
                     }
                 }
-                else if (MouseStates[index].ClickEvent == 1)
-                {
-                    MouseStates[index] = new MouseState
-                    {
-                        CurrentState = MouseState.State.Clicked,
-                        ClickEvent = 0
-                    };
-                }
-            }
-            //if the mouse is anywhere but over the collider 
+            } 
             else
             {
-                //and this entities MouseState is clicked
                 if (state.CurrentState == MouseState.State.Clicked)
                 {
-                    //set it to Neutral if we click
                     if (mouseButtonDown)
                     {
-                        MouseStates[index] = new MouseState
-                        {
-                            CurrentState = MouseState.State.Neutral
-                        };
+                        state.CurrentState = MouseState.State.Neutral;
+                        MouseStates[index] = state;
                     }
-
                 }
-                //set it to neutral if it was Hovered
                 else
                 {
                     if (state.CurrentState != MouseState.State.Neutral)
                     {
-                        MouseStates[index] = new MouseState
-                        {
-                            CurrentState = MouseState.State.Neutral
-                        };
+                        state.CurrentState = MouseState.State.Neutral;
+                        MouseStates[index] = state;
                     }
                 }
             }
+
+            if (state.ClickEvent == 1 && !mouseButtonDown)
+            {
+                CommandBuffer.RemoveComponent<ClickEvent>(entity);
+                state.CurrentState = MouseState.State.Clicked;
+                state.ClickEvent = 0;
+                MouseStates[index] = state;
+            }
         }
+        
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
         if (Physics.Raycast(ray, out RaycastHit hit) && !eventSystem.IsPointerOverGameObject())
         {
             var mouseStateJob = new MouseStateJob
             {
                 mouseButtonDown = Input.GetButtonDown("Fire1"),
                 hit = hit,
-                Positons = m_Data.PositonData,
-                MouseStates = m_Data.MouseStateData,
-            }.Schedule(m_Data.Length, 1, inputDeps);
+                Positons = m_MouseStateData.PositonData,
+                MouseStates = m_MouseStateData.MouseStates,
+                MouseVars = m_MouseStateData.MouseVariables,
+                MarkerStates = m_MouseStateData.MarkerStates,
+                PlayerState = m_AuthoritativePlayerData.PlayerStateData[0],
+                HighlightingData = m_AuthoritativePlayerData.HighlightingData,
+                Ids = m_MouseStateData.EntityIDs,
+                Coords = m_MouseStateData.Coords,
+                Entities = m_MouseStateData.EntityData,
+                CommandBuffer = _EntityBarrier.CreateCommandBuffer()
 
+            }.Schedule(m_MouseStateData.Length, 1, inputDeps);
             return mouseStateJob;
         }
         else

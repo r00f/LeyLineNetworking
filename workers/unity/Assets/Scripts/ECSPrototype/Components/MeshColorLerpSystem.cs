@@ -1,9 +1,12 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
-using Improbable.Gdk.PlayerLifecycle;
-using Improbable.Worker.CInterop;
+using Improbable;
+using Cell;
+using Generic;
+using Player;
+using Improbable.Gdk.ReactiveComponents;
+using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
@@ -16,7 +19,7 @@ namespace LeyLineHybridECS
             public ComponentArray<MeshColor> MeshColorData;
         }
 
-        [Inject] private CircleData m_CircleData;
+        [Inject] CircleData m_CircleData;
 
         public struct LineData
         {
@@ -24,7 +27,7 @@ namespace LeyLineHybridECS
             public ComponentArray<MeshGradientColor> MeshGradientColorData;
         }
 
-        [Inject] private LineData m_LineData;
+        [Inject] LineData m_LineData;
 
         private struct ProjectorAddedData
         {
@@ -33,39 +36,43 @@ namespace LeyLineHybridECS
             public readonly ComponentArray<Projector> Projectors;
         }
 
-        [Inject] private ProjectorAddedData m_ProjectorAddedData;
+        [Inject] ProjectorAddedData m_ProjectorAddedData;
 
+        ComponentGroup manalithGroup;
+        ComponentGroup playerGroup;
+        ComponentGroup gameControllerGroup;
 
-        private ComponentGroup manalithGroup;
-        private ComponentGroup playerGroup;
-        private ComponentGroup gameControllerGroup;
+        Settings settings;
 
         protected override void OnCreateManager()
         {
             
             base.OnCreateManager();
 
+            //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+            settings = Resources.Load<Settings>("Settings");
+
             playerGroup = Worlds.ClientWorld.CreateComponentGroup(
 
-                ComponentType.Create<Authoritative<Player.PlayerState.Component>>(),
-                ComponentType.Create<Generic.WorldIndex.Component>()
+                ComponentType.Create<Authoritative<PlayerState.Component>>(),
+                ComponentType.Create<WorldIndex.Component>()
 
             );
 
             gameControllerGroup = Worlds.ClientWorld.CreateComponentGroup(
 
-                ComponentType.Create<Generic.GameState.Component>(),
-                ComponentType.Create<Generic.WorldIndex.Component>(),
-                ComponentType.Create<Improbable.Position.Component>()
+                ComponentType.Create<GameState.Component>(),
+                ComponentType.Create<WorldIndex.Component>(),
+                ComponentType.Create<Position.Component>()
 
             );
 
             //var Manager = World.Active.GetExistingManager<EntityManager>();
             manalithGroup = Worlds.ClientWorld.CreateComponentGroup(
 
-                ComponentType.Create<Generic.FactionComponent.Component>(),
-                ComponentType.Create<Cells.CircleCells.Component>(),
-                ComponentType.Create<Improbable.Position.Component>()
+                ComponentType.Create<FactionComponent.Component>(),
+                ComponentType.Create<CircleCells.Component>(),
+                ComponentType.Create<Position.Component>()
             );
 
         }
@@ -74,22 +81,22 @@ namespace LeyLineHybridECS
         {
             if(m_ProjectorAddedData.Length != 0 && playerGroup.GetEntityArray().Length != 0)
             {
-                var playerWorldIndex = playerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[0].Value;
+                var playerWorldIndex = playerGroup.GetComponentDataArray<WorldIndex.Component>()[0].Value;
 
                 for (int i = 0; i < gameControllerGroup.GetEntityArray().Length; i++)
                 {
-                    var gameControllerWorldIndex = gameControllerGroup.GetComponentDataArray<Generic.WorldIndex.Component>()[i].Value;
-                    var position = gameControllerGroup.GetComponentDataArray<Improbable.Position.Component>()[i].Coords.ToUnityVector();
+                    var gameControllerWorldIndex = gameControllerGroup.GetComponentDataArray<WorldIndex.Component>()[i].Value;
+                    var position = gameControllerGroup.GetComponentDataArray<Position.Component>()[i].Coords.ToUnityVector();
 
                     if (gameControllerWorldIndex == playerWorldIndex)
                     {
-
-                        if (m_ProjectorAddedData.Transforms[0].position != position + new Vector3(0, 10, 50))
+                        /*
+                        if (m_ProjectorAddedData.Transforms[0].position != position + new Vector3(17, 10, 17))
                         {
                             //Debug.Log("SetProjectorPosition");
-                            m_ProjectorAddedData.Transforms[0].position = position + new Vector3(0, 10, 50);
+                            //m_ProjectorAddedData.Transforms[0].position = position + new Vector3(17, 10, 17);
                         }
-
+                        */
                     }
                 }
             }
@@ -102,23 +109,13 @@ namespace LeyLineHybridECS
 
                 for (int i = 0; i < manalithGroup.GetEntityArray().Length; i++)
                 {
-                    var faction = manalithGroup.GetComponentDataArray<Generic.FactionComponent.Component>()[i];
-                    var position = manalithGroup.GetComponentDataArray<Improbable.Position.Component>()[i].Coords.ToUnityVector().sqrMagnitude;
+                    var faction = manalithGroup.GetComponentDataArray<FactionComponent.Component>()[i];
+                    var position = manalithGroup.GetComponentDataArray<Position.Component>()[i].Coords.ToUnityVector().sqrMagnitude;
 
                     if (position == circlePos)
                     {
-                        switch (faction.Faction)
-                        {
-                            case 0:
-                                circleColor = Color.yellow;
-                                break;
-                            case 1:
-                                circleColor = Color.blue;
-                                break;
-                            case 2:
-                                circleColor = Color.red;
-                                break;
-                        }
+                        circleColor = settings.FactionColors[(int)faction.Faction];
+
                         m_CircleData.MeshColorData[ci].Color = circleColor;
                     }
                 }
@@ -126,14 +123,13 @@ namespace LeyLineHybridECS
 
             for (int i = 0; i < m_CircleData.Length; i++)
             {
-                //Debug.Log("??");
                 var meshColor = m_CircleData.MeshColorData[i];
 
                 if (meshColor.LerpColor != meshColor.Color)
                     meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
 
-                if (meshColor.MeshRenderer.material.color != meshColor.LerpColor)
-                    meshColor.MeshRenderer.material.color = meshColor.LerpColor;
+                Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
+                meshColor.MeshRenderer.material.color = emissionColor;
 
                 ParticleSystem pPs = meshColor.ParticleSystem;
                 var mainModule = pPs.main;
@@ -146,17 +142,61 @@ namespace LeyLineHybridECS
             {
                 var meshGradientColor = m_LineData.MeshGradientColorData[i];
 
+                Color c1 = meshGradientColor.ManalithColor.LerpColor;
+                Color c2 = meshGradientColor.ConnectedManalithColor.LerpColor;
 
-                if (meshGradientColor.ManalithColor.LerpColor != meshGradientColor.ManalithColor.Color || meshGradientColor.ConnectedManalithColor.LerpColor != meshGradientColor.ConnectedManalithColor.Color)
+                
+                // Populate the color keys at the relative time 0 and 1 (0 and 100%)
+                var colorKey = new GradientColorKey[4];
+                colorKey[0].color = c1;
+                colorKey[0].time = 0.0f;
+                colorKey[1].color = c1;
+                colorKey[1].time = .25f;
+                colorKey[2].color = c2;
+                colorKey[2].time = .75f;
+                colorKey[3].color = c2;
+                colorKey[3].time = 1.0f;
+
+                var alphaKey = new GradientAlphaKey[2];
+                alphaKey[0].alpha = 1.0f;
+                alphaKey[0].time = 0.0f;
+                alphaKey[1].alpha = 1.0f;
+                alphaKey[1].time = 1.0f;
+
+                meshGradientColor.Gradient.SetKeys(colorKey, alphaKey);
+                
+
+                for (int li = 0; li < meshGradientColor.colors.Length; li++)
                 {
-                    // Instead if vertex.y we use uv.x
-                    for (int li = 0; li < meshGradientColor.uv.Length; li++)
+                    //Debug.Log((float)li / meshGradientColor.colors.Length);
+                    //meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li / meshGradientColor.colors.Length);
+                    meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float)li/meshGradientColor.colors.Length) * meshGradientColor.EmissionMultiplier;
+                    /*
+                    if (li < 3)
                     {
-                        meshGradientColor.colors[li] = Color.Lerp(meshGradientColor.ManalithColor.LerpColor, meshGradientColor.ConnectedManalithColor.LerpColor, meshGradientColor.uv[li].x / meshGradientColor.uv[meshGradientColor.uv.Length - 1].x);
+                        meshGradientColor.colors[li] = emissiveColor1;
                     }
+                    else if(li > meshGradientColor.colors.Length - 4)
+                    {
+                        meshGradientColor.colors[li] = emissiveColor2;
+                    }
+                    else
+                    {
+                        if (li % 2 == 0)
+                        {
+                            meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li);
+                        }
+                        else
+                        {
+                            meshGradientColor.colors[li] = meshGradientColor.colors[li - 1];
+                        }
 
-                    meshGradientColor.mesh.colors = meshGradientColor.colors;
+                    }
+                                    */
                 }
+
+                meshGradientColor.mesh.colors = meshGradientColor.colors;
+                //}
             }
         }
     }

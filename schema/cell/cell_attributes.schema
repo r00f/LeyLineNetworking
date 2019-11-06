@@ -1,0 +1,36 @@
+package cell;
+
+import "improbable/vector3.schema";
+import "generic/faction.schema";
+
+component CellAttributesComponent 
+{
+    id = 107;
+	CellAttributes cell_attributes = 1;
+}
+
+type CellAttributes {
+	
+	CellAttribute cell = 1;
+	CellAttributeList neighbours = 2;
+	int32 cell_map_color_index = 3;
+
+}
+
+type CellAttribute	{
+	
+	improbable.Vector3f position = 1;
+	improbable.Vector3f cube_coordinate = 2;
+	bool is_taken = 3;
+	int32 movement_cost = 4;
+	int64 unit_on_cell_id = 5;
+	bool obstruct_vision = 6;
+}
+
+type CellAttributeList {
+
+	list<CellAttribute> cell_attributes = 1;
+
+}
+
+

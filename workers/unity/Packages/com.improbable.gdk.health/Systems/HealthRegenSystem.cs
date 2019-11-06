@@ -1,4 +1,5 @@
 using Improbable.Gdk.Core;
+using Improbable.Gdk.ReactiveComponents;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -146,13 +147,15 @@ namespace Improbable.Gdk.Health
 
                         // Send command to regen entity.
                         var commandSender = toRegen.ModifyHealthCommandSenders[i];
-                        var modifyHealthRequest = HealthComponent.ModifyHealth.CreateRequest(
+                        /*
+                        var modifyHealthRequest = HealthComponent.ModifyHealth.(
                             toRegen.EntityId[i].EntityId,
                             new HealthModifier()
                             {
                                 Amount = regenComponent.RegenAmount
                             });
                         commandSender.RequestsToSend.Add(modifyHealthRequest);
+                        */
                     }
                     toRegen.RegenData[i] = regenData;
                 }

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace LeyLineHybridECS
 {
     [CreateAssetMenu]
+    [System.Serializable]
     public class SecondaryPath : ECSActionSecondaryTargets
     {
         public bool respectTaken;

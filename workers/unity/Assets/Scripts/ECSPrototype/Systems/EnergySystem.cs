@@ -14,7 +14,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<Faction> FactionData;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         public struct UnitData
         {
@@ -23,7 +23,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<Faction> FactionData;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         protected override void OnUpdate()
         {

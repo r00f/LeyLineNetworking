@@ -1,0 +1,132 @@
+package unit;
+import "improbable/vector3.schema";
+import "unit/action_effect.schema";
+import "cell/cell_attributes.schema";
+
+component Actions{
+	
+    id = 125;
+	Action basic_move = 1;
+	Action basic_attack = 2;
+	list<Action> other_actions = 3;
+	Action current_selected = 4;
+	Action last_selected = 5;
+	Action locked_action = 6;
+	Action null_action = 7;
+	bool executed = 8;
+	command SelectActionResponse select_action_command(SelectActionRequest);
+	command SetTargetResponse set_target_command(SetTargetRequest);
+}
+
+
+type Action {
+	string name = 1;
+	uint32 combined_cost = 2;
+	int32 index = 3;
+	list<ActionTarget> targets = 4;
+	list<unit.ActionEffect> effects = 5;
+	ExecuteStepEnum action_execute_step = 6;
+	float time_to_execute = 7;
+}
+
+type ActionTarget {
+	type UnitTarget {
+		UnitRequisitesEnum unit_req = 1;
+		
+	}
+	type CellTarget {
+		bool require_empty = 1;
+		bool require_visible = 2;
+	}
+
+	int64 target_id = 1;
+	improbable.Vector3f target_coordinate = 2;
+	int32 targettingrange = 3;
+	uint32 energy_cost = 4;
+	UseHighlighterEnum higlighter = 5;
+	TargetTypeEnum target_type = 6;
+	CellTarget cell_target_nested = 7;
+	UnitTarget unit_target_nested = 8;
+	list<TargetMod> mods = 9;
+	
+	
+}
+type TargetMod {
+	
+	type AoE {
+		int32 radius = 1;
+		}
+	type Path {
+		int32 costpertile = 1;
+	}
+	type Ring {
+	
+		uint32 radius = 1;
+	}
+	list<CoordinatePositionPair> coordinate_position_pairs = 1;
+	AoE aoe_nested = 2;
+	Path path_nested = 3;
+	Ring ring_nested = 4;
+	ModTypeEnum mod_type = 5;
+}
+
+type CoordinatePositionPair {
+
+	improbable.Vector3f cube_coordinate = 1;
+	improbable.Vector3f world_position = 2;
+
+}
+
+enum ExecuteStepEnum {
+    interrupt = 0;
+    attack = 1;
+    move = 2;
+    skillshot = 3;
+    cleanup = 4;
+}
+
+enum UnitRequisitesEnum {
+
+	friendly = 0;
+	friendly_other = 1;
+	self = 2;
+	enemy = 3;
+	other = 4;
+	any = 5;
+}
+
+enum TargetTypeEnum {
+cell = 0;
+unit = 1;
+}
+
+enum ModTypeEnum {
+aoe = 0;
+path = 1;
+line = 2;
+ring = 3;
+}
+
+enum UseHighlighterEnum {
+no_pathing = 0;
+pathing = 1;
+no_pathing_visible = 2;
+pathing_visible = 3;
+}
+
+type SelectActionRequest {
+
+	int32 action_id = 1;
+}
+
+type SelectActionResponse {
+
+}
+
+type SetTargetRequest {
+	int64 target_id = 1;
+}
+
+type SetTargetResponse {
+
+}

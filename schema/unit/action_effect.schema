@@ -1,0 +1,50 @@
+package unit;
+import "improbable/vector3.schema";
+
+type ActionEffect {
+ EffectTypeEnum effect_type = 1;
+	type SpawnUnit {
+	string unit_name = 1;
+	}
+	type DealDamage {
+	uint32 damage_amount = 1;
+	}
+	type GainArmor {
+	uint32 armor_amount = 1;
+	}
+	type MoveAlongPath{
+	float time_per_cell = 1;
+	}
+	SpawnUnit spawn_unit_nested = 2;
+	DealDamage deal_damage_nested = 3;
+	GainArmor gain_armor_nested = 4;
+	MoveAlongPath move_along_path_nested = 5;
+	int32 target_specification = 6;
+	uint32 turn_duration = 7;
+	ApplyToTargetsEnum apply_to_target = 8;
+	ApplyToRestrictionsEnum apply_to_restrictions = 9;
+}
+
+enum EffectTypeEnum {
+spawn_unit = 0;
+deal_damage = 1;
+gain_armor = 2;
+move_along_path = 3;
+}
+
+enum ApplyToTargetsEnum
+{
+primary = 0;
+secondary= 1;
+both = 2;
+}
+
+enum ApplyToRestrictionsEnum
+{
+friendly = 0;
+friendly_other = 1;
+self = 2;
+enemy = 3;
+other = 4;
+any = 5;            
+}

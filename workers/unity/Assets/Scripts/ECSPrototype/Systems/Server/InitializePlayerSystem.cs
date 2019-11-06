@@ -6,15 +6,15 @@ using Generic;
 using System.Collections.Generic;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Gdk;
-using Cells;
+using Cell;
 using Improbable;
+using Improbable.Gdk.ReactiveComponents;
 
 namespace LeyLineHybridECS
 {
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class InitializePlayerSystem : ComponentSystem
     {
-        
         public struct PlayerData
         {
             public readonly int Length;
@@ -24,18 +24,19 @@ namespace LeyLineHybridECS
             public ComponentDataArray<FactionComponent.Component> FactionComponent;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         public struct CellData
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<CellAttributesComponent.Component>> AuthorativeData;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<IsSpawn.Component> IsSpawnData;
             public ComponentDataArray<UnitToSpawn.Component> UnitToSpawnData;
         }
 
-        [Inject] private CellData m_CellData;
+        [Inject] CellData m_CellData;
 
         public struct GameStateData
         {
@@ -45,7 +46,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<GameState.Component> GameStates;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
         public struct PlayerStateData : ISystemStateComponentData
         {
@@ -63,7 +64,7 @@ namespace LeyLineHybridECS
             public SubtractiveComponent<PlayerStateData> WorldIndexState;
         }
 
-        [Inject] private PlayerAddedData m_PlayerAddedData;
+        [Inject] PlayerAddedData m_PlayerAddedData;
 
 
         public struct PlayerRemovedData
@@ -76,7 +77,9 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<PlayerStateData> WorldIndexState;
         }
 
-        [Inject] private PlayerRemovedData m_PlayerRemovedData;
+        [Inject] PlayerRemovedData m_PlayerRemovedData;
+
+        [Inject] SpawnUnitsSystem m_SpawnSystem;
 
         protected override void OnUpdate()
         {
@@ -145,14 +148,18 @@ namespace LeyLineHybridECS
                     {
                         var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
                         var unitToSpawn = m_CellData.UnitToSpawnData[ci];
+                        var coord = m_CellData.CoordinateData[ci];
 
                         if (cellWorldIndex == worldIndex.WorldIndexState.Value)
                         {
-                            if (unitToSpawn.Faction == factionComp.Faction)
+                            if (unitToSpawn.Faction == factionComp.Faction && unitToSpawn.IsSpawn)
                             {
-                                unitToSpawn.UnitName = playerAttributes.HeroName;
-                                unitToSpawn.TeamColor = factionComp.TeamColor;
-                                m_CellData.UnitToSpawnData[ci] = unitToSpawn;
+                                //unitToSpawn.UnitName = playerAttributes.HeroName;
+                                //unitToSpawn.TeamColor = factionComp.TeamColor;
+                                //m_CellData.UnitToSpawnData[ci] = unitToSpawn;
+                                //unitToSpawn.UnitName = "";
+                                //m_CellData.UnitToSpawnData[i] = unitToSpawn;
+                                m_SpawnSystem.SpawnUnit(cellWorldIndex, playerAttributes.HeroName, unitToSpawn.Faction, coord.CubeCoordinate);
                             }
                         }
                     }

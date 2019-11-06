@@ -1,17 +1,31 @@
 package player;
+import "cell/cell_attributes.schema";
+import "improbable/vector3.schema";
 
 component PlayerState {
 	
     id = 104;
 	PlayerStateEnum current_state = 1;
-	uint32 selected_unit_id = 2;
-	
+	int64 selected_unit_id = 2;
+	improbable.Vector3f selected_unit_coordinate = 3;
+	list<cell.CellAttribute> cells_in_range = 4;
+	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 5;
+	int32 selected_action_id = 6;
+	map<int64, CubeCoordinateList> unit_targets = 7;
+	bool end_step_ready = 8;
+}
+
+type CubeCoordinateList {
+
+	list<improbable.Vector3f> cube_coordinates = 1;
+
 }
 
 enum PlayerStateEnum {
 
 	waiting = 0;
 	unit_selected = 1;
-	ready = 2;
+	waiting_for_target = 2;
+	ready = 3;
 
 }

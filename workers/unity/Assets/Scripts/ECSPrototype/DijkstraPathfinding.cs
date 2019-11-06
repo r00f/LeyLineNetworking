@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Cells;
+using Cell;
 /// <summary>
 /// Implementation of Dijkstra pathfinding algorithm.
 /// </summary>

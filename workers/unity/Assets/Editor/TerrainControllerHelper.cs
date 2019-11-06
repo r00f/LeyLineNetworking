@@ -19,37 +19,23 @@ public class TerrainControllerHelper : Editor
 
     public override void OnInspectorGUI()
     {
-        base.OnInspectorGUI();
-        serializedObject.Update();
-
-            /*
-
-            if (GUILayout.Button("Update Terrain Height"))
-            {
-                myTarget.UpdateTerrainHeight();
-            }
-
-            if (GUILayout.Button("Set Square Terrain Height"))
-            {
-                myTarget.SetSquareTerrainHeight();
-            }
-
-            if (GUILayout.Button("Get Terrain Height"))
-            {
-                myTarget.GetTerrainHeight();
-            }
-             */
+            base.OnInspectorGUI();
+            serializedObject.Update();
 
 
             if (GUILayout.Button("Update Trees"))
-        {
-            myTarget.UpdateHexagonTrees();
-        }
+            {
+                myTarget.UpdateHexagonTrees();
+            }
 
-        if (GUILayout.Button("Set Slope Texture"))
-        {
-            myTarget.SetSlopeTexture();
-        }
+            if (GUILayout.Button("Set Slope Texture"))
+            {
+                myTarget.SetSlopeTexture();
+            }
+            if (GUILayout.Button("Smooth Terrain"))
+            {
+                myTarget.SmoothTerrainHeights();
+            }
 
             if (GUILayout.Button("PaintTerrainHeight"))
             {
@@ -58,17 +44,17 @@ public class TerrainControllerHelper : Editor
 
 
             if (GUILayout.Button("Set Whole Terrain Height"))
-        {
-            myTarget.SetWholeTerrainHeight();
-        }
+            {
+                myTarget.SetWholeTerrainHeight();
+            }
 
-        if (GUILayout.Button("Set Whole Terrain Texture"))
-        {
-            myTarget.SetWholeTerrainTexture();
-        }
+            if (GUILayout.Button("Set Whole Terrain Texture"))
+            {
+                myTarget.SetWholeTerrainTexture();
+            }
 
-        serializedObject.ApplyModifiedProperties();
-    }
+            serializedObject.ApplyModifiedProperties();
+        }
 
 }
 #endif

@@ -5,7 +5,7 @@ using UnityEngine;
 using Snapshot = Improbable.Gdk.Core.Snapshot;
 using LeyLineHybridECS;
 using System.Collections.Generic;
-using Cells;
+using Cell;
 
 namespace BlankProject.Editor
 {
@@ -39,7 +39,7 @@ namespace BlankProject.Editor
         {
             foreach(EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
             {
-                Vector3f pos = new Vector3f(wi.transform.position.x + 50, wi.transform.position.y, wi.transform.position.z);
+                Vector3f pos = new Vector3f(wi.transform.position.x, wi.transform.position.y, wi.transform.position.z);
                 var gameState = LeyLineEntityTemplates.GameState(pos, wi.WorldIndex);
                 snapshot.AddEntity(gameState);
             }
@@ -55,7 +55,7 @@ namespace BlankProject.Editor
                 };
 
                 
-                foreach (Cell n in m.leyLineCircle)
+                foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
                     circle.CellAttributes.Add(new CellAttribute
                     {
@@ -75,14 +75,14 @@ namespace BlankProject.Editor
 
         private static void AddCellGrid(Snapshot snapshot)
         {
-            foreach (Cell c in Object.FindObjectsOfType<Cell>())
+            foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
             {
                 var neighbours = new CellAttributeList
                 {
                     CellAttributes = new List<CellAttribute>()
                 };
 
-                foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                foreach(LeyLineHybridECS.Cell n in c.GetComponent<Neighbours>().NeighboursList)
                 {
                     neighbours.CellAttributes.Add(new CellAttribute
                     {
@@ -96,7 +96,8 @@ namespace BlankProject.Editor
                 Vector3f pos = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z);
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
                 uint worldIndex = c.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision);
+                int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
+                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor);
                 snapshot.AddEntity(cell);
             }
         }

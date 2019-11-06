@@ -4,6 +4,6 @@ using UnityEngine;
 
 public class Healthbar : MonoBehaviour
 {
-    public GameObject HealthBarPrefab;
-    public GameObject HealthBarInstance;
+    public GameObject UnitHeadUIPrefab;
+    public GameObject UnitHeadUIInstance;
 }

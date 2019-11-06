@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using Improbable;
 
 namespace LeyLineHybridECS
 {
     [CreateAssetMenu]
-
+    [System.Serializable]
     public class ECSAction : ScriptableObject
     {
         /*
@@ -20,12 +20,28 @@ namespace LeyLineHybridECS
     }
     public MultiTarget MultiTargetting = MultiTarget.No;
     */
+        public enum ExecuteStep
+        {
+            Interrupt,
+            Attack,
+            Move,
+            Skillshot,
+            Cleanup
+        }
+
+        public ExecuteStep ActionExecuteStep = ExecuteStep.Attack;
+
+        [Header("Action Information")]
+        public Sprite ActionIcon;
+        public Projectile ProjectileFab;
+        public string ActionName;
+        public string ToolTip;
+        public float TimeToExecute;
+
+        [Header("Add Targets/Effects")]
+        public ECSActionTarget TargetToAdd;
+        public ECSActionEffect EffectToAdd;
         public List<ECSActionTarget> Targets;
         public List<ECSActionEffect> Effects;
-        //public Unit usedby;
-        public int baseEneryCost;
-        public int currentEnergyCost;
-        public string ActionName;
-        public Sprite ActionIcon;
     }
 }

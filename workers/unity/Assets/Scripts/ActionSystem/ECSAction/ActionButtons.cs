@@ -10,7 +10,7 @@ namespace LeyLineHybridECS
     public class ActionButtons : MonoBehaviour
     {
         // Start is called before the first frame update
-        public Actions ActionsSelectedUnit;
+        //public Actions ActionsSelectedUnit;
         Button ButtonRef;
         public ECSAction AssignedAction;
         Text MyText;
@@ -29,7 +29,7 @@ namespace LeyLineHybridECS
 
         public void OnButtonPressed()
         {
-            if(AssignedAction != null && ActionsSelectedUnit != null)
+            if(AssignedAction != null /*&& ActionsSelectedUnit != null*/)
             {
                 //ActionsSelectedUnit.CurrentActiveAction = AssignedAction;
             }
@@ -39,7 +39,7 @@ namespace LeyLineHybridECS
             MyImage.enabled = false;
             MyText.text = "";
             ButtonRef.interactable = false;
-            ActionsSelectedUnit = null;
+            //ActionsSelectedUnit = null;
             AssignedAction = null;
             //hide button
         }

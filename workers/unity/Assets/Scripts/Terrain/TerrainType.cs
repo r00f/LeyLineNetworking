@@ -5,6 +5,8 @@ using UnityEngine;
 [CreateAssetMenu]
 public class TerrainType : ScriptableObject
 {
+    public int MapCellIconIndex;
+    public int MapCellColorIndex;
     public bool spawnTree;
     public int treeIndex;
     public float detailSpawnPercentage;

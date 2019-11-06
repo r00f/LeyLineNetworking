@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
@@ -8,7 +7,7 @@ using Player;
 using Unit;
 
 [DisableAutoCreation]
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ManalithSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ResourceSystem : ComponentSystem
 {
     public struct PlayerData
@@ -19,18 +18,20 @@ public class ResourceSystem : ComponentSystem
         public ComponentDataArray<PlayerEnergy.Component> PlayerEnergyData;
     }
 
-    [Inject] private PlayerData m_PlayerData;
+    [Inject] PlayerData m_PlayerData;
 
     public struct UnitData
     {
         public readonly int Length;
         public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
+        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<Energy.Component> UnitEnergyData;
         public readonly ComponentDataArray<FactionComponent.Component> FactionData;
+        public ComponentDataArray<Actions.Component> ActionData;
         public ComponentDataArray<Health.Component> HealthData;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     struct GameStateData
     {
@@ -39,7 +40,9 @@ public class ResourceSystem : ComponentSystem
         public readonly ComponentDataArray<GameState.Component> GameStates;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
+
+    [Inject] CleanupSystem m_CleanupSystem;
 
     protected override void OnUpdate()
     {
@@ -132,7 +135,6 @@ public class ResourceSystem : ComponentSystem
 
     public void AddEnergy(uint playerFaction, uint energyAmount)
     {
-        //Debug.Log("Add " + energyAmount + " energy to player " + playerFaction);
         for (int i = 0; i < m_PlayerData.Length; i++)
         {
             var faction = m_PlayerData.FactionData[i].Faction;
@@ -163,7 +165,6 @@ public class ResourceSystem : ComponentSystem
 
             if (playerFaction == faction)
             {
-                //Debug.Log(energyComp.Energy - energyAmount);
                 //since uint cant be negative and turns into a huge number convert to int to check
                 if ((int)energyComp.Energy - (int)energyAmount > 0)
                 {
@@ -179,14 +180,32 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void Heal(uint unitID, uint healAmount)
+    public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
+    {
+        UpdateInjectedComponentGroups();
+        int leftOverEnergy = 0;
+
+        for (int i = 0; i < m_PlayerData.Length; i++)
+        {
+            var faction = m_PlayerData.FactionData[i].Faction;
+            var energyComp = m_PlayerData.PlayerEnergyData[i];
+
+            if(playerFaction == faction)
+            {
+                leftOverEnergy = (int)energyComp.Energy - (int)energyCost;
+            }
+        }
+        return leftOverEnergy;
+    }
+
+    public void Heal(long unitID, uint healAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
-            var id = m_UnitData.EntityIdData[i].EntityId;
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
             var health = m_UnitData.HealthData[i];
 
-            if (unitID.Equals(id))
+            if (id == unitID)
             {
                 if (health.CurrentHealth + healAmount < health.MaxHealth)
                 {
@@ -202,40 +221,93 @@ public class ResourceSystem : ComponentSystem
         }
     }
 
-    public void DealDamage(uint unitID, uint damageAmount)
+    public void AddArmor(long unitID, uint armorAmount)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
-            var id = m_UnitData.EntityIdData[i].EntityId;
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
             var health = m_UnitData.HealthData[i];
 
-            if(unitID.Equals(id))
+            if (unitID == id)
             {
-                if((int)health.CurrentHealth - (int)damageAmount > 0)
-                {
-                    health.CurrentHealth -= damageAmount;
-                }
-                else
-                {
-                    health.CurrentHealth = 0;
-                    Die(unitID);
-                }
-
+                health.Armor += armorAmount;
                 m_UnitData.HealthData[i] = health;
             }
         }
     }
 
-    public void Die(uint unitID)
+    public void RemoveArmor(long unitID, uint armorAmount)
+    {
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
+            var health = m_UnitData.HealthData[i];
+
+            if (unitID == id)
+            {
+                health.Armor -= armorAmount;
+                m_UnitData.HealthData[i] = health;
+            }
+        }
+    }
+
+    public void ResetArmor(uint worldIndex)
+    {
+        UpdateInjectedComponentGroups();
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId;
+            var health = m_UnitData.HealthData[i];
+            var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+
+            if(worldIndex == unitWorldIndex)
+            {
+                health.Armor = 0;
+                m_UnitData.HealthData[i] = health;
+            }
+        }
+    }
+
+    public void DealDamage(long unitID, uint damageAmount, ExecuteStepEnum executeStep)
+    {
+        for (int i = 0; i < m_UnitData.Length; i++)
+        {
+            var id = m_UnitData.EntityIdData[i].EntityId.Id;
+            var health = m_UnitData.HealthData[i];
+
+            if(unitID == id)
+            {
+                var combinedHealth = health.CurrentHealth + health.Armor;
+
+                if((int)combinedHealth - (int)damageAmount > 0)
+                {
+                    combinedHealth -= damageAmount;
+                    if (health.CurrentHealth > combinedHealth)
+                        health.CurrentHealth = combinedHealth;
+                    else
+                        health.Armor = combinedHealth - health.CurrentHealth;
+                }
+                else
+                {
+                    health.CurrentHealth = 0;
+                    Die(unitID, executeStep);
+                }
+                m_UnitData.HealthData[i] = health;
+            }
+        }
+    }
+
+    public void Die(long unitID, ExecuteStepEnum executeStep)
     {
         for (int i = 0; i < m_UnitData.Length; i++)
         {
             var id = m_UnitData.EntityIdData[i].EntityId;
+            var actions = m_UnitData.ActionData[i];
 
-            if (unitID.Equals(id))
+            //clear dying unit actions if its lockedAction is in a different state then the killing action;
+            if (unitID == id.Id && executeStep != actions.LockedAction.ActionExecuteStep)
             {
-                //DEATH CODE
-
+                m_UnitData.ActionData[i] = m_CleanupSystem.ClearLockedActions(actions);
             }
         }
     }

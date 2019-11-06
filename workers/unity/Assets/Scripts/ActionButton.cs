@@ -16,7 +16,8 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     public Image Icon;
     public string ActionName;
     public Button Button;
-
+    public int ActionIndex;
+    public int UnitId;
 
     public void OnPointerDown(PointerEventData eventData)
     {

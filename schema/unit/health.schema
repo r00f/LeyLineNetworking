@@ -5,5 +5,5 @@ component Health {
     id = 122;
 	uint32 max_health = 1;
 	uint32 current_health = 2;
-
+	uint32 armor = 3;
 }

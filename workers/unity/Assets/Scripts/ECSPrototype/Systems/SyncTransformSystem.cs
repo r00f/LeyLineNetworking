@@ -16,7 +16,7 @@ namespace LeyLineHybridECS
             public ComponentArray<Transform> OutputData;
         }
 
-        [Inject] private Data m_Data;
+        [Inject] Data m_Data;
 
         protected override void OnUpdate()
         {

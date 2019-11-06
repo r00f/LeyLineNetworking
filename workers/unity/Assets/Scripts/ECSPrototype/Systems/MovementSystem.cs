@@ -4,8 +4,10 @@ using System.Collections.Generic;
 using Improbable.Gdk.Core;
 using Generic;
 using Unit;
-using Cells;
+using Cell;
 using Improbable;
+using Improbable.Gdk.ReactiveComponents;
+using System.Linq;
 
 namespace LeyLineHybridECS
 {
@@ -17,15 +19,15 @@ namespace LeyLineHybridECS
             public readonly int Length;
             public readonly ComponentDataArray<SpatialEntityId> EntityIDs;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
+            public ComponentDataArray<Actions.Component> ActionsData;
             public ComponentDataArray<MovementVariables.Component> MovementVariables;
             public ComponentDataArray<CellsToMark.Component> CellsToMark;
             public ComponentDataArray<CubeCoordinate.Component> CubeCoordinates;
-            public ComponentDataArray<ServerPath.Component> ServerPathData;
             public ComponentDataArray<Position.Component> Positions;
             public ComponentDataArray<Vision.Component> Vision;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         public struct CellData
         {
@@ -35,7 +37,7 @@ namespace LeyLineHybridECS
             public ComponentDataArray<CellAttributesComponent.Component> CellAttributes;
         }
 
-        [Inject] private CellData m_CellData;
+        [Inject] CellData m_CellData;
 
         public struct GameStateData
         {
@@ -45,9 +47,9 @@ namespace LeyLineHybridECS
             public readonly ComponentDataArray<GameState.Component> GameState;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
-        [Inject] private HandleCellGridRequestsSystem m_CellGridSystem;
+        [Inject] HandleCellGridRequestsSystem m_CellGridSystem;
 
         protected override void OnStartRunning()
         {
@@ -59,98 +61,167 @@ namespace LeyLineHybridECS
         {
             for (int i = 0; i < m_UnitData.Length; ++i)
             {
+                var unitId = m_UnitData.EntityIDs[i].EntityId.Id;
+                var actionsData = m_UnitData.ActionsData[i];
                 var unitWorldIndex = m_UnitData.WorldIndexData[i].Value;
-
-                for (int gi = 0; gi < m_GameStateData.Length; gi++)
+                var position = m_UnitData.Positions[i];
+                var coord = m_UnitData.CubeCoordinates[i];
+                var movementVariables = m_UnitData.MovementVariables[i];
+                var vision = m_UnitData.Vision[i];
+                
+                if (actionsData.LockedAction.Index == -2)
                 {
-                    var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
+                    var currentPath = m_UnitData.ActionsData[i].LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
 
-                    if (unitWorldIndex == gameStateWorldIndex)
+                    for (int gi = 0; gi < m_GameStateData.Length; gi++)
                     {
-                        var cellsToMark = m_UnitData.CellsToMark[i];
+                        var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
 
-                        if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.moving)
+                        if (unitWorldIndex == gameStateWorldIndex)
                         {
-                            var currentPath = m_UnitData.ServerPathData[i];
-                            var position = m_UnitData.Positions[i];
-                            var coord = m_UnitData.CubeCoordinates[i];
-                            var movementVariables = m_UnitData.MovementVariables[i];
-                            var vision = m_UnitData.Vision[i];
+                            var cellsToMark = m_UnitData.CellsToMark[i];
 
-                            if (currentPath.Path.CellAttributes.Count != 0 && cellsToMark.CellsInRange.Count != 0)
+                            if(m_GameStateData.GameState[gi].CurrentState == GameStateEnum.interrupt)
                             {
-                                for (int ci = 0; ci < m_CellData.Length; ci++)
+                                //PATH CULLING
+                                actionsData = CompareCullableActions(actionsData, gameStateWorldIndex, unitId);
+                                m_UnitData.ActionsData[i] = actionsData;
+                            }
+                            else if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.move)
+                            {
+                                if (currentPath.Count != 0 && cellsToMark.CellsInRange.Count != 0)
                                 {
-                                    var cellAtt = m_CellData.CellAttributes[ci];
-                                    var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
-
-                                    if (cellsToMark.CellsInRange[0].Cell.CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellAtt.CellAttributes.Cell.IsTaken && cellWorldIndex == unitWorldIndex)
+                                    //STOP THE LOOPTHALOOP!!!!
+                                    /*
+                                    for (int ci = 0; ci < m_CellData.Length; ci++)
                                     {
-                                        //Debug.Log("ASYD");
-                                        cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, new EntityId(), cellWorldIndex);
+                                        var cellAtt = m_CellData.CellAttributes[ci];
+                                        var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
 
-                                        m_CellData.CellAttributes[ci] = cellAtt;
-
-                                        //m_CellGridSystem.UpdateNeighbours(cellAtt.CellAttributes.Cell, cellAtt.CellAttributes.Neighbours);
+                                        if (cellsToMark.CellsInRange[0].Cell.CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellAtt.CellAttributes.Cell.IsTaken && cellWorldIndex == unitWorldIndex)
+                                        {
+                                            cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, 0, cellWorldIndex);
+                                            m_CellData.CellAttributes[ci] = cellAtt;
+                                        }
                                     }
-                                }
+                                    */
 
-                                //instead of lerping towards next pos in path, set pos and wait for client to catch up
-                                if (position.Coords.ToUnityVector() != currentPath.Path.CellAttributes[0].Position.ToUnityVector())
-                                {
-                                    if (movementVariables.TimeLeft > 0)
+                                    //instead of lerping towards next pos in path, set pos and wait for client to catch up
+                                    if (movementVariables.TimeLeft >= 0)
                                     {
                                         movementVariables.TimeLeft -= Time.deltaTime;
                                         m_UnitData.MovementVariables[i] = movementVariables;
                                     }
                                     else
                                     {
-                                        position.Coords = new Coordinates(currentPath.Path.CellAttributes[0].Position.X, currentPath.Path.CellAttributes[0].Position.Y, currentPath.Path.CellAttributes[0].Position.Z);
+                                        //convert cube Coordinate to position
+                                        position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
                                         m_UnitData.Positions[i] = position;
-                                    }
-                                }
-                                else
-                                {
-                                    movementVariables.TimeLeft = movementVariables.TravelTime;
 
-                                    if (currentPath.Path.CellAttributes.Count == 1)
-                                    {
-                                        movementVariables.TimeLeft = 0;
-                                        for (int ci = 0; ci < m_CellData.Length; ci++)
+                                        
+                                        if (currentPath.Count == 1)
                                         {
-                                            var cellAtt = m_CellData.CellAttributes[ci];
-                                            var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
-
-                                            if (currentPath.Path.CellAttributes[0].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
+                                            /*
+                                            for (int ci = 0; ci < m_CellData.Length; ci++)
                                             {
-                                                cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId, cellWorldIndex);
+                                                var cellAtt = m_CellData.CellAttributes[ci];
+                                                var cellWorldIndex = m_CellData.WorldIndexData[ci].Value;
 
-                                                m_CellData.CellAttributes[ci] = cellAtt;
-
-                                                //m_CellGridSystem.UpdateNeighbours(cellAtt.CellAttributes.Cell, cellAtt.CellAttributes.Neighbours);
+                                                if (currentPath[0].CubeCoordinate == cellAtt.CellAttributes.Cell.CubeCoordinate && cellWorldIndex == unitWorldIndex)
+                                                {
+                                                    cellAtt.CellAttributes = cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, m_UnitData.EntityIDs[i].EntityId.Id, cellWorldIndex);
+                                                    m_CellData.CellAttributes[ci] = cellAtt;
+                                                }
                                             }
+                                            */
+                                            movementVariables.TimeLeft = 0;
                                         }
+                                        else
+                                        {
+                                            movementVariables.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
+                                        }
+                                        coord.CubeCoordinate = currentPath[0].CubeCoordinate;
+                                        vision.RequireUpdate = true;
+                                        m_UnitData.Vision[i] = vision;
+                                        m_UnitData.CubeCoordinates[i] = coord;
+                                        currentPath.RemoveAt(0);
+                                        m_UnitData.MovementVariables[i] = movementVariables;
                                     }
-
-                                    m_UnitData.MovementVariables[i] = movementVariables;
-                                    coord.CubeCoordinate = currentPath.Path.CellAttributes[0].CubeCoordinate;
-                                    vision.RequireUpdate = true;
-                                    m_UnitData.Vision[i] = vision;
-                                    m_UnitData.CubeCoordinates[i] = coord;
-                                    currentPath.Path.CellAttributes.RemoveAt(0);
                                 }
                             }
-
-                        }
-                        else if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.calculate_energy)
-                        {
-                            cellsToMark.CachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-                            cellsToMark.CellsInRange = new List<CellAttributes>();
-                            m_UnitData.CellsToMark[i] = cellsToMark;
+                            else if (m_GameStateData.GameState[gi].CurrentState == GameStateEnum.calculate_energy)
+                            {
+                                cellsToMark.CachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
+                                cellsToMark.CellsInRange = new List<CellAttributes>();
+                                m_UnitData.CellsToMark[i] = cellsToMark;
+                            }
                         }
                     }
                 }
             }
+        }
+
+        private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)
+        {
+            for (int i = 0; i < m_UnitData.Length; ++i)
+            {
+                var otherUnitId = m_UnitData.EntityIDs[i].EntityId.Id;
+                var otherUnitActions = m_UnitData.ActionsData[i];
+                var otherUnitWorldIndex = m_UnitData.WorldIndexData[i].Value;
+
+                if (worldIndex == otherUnitWorldIndex && unitId != otherUnitId)
+                {
+                    if (otherUnitActions.LockedAction.Index != -3 && otherUnitActions.LockedAction.Targets[0].TargetCoordinate == unitActions.LockedAction.Targets[0].TargetCoordinate)
+                    {
+                        if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                        {
+                            //Decide which path to cull
+                            float unitMoveTime = unitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+                            float otherUnitMoveTime = otherUnitActions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * otherUnitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+                            if (unitMoveTime == otherUnitMoveTime)
+                            {
+                                if (Random.Range(0, 2) == 0)
+                                {
+                                    unitActions = CullPath(unitActions);
+                                }
+                                Debug.Log("MoveTimesTheSame");
+                            }
+                            else if (unitMoveTime > otherUnitMoveTime)
+                            {
+                                unitActions = CullPath(unitActions);
+                                Debug.Log("UnitSlower, Cull path");
+                            }
+                        }
+                        else if(otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
+                        {
+                            Debug.Log("SpawnCullPath");
+                            unitActions = CullPath(unitActions);
+                        }
+                    }
+                }
+            }
+            return unitActions;
+        }
+
+        private Actions.Component CullPath(Actions.Component unitActions)
+        {
+            var coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+            unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(coordCount - 1);
+            coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+
+            if(coordCount != 0)
+            {
+                Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[coordCount - 1].CubeCoordinate;
+                var t = unitActions.LockedAction.Targets[0];
+                t.TargetCoordinate = newTarget;
+                unitActions.LockedAction.Targets[0] = t;
+                unitActions.LockedAction = unitActions.LockedAction;
+            }
+            else
+            {
+                unitActions.LockedAction = unitActions.NullAction;
+            }
+            return unitActions;
         }
     }
 }

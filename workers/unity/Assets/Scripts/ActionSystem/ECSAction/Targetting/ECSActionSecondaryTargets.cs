@@ -1,11 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
+    [System.Serializable]
     public class ECSActionSecondaryTargets : ScriptableObject
     {
-        public List<Cell> MySecondaryTargets;
+        public List<Vector3f> MySecondaryTargetCoordinates;
     }
 }

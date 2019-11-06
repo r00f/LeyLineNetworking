@@ -1,11 +1,10 @@
-﻿using UnityEngine;
-using Unity.Entities;
-using UnityEngine.UI;
+﻿using Unity.Entities;
 using Improbable.Gdk.Core;
 using Generic;
 using Player;
 using Unit;
-
+using Improbable.Gdk.ReactiveComponents;
+using UnityEngine;
 
 namespace LeyLineHybridECS
 {
@@ -19,34 +18,46 @@ namespace LeyLineHybridECS
             public ComponentDataArray<GameState.Component> GameState;
         }
 
-        [Inject] private GameStateData m_GameStateData;
+        [Inject] GameStateData m_GameStateData;
 
         public struct PlayerData
         {
             public readonly int Length;
             public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
             public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public ComponentArray<Moba_Camera> CameraScripts;
             public ComponentDataArray<PlayerState.Component> PlayerStateData;
         }
 
-        [Inject] private PlayerData m_PlayerData;
+        [Inject] PlayerData m_PlayerData;
 
         public struct UnitData
         {
             public readonly int Length;
+            public readonly ComponentDataArray<SpatialEntityId> EntityIdData;
+            public readonly ComponentDataArray<Actions.Component> ActionsData;
+            public readonly ComponentDataArray<CubeCoordinate.Component> CoordinateData;
             public readonly ComponentDataArray<FactionComponent.Component> FactionData;
             public readonly ComponentDataArray<MouseState> MouseStateData;
             public readonly ComponentDataArray<Health.Component> HealthData;
+            public readonly ComponentArray<Transform> Transforms;
+            public ComponentArray<UnitComponentReferences> UnitCompReferences;
         }
 
-        [Inject] private UnitData m_UnitData;
+        [Inject] UnitData m_UnitData;
 
         protected override void OnUpdate()
         {
+            if (m_PlayerData.Length == 0)
+                return;
+
+            var playerState = m_PlayerData.PlayerStateData[0];
+            var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+            var playerCam = m_PlayerData.CameraScripts[0];
+
             for (int gi = 0; gi < m_GameStateData.Length; gi++)
             {
-                var playerState = m_PlayerData.PlayerStateData[0];
-                var playerWorldIndex = m_PlayerData.WorldIndexData[0].Value;
+
                 var gameStateWorldIndex = m_GameStateData.WorldIndexData[gi].Value;
                 var gameState = m_GameStateData.GameState[gi];
 
@@ -54,23 +65,70 @@ namespace LeyLineHybridECS
                 {
                     if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        if (playerState.CurrentState != PlayerStateEnum.ready)
+                        for (int ui = 0; ui < m_UnitData.Length; ui++)
                         {
-                            if (AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.unit_selected)
+                            var transform = m_UnitData.Transforms[ui];
+                            var unitId = m_UnitData.EntityIdData[ui].EntityId.Id;
+                            var unitCoord = m_UnitData.CoordinateData[ui].CubeCoordinate;
+                            var actions = m_UnitData.ActionsData[ui];
+                            var unitComponentReferences = m_UnitData.UnitCompReferences[ui];
+                            var mouseState = m_UnitData.MouseStateData[ui];
+
+                            if (playerState.CurrentState != PlayerStateEnum.ready)
                             {
-                                SetPlayerState(PlayerStateEnum.unit_selected);
+                                if (unitId == playerState.SelectedUnitId)
+                                {
+                                    playerCam.SetTargetTransform(transform);
+
+                                    if(actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
+                                    {
+                                        if(playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                                            SetPlayerState(PlayerStateEnum.waiting_for_target);
+                                    }
+                                    else
+                                    {
+                                        if(playerState.CurrentState != PlayerStateEnum.unit_selected)
+                                            SetPlayerState(PlayerStateEnum.unit_selected);
+                                    }
+                                    
+                                    if (!unitComponentReferences.SelectionCircleGO.activeSelf)
+                                        unitComponentReferences.SelectionCircleGO.SetActive(true);
+                                }
+                                else if (playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
+                                {
+                                    playerState.SelectedUnitCoordinate = unitCoord;
+                                    playerState.SelectedUnitId = unitId;
+                                    m_PlayerData.PlayerStateData[0] = playerState;
+                                }
+                                else
+                                {
+                                    if (unitComponentReferences.SelectionCircleGO.activeSelf)
+                                        unitComponentReferences.SelectionCircleGO.SetActive(false);
+                                }
                             }
-                            else if (!AnyUnitClicked() && playerState.CurrentState != PlayerStateEnum.waiting)
+                            else if(playerState.SelectedUnitId != 0)
                             {
-                                SetPlayerState(PlayerStateEnum.waiting);
+                                playerState.SelectedUnitId = 0;
+                                m_PlayerData.PlayerStateData[0] = playerState;
+                                if (unitComponentReferences.SelectionCircleGO.activeSelf)
+                                    unitComponentReferences.SelectionCircleGO.SetActive(false);
                             }
                         }
                     }
-                    else if(gameState.CurrentState == GameStateEnum.calculate_energy)
+                    else if (gameState.CurrentState == GameStateEnum.interrupt)
                     {
                         SetPlayerState(PlayerStateEnum.waiting);
                         return;
                     }
+                    
+                    else if(playerState.UnitTargets.Count != 0)
+                    {
+                        //Debug.Log("ClearUnitTargets");
+                        playerState.UnitTargets.Clear();
+                        playerState.UnitTargets = playerState.UnitTargets;
+                        m_PlayerData.PlayerStateData[0] = playerState;
+                    }
+                    
                 }
             }
         }
@@ -78,9 +136,19 @@ namespace LeyLineHybridECS
         public void SetPlayerState(PlayerStateEnum state)
         {
             UpdateInjectedComponentGroups();
+
+            if (m_PlayerData.Length == 0)
+            {
+                return;
+            }
+
             var playerState = m_PlayerData.PlayerStateData[0];
-            playerState.CurrentState = state;
-            m_PlayerData.PlayerStateData[0] = playerState;
+
+            if(playerState.CurrentState != state)
+            {
+                playerState.CurrentState = state;
+                m_PlayerData.PlayerStateData[0] = playerState;
+            }
         }
 
         private bool AnyUnitClicked()

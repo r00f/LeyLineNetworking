@@ -1,9 +1,0 @@
-package cells;
-
-import "cells/cell_attributes.schema";
-
-component CircleCells 
-{
-    id = 113;
-	cells.CellAttributeList circle_attribute_list = 1;
-}

@@ -1,7 +1,7 @@
 ﻿
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Core.Commands;
-using Improbable.Gdk.GameObjectRepresentation;
+using Improbable.Gdk.GameObjectCreation;
 using Improbable.Worker.CInterop;
 using UnityEngine;
 
@@ -9,14 +9,14 @@ using UnityEngine;
 
 public class EntityCreationBehaviour : MonoBehaviour
 {
-    [Require] private WorldCommands.Requirable.WorldCommandRequestSender commandSender;
-    [Require] private WorldCommands.Requirable.WorldCommandResponseHandler responseHandler;
+    //private WorldCommands.Requirable.WorldCommandRequestSender commandSender;
+    //private WorldCommands.Requirable.WorldCommandResponseHandler responseHandler;
 
     void OnEnable()
     {
         // Register callback for listening to any incoming create entity command responses for this entity
-        if (responseHandler != null)
-            responseHandler.OnCreateEntityResponse += OnCreateEntityResponse;
+        //if (responseHandler != null)
+            //responseHandler.OnCreateEntityResponse += OnCreateEntityResponse;
 
     }
 
@@ -27,8 +27,8 @@ public class EntityCreationBehaviour : MonoBehaviour
 
     public void CreateExampleEntity(EntityTemplate entityTemplate)
     {
-        if(commandSender != null)
-        commandSender.CreateEntity(entityTemplate);
+        //if(commandSender != null)
+        //commandSender.CreateEntity(entityTemplate);
     }
 
     void OnCreateEntityResponse(WorldCommands.CreateEntity.ReceivedResponse response)

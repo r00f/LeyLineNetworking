@@ -1,9 +1,13 @@
-﻿using UnityEngine;
-using Unity.Entities;
-using Improbable.Gdk.Core;
+﻿using Cell;
 using Generic;
+using Improbable.Gdk.Core;
+using Improbable.Gdk.ReactiveComponents;
 using Player;
+using System.Collections.Generic;
+using Unity.Entities;
+using UnityEngine;
 using Unit;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
@@ -15,77 +19,154 @@ namespace LeyLineHybridECS
         {
             public readonly int Length;
             public readonly ComponentDataArray<Authoritative<PlayerState.Component>> AuthorativeData;
+            public readonly ComponentDataArray<FactionComponent.Component> Factions;
             public readonly ComponentDataArray<Vision.Component> VisionData;
         }
 
-        [Inject] PlayerData m_Player;
+        [Inject] PlayerData m_PlayerData;
+
+        struct UpdateVisionRequestData
+        {
+            public readonly int Length;
+            public ComponentDataArray<Vision.CommandRequests.UpdateClientVisionCommand> UpdateClientVisionRequests;
+        }
+
+        [Inject] UpdateVisionRequestData m_UpdateVisionRequestData;
 
         struct IsVisibleData
         {
             public readonly int Length;
-            public readonly ComponentDataArray<CubeCoordinate.Component> Coordinate;
+            public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
             public ComponentDataArray<IsVisible> Visible;
             public ComponentArray<IsVisibleReferences> VisibleRef;
         }
 
         [Inject] IsVisibleData m_IsVisible;
 
+        struct UnitData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<CubeCoordinate.Component> Coordinates;
+            public readonly ComponentDataArray<FactionComponent.Component> Factions;
+            public ComponentDataArray<IsVisible> Visible;
+        }
+
+        [Inject] UnitData m_UnitData;
+
+
+        public struct GameStateData
+        {
+            public readonly int Length;
+            public readonly ComponentDataArray<GameState.Component> GameState;
+        }
+
+        [Inject] GameStateData m_GameStateData;
+
+
         protected override void OnUpdate()
         {
-            for (int i = m_Player.Length - 1; i >= 0; i--)
+            if (m_GameStateData.Length == 0 || m_GameStateData.GameState[0].CurrentState == GameStateEnum.planning)
+                return;
+
+            for (int i = 0; i < m_UpdateVisionRequestData.Length; i++)
             {
-                var playerVision = m_Player.VisionData[i];
+                Debug.Log("updateClientVisionRequest");
+            }
 
-                for (int e = m_IsVisible.Length - 1; e >= 0; e--)
+            var playerVision = m_PlayerData.VisionData[0];
+            var playerFaction = m_PlayerData.Factions[0].Faction;
+
+            HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
+            HashSet<Vector3f> positivesHash = new HashSet<Vector3f>(playerVision.Positives);
+            HashSet<Vector3f> negativessHash = new HashSet<Vector3f>(playerVision.Negatives);
+
+            //set opposing unit visibilty values when they enter / leave a players visionRange
+            for (int i = 0; i < m_UnitData.Length; i++)
+            {
+                var faction = m_UnitData.Factions[i].Faction;
+                var coord = m_UnitData.Coordinates[i].CubeCoordinate;
+                var visible = m_UnitData.Visible[i];
+
+                if (faction != playerFaction && visible.RequireUpdate == 0)
                 {
-                    var coordinate = m_IsVisible.Coordinate[e];
-                    var visible = m_IsVisible.Visible[e];
-                    visible.Value = 0;
-
-                    foreach (Cells.CellAttributes c in playerVision.CellsInVisionrange)
+                    if(visionCoordsHash.Contains(coord))
                     {
-                        if (c.Cell.CubeCoordinate == coordinate.CubeCoordinate)
-                        {
-                            visible.Value = 1;
-                        }
+                        visible.Value = 1;
                     }
-
+                    else
+                    {
+                        visible.Value = 0;
+                    }
                     visible.RequireUpdate = 1;
-                    m_IsVisible.Visible[e] = visible;
+
+                    m_UnitData.Visible[i] = visible;
                 }
             }
+
 
             for (int i = 0; i < m_IsVisible.Length; i++)
             {
                 var isVisibleComp = m_IsVisible.Visible[i];
                 MeshRenderer meshRenderer = m_IsVisible.VisibleRef[i].MeshRenderer;
-                GameObject go = m_IsVisible.VisibleRef[i].GO;
+                List<GameObject> gameObjects = m_IsVisible.VisibleRef[i].GameObjects;
+                Collider collider = m_IsVisible.VisibleRef[i].Collider;
                 byte isVisible = m_IsVisible.Visible[i].Value;
-                //Debug.Log(isVisible);
+                var coord = m_IsVisible.Coordinates[i].CubeCoordinate;
 
-                if (isVisibleComp.RequireUpdate == 1)
+                if (isVisibleComp.RequireUpdate == 0)
                 {
+                    //only compare when serverSide playerVision is updated
+                    if (isVisible == 0)
+                    {
+                        if(positivesHash.Contains(coord))
+                        {
+                            isVisibleComp.Value = 1;
+                            isVisibleComp.RequireUpdate = 1;
+                        }
+                    }
+                    else
+                    {
+                        if (negativessHash.Contains(coord))
+                        {
+                            isVisibleComp.Value = 0;
+                            isVisibleComp.RequireUpdate = 1;
+                        }
+                    }
+                    m_IsVisible.Visible[i] = isVisibleComp;
+                }
+                else
+                {
+                    Color color = meshRenderer.material.color;
+
                     if (isVisibleComp.LerpSpeed != 0)
                     {
                         if (isVisible == 0)
                         {
                             if (meshRenderer.material.color.a > 0)
                             {
-                                meshRenderer.material.color = new Color(1, 1, 1, meshRenderer.material.color.a - isVisibleComp.LerpSpeed * Time.deltaTime);
+                                color.a = meshRenderer.material.color.a - isVisibleComp.LerpSpeed * Time.deltaTime;
+                                meshRenderer.material.color = color;
                             }
                             else
                             {
-                                go.SetActive(false);
+                                foreach (GameObject g in gameObjects)
+                                {
+                                    g.SetActive(false);
+                                }
                                 isVisibleComp.RequireUpdate = 0;
                             }
                         }
                         else
                         {
-                            go.SetActive(true);
+                            foreach (GameObject g in gameObjects)
+                            {
+                                g.SetActive(true);
+                            }
 
                             if (meshRenderer.material.color.a < 1)
                             {
-                                meshRenderer.material.color = new Color(1, 1, 1, meshRenderer.material.color.a + isVisibleComp.LerpSpeed * Time.deltaTime);
+                                color.a = meshRenderer.material.color.a + isVisibleComp.LerpSpeed * Time.deltaTime;
+                                meshRenderer.material.color = color;
                             }
                             else
                             {
@@ -97,13 +178,64 @@ namespace LeyLineHybridECS
                     {
                         if (isVisible == 0)
                         {
-                            go.SetActive(false);
+                            foreach (GameObject g in gameObjects)
+                            {
+                                g.SetActive(false);
+                            }
+                            collider.enabled = false;
+                            isVisibleComp.RequireUpdate = 0;
                         }
                         else
                         {
-                            go.SetActive(true);
+                            foreach (GameObject g in gameObjects)
+                            {
+                                g.SetActive(true);
+                            }
+                            collider.enabled = true;
+                            isVisibleComp.RequireUpdate = 0;
                         }
                     }
+                    m_IsVisible.Visible[i] = isVisibleComp;
+                }
+            }
+        }
+
+        public void UpdateVision()
+        {
+            var playerVision = m_PlayerData.VisionData[0];
+
+            for (int i = 0; i < m_IsVisible.Length; i++)
+            {
+                var isVisibleComp = m_IsVisible.Visible[i];
+                byte isVisible = m_IsVisible.Visible[i].Value;
+                var coord = m_IsVisible.Coordinates[i];
+
+                if (isVisibleComp.RequireUpdate == 0)
+                {
+                    //only compare when serverSide playerVision is updated
+                    if (isVisible == 0)
+                    {
+                        foreach (Vector3f c in playerVision.Positives)
+                        {
+                            if (c == coord.CubeCoordinate)
+                            {
+                                isVisibleComp.Value = 1;
+                                isVisibleComp.RequireUpdate = 1;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        foreach (Vector3f c in playerVision.Negatives)
+                        {
+                            if (c == coord.CubeCoordinate)
+                            {
+                                isVisibleComp.Value = 0;
+                                isVisibleComp.RequireUpdate = 1;
+                            }
+                        }
+                    }
+                    m_IsVisible.Visible[i] = isVisibleComp;
                 }
             }
         }

@@ -1,9 +1,10 @@
 ﻿using Unity.Entities;
-using Cells;
+using Cell;
 using Generic;
 using Unit;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
+using Improbable.Gdk.ReactiveComponents;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : ComponentSystem
@@ -16,7 +17,7 @@ public class ManalithSystem : ComponentSystem
         public ComponentDataArray<FactionComponent.Component> Factions;
     }
 
-    [Inject] private ManalithData m_ManaLithData;
+    [Inject] ManalithData m_ManaLithData;
 
     public struct CellData
     {
@@ -27,7 +28,7 @@ public class ManalithSystem : ComponentSystem
         public readonly ComponentDataArray<IsCircleCell.Component> IsCircleCellData;
     }
 
-    [Inject] private CellData m_CellData;
+    [Inject] CellData m_CellData;
 
     public struct UnitData
     {
@@ -35,11 +36,11 @@ public class ManalithSystem : ComponentSystem
         public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
         public readonly ComponentDataArray<SpatialEntityId> Ids;
         public readonly ComponentDataArray<FactionComponent.Component> Factions;
-        public readonly ComponentDataArray<ServerPath.Component> Paths;
+        public readonly ComponentDataArray<Actions.Component> ActionsData;
         public ComponentDataArray<Energy.Component> EnergyData;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct GameStateData
     {
@@ -49,12 +50,11 @@ public class ManalithSystem : ComponentSystem
         public readonly ComponentDataArray<GameState.Component> GameStates;
     }
 
-    [Inject] private GameStateData m_GameStateData;
+    [Inject] GameStateData m_GameStateData;
 
     protected override void OnUpdate()
     {
-        //reset unit harvesting if they have a path
-
+        //reset unit harvesting if they have a locked moveaction
         for (int i = 0; i < m_GameStateData.Length; i++)
         {
             var gameStateWorldIndex = m_GameStateData.WorldIndexData[i].Value;
@@ -64,11 +64,11 @@ public class ManalithSystem : ComponentSystem
             {
                 var unitWorldIndex = m_UnitData.WorldIndexData[ui].Value;
                 var energy = m_UnitData.EnergyData[ui];
-                var path = m_UnitData.Paths[ui].Path.CellAttributes.Count;
+                var lockedAction = m_UnitData.ActionsData[ui].LockedAction;
 
                 if (gameStateWorldIndex == unitWorldIndex)
                 {
-                    if (gameState == GameStateEnum.moving && energy.Harvesting && path != 0)
+                    if (gameState == GameStateEnum.move && energy.Harvesting && lockedAction.Index == -2)
                     {
                         energy.Harvesting = false;
                         m_UnitData.EnergyData[ui] = energy;
@@ -160,7 +160,7 @@ public class ManalithSystem : ComponentSystem
                 var unitId = m_UnitData.Ids[ui];
                 var unitFaction = m_UnitData.Factions[ui];
 
-                if (unitId.EntityId == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
+                if (unitId.EntityId.Id == circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId)
                 {
                     if (unitFaction.Faction == (worldIndex - 1) * 2 + 1)
                     {
@@ -188,7 +188,7 @@ public class ManalithSystem : ComponentSystem
         }
     }
 
-    public void UpdateUnit(EntityId inUnitId, uint faction)
+    public void UpdateUnit(long inUnitId, uint faction)
     {
         for (int ui = 0; ui < m_UnitData.Length; ui++)
         {
@@ -196,7 +196,7 @@ public class ManalithSystem : ComponentSystem
             var unitId = m_UnitData.Ids[ui].EntityId;
             var unitFaction = m_UnitData.Factions[ui];
 
-            if (unitId == inUnitId)
+            if (unitId.Id == inUnitId)
             {
                 if (unitFaction.Faction == faction)
                     energy.Harvesting = true;

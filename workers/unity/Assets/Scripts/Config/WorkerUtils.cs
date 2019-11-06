@@ -1,8 +1,3 @@
-using Improbable.Gdk.GameObjectRepresentation;
-using Improbable.Gdk.GameObjectCreation;
-using System.Collections.Generic;
-using Improbable.Gdk.PlayerLifecycle;
-using Improbable.Gdk.TransformSynchronization;
 using Unity.Entities;
 using LeyLineHybridECS;
 
@@ -15,16 +10,18 @@ public static class WorkerUtils
     public static void AddClientSystems(World world)
     {
         world.GetOrCreateManager<MouseStateSystem>();
-        world.GetOrCreateManager<CellStateSystem>();
         world.GetOrCreateManager<CellMarkerSystem>();
         world.GetOrCreateManager<AddComponentsSystem>();
         world.GetOrCreateManager<PlayerStateSystem>();
-        world.GetOrCreateManager<SendCellGridRequestsSystem>();
-        world.GetOrCreateManager<ClientMovementSystem>();
+        world.GetOrCreateManager<SendActionRequestSystem>();
+        world.GetOrCreateManager<UnitAnimationSystem>();
         world.GetOrCreateManager<InitializeUnitsSystem>();
-        world.GetOrCreateManager<ClientPathVisualsSystem>();
         world.GetOrCreateManager<VisionSystem_Client>();
         world.GetOrCreateManager<UISystem>();
+        world.GetOrCreateManager<HighlightingSystem>();
+        world.GetOrCreateManager<ActionEffectsSystem>();
+        //world.GetOrCreateManager<ClientCleanupSystem>();
+        //world.GetOrCreateManager<ProjectileSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -38,6 +35,8 @@ public static class WorkerUtils
         world.GetOrCreateManager<UnitLifeCycleSystem>();
         world.GetOrCreateManager<VisionSystem_Server>();
         world.GetOrCreateManager<ResourceSystem>();
+        world.GetOrCreateManager<ExecuteActionsSystem>();
+        world.GetOrCreateManager<CleanupSystem>();
+        world.GetOrCreateManager<TimerSystem>();
     }
-
 }

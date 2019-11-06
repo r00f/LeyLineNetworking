@@ -2,6 +2,8 @@
 using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
+using LeyLineHybridECS;
+using cakeslice;
 
 public class InitializeUnitsSystem : ComponentSystem
 {
@@ -12,10 +14,13 @@ public class InitializeUnitsSystem : ComponentSystem
         public readonly ComponentArray<Transform> Transforms;
         public readonly ComponentDataArray<NewlyAddedSpatialOSEntity> NewEntity;
         public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
+        public ComponentArray<UnitComponentReferences> ComponentReferences;
+        public ComponentArray<LineRendererComponent> LineRenderers;
         public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
+        public ComponentArray<UnitMarkerGameObjects> MarkerGameObjects;
     }
 
-    [Inject] private UnitData m_UnitData;
+    [Inject] UnitData m_UnitData;
 
     public struct PlayerData
     {
@@ -24,7 +29,19 @@ public class InitializeUnitsSystem : ComponentSystem
         public ComponentArray<HeroTransform> HeroTransforms;
     }
 
-    [Inject] private PlayerData m_PlayerData;
+    [Inject] PlayerData m_PlayerData;
+
+    Settings settings;
+
+    protected override void OnCreateManager()
+    {
+
+        base.OnCreateManager();
+
+        //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
+        settings = Resources.Load<Settings>("Settings");
+
+    }
 
     protected override void OnUpdate()
     {
@@ -32,24 +49,57 @@ public class InitializeUnitsSystem : ComponentSystem
         {
             var unitFactionComp = m_UnitData.FactionData[i];
             var teamColorMeshes = m_UnitData.TeamColorMeshesData[i];
+            var componentReferences = m_UnitData.ComponentReferences[i];
+            var lineRenderer = m_UnitData.LineRenderers[i];
             var unitTransform = m_UnitData.Transforms[i];
+            var markerObjects = m_UnitData.MarkerGameObjects[i];
 
-            foreach(MeshRenderer r in teamColorMeshes.meshRenderers)
+
+            Color factionColor = new Color();
+
+            switch (unitFactionComp.TeamColor)
             {
-                switch(unitFactionComp.TeamColor)
+                case Generic.TeamColorEnum.blue:
+                    markerObjects.Outline.color = 1;
+                    factionColor = settings.FactionColors[1];
+                    foreach (Renderer r in teamColorMeshes.detailColorMeshes)
+                    {
+                        r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0, 0.5f));
+                    }
+                    break;
+                case Generic.TeamColorEnum.red:
+                    markerObjects.Outline.color = 2;
+                    factionColor = settings.FactionColors[2];
+                    foreach (Renderer r in teamColorMeshes.detailColorMeshes)
+                    {
+                        r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0.5f, 0.5f));
+                    }
+                    break;
+            }
+
+            //lineRenderer.lineRenderer.startColor = factionColor;
+            //lineRenderer.lineRenderer.endColor = factionColor;
+
+            foreach (Renderer r in teamColorMeshes.FullColorMeshes)
+            {
+                r.material.color = factionColor;
+                if(r is TrailRenderer)
                 {
-                    case Generic.TeamColorEnum.blue:
-                        r.material.color = new Color(Color.blue.r, Color.blue.g, Color.blue.b, r.material.color.a);
-                        break;
-                    case Generic.TeamColorEnum.red:
-                        r.material.color = new Color(Color.red.r, Color.red.g, Color.red.b, r.material.color.a);
-                        break;
+                    TrailRenderer tr = r as TrailRenderer;
+                    float alpha = 1.0f;
+                    Gradient gradient = new Gradient();
+                    gradient.SetKeys(
+                        new GradientColorKey[] { new GradientColorKey(factionColor, 0.0f), new GradientColorKey(factionColor, 1.0f) },
+                        new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha, 1.0f) }
+                    );
+                    tr.colorGradient = gradient;
+
                 }
             }
 
             //Debug.Log(m_PlayerData.Length);
 
-            for(int pi = 0; pi < m_PlayerData.Length; pi++)
+            for (int pi = 0; pi < m_PlayerData.Length; pi++)
             {
 
                 var playerFactionComp = m_PlayerData.FactionData[pi];

@@ -2,7 +2,7 @@
 using Improbable.Gdk.Core;
 using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Worker.CInterop;
-using Improbable.Gdk.GameObjectRepresentation;
+//using Improbable.Gdk.GameObjectRepresentation;
 using Improbable.Gdk.GameObjectCreation;
 using Unity.Entities;
 
@@ -23,9 +23,12 @@ namespace BlankProject
         protected override void HandleWorkerConnectionEstablished()
         {
             Worlds.ClientWorld = Worker.World.GetOrCreateManager<EntityManager>();
+            Worlds.DefaultWorld = World.AllWorlds[0].GetOrCreateManager<EntityManager>();
             WorkerUtils.AddClientSystems(Worker.World);
             World.Active.GetOrCreateManager<LeyLineHybridECS.MeshColorLerpSystem>();
-            GameObjectRepresentationHelper.AddSystems(Worker.World);
+            World.Active.GetOrCreateManager<ProjectileSystem>();
+            World.Active.GetOrCreateManager<ClientCleanupSystem>();
+            //GameObjectRepresentationHelper.AddSystems(Worker.World);
             var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer, fallback), gameObject);
             PlayerLifecycleHelper.AddClientSystems(Worker.World);
