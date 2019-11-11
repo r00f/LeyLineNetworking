@@ -10,6 +10,7 @@ using Unity.Collections;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
 {
+    PathFindingSystem m_PathFindingSystem;
     HandleCellGridRequestsSystem m_HandleCellGridSystem;
     ResourceSystem m_ResourceSystem;
     TimerSystem m_TimerSystem;
@@ -37,6 +38,7 @@ public class ExecuteActionsSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_HandleCellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
         m_TimerSystem = World.GetExistingSystem<TimerSystem>();
@@ -192,11 +194,11 @@ public class ExecuteActionsSystem : ComponentSystem
         HashSet<Vector3f> Coords = new HashSet<Vector3f>(inCoords);
         List<long> unitIds = new List<long>();
 
-        Entities.With(m_UnitData).ForEach((ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId) =>
+        Entities.With(m_UnitData).ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId) =>
         {
             if (Coords.Contains(unitCoord.CubeCoordinate))
             {
-                if (m_HandleCellGridSystem.ValidateUnitTarget(unitId.EntityId.Id, usingID, usingFaction, (UnitRequisitesEnum)(int)restricitons))
+                if (m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)(int)restricitons, usingID, usingFaction))
                 {
                     unitIds.Add(unitId.EntityId.Id);
                 }

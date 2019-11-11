@@ -14,6 +14,8 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class MovementSystem : ComponentSystem
     {
+        ILogDispatcher logger;
+
         EntityQuery m_GameStateData;
         EntityQuery m_CellData;
         EntityQuery m_UnitData;
@@ -47,7 +49,8 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
-            //terrain = UnityEngine.Object.FindObjectOfType<Terrain>();
+            logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+
         }
 
         protected override void OnUpdate()
@@ -108,6 +111,11 @@ namespace LeyLineHybridECS
                                             movementVariables.TimeLeft = actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                                         }
                                         cor.CubeCoordinate = currentPath[0].CubeCoordinate;
+
+                                        logger.HandleLog(LogType.Warning,
+                                        new LogEvent("Set Unit ReqUpdate from MovementSystem")
+                                        .WithField("AYAYA", "AYAYA"));
+
                                         vis.RequireUpdate = true;
                                         currentPath.RemoveAt(0);
                                     }

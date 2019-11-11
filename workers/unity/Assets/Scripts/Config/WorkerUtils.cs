@@ -20,6 +20,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<UISystem>();
         world.GetOrCreateSystem<HighlightingSystem>();
         world.GetOrCreateSystem<ActionEffectsSystem>();
+        world.GetOrCreateSystem<PathFindingSystem>();
         //world.GetOrCreateManager<ClientCleanupSystem>();
         //world.GetOrCreateManager<ProjectileSystem>();
     }
@@ -38,5 +39,6 @@ public static class WorkerUtils
         world.GetOrCreateSystem<ExecuteActionsSystem>();
         world.GetOrCreateSystem<CleanupSystem>();
         world.GetOrCreateSystem<TimerSystem>();
+        world.GetOrCreateSystem<PathFindingSystem>();
     }
 }

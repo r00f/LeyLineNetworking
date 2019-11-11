@@ -46,7 +46,7 @@ public class ActionEffectsSystem : ComponentSystem
         {
             if (inCubeCoordinates.Contains(animatorComp.LastStationaryCoordinate))
             {
-                //Debug.Log("Set Unit actionEffectTrigger");
+                //Debug.Log("Set Unit actionEffectTrigger from actionEffectsSystem");
                 animatorComp.ActionEffectTrigger = true;
             }
         });

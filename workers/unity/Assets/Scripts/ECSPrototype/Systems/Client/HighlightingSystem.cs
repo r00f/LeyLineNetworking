@@ -2,7 +2,6 @@
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
-//using Improbable.Gdk.ReactiveComponents;
 using LeyLineHybridECS;
 using Player;
 using System;
@@ -16,17 +15,13 @@ using UnityEngine;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HighlightingSystem : ComponentSystem
 {
-    DijkstraPathfinding pathfinder = new DijkstraPathfinding();
-
-    //ResourceSystem m_ResourceSystem;
-    //HandleCellGridRequestsSystem m_CellGrid;
+    PathFindingSystem m_PathFindingSystem;
     EntityQuery m_ActiveUnitData;
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
     EntityQuery m_MarkerStateData;
     EntityQuery m_PlayerStateData;
     EntityQuery m_GameStateData;
-    //bool initialized;
 
     protected override void OnCreate()
     {
@@ -93,7 +88,7 @@ public class HighlightingSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
-
+        m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
     }
 
     protected override void OnUpdate()
@@ -248,29 +243,22 @@ public class HighlightingSystem : ComponentSystem
             }
         }
 
-        return playerState;
-
-        /*
-        //loop over units to check if any effect restriction applies and remove unit if true
-        for (int i = 0; i < m_UnitData.Length; i++)
+        Entities.With(m_UnitData).ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>
         {
-            var unitCoord = m_UnitData.Coords[i].CubeCoordinate;
-            var unitFaction = m_UnitData.Factions[i].Faction;
-            var unitId = m_UnitData.EntityIds[i].EntityId.Id;
-
             if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
             {
-                if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Contains(unitCoord))
+                if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Contains(unitCoord.CubeCoordinate))
                 {
                     //if target is not valid, remove it from UnitTargets Dict
-                    if (!m_CellGrid.ValidateUnitTarget(unitId, playerState.SelectedUnitId, unitFaction, (UnitRequisitesEnum)inHinghlightningData.EffectRestrictionIndex))
+                    if (!m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, unitFaction.Faction))
                     {
-                        playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord);
+                        playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
                     }
                 }
             }
-        }
-        */
+        });
+
+        return playerState;
     }
 
     public HighlightingDataComponent GatherHighlightingInformation(long unitID, int actionID, HighlightingDataComponent playerHighlightingData)
@@ -410,8 +398,8 @@ public class HighlightingSystem : ComponentSystem
                             //}
                         }
 
-                        List<CellAttributes> go = GetRadius(occCoord.CubeCoordinate, range, worldIndex.Value);
-                        playerState.CachedPaths = GetAllPathsInRadius(range, go, occCoord.CubeCoordinate);
+                        List<CellAttributes> go = m_PathFindingSystem.GetRadius(occCoord.CubeCoordinate, range, worldIndex.Value);
+                        playerState.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, go, occCoord.CubeCoordinate);
 
                         foreach (CellAttribute key in playerState.CachedPaths.Keys)
                         {
@@ -424,7 +412,7 @@ public class HighlightingSystem : ComponentSystem
                     }
                     else
                     {
-                        List<CellAttributes> go = GetRadius(occCoord.CubeCoordinate, playerHighlightingData.Range, worldIndex.Value);
+                        List<CellAttributes> go = m_PathFindingSystem.GetRadius(occCoord.CubeCoordinate, playerHighlightingData.Range, worldIndex.Value);
                         foreach (CellAttributes c in go)
                         {
                             playerState.CellsInRange.Add(c.Cell);
@@ -452,7 +440,7 @@ public class HighlightingSystem : ComponentSystem
                 if (playerHighlightingData.PathLine == 1)
                 {
                     CellAttributeList Path = new CellAttributeList();
-                    Path = FindPath(playerHighlightingData.HoveredCoordinate, playerState.CachedPaths);
+                    Path = m_PathFindingSystem.FindPath(playerHighlightingData.HoveredCoordinate, playerState.CachedPaths);
 
                     if (Path.CellAttributes.Count > 0)
                     {
@@ -479,179 +467,6 @@ public class HighlightingSystem : ComponentSystem
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
         playerStates.Dispose();
         playerHighlightingDatas.Dispose();
-    }
-
-    //PATHFINDING METHODS NEED TO BE IN A SEPARATE SYSTEM TO PREVENT SHITTONNES OF DUPLICATE CODE
-
-    CellAttributeList FindPath(CellAttribute destination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
-    {
-        if (cachedPaths.ContainsKey(destination))
-        {
-            return cachedPaths[destination];
-        }
-        else
-            return new CellAttributeList(new List<CellAttribute>());
-    }
-
-    CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
-    {
-        CellAttribute destination = new CellAttribute();
-
-        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coordinate, ref CellAttributesComponent.Component cellAttribute) =>
-        {
-            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
-            {
-                destination = cellAttribute.CellAttributes.Cell;
-            }
-        });
-
-        if (cachedPaths.ContainsKey(destination))
-        {
-            return cachedPaths[destination];
-        }
-        else
-            return new CellAttributeList(new List<CellAttribute>());
-    }
-
-    List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
-    {
-        //returns a list of offsetCoordinates
-        var cellsInRadius = new List<CellAttributes>();
-        //reserve first index for origin
-        cellsInRadius.Add(new CellAttributes { Neighbours = new CellAttributeList(new List<CellAttribute>()) });
-
-        //get all cubeCordinates within range
-        var coordList = CellGridMethods.CircleDraw(originCellCubeCoordinate, radius);
-
-        HashSet<Vector3f> coordHash = new HashSet<Vector3f>();
-
-        foreach (Vector3f v in coordList)
-        {
-            coordHash.Add(v);
-        }
-
-        //use a hashset instead of a list to improve contains performance
-
-        Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref CubeCoordinate.Component cubeCoordinate, ref CellAttributesComponent.Component cellAttributes) =>
-        {
-            if (cellWorldIndex.Value == unitWorldIndex)
-            {
-                if (Vector3fext.ToUnityVector(cubeCoordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCellCubeCoordinate))
-                {
-                    cellsInRadius[0] = cellAttributes.CellAttributes;
-                }
-                else if (coordHash.Contains(cubeCoordinate.CubeCoordinate))
-                {
-                    cellsInRadius.Add(cellAttributes.CellAttributes);
-                }
-            }
-        });
-
-        return cellsInRadius;
-    }
-
-    Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, CellAttribute origin)
-    {
-        var paths = CachePaths(cellsInRange, origin);
-        var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-
-        foreach (var key in paths.Keys)
-        {
-            var path = paths[key];
-
-            int pathCost;
-
-            if (key.IsTaken)
-                continue;
-
-            pathCost = path.CellAttributes.Sum(c => c.MovementCost);
-
-            if (pathCost <= radius)
-            {
-                path.CellAttributes.Reverse();
-                cachedPaths.Add(key, path);
-            }
-        }
-
-        return cachedPaths;
-
-    }
-
-    Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
-    {
-        CellAttribute origin = new CellAttribute();
-        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coordinate, ref CellAttributesComponent.Component cellAttribute) =>
-        {
-            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCoord))
-            {
-                origin = cellAttribute.CellAttributes.Cell;
-            }
-        });
-
-        var paths = CachePaths(cellsInRange, origin);
-        var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-
-        foreach (var key in paths.Keys)
-        {
-            var path = paths[key];
-
-            int pathCost;
-
-            if (key.IsTaken)
-                continue;
-
-            pathCost = path.CellAttributes.Sum(c => c.MovementCost);
-
-            if (pathCost <= radius)
-            {
-                cachedPaths.Add(key, path);
-            }
-
-            path.CellAttributes.Reverse();
-        }
-
-        return cachedPaths;
-    }
-
-    Dictionary<CellAttribute, CellAttributeList> CachePaths(List<CellAttributes> cellsInRange, CellAttribute origin)
-    {
-        var edges = GetGraphEdges(cellsInRange, origin);
-        var paths = pathfinder.FindAllPaths(edges, origin);
-        return paths;
-    }
-
-    Dictionary<CellAttribute, Dictionary<CellAttribute, int>> GetGraphEdges(List<CellAttributes> cellsInRange, CellAttribute origin)
-    {
-        Dictionary<CellAttribute, Dictionary<CellAttribute, int>> ret = new Dictionary<CellAttribute, Dictionary<CellAttribute, int>>();
-
-        //instead of looping over all cells in grid only loop over cells in CellsInMovementRange
-
-        for (int i = 0; i < cellsInRange.Count; ++i)
-        {
-            CellAttributes cell = cellsInRange[i];
-
-            var isTaken = cellsInRange[i].Cell.IsTaken;
-            var movementCost = cellsInRange[i].Cell.MovementCost;
-            var neighbours = cellsInRange[i].Neighbours.CellAttributes;
-
-
-            ret[cell.Cell] = new Dictionary<CellAttribute, int>();
-
-
-            if (!isTaken || Vector3fext.ToUnityVector(cell.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(origin.CubeCoordinate))
-            {
-                if (neighbours != null)
-                {
-                    foreach (var neighbour in neighbours)
-                    {
-                        ret[cell.Cell][neighbour] = neighbour.MovementCost;
-                    }
-
-                }
-
-            }
-        }
-        return ret;
     }
 
     void HandleMods(List<ECSActionSecondaryTargets> inMods, ref HighlightingDataComponent highLightingData)

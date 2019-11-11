@@ -13,8 +13,6 @@ using Cell;
 public class UnitAnimationSystem : ComponentSystem
 {
     ActionEffectsSystem m_ActionEffectsSystem;
-    //ILLEGAL
-    //HandleCellGridRequestsSystem m_CellGridSystem;
     UISystem m_UISystem;
     EntityQuery m_GameStateData;
     EntityQuery m_TransformData;
@@ -65,7 +63,6 @@ public class UnitAnimationSystem : ComponentSystem
         base.OnStartRunning();
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
-        //m_CellGridSystem = Worlds.GameLogicWorld.World.GetExistingSystem<HandleCellGridRequestsSystem>();
         GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
 
         m_GarbageCollection = Worlds.DefaultWorld.CreateEntityQuery(
@@ -80,14 +77,12 @@ public class UnitAnimationSystem : ComponentSystem
 
         var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
-        //Set animComp currentlockedAction
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
         {
-
-            //Does this even work?
             var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
             var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
 
+            //outgoing effects (launch projectiles usw.)
             if (actions.LockedAction.Index != -3)
             {
                 if (!animatorComponent.CurrentLockedAction)
@@ -134,7 +129,14 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
                         }
 
+                        //make sure units that die trigger their actionVisuals (Egg dying whitout animation / units getting killed before they get to animEvent 
+                        if (health.CurrentHealth == 0 && !animatorComponent.AnimationEvents.EventTrigger && !animatorComponent.DeathEventTrigger)
+                        {
+                            animatorComponent.AnimationEvents.EventTrigger = true;
+                            animatorComponent.DeathEventTrigger = true;
+                        }
 
+                        //event triggered from animation
                         if (animatorComponent.AnimationEvents.EventTrigger)
                         {
                             if (actions.LockedAction.Targets[0].Mods.Count != 0)
@@ -160,84 +162,29 @@ public class UnitAnimationSystem : ComponentSystem
                             {
                                 m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
                             }
+
                             animatorComponent.AnimationEvents.EventTrigger = false;
                         }
                     }
 
-                    if (animatorComponent.LastHealth != 0)
+                    if (!animatorComponent.ExecuteTriggerSet)
                     {
-                        //Debug.Log("TriggerHatchActionEffect");
-                        m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                        ExecuteActionAnimation(actions, animatorComponent, gameStates[0].CurrentState, worldIndex.Value);
                     }
-
-                }
-            }
-
-            if (animatorComponent.Visuals.Count != 0)
-            {
-                if (animatorComponent.EnableVisualsDelay >= 0)
-                {
-                    animatorComponent.EnableVisualsDelay -= Time.deltaTime;
-                }
-                else if (!animatorComponent.Dead)
-                {
-                    foreach (GameObject g in animatorComponent.Visuals)
+                    else
                     {
-                        g.SetActive(true);
+                        //constantly rotate towards serverposition if moving
+                        if (gameStates[0].CurrentState == GameStateEnum.move)
+                        {
+                            if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
+                                animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
+                        }
+                        //rotate animatorComponent.RotateTransform towards targetDirection
+                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
+                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                     }
                 }
             }
-
-
-            if (!animatorComponent.Animator)
-            {
-                Debug.Log("Animator reference not set!");
-                return;
-            }
-            //check if action has the current step and set executeTrigger if true
-            if (actions.LockedAction.Index != -3 && gameStates[0].CurrentState != GameStateEnum.planning)
-            {
-                //Debug.Log("Execute");
-                //set initial anim Values if in the right step and they are not set yet
-                if (!animatorComponent.ExecuteTriggerSet)
-                {
-                    ExecuteActionAnimation(actions, animatorComponent, gameStates[0].CurrentState, worldIndex.Value);
-                }
-                else
-                {
-                    //constantly rotate towards serverposition if moving
-                    if (gameStates[0].CurrentState == GameStateEnum.move)
-                    {
-                        if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
-                            animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
-                    }
-                    //rotate animatorComponent.RotateTransform towards targetDirection
-                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
-                    animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
-                }
-            }
-            else
-            {
-                animatorComponent.CurrentLockedAction = null;
-
-                if (animatorComponent.InitialValuesSet)
-                {
-                    animatorComponent.InitialValuesSet = false;
-                }
-
-                if (animatorComponent.DestinationReachTriggerSet)
-                {
-                    animatorComponent.Animator.ResetTrigger("DestinationReached");
-                    animatorComponent.DestinationReachTriggerSet = false;
-                }
-                if (animatorComponent.ExecuteTriggerSet)
-                {
-                    animatorComponent.Animator.ResetTrigger("Execute");
-                    animatorComponent.ExecuteTriggerSet = false;
-                }
-            }
-
-            //damage feedback
 
             //FeedBack to incoming Attacks / Heals
             if (animatorComponent.ActionEffectTrigger)
@@ -259,9 +206,47 @@ public class UnitAnimationSystem : ComponentSystem
                     }
                     animatorComponent.LastHealth = health.CurrentHealth;
                 }
-
                 animatorComponent.ActionEffectTrigger = false;
             }
+
+            if (animatorComponent.Visuals.Count != 0)
+            {
+                if (animatorComponent.EnableVisualsDelay >= 0)
+                {
+                    animatorComponent.EnableVisualsDelay -= Time.deltaTime;
+                }
+                else if (!animatorComponent.Dead)
+                {
+                    foreach (GameObject g in animatorComponent.Visuals)
+                    {
+                        g.SetActive(true);
+                    }
+                }
+            }
+
+            //reset in planning SHOULD BE ONLY ONE TIME
+            if (actions.LockedAction.Index == -3 && gameStates[0].CurrentState == GameStateEnum.planning)
+            {
+                animatorComponent.CurrentLockedAction = null;
+
+                if (animatorComponent.InitialValuesSet)
+                {
+                    animatorComponent.InitialValuesSet = false;
+                }
+
+                if (animatorComponent.DestinationReachTriggerSet)
+                {
+                    animatorComponent.Animator.ResetTrigger("DestinationReached");
+                    animatorComponent.DestinationReachTriggerSet = false;
+                }
+                if (animatorComponent.ExecuteTriggerSet)
+                {
+                    animatorComponent.Animator.ResetTrigger("Execute");
+                    animatorComponent.ExecuteTriggerSet = false;
+                }
+            }
+
+            #region Set Animator Variables
 
             animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
 
@@ -270,6 +255,10 @@ public class UnitAnimationSystem : ComponentSystem
 
             if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
+
+            #endregion
+
+            #region Movement
 
             if (animatorComponent.transform.position != serverPosition.Coords.ToUnityVector())
             {
@@ -293,6 +282,8 @@ public class UnitAnimationSystem : ComponentSystem
                     animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
+
+            #endregion
         });
 
         gameStates.Dispose();
@@ -333,9 +324,6 @@ public class UnitAnimationSystem : ComponentSystem
     public void Death(AnimatorComponent animatorComponent)
     {
         var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
-
-        //Debug.Log("Death");
-
         animatorComponent.Dead = true;
 
         if (animatorComponent.DeathParticleSystem)

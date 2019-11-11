@@ -11,27 +11,28 @@ using Unit;
 using System.Linq;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(ResourceSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class VisionSystem_Server : ComponentSystem
 {
-    HandleCellGridRequestsSystem m_GridSystem;
+    //HandleCellGridRequestsSystem m_GridSystem;
+    ILogDispatcher logger;
 
     EntityQuery m_UnitData;
     EntityQuery m_PlayerData;
     EntityQuery m_CellData;
 
     bool Init = true;
-    bool firstTime = true;
     private List<RawCluster> FixClusters = new List<RawCluster>();
 
     protected override void OnCreate()
     {
         base.OnCreate();
-
         //m_ClientVisionSystem = World.GetExistingSystem<VisionSystem_Client>();
-        m_GridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
+        //m_GridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
+
 
         m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -53,38 +54,72 @@ public class VisionSystem_Server : ComponentSystem
 
     }
 
+    protected override void OnStartRunning()
+    {
+        base.OnStartRunning();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+
+    }
+
     protected override void OnUpdate()
     {
-        if (firstTime) firstTime = false;
-        else {
-            if (Init) BuildRawClusters();
+        if (Init)
+            BuildRawClusters();
+        else
+        {
 
             //if any unit requires an update, update player aswell
-            bool anyUnitReqUpdate = false;
 
-            Entities.With(m_UnitData).ForEach((ref WorldIndex.Component u_worldIndex, ref Vision.Component u_Vision, ref CubeCoordinate.Component u_OccupiedCell, ref FactionComponent.Component u_Faction) =>
+            Entities.With(m_UnitData).ForEach((ref SpatialEntityId id, ref WorldIndex.Component u_worldIndex, ref Vision.Component u_Vision, ref CubeCoordinate.Component u_OccupiedCell, ref FactionComponent.Component u_Faction) =>
             {
+                var unitFaction = u_Faction.Faction;
+
                 if (u_Vision.RequireUpdate == true)
                 {
+                    logger.HandleLog(LogType.Warning,
+                    new LogEvent("u_Vision.ReqUpdate = true")
+                    .WithField("unitId", id.EntityId.Id));
+
                     u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
-                    anyUnitReqUpdate = true;
+
+                    Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
+                    {
+                        if (p_Faction.Faction == unitFaction)
+                        {
+                            logger.HandleLog(LogType.Warning,
+                            new LogEvent("Call UpdatePlayerVision")
+                            .WithField("UnitFaction", unitFaction));
+                            p_Vision.RequireUpdate = true;
+                        }
+                    });
+
+                    u_Vision.RequireUpdate = false;
+                }
+                else if(u_Vision.VisionRange > 0 && u_Vision.CellsInVisionrange.Count == 0)
+                {
+                    u_Vision.RequireUpdate = true;
                 }
             });
 
             Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
             {
-                if (anyUnitReqUpdate)
+                if (p_Vision.RequireUpdate)
                 {
-                    //Debug.Log("UpdatePlayerVision");
+                    logger.HandleLog(LogType.Warning,
+                    new LogEvent("playerVision.ReqUpdate = true")
+                    .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+
                     p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
                     p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                    //p_Vision.RequireUpdate = p_Vision.RequireUpdate;
                     p_Vision.Positives = p_Vision.Positives;
                     p_Vision.Negatives = p_Vision.Negatives;
                     p_Vision.Lastvisible = p_Vision.Lastvisible;
+                    p_Vision.RequireUpdate = false;
+                    //Debug.Log("UpdatePlayerVision");
+
                     //Send clientSide updateVision command
                     /*
-                    
+
                     var request = new Vision.UpdateClientVisionCommand.Request
                     (
                         p_id,
@@ -105,7 +140,7 @@ public class VisionSystem_Server : ComponentSystem
 
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
-        List<Vector3f> sight = m_GridSystem.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
+        List<Vector3f> sight = CellGridMethods.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
         
         var sightHash = new HashSet<Vector3f>();
         foreach (Vector3f v in sight)
@@ -113,10 +148,7 @@ public class VisionSystem_Server : ComponentSystem
             sightHash.Add(v);
         }
 
-
         List<ObstructVisionCluster> RelevantClusters = new List<ObstructVisionCluster>();
-
-
 
         foreach(RawCluster c in FixClusters)
         {
@@ -136,12 +168,12 @@ public class VisionSystem_Server : ComponentSystem
 
         if (RelevantClusters.Count != 0)
         {
-            List<Vector3f> Ring = m_GridSystem.RingDraw(coor.CubeCoordinate, inVision.VisionRange);
+            List<Vector3f> Ring = CellGridMethods.RingDraw(coor.CubeCoordinate, inVision.VisionRange);
             List<List<Vector3f>> Lines = new List<List<Vector3f>>();
 
             foreach (Vector3f c in Ring)
             {
-                Lines.Add(m_GridSystem.LineDraw(coor.CubeCoordinate, c));
+                Lines.Add(CellGridMethods.LineDraw(coor.CubeCoordinate, c));
             }
             foreach (List<Vector3f> l in Lines)
             {
@@ -169,14 +201,17 @@ public class VisionSystem_Server : ComponentSystem
         }
 
         inVision.CellsInVisionrange = sight;
-        inVision.RequireUpdate = false;
 
         return inVision;
     }
 
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
     {
-        //Debug.Log(inVision.CellsInVisionrange.Count);
+        //Debug.Log("UpdatePlayerVision: " + faction);
+        logger.HandleLog(LogType.Warning,
+        new LogEvent("UpdatePlayerVision.")
+        .WithField("Faction", faction));
+
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
 

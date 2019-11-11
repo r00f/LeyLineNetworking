@@ -176,11 +176,11 @@ public static class LeyLineEntityTemplates {
 
         var playerVision = new Vision.Snapshot
         {
+            RequireUpdate = false,
             CellsInVisionrange = new List<Vector3f>(),
             Lastvisible = new List<Vector3f>(),
             Positives = new List<Vector3f>(),
             Negatives = new List<Vector3f>()
-            
         };
 
         var playerState = new PlayerState.Snapshot
@@ -264,7 +264,7 @@ public static class LeyLineEntityTemplates {
             Lastvisible = new List<Vector3f>(),
             Positives = new List<Vector3f>(),
             Negatives = new List<Vector3f>(),
-            RequireUpdate = true,
+            RequireUpdate = false,
             VisionRange = Stats.VisionRange
         };
 

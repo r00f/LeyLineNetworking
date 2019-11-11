@@ -193,6 +193,8 @@ public class ProjectileSystem : ComponentSystem
 
 
 
+
+            /*
             Entities.With(m_MoveAnimData).ForEach((MovementAnimComponent moveAnim) =>
             {
                 Debug.Log("Projectile moveanimData");
@@ -214,20 +216,22 @@ public class ProjectileSystem : ComponentSystem
                     }
                 }
             });
+            */
         }
     }
 
     void TriggerUnitActionEffect(EffectTypeEnum inEffectType, HashSet<Vector3f> inCubeCoordinates)
     {
-        Debug.Log("TriggerUnitActionEffect");
-        Entities.With(m_UnitData).ForEach((AnimatorComponent animatorComponent)=>
+        var animatorComponents = m_UnitData.ToComponentArray<AnimatorComponent>(); 
+
+        for(int i = 0; i < animatorComponents.Length; i++)
         {
-            Debug.Log("UnitDataExists!");
+            var animatorComponent = animatorComponents[i];
+
             if (inCubeCoordinates.Contains(animatorComponent.LastStationaryCoordinate) && !animatorComponent.ActionEffectTrigger)
             {
-                //Debug.Log("Set Unit actionEffectTrigger");
                 animatorComponent.ActionEffectTrigger = true;
             }
-        });
+        }
     }
 }

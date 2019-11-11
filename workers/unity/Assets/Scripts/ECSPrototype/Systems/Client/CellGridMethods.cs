@@ -5,12 +5,35 @@ using Generic;
 
 public static class CellGridMethods
 {
-    static Vector3f[] DirectionsArray = new Vector3f[]{
+    public static Vector3f[] DirectionsArray = new Vector3f[]{
           new Vector3f(+1, -1, 0), new Vector3f(+1, 0, -1), new Vector3f(0, +1, -1),
             new Vector3f(-1, +1, 0), new Vector3f(-1, 0, +1), new Vector3f(0, -1, +1)
     };
 
-    static Vector3f CubeDirection(uint direction)
+    public static Vector2 CubeToAxial(Vector3f cube)
+    {
+        return new Vector2(cube.X, cube.Y);
+    }
+
+    public static Vector3f AxialToCube(Vector2 axial)
+    {
+        return new Vector3f(axial.x, axial.y, -axial.x - axial.y);
+    }
+
+    //size equals width of a hexagon / 2
+    /*
+    public Vector2 CubeCoordToXZ(Vector3f coord)
+    {
+        Vector2 axial = CubeToAxial(coord);
+        var x = 1.5f * (3 / 2 * axial.x);
+        var y = 1.73f * ((axial.x * 0.5f) + axial.y);
+
+        //center cell + coordinate offset = XZ coordinate in world space - offset X by (worldindex - 1) * 100?
+        return new Vector2(50, 55.22f) + new Vector2(x, y);
+    }
+    */
+
+    public static Vector3f CubeDirection(uint direction)
     {
         if (direction < 6)
             return DirectionsArray[direction];
@@ -18,13 +41,84 @@ public static class CellGridMethods
             return new Vector3f();
     }
 
-    static int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
+    public static Vector3f CubeNeighbour(Vector3f origin, uint direction)
+    {
+        var cubeDirection = CubeDirection(direction);
+        return new Vector3f(origin.X + cubeDirection.X, origin.Y + cubeDirection.Y, origin.Z + cubeDirection.Z);
+    }
+
+    public static Vector3f CubeScale(Vector3f direction, uint scale)
+    {
+        return new Vector3f(direction.X * scale, direction.Y * scale, direction.Z * scale);
+    }
+
+    public static Vector3f CoordinateDirection(Vector3f origin, Vector3f destination)
+    {
+        return new Vector3f(destination.X - origin.X, destination.Y - origin.Y, destination.Z - origin.Z);
+    }
+
+    public static List<Vector3f> RingDraw(Vector3f origin, uint radius)
+    {
+        var ring = new List<Vector3f>();
+        var cubeScale = CubeScale(DirectionsArray[4], radius);
+        //Debug.Log("OriginCoord = " + origin.X + ", " + origin.Y + ", " + origin.Z);
+        //Debug.Log("CubeScale = " + cubeScale.X + ", " + cubeScale.Y + ", " + cubeScale.Z);
+        var coord = new Vector3f(origin.X + cubeScale.X, origin.Y + cubeScale.Y, origin.Z + cubeScale.Z);
+
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < radius; j++)
+            {
+                //Debug.Log("RingCoord = " + coord.X + coord.Y + coord.Z);
+                ring.Add(coord);
+                coord = CubeNeighbour(coord, (uint)i);
+            }
+        }
+
+        //Debug.Log("RingCount = " + ring.Count);
+        return ring;
+    }
+
+    public static int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)
     {
         int distance = (int)(Mathf.Abs(originCubeCoordinate.X - otherCubeCoordinate.X) + Mathf.Abs(originCubeCoordinate.Y - otherCubeCoordinate.Y) + Mathf.Abs(originCubeCoordinate.Z - otherCubeCoordinate.Z)) / 2;
         return distance;
     }
 
-    static Vector3f CubeRound(Vector3f cubeFloat)
+    public static float GetAngle(Vector3f originPos, Vector3f targetPos)
+    {
+        Vector3f dir = CoordinateDirection(originPos, targetPos);
+        float Angle = Mathf.Atan2(dir.X, dir.Z) * Mathf.Rad2Deg;
+        return Angle;
+    }
+
+    public static float LineLerp(float a, float b, float t)
+    {
+        return a + (b - a) * t;
+    }
+
+    public static Vector3f CubeLerp(Vector3f a, Vector3f b, float t)
+    {
+        return CubeRound(new Vector3f(LineLerp(a.X, b.X, t), LineLerp(a.Y, b.Y, t), LineLerp(a.Z, b.Z, t)));
+    }
+
+    public static List<Vector3f> LineDraw(Vector3f origin, Vector3f destination)
+    {
+        List<Vector3f> line = new List<Vector3f>();
+        var n = GetDistance(origin, destination);
+
+        //nudge destination
+        //destination = new Vector3f(destination.X + 1e - 6f, destination.Y + 2e-6f, destination.Z + 3e-6f);
+
+        for (int i = 0; i <= n; i++)
+        {
+            line.Add(CubeLerp(origin, destination, 1f / n * i));
+        }
+
+        return line;
+    }
+
+    public static Vector3f CubeRound(Vector3f cubeFloat)
     {
 
         var rx = Mathf.Round(cubeFloat.X);
@@ -51,43 +145,6 @@ public static class CellGridMethods
         return new Vector3f(rx, ry, rz);
     }
 
-    static Vector3f CubeLerp(Vector3f a, Vector3f b, float t)
-    {
-        return CubeRound(new Vector3f(LineLerp(a.X, b.X, t), LineLerp(a.Y, b.Y, t), LineLerp(a.Z, b.Z, t)));
-    }
-
-    static float LineLerp(float a, float b, float t)
-    {
-        return a + (b - a) * t;
-    }
-
-    static Vector3f CubeNeighbour(Vector3f origin, uint direction)
-    {
-        var cubeDirection = CubeDirection(direction);
-        return new Vector3f(origin.X + cubeDirection.X, origin.Y + cubeDirection.Y, origin.Z + cubeDirection.Z);
-    }
-
-    static Vector3f CubeScale(Vector3f direction, uint scale)
-    {
-        return new Vector3f(direction.X * scale, direction.Y * scale, direction.Z * scale);
-    }
-
-    public static List<Vector3f> LineDraw(Vector3f origin, Vector3f destination)
-    {
-        List<Vector3f> line = new List<Vector3f>();
-        var n = GetDistance(origin, destination);
-
-        //nudge destination
-        //destination = new Vector3f(destination.X + 1e - 6f, destination.Y + 2e-6f, destination.Z + 3e-6f);
-
-        for (int i = 0; i <= n; i++)
-        {
-            line.Add(CubeLerp(origin, destination, 1f / n * i));
-        }
-
-        return line;
-    }
-
     public static List<Vector3f> CircleDraw(Vector3f originCellCubeCoordinate, uint radius)
     {
         var results = new List<Vector3f>();
@@ -102,28 +159,6 @@ public static class CellGridMethods
             }
         }
         return results;
-    }
-
-    public static List<Vector3f> RingDraw(Vector3f origin, uint radius)
-    {
-        var ring = new List<Vector3f>();
-        var cubeScale = CubeScale(DirectionsArray[4], radius);
-        //Debug.Log("OriginCoord = " + origin.X + ", " + origin.Y + ", " + origin.Z);
-        //Debug.Log("CubeScale = " + cubeScale.X + ", " + cubeScale.Y + ", " + cubeScale.Z);
-        var coord = new Vector3f(origin.X + cubeScale.X, origin.Y + cubeScale.Y, origin.Z + cubeScale.Z);
-
-        for (int i = 0; i < 6; i++)
-        {
-            for (int j = 0; j < radius; j++)
-            {
-                //Debug.Log("RingCoord = " + coord.X + coord.Y + coord.Z);
-                ring.Add(coord);
-                coord = CubeNeighbour(coord, (uint)i);
-            }
-        }
-
-        //Debug.Log("RingCount = " + ring.Count);
-        return ring;
     }
 
 }

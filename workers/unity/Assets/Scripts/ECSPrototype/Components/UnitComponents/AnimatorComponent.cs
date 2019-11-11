@@ -35,6 +35,7 @@ public class AnimatorComponent : MonoBehaviour
 
     [Header("Death")]
     public bool Dead;
+    public bool DeathEventTrigger;
     public List<GameObject> ObjectsToDisable;
     public List<Rigidbody> RagdollRigidBodies;
     public List<Transform> Props;
