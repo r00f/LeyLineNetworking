@@ -111,11 +111,11 @@ namespace LeyLineHybridECS
                                             movementVariables.TimeLeft = actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                                         }
                                         cor.CubeCoordinate = currentPath[0].CubeCoordinate;
-
+                                        /*
                                         logger.HandleLog(LogType.Warning,
                                         new LogEvent("Set Unit ReqUpdate from MovementSystem")
                                         .WithField("AYAYA", "AYAYA"));
-
+                                        */
                                         vis.RequireUpdate = true;
                                         currentPath.RemoveAt(0);
                                     }

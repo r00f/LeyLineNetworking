@@ -272,7 +272,7 @@ namespace LeyLineHybridECS
 
         private void UpdateIsTaken(uint gameStateWorldIndex)
         {
-            Debug.Log("UpdateIsTaken");
+            //Debug.Log("UpdateIsTaken");
             Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
             HashSet<Vector3f> unitCoordHash = new HashSet<Vector3f>();
 

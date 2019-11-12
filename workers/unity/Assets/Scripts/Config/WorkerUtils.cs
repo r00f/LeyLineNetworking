@@ -34,11 +34,11 @@ public static class WorkerUtils
         world.GetOrCreateSystem<MovementSystem>();
         world.GetOrCreateSystem<ManalithSystem>();
         world.GetOrCreateSystem<UnitLifeCycleSystem>();
-        world.GetOrCreateSystem<VisionSystem_Server>();
         world.GetOrCreateSystem<ResourceSystem>();
         world.GetOrCreateSystem<ExecuteActionsSystem>();
         world.GetOrCreateSystem<CleanupSystem>();
         world.GetOrCreateSystem<TimerSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
+        world.GetOrCreateSystem<VisionSystem_Server>();
     }
 }
