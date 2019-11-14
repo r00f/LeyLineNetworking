@@ -16,7 +16,8 @@ MonoBehaviour:
   ActionIcon: {fileID: 21300000, guid: 267ab9291cae3f14d814a63f36dc932c, type: 3}
   ProjectileFab: {fileID: 0}
   ActionName: Defend
-  ToolTip: 
+  Description: Enters a defensive stance to prepare for incoming damage. Gains 60
+    armor.
   TimeToExecute: 3
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}

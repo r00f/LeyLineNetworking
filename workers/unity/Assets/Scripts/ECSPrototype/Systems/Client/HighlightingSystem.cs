@@ -125,8 +125,6 @@ public class HighlightingSystem : ComponentSystem
         var playerFaction = playerFactions[0];
         #endregion
 
-        var hoveredToUnityVector3 = Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate);
-        var lastHoveredToUnityVector3 = Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate);
         var activeUnitLineRenderers = m_ActiveUnitData.ToComponentArray<LineRendererComponent>();
 
         //used to increase performance - does not work for clearing old AoE when selecting new action yet
@@ -138,11 +136,11 @@ public class HighlightingSystem : ComponentSystem
             {
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
-                    if (hoveredToUnityVector3 != lastHoveredToUnityVector3)
+                    Debug.Log("lastHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) + "currHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate));
+                    if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate))
                     {
                         if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                         {
-                            //Debug.Log("WaitingForTarget");
                             playerState = FillUnitTargetsList(playerHighlightingData, playerState);
                             SetNumberOfTargets(playerState);
                             UpdateSelectedUnit();
@@ -153,7 +151,6 @@ public class HighlightingSystem : ComponentSystem
                         }
 
                         playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
-                        playerHighlightingDatas[0] = playerHighlightingData;
                     }
                 }
                 else
@@ -176,9 +173,11 @@ public class HighlightingSystem : ComponentSystem
         });
 
         #region playerStateData
+        playerHighlightingDatas[0] = playerHighlightingData;
+        m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
         playerStates[0] = playerState;
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
-        m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
+
         playerStates.Dispose();
         playerWorldIndexes.Dispose();
         playerHighlightingDatas.Dispose();
@@ -369,6 +368,7 @@ public class HighlightingSystem : ComponentSystem
 
     public void UpdateSelectedUnit()
     {
+        //Debug.Log("UpdateSelectedUnit");
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
@@ -449,9 +449,12 @@ public class HighlightingSystem : ComponentSystem
                 }
                 else if (playerHighlightingData.LineAoE == 0)
                 {
+
+                    //Debug.Log("HoveredPos: " + playerHighlightingData.HoveredPosition);
                     //use Arc Line
                     if (playerHighlightingData.HoveredPosition != Vector3.zero)
                     {
+                        //Debug.Log("UpdateArc: " + playerHighlightingData.HoveredPosition);
                         UpdateArcLineRenderer(playerHighlightingData.LineYOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
                     }
                     else// if (mouseState.CurrentState != MouseState.State.Neutral)

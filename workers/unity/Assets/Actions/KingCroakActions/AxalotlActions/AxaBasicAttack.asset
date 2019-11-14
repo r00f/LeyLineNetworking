@@ -16,8 +16,8 @@ MonoBehaviour:
   ActionIcon: {fileID: 21300000, guid: 5041f3c82626a1f4bacee1b01e209b77, type: 3}
   ProjectileFab: {fileID: 93931158904744250, guid: c88def649c416ac499e64a4280acef24,
     type: 3}
-  ActionName: Attack
-  ToolTip: 
+  ActionName: Splash
+  Description: Attacks a enemy with water from afar. Has 3 range and deals 35 damage.
   TimeToExecute: 5
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}

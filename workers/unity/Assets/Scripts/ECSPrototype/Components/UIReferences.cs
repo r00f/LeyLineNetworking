@@ -51,6 +51,15 @@ public class UIReferences : MonoBehaviour
     public Toggle SpawnActionsToggle;
     public List<Toggle> TurnStateToggles;
 
+    [Header("ToolTip")]
+    public GameObject TTPanel;
+    public RectTransform TTRect;
+    public Text TTActionName;
+    public Text TTActionDescription;
+    public Text TTActionCost;
+    public Image TTExecuteStepImage;
+    public List<Sprite> ExecuteStepSprites;
+
     [Header("GameOver")]
     public GameObject GameOverPanel;
     public GameObject VictoryPanel;

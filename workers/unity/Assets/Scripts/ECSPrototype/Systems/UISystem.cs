@@ -89,6 +89,63 @@ namespace LeyLineHybridECS
             }
         }
 
+        ActionButton FillButtonFields(ActionButton inButton, Unit_BaseDataSet inBaseData, long inUnitId, int inIndex, bool isSpawnAction, bool hasBasicAction)
+        {
+            if(isSpawnAction)
+            {
+                inButton.ExecuteStepIndex = (int)inBaseData.SpawnActions[inIndex].ActionExecuteStep;
+                inButton.EnergyCost = inBaseData.SpawnActions[inIndex].Targets[0].energyCost;
+                //need to construct Desc with stats DMG RANGE AOE (to enabler progression damage scaling)
+                inButton.ActionDescription = inBaseData.SpawnActions[inIndex].Description;
+                inButton.ActionName = inBaseData.SpawnActions[inIndex].ActionName;
+                inButton.Icon.sprite = inBaseData.SpawnActions[inIndex].ActionIcon;
+                inButton.ActionIndex = inBaseData.Actions.Count + inIndex;
+            }
+            else if(hasBasicAction)
+            {
+                if(inIndex == 0)
+                {
+                    inButton.EnergyCost = 0;
+                    inButton.ExecuteStepIndex = (int)inBaseData.BasicMove.ActionExecuteStep;
+                    inButton.ActionDescription = inBaseData.BasicMove.Description;
+                    inButton.ActionName = inBaseData.BasicMove.ActionName;
+                    inButton.Icon.sprite = inBaseData.BasicMove.ActionIcon;
+                    inButton.ActionIndex = -2;
+                }
+                else if(inIndex == 1)
+                {
+                    inButton.ExecuteStepIndex = (int)inBaseData.BasicAttack.ActionExecuteStep;
+                    inButton.EnergyCost = inBaseData.BasicAttack.Targets[0].energyCost;
+                    inButton.ActionDescription = inBaseData.BasicAttack.Description;
+                    inButton.ActionName = inBaseData.BasicAttack.ActionName;
+                    inButton.Icon.sprite = inBaseData.BasicAttack.ActionIcon;
+                    inButton.ActionIndex = -1;
+                }
+                else
+                {
+                    inButton.ExecuteStepIndex = (int)inBaseData.Actions[inIndex - 2].ActionExecuteStep;
+                    inButton.EnergyCost = inBaseData.Actions[inIndex - 2].Targets[0].energyCost;
+                    inButton.ActionDescription = inBaseData.Actions[inIndex - 2].Description;
+                    inButton.ActionName = inBaseData.Actions[inIndex - 2].ActionName;
+                    inButton.Icon.sprite = inBaseData.Actions[inIndex - 2].ActionIcon;
+                    inButton.ActionIndex = inIndex - 2;
+                }
+            }
+            else
+            {
+                inButton.ExecuteStepIndex = (int)inBaseData.Actions[inIndex].ActionExecuteStep;
+                inButton.EnergyCost = inBaseData.Actions[inIndex].Targets[0].energyCost;
+                inButton.ActionDescription = inBaseData.Actions[inIndex].Description;
+                inButton.ActionName = inBaseData.Actions[inIndex].ActionName;
+                inButton.Icon.sprite = inBaseData.Actions[inIndex].ActionIcon;
+                inButton.ActionIndex = inIndex;
+            }
+
+            inButton.UnitId = (int)inUnitId;
+
+            return inButton;
+        }
+
         protected override void OnUpdate()
         {
             if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
@@ -243,10 +300,8 @@ namespace LeyLineHybridECS
                                     UIRef.SpawnActions[si].Button.interactable = true;
                                 }
                                 UIRef.SpawnActions[si].Visuals.SetActive(true);
-                                UIRef.SpawnActions[si].ActionName = stats.SpawnActions[si].ActionName;
-                                UIRef.SpawnActions[si].Icon.sprite = stats.SpawnActions[si].ActionIcon;
-                                UIRef.SpawnActions[si].ActionIndex = stats.Actions.Count + si;
-                                UIRef.SpawnActions[si].UnitId = (int)unitId;
+
+                                UIRef.SpawnActions[si] = FillButtonFields(UIRef.SpawnActions[si], stats, unitId, si, true, true);
                             }
                             else
                             {
@@ -259,9 +314,6 @@ namespace LeyLineHybridECS
                             if (bi < actionCount)
                             {
                                 UIRef.Actions[bi].Visuals.SetActive(true);
-                                UIRef.Actions[bi].UnitId = (int)unitId;
-                                //basic move
-                                //disable if not enough energy
 
                                 if (stats.BasicMove != null && stats.BasicAttack != null)
                                 {
@@ -275,11 +327,7 @@ namespace LeyLineHybridECS
                                         {
                                             UIRef.Actions[bi].Button.interactable = true;
                                         }
-                                        UIRef.Actions[bi].ActionName = stats.BasicMove.ActionName;
-                                        UIRef.Actions[bi].Icon.sprite = stats.BasicMove.ActionIcon;
-                                        UIRef.Actions[bi].ActionIndex = -2;
                                     }
-                                    //basic attack
                                     else if (bi == 1)
                                     {
                                         if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy + action.LockedAction.CombinedCost)
@@ -290,9 +338,6 @@ namespace LeyLineHybridECS
                                         {
                                             UIRef.Actions[bi].Button.interactable = true;
                                         }
-                                        UIRef.Actions[bi].ActionName = stats.BasicAttack.ActionName;
-                                        UIRef.Actions[bi].Icon.sprite = stats.BasicAttack.ActionIcon;
-                                        UIRef.Actions[bi].ActionIndex = -1;
                                     }
                                     //all other actions
                                     else
@@ -305,12 +350,10 @@ namespace LeyLineHybridECS
                                         {
                                             UIRef.Actions[bi].Button.interactable = true;
                                         }
-                                        UIRef.Actions[bi].ActionName = stats.Actions[bi - 2].ActionName;
-                                        UIRef.Actions[bi].Icon.sprite = stats.Actions[bi - 2].ActionIcon;
-                                        UIRef.Actions[bi].ActionIndex = bi - 2;
                                     }
-                                }
 
+                                    UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, true);
+                                }
                                 else
                                 {
                                     if (bi < actionCount - 2)
@@ -323,9 +366,7 @@ namespace LeyLineHybridECS
                                         {
                                             UIRef.Actions[bi].Button.interactable = true;
                                         }
-                                        UIRef.Actions[bi].ActionName = stats.Actions[bi].ActionName;
-                                        UIRef.Actions[bi].Icon.sprite = stats.Actions[bi].ActionIcon;
-                                        UIRef.Actions[bi].ActionIndex = bi;
+                                        UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, false);
                                     }
                                     else
                                     {
@@ -573,6 +614,8 @@ namespace LeyLineHybridECS
                 }
             });
         }
+
+
     }
 }
 

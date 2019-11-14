@@ -184,7 +184,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            Debug.Log("Cleanup -> Planning");
+                            //Debug.Log("Cleanup -> Planning");
                             //UpdateIsTaken(gameStateWorldIndex);
                             gameState.CurrentState = GameStateEnum.planning;
                         }

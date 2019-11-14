@@ -35,7 +35,7 @@ namespace LeyLineHybridECS
         public Sprite ActionIcon;
         public Projectile ProjectileFab;
         public string ActionName;
-        public string ToolTip;
+        public string Description;
         public float TimeToExecute;
 
         [Header("Add Targets/Effects")]
