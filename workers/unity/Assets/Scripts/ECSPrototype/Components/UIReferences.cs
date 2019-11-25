@@ -12,6 +12,12 @@ public class UIReferences : MonoBehaviour
     public GameObject StartupPanel;
     public GameObject MatchReadyPanel;
 
+    [Header("TopLeftHeroPanel")]
+    public Image TopEnergyIncomeFill;
+    public Image TopCurrentEnergyFill;
+    public Image TopHealthFill;
+    public Image TopArmorFill;
+
     [Header("EnergyBarPanel")]
     public Image EnergyIncomeFill;
     public Image CurrentEnergyFill;
@@ -60,9 +66,17 @@ public class UIReferences : MonoBehaviour
     public Image TTExecuteStepImage;
     public List<Sprite> ExecuteStepSprites;
 
+    [Header("UnitGroups")]
+    public SelectUnitButton UnitButtonPrefab;
+    public UnitGroupUI UnitGroupPrefab;
+    public GameObject UnitGroupsParent;
+    public Dictionary<uint, UnitGroupUI> ExistingUnitGroups = new Dictionary<uint, UnitGroupUI>();
+
     [Header("GameOver")]
     public GameObject GameOverPanel;
     public GameObject VictoryPanel;
     public GameObject DefeatPanel;
     public GameObject DrawPanel;
+
+
 }

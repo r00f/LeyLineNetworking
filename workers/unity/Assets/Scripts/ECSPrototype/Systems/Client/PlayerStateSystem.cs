@@ -113,7 +113,6 @@ namespace LeyLineHybridECS
                             }
                             else if (playerState.SelectedUnitId != 0)
                             {
-                                
                                 playerState.SelectedUnitId = 0;
                             }
                         }

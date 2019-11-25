@@ -4995,6 +4995,9 @@ MonoBehaviour:
   BasicMove: {fileID: 0}
   BasicAttack: {fileID: 0}
   IsHero: 0
+  UIInitialized: 0
+  UnitTypeId: 2
+  UnitTypeSprite: {fileID: 21300000, guid: 2cdaf9a824088ad4a8faa3308b3b1b5b, type: 3}
   Actions:
   - {fileID: 11400000, guid: de36ec15ebc653a4693a9b5021b3f632, type: 2}
   SpawnActions: []
@@ -5080,6 +5083,7 @@ MonoBehaviour:
   LastHealth: 1
   ActionEffectTrigger: 1
   Dead: 0
+  DeathEventTrigger: 0
   ObjectsToDisable:
   - {fileID: 7550265048827665363}
   RagdollRigidBodies:

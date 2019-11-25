@@ -53,7 +53,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<PlayerState.Component>()
+                ComponentType.ReadWrite<PlayerState.Component>()
                 );
 
             m_AuthoritativePlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
@@ -159,8 +159,6 @@ namespace LeyLineHybridECS
             var authPlayersState = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
             #endregion
 
-
-
             var gameState = gameStates[0];
 
             if (gameState.CurrentState == GameStateEnum.waiting_for_players)
@@ -184,12 +182,15 @@ namespace LeyLineHybridECS
                         {
                             case TeamColorEnum.blue:
                                 //UIRef.HeroPortraitTeamColour.color = Color.blue;
+
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[1];
+                                UIRef.TopCurrentEnergyFill.color = settings.FactionColors[1];
 
                                 break;
                             case TeamColorEnum.red:
                                 //UIRef.HeroPortraitTeamColour.color = Color.red;
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
+                                UIRef.TopCurrentEnergyFill.color = settings.FactionColors[1];
 
                                 break;
                         }
@@ -244,6 +245,12 @@ namespace LeyLineHybridECS
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
                 int actionCount = stats.Actions.Count + 2;
                 int spawnActionCount = stats.SpawnActions.Count;
+
+                //set topLeft healthBar values for this players hero
+                if(stats.IsHero && faction.Faction == authPlayerFaction)
+                {
+                    SetHealthBarFillAmounts(UIRef.TopHealthFill, UIRef.TopArmorFill, health, faction.Faction);
+                }
 
                 if (authPlayerState.SelectedUnitId == unitId)
                 {
@@ -406,21 +413,23 @@ namespace LeyLineHybridECS
                         unitInfoPanel.SetActive(false);
                 }
 
-                //if there is no healthbar, instantiate it into healthBarParent
-                if (!healthbar.UnitHeadUIInstance)
+
+                if (!stats.UIInitialized)
                 {
-                    if (health.CurrentHealth != 0)
-                        healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
+                    InitializeUnitUI(healthbar, stats, unitId);
+                    stats.UIInitialized = true;
                 }
                 else
                 {
+                    //does not get called when units get destroyed because a player disconnects
+                    //
                     if (health.CurrentHealth == 0)
                     {
-                        Object.Destroy(healthbar.UnitHeadUIInstance);
+                        if(healthbar.UnitHeadUIInstance)
+                            CleanupUnitUI(healthbar, stats, unitId);
                     }
                     else
                     {
-
                         GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
 
                         if (gameState.CurrentState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
@@ -446,6 +455,8 @@ namespace LeyLineHybridECS
                 float energyIncome = authPlayerEnergy.Income;
                 Image energyFill = UIRef.CurrentEnergyFill;
                 Image incomeEnergyFill = UIRef.EnergyIncomeFill;
+                Image topEnergyFill = UIRef.TopCurrentEnergyFill;
+                Image topIncomeEnergyFill = UIRef.TopEnergyIncomeFill;
                 Text energyText = UIRef.HeroEnergyText;
 
                 if (gameState.CurrentState != GameStateEnum.planning)
@@ -465,9 +476,14 @@ namespace LeyLineHybridECS
                 }
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
+                topEnergyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
 
                 if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
+                {
                     incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
+                    topIncomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
+                }
+
 
                 energyText.text = currentEnergy + " / " + maxEnergy;
 
@@ -525,9 +541,6 @@ namespace LeyLineHybridECS
                 UIRef.RopeBar.enabled = false;
             }
 
-
-
-
             gameStates.Dispose();
 
             #region authPlayerData
@@ -535,8 +548,16 @@ namespace LeyLineHybridECS
             authPlayersFaction.Dispose();
             authPlayersState.Dispose();
             #endregion
+        }
 
-
+        void SetSelectedUnitId(long unitId)
+        {
+            var playerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            var playerState = playerStates[0];
+            playerState.SelectedUnitId = unitId;
+            playerStates[0] = playerState;
+            m_AuthoritativePlayerData.CopyFromComponentDataArray(playerStates);
+            playerStates.Dispose();
         }
 
         public Vector3 WorldToUISpace(Canvas parentCanvas, Vector3 worldPos)
@@ -551,7 +572,6 @@ namespace LeyLineHybridECS
 
         public void SetHealthBarFillAmounts(Image inHealthFill, Image inArmorFill, Health.Component health, uint unitFaction)
         {
-
             #region authPlayerData
             var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
             #endregion
@@ -583,9 +603,7 @@ namespace LeyLineHybridECS
 
         public void SetHealthFloatText(long inUnitId, uint inHealthAmount, bool isHeal = false)
         {
-
             Entities.With(m_UnitData).ForEach((Healthbar healthbar, ref SpatialEntityId spatialId) =>
-
             {
                 var unitId = spatialId.EntityId.Id;
 
@@ -615,7 +633,65 @@ namespace LeyLineHybridECS
             });
         }
 
+        public void InitializeUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitId)
+        {
+            //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
 
+            healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
+            //if there is no group of this unitType, create one
+
+            if (!stats.IsHero)
+            {
+                if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
+                {
+                    //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
+                    UnitGroupUI unitGroup = Object.Instantiate(UIRef.UnitGroupPrefab, UIRef.UnitGroupsParent.transform);
+                    unitGroup.UnitTypeImage.sprite = stats.UnitTypeSprite;
+                    SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
+                    unitButton.UnitId = unitId;
+                    unitButton.UnitButton.image.sprite = stats.UnitTypeSprite;
+                    stats.SelectUnitButtonInstance = unitButton.gameObject;
+                    unitButton.UnitButton.onClick.AddListener(delegate {SetSelectedUnitId(unitId); });
+                    unitGroup.ExistingUnitIds.Add(unitId);
+                    unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
+                    UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
+                }
+                else
+                {
+                    //if a group of this type already exists, instanciate a button inside it for this unit
+                    UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];
+
+                    if (!unitGroup.ExistingUnitIds.Contains(unitId))
+                    {
+                        SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
+                        unitButton.UnitId = unitId;
+                        unitButton.UnitButton.image.sprite = stats.UnitTypeSprite;
+                        stats.SelectUnitButtonInstance = unitButton.gameObject;
+                        unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                        unitGroup.ExistingUnitIds.Add(unitId);
+                        unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
+                    }
+                }
+            }
+        }
+
+        void CleanupUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitID)
+        {
+            //Delete headUI / UnitGroupUI on unit death (when health = 0)
+            Object.Destroy(healthbar.UnitHeadUIInstance);
+
+            //remove unitID from unitGRPUI / delete selectUnitButton
+            UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];
+            unitGroup.ExistingUnitIds.Remove(unitID);
+            unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
+            Object.Destroy(stats.SelectUnitButtonInstance);
+
+            if (unitGroup.ExistingUnitIds.Count == 0)
+            {
+                UIRef.ExistingUnitGroups.Remove(stats.UnitTypeId);
+                Object.Destroy(unitGroup.gameObject);
+            }
+        }
     }
 }
 
