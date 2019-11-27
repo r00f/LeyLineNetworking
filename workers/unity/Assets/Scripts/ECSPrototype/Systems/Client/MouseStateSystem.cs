@@ -39,7 +39,7 @@ public class MouseStateSystem : JobComponentSystem
         );
 
         m_AuthoritativePlayerData = GetEntityQuery(
-            ComponentType.ReadOnly<PlayerState.Component>(),
+            ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<HighlightingDataComponent>()
@@ -72,7 +72,8 @@ public class MouseStateSystem : JobComponentSystem
                 //PathFinding = m_PathFindingSystem,
                 CellAttributes = myTypeFromEntity,
                 PlayerEntities = m_AuthoritativePlayerData.ToEntityArray(Allocator.TempJob),
-                MouseButtonDown = Input.GetButtonDown("Fire1"),
+                MouseLeftButtonDown = Input.GetButtonDown("Fire1"),
+                //MouseRightButtonDown = Input.GetButtonDown("Fire2"),
                 Hit = hit,
                 PlayerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob),
                 PlayerFactions = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob),
@@ -92,7 +93,8 @@ public class MouseStateSystem : JobComponentSystem
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<Entity> PlayerEntities;
         public RaycastHit Hit;
-        public bool MouseButtonDown;
+        public bool MouseLeftButtonDown;
+        //public bool MouseRightButtonDown;
         public EntityCommandBuffer.Concurrent ECBuffer;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<FactionComponent.Component> PlayerFactions;
@@ -116,9 +118,25 @@ public class MouseStateSystem : JobComponentSystem
             else
                 unitOnCellId = 0;
 
+            //reset clicked mouseStates on rightclick
+            /*
+            if(mouseState.CurrentState == MouseState.State.Clicked && MouseRightButtonDown)
+            {
+                Debug.Log("RightMouseDown!");
+                mouseState.CurrentState = MouseState.State.Neutral;
+            }
+            
+
+            if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && MouseRightButtonDown)
+            {
+                Debug.Log("ResetMouseStates MouseRight");
+                mouseState.CurrentState = MouseState.State.Neutral;
+            }
+            */
+
             if (hitSquared < mouseVars.Distance * mouseVars.Distance)
             {
-                if (MouseButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
+                if (MouseLeftButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
                 {
                     //add reactive component ClickEvent to flag this object as a clicked object
                     //other arrays should be able to be culled to the clicked object
@@ -183,11 +201,16 @@ public class MouseStateSystem : JobComponentSystem
                     }
                 }
             }
+            else if(mouseState.CurrentState != MouseState.State.Clicked && mouseState.CurrentState != MouseState.State.Neutral)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+            }
+            /*
             else
             {
                 if (mouseState.CurrentState == MouseState.State.Clicked)
                 {
-                    if (MouseButtonDown)
+                    if (MouseLeftButtonDown || MouseRightButtonDown)
                     {
                         mouseState.CurrentState = MouseState.State.Neutral;
                     }
@@ -200,8 +223,9 @@ public class MouseStateSystem : JobComponentSystem
                     }
                 }
             }
+            */
 
-            if (mouseState.ClickEvent == 1 && !MouseButtonDown)
+            if (mouseState.ClickEvent == 1 && !MouseLeftButtonDown)
             {
                 ECBuffer.RemoveComponent(index, entity, typeof(ClickEvent));
                 mouseState.CurrentState = MouseState.State.Clicked;

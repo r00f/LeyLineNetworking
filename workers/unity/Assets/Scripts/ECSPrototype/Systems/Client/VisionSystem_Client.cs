@@ -177,6 +177,7 @@ namespace LeyLineHybridECS
             playerFactions.Dispose();
         }
 
+        /*
         public void UpdateVision()
         {
             var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
@@ -217,5 +218,6 @@ namespace LeyLineHybridECS
 
             playerVisions.Dispose();
         }
+        */
     }
 }

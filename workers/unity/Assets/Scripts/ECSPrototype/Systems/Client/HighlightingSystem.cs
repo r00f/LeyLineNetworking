@@ -93,23 +93,6 @@ public class HighlightingSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        //when built Worlds.GameLogicWorld does not get filled! 
-        //figure out a replacement for system injection of systems that don't run in the same world
-        //or move shared functionallity to a system that runs on both worlds
-        //or use commands?
-
-        /*
-        if(!initialized)
-        {
-            if(Worlds.GameLogicWorld != null)
-            {
-                m_ResourceSystem = Worlds.GameLogicWorld.World.GetExistingSystem<ResourceSystem>();
-                m_CellGrid = Worlds.GameLogicWorld.World.GetExistingSystem<HandleCellGridRequestsSystem>();
-                initialized = true;
-            }
-            return;
-        }
-        */
         if (m_PlayerStateData.CalculateEntityCount() == 0)
             return;
 
@@ -260,77 +243,74 @@ public class HighlightingSystem : ComponentSystem
         return playerState;
     }
 
-    public HighlightingDataComponent GatherHighlightingInformation(long unitID, int actionID, HighlightingDataComponent playerHighlightingData)
+    public HighlightingDataComponent GatherHighlightingInformation(Entity e, int actionID, HighlightingDataComponent playerHighlightingData)
     {
         var h = playerHighlightingData;
         ECSActionTarget target = null;
         ECSActionEffect effect = null;
 
-        Entities.With(m_ActiveUnitData).ForEach((Unit_BaseDataSet actions, ref SpatialEntityId iD) =>
+        //var id = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
+        var actions = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+
+        if (target == null)
         {
-            if (iD.EntityId.Id == unitID)
+            if (actionID < 0)
             {
-                if (target == null)
+                switch (actionID)
                 {
-                    if (actionID < 0)
-                    {
-                        switch (actionID)
-                        {
-                            case -3:
-                                break;
-                            case -2:
-                                target = actions.BasicMove.Targets[0];
-                                effect = actions.BasicMove.Effects[0];
-                                break;
-                            case -1:
-                                target = actions.BasicAttack.Targets[0];
-                                effect = actions.BasicAttack.Effects[0];
-                                break;
-                        }
-                    }
-                    else
-                    {
-                        if (actionID < actions.Actions.Count)
-                        {
-                            target = actions.Actions[actionID].Targets[0];
-                            effect = actions.Actions[actionID].Effects[0];
-                        }
-                        else
-                        {
-                            target = actions.SpawnActions[actionID - actions.Actions.Count].Targets[0];
-                            effect = actions.SpawnActions[actionID - actions.Actions.Count].Effects[0];
-                        }
-                    }
-                }
-
-                h.Range = (uint)target.targettingRange;
-
-                switch (target.HighlighterToUse)
-                {
-                    case ECSActionTarget.HighlightDef.Radius:
-                        h.PathingRange = 0;
+                    case -3:
                         break;
-                    case ECSActionTarget.HighlightDef.Path:
-                        h.PathingRange = 1;
+                    case -2:
+                        target = actions.BasicMove.Targets[0];
+                        effect = actions.BasicMove.Effects[0];
+                        break;
+                    case -1:
+                        target = actions.BasicAttack.Targets[0];
+                        effect = actions.BasicAttack.Effects[0];
                         break;
                 }
-
-                if (target is ECSATarget_Unit)
-                {
-                    ECSATarget_Unit unitTarget = target as ECSATarget_Unit;
-                    h.IsUnitTarget = 1;
-                    h.TargetRestrictionIndex = (uint)unitTarget.Restrictions;
-                }
-                else if (target is ECSATarget_Tile)
-                {
-                    h.IsUnitTarget = 0;
-                    h.TargetRestrictionIndex = 999;
-                }
-
-                h.EffectRestrictionIndex = (uint)effect.ApplyToRestrictions;
-                HandleMods(target.SecondaryTargets, ref h);
             }
-        });
+            else
+            {
+                if (actionID < actions.Actions.Count)
+                {
+                    target = actions.Actions[actionID].Targets[0];
+                    effect = actions.Actions[actionID].Effects[0];
+                }
+                else
+                {
+                    target = actions.SpawnActions[actionID - actions.Actions.Count].Targets[0];
+                    effect = actions.SpawnActions[actionID - actions.Actions.Count].Effects[0];
+                }
+            }
+        }
+
+        h.Range = (uint)target.targettingRange;
+
+        switch (target.HighlighterToUse)
+        {
+            case ECSActionTarget.HighlightDef.Radius:
+                h.PathingRange = 0;
+                break;
+            case ECSActionTarget.HighlightDef.Path:
+                h.PathingRange = 1;
+                break;
+        }
+
+        if (target is ECSATarget_Unit)
+        {
+            ECSATarget_Unit unitTarget = target as ECSATarget_Unit;
+            h.IsUnitTarget = 1;
+            h.TargetRestrictionIndex = (uint)unitTarget.Restrictions;
+        }
+        else if (target is ECSATarget_Tile)
+        {
+            h.IsUnitTarget = 0;
+            h.TargetRestrictionIndex = 999;
+        }
+
+        h.EffectRestrictionIndex = (uint)effect.ApplyToRestrictions;
+        HandleMods(target.SecondaryTargets, ref h);
         return h;
     }
 
@@ -462,6 +442,7 @@ public class HighlightingSystem : ComponentSystem
                 }
                 else
                 {
+                    Debug.Log("SetLineRendererpositionCountTo 0");
                     lineRendererComp.lineRenderer.positionCount = 0;
                 }
                 
@@ -579,18 +560,16 @@ public class HighlightingSystem : ComponentSystem
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
-        var coordToReset = new Vector3(999, 999, 999);
         HashSet<long> unitIdHash = new HashSet<long>(playerStates[0].UnitTargets.Keys);
 
-        Entities.With(m_ActiveUnitData).ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
+        Entities.With(m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
         {
+            //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
             if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3)
             {
                 if (unitIdHash.Contains(unitId.EntityId.Id) && playerHighlightingDatas[0].TargetRestrictionIndex != 2)
                 {
-                    lineRendererComp.lineRenderer.positionCount = 0;
-                    if (playerStates[0].UnitTargets[unitId.EntityId.Id].CubeCoordinates.Count != 0)
-                        coordToReset = Vector3fext.ToUnityVector(playerStates[0].UnitTargets[unitId.EntityId.Id].CubeCoordinates[0]);
+                    ResetUnitHighLights(e, playerStates[0], unitId.EntityId.Id);
                     playerStates[0].UnitTargets.Remove(unitId.EntityId.Id);
                 }
             }
@@ -598,13 +577,6 @@ public class HighlightingSystem : ComponentSystem
 
         Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
-            var c = Vector3fext.ToUnityVector(coord.CubeCoordinate);
-
-            if (c == coordToReset)
-            {
-                mouseState.CurrentState = MouseState.State.Neutral;
-                markerState.NumberOfTargets = 0;
-            }
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
                 mouseState.CurrentState = MouseState.State.Neutral;
@@ -619,6 +591,35 @@ public class HighlightingSystem : ComponentSystem
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
         playerStates.Dispose();
         playerHighlightingDatas.Dispose();
+    }
+
+    public void ResetUnitHighLights(Entity e, PlayerState.Component playerState, long unitId)
+    {
+        Debug.Log("ResetUnitHighlights");
+        var lineRendererComp = EntityManager.GetComponentObject<LineRendererComponent>(e);
+        lineRendererComp.lineRenderer.positionCount = 0;
+
+        if (playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
+        {
+            ResetMarkerNumberOfTargets(playerState.UnitTargets[unitId].CubeCoordinates[0]);
+        }
+    }
+
+    public void ResetMarkerNumberOfTargets(Vector3f cubeCoord)
+    {
+        var coordToReset = Vector3fext.ToUnityVector(cubeCoord);
+
+        Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        {
+            var c = Vector3fext.ToUnityVector(coord.CubeCoordinate);
+
+            if (c == coordToReset && markerState.NumberOfTargets > 0)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+                markerState.NumberOfTargets -= 1;
+            }
+        });
+
     }
 
     public void HighlightReachable()

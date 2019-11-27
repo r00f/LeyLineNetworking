@@ -197,7 +197,7 @@ public class UnitAnimationSystem : ComponentSystem
                     }
                     else if (animatorComponent.LastHealth > health.CurrentHealth)
                     {
-                        m_UISystem.SetHealthFloatText(id.EntityId.Id, animatorComponent.LastHealth - health.CurrentHealth);
+                        m_UISystem.SetHealthFloatText(e, animatorComponent.LastHealth - health.CurrentHealth);
                         animatorComponent.Animator.SetTrigger("GetHit");
                     }
                     else

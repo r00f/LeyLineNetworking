@@ -1,12 +1,13 @@
 ﻿using Cell;
 using Generic;
 using Improbable.Gdk.Core;
-//using Improbable.Gdk.ReactiveComponents;
 using LeyLineHybridECS;
 using Player;
 using Unit;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.Rendering;
+using Unity.Transforms;
 using UnityEngine;
 
 [DisableAutoCreation]
@@ -23,10 +24,15 @@ public class AddComponentsSystem : ComponentSystem
     EntityQuery m_ProjectileAddedData;
     EntityQuery m_UnitAddedData;
     EntityQuery m_CellAddedData;
+    EntityManager em;
 
+    Settings settings;
     protected override void OnCreate()
     {
         base.OnCreateManager();
+
+        em = World.Active.EntityManager;
+        settings = Resources.Load<Settings>("Settings");
 
         var projectileAddedDesc = new EntityQueryDesc
         {
@@ -119,6 +125,7 @@ public class AddComponentsSystem : ComponentSystem
             //{
                 HighlightingDataComponent highlightingData = new HighlightingDataComponent();
                 PostUpdateCommands.AddComponent(entity, highlightingData);
+
             //}
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
@@ -130,39 +137,63 @@ public class AddComponentsSystem : ComponentSystem
 
             //if (cellWorldIndex.Value == authPlayerWorldIndex)
             //{
-                //Debug.Log("AddCellComponents");
+            //Debug.Log("AddCellComponents");
+            //UnityEngine.Rendering.Hybrid
 
-                IsVisible isVisible = new IsVisible
-                {
-                    Value = 0,
-                    RequireUpdate = 1,
-                    LerpSpeed = 0.5f,
-                };
+            /*
+            RenderMesh meshTest = new RenderMesh
+            {
 
-                MouseState mouseState = new MouseState
-                {
-                    CurrentState = MouseState.State.Neutral,
-                };
 
-                MouseVariables mouseVars = new MouseVariables
-                {
-                    Distance = 0.865f
-                };
+            };
+            */
 
-                MarkerState markerState = new MarkerState
-                {
-                    CurrentTargetType = MarkerState.TargetType.Neutral,
-                    IsSet = 0,
-                    TargetTypeSet = 0,
-                    CurrentState = MarkerState.State.Neutral,
-                    IsUnit = 0
-                };
+            IsVisible isVisible = new IsVisible
+            {
+                Value = 0,
+                RequireUpdate = 1,
+                LerpSpeed = 0.5f,
+            };
 
-                PostUpdateCommands.AddComponent(entity, mouseVars);
-                PostUpdateCommands.AddComponent(entity, mouseState);
-                PostUpdateCommands.AddComponent(entity, markerState);
-                PostUpdateCommands.AddComponent(entity, isVisible);
-            //}
+            MouseState mouseState = new MouseState
+            {
+                CurrentState = MouseState.State.Neutral,
+            };
+
+            MouseVariables mouseVars = new MouseVariables
+            {
+                Distance = 0.865f
+            };
+
+            MarkerState markerState = new MarkerState
+            {
+                CurrentTargetType = MarkerState.TargetType.Neutral,
+                IsSet = 0,
+                TargetTypeSet = 0,
+                CurrentState = MarkerState.State.Neutral,
+                IsUnit = 0
+            };
+
+            PostUpdateCommands.AddComponent(entity, mouseVars);
+            PostUpdateCommands.AddComponent(entity, mouseState);
+            PostUpdateCommands.AddComponent(entity, markerState);
+            PostUpdateCommands.AddComponent(entity, isVisible);
+
+
+            /*
+            //PostUpdateCommands.AddComponent(entity, new NonUniformScale());
+            //PostUpdateCommands.AddComponent(entity, new Translation());
+            //PostUpdateCommands.AddComponent(entity, new LocalToWorld());
+            //PostUpdateCommands.AddComponent(entity, new WorldRenderBounds());
+            //PostUpdateCommands.AddComponent(entity, new ChunkWorldRenderBounds());
+
+            PostUpdateCommands.AddSharedComponent(entity, new RenderMesh
+            {
+                mesh = settings.TestMesh,
+                material = settings.TestMat
+
+            });
+            */
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
 

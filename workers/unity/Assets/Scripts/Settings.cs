@@ -7,4 +7,7 @@ public class Settings : ScriptableObject
 {
     public List<Color> FactionColors;
     public List<Color> MapCellColors;
+    public Mesh TestMesh;
+    public Material TestMat;
+    
 }

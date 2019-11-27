@@ -81,15 +81,11 @@ namespace LeyLineHybridECS
                        
                         if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() == 1)
                         {
-                            Debug.Log("ExitWaitingForPlayersEditor");
-                            UpdateIsTaken(gameStateWorldIndex.Value);
                             gameState.CurrentState = GameStateEnum.planning;
                         }
 #else
                         if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() == 2)
                         {
-                            Debug.Log("ExitWaitingForPlayers");
-                            UpdateIsTaken(gameStateWorldIndex.Value);
                             gameState.CurrentState = GameStateEnum.planning;
                         }
 #endif

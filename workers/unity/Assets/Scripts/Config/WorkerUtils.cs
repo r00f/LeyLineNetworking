@@ -1,5 +1,6 @@
 using Unity.Entities;
 using LeyLineHybridECS;
+using Unity.Rendering;
 
 public static class WorkerUtils
 {
@@ -21,6 +22,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<HighlightingSystem>();
         world.GetOrCreateSystem<ActionEffectsSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
+        world.GetOrCreateSystem<RenderMeshSystemV2>();
         //world.GetOrCreateManager<ClientCleanupSystem>();
         //world.GetOrCreateManager<ProjectileSystem>();
     }

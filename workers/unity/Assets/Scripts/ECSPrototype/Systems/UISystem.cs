@@ -190,7 +190,7 @@ namespace LeyLineHybridECS
                             case TeamColorEnum.red:
                                 //UIRef.HeroPortraitTeamColour.color = Color.red;
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
-                                UIRef.TopCurrentEnergyFill.color = settings.FactionColors[1];
+                                UIRef.TopCurrentEnergyFill.color = settings.FactionColors[2];
 
                                 break;
                         }
@@ -601,36 +601,30 @@ namespace LeyLineHybridECS
             authPlayersFaction.Dispose();
         }
 
-        public void SetHealthFloatText(long inUnitId, uint inHealthAmount, bool isHeal = false)
+        public void SetHealthFloatText(Entity e, uint inHealthAmount, bool isHeal = false)
         {
-            Entities.With(m_UnitData).ForEach((Healthbar healthbar, ref SpatialEntityId spatialId) =>
+            var healthbar = EntityManager.GetComponentObject<Healthbar>(e);
+
+            GameObject healthTextGO = healthbar.UnitHeadUIInstance.transform.GetChild(1).gameObject;
+            Text healthText = healthTextGO.GetComponent<Text>();
+            Animator anim = healthTextGO.GetComponent<Animator>();
+            healthText.text = inHealthAmount.ToString();
+            Color healthColor = healthText.color;
+
+            if (isHeal)
             {
-                var unitId = spatialId.EntityId.Id;
-
-                if (inUnitId == unitId)
-                {
-                    GameObject healthTextGO = healthbar.UnitHeadUIInstance.transform.GetChild(1).gameObject;
-                    Text healthText = healthTextGO.GetComponent<Text>();
-                    Animator anim = healthTextGO.GetComponent<Animator>();
-                    healthText.text = inHealthAmount.ToString();
-                    Color healthColor = healthText.color;
-
-                    if (isHeal)
-                    {
-                        healthColor.r = Color.green.r;
-                        healthColor.g = Color.green.g;
-                        healthColor.b = Color.green.b;
-                    }
-                    else
-                    {
-                        healthColor.r = Color.red.r;
-                        healthColor.g = Color.red.g;
-                        healthColor.b = Color.red.b;
-                    }
-                    //Debug.Log("PlayFloatingHealthAnim");
-                    anim.Play("HealthText", 0, 0);
-                }
-            });
+                healthColor.r = Color.green.r;
+                healthColor.g = Color.green.g;
+                healthColor.b = Color.green.b;
+            }
+            else
+            {
+                healthColor.r = Color.red.r;
+                healthColor.g = Color.red.g;
+                healthColor.b = Color.red.b;
+            }
+            //Debug.Log("PlayFloatingHealthAnim");
+            anim.Play("HealthText", 0, 0);
         }
 
         public void InitializeUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitId)
@@ -651,6 +645,8 @@ namespace LeyLineHybridECS
                     unitButton.UnitId = unitId;
                     unitButton.UnitButton.image.sprite = stats.UnitTypeSprite;
                     stats.SelectUnitButtonInstance = unitButton.gameObject;
+                    //problematic if unit has a locked action
+                    //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
                     unitButton.UnitButton.onClick.AddListener(delegate {SetSelectedUnitId(unitId); });
                     unitGroup.ExistingUnitIds.Add(unitId);
                     unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
@@ -667,6 +663,8 @@ namespace LeyLineHybridECS
                         unitButton.UnitId = unitId;
                         unitButton.UnitButton.image.sprite = stats.UnitTypeSprite;
                         stats.SelectUnitButtonInstance = unitButton.gameObject;
+                        //problematic if unit has a locked action
+                        //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
                         unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
                         unitGroup.ExistingUnitIds.Add(unitId);
                         unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
@@ -680,16 +678,19 @@ namespace LeyLineHybridECS
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
             Object.Destroy(healthbar.UnitHeadUIInstance);
 
-            //remove unitID from unitGRPUI / delete selectUnitButton
-            UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];
-            unitGroup.ExistingUnitIds.Remove(unitID);
-            unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
-            Object.Destroy(stats.SelectUnitButtonInstance);
-
-            if (unitGroup.ExistingUnitIds.Count == 0)
+            if(!stats.IsHero)
             {
-                UIRef.ExistingUnitGroups.Remove(stats.UnitTypeId);
-                Object.Destroy(unitGroup.gameObject);
+                //remove unitID from unitGRPUI / delete selectUnitButton
+                UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];
+                unitGroup.ExistingUnitIds.Remove(unitID);
+                unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
+                Object.Destroy(stats.SelectUnitButtonInstance);
+
+                if (unitGroup.ExistingUnitIds.Count == 0)
+                {
+                    UIRef.ExistingUnitGroups.Remove(stats.UnitTypeId);
+                    Object.Destroy(unitGroup.gameObject);
+                }
             }
         }
     }

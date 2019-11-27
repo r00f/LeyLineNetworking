@@ -120,6 +120,7 @@ namespace LeyLineHybridECS
 
                             if (markerState.IsSet == 0)
                             {
+                                //Debug.Log("markerstateSet = 0");
                                 switch (markerState.CurrentState)
                                 {
                                     case MarkerState.State.Neutral:

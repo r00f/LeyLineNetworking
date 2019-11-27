@@ -14,6 +14,8 @@ namespace LeyLineHybridECS
         EntityQuery m_UnitData;
         EntityQuery m_PlayerData;
         EntityQuery m_GameStateData;
+        SendActionRequestSystem m_ActionRequestSystem;
+        HighlightingSystem m_HighlightingSystem;
 
         protected override void OnCreate()
         {
@@ -46,7 +48,14 @@ namespace LeyLineHybridECS
 
         }
 
-        
+
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            m_ActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
+            m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+        }
+
 
         protected override void OnUpdate()
         {
@@ -70,7 +79,7 @@ namespace LeyLineHybridECS
                 var gWi = gameStateWorldIndex.Value;
                 var g = gameState;
 
-                Entities.With(m_UnitData).ForEach((UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
+                Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
                 {
                     if (playerWorldIndex == gWi)
                     {
@@ -87,6 +96,13 @@ namespace LeyLineHybridECS
                                         if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                                         {
                                             playerState.CurrentState = PlayerStateEnum.waiting_for_target;
+                                        }
+                                        //if playerState is WaitingForTarget and rightMouseButton is pressed
+                                        else if(Input.GetButtonDown("Fire2"))
+                                        {
+                                            m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
+                                            m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
+                                            playerState.UnitTargets.Remove(unitId.EntityId.Id);
                                         }
                                     }
                                     else
@@ -140,7 +156,6 @@ namespace LeyLineHybridECS
             playersState.Dispose();
             #endregion
         }
-        
 
         public void SetPlayerState(PlayerStateEnum state)
         {

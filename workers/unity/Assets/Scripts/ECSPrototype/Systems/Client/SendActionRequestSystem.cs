@@ -228,7 +228,7 @@ public class SendActionRequestSystem : ComponentSystem
 
         playerState.SelectedActionId = actionIndex;
 
-        Entities.With(m_UnitData).ForEach((ref SpatialEntityId idComponent, ref Actions.Component actions) =>
+        Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
             if (idComponent.EntityId.Id == entityId)
             {
@@ -239,6 +239,7 @@ public class SendActionRequestSystem : ComponentSystem
                 );
 
                 m_CommandSystem.SendCommand(request);
+
                 if (actionIndex >= 0)
                 {
                     Action act = actions.OtherActions[actionIndex];
@@ -250,23 +251,29 @@ public class SendActionRequestSystem : ComponentSystem
                         }
                     }
                 }
-                m_HighlightingSystem.ResetHighlights();
 
-                if (!isSelfTarget)
+                m_HighlightingSystem.ResetHighlights();
+                //playerHigh.LastHoveredCoordinate = new Vector3f(999f, 999f, 999f);
+
+
+                if (actionIndex != -3)
                 {
-                    m_HighlightingSystem.ClearPlayerState();
-                    playerHigh = m_HighlightingSystem.GatherHighlightingInformation(entityId, actionIndex, playerHigh);
-                    playerState = m_HighlightingSystem.FillUnitTargetsList(playerHigh, playerState);
-                    playerStates[0] = playerState;
-                    playerHighlightingDatas[0] = playerHigh;
-                    m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
-                    m_PlayerData.CopyFromComponentDataArray(playerStates);
-                    m_HighlightingSystem.UpdateSelectedUnit();
-                }
-                else
-                {
-                    playerHigh.TargetRestrictionIndex = 2;
-                    m_HighlightingSystem.SetSelfTarget(entityId);
+                    if (!isSelfTarget)
+                    {
+                        m_HighlightingSystem.ClearPlayerState();
+                        playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
+                        playerState = m_HighlightingSystem.FillUnitTargetsList(playerHigh, playerState);
+                        playerStates[0] = playerState;
+                        playerHighlightingDatas[0] = playerHigh;
+                        m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+                        m_PlayerData.CopyFromComponentDataArray(playerStates);
+                        m_HighlightingSystem.UpdateSelectedUnit();
+                    }
+                    else
+                    {
+                        playerHigh.TargetRestrictionIndex = 2;
+                        m_HighlightingSystem.SetSelfTarget(entityId);
+                    }
                 }
             }
         });
@@ -277,6 +284,5 @@ public class SendActionRequestSystem : ComponentSystem
         m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();
-
     }
 }
