@@ -78,5 +78,8 @@ public class UIReferences : MonoBehaviour
     public GameObject DefeatPanel;
     public GameObject DrawPanel;
 
+    [Header("MapPanel")]
+    public MinimapScript MinimapComponent;
+
 
 }

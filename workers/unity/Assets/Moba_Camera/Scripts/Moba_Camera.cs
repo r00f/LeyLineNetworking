@@ -317,6 +317,13 @@ public class Moba_Camera : MonoBehaviour {
                 settings.cameraLocked = true;
             }
         }
+        if (heroTransform.requireUpdate)
+        {
+            settings.cameraLocked = false;
+            settings.lockTargetTransform = null;
+            requirements.pivot.position = new Vector3(heroTransform.Position.x, requirements.pivot.position.y, heroTransform.Position.z);
+            heroTransform.requireUpdate = false;
+        }
     }
 	
 	void CalculateCameraZoom() {
@@ -347,6 +354,7 @@ public class Moba_Camera : MonoBehaviour {
 		
 		_currentZoomAmount += zoomChange * settings.zoom.zoomRate * inverted * Time.deltaTime;
 	}
+
 	
 	void CalculateCameraRotation() {
 		////////////////////////////////////////////////////////////////////////////////////////////////////

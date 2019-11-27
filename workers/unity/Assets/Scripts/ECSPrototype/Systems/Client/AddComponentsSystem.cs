@@ -26,7 +26,16 @@ public class AddComponentsSystem : ComponentSystem
     EntityQuery m_CellAddedData;
     EntityManager em;
 
+    UIReferences m_UIReferences;
+
     Settings settings;
+
+    protected override void OnStartRunning()
+    {
+        m_UIReferences = Object.FindObjectOfType<UIReferences>();
+        base.OnStartRunning();
+    }
+
     protected override void OnCreate()
     {
         base.OnCreateManager();
@@ -92,7 +101,8 @@ public class AddComponentsSystem : ComponentSystem
             All = new ComponentType[]
             {
                 ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadOnly<PlayerState.Component>()
+                ComponentType.ReadOnly<PlayerState.Component>(),
+                ComponentType.ReadWrite<HeroTransform>()
             }
         };
 
@@ -119,12 +129,14 @@ public class AddComponentsSystem : ComponentSystem
         var playerFaction = playerFactions[0];
         var authPlayerWorldIndex = authPlayerWorldIndexes[0].Value;
 
-        Entities.With(m_PlayerAddedData).ForEach((Entity entity, ref WorldIndex.Component pWorldIndex) =>
+        Entities.With(m_PlayerAddedData).ForEach((Entity entity, HeroTransform htrans, ref WorldIndex.Component pWorldIndex) =>
         {
             //if (pWorldIndex.Value == authPlayerWorldIndex)
             //{
                 HighlightingDataComponent highlightingData = new HighlightingDataComponent();
                 PostUpdateCommands.AddComponent(entity, highlightingData);
+                m_UIReferences.MinimapComponent.h_Transform = htrans;
+                
 
             //}
 
