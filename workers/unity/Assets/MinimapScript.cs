@@ -32,7 +32,7 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     void Update()
     {
 
-        if (Input.GetButtonDown("Fire1") && isHovered) { 
+        if (Input.GetButton("Fire1") && isHovered) { 
             Vector2 MouseScreenPos = Input.mousePosition;
             Vector2 RectPos = Map.position;
             Vector2 Dir = (MouseScreenPos - RectPos)/100;
@@ -44,8 +44,6 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
                 h_Transform.Position = PlanePosition;
                 h_Transform.requireUpdate = true;
             }
-
-            Debug.Log("Minimap Clicked" + Dir);
         }
     }
 }

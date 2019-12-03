@@ -11,6 +11,7 @@ component Vision {
 	list<generic.Vector3f> positives = 4;
 	list<generic.Vector3f> negatives = 5;
 	bool require_update = 6;
+	float initial_wait_time = 7;
 	command UpdateClientVisionResponse update_client_vision_command(UpdateClientVisionRequest);
 }
 

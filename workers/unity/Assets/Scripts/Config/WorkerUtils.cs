@@ -22,7 +22,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<HighlightingSystem>();
         world.GetOrCreateSystem<ActionEffectsSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
-        world.GetOrCreateSystem<RenderMeshSystemV2>();
+        //world.GetOrCreateSystem<RenderMeshSystemV2>();
         //world.GetOrCreateManager<ClientCleanupSystem>();
         //world.GetOrCreateManager<ProjectileSystem>();
     }

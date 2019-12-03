@@ -79,6 +79,7 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+            ComponentType.ReadOnly<PlayerEnergy.Component>(),
             ComponentType.ReadWrite<HighlightingDataComponent>()
             );
 
@@ -372,10 +373,10 @@ public class HighlightingSystem : ComponentSystem
 
                         if (playerHighlightingData.PathLine == 1)
                         {
-                            //if (m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0) < playerHighlightingData.Range)
-                           //{
-                                //range = (uint)m_ResourceSystem.CheckPlayerEnergy(faction.Faction, 0);
-                            //}
+                           if (CheckPlayerEnergy(faction.Faction, 0) < playerHighlightingData.Range)
+                           {
+                                range = (uint)CheckPlayerEnergy(faction.Faction, 0);
+                           }
                         }
 
                         List<CellAttributes> go = m_PathFindingSystem.GetRadius(occCoord.CubeCoordinate, range, worldIndex.Value);
@@ -595,31 +596,27 @@ public class HighlightingSystem : ComponentSystem
 
     public void ResetUnitHighLights(Entity e, PlayerState.Component playerState, long unitId)
     {
-        Debug.Log("ResetUnitHighlights");
         var lineRendererComp = EntityManager.GetComponentObject<LineRendererComponent>(e);
         lineRendererComp.lineRenderer.positionCount = 0;
 
-        if (playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
+        if (playerState.UnitTargets.ContainsKey(unitId) && playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
         {
-            ResetMarkerNumberOfTargets(playerState.UnitTargets[unitId].CubeCoordinates[0]);
+            ResetMarkerNumberOfTargets(playerState.UnitTargets[unitId].CubeCoordinates);
         }
     }
 
-    public void ResetMarkerNumberOfTargets(Vector3f cubeCoord)
+    public void ResetMarkerNumberOfTargets(List<Vector3f> cubeCoords)
     {
-        var coordToReset = Vector3fext.ToUnityVector(cubeCoord);
+        HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoords);
 
         Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
-            var c = Vector3fext.ToUnityVector(coord.CubeCoordinate);
-
-            if (c == coordToReset && markerState.NumberOfTargets > 0)
+            if (coordHash.Contains(coord.CubeCoordinate) && markerState.NumberOfTargets > 0)
             {
                 mouseState.CurrentState = MouseState.State.Neutral;
                 markerState.NumberOfTargets -= 1;
             }
         });
-
     }
 
     public void HighlightReachable()
@@ -710,6 +707,19 @@ public class HighlightingSystem : ComponentSystem
         playerStates.Dispose();
 
 
+    }
+
+    public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
+    {
+        int leftOverEnergy = 0;
+        Entities.With(m_PlayerStateData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        {
+            if (playerFaction == faction.Faction)
+            {
+                leftOverEnergy = (int)energyComp.Energy - (int)energyCost;
+            }
+        });
+        return leftOverEnergy;
     }
 
 }

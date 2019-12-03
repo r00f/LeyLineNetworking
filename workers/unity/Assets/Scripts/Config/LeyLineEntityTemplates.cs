@@ -265,6 +265,7 @@ public static class LeyLineEntityTemplates {
             Positives = new List<Vector3f>(),
             Negatives = new List<Vector3f>(),
             RequireUpdate = false,
+            InitialWaitTime = .1f,
             VisionRange = Stats.VisionRange
         };
 

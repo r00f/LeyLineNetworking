@@ -416,7 +416,7 @@ namespace LeyLineHybridECS
 
                 if (!stats.UIInitialized)
                 {
-                    InitializeUnitUI(healthbar, stats, unitId);
+                    InitializeUnitUI(healthbar, stats, unitId, faction.Faction, authPlayerFaction);
                     stats.UIInitialized = true;
                 }
                 else
@@ -426,7 +426,7 @@ namespace LeyLineHybridECS
                     if (health.CurrentHealth == 0)
                     {
                         if(healthbar.UnitHeadUIInstance)
-                            CleanupUnitUI(healthbar, stats, unitId);
+                            CleanupUnitUI(healthbar, stats, unitId, faction.Faction, authPlayerFaction);
                     }
                     else
                     {
@@ -627,14 +627,14 @@ namespace LeyLineHybridECS
             anim.Play("HealthText", 0, 0);
         }
 
-        public void InitializeUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitId)
+        public void InitializeUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
         {
             //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
 
             healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
             //if there is no group of this unitType, create one
 
-            if (!stats.IsHero)
+            if (!stats.IsHero && unitFaction == playerFaction)
             {
                 if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
                 {
@@ -673,12 +673,12 @@ namespace LeyLineHybridECS
             }
         }
 
-        void CleanupUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitID)
+        void CleanupUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
             Object.Destroy(healthbar.UnitHeadUIInstance);
 
-            if(!stats.IsHero)
+            if(!stats.IsHero && unitFaction == playerFaction)
             {
                 //remove unitID from unitGRPUI / delete selectUnitButton
                 UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];

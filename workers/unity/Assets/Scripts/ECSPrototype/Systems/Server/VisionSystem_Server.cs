@@ -76,35 +76,51 @@ public class VisionSystem_Server : ComponentSystem
 
                 Entities.With(m_UnitData).ForEach((ref SpatialEntityId id, ref WorldIndex.Component u_worldIndex, ref Vision.Component u_Vision, ref CubeCoordinate.Component u_OccupiedCell, ref FactionComponent.Component u_Faction) =>
                 {
+                    /*
+                    if (u_Vision.VisionRange > 0)
+                    {
+                        logger.HandleLog(LogType.Warning,
+                        new LogEvent("initialize UnitVision")
+                        .WithField("unitId", id.EntityId.Id));
+                        u_Vision.RequireUpdate = true;
+                    }
+                    */
+
+                    if(u_Vision.InitialWaitTime > 0)
+                    {
+                        u_Vision.InitialWaitTime -= Time.deltaTime;
+                        if (u_Vision.InitialWaitTime <= 0)
+                            u_Vision.RequireUpdate = true;
+                    }
+
                     var unitFaction = u_Faction.Faction;
+
 
                     if (u_Vision.RequireUpdate == true)
                     {
-                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("u_Vision.ReqUpdate = true")
                         .WithField("unitId", id.EntityId.Id));
-                        */
-                        u_Vision = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
 
-                        Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
+                        var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
+
+                        if (v.CellsInVisionrange.Count != 0)
                         {
-                            if (p_Faction.Faction == unitFaction)
+                            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
                             {
-                                /*
-                                logger.HandleLog(LogType.Warning,
-                                new LogEvent("Call UpdatePlayerVision")
-                                .WithField("UnitFaction", unitFaction));
-                                */
-                                p_Vision.RequireUpdate = true;
-                            }
-                        });
+                                if (p_Faction.Faction == unitFaction)
+                                {
+                                    logger.HandleLog(LogType.Warning,
+                                    new LogEvent("UnitLoopSetPlayerVisionReq")
+                                    .WithField("UnitFaction", unitFaction));
 
-                        u_Vision.RequireUpdate = false;
-                    }
-                    else if (u_Vision.VisionRange > 0 && u_Vision.CellsInVisionrange.Count == 0)
-                    {
-                        u_Vision.RequireUpdate = true;
+                                    p_Vision.RequireUpdate = true;
+                                }
+                            });
+
+                            u_Vision = v;
+                            u_Vision.RequireUpdate = false;
+                        }
                     }
                 });
 
@@ -112,17 +128,21 @@ public class VisionSystem_Server : ComponentSystem
                 {
                     if (p_Vision.RequireUpdate)
                     {
-                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("playerVision.ReqUpdate = true")
                         .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
-                        */
+
+                        
+
                         p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
+                        
                         p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
                         p_Vision.Positives = p_Vision.Positives;
                         p_Vision.Negatives = p_Vision.Negatives;
                         p_Vision.Lastvisible = p_Vision.Lastvisible;
+
                         p_Vision.RequireUpdate = false;
+
                         //Debug.Log("UpdatePlayerVision");
 
                         //Send clientSide updateVision command
@@ -219,9 +239,9 @@ public class VisionSystem_Server : ComponentSystem
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
     {
         //Debug.Log("UpdatePlayerVision: " + faction);
-        /*logger.HandleLog(LogType.Warning,
+        logger.HandleLog(LogType.Warning,
         new LogEvent("UpdatePlayerVision.")
-        .WithField("Faction", faction));*/
+        .WithField("Faction", faction));
 
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
