@@ -6,8 +6,8 @@ Mesh:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: leylinepath196
-  serializedVersion: 9
+  m_Name: leylinepath85
+  serializedVersion: 10
   m_SubMeshes:
   - serializedVersion: 2
     firstByte: 0
@@ -17,8 +17,8 @@ Mesh:
     firstVertex: 0
     vertexCount: 14
     localAABB:
-      m_Center: {x: 4.513011, y: -0.30000117, z: -4.2990437}
-      m_Extent: {x: 3.1124086, y: 0.10000024, z: 3.5111542}
+      m_Center: {x: 4.512583, y: -0.30000022, z: -4.2995996}
+      m_Extent: {x: 3.112835, y: 0.10000024, z: 3.5106134}
   m_Shapes:
     vertices: []
     shapes: []
@@ -27,6 +27,9 @@ Mesh:
   m_BindPose: []
   m_BoneNameHashes: 
   m_RootBoneNameHash: 0
+  m_BonesAABB: []
+  m_VariableBoneCountWeights:
+    m_Data: 
   m_MeshCompression: 0
   m_IsReadable: 1
   m_KeepVertices: 1
@@ -34,7 +37,7 @@ Mesh:
   m_IndexFormat: 0
   m_IndexBuffer: 000001000200020001000300020003000400040003000500040005000600060005000700060007000800080007000900080009000a000a0009000b000a000b000c000c000b000d00
   m_VertexData:
-    serializedVersion: 2
+    serializedVersion: 3
     m_VertexCount: 14
     m_Channels:
     - stream: 0
@@ -94,7 +97,7 @@ Mesh:
       format: 0
       dimension: 0
     m_DataSize: 336
-    _typelessdata: f046b33fecccccbe60b471bfffffffff000000000000803f10b9cc3fedccccbe20b349bfffffffff000000000000000008273a4011cd4cbef002e9bfffffffffff2cdf3f0000803ff8d8454013cd4cbed064d2bfffffffffff2cdf3f00000000406c8c400bcd4cbec8d42ac0ffffffff67705e400000803fc09393400ccd4cbef8b821c0ffffffff67705e4000000000c4ac8c403dcd4cbe34c78dc0ffffffff30a5a6400000803f3c5393403ecd4cbea45987c0ffffffff30a5a64000000000f431be40fbccccbeacf4a9c0ffffffff6c70de400000803f0ccec140fcccccbe1c99a2c0ffffffff6c70de40000000001c36ec40f7ccccbe0c44c4c0ffffffffafee0a410000803fe4c9f340f8ccccbeacb6bfc0ffffffffafee0a410000000090fceb40f1ccccbe24edf9c0ffffffff2ba526410000803f7003f440f1ccccbe84e7f8c0ffffffff2ba5264100000000
+    _typelessdata: f02ab33fccccccbe806c71bfffffffff000000000000803f10d5cc3fcdccccbe00fb49bfffffffff0000000000000000501d3a40d1cc4cbeb0f1e8bfffffffffff2cdf3f0000803fb0e24540d3cc4cbe1076d2bfffffffffff2cdf3f000000003c6c8c40cbcc4cbe80d32ac0ffffffff67705e400000803fc4939340cccc4cbe40ba21c0ffffffff67705e40000000008cae8c40fdcc4cbee4cc8dc0ffffffff30a5a6400000803f74519340fecc4cbef45387c0ffffffff30a5a640000000004836be40dbccccbe7cf7a9c0ffffffff6c70de400000803fb8c9c140dcccccbe4c96a2c0ffffffff6c70de40000000004036ec40d7ccccbed444c4c0ffffffffafee0a410000803fc0c9f340d8ccccbee4b5bfc0ffffffffafee0a410000000094fceb40d1ccccbe44edf9c0ffffffff2ba526410000803f6c03f440d1ccccbe64e7f8c0ffffffff2ba5264100000000
   m_CompressedMesh:
     m_Vertices:
       m_NumItems: 0
@@ -148,14 +151,14 @@ Mesh:
       m_BitSize: 0
     m_UVInfo: 0
   m_LocalAABB:
-    m_Center: {x: 4.513011, y: -0.30000117, z: -4.2990437}
-    m_Extent: {x: 3.1124086, y: 0.10000024, z: 3.5111542}
+    m_Center: {x: 4.512583, y: -0.30000022, z: -4.2995996}
+    m_Extent: {x: 3.112835, y: 0.10000024, z: 3.5106134}
   m_MeshUsageFlags: 0
   m_BakedConvexCollisionMesh: 
   m_BakedTriangleCollisionMesh: 
   m_MeshMetrics[0]: 1
   m_MeshMetrics[1]: 1
-  m_MeshOptimized: 0
+  m_MeshOptimizationFlags: 1
   m_StreamData:
     offset: 0
     size: 0

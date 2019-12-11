@@ -54,8 +54,8 @@ namespace LeyLineHybridECS
         List<Cell> otherManaliths = new List<Cell>();
 
         [SerializeField]
-        [Range(3, 128)]
-        int circleSegments = 128;
+        [Range(3, 256)]
+        int circleSegments = 256;
 
         [SerializeField]
         int lineSegments = 10;

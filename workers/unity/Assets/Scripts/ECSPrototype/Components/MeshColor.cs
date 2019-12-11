@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
@@ -10,7 +11,8 @@ namespace LeyLineHybridECS
         [ColorUsage(true, true)]
         public Color LerpColor;
         public MeshRenderer MeshRenderer;
-        public ParticleSystem ParticleSystem;
+        public List<MeshRenderer> EmissionColorRenderers;
+        public List<ParticleSystem> ParticleSystems;
         public float EmissionMultiplier;
     }
 

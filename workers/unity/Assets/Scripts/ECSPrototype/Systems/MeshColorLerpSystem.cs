@@ -128,13 +128,21 @@ namespace LeyLineHybridECS
                         meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
 
                     Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
-                    meshColor.MeshRenderer.material.color = emissionColor;
+                    meshColor.MeshRenderer.material.color = meshColor.LerpColor;
 
-                    ParticleSystem pPs = meshColor.ParticleSystem;
-                    var mainModule = pPs.main;
+                    foreach (MeshRenderer r in meshColor.EmissionColorRenderers)
+                    {   
+                        r.material.SetColor("_EmissionColor", emissionColor);
+                    }
 
-                    if (mainModule.startColor.color != meshColor.LerpColor)
-                        mainModule.startColor = meshColor.LerpColor;
+                    foreach (ParticleSystem p in meshColor.ParticleSystems)
+                    {
+                        var mainModule = p.main;
+
+                        if (mainModule.startColor.color != emissionColor)
+                            mainModule.startColor = emissionColor;
+                    }
+
                 });
 
                 Entities.With(m_LineData).ForEach((MeshGradientColor meshGradientColor) =>
@@ -193,8 +201,11 @@ namespace LeyLineHybridECS
                                         */
                     }
 
+                    //meshGradientColor.m
+                    //meshGradientColor.mesh.SetColor("_EmissionColor", meshGradientColor.colors);
+                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", meshGradientColor.colors);
                     meshGradientColor.mesh.colors = meshGradientColor.colors;
-                    //}
+                    //}q
                 });
 
 

@@ -396,6 +396,7 @@ MonoBehaviour:
   EnergyIncome: 4
   BasicMove: {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
   BasicAttack: {fileID: 0}
+  SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 0
@@ -1157,6 +1158,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: UnitMapCircle
+      objectReference: {fileID: 0}
+    - target: {fileID: 8901894970336887070, guid: 100ce833a7e1c224990c370409597f62,
+        type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 632653231029839956, guid: 100ce833a7e1c224990c370409597f62,
         type: 3}

@@ -3,7 +3,10 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Projector
+  - HealthBarParent
+  - GarbageCollection
   layers:
   - Default
   - TransparentFX
@@ -14,13 +17,13 @@ TagManager:
   - 
   - 
   - PostProcessing
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - GamePlayTerrain
+  - NeighbourTerrain
+  - Unit
+  - ShadowMarker
+  - MapIcon
+  - UIMarker
+  - Bloom
   - 
   - 
   - 
