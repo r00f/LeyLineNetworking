@@ -11,7 +11,7 @@ namespace LeyLineHybridECS
         public Mesh mesh;
         public Vector2[] uv;
         public Gradient Gradient;
-        [ColorUsage(true, true)]
+        //[ColorUsage(true, true)]
         public Color[] colors;
         public float EmissionMultiplier;
 

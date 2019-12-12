@@ -128,11 +128,12 @@ namespace LeyLineHybridECS
                         meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
 
                     Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
-                    meshColor.MeshRenderer.material.color = meshColor.LerpColor;
+                    meshColor.MeshRenderer.material.SetColor("_UnlitColor", emissionColor);
+                    meshColor.MeshRenderer.material.SetColor("_EmissiveColor", emissionColor);
 
                     foreach (MeshRenderer r in meshColor.EmissionColorRenderers)
                     {   
-                        r.material.SetColor("_EmissionColor", emissionColor);
+                        r.material.SetColor("_EmissiveColor", emissionColor);
                     }
 
                     foreach (ParticleSystem p in meshColor.ParticleSystems)
@@ -176,7 +177,7 @@ namespace LeyLineHybridECS
                     {
                         //Debug.Log((float)li / meshGradientColor.colors.Length);
                         //meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li / meshGradientColor.colors.Length);
-                        meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float)li / meshGradientColor.colors.Length) * meshGradientColor.EmissionMultiplier;
+                        meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float)li / meshGradientColor.colors.Length) /** meshGradientColor.EmissionMultiplier*/;
                         /*
                         if (li < 3)
                         {
@@ -204,7 +205,14 @@ namespace LeyLineHybridECS
                     //meshGradientColor.m
                     //meshGradientColor.mesh.SetColor("_EmissionColor", meshGradientColor.colors);
                     //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", meshGradientColor.colors);
+                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColorArray("_UnlitColorMap", meshGradientColor.colors);
+                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColorArray("_EmissiveColorMap", meshGradientColor.colors);
+                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_StartColor", c1);
+                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_EndColor", c2);
+
+
                     meshGradientColor.mesh.colors = meshGradientColor.colors;
+
                     //}q
                 });
 

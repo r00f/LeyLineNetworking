@@ -1,10 +1,14 @@
 fileFormatVersion: 2
 guid: a78da3f00f3328541b4526c0b0b5ec5c
-timeCreated: 1487888760
-licenseType: Store
 MonoImporter:
+  externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - sourceCamera: {instanceID: 0}
+  - outlineCamera: {instanceID: 0}
+  - outlineShaderMaterial: {instanceID: 0}
+  - renderTexture: {instanceID: 0}
+  - extraRenderTexture: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

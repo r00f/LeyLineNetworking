@@ -9,22 +9,37 @@ Material:
   m_PrefabAsset: {fileID: 0}
   m_Name: ShadowProjector
   m_Shader: {fileID: 4800000, guid: 01a668cc78047034a8a0c5ca2d24c6f7, type: 3}
-  m_ShaderKeywords: 
+  m_ShaderKeywords: _ALBEDOCONTRIBUTION
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
-  disabledShaderPasses: []
+  disabledShaderPasses:
+  - DBufferMesh_M
+  - DBufferMesh_AO
+  - DBufferMesh_MAO
+  - Mesh_Emissive
+  - DBufferMesh_MS
+  - DBufferMesh_AOS
+  - DBufferMesh_MAOS
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BaseColorMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BumpTex:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _CombineTex:
         m_Texture: {fileID: 2800000, guid: 92b0a732ad112a541100162a44295342, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissiveColorMap:
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _FalloffTex:
@@ -39,14 +54,50 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _MaskMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _NormalMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _ShadowTex:
         m_Texture: {fileID: 8400000, guid: 38d798ca54dfbf949be919f452de47ad, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    m_Floats: []
+    m_Floats:
+    - _AORemapMax: 1
+    - _AORemapMin: 0
+    - _AlbedoMode: 1
+    - _DecalBlend: 0.5
+    - _DecalMaskMapBlueScale: 1
+    - _DecalMeshDepthBias: 0
+    - _DecalStencilRef: 8
+    - _DecalStencilWriteMask: 8
+    - _DrawOrder: 0
+    - _Emissive: 0
+    - _EmissiveExposureWeight: 1
+    - _EmissiveIntensity: 1
+    - _EmissiveIntensityUnit: 0
+    - _HdrpVersion: 2
+    - _MaskBlendMode: 4
+    - _MaskBlendSrc: 1
+    - _MaskmapAO: 0
+    - _MaskmapMetal: 0
+    - _MaskmapSmoothness: 1
+    - _MetallicScale: 1
+    - _NormalBlendSrc: 0
+    - _SmoothnessRemapMax: 1
+    - _SmoothnessRemapMin: 0
+    - _UseEmissiveIntensity: 0
     m_Colors:
     - BumpMapScale: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _EmissiveColor: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissiveColorHDR: {r: 0, g: 0, b: 0, a: 1}
+    - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
     - _ProjectorClip_0: {r: -0.015438232, g: -0.025866693, b: 0.14460614, a: 0.29360974}
     - _ProjectorClip_1: {r: 0.0047582523, g: 0.14523815, b: 0.026487738, a: 0.0030641258}
     - _ProjectorClip_2: {r: -0.015438232, g: -0.025866693, b: 0.14460614, a: 0.29360974}

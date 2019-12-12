@@ -5368,7 +5368,8 @@ MonoBehaviour:
   LerpColor: {r: 0, g: 0, b: 0, a: 0}
   MeshRenderer: {fileID: 1117199391049767067}
   EmissionColorRenderers: []
-  ParticleSystems: []
+  ParticleSystems:
+  - {fileID: 3860969469174214555}
   EmissionMultiplier: 5
 --- !u!114 &3716064494397730003
 MonoBehaviour:
