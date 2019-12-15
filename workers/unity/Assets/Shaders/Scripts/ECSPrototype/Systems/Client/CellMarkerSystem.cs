@@ -72,7 +72,7 @@ namespace LeyLineHybridECS
             Entities.With(m_NewCellData).ForEach((MarkerGameObjects markerGameObjects, ref CellAttributesComponent.Component cellAtt) =>
             {
                 int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-                markerGameObjects.MapMarkerRenderer.material.color = settings.MapCellColors[colorIndex];
+                markerGameObjects.MapMarkerRenderer.material.SetColor("_BaseColor", settings.MapCellColors[colorIndex]);
             });
 
             var playerWorldIndexes = m_PlayerStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);

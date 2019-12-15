@@ -104,8 +104,12 @@ public class InitializeUnitsSystem : ComponentSystem
 
             foreach (Renderer r in teamColorMeshes.FullColorMeshes)
             {
-                r.material.color = factionColor;
-                if(r is TrailRenderer)
+                if(r.material.HasProperty("_UnlitColor"))
+                    r.material.SetColor("_UnlitColor", factionColor);
+                else if(r.material.HasProperty("_BaseColor"))
+                    r.material.SetColor("_BaseColor", factionColor);
+
+                if (r is TrailRenderer)
                 {
                     TrailRenderer tr = r as TrailRenderer;
                     float alpha = 1.0f;

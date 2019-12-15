@@ -111,7 +111,10 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    Color color = meshRenderer.material.GetColor("_UnlitColor");
+                    Color color = new Color();
+
+                    if (meshRenderer.material.HasProperty("_UnlitColor"))
+                        color = meshRenderer.material.GetColor("_UnlitColor");
 
                     if (isVisibleComp.LerpSpeed != 0)
                     {
