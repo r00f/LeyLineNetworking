@@ -9,27 +9,6 @@ using Unity.Collections;
 
 public class InitializeUnitsSystem : ComponentSystem
 {
-    /*
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentArray<> Transforms;
-        public readonly ComponentDataArray<> NewEntity;
-        public readonly ComponentDataArray<Generic.FactionComponent.Component> FactionData;
-        public ComponentArray<UnitComponentReferences> ComponentReferences;
-        public ComponentArray<LineRendererComponent> LineRenderers;
-        public ComponentArray<TeamColorMeshes> TeamColorMeshesData;
-        public ComponentArray<UnitMarkerGameObjects> MarkerGameObjects;
-    }
-    public struct PlayerData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<Generic.> FactionData;
-        public ComponentArray<HeroTransform> HeroTransforms;
-    }
-
-    */
-
     EntityQuery m_PlayerData;
     EntityQuery m_UnitData;
     Settings settings;
@@ -84,19 +63,26 @@ public class InitializeUnitsSystem : ComponentSystem
                 case Generic.TeamColorEnum.blue:
                     markerObjects.Outline.color = 1;
                     factionColor = settings.FactionColors[1];
-                    foreach (Renderer r in teamColorMeshes.detailColorMeshes)
-                    {
-                        r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0, 0.5f));
-                    }
                     break;
                 case Generic.TeamColorEnum.red:
                     markerObjects.Outline.color = 2;
                     factionColor = settings.FactionColors[2];
-                    foreach (Renderer r in teamColorMeshes.detailColorMeshes)
-                    {
-                        r.material.SetTextureOffset("_DetailAlbedoMap", new Vector2(0.5f, 0.5f));
-                    }
                     break;
+            }
+
+            for(int m = 0; m < teamColorMeshes.detailColorMeshes.Count; m++)
+            {
+                Renderer r = teamColorMeshes.detailColorMeshes[m];
+
+                //set layerMask 
+                if (m < teamColorMeshes.PartialColorMasks.Count)
+                    r.material.SetTexture("_LayerMaskMap", teamColorMeshes.PartialColorMasks[m]);
+                else
+                    Debug.LogError("Not Enough PartialColorMasks set, set them on the unit TeamColorMeshes component!");
+
+                //set layer1 color to factionColor
+                r.material.SetColor("_BaseColor1", factionColor);
+
             }
 
             //lineRenderer.lineRenderer.startColor = factionColor;

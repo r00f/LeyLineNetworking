@@ -9,5 +9,6 @@ public class Settings : ScriptableObject
     public List<Color> MapCellColors;
     public Mesh TestMesh;
     public Material TestMat;
+    public List<Texture2D> ParialColorMasks;
     
 }

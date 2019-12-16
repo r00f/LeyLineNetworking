@@ -1224,6 +1224,10 @@ MonoBehaviour:
   - {fileID: 512922516777160007}
   - {fileID: 512922516777160109}
   - {fileID: 512922516777160001}
+  PartialColorMasks:
+  - {fileID: 2800000, guid: 02359f6796332864db90a81aa32a9317, type: 3}
+  - {fileID: 2800000, guid: 20fd58340a7d39d49adb2a99f2d33074, type: 3}
+  - {fileID: 2800000, guid: 02359f6796332864db90a81aa32a9317, type: 3}
 --- !u!114 &9121732361173887378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1599,6 +1603,18 @@ PrefabInstance:
       propertyPath: m_ApplyRootMotion
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2300032, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4cc02b0a8b659bb4699ca7ff76d026b1, type: 2}
+    - target: {fileID: 2300038, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4cc02b0a8b659bb4699ca7ff76d026b1, type: 2}
+    - target: {fileID: 2300012, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 4cc02b0a8b659bb4699ca7ff76d026b1, type: 2}
     - target: {fileID: 400010, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

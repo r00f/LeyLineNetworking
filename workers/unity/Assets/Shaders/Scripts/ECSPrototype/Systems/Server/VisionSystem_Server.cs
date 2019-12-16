@@ -216,7 +216,8 @@ public class VisionSystem_Server : ComponentSystem
                             if (o.cluster.Contains(l[i]))
                             {
                                 visible = false;
-                                sightHash.Remove(l[i]);
+                                //first tree is visible if not removed from hash
+                                //sightHash.Remove(l[i]);
                                 //Debug.Log("contains removed Coord: " + l[i].X + "," + l[i].Y + "," + l[i].Z);
                             }
                         }

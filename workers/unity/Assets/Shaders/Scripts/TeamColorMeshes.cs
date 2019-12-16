@@ -10,4 +10,5 @@ public class TeamColorMeshes : MonoBehaviour
     public Color color;
     [SerializeField]
     public List<Renderer> detailColorMeshes = new List<Renderer>();
+    public List<Texture2D> PartialColorMasks;
 }

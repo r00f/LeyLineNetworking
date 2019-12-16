@@ -351,6 +351,12 @@ MonoBehaviour:
   - {fileID: 9010769315543680080}
   - {fileID: 9010769315543680094}
   - {fileID: 9010769315543680066}
+  PartialColorMasks:
+  - {fileID: 2800000, guid: 137b87dfedb39a34ca4e8218cb373ed6, type: 3}
+  - {fileID: 2800000, guid: 137b87dfedb39a34ca4e8218cb373ed6, type: 3}
+  - {fileID: 2800000, guid: 137b87dfedb39a34ca4e8218cb373ed6, type: 3}
+  - {fileID: 2800000, guid: 137b87dfedb39a34ca4e8218cb373ed6, type: 3}
+  - {fileID: 2800000, guid: 137b87dfedb39a34ca4e8218cb373ed6, type: 3}
 --- !u!114 &9121732361173887378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -386,6 +392,7 @@ MonoBehaviour:
   EnergyIncome: 0
   BasicMove: {fileID: 11400000, guid: 2f99df2ec1034d44283d60d18630f201, type: 2}
   BasicAttack: {fileID: 11400000, guid: 443eec8ad1de14349bb4a317428cecdd, type: 2}
+  SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 1

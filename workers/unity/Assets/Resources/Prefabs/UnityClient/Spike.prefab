@@ -706,6 +706,9 @@ MonoBehaviour:
   detailColorMeshes:
   - {fileID: 6277809151408466522}
   - {fileID: 6277809151411747186}
+  PartialColorMasks:
+  - {fileID: 2800000, guid: 137b87dfedb39a34ca4e8218cb373ed6, type: 3}
+  - {fileID: 2800000, guid: 257aa3fedac3ff845ba937f0f3d9df15, type: 3}
 --- !u!114 &9121732361173887378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -741,6 +744,7 @@ MonoBehaviour:
   EnergyIncome: 0
   BasicMove: {fileID: 11400000, guid: 82744cfe9643d2a46aa70b15293eede3, type: 2}
   BasicAttack: {fileID: 11400000, guid: 66605e5bd7ae0354cb6dd5699143dd60, type: 2}
+  SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 2
