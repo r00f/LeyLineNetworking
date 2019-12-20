@@ -140,8 +140,8 @@ namespace LeyLineHybridECS
                     {
                         var mainModule = p.main;
 
-                        if (mainModule.startColor.color != emissionColor)
-                            mainModule.startColor = emissionColor;
+                        if (mainModule.startColor.color != meshColor.LerpColor)
+                            mainModule.startColor = meshColor.LerpColor;
                     }
 
                 });

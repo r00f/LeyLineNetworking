@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class BlitTexture : MonoBehaviour
 {
     [SerializeField]
@@ -19,9 +20,8 @@ public class BlitTexture : MonoBehaviour
         }
     }
 
-    void Update()
+    void OnRenderImage(RenderTexture source, RenderTexture destination)
     {
-        
-        //Graphics.Blit(sourceTexture, destTex, );
+        Graphics.Blit(source, destination, mat);
     }
 }

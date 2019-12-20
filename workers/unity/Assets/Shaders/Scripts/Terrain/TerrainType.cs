@@ -12,6 +12,7 @@ public class TerrainType : ScriptableObject
     public float detailSpawnPercentage;
     public int textureIndex;
     public int detailIndex;
+    public Vector2 GrassAmountMinMax;
     public string terrain_Name;
     public int additionalCost;
     [Range (-15.0f, 15.0f)]
