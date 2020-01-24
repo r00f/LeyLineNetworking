@@ -5368,6 +5368,7 @@ MonoBehaviour:
   LerpColor: {r: 0, g: 0, b: 0, a: 0}
   MeshRenderer: {fileID: 1117199391049767067}
   EmissionColorRenderers: []
+  Lights: []
   ParticleSystems:
   - {fileID: 3860969469174214555}
   EmissionMultiplier: 5
@@ -5487,7 +5488,7 @@ ParticleSystem:
   m_GameObject: {fileID: 8465982628031621877}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.05
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -5561,8 +5562,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.5
-      minScalar: 0.35
+      scalar: 0.25
+      minScalar: 0.15
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5668,7 +5669,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 66.75347, g: 66.75347, b: 66.75347, a: 49.999973}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -5731,7 +5732,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 3
       scalar: 0.7
-      minScalar: 0.6
+      minScalar: 0.5
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -6052,7 +6053,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -1.5
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -6311,7 +6312,7 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 60
+      scalar: 400
       minScalar: 10
       maxCurve:
         serializedVersion: 2
@@ -6765,9 +6766,9 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
-        atime2: 0
+        atime2: 65535
         atime3: 0
         atime4: 0
         atime5: 0

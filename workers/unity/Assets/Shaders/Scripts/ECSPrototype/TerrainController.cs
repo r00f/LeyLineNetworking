@@ -37,6 +37,9 @@ namespace LeyLineHybridECS
         [SerializeField]
         float grassCircleRange;
 
+        [SerializeField]
+        int randomGrasRotationMax;
+
         float[,] terrainHeights;
 
         List<TreeInstance> treeList = new List<TreeInstance>();
@@ -131,44 +134,47 @@ namespace LeyLineHybridECS
             {
                 TerrainType terrainType = c.GetComponent<CellType>().thisCellsTerrain;
 
-                if (terrainType.spawnTree)
+                if (terrainType.TreeIndexMinMax.x != 0)
                 {
-                    TreeInstance treeInstance = new TreeInstance()
-                    {
-                        prototypeIndex = UnityEngine.Random.Range(0, firVariantCount),
-                        color = Color.black,
-                        heightScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
-                        widthScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
-                        rotation = UnityEngine.Random.Range(0f, 360f)
-                    };
-                    SpawnHexagonTree(c.transform.position, treeInstance);
-                }
-
-                if(terrainType.detailIndex != 0)
-                {
-                    int grassAmount = UnityEngine.Random.Range((int)terrainType.GrassAmountMinMax.x, (int)terrainType.GrassAmountMinMax.y + 1);
-
-                    for(int i = 0; i < grassAmount; i++)
+                    if (terrainType.GrassAmountMinMax.x == 0)
                     {
                         TreeInstance treeInstance = new TreeInstance()
                         {
-                            prototypeIndex = c.GetComponent<CellType>().thisCellsTerrain.detailIndex - 1,
+                            prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
                             color = Color.black,
-                            heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
-                            widthScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                            heightScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
+                            widthScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
                             rotation = UnityEngine.Random.Range(0f, 360f)
                         };
+                        SpawnHexagonTree(c.transform.position, treeInstance);
+                    }
+                    else
+                    {
+                        int grassAmount = UnityEngine.Random.Range((int)terrainType.GrassAmountMinMax.x, (int)terrainType.GrassAmountMinMax.y + 1);
 
-                        //can spawn at same place
-                        Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * grassCircleRange;
+                        for (int i = 0; i < grassAmount; i++)
+                        {
+                            TreeInstance treeInstance = new TreeInstance()
+                            {
+                                prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
+                                color = Color.black,
+                                heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                                widthScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                                rotation = UnityEngine.Random.Range(0f, randomGrasRotationMax)
+                            };
 
-                        Vector3 pos = c.transform.position + new Vector3(randomOffset.x, 0, randomOffset.y);
+                            //can spawn at same place
+                            Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * grassCircleRange;
 
-                        SpawnHexagonTree(pos, treeInstance);
+                            Vector3 pos = c.transform.position + new Vector3(randomOffset.x, 0, randomOffset.y);
+
+                            SpawnHexagonTree(pos, treeInstance);
+
+
+                        }
                     }
                 }
             }
-
             //add grass to treeList before setting terrain.treeInstances
 
             terrain.terrainData.treeInstances = treeList.ToArray();

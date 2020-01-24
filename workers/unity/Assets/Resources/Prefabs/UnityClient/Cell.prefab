@@ -184,10 +184,10 @@ MonoBehaviour:
   MapMarkerRenderer: {fileID: 52139403535519663}
   MapIconRenderer: {fileID: 3184115698011300457}
   TargetColors:
-  - {r: 0.5463539, g: 1, b: 0.3443396, a: 0.6862745}
-  - {r: 0.08549515, g: 0.8207547, b: 0, a: 0.6862745}
-  - {r: 0.053844787, g: 0.5188679, b: 0, a: 0.6862745}
-  - {r: 0.015944738, g: 0.2830189, b: 0, a: 0.6862745}
+  - {r: 0.5463539, g: 1, b: 0.3443396, a: 0.29803923}
+  - {r: 0.08549515, g: 0.8207547, b: 0, a: 0.29803923}
+  - {r: 0.053844787, g: 0.5188679, b: 0, a: 0.29803923}
+  - {r: 0.015944738, g: 0.2830189, b: 0, a: 0.29803923}
   EffectType: 0
 --- !u!1 &1669076608269378
 GameObject:
@@ -206,7 +206,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &4235070012917042
 Transform:
   m_ObjectHideFlags: 0
@@ -480,7 +480,7 @@ MeshRenderer:
   m_RenderingLayerMask: 4294967295
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 457b31af9151dd7499b6c97abc46f303, type: 2}
+  - {fileID: 2100000, guid: 9a7c717ea031800438de0ef98a540116, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

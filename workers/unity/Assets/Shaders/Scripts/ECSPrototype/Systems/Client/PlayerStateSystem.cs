@@ -135,7 +135,7 @@ namespace LeyLineHybridECS
                         else
                         {
                             unitComponentReferences.SelectionCircleGO.SetActive(false);
-                            if (playerState.CurrentState != PlayerStateEnum.waiting)
+                            if (playerState.CurrentState != PlayerStateEnum.waiting && g.CurrentState == GameStateEnum.cleanup)
                             {
                                 if (playerState.UnitTargets.Count != 0)
                                 {

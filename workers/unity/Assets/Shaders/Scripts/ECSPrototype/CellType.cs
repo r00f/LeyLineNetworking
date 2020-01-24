@@ -63,7 +63,7 @@ namespace LeyLineHybridECS
                 transform.localPosition = new Vector3(transform.localPosition.x, thisCellsTerrain.yOffset + height, transform.localPosition.z);
                 terrainController.SetHexagonTerrainHeight(cellDimensions.Size, transform.position);
                 terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position, thisCellsTerrain.textureIndex);
-                terrainController.SetHexagonTerrainDetails(cellDimensions.Size, transform.position, thisCellsTerrain.detailIndex, thisCellsTerrain.detailSpawnPercentage);
+                //terrainController.SetHexagonTerrainDetails(cellDimensions.Size, transform.position, thisCellsTerrain.detailIndex, thisCellsTerrain.detailSpawnPercentage);
                 terrainController.UpdateHexagonTrees();
 
                 if (thisCellsTerrain.Walkable)

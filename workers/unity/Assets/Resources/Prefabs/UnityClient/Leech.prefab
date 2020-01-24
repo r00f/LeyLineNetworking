@@ -361,6 +361,7 @@ MonoBehaviour:
   - {fileID: 517547637295688906}
   color: {r: 0, g: 0, b: 0, a: 0}
   detailColorMeshes: []
+  PartialColorMasks: []
 --- !u!114 &9121732361173887378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1162,7 +1163,7 @@ PrefabInstance:
     - target: {fileID: 8901894970336887070, guid: 100ce833a7e1c224990c370409597f62,
         type: 3}
       propertyPath: m_Layer
-      value: 0
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 632653231029839956, guid: 100ce833a7e1c224990c370409597f62,
         type: 3}

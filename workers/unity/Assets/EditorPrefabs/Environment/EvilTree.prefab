@@ -11,12 +11,12 @@ GameObject:
   - component: {fileID: 8705686099794053344}
   - component: {fileID: 3714231724751616507}
   - component: {fileID: 6456765139998067380}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (2)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &8705686099794053344
 Transform:
@@ -25,13 +25,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1086950002543320237}
-  m_LocalRotation: {x: -0, y: -0.68250275, z: -0, w: 0.73088306}
-  m_LocalPosition: {x: -0.60500014, y: 2.25, z: 0.055999994}
+  m_LocalRotation: {x: -0.08362647, y: -0.67802054, z: -0.07809087, w: 0.72608316}
+  m_LocalPosition: {x: -0.599, y: 2.284, z: 0.024}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 160286591871172161}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: -86.079, z: 0}
+  m_LocalEulerAnglesHint: {x: -13.14, y: -86.079, z: 0}
 --- !u!198 &3714231724751616507
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -41,7 +41,7 @@ ParticleSystem:
   m_GameObject: {fileID: 1086950002543320237}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -115,8 +115,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -168,8 +168,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 2
-      minScalar: 1
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -222,7 +222,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -606,7 +606,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -865,8 +865,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -1303,7 +1303,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -1319,7 +1319,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -4764,12 +4764,12 @@ GameObject:
   - component: {fileID: 6662226909518957921}
   - component: {fileID: 4701489527702748183}
   - component: {fileID: 2746940541252108409}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &6662226909518957921
 Transform:
@@ -4778,13 +4778,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1543291475972185308}
-  m_LocalRotation: {x: -0, y: 0.43737906, z: -0, w: 0.89927727}
-  m_LocalPosition: {x: 0.46600008, y: 2.281, z: 0.25400004}
+  m_LocalRotation: {x: 0.06307972, y: 0.4363017, z: -0.030679923, w: 0.89706224}
+  m_LocalPosition: {x: 0.51, y: 2.31, z: 0.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 160286591871172161}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 51.874004, z: 0}
+  m_LocalEulerAnglesHint: {x: 8.045, y: 51.874004, z: 0}
 --- !u!198 &4701489527702748183
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -4794,7 +4794,7 @@ ParticleSystem:
   m_GameObject: {fileID: 1543291475972185308}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -4868,8 +4868,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -4921,8 +4921,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 2
-      minScalar: 1
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -4975,7 +4975,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -5359,7 +5359,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -5618,8 +5618,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -6056,7 +6056,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -6072,7 +6072,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -9517,12 +9517,12 @@ GameObject:
   - component: {fileID: 289470967936851574}
   - component: {fileID: 895829990664147073}
   - component: {fileID: 8344268836048811498}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (3)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &289470967936851574
 Transform:
@@ -9547,7 +9547,7 @@ ParticleSystem:
   m_GameObject: {fileID: 1764161343068017159}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -9621,8 +9621,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -9674,8 +9674,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 3
-      minScalar: 2
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -9728,7 +9728,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -9790,8 +9790,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.4
-      minScalar: 0.1
+      scalar: 0.5
+      minScalar: 0.3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -10112,7 +10112,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -10371,8 +10371,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -10809,7 +10809,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -10825,7 +10825,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -14270,12 +14270,12 @@ GameObject:
   - component: {fileID: 6817576029380129526}
   - component: {fileID: 7408854794284931109}
   - component: {fileID: 4954799645134363242}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (6)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &6817576029380129526
 Transform:
@@ -14284,13 +14284,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2062027024386054600}
-  m_LocalRotation: {x: 0.01066058, y: -0.98862594, z: -0.12326902, w: -0.085498475}
-  m_LocalPosition: {x: 0.143, y: 2.327, z: -0.649}
+  m_LocalRotation: {x: -0.6647825, y: -0, z: 0.000000059604638, w: 0.747037}
+  m_LocalPosition: {x: 0.143, y: 2.27, z: -0.746}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 160286591871172161}
   m_RootOrder: 6
-  m_LocalEulerAnglesHint: {x: -14.215001, y: -189.88599, z: 0}
+  m_LocalEulerAnglesHint: {x: -83.331, y: 0, z: 0}
 --- !u!198 &7408854794284931109
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -14300,7 +14300,7 @@ ParticleSystem:
   m_GameObject: {fileID: 2062027024386054600}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -14374,8 +14374,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -14427,8 +14427,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1
-      minScalar: 0.3
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -14481,7 +14481,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -14543,8 +14543,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.35
-      minScalar: 0.25
+      scalar: 0.5
+      minScalar: 0.3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -14865,7 +14865,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -15124,8 +15124,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -15562,7 +15562,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -15578,7 +15578,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -19023,12 +19023,12 @@ GameObject:
   - component: {fileID: 1398912073942626423}
   - component: {fileID: 7940665972880689729}
   - component: {fileID: 4399560310132717240}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilTree
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1398912073942626423
 Transform:
@@ -19037,14 +19037,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2680405691785282148}
-  m_LocalRotation: {x: -0, y: -0.6206142, z: -0, w: -0.78411615}
-  m_LocalPosition: {x: 0.020000458, y: -0.034999847, z: -0.088710785}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 160286591871172161}
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: -283.278, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7940665972880689729
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -19102,12 +19102,12 @@ GameObject:
   - component: {fileID: 160286591871172161}
   - component: {fileID: 2121828342659215316}
   - component: {fileID: 8348567761105041995}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: GameObject
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &160286591871172161
 Transform:
@@ -23863,12 +23863,12 @@ GameObject:
   - component: {fileID: 6149319897821952839}
   - component: {fileID: 7113076679562852420}
   - component: {fileID: 5399315240633566083}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &6149319897821952839
 Transform:
@@ -23877,13 +23877,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4841027408568387018}
-  m_LocalRotation: {x: -0, y: 0.99155676, z: -0, w: -0.1296736}
+  m_LocalRotation: {x: 0.039874416, y: 0.94351435, z: 0.3049025, w: -0.123390675}
   m_LocalPosition: {x: -0.16800004, y: 1.508, z: -0.6800002}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 160286591871172161}
   m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 194.90099, z: 0}
+  m_LocalEulerAnglesHint: {x: -35.817, y: 194.90099, z: 0}
 --- !u!198 &7113076679562852420
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -23893,7 +23893,7 @@ ParticleSystem:
   m_GameObject: {fileID: 4841027408568387018}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -23967,8 +23967,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -24020,8 +24020,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 2
-      minScalar: 1
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -24074,7 +24074,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -24458,7 +24458,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -24717,8 +24717,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -25155,7 +25155,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5058824}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -25171,7 +25171,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -28616,12 +28616,12 @@ GameObject:
   - component: {fileID: 1629122273524392799}
   - component: {fileID: 3359247098606622892}
   - component: {fileID: 7031843942183597177}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (7)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1629122273524392799
 Transform:
@@ -28646,7 +28646,7 @@ ParticleSystem:
   m_GameObject: {fileID: 6593159833890466015}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -28720,8 +28720,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -28827,7 +28827,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -29470,8 +29470,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -29908,7 +29908,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -29924,7 +29924,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -33369,12 +33369,12 @@ GameObject:
   - component: {fileID: 2725520046461884471}
   - component: {fileID: 3077740765812786785}
   - component: {fileID: 3680033418755701776}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &2725520046461884471
 Transform:
@@ -33383,13 +33383,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6856732687266969732}
-  m_LocalRotation: {x: -0, y: -0.98507494, z: -0, w: 0.1721264}
+  m_LocalRotation: {x: -0.069604315, y: -0.900941, z: -0.39834398, w: 0.15742531}
   m_LocalPosition: {x: 0.017, y: 4.025, z: 0.372}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 160286591871172161}
   m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: -160.177, z: 0}
+  m_LocalEulerAnglesHint: {x: -47.704002, y: -160.177, z: 0}
 --- !u!198 &3077740765812786785
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -33399,7 +33399,7 @@ ParticleSystem:
   m_GameObject: {fileID: 6856732687266969732}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -33473,8 +33473,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -33526,8 +33526,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 2.5
-      minScalar: 1
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -33580,7 +33580,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -33642,8 +33642,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.5
+      minScalar: 0.3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -33964,7 +33964,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -34223,8 +34223,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -34661,7 +34661,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -34677,7 +34677,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0
@@ -38122,12 +38122,12 @@ GameObject:
   - component: {fileID: 6488087303385346259}
   - component: {fileID: 1260412137998269119}
   - component: {fileID: 6048565915175528418}
-  m_Layer: 15
+  m_Layer: 9
   m_Name: EvilEyePS1 (5)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &6488087303385346259
 Transform:
@@ -38136,13 +38136,13 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7665896459240236974}
-  m_LocalRotation: {x: -0.09530682, y: -0.52197534, z: -0.05883312, w: 0.845575}
-  m_LocalPosition: {x: 0.77, y: 3.595, z: -0.377}
+  m_LocalRotation: {x: -0.35182136, y: -0.46736854, z: -0.19779252, w: 0.7865536}
+  m_LocalPosition: {x: 0.797, y: 3.625, z: -0.392}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 160286591871172161}
   m_RootOrder: 5
-  m_LocalEulerAnglesHint: {x: -12.862, y: -63.374004, z: 0}
+  m_LocalEulerAnglesHint: {x: -47.590004, y: -62.101, z: 1.5050001}
 --- !u!198 &1260412137998269119
 ParticleSystem:
   m_ObjectHideFlags: 0
@@ -38152,7 +38152,7 @@ ParticleSystem:
   m_GameObject: {fileID: 7665896459240236974}
   serializedVersion: 6
   lengthInSec: 5
-  simulationSpeed: 0.17
+  simulationSpeed: 0.1
   stopAction: 0
   cullingMode: 1
   ringBufferMode: 0
@@ -38226,8 +38226,8 @@ ParticleSystem:
     startLifetime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.3
-      minScalar: 0.2
+      scalar: 0.2
+      minScalar: 0.1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -38279,8 +38279,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1.5
-      minScalar: 0.5
+      scalar: 5
+      minScalar: 3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -38333,7 +38333,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 1, g: 1, b: 1, a: 1}
+      maxColor: {r: 0.86394244, g: 0.99998546, b: 0.0000002113901, a: 0.99999946}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -38395,8 +38395,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.35
-      minScalar: 0.25
+      scalar: 0.5
+      minScalar: 0.3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -38717,7 +38717,7 @@ ParticleSystem:
     gravityModifier:
       serializedVersion: 2
       minMaxState: 0
-      scalar: -2
+      scalar: -3
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -38976,8 +38976,8 @@ ParticleSystem:
     rateOverTime:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 6
-      minScalar: 2
+      scalar: 50
+      minScalar: 20
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -39414,7 +39414,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 1, g: 1, b: 1, a: 0.5764706}
+        key0: {r: 1, g: 1, b: 1, a: 0.20784314}
         key1: {r: 1, g: 1, b: 1, a: 0}
         key2: {r: 0, g: 0, b: 0, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
@@ -39430,7 +39430,7 @@ ParticleSystem:
         ctime5: 0
         ctime6: 0
         ctime7: 0
-        atime0: 44140
+        atime0: 0
         atime1: 65535
         atime2: 0
         atime3: 0

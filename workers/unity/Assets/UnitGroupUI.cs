@@ -8,9 +8,11 @@ public class UnitGroupUI : MonoBehaviour
 
     public GameObject UnitsPanel;
     public Image UnitTypeImage;
+    public Image EnergyFill;
     public RectTransform Arrow;
     public Text UnitCountText;
     public List<long> ExistingUnitIds = new List<long>();
+    public List<SelectUnitButton> SelectUnitButtons;
 
     public void SwitchPanelActive()
     {

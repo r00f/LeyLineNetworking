@@ -21,6 +21,7 @@ public class SendActionRequestSystem : ComponentSystem
     EntityQuery m_ClickedUnitData;
     //EntityQuery m_SelectActionRequestData;
     CommandSystem m_CommandSystem;
+    UISystem m_UISystem;
 
     protected override void OnCreate()
     {
@@ -70,6 +71,7 @@ public class SendActionRequestSystem : ComponentSystem
         base.OnStartRunning();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+        m_UISystem = World.GetExistingSystem<UISystem>();
     }
 
     protected override void OnUpdate()
@@ -114,6 +116,7 @@ public class SendActionRequestSystem : ComponentSystem
                 if (actionsData.BasicMove.Index != -3 && faction.Faction == playerFaction.Faction)
                 {
                     SelectActionCommand(-2, unitEntityId.Id);
+                    m_UISystem.InitializeSelectedActionTooltip(0);
                 }
                 else
                 {

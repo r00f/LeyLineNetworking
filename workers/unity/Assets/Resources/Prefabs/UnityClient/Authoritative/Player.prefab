@@ -67,7 +67,7 @@ Camera:
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 53047
+    m_Bits: 118583
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 0}
   m_TargetDisplay: 0
@@ -278,12 +278,12 @@ MonoBehaviour:
     useKeyCodeInputs: 1
     keycodes:
       RotateCamera: 325
-      LockCamera: 108
+      LockCamera: 102
       characterFocus: 32
-      CameraMoveLeft: 276
-      CameraMoveRight: 275
-      CameraMoveForward: 273
-      CameraMoveBackward: 274
+      CameraMoveLeft: 97
+      CameraMoveRight: 100
+      CameraMoveForward: 119
+      CameraMoveBackward: 115
     axis:
       DeltaScrollWheel: Mouse ScrollWheel
       DeltaMouseHorizontal: Mouse X

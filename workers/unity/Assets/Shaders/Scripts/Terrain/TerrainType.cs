@@ -7,11 +7,12 @@ public class TerrainType : ScriptableObject
 {
     public int MapCellIconIndex;
     public int MapCellColorIndex;
-    public bool spawnTree;
-    public int treeIndex;
-    public float detailSpawnPercentage;
+    //public bool spawnTree;
+    //public int treeIndex;
+    //public float detailSpawnPercentage;
+    //public int detailIndex;
     public int textureIndex;
-    public int detailIndex;
+    public Vector2 TreeIndexMinMax;
     public Vector2 GrassAmountMinMax;
     public string terrain_Name;
     public int additionalCost;

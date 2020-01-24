@@ -34,6 +34,7 @@ public class Projectile : MonoBehaviour
     public bool Launched;
     public Joint BaseJoint;
     public List<SpringJoint> SpringJoints;
+    public float DestroyAfterSeconds;
 
     [Header("Impact Physics Explosion")]
     public float ExplosionWaitTime;

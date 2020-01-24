@@ -18,6 +18,7 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     [Header("Component References")]
     public GameObject Visuals;
     public Image Icon;
+    public Image TurnStepBauble;
     public int ExecuteStepIndex;
     public string ActionName;
     public string ActionDescription;
@@ -28,12 +29,12 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        IconRectTransform.anchoredPosition = Offset;
+        //IconRectTransform.anchoredPosition = Offset;
     }
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        IconRectTransform.anchoredPosition = new Vector2(0, 0);
+        //IconRectTransform.anchoredPosition = new Vector2(0, 0);
     }
 
     public void OnPointerEnter(PointerEventData eventData)
@@ -52,7 +53,7 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     public void OnPointerExit(PointerEventData eventData)
     {
         UIRef.TTPanel.SetActive(false);
-        IconRectTransform.anchoredPosition = new Vector2(0, 0);
+        //IconRectTransform.anchoredPosition = new Vector2(0, 0);
     }
 
 

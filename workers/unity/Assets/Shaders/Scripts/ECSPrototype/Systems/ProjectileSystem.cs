@@ -65,6 +65,17 @@ public class ProjectileSystem : ComponentSystem
         {
             Entities.With(m_ProjectileData).ForEach((Entity entity, Projectile projectile, Transform transform) =>
             {
+                if(projectile.DestroyAfterSeconds != 0)
+                {
+                    if (projectile.DestroyAfterSeconds > 0.05f)
+                    {
+                        projectile.DestroyAfterSeconds -= Time.deltaTime;
+                    }
+                    else
+                    {
+                        projectile.FlagForDestruction = true;
+                    }
+                }
                 if (projectile.ToungeEnd)
                 {
                     if (!projectile.Launched && projectile.TravellingCurve.Count != 0)

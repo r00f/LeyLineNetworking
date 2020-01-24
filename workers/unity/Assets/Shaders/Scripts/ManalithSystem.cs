@@ -48,6 +48,17 @@ public class ManalithSystem : ComponentSystem
 
     }
 
+    protected override void OnStartRunning()
+    {
+        base.OnStartRunning();
+
+        Entities.With(m_ManalithData).ForEach((ref FactionComponent.Component factionref) =>
+        {
+            factionref.Faction = 0;
+        });
+
+    }
+
 
     protected override void OnUpdate()
     {

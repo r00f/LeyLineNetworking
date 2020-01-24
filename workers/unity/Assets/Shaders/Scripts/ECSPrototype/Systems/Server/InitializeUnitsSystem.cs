@@ -95,6 +95,11 @@ public class InitializeUnitsSystem : ComponentSystem
                 else if(r.material.HasProperty("_BaseColor"))
                     r.material.SetColor("_BaseColor", factionColor);
 
+                if(r is SpriteRenderer)
+                {
+                    r.material.color = factionColor;
+                }
+
                 if (r is TrailRenderer)
                 {
                     TrailRenderer tr = r as TrailRenderer;

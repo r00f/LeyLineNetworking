@@ -4835,7 +4835,7 @@ ParticleSystemRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10308, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 148fe9da6978c5048b1463da8018e6c2, type: 2}
   - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
@@ -4962,6 +4962,7 @@ MonoBehaviour:
   - {fileID: 7550265048825398771}
   color: {r: 0, g: 0, b: 0, a: 0}
   detailColorMeshes: []
+  PartialColorMasks: []
 --- !u!114 &6210986102677212119
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4994,6 +4995,7 @@ MonoBehaviour:
   EnergyIncome: 0
   BasicMove: {fileID: 0}
   BasicAttack: {fileID: 0}
+  SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 1

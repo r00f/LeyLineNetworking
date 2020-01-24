@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,15 +12,18 @@ public class UIReferences : MonoBehaviour
     public GameObject MatchReadyPanel;
 
     [Header("TopLeftHeroPanel")]
-    public Image TopEnergyIncomeFill;
-    public Image TopCurrentEnergyFill;
+    public Text TopEnergyText;
+    public Image TopEnergyFill;
     public Image TopHealthFill;
     public Image TopArmorFill;
 
     [Header("EnergyBarPanel")]
+    public Image LeftEnergyIncomeFill;
+    public Image LeftCurrentEnergyFill;
     public Image EnergyIncomeFill;
     public Image CurrentEnergyFill;
-    public Text HeroEnergyText;
+    public Text CurrentEnergyText;
+    public Text MaxEnergyText;
 
     [Header("HealthBars")]
     public float HealthBarYOffset;
@@ -29,8 +31,8 @@ public class UIReferences : MonoBehaviour
 
     [Header("ReadyPanel")]
     public Button ReadyButton;
-    public GameObject RedReady;
-    public GameObject BlueReady;
+    //public GameObject RedReady;
+    //public GameObject BlueReady;
     public Image BlueColor;
     public Image RedColor;
     public Image RopeBar;
@@ -42,6 +44,16 @@ public class UIReferences : MonoBehaviour
 
     [Header("UnitStats")]
     public Text UnitStats;
+
+    [Header("TurnWheel")]
+    public float WheelRotationSpeed;
+    public RectTransform TurnWheelBig;
+    public RectTransform TurnWheelSmol;
+    public float ReadyOutSpeed;
+    public float ReadyInSpeed;
+    public RectTransform BlueReady;
+    public RectTransform RedReady;
+
 
     [Header("BottomBars")]
     public Text HealthText;
@@ -55,7 +67,15 @@ public class UIReferences : MonoBehaviour
     public GameObject SpawnToggleGO;
     public Toggle ActionsToggle;
     public Toggle SpawnActionsToggle;
-    public List<Toggle> TurnStateToggles;
+    //public List<Toggle> TurnStateToggles;
+
+    [Header("SelectedActionToolTip")]
+    public Text SAActionName;
+    public Text SAActionDescription;
+    public Text SAEnergyText;
+    public Image SAExecuteStepIcon;
+    public Image SAExecuteStepBackGround;
+    public Image SAEnergyFill;
 
     [Header("ToolTip")]
     public GameObject TTPanel;
@@ -64,9 +84,11 @@ public class UIReferences : MonoBehaviour
     public Text TTActionDescription;
     public Text TTActionCost;
     public Image TTExecuteStepImage;
+
     public List<Sprite> ExecuteStepSprites;
 
     [Header("UnitGroups")]
+    public List<UnitGroupUI> UnitGroups;
     public SelectUnitButton UnitButtonPrefab;
     public UnitGroupUI UnitGroupPrefab;
     public GameObject UnitGroupsParent;

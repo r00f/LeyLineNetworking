@@ -86,6 +86,15 @@ namespace LeyLineHybridECS
 
         }
 
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            Entities.With(m_CircleData).ForEach((MeshColor meshColor) =>
+            {
+                meshColor.Color = settings.FactionColors[0];
+            });
+        }
+
         protected override void OnUpdate()
         {
             if(WorldsInitialized())
@@ -134,6 +143,11 @@ namespace LeyLineHybridECS
                     foreach (MeshRenderer r in meshColor.EmissionColorRenderers)
                     {   
                         r.material.SetColor("_EmissiveColor", emissionColor);
+                    }
+
+                    foreach (Light l in meshColor.Lights)
+                    {
+                        l.color = meshColor.LerpColor;
                     }
 
                     foreach (ParticleSystem p in meshColor.ParticleSystems)

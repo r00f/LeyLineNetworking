@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1199834125490395627}
   - component: {fileID: 8820592072953713341}
-  - component: {fileID: 3784709690316879421}
-  m_Layer: 12
+  - component: {fileID: 6904204656751084124}
+  m_Layer: 16
   m_Name: ToungeProjectile
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -57,10 +57,10 @@ MonoBehaviour:
   MaxHeight: 0
   MovementDelay: 0.026
   Acceleration: 0
-  TargetYOffset: -0.3
+  TargetYOffset: 0
   ToungeEnd: {fileID: 4688949177296653295}
   ToungeBase: {fileID: 7703656456084220977}
-  LaunchForce: 45
+  LaunchForce: 40
   ContractSpeed: 35
   ContractUpForce: 100
   Launched: 0
@@ -70,6 +70,7 @@ MonoBehaviour:
   - {fileID: 5043565909834758946}
   - {fileID: 6313709426211851775}
   - {fileID: 2591146601566630127}
+  DestroyAfterSeconds: 0.65
   ExplosionWaitTime: 0.01
   ExplosionRadius: 1.25
   ExplosionForce: 2500
@@ -82,7 +83,7 @@ MonoBehaviour:
   EffectOnDetonation: 0
   IsTravelling: 0
   MovementPercentage: 0
---- !u!114 &3784709690316879421
+--- !u!114 &6904204656751084124
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -105,7 +106,7 @@ GameObject:
   - component: {fileID: 1349862819842723953}
   - component: {fileID: 4153580750195930896}
   - component: {fileID: 2633994155445010485}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: ExplosionPs
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4917,7 +4918,7 @@ GameObject:
   - component: {fileID: 4265137128855466370}
   - component: {fileID: 7703656456084220977}
   - component: {fileID: 4654898817733324332}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: Tounge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4977,7 +4978,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4265137128855466372}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: Tounge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5010,7 +5011,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4265137128855466374}
   - component: {fileID: 4265137128844124326}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: mTounge
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5099,7 +5100,7 @@ GameObject:
   - component: {fileID: 6620483755376565931}
   - component: {fileID: 4360416626906519139}
   - component: {fileID: 5043565909834758946}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: Tounge5
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5165,7 +5166,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0138265
+  m_MaxDistance: 1.777767
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5185,7 +5186,7 @@ GameObject:
   - component: {fileID: 3218540619276820119}
   - component: {fileID: 748744018203513844}
   - component: {fileID: 6796338131472732308}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: Tounge3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5251,7 +5252,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0138265
+  m_MaxDistance: 1.777767
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5268,7 +5269,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4265137128855466384}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: ToungeEnd
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5302,7 +5303,7 @@ GameObject:
   - component: {fileID: 2591146601566630127}
   - component: {fileID: 3147936743814150034}
   - component: {fileID: 3894418696988491608}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: Tounge9
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5356,7 +5357,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0138265
+  m_MaxDistance: 1.777767
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5375,7 +5376,7 @@ SphereCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Radius: 0.11
+  m_Radius: 0.08
   m_Center: {x: -0.11, y: 0, z: 0}
 --- !u!114 &3894418696988491608
 MonoBehaviour:
@@ -5402,7 +5403,7 @@ GameObject:
   - component: {fileID: 5057948401439898798}
   - component: {fileID: 6313709426211851775}
   - component: {fileID: 9017076790689303666}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: Tounge7
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -5455,7 +5456,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0138265
+  m_MaxDistance: 1.777767
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5487,7 +5488,7 @@ GameObject:
   - component: {fileID: 1576450063244905998}
   - component: {fileID: 4377575480916207703}
   - component: {fileID: 5188487256868854824}
-  m_Layer: 12
+  m_Layer: 16
   m_Name: TrailsPs
   m_TagString: Untagged
   m_Icon: {fileID: 0}

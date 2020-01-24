@@ -12,6 +12,7 @@ namespace LeyLineHybridECS
         public Color LerpColor;
         public MeshRenderer MeshRenderer;
         public List<MeshRenderer> EmissionColorRenderers;
+        public List<Light> Lights;
         public List<ParticleSystem> ParticleSystems;
         public float EmissionMultiplier;
     }

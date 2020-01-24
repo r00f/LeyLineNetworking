@@ -11,7 +11,7 @@ public class Unit_BaseDataSet : MonoBehaviour
     public uint EnergyIncome;
     public ECSAction BasicMove;
     public ECSAction BasicAttack;
-    public GameObject SelectUnitButtonInstance;
+    public SelectUnitButton SelectUnitButtonInstance;
     public bool IsHero;
     public bool UIInitialized;
     public uint UnitTypeId;

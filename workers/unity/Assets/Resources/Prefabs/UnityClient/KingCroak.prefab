@@ -942,8 +942,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 0.09548664, g: 0.8396226, b: 0, a: 1}
-      key1: {r: 0.0940786, g: 0.8207547, b: 0, a: 1}
+      key0: {r: 0.09548664, g: 0.8396226, b: 0, a: 0.3137255}
+      key1: {r: 0.0940786, g: 0.8207547, b: 0, a: 0.3137255}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -1270,6 +1270,7 @@ MonoBehaviour:
   UnitTypeSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
+  - {fileID: 11400000, guid: e50907b59684e30429dfebca7cce9eb9, type: 2}
   SpawnActions:
   - {fileID: 11400000, guid: cf378819988d7874c80f53c1f72a1695, type: 2}
   - {fileID: 11400000, guid: 06d8c3eca471abd4197edf42c50687ac, type: 2}

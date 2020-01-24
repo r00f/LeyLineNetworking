@@ -14,12 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapCellIconIndex: 2
   MapCellColorIndex: 2
-  spawnTree: 0
-  treeIndex: 0
-  detailSpawnPercentage: 0.08
   textureIndex: 1
-  detailIndex: 4
-  GrassAmountMinMax: {x: 15, y: 20}
+  TreeIndexMinMax: {x: 6, y: 6}
+  GrassAmountMinMax: {x: 6, y: 15}
   terrain_Name: 
   additionalCost: 0
   yOffset: 0.1
