@@ -121,7 +121,7 @@ public class HighlightingSystem : ComponentSystem
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
                     //Debug.Log("lastHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) + "currHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate));
-                    if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate))
+                    if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) && playerHighlightingData.ClickCoolDown <= 0)
                     {
                         if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                         {
@@ -136,6 +136,9 @@ public class HighlightingSystem : ComponentSystem
 
                         playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
                     }
+
+                    if(playerHighlightingData.ClickCoolDown >= 0)
+                        playerHighlightingData.ClickCoolDown -= Time.deltaTime;
                 }
                 else
                 {
@@ -172,7 +175,7 @@ public class HighlightingSystem : ComponentSystem
 
     public PlayerState.Component FillUnitTargetsList(HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState)
     {
-        var hoveredCoordToUnityVector3 = Vector3fext.ToUnityVector(inHinghlightningData.HoveredCoordinate);
+        //var hoveredCoordToUnityVector3 = Vector3fext.ToUnityVector(inHinghlightningData.HoveredCoordinate);
 
         if (inHinghlightningData.AoERadius > 0)
         {
@@ -181,7 +184,7 @@ public class HighlightingSystem : ComponentSystem
             area = CellGridMethods.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius);
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
 
-            if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999))
+            if (cubeCoordList.CubeCoordinates.Count != 1 /* && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999)*/)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
             }
@@ -193,7 +196,7 @@ public class HighlightingSystem : ComponentSystem
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring);
 
             //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999))
+            if (cubeCoordList.CubeCoordinates.Count != 1 /* && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999)*/)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
 
@@ -204,7 +207,7 @@ public class HighlightingSystem : ComponentSystem
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
             cubeCoordList.CubeCoordinates = CellGridMethods.LineDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate);
             //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            if (cubeCoordList.CubeCoordinates.Count != 1 && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999))
+            if (cubeCoordList.CubeCoordinates.Count != 1 /*&& hoveredCoordToUnityVector3 != new Vector3(999, 999, 999)*/)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
             }
@@ -215,15 +218,31 @@ public class HighlightingSystem : ComponentSystem
             cubeCoordList.CubeCoordinates.Add(inHinghlightningData.HoveredCoordinate);
 
             HashSet<long> unitIds = new HashSet<long>(playerState.UnitTargets.Keys);
+
+
             //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            if (hoveredCoordToUnityVector3 != new Vector3(999, 999, 999))
+            /*if (hoveredCoordToUnityVector3 != new Vector3(999, 999, 999))
             {
-                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+                
             }
-            else if (unitIds.Contains(playerState.SelectedUnitId) && inHinghlightningData.TargetRestrictionIndex != 2)
+            else */
+            if (unitIds.Contains(playerState.SelectedUnitId))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Clear();
             }
+
+            playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+            /*
+            if (unitIds.Contains(playerState.SelectedUnitId) && inHinghlightningData.TargetRestrictionIndex != 2)
+            {
+                
+            }
+            else
+            {
+                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
+            }
+            */
+
         }
 
         Entities.With(m_UnitData).ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>

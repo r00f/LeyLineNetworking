@@ -85,13 +85,18 @@ public class MouseStateSystem : JobComponentSystem
 
             if(Input.GetButtonDown("Fire1"))
             {
+                m_PlayerStateSystem.ResetClickCoolDown(0.3f);
                 //instantiate mouse particle at hitPos
                 Object.Instantiate(settings.MouseClickPS, hit.point, Quaternion.identity);
+            }
+            else if (!Input.GetButton("Fire1") && !Input.GetButtonUp("Fire1"))
+            {
+                //instantiate mouse particle at hitPos
+                m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, hit.point);
 
             }
-
             //set to center of hovered cell instead of hit.point
-            m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, hit.point);
+           
 
             //HighlightingDataComponent h = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
             //Debug.Log("posToCubeCoord: " + posToCubeCoord.X + ", " + posToCubeCoord.Y + ", " + posToCubeCoord.Z);

@@ -157,6 +157,14 @@ namespace LeyLineHybridECS
             #endregion
         }
 
+        public void ResetClickCoolDown(float coolDown)
+        {
+            Entities.With(m_PlayerData).ForEach((Entity e, ref HighlightingDataComponent highlightingData) =>
+            {
+                highlightingData.ClickCoolDown = coolDown;
+            });
+        }
+
         public void SetHoveredCoordinates(Vector3f cubeCoord, Vector3 pos)
         {
             Entities.With(m_PlayerData).ForEach((Entity e, ref HighlightingDataComponent highlightingData) => 
