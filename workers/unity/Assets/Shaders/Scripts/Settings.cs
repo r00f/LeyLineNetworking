@@ -12,5 +12,6 @@ public class Settings : ScriptableObject
     public Mesh TestMesh;
     public Material TestMat;
     public List<Texture2D> ParialColorMasks;
+    public GameObject MouseClickPS;
     
 }

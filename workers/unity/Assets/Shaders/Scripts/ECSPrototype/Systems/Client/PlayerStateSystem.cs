@@ -157,6 +157,15 @@ namespace LeyLineHybridECS
             #endregion
         }
 
+        public void SetHoveredCoordinates(Vector3f cubeCoord, Vector3 pos)
+        {
+            Entities.With(m_PlayerData).ForEach((Entity e, ref HighlightingDataComponent highlightingData) => 
+            {
+                highlightingData.HoveredCoordinate = cubeCoord;
+                highlightingData.HoveredPosition = pos;
+            });
+        }
+
         public void SetPlayerState(PlayerStateEnum state)
         {
             //Debug.Log("SetPlayerStateMethodCall");

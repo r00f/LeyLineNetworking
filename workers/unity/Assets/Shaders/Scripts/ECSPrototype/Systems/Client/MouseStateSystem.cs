@@ -18,16 +18,23 @@ public class MouseStateSystem : JobComponentSystem
 {
     private BeginSimulationEntityCommandBufferSystem entityCommandBufferSystem;
 
+    Settings settings;
     EntityQuery m_AuthoritativePlayerData;
     EntityQuery m_MouseStateData;
     //PathFindingSystem m_PathFindingSystem;
     EventSystem eventSystem;
+
+    PlayerStateSystem m_PlayerStateSystem;
+
+    Vector2 MapCenter = new Vector2(28f, 28f);
 
     protected override void OnCreate()
     {
         base.OnCreate();
         entityCommandBufferSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
         eventSystem = Object.FindObjectOfType<EventSystem>();
+        settings = Resources.Load<Settings>("Settings");
+        
 
         m_MouseStateData = GetEntityQuery(
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -50,9 +57,10 @@ public class MouseStateSystem : JobComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
-
-        //m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
+        m_PlayerStateSystem = World.GetExistingSystem<PlayerStateSystem>();
     }
+
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         if (m_AuthoritativePlayerData.CalculateEntityCount() == 0)
@@ -67,9 +75,31 @@ public class MouseStateSystem : JobComponentSystem
 
         if (Physics.Raycast(ray, out RaycastHit hit) && !eventSystem.IsPointerOverGameObject())
         {
+            float dist = Vector3.Distance(ray.origin, hit.point);
+            Debug.DrawRay(ray.origin, ray.direction * dist, Color.red);
+
+            Vector2 mouseHitXZPos = (MapCenter - new Vector2(hit.point.x, hit.point.z)) * -1;
+            //Debug.Log("mouseHitXZ: " + mouseHitXZPos.x + ", " + mouseHitXZPos.y);
+
+            Vector3f posToCubeCoord = PixelToCube(mouseHitXZPos);
+
+            if(Input.GetButtonDown("Fire1"))
+            {
+                //instantiate mouse particle at hitPos
+                Object.Instantiate(settings.MouseClickPS, hit.point, Quaternion.identity);
+
+            }
+
+            //set to center of hovered cell instead of hit.point
+            m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, hit.point);
+
+            //HighlightingDataComponent h = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+            //Debug.Log("posToCubeCoord: " + posToCubeCoord.X + ", " + posToCubeCoord.Y + ", " + posToCubeCoord.Z);
+
             var mouseStateJob = new MouseStateJob
             {
                 //PathFinding = m_PathFindingSystem,
+                HoveredCoord = posToCubeCoord,
                 CellAttributes = myTypeFromEntity,
                 PlayerEntities = m_AuthoritativePlayerData.ToEntityArray(Allocator.TempJob),
                 MouseLeftButtonDown = Input.GetButtonDown("Fire1"),
@@ -77,7 +107,7 @@ public class MouseStateSystem : JobComponentSystem
                 Hit = hit,
                 PlayerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob),
                 PlayerFactions = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob),
-                HighlightingDatas = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob),
+                //HighlightingDatas = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob),
                 ECBuffer = entityCommandBufferSystem.CreateCommandBuffer().ToConcurrent()
             };
             return mouseStateJob.Schedule(this, inputDeps);
@@ -86,10 +116,19 @@ public class MouseStateSystem : JobComponentSystem
             return inputDeps;
     }
 
+    public Vector3f PixelToCube(Vector2 point)
+    {
+        var q = (2f / 3 * point.x);
+        var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
+        return CellGridMethods.CubeRound(CellGridMethods.AxialToCube(new Vector2(q,r)));
+    }
+
+
     struct MouseStateJob : IJobForEachWithEntity<Position.Component, MouseState, MouseVariables, CubeCoordinate.Component, SpatialEntityId, MarkerState>
     {
         [ReadOnly] public ComponentDataFromEntity<CellAttributesComponent.Component> CellAttributes;
         //public PathFindingSystem PathFinding;
+        public Vector3f HoveredCoord;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<Entity> PlayerEntities;
         public RaycastHit Hit;
@@ -100,23 +139,26 @@ public class MouseStateSystem : JobComponentSystem
         public NativeArray<FactionComponent.Component> PlayerFactions;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<PlayerState.Component> PlayerStates;
-        [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
-        public NativeArray<HighlightingDataComponent> HighlightingDatas;
+        //[NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
+       // public NativeArray<HighlightingDataComponent> HighlightingDatas;
 
         public void Execute(Entity entity, int index, ref Position.Component pos, ref MouseState mouseState, ref MouseVariables mouseVars, ref CubeCoordinate.Component coord, ref SpatialEntityId id, ref MarkerState markerState)
         {
             var playerFaction = PlayerFactions[0];
             var playerState = PlayerStates[0];
-            var highLighting = HighlightingDatas[0];
+            //var highLighting = HighlightingDatas[0];
             Vector3 position = pos.Coords.ToUnityVector() + new Vector3(0, mouseVars.yOffset, 0);
             Vector3 hitDist = Hit.point - position;
             float hitSquared = hitDist.sqrMagnitude;
-            long unitOnCellId;
 
-            if (markerState.IsUnit == 0)
-                unitOnCellId = CellAttributes[entity].CellAttributes.Cell.UnitOnCellId;
-            else
-                unitOnCellId = 0;
+            //long unitOnCellId;
+
+            //if (markerState.IsUnit == 0)
+                //unitOnCellId = CellAttributes[entity].CellAttributes.Cell.UnitOnCellId;
+            //else
+                //unitOnCellId = 0;
+
+            //highLighting.HoveredCoordinate = HoveredCoord;
 
             //reset clicked mouseStates on rightclick
             /*
@@ -134,8 +176,9 @@ public class MouseStateSystem : JobComponentSystem
             }
             */
 
-            if (hitSquared < mouseVars.Distance * mouseVars.Distance)
+            if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(HoveredCoord)    /*hitSquared < mouseVars.Distance * mouseVars.Distance*/)
             {
+                //Debug.Log("Hit a Coordinate!");
                 if (MouseLeftButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
                 {
                     //add reactive component ClickEvent to flag this object as a clicked object
@@ -147,20 +190,22 @@ public class MouseStateSystem : JobComponentSystem
                 {
                     if (mouseState.CurrentState != MouseState.State.Hovered)
                     {
+                        /*
                         if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
-                            if (Vector3fext.ToUnityVector(highLighting.HoveredCoordinate) != Vector3fext.ToUnityVector(coord.CubeCoordinate))
-                            {
-                                highLighting.HoveredCoordinate = coord.CubeCoordinate;
-                                highLighting.HoveredPosition = position;
-                            }
-                            else
-                            {
-                                highLighting.LastHoveredCoordinate = new Vector3f(999, 999, 999);
-                            }
+                            //if (Vector3fext.ToUnityVector(highLighting.HoveredCoordinate) != Vector3fext.ToUnityVector(coord.CubeCoordinate))
+                            //{
+                                //highLighting.HoveredCoordinate = coord.CubeCoordinate;
+                                //highLighting.HoveredPosition = position;
+                            //}
+                            //else
+                            //{
+                                //highLighting.LastHoveredCoordinate = new Vector3f(999, 999, 999);
+                            //}
                         }
                         else
                         {
+                            /*
                             if (highLighting.IsUnitTarget == 1)
                             {
                                 if (markerState.IsUnit == 1)
@@ -195,8 +240,10 @@ public class MouseStateSystem : JobComponentSystem
                                 highLighting.HoveredCoordinate = coord.CubeCoordinate;
                                 highLighting.HoveredPosition = position;
                             }
+
                         }
-                        ECBuffer.SetComponent(index, PlayerEntities[0], highLighting);
+                        //ECBuffer.SetComponent(index, PlayerEntities[0], highLighting);
+                        */
                         mouseState.CurrentState = MouseState.State.Hovered;
                     }
                 }

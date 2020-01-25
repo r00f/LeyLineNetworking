@@ -51,6 +51,20 @@ LODGroup:
     renderers:
     - renderer: {fileID: 7073928196423604147}
   m_Enabled: 1
+--- !u!136 &4351772310324813884
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8797625997368288111}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.3
+  m_Height: 5.8212
+  m_Direction: 1
+  m_Center: {x: 0, y: 2.58, z: 0}
 --- !u!1001 &663893014899309158
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -120,6 +134,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 27fadb35e5314a448b6858b6bccf8b30, type: 3}
+--- !u!1 &8797625997368288111 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -927199367670048503, guid: 27fadb35e5314a448b6858b6bccf8b30,
+    type: 3}
+  m_PrefabInstance: {fileID: 663893014899309158}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5497817501091107196 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 27fadb35e5314a448b6858b6bccf8b30,
