@@ -91,11 +91,11 @@ public class InitializeUnitsSystem : ComponentSystem
             foreach (Renderer r in teamColorMeshes.FullColorMeshes)
             {
                 if(r.material.HasProperty("_UnlitColor"))
-                    r.material.SetColor("_UnlitColor", factionColor);
+                    r.material.SetColor("_UnlitColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_UnlitColor").a));
                 else if(r.material.HasProperty("_BaseColor"))
-                    r.material.SetColor("_BaseColor", factionColor);
+                    r.material.SetColor("_BaseColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_BaseColor").a));
 
-                if(r is SpriteRenderer)
+                if (r is SpriteRenderer)
                 {
                     r.material.color = factionColor;
                 }

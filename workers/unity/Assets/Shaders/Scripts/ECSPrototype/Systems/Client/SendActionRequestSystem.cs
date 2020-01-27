@@ -47,6 +47,7 @@ public class SendActionRequestSystem : ComponentSystem
         );
 
         m_ClickedUnitData = GetEntityQuery(
+        ComponentType.ReadOnly<Actions.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<ClickEvent>()
@@ -145,11 +146,12 @@ public class SendActionRequestSystem : ComponentSystem
                     //Now only loops over the clicked cell (ClickEvent component)
                     Entities.With(m_CellData).ForEach((ref SpatialEntityId cellEntityId, ref CubeCoordinate.Component cCoord, ref MarkerState cellMarkerState) =>
                     {
-
                         var cellCoord = Vector3fext.ToUnityVector(cCoord.CubeCoordinate);
 
                         if (cellCoord != unitCoord || TargetCoord == cellCoord)
                         {
+
+                            Debug.Log("SendCellTargetRequest");
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
@@ -166,10 +168,10 @@ public class SendActionRequestSystem : ComponentSystem
                 }
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
-                    bool sent = false;
+                    //bool sent = false;
                     Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId) =>
                     {
-
+                        Debug.Log("SendUnitTargetRequest");
                         var request = new Actions.SetTargetCommand.Request
                         (
                             unitEntityId,
@@ -177,9 +179,10 @@ public class SendActionRequestSystem : ComponentSystem
                         );
 
                         m_CommandSystem.SendCommand(request);
-                        sent = true;
+                        //sent = true;
                         m_HighlightingSystem.ResetHighlights();
                     });
+                    /*
                     if (!sent)
                     {
                         Entities.With(m_CellData).ForEach((ref SpatialEntityId cellEntityId, ref CubeCoordinate.Component cCoord, ref MarkerState cellMarkerState) =>
@@ -200,6 +203,7 @@ public class SendActionRequestSystem : ComponentSystem
                             m_HighlightingSystem.ResetHighlights();
                         });
                     }
+                    */
                 }
             }
 
@@ -221,6 +225,8 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
+
+        Debug.Log("SelectActionCommand");
         bool isSelfTarget = false;
 
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);

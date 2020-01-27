@@ -205,9 +205,6 @@ namespace LeyLineHybridECS
                                 break;
                         }
 
-                        UIRef.BlueColor.color = settings.FactionColors[1];
-                        UIRef.RedColor.color = settings.FactionColors[2];
-
                         UIRef.StartupPanel.SetActive(false);
                     }
                 }
@@ -830,39 +827,20 @@ namespace LeyLineHybridECS
             healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
             //if there is no group of this unitType, create one
 
-            if (!stats.IsHero && unitFaction == playerFaction)
+            if (!stats.IsHero)
             {
-                if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
+                if(unitFaction == playerFaction)
                 {
-                    //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
-                    UnitGroupUI unitGroup = Object.Instantiate(UIRef.UnitGroupPrefab, UIRef.UnitGroupsParent.transform);
-                    unitGroup.UnitTypeImage.sprite = stats.UnitTypeSprite;
-                    //if faction is even set to factionColors 1 if odd to factioncolors2
-                    unitGroup.EnergyFill.color = settings.FactionColors[(int)playerFaction];
-                    SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
-                    unitButton.UnitId = unitId;
-                    unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
-                    unitButton.UnitIcon.sprite = stats.UnitTypeSprite;
-                    if (!unitGroup.SelectUnitButtons.Contains(unitButton))
-                        unitGroup.SelectUnitButtons.Add(unitButton);
-                    stats.SelectUnitButtonInstance = unitButton;
-                    //problematic if unit has a locked action
-                    //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                    unitButton.UnitButton.onClick.AddListener(delegate {SetSelectedUnitId(unitId); });
-                    unitGroup.ExistingUnitIds.Add(unitId);
-                    unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
-                    UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
-                }
-                else
-                {
-                    //if a group of this type already exists, instanciate a button inside it for this unit
-                    UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];
-
-                    if (!unitGroup.ExistingUnitIds.Contains(unitId))
+                    if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
                     {
+                        //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
+                        UnitGroupUI unitGroup = Object.Instantiate(UIRef.UnitGroupPrefab, UIRef.UnitGroupsParent.transform);
+                        unitGroup.UnitTypeImage.sprite = stats.UnitTypeSprite;
+                        //if faction is even set to factionColors 1 if odd to factioncolors2
+                        unitGroup.EnergyFill.color = settings.FactionColors[(int)playerFaction];
                         SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
-                        unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
                         unitButton.UnitId = unitId;
+                        unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
                         unitButton.UnitIcon.sprite = stats.UnitTypeSprite;
                         if (!unitGroup.SelectUnitButtons.Contains(unitButton))
                             unitGroup.SelectUnitButtons.Add(unitButton);
@@ -872,8 +850,35 @@ namespace LeyLineHybridECS
                         unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
                         unitGroup.ExistingUnitIds.Add(unitId);
                         unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
+                        UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
+                    }
+                    else
+                    {
+                        //if a group of this type already exists, instanciate a button inside it for this unit
+                        UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];
+
+                        if (!unitGroup.ExistingUnitIds.Contains(unitId))
+                        {
+                            SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
+                            unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
+                            unitButton.UnitId = unitId;
+                            unitButton.UnitIcon.sprite = stats.UnitTypeSprite;
+                            if (!unitGroup.SelectUnitButtons.Contains(unitButton))
+                                unitGroup.SelectUnitButtons.Add(unitButton);
+                            stats.SelectUnitButtonInstance = unitButton;
+                            //problematic if unit has a locked action
+                            //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
+                            unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                            unitGroup.ExistingUnitIds.Add(unitId);
+                            unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
+                        }
                     }
                 }
+            }
+            else
+            {
+                UIRef.SelectHeroButton.UnitId = unitId;
+                UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
             }
         }
 

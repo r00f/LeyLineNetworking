@@ -12,6 +12,7 @@ public class UIReferences : MonoBehaviour
     public GameObject MatchReadyPanel;
 
     [Header("TopLeftHeroPanel")]
+    public SelectUnitButton SelectHeroButton;
     public Text TopEnergyText;
     public Image TopEnergyFill;
     public Image TopHealthFill;
@@ -31,10 +32,6 @@ public class UIReferences : MonoBehaviour
 
     [Header("ReadyPanel")]
     public Button ReadyButton;
-    //public GameObject RedReady;
-    //public GameObject BlueReady;
-    public Image BlueColor;
-    public Image RedColor;
     public Image RopeBar;
 
     [Header("UnitPortrait")]
