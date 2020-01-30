@@ -45,8 +45,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Action:
+    Name: 
+    CombinedCost: 0
+    Index: 0
+    Targets: []
+    Effects: []
+    ActionExecuteStep: 0
+    TimeToExecute: 0
   DestroyAtDestination: 0
   DestinationReached: 0
+  EffectTriggered: 0
   FlagForDestruction: 0
   QueuedForDestruction: 0
   ArriveInstantly: 1
@@ -5166,7 +5175,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4323535
+  m_MaxDistance: 0.30424747
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5252,7 +5261,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4323535
+  m_MaxDistance: 0.30424747
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5357,7 +5366,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4323535
+  m_MaxDistance: 0.30424747
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5456,7 +5465,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4323535
+  m_MaxDistance: 0.30424747
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

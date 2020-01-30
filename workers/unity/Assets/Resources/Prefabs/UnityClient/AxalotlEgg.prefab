@@ -4899,6 +4899,7 @@ GameObject:
   - component: {fileID: 209969215213833698}
   - component: {fileID: 4367961099226942553}
   - component: {fileID: 296642661416012695}
+  - component: {fileID: -979750950693851312}
   m_Layer: 11
   m_Name: AxalotlEgg
   m_TagString: Untagged
@@ -4975,7 +4976,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UnitHeadUIPrefab: {fileID: 6185683490695699564, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
+  UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
   UnitHeadUIInstance: {fileID: 0}
 --- !u!114 &8656971215830653018
@@ -5073,17 +5074,11 @@ MonoBehaviour:
   - {fileID: 7550265048827665363}
   EnableVisualsDelay: 2
   CharacterEffects: []
-  LastStationaryCoordinate:
-    X: 0
-    Y: 0
-    Z: 0
   RotationSpeed: 0
   RotateTransform: {fileID: 7550265048827693047}
   DestinationReachTriggerSet: 0
   RotationTarget: {x: 0, y: 0, z: 0}
   DestinationPosition: {x: 0, y: 0, z: 0}
-  LastHealth: 1
-  ActionEffectTrigger: 1
   Dead: 0
   DeathEventTrigger: 0
   ObjectsToDisable:
@@ -5159,6 +5154,28 @@ MonoBehaviour:
   arcOffset: {x: 0, y: 1.2, z: 0}
   pathColor: {r: 0.149055, g: 1, b: 0, a: 1}
   arcColor: {r: 1, g: 0.6693673, b: 0, a: 1}
+--- !u!114 &-979750950693851312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1648259841331300964}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0b0f8c96b65f0b47a375a65b1bcd83e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  BloodParticleSystem: {fileID: 1393841048670574437, guid: 4233759ae060dcf45b46bda562f15480,
+    type: 3}
+  DefenseParticleSystem: {fileID: 0}
+  LastArmor: 0
+  LastHealth: 0
+  LastStationaryCoordinate:
+    X: 0
+    Y: 0
+    Z: 0
+  ActionEffectTrigger: 0
 --- !u!1 &5768095011305597722
 GameObject:
   m_ObjectHideFlags: 0
@@ -6158,12 +6175,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
---- !u!23 &7352173986785806790 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 2300000, guid: 51c255269242ba748954e29d496625c5,
-    type: 3}
-  m_PrefabInstance: {fileID: 7352173986783908262}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7352173986783513382 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: 51c255269242ba748954e29d496625c5,
@@ -6173,6 +6184,12 @@ Transform:
 --- !u!1 &7352173986783876870 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5,
+    type: 3}
+  m_PrefabInstance: {fileID: 7352173986783908262}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7352173986785806790 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2300000, guid: 51c255269242ba748954e29d496625c5,
     type: 3}
   m_PrefabInstance: {fileID: 7352173986783908262}
   m_PrefabAsset: {fileID: 0}
@@ -6373,12 +6390,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &7550265048827665367 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100000, guid: e92f6362d6f75964e8ca2af4bea3a123,
-    type: 3}
-  m_PrefabInstance: {fileID: 7550265048827567479}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &7550265048825398555 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 2300012, guid: e92f6362d6f75964e8ca2af4bea3a123,
@@ -6424,6 +6435,12 @@ GameObject:
 --- !u!4 &7550265048827693047 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: e92f6362d6f75964e8ca2af4bea3a123,
+    type: 3}
+  m_PrefabInstance: {fileID: 7550265048827567479}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &7550265048827665367 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100000, guid: e92f6362d6f75964e8ca2af4bea3a123,
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}

@@ -70,6 +70,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -94,21 +95,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Action:
+    Name: 
+    CombinedCost: 0
+    Index: 0
+    Targets: []
+    Effects: []
+    ActionExecuteStep: 0
+    TimeToExecute: 0
   DestroyAtDestination: 1
   DestinationReached: 0
+  EffectTriggered: 0
   FlagForDestruction: 0
+  QueuedForDestruction: 0
+  ArriveInstantly: 0
   TransformToMove: {fileID: 5341185222269292129}
   TransformToRotate: {fileID: 5341185222269292129}
   PhysicsExplosionOrigin: {fileID: 5341185222269292129}
-  TravellingSpeed: 7
+  TravellingSpeed: 12
   MaxHeight: 1.5
+  MovementDelay: 0
+  Acceleration: 0
+  TargetYOffset: 0
   ToungeEnd: {fileID: 0}
   ToungeBase: {fileID: 0}
   LaunchForce: 0
   ContractSpeed: 0
+  ContractUpForce: 0
   Launched: 0
   BaseJoint: {fileID: 0}
   SpringJoints: []
+  DestroyAfterSeconds: 0
+  ExplosionWaitTime: 0.02
   ExplosionRadius: 1
   ExplosionForce: 300
   BodyParticleSystem: {fileID: 3589144075304049518}
@@ -117,7 +135,6 @@ MonoBehaviour:
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
-  EffectOnDetonation: 0
   IsTravelling: 0
   MovementPercentage: 0
 --- !u!114 &6593013996290753601

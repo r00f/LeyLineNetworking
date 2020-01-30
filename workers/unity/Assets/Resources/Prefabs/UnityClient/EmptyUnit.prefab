@@ -56,6 +56,7 @@ LineRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -191,6 +192,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -275,6 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 0}
   AnimationEvents: {fileID: 0}
   ExecuteTriggerSet: 0
@@ -283,18 +286,13 @@ MonoBehaviour:
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects: []
-  LastStationaryCoordinate:
-    X: 0
-    Y: 0
-    Z: 0
   RotationSpeed: 4
   RotateTransform: {fileID: 0}
   DestinationReachTriggerSet: 0
   RotationTarget: {x: 0, y: 0, z: 0}
   DestinationPosition: {x: 0, y: 0, z: 0}
-  LastHealth: 0
-  ActionEffectTrigger: 1
   Dead: 0
+  DeathEventTrigger: 0
   ObjectsToDisable: []
   RagdollRigidBodies:
   - {fileID: 0}
@@ -335,6 +333,7 @@ MonoBehaviour:
   - {fileID: 3054411595258263595}
   color: {r: 0, g: 0, b: 0, a: 0}
   detailColorMeshes: []
+  PartialColorMasks: []
 --- !u!114 &9121732361173887378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -368,7 +367,11 @@ MonoBehaviour:
   EnergyIncome: 0
   BasicMove: {fileID: 11400000, guid: 8fa6cd2aaaa8e02459cc97c4cf951ae2, type: 2}
   BasicAttack: {fileID: 11400000, guid: a522648c58fd9b44fa672d200d7834a7, type: 2}
+  SelectUnitButtonInstance: {fileID: 0}
   IsHero: 1
+  UIInitialized: 0
+  UnitTypeId: 0
+  UnitTypeSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
   - {fileID: 0}
@@ -386,7 +389,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UnitHeadUIPrefab: {fileID: 6185683490695699564, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
+  UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
   UnitHeadUIInstance: {fileID: 0}
 --- !u!114 &930118610718755571
@@ -514,6 +517,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
@@ -624,6 +628,7 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
   m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
   m_PreserveUVs: 0
   m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0

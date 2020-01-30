@@ -17,6 +17,10 @@ namespace LeyLineHybridECS
             {
                 gridGenerator.GenerateGrid();
             }
+            if (GUILayout.Button("Refresh Grid"))
+            {
+                gridGenerator.RefreshHexagonList();
+            }
             if (GUILayout.Button("Clear Grid"))
             {
                 var children = new List<GameObject>();
