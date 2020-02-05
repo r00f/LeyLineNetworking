@@ -225,7 +225,7 @@ namespace LeyLineHybridECS
                     case GameStateEnum.planning:
                         foreach(UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                         {
-                            UpdateUnitGroupBauble(g);
+                            UpdateUnitGroupBauble(g, authPlayersFaction[0]);
                         }
 
                         if (Input.GetKeyDown(KeyCode.Alpha1))
@@ -326,6 +326,7 @@ namespace LeyLineHybridECS
             {
                 uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var position = EntityManager.GetComponentObject<Transform>(e).position;
+                var energy = EntityManager.GetComponentData<Energy.Component>(e);
                 var lineRenderer = EntityManager.GetComponentObject<LineRendererComponent>(e);
                 var animatedPortrait = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClip;
                 var factionColor = faction.TeamColor;
@@ -341,7 +342,7 @@ namespace LeyLineHybridECS
 
                 //WHEN TO UPDATE UNIT BUTTON
                 if (stats.SelectUnitButtonInstance)
-                    UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance);
+                    UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
 
                 //set topLeft healthBar values for this players hero
                 if (stats.IsHero && faction.Faction == authPlayerFaction)
@@ -350,7 +351,7 @@ namespace LeyLineHybridECS
 
                     if(gameState.CurrentState == GameStateEnum.planning)
                     {
-                        UpdateCircleBauble(lineRenderer, actions, UIRef.TopEnergyFill, UIRef.TopEnergyText);
+                        UpdateHeroBauble(lineRenderer, actions, UIRef.TopEnergyFill, UIRef.TopEnergyText, energy, faction);
                     }
 
                 }
@@ -698,46 +699,70 @@ namespace LeyLineHybridECS
             return parentCanvas.transform.TransformPoint(movePos);
         }
 
-        void UpdateSelectUnitButton(Actions.Component actions, SelectUnitButton unitButton)
+        void UpdateSelectUnitButton(Actions.Component actions, SelectUnitButton unitButton, Energy.Component inEnergy, FactionComponent.Component inFaction)
         {
-            if(!unitButton.HasLockedAction)
+            unitButton.EnergyAmountChange = 0;
+            if (inEnergy.Harvesting)
             {
-                if(actions.LockedAction.Index != -3)
-                {
-                    unitButton.EnergyFill.enabled = true;
-                    unitButton.HasLockedAction = true;
-                }
+                unitButton.EnergyAmountChange += (int)inEnergy.EnergyIncome;
+            }
+            if(actions.LockedAction.Index != -3)
+            {
+                unitButton.EnergyAmountChange -= (int)actions.LockedAction.CombinedCost;
+
+            }
+
+            if(unitButton.EnergyAmountChange > 0)
+            {
+                unitButton.EnergyFill.enabled = true;
+                unitButton.EnergyFill.color = settings.UIEnergyIncomeColor;
+            }
+            else if(unitButton.EnergyAmountChange < 0)
+            {
+
+                unitButton.EnergyFill.enabled = true;
+                unitButton.EnergyFill.color = settings.FactionColors[(int)inFaction.TeamColor+1];
             }
             else
             {
-                if (actions.LockedAction.Index == -3)
-                {
-                    unitButton.EnergyFill.enabled = false;
-                    unitButton.HasLockedAction = false;
-                }
+                unitButton.EnergyFill.enabled = false;
             }
         }
 
-        void UpdateUnitGroupBauble(UnitGroupUI unitGroupUI)
+        void UpdateUnitGroupBauble(UnitGroupUI unitGroupUI, FactionComponent.Component faction)
         {
             //int totalCost = 0;
+            int combinedAmount = 0;
             float percentageToFill = 0;
 
             foreach(SelectUnitButton selectButton in unitGroupUI.SelectUnitButtons)
             {
-                if(selectButton.HasLockedAction)
+                if(selectButton.EnergyAmountChange != 0)
                 {
                     percentageToFill += 1f;
                 }
+                combinedAmount += selectButton.EnergyAmountChange;
             }
 
             percentageToFill /= unitGroupUI.SelectUnitButtons.Count;
+
+            if (combinedAmount > 0)
+            {
+                unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
+                unitGroupUI.EnergyFill.color = settings.UIEnergyIncomeColor;
+            }
+            else
+            {
+                unitGroupUI.EnergyChangeText.text = combinedAmount.ToString();
+                unitGroupUI.EnergyFill.color = settings.FactionColors[(int)faction.TeamColor + 1];
+            }
 
             LerpEnergyFillAmount(unitGroupUI.EnergyFill, percentageToFill);
         }
 
         void UpdateCircleBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText)
         {
+            //pass in unit to get acces to isharvesting??
             //hacky fix to set current cost of move with linerenderer.count
             if (actions.CurrentSelected.Index == -2)
             {
@@ -762,6 +787,51 @@ namespace LeyLineHybridECS
                     LerpEnergyFillAmount(inEnergyFill, 0);
             }
         }
+
+        void UpdateHeroBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText, Energy.Component inEnergy, FactionComponent.Component inFaction)
+        {
+            int EnergyChangeAmount = 0;
+            if (inEnergy.Harvesting)
+            {
+                EnergyChangeAmount += (int)inEnergy.EnergyIncome;
+            }
+
+            if (actions.CurrentSelected.Index == -2)
+            {
+                EnergyChangeAmount -= lineRenderer.lineRenderer.positionCount - 1;
+            }
+            else if (actions.CurrentSelected.Index != -3)
+            {
+                EnergyChangeAmount -= (int)actions.CurrentSelected.CombinedCost;
+            }
+
+            if (actions.LockedAction.Index != -3)
+            {
+                EnergyChangeAmount -= (int)actions.LockedAction.CombinedCost;
+            }
+
+            if(EnergyChangeAmount != 0)
+            {
+                if (inEnergyFill.fillAmount < 1)
+                    LerpEnergyFillAmount(inEnergyFill, 1);
+                if(EnergyChangeAmount > 0)
+                {
+                    inEnergyText.text = "+" + EnergyChangeAmount.ToString();
+                    inEnergyFill.color = settings.UIEnergyIncomeColor;
+                }
+                else
+                {
+                    inEnergyText.text = EnergyChangeAmount.ToString();
+                    inEnergyFill.color = settings.FactionColors[(int)inFaction.TeamColor+1];
+                }
+            }
+            else
+            {
+                inEnergyText.text = "0";
+                if (inEnergyFill.fillAmount > 0)
+                    LerpEnergyFillAmount(inEnergyFill, 0);
+            }
+    }
 
         public void ResetEnergyBaubles()
         {

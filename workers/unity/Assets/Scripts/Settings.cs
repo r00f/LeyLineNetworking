@@ -9,6 +9,7 @@ public class Settings : ScriptableObject
     public List<Color> MapCellColors;
     public List<Color> TurnStepColors;
     public List<Color> TurnStepBgColors;
+    public Color UIEnergyIncomeColor;
     public Mesh TestMesh;
     public Material TestMat;
     public List<Texture2D> ParialColorMasks;

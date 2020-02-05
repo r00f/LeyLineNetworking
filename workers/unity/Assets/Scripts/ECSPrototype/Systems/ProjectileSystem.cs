@@ -152,7 +152,7 @@ public class ProjectileSystem : ComponentSystem
 
                         if (!projectile.EffectTriggered)
                         {
-                            Debug.Log("TriggerActionEffect from Projetile");
+                            //Debug.Log("TriggerActionEffect from Projetile");
                             m_ActionEffectSystem.TriggerActionEffect(projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin);
 
                             if (projectile.ExplosionParticleSystem)

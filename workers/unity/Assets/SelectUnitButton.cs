@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class SelectUnitButton : MonoBehaviour
 {
     public bool HasLockedAction;
+    public int EnergyAmountChange;
     public Image EnergyFill;
     public Image UnitIcon;
     public Button UnitButton;

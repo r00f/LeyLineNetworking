@@ -99,7 +99,7 @@ public class ActionEffectsSystem : ComponentSystem
 
                             uint damageAmount = effect.DealDamageNested.DamageAmount;
 
-                            Debug.Log("DealDamage: " + damageAmount);
+                            //Debug.Log("DealDamage: " + damageAmount);
 
                             if (unitEffects.CurrentArmor > 0)
                             {
@@ -149,7 +149,7 @@ public class ActionEffectsSystem : ComponentSystem
                                 }
                                 else
                                 {
-                                    Debug.Log("unitEffects.CurrentHealth Negative Set To 0");
+                                    //Debug.Log("unitEffects.CurrentHealth Negative Set To 0");
                                     unitEffects.CurrentHealth = 0;
                                 }
                             }

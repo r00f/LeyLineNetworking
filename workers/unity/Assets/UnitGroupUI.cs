@@ -11,6 +11,7 @@ public class UnitGroupUI : MonoBehaviour
     public Image EnergyFill;
     public RectTransform Arrow;
     public Text UnitCountText;
+    public Text EnergyChangeText;
     public List<long> ExistingUnitIds = new List<long>();
     public List<SelectUnitButton> SelectUnitButtons;
 

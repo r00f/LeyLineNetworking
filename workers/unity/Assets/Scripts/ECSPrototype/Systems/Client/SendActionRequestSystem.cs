@@ -151,7 +151,7 @@ public class SendActionRequestSystem : ComponentSystem
                         if (cellCoord != unitCoord || TargetCoord == cellCoord)
                         {
 
-                            Debug.Log("SendCellTargetRequest");
+                            //Debug.Log("SendCellTargetRequest");
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
