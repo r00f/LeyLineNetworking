@@ -17,6 +17,7 @@ public class UIReferences : MonoBehaviour
     public Image TopEnergyFill;
     public Image TopHealthFill;
     public Image TopArmorFill;
+    public Image HeroPortraitPlayerColor;
 
     [Header("EnergyBarPanel")]
     public Image LeftEnergyIncomeFill;

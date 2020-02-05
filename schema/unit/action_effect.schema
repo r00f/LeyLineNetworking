@@ -7,6 +7,9 @@ type ActionEffect {
 	}
 	type DealDamage {
 	uint32 damage_amount = 1;
+	uint32 explosion_force = 2;
+	uint32 up_force = 3;
+	float explosion_radius = 4;
 	}
 	type GainArmor {
 	uint32 armor_amount = 1;

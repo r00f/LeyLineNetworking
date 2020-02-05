@@ -8,6 +8,8 @@ using Generic;
 public class AnimatorComponent : MonoBehaviour
 {
 
+    public Transform WeaponTransform;
+
     [Header("GenericAnimation")]
     public ECSAction CurrentLockedAction;
     public Animator Animator;

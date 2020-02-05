@@ -45,11 +45,12 @@ public class Projectile : MonoBehaviour
     public List<SpringJoint> SpringJoints;
     public float DestroyAfterSeconds;
 
+    /*
     [Header("Impact Physics Explosion")]
     public float ExplosionWaitTime;
     public float ExplosionRadius;
     public int ExplosionForce;
-
+    */
 
     public ParticleSystem BodyParticleSystem;
     public ParticleSystem TrailParticleSystem;

@@ -13,5 +13,6 @@ public class Settings : ScriptableObject
     public Material TestMat;
     public List<Texture2D> ParialColorMasks;
     public GameObject MouseClickPS;
+    public GameObject ExplosionDebugSphere;
     
 }

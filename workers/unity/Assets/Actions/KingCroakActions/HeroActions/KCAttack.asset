@@ -41,7 +41,10 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  damageAmount: 65
+  DamageAmount: 55
+  ExplosionRadius: 0.8
+  ExplosionForce: 2000
+  UpForce: 20
 --- !u!114 &114273308848104638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -55,7 +58,7 @@ MonoBehaviour:
   m_Name: T_Unit(Clone)
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
-  targettingRange: 4
+  targettingRange: 5
   energyCost: 5
   ModToAdd: {fileID: 0}
   SecondaryTargets: []

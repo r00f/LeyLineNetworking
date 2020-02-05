@@ -189,7 +189,7 @@ namespace LeyLineHybridECS
                         {
                             case TeamColorEnum.blue:
                                 //UIRef.HeroPortraitTeamColour.color = Color.blue;
-
+                                UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[1];
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[1];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[1];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[1];
@@ -198,6 +198,7 @@ namespace LeyLineHybridECS
                                 break;
                             case TeamColorEnum.red:
                                 //UIRef.HeroPortraitTeamColour.color = Color.red;
+                                UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[2];
                                 UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[2];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[2];

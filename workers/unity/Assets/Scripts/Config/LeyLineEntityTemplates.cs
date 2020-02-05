@@ -554,7 +554,10 @@ public static class LeyLineEntityTemplates {
             {
                 ECS_DealDamageEffect go = inAction.Effects[i] as ECS_DealDamageEffect;
                 AF.EffectType = EffectTypeEnum.deal_damage;
-                AF.DealDamageNested.DamageAmount = go.damageAmount;
+                AF.DealDamageNested.UpForce = go.UpForce;
+                AF.DealDamageNested.ExplosionForce = go.ExplosionForce;
+                AF.DealDamageNested.ExplosionRadius = go.ExplosionRadius;
+                AF.DealDamageNested.DamageAmount = go.DamageAmount;
             }
             if (inAction.Effects[i] is ECS_ArmorEffect)
             {

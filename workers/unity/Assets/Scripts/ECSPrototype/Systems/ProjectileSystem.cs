@@ -153,7 +153,7 @@ public class ProjectileSystem : ComponentSystem
                         if (!projectile.EffectTriggered)
                         {
                             Debug.Log("TriggerActionEffect from Projetile");
-                            m_ActionEffectSystem.TriggerActionEffect(projectile.Action, projectile.UnitId);
+                            m_ActionEffectSystem.TriggerActionEffect(projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin);
 
                             if (projectile.ExplosionParticleSystem)
                             {
@@ -163,24 +163,16 @@ public class ProjectileSystem : ComponentSystem
                             projectile.EffectTriggered = true;
                         }
 
-
-
-                        if (projectile.ExplosionWaitTime > 0)
+                        if (projectile.DestroyAtDestination)
                         {
-                            projectile.ExplosionWaitTime -= Time.deltaTime;
-                        }
-                        else
-                        {
-                            if (projectile.DestroyAtDestination)
+                            if (!projectile.FlagForDestruction)
                             {
-                                if (!projectile.FlagForDestruction)
-                                {
-                                    projectile.FlagForDestruction = true;
-                                }
+                                projectile.FlagForDestruction = true;
                             }
-                            Explode(projectile);
-                            projectile.IsTravelling = false;
                         }
+
+                        //Explode(projectile);
+                        projectile.IsTravelling = false;
                     }
                 }
 
@@ -196,27 +188,6 @@ public class ProjectileSystem : ComponentSystem
         }
     }
 
-    public void Explode(Projectile projectile)
-    {
-        Debug.Log("Explode");
-        //Add ExplosionForce to all Rigidbodies in N range
-        var cols = Physics.OverlapSphere(projectile.PhysicsExplosionOrigin.position, projectile.ExplosionRadius);
-        var rigidbodies = new List<Rigidbody>();
-
-        foreach (var col in cols)
-        {
-            if (col.attachedRigidbody != null && !rigidbodies.Contains(col.attachedRigidbody) && col.gameObject.layer == 11 && !col.attachedRigidbody.isKinematic)
-            {
-                //Debug.Log(col.name);
-                rigidbodies.Add(col.attachedRigidbody);
-            }
-        }
-        foreach (Rigidbody r in rigidbodies)
-        {
-            //Debug.Log("RigidBodyInExplosionRange");
-            r.AddExplosionForce(projectile.ExplosionForce, projectile.PhysicsExplosionOrigin.position, projectile.ExplosionRadius);
-        }
-    }
     /*
     void TriggerUnitActionEffect(EffectTypeEnum inEffectType, HashSet<Vector3f> inCubeCoordinates)
     {

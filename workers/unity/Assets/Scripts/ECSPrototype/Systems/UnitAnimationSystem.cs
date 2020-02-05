@@ -19,10 +19,6 @@ public class UnitAnimationSystem : ComponentSystem
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
 
-    GameObject GarbageCollection;
-
-    EntityQuery m_GarbageCollection;
-
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -64,11 +60,7 @@ public class UnitAnimationSystem : ComponentSystem
         base.OnStartRunning();
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
-        GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
 
-        m_GarbageCollection = Worlds.DefaultWorld.CreateEntityQuery(
-        ComponentType.ReadWrite<GarbageCollectorComponent>()
-        );
     }
 
     protected override void OnUpdate()
@@ -145,7 +137,7 @@ public class UnitAnimationSystem : ComponentSystem
                             else
                             {
                                 Debug.Log("Trigger Action Effect: " + animatorComponent.Animator.GetInteger("ActionIndexInt"));
-                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction, id.EntityId.Id);
+                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform);
                             }
 
                             animatorComponent.AnimationEvents.EventTrigger = false;
@@ -304,74 +296,6 @@ public class UnitAnimationSystem : ComponentSystem
             }
             animatorComponent.Animator.SetTrigger("Execute");
             animatorComponent.ExecuteTriggerSet = true;
-        }
-    }
-
-    public void Death(AnimatorComponent animatorComponent, GameObject bodyPartParticle = null)
-    {
-        var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
-        animatorComponent.Dead = true;
-
-        /*
-        if (animatorComponent.DeathParticleSystem)
-        {
-            ParticleSystem ps = animatorComponent.DeathParticleSystem;
-            ps.Emit(animatorComponent.DeathParticlesCount);
-        }
-        */
-
-        if(bodyPartParticle)
-        {
-            int random = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
-            int random2 = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
-
-            for (int i = 0; i < animatorComponent.RagdollRigidBodies.Count; i++)
-            {
-                if(i == random || i == random2)
-                {
-                    Object.Instantiate(bodyPartParticle, animatorComponent.RagdollRigidBodies[i].position, Quaternion.identity, animatorComponent.RagdollRigidBodies[i].transform);
-                }
-            }
-
-            /*
-            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-            {
-
-                int random = Random.Range(0, 3);
-                //33% chance to spawn 
-                if(random == 0)
-                    Object.Instantiate(bodyPartParticle, r.position, Quaternion.identity, r.transform);
-            }
-            */
-
-        }
-
-        foreach(GameObject go in animatorComponent.ObjectsToDisable)
-        {
-            go.SetActive(false);
-        }
-
-        foreach (Transform t in animatorComponent.Props)
-        {
-            t.parent = animatorComponent.Animator.transform;
-        }
-
-        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
-        animatorComponent.Animator.enabled = false;
-        garbageCollector.GarbageObjects.Add(animatorComponent.Animator.gameObject);
-
-        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-        {
-            garbageCollector.GarbageRigidbodies.Add(r);
-            r.isKinematic = false;
-        }
-
-        if(animatorComponent.DeathExplosionPos)
-        {
-            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-            {
-                r.AddExplosionForce(animatorComponent.DeathExplosionForce, animatorComponent.DeathExplosionPos.position, animatorComponent.DeathExplosionRadius);
-            }
         }
     }
 

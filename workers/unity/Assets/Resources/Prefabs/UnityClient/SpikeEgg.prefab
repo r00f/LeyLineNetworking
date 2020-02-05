@@ -5063,6 +5063,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WeaponTransform: {fileID: 8846974289181975837}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 8045395822357648005}
   AnimationEvents: {fileID: 2081589284147450996}
@@ -5168,9 +5169,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BloodParticleSystem: {fileID: 1393841048670574437, guid: 4233759ae060dcf45b46bda562f15480,
     type: 3}
+  BodyPartBloodParticleSystem: {fileID: 0}
   DefenseParticleSystem: {fileID: 0}
-  LastArmor: 0
-  LastHealth: 0
+  HitPosition: {x: 0, y: 0, z: 0}
+  Action:
+    Name: 
+    CombinedCost: 0
+    Index: 0
+    Targets: []
+    Effects: []
+    ActionExecuteStep: 0
+    TimeToExecute: 0
+  CurrentArmor: 0
+  CurrentHealth: 0
   LastStationaryCoordinate:
     X: 0
     Y: 0

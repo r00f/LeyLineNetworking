@@ -59,9 +59,10 @@ MonoBehaviour:
   FlagForDestruction: 0
   QueuedForDestruction: 0
   ArriveInstantly: 1
+  UnitId: 0
   TransformToMove: {fileID: 0}
   TransformToRotate: {fileID: 1199834125490395627}
-  PhysicsExplosionOrigin: {fileID: 4265137128855466386}
+  PhysicsExplosionOrigin: {fileID: 4265137128855466384}
   TravellingSpeed: 0
   MaxHeight: 0
   MovementDelay: 0.026
@@ -80,16 +81,12 @@ MonoBehaviour:
   - {fileID: 6313709426211851775}
   - {fileID: 2591146601566630127}
   DestroyAfterSeconds: 0.65
-  ExplosionWaitTime: 0.01
-  ExplosionRadius: 1.25
-  ExplosionForce: 2500
   BodyParticleSystem: {fileID: 0}
   TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 4153580750195930896}
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
-  EffectOnDetonation: 0
   IsTravelling: 0
   MovementPercentage: 0
 --- !u!114 &6904204656751084124
@@ -5175,7 +5172,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.30424747
+  m_MaxDistance: 1.7595043
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5261,7 +5258,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.30424747
+  m_MaxDistance: 1.7595043
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5366,7 +5363,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.30424747
+  m_MaxDistance: 1.7595043
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5465,7 +5462,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.30424747
+  m_MaxDistance: 1.7595043
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

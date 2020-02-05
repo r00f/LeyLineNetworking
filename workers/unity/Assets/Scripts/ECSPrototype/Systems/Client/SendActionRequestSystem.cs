@@ -171,7 +171,7 @@ public class SendActionRequestSystem : ComponentSystem
                     //bool sent = false;
                     Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId) =>
                     {
-                        Debug.Log("SendUnitTargetRequest");
+                        //Debug.Log("SendUnitTargetRequest");
                         var request = new Actions.SetTargetCommand.Request
                         (
                             unitEntityId,
@@ -226,7 +226,7 @@ public class SendActionRequestSystem : ComponentSystem
     public void SelectActionCommand(int actionIndex, long entityId)
     {
 
-        Debug.Log("SelectActionCommand");
+        //Debug.Log("SelectActionCommand");
         bool isSelfTarget = false;
 
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);

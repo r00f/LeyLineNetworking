@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Settings
   m_EditorClassIdentifier: 
   FactionColors:
-  - {r: 0.8639405, g: 1, b: 0, a: 1}
+  - {r: 0.6650906, g: 0.6698113, b: 0.26855642, a: 1}
   - {r: 0, g: 0.3966503, b: 1, a: 1}
   - {r: 1, g: 0, b: 0.01442337, a: 1}
   MapCellColors:
@@ -41,4 +41,6 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   MouseClickPS: {fileID: 6132432271661376897, guid: 1cd31527b961a9341be074ff547745d7,
+    type: 3}
+  ExplosionDebugSphere: {fileID: 3937053955492011579, guid: ab8f5f369440e964fa69633247f76f25,
     type: 3}

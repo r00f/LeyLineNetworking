@@ -98,10 +98,11 @@ public class VisionSystem_Server : ComponentSystem
 
                     if (u_Vision.RequireUpdate == true)
                     {
+                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("u_Vision.ReqUpdate = true")
                         .WithField("unitId", id.EntityId.Id));
-
+                        */
                         var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
 
                         if (v.CellsInVisionrange.Count != 0)
@@ -110,10 +111,11 @@ public class VisionSystem_Server : ComponentSystem
                             {
                                 if (p_Faction.Faction == unitFaction)
                                 {
+                                    /*
                                     logger.HandleLog(LogType.Warning,
                                     new LogEvent("UnitLoopSetPlayerVisionReq")
                                     .WithField("UnitFaction", unitFaction));
-
+                                    */
                                     p_Vision.RequireUpdate = true;
                                 }
                             });
@@ -128,10 +130,11 @@ public class VisionSystem_Server : ComponentSystem
                 {
                     if (p_Vision.RequireUpdate)
                     {
+                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("playerVision.ReqUpdate = true")
                         .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
-
+                        */
                         
 
                         p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
@@ -217,7 +220,7 @@ public class VisionSystem_Server : ComponentSystem
                             {
                                 visible = false;
                                 //first tree is visible if not removed from hash
-                                //sightHash.Remove(l[i]);
+                                sightHash.Remove(l[i]);
                                 //Debug.Log("contains removed Coord: " + l[i].X + "," + l[i].Y + "," + l[i].Z);
                             }
                         }
@@ -240,10 +243,11 @@ public class VisionSystem_Server : ComponentSystem
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
     {
         //Debug.Log("UpdatePlayerVision: " + faction);
+        /*
         logger.HandleLog(LogType.Warning,
         new LogEvent("UpdatePlayerVision.")
         .WithField("Faction", faction));
-
+        */
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
 

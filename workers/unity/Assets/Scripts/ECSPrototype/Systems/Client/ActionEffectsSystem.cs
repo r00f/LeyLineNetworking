@@ -12,6 +12,8 @@ using Unity.Collections;
 public class ActionEffectsSystem : ComponentSystem
 {
 
+    Settings settings;
+
     UISystem m_UISystem;
     PathFindingSystem m_PathFindingSystem;
     UnitAnimationSystem m_UnitAnimationSystem;
@@ -20,9 +22,15 @@ public class ActionEffectsSystem : ComponentSystem
     EntityQuery m_CellData;
     EntityQuery m_GameStateData;
 
+    GameObject GarbageCollection;
+    EntityQuery m_GarbageCollection;
+
+
     protected override void OnCreate()
     {
         base.OnCreate();
+        settings = Resources.Load<Settings>("Settings");
+
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<Health.Component>(),
@@ -50,6 +58,12 @@ public class ActionEffectsSystem : ComponentSystem
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+
+        GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
+
+        m_GarbageCollection = Worlds.DefaultWorld.CreateEntityQuery(
+        ComponentType.ReadWrite<GarbageCollectorComponent>()
+        );
     }
 
     protected override void OnUpdate()
@@ -145,11 +159,11 @@ public class ActionEffectsSystem : ComponentSystem
                                 //Object.Instantiate(unitEffects.BloodParticleSystem, animatorComponent.transform.position + new Vector3(0, randomYoffset, 0), Quaternion.identity);
                                 if (unitEffects.BodyPartBloodParticleSystem)
                                 {
-                                    m_UnitAnimationSystem.Death(animatorComponent, unitEffects.BodyPartBloodParticleSystem);
+                                    Death(animatorComponent, unitEffects.Action, unitEffects.HitPosition, unitEffects.BodyPartBloodParticleSystem);
                                 }
                                 else
                                 {
-                                    m_UnitAnimationSystem.Death(animatorComponent);
+                                    Death(animatorComponent, unitEffects.Action, unitEffects.HitPosition);
                                 }
                             }
                             break;
@@ -174,7 +188,7 @@ public class ActionEffectsSystem : ComponentSystem
         gameStates.Dispose();
     }
 
-    public void TriggerActionEffect(Action action, long unitID/*EffectTypeEnum inEffectType,  uint healthAmount, uint armorAmount*/)
+    public void TriggerActionEffect(Action action, long unitID, Transform hitTransform/*EffectTypeEnum inEffectType,  uint healthAmount, uint armorAmount*/)
     {
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
         HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { action.Targets[0].TargetCoordinate };
@@ -195,6 +209,7 @@ public class ActionEffectsSystem : ComponentSystem
             if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)(int)action.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
                 unitEffects.Action = action;
+                unitEffects.HitPosition = hitTransform.position;
                 //Debug.Log("Set Unit actionEffectTrigger from actionEffectsSystem");
                 unitEffects.ActionEffectTrigger = true;
             }
@@ -254,5 +269,103 @@ public class ActionEffectsSystem : ComponentSystem
         projectile.SpawnTransform = spawnTransform;
         projectile.TravellingCurve = travellingPoints;
         projectile.IsTravelling = true;
+    }
+
+    public void Death(AnimatorComponent animatorComponent, Action action, Vector3 position, GameObject bodyPartParticle = null)
+    {
+        var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
+        animatorComponent.Dead = true;
+
+        if (bodyPartParticle)
+        {
+            int random = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
+            int random2 = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
+
+            for (int i = 0; i < animatorComponent.RagdollRigidBodies.Count; i++)
+            {
+                if (i == random || i == random2)
+                {
+                    Object.Instantiate(bodyPartParticle, animatorComponent.RagdollRigidBodies[i].position, Quaternion.identity, animatorComponent.RagdollRigidBodies[i].transform);
+                }
+            }
+        }
+
+        foreach (GameObject go in animatorComponent.ObjectsToDisable)
+        {
+            go.SetActive(false);
+        }
+
+        foreach (Transform t in animatorComponent.Props)
+        {
+            t.parent = animatorComponent.Animator.transform;
+        }
+
+        //Enable ragdoll behaviour
+        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
+        animatorComponent.Animator.enabled = false;
+        garbageCollector.GarbageObjects.Add(animatorComponent.Animator.gameObject);
+
+
+        HashSet<Rigidbody> ragdollHash = new HashSet<Rigidbody>();
+
+        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+        {
+            ragdollHash.Add(r);
+            garbageCollector.GarbageRigidbodies.Add(r);
+            r.isKinematic = false;
+        }
+
+
+        
+        foreach (ActionEffect e in action.Effects)
+        {
+            if(e.EffectType == EffectTypeEnum.deal_damage)
+            {
+                //apply physics forces to ragdoll
+                Explode(position, e.DealDamageNested.ExplosionRadius, e.DealDamageNested.ExplosionForce, e.DealDamageNested.UpForce, ragdollHash);
+            }
+        }
+        //EGG DEATHEXPLOSION 
+        /*
+        if (animatorComponent.DeathExplosionPos)
+        {
+            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+            {
+                r.AddExplosionForce(animatorComponent.DeathExplosionForce, animatorComponent.DeathExplosionPos.position, animatorComponent.DeathExplosionRadius);
+            }
+        }
+        */
+    }
+
+    public void Explode(Vector3 explosionOrigin, float explosionRadius, float explosionForce, uint upForce, HashSet<Rigidbody> ragdollRigidbodies)
+    {
+        //Debug.Log("Explode");
+        //Add ExplosionForce to all Rigidbodies in N range
+        var cols = Physics.OverlapSphere(explosionOrigin, explosionRadius);
+        var rigidbodies = new List<Rigidbody>();
+
+        
+        //var debugSphere = Object.Instantiate(settings.ExplosionDebugSphere, explosionOrigin, Quaternion.identity);
+        //debugSphere.transform.localScale *= explosionRadius;
+        
+
+        foreach (var col in cols)
+        {
+            if (col.attachedRigidbody != null && !rigidbodies.Contains(col.attachedRigidbody) && ragdollRigidbodies.Contains(col.attachedRigidbody))
+            {
+                //Debug.Log(col.name);
+                rigidbodies.Add(col.attachedRigidbody);
+            }
+        }
+
+        foreach (Rigidbody r in rigidbodies)
+        {
+            //ADD MORITZ FANCY AYAYA physics explosion code
+            //Debug.Log("RigidBodyInExplosionRange");
+            r.AddForce(Vector3.up * upForce, ForceMode.Impulse);
+            r.AddExplosionForce(explosionForce, explosionOrigin, explosionRadius);
+        }
+
+        
     }
 }

@@ -42,7 +42,10 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  damageAmount: 55
+  DamageAmount: 55
+  ExplosionRadius: 3
+  ExplosionForce: 500
+  UpForce: 5
 --- !u!114 &114489467121559340
 MonoBehaviour:
   m_ObjectHideFlags: 0
