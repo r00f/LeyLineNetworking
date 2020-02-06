@@ -13,12 +13,14 @@ public class UnitLifeCycleSystem : ComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData
     {
+        public FactionComponent.Component FactionState;
         public CubeCoordinate.Component CubeCoordState;
         public WorldIndex.Component WorldIndexState;
         public long EntityId;
     }
 
     HandleCellGridRequestsSystem m_CellGridSystem;
+    EntityQuery m_PlayerData;
     EntityQuery m_CellData;
     EntityQuery m_UnitAddedData;
     EntityQuery m_UnitRemovedData;
@@ -61,6 +63,13 @@ public class UnitLifeCycleSystem : ComponentSystem
 
         m_UnitRemovedData = GetEntityQuery(unitRemovedDesc);
 
+        m_PlayerData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<PlayerAttributes.Component>(),
+        ComponentType.ReadOnly<FactionComponent.Component>(),
+        ComponentType.ReadWrite<Vision.Component>()
+        );
+
         m_UnitChangedData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
@@ -77,7 +86,7 @@ public class UnitLifeCycleSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        Entities.With(m_UnitAddedData).ForEach((Entity e, ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCubeCoordinate, ref SpatialEntityId unitEntityId) =>
+        Entities.With(m_UnitAddedData).ForEach((Entity e, ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCubeCoordinate, ref SpatialEntityId unitEntityId, ref FactionComponent.Component unitFaction) =>
         {
             var coordComp = unitCubeCoordinate;
             var coord = Vector3fext.ToUnityVector(unitCubeCoordinate.CubeCoordinate);
@@ -92,15 +101,14 @@ public class UnitLifeCycleSystem : ComponentSystem
                 }
             });
 
-            PostUpdateCommands.AddComponent(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id });
+            PostUpdateCommands.AddComponent(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction });
         });
 
-
-        Entities.With(m_UnitChangedData).ForEach((Entity e, ref SpatialEntityId unitEntityId, ref CubeCoordinate.Component unitCubeCoord, ref UnitStateData unitState, ref WorldIndex.Component unitWorldIndex) =>
+        Entities.With(m_UnitChangedData).ForEach((Entity e, ref SpatialEntityId unitEntityId, ref CubeCoordinate.Component unitCubeCoord, ref UnitStateData unitState, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component unitFaction) =>
         {
             if (Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate) != Vector3fext.ToUnityVector(unitCubeCoord.CubeCoordinate) || unitState.WorldIndexState.Value != unitWorldIndex.Value)
             {
-                PostUpdateCommands.SetComponent(e, new UnitStateData { CubeCoordState = unitCubeCoord, WorldIndexState = unitWorldIndex, EntityId = unitEntityId.EntityId.Id });
+                PostUpdateCommands.SetComponent(e, new UnitStateData { CubeCoordState = unitCubeCoord, WorldIndexState = unitWorldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction});
             }
 
         });
@@ -111,6 +119,14 @@ public class UnitLifeCycleSystem : ComponentSystem
             var unitStateVar = unitState;
             var unitCubeCoordinate = Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate);
             var unitWorldIndex = unitState.WorldIndexState.Value;
+
+            //Tell player to update his vision
+            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
+            {
+                if(p_Faction.Faction == unitStateVar.FactionState.Faction)
+                    p_Vision.RequireUpdate = true;
+            });
+
 
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cellCubeCoordinate, ref WorldIndex.Component cellWorldIndex, ref CellAttributesComponent.Component cellAttribute) =>
             {

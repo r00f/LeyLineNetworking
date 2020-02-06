@@ -54,6 +54,15 @@ namespace LeyLineHybridECS
             if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthorativePlayerData.CalculateEntityCount() == 0)
                 return;
 
+            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+            var gameState = gameStates[0];
+
+
+            if (gameState.CurrentState == GameStateEnum.cleanup)
+            {
+                UpdateVision();
+            }
+
             //|| m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob)[0].CurrentState == GameStateEnum.planning ||
 
             var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
@@ -89,27 +98,18 @@ namespace LeyLineHybridECS
                 Collider collider = isVisibleGOs.Collider;
                 byte isVisible = isVisibleComp.Value;
 
-                if (isVisibleComp.RequireUpdate == 0)
+                if (positivesHash.Contains(coord.CubeCoordinate))
                 {
-                    //only compare when serverSide playerVision is updated
-                    if (isVisible == 0)
-                    {
-                        if (positivesHash.Contains(coord.CubeCoordinate))
-                        {
-                            isVisibleComp.Value = 1;
-                            isVisibleComp.RequireUpdate = 1;
-                        }
-                    }
-                    else
-                    {
-                        if (negativessHash.Contains(coord.CubeCoordinate))
-                        {
-                            isVisibleComp.Value = 0;
-                            isVisibleComp.RequireUpdate = 1;
-                        }
-                    }
+                    isVisibleComp.Value = 1;
+                    isVisibleComp.RequireUpdate = 1;
                 }
-                else
+                else if (negativessHash.Contains(coord.CubeCoordinate))
+                {
+                    isVisibleComp.Value = 0;
+                    isVisibleComp.RequireUpdate = 1;
+                }
+
+                if (isVisibleComp.RequireUpdate == 1)
                 {
                     Color color = new Color();
 
@@ -178,6 +178,43 @@ namespace LeyLineHybridECS
 
             playerVisions.Dispose();
             playerFactions.Dispose();
+            gameStates.Dispose();
+        }
+
+
+        //safety method to make sure vision is correct after every step
+
+
+        public void UpdateVision()
+        {
+            Debug.Log("SafetyVisionUpdate in Cleanup Step");
+
+            var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
+            var playerVision = playerVisions[0];
+
+            HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
+
+            Entities.With(m_IsVisibleData).ForEach((IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
+            {
+                if(visionCoordsHash.Contains(cubeCoord.CubeCoordinate))
+                {
+                    if (isVisibleComp.Value == 0)
+                    {
+                        isVisibleComp.Value = 1;
+                        isVisibleComp.RequireUpdate = 1;
+                    }
+                }
+                else
+                {
+                    if (isVisibleComp.Value == 1)
+                    {
+                        isVisibleComp.Value = 0;
+                        isVisibleComp.RequireUpdate = 1;
+                    }
+                }
+            });
+
+            playerVisions.Dispose();
         }
 
         /*
