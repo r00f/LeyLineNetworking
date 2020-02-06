@@ -22,8 +22,6 @@ public class UIReferences : MonoBehaviour
     [Header("EnergyBarPanel")]
     public Image LeftEnergyIncomeFill;
     public Image LeftCurrentEnergyFill;
-    public Image EnergyIncomeFill;
-    public Image CurrentEnergyFill;
     public Text CurrentEnergyText;
     public Text MaxEnergyText;
 

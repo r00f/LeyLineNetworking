@@ -188,18 +188,14 @@ namespace LeyLineHybridECS
                         switch (authPlayersFaction[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
-                                //UIRef.HeroPortraitTeamColour.color = Color.blue;
                                 UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[1];
-                                UIRef.CurrentEnergyFill.color = settings.FactionColors[1];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[1];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[1];
                                 UIRef.SAEnergyFill.color = settings.FactionColors[1];
 
                                 break;
                             case TeamColorEnum.red:
-                                //UIRef.HeroPortraitTeamColour.color = Color.red;
                                 UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[2];
-                                UIRef.CurrentEnergyFill.color = settings.FactionColors[2];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[2];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[2];
                                 UIRef.SAEnergyFill.color = settings.FactionColors[2];
@@ -571,10 +567,8 @@ namespace LeyLineHybridECS
                 float maxEnergy = authPlayerEnergy.MaxEnergy;
                 float currentEnergy = authPlayerEnergy.Energy;
                 float energyIncome = authPlayerEnergy.Income;
-                Image energyFill = UIRef.CurrentEnergyFill;
-                Image incomeEnergyFill = UIRef.EnergyIncomeFill;
-                Image topEnergyFill = UIRef.LeftCurrentEnergyFill;
-                Image topIncomeEnergyFill = UIRef.LeftEnergyIncomeFill;
+                Image energyFill = UIRef.LeftCurrentEnergyFill;
+                Image incomeFill = UIRef.LeftEnergyIncomeFill;
                 Text currentEnergyText = UIRef.CurrentEnergyText;
                 Text maxEnergyText = UIRef.MaxEnergyText;
 
@@ -592,21 +586,18 @@ namespace LeyLineHybridECS
                         UIRef.ReadyButton.interactable = true;
                     }
 
+                    energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
+
+                    if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
+                    {
+                        incomeFill.fillAmount = Mathf.Lerp(incomeFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
+                    }
                 }
 
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
-                topEnergyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, .1f);
-
-                if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
-                {
-                    incomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
-                    topIncomeEnergyFill.fillAmount = Mathf.Lerp(incomeEnergyFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, .1f);
-                }
 
                 currentEnergyText.text = currentEnergy.ToString();
                 maxEnergyText.text = maxEnergy.ToString();
-                //energyText.text = currentEnergy + " / " + maxEnergy;
-
 
                 if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
                 {

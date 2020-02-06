@@ -62,17 +62,24 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) => 
         {
+            /*
             if(gameState.CurrentState == GameStateEnum.calculate_energy)
             {
                 ResetIncomeAdded(gameStateWorldIndex.Value);
             }
-            else if(gameState.CurrentState == GameStateEnum.planning)
+            else*/
+            if (gameState.CurrentState == GameStateEnum.planning)
+            {
+                CalculateIncome(gameStateWorldIndex.Value);
+            }
+            else if (gameState.CurrentState == GameStateEnum.interrupt)
             {
                 AddIncome(gameStateWorldIndex.Value);
             }
         });
     }
 
+    /*
     public void ResetIncomeAdded(uint worldIndex)
     {
         //var workerSystem = World.GetExistingSystem<WorkerSystem>();
@@ -81,13 +88,14 @@ public class ResourceSystem : ComponentSystem
             if (playerWorldIndex.Value == worldIndex && playerEnergy.IncomeAdded == true)
             {
                 playerEnergy.IncomeAdded = false;
-                /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("ResetIncomeAdded.")
-                .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));*/
+                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("ResetIncomeAdded.")
+                .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));
             }
         });
     }
+   */
 
-    public void AddIncome(uint worldIndex)
+    public void CalculateIncome(uint worldIndex)
     {
         var workerSystem = World.GetExistingSystem<WorkerSystem>();
 
@@ -102,12 +110,10 @@ public class ResourceSystem : ComponentSystem
 
         Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
         {
-
             if (playerWorldIndex.Value == worldIndex)
             {
-                if (playerEnergy.IncomeAdded == false)
+                if (playerEnergy.IncomeAdded == true)
                 {
-                    playerEnergy.IncomeAdded = true;
                     playerEnergy.Income = playerEnergy.BaseIncome;
 
                     //Income Calculation do this once at the beginning of each turn
@@ -126,6 +132,8 @@ public class ResourceSystem : ComponentSystem
                         }
                     }
 
+                    playerEnergy.IncomeAdded = false;
+                    /*
                     if (playerEnergy.Energy + playerEnergy.Income <= playerEnergy.MaxEnergy)
                     {
                         playerEnergy.Energy += playerEnergy.Income;
@@ -134,7 +142,7 @@ public class ResourceSystem : ComponentSystem
                     {
                         playerEnergy.Energy = playerEnergy.MaxEnergy;
                     }
-
+                    */
                     //playersEnergy[pi] = playerEnergy;
 
                     /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("AddIncome.")
@@ -147,11 +155,34 @@ public class ResourceSystem : ComponentSystem
         unitsEnergy.Dispose();
     }
 
+    void AddIncome(uint worldIndex)
+    {
+        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        {
+            if (playerWorldIndex.Value == worldIndex)
+            {
+                if (energyComp.IncomeAdded == false)
+                {
+                    if (energyComp.Energy + energyComp.Income < energyComp.MaxEnergy)
+                    {
+                        energyComp.Energy += energyComp.Income;
+                    }
+                    else
+                    {
+                        energyComp.Energy = energyComp.MaxEnergy;
+                    }
+
+                    energyComp.IncomeAdded = true;
+                }
+            }
+        });
+    }
+
     public void AddEnergy(uint playerFaction, uint energyAmount)
     {
         Entities.With(m_PlayerData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
         {
-            if (playerFaction == faction.Faction)
+            if (playerFaction == faction.Faction && energyComp.IncomeAdded == false)
             {
                 if (energyComp.Energy + energyAmount < energyComp.MaxEnergy)
                 {
@@ -161,6 +192,8 @@ public class ResourceSystem : ComponentSystem
                 {
                     energyComp.Energy = energyComp.MaxEnergy;
                 }
+
+                energyComp.IncomeAdded = true;
             }
         });
     }
