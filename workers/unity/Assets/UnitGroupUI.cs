@@ -9,6 +9,7 @@ public class UnitGroupUI : MonoBehaviour
     public GameObject UnitsPanel;
     public Image UnitTypeImage;
     public Image EnergyFill;
+    public Image EnergyGainFill;
     public RectTransform Arrow;
     public Text UnitCountText;
     public Text EnergyChangeText;

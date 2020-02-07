@@ -725,35 +725,43 @@ namespace LeyLineHybridECS
             //int totalCost = 0;
             int combinedAmount = 0;
             float percentageToFill = 0;
+            float percentageGainFill = 0;
 
             foreach(SelectUnitButton selectButton in unitGroupUI.SelectUnitButtons)
             {
-                if(selectButton.EnergyAmountChange != 0)
+                if(selectButton.EnergyAmountChange > 0)
+                {
+                    percentageGainFill += 1f;
+                }
+                else if(selectButton.EnergyAmountChange < 0)
                 {
                     percentageToFill += 1f;
+                    percentageGainFill += 1f;
                 }
                 combinedAmount += selectButton.EnergyAmountChange;
             }
 
             percentageToFill /= unitGroupUI.SelectUnitButtons.Count;
+            percentageGainFill /= unitGroupUI.SelectUnitButtons.Count;
 
+            
             if (combinedAmount > 0)
             {
                 unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
-                unitGroupUI.EnergyFill.color = settings.UIEnergyIncomeColor;
+        //        unitGroupUI.EnergyFill.color = settings.UIEnergyIncomeColor;
             }
             else
             {
                 unitGroupUI.EnergyChangeText.text = combinedAmount.ToString();
-                unitGroupUI.EnergyFill.color = settings.FactionColors[(int)faction.TeamColor + 1];
+             //   unitGroupUI.EnergyFill.color = settings.FactionColors[(int)faction.TeamColor + 1];
             }
-
+            
             LerpEnergyFillAmount(unitGroupUI.EnergyFill, percentageToFill);
+            LerpEnergyFillAmount(unitGroupUI.EnergyGainFill, percentageGainFill);
         }
 
         void UpdateCircleBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText)
         {
-            //pass in unit to get acces to isharvesting??
             //hacky fix to set current cost of move with linerenderer.count
             if (actions.CurrentSelected.Index == -2)
             {
@@ -787,14 +795,14 @@ namespace LeyLineHybridECS
                 EnergyChangeAmount += (int)inEnergy.EnergyIncome;
             }
 
-            if (actions.CurrentSelected.Index == -2)
+          /*  if (actions.CurrentSelected.Index == -2)
             {
                 EnergyChangeAmount -= lineRenderer.lineRenderer.positionCount - 1;
             }
             else if (actions.CurrentSelected.Index != -3)
             {
                 EnergyChangeAmount -= (int)actions.CurrentSelected.CombinedCost;
-            }
+            }*/
 
             if (actions.LockedAction.Index != -3)
             {
@@ -943,6 +951,7 @@ namespace LeyLineHybridECS
                         unitGroup.UnitTypeImage.sprite = stats.UnitTypeSprite;
                         //if faction is even set to factionColors 1 if odd to factioncolors2
                         unitGroup.EnergyFill.color = settings.FactionColors[(int)playerFaction];
+                        unitGroup.EnergyGainFill.color = settings.UIEnergyIncomeColor;
                         SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
                         unitButton.UnitId = unitId;
                         unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
