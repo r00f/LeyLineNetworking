@@ -91,10 +91,11 @@ public class ActionEffectsSystem : ComponentSystem
             if (unitEffects.ActionEffectTrigger)
             {
                 unitEffects.HitPosition = unitCollider.ClosestPoint(unitEffects.AttackPosition);
+                Vector3 dir = unitEffects.AttackPosition - unitEffects.HitPosition;
 
                 //float randomYoffset = Random.Range(0.5f, 1f);
 
-                foreach(ActionEffect effect in unitEffects.Action.Effects)
+                foreach (ActionEffect effect in unitEffects.Action.Effects)
                 {
                     switch (effect.EffectType)
                     {
@@ -135,7 +136,7 @@ public class ActionEffectsSystem : ComponentSystem
                             }
                             else
                             {
-                                Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.identity);
+                                Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
                                 m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
                                 animatorComponent.Animator.SetTrigger("GetHit");
 
