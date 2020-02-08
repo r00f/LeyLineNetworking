@@ -11,6 +11,7 @@ public class UnitEffects : MonoBehaviour
     public GameObject DefenseParticleSystem;
 
     [Header("GetHit")]
+    public Vector3 AttackPosition;
     public Vector3 HitPosition;
     public Action Action;
     public uint CurrentArmor;

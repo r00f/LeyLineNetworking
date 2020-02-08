@@ -37,6 +37,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     private readonly Type[] componentsToAdd =
     {
     typeof(Transform),
+    typeof(Collider),
     typeof(HeroTransform),
     typeof(MarkerGameObjects),
     typeof(UnitMarkerGameObjects),

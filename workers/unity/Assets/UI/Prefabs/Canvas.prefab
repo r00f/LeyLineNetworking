@@ -366,7 +366,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -837.71, y: -207}
+  m_AnchoredPosition: {x: -831.22, y: -210.45}
   m_SizeDelta: {x: 257.56, y: 78.86}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5856338254542589232
@@ -6427,7 +6427,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 145.85}
+  m_AnchoredPosition: {x: 0, y: 20}
   m_SizeDelta: {x: -244.6, y: -291.7}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &7408662512737035267
@@ -6556,7 +6556,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4776103469918531139
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9736,8 +9736,6 @@ MonoBehaviour:
   HeroPortraitPlayerColor: {fileID: 6205598251067044196}
   LeftEnergyIncomeFill: {fileID: 3701078343624185720}
   LeftCurrentEnergyFill: {fileID: 376111631446629397}
-  EnergyIncomeFill: {fileID: 0}
-  CurrentEnergyFill: {fileID: 0}
   CurrentEnergyText: {fileID: 1186699528499484010}
   MaxEnergyText: {fileID: 8271052469091756682}
   HealthBarYOffset: 2.3
@@ -11309,6 +11307,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -11414,16 +11422,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &3761278860204851281 stripped
@@ -11451,6 +11449,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -11556,16 +11564,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &4423566462778211863 stripped
@@ -11593,6 +11591,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -11698,16 +11706,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!114 &3315164831001419125 stripped
@@ -11735,6 +11733,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (8)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -11840,16 +11848,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (8)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!114 &2229484665528436495 stripped
@@ -11877,6 +11875,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -11982,16 +11990,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 2030883953444207045, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -12029,6 +12027,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12134,16 +12142,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (7)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!114 &799805923634901477 stripped
@@ -12171,6 +12169,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12276,16 +12284,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (4)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &1151039945117745096 stripped
@@ -12313,6 +12311,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12418,16 +12426,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (5)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &983603304266745479 stripped
@@ -12455,6 +12453,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12560,16 +12568,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (4)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &8120695115976015664 stripped
@@ -12597,6 +12595,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12702,16 +12710,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (6)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &7620834697554242957 stripped
@@ -12739,6 +12737,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (7)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12844,16 +12852,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (7)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &6207485700591766437 stripped
@@ -12881,6 +12879,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -12986,16 +12994,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &6650392133706612129 stripped
@@ -13023,6 +13021,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13128,16 +13136,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (6)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &6677030011838592526 stripped
@@ -13165,6 +13163,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13270,16 +13278,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (5)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &6503289953180808386 stripped
@@ -13307,6 +13305,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (8)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13412,16 +13420,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (8)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!114 &5839552677488233234 stripped
@@ -13449,6 +13447,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13554,16 +13562,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (3)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!114 &5321664487741918209 stripped
@@ -13591,6 +13589,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2888140846831609673}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13696,16 +13704,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (3)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!114 &4782439352061336038 stripped
@@ -13733,6 +13731,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Name
+      value: ButtonPanel (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: UIRef
+      value: 
+      objectReference: {fileID: 1049850189765156606}
     - target: {fileID: 3895521207639221027, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -13838,16 +13846,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.00000011920929
       objectReference: {fileID: 0}
-    - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: m_Name
-      value: ButtonPanel (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 4341496925114342383, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
-        type: 3}
-      propertyPath: UIRef
-      value: 
-      objectReference: {fileID: 1049850189765156606}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &5331590411094859219 stripped

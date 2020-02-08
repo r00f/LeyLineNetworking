@@ -34,6 +34,7 @@ public class ActionEffectsSystem : ComponentSystem
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<Health.Component>(),
+        ComponentType.ReadOnly<Collider>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
         ComponentType.ReadWrite<UnitEffects>()
@@ -78,6 +79,7 @@ public class ActionEffectsSystem : ComponentSystem
           
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref Health.Component health) =>
         {
+            var unitCollider = EntityManager.GetComponentObject<Collider>(e);
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
             if(gameStates[0].CurrentState == GameStateEnum.planning)
@@ -85,11 +87,12 @@ public class ActionEffectsSystem : ComponentSystem
                 unitEffects.CurrentArmor = 0;
                 unitEffects.CurrentHealth = health.CurrentHealth;
             }
-
             //FeedBack to incoming Attacks / Heals
             if (unitEffects.ActionEffectTrigger)
             {
-                float randomYoffset = Random.Range(0.5f, 1f);
+                unitEffects.HitPosition = unitCollider.ClosestPoint(unitEffects.AttackPosition);
+
+                //float randomYoffset = Random.Range(0.5f, 1f);
 
                 foreach(ActionEffect effect in unitEffects.Action.Effects)
                 {
@@ -99,29 +102,24 @@ public class ActionEffectsSystem : ComponentSystem
 
                             uint damageAmount = effect.DealDamageNested.DamageAmount;
 
-                            //Debug.Log("DealDamage: " + damageAmount);
-
                             if (unitEffects.CurrentArmor > 0)
                             {
                                 //if we take less damage than our last amor amount
                                 if (damageAmount < unitEffects.CurrentArmor)
                                 {
                                     //do armor damage Stuff
+                                    Object.Instantiate(unitEffects.DefenseParticleSystem, unitEffects.HitPosition, Quaternion.identity);
                                     unitEffects.CurrentArmor -= damageAmount;
                                     m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, 5f);
                                     m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.yellow);
                                 }
                                 else
                                 {
-                                    uint remainingDamage = damageAmount - unitEffects.CurrentArmor;
-
-                                    Object.Instantiate(unitEffects.BloodParticleSystem, animatorComponent.transform.position + new Vector3(0, randomYoffset, 0), Quaternion.identity);
-                                    m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red);
-                                    animatorComponent.Animator.SetTrigger("GetHit");
-
                                     //shatter shield
+                                    uint remainingDamage = damageAmount - unitEffects.CurrentArmor;
+                                    Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.identity);
+                                    m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red);
                                     m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .4f, true);
-
                                     unitEffects.CurrentArmor = 0;
 
                                     if ((int)unitEffects.CurrentHealth - (int)remainingDamage > 0)
@@ -130,14 +128,14 @@ public class ActionEffectsSystem : ComponentSystem
                                     }
                                     else
                                     {
-                                        Debug.Log("unitEffects.CurrentHealth Negative Set To 0");
+                                        //Debug.Log("unitEffects.CurrentHealth Negative Set To 0");
                                         unitEffects.CurrentHealth = 0;
                                     }
                                 }
                             }
                             else
                             {
-                                Object.Instantiate(unitEffects.BloodParticleSystem, animatorComponent.transform.position + new Vector3(0, randomYoffset, 0), Quaternion.identity);
+                                Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.identity);
                                 m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
                                 animatorComponent.Animator.SetTrigger("GetHit");
 
@@ -154,21 +152,26 @@ public class ActionEffectsSystem : ComponentSystem
                                 }
                             }
 
+                            animatorComponent.Animator.SetTrigger("GetHit");
+
                             if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0)
                             {
                                 //Object.Instantiate(unitEffects.BloodParticleSystem, animatorComponent.transform.position + new Vector3(0, randomYoffset, 0), Quaternion.identity);
                                 if (unitEffects.BodyPartBloodParticleSystem)
                                 {
-                                    Death(animatorComponent, unitEffects.Action, unitEffects.HitPosition, unitEffects.BodyPartBloodParticleSystem);
+                                    Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition, unitEffects.BodyPartBloodParticleSystem);
                                 }
                                 else
                                 {
-                                    Death(animatorComponent, unitEffects.Action, unitEffects.HitPosition);
+                                    Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition);
                                 }
                             }
                             break;
 
                         case EffectTypeEnum.gain_armor:
+
+                            //enter defensive stance in animator
+                            
                             uint armorAmount = unitEffects.Action.Effects[0].GainArmorNested.ArmorAmount;
                             //do gainArmorStuff
                             unitEffects.CurrentArmor += armorAmount;
@@ -176,13 +179,11 @@ public class ActionEffectsSystem : ComponentSystem
                             m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);
                             break;
                     }
-
-
                 }
-
                 unitEffects.ActionEffectTrigger = false;
-
             }
+
+            animatorComponent.Animator.SetInteger("Armor", (int)unitEffects.CurrentArmor);
         });
 
         gameStates.Dispose();
@@ -209,7 +210,7 @@ public class ActionEffectsSystem : ComponentSystem
             if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)(int)action.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
                 unitEffects.Action = action;
-                unitEffects.HitPosition = hitTransform.position;
+                unitEffects.AttackPosition = hitTransform.position;
                 //Debug.Log("Set Unit actionEffectTrigger from actionEffectsSystem");
                 unitEffects.ActionEffectTrigger = true;
             }
