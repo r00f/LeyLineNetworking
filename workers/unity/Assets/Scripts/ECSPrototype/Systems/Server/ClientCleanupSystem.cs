@@ -56,7 +56,11 @@ public class ClientCleanupSystem : ComponentSystem
 
             if (gameState.CurrentState == GameStateEnum.planning)
             {
-                if (garbageCollector.CurrentSinkTime >= 0)
+                if(garbageCollector.SinkDelay >= 0)
+                {
+                    garbageCollector.SinkDelay -= Time.deltaTime;
+                }
+                else if(garbageCollector.CurrentSinkTime >= 0)
                 {
                     garbageCollector.CurrentSinkTime -= Time.deltaTime;
                     foreach (Rigidbody r in garbageCollector.GarbageRigidbodies)
@@ -84,6 +88,8 @@ public class ClientCleanupSystem : ComponentSystem
             {
                 if (garbageCollector.CurrentSinkTime != garbageCollector.MaxSinkTime)
                     garbageCollector.CurrentSinkTime = garbageCollector.MaxSinkTime;
+                if (garbageCollector.SinkDelay != garbageCollector.MaxSinkDelay)
+                    garbageCollector.SinkDelay = garbageCollector.MaxSinkDelay;
             }
 
             gameStates.Dispose();
