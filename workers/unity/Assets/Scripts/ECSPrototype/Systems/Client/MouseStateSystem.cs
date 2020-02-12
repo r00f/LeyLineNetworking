@@ -80,9 +80,9 @@ public class MouseStateSystem : JobComponentSystem
             Vector2 mouseHitXZPos = (MapCenter - new Vector2(hit.point.x, hit.point.z)) * -1;
             //Debug.Log("mouseHitXZ: " + mouseHitXZPos.x + ", " + mouseHitXZPos.y);
 
-            Vector3f posToCubeCoord = PosToCube(mouseHitXZPos);
+            Vector3f posToCubeCoord = CellGridMethods.PosToCube(mouseHitXZPos);
 
-            Vector3 CubeCoordToWorldPos = CubeToPos(posToCubeCoord);
+            Vector3 CubeCoordToWorldPos = CellGridMethods.CubeToPos(posToCubeCoord, MapCenter);
 
             //Debug.Log("CubeCoordinate to worldPos: " + CubeCoordToWorldPos);
 
@@ -121,24 +121,6 @@ public class MouseStateSystem : JobComponentSystem
         }
         else
             return inputDeps;
-    }
-
-    public Vector3f PosToCube(Vector2 point)
-    {
-        var q = (2f / 3 * point.x);
-        var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
-        return CellGridMethods.CubeRound(CellGridMethods.AxialToCube(new Vector2(q,r)));
-    }
-
-    public Vector3 CubeToPos(Vector3f cubeCoord)
-    {
-        Vector2 axial = CellGridMethods.CubeToAxial(cubeCoord);
-
-        var x = (3f/ 2 * axial.x);
-        var z = (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
-
-        //factor in mapCenter before returning
-        return new Vector3(MapCenter.x + x, 5, MapCenter.y + z);
     }
 
     struct MouseStateJob : IJobForEachWithEntity<Position.Component, MouseState, MouseVariables, CubeCoordinate.Component, SpatialEntityId, MarkerState>

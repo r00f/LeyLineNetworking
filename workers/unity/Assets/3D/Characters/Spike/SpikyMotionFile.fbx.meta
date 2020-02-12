@@ -1851,12 +1851,19 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.1699594
+      - time: 0.15148973
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
+        messageOptions: 0
+      - time: 0.20506468
+        functionName: SwitchEffect
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 2
         messageOptions: 0
       - time: 0.3090969
         functionName: TriggerEvent
@@ -1865,12 +1872,19 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.39536446
+      - time: 0.36897925
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
+        messageOptions: 0
+      - time: 0.42215413
+        functionName: SwitchEffect
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 2
         messageOptions: 0
       transformMask:
       - path: 

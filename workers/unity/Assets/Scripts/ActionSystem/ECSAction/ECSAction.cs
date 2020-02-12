@@ -37,6 +37,7 @@ namespace LeyLineHybridECS
         public string ActionName;
         public string Description;
         public float TimeToExecute;
+        public bool HasWindup;
 
         [Header("Add Targets/Effects")]
         public ECSActionTarget TargetToAdd;

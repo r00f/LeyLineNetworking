@@ -5,6 +5,24 @@ using Generic;
 
 public static class CellGridMethods
 {
+    public static Vector3f PosToCube(Vector2 point)
+    {
+        var q = (2f / 3 * point.x);
+        var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
+        return CubeRound(AxialToCube(new Vector2(q, r)));
+    }
+
+    public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2 mapCenter)
+    {
+        Vector2 axial = CubeToAxial(cubeCoord);
+
+        var x = (3f / 2 * axial.x);
+        var z = (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
+
+        //factor in mapCenter before returning
+        return new Vector3(mapCenter.x + x, 5, mapCenter.y + z);
+    }
+
     public static Vector3f[] DirectionsArray = new Vector3f[]{
           new Vector3f(+1, -1, 0), new Vector3f(+1, 0, -1), new Vector3f(0, +1, -1),
             new Vector3f(-1, +1, 0), new Vector3f(-1, 0, +1), new Vector3f(0, -1, +1)

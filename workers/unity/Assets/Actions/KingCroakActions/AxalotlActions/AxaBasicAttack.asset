@@ -19,6 +19,7 @@ MonoBehaviour:
   ActionName: Splash
   Description: Attacks a enemy with water from afar. Has 3 range and deals 35 damage.
   TimeToExecute: 5
+  HasWindup: 1
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:

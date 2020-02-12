@@ -112,6 +112,11 @@ public class UnitAnimationSystem : ComponentSystem
 
                 else if (gameStates[0].CurrentState != GameStateEnum.planning)
                 {
+                    if(gameStates[0].CurrentState == GameStateEnum.interrupt)
+                    {
+                        animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f)); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                    }
+
                     if (animatorComponent.AnimationEvents)
                     {
                         if (animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
@@ -126,7 +131,7 @@ public class UnitAnimationSystem : ComponentSystem
                             if (animatorComponent.CurrentLockedAction.ProjectileFab)
                             {
                                 //THIS METHOD SUCKS
-                                Vector3 targetPos = CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f)); //CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
                                 float targetYoffset = 0;
                                 if (animatorComponent.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
                                 {
@@ -156,37 +161,16 @@ public class UnitAnimationSystem : ComponentSystem
                             if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
                                 animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
                         }
-                        //rotate animatorComponent.RotateTransform towards targetDirection
-                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
-                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                     }
+
+
+                    //rotate animatorComponent.RotateTransform towards targetDirection
+                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
+                    animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+
                 }
             }
 
-            /*
-            //FeedBack to incoming Attacks / Heals
-            if (animatorComponent.ActionEffectTrigger)
-            {
-                if (animatorComponent.LastHealth != health.CurrentHealth)
-                {
-                    if (health.CurrentHealth == 0)
-                    {
-                        Death(animatorComponent);
-                    }
-                    else if (animatorComponent.LastHealth > health.CurrentHealth)
-                    {
-                        m_UISystem.SetHealthFloatText(e, animatorComponent.LastHealth - health.CurrentHealth);
-                        animatorComponent.Animator.SetTrigger("GetHit");
-                    }
-                    else
-                    {
-                        //healing feedback
-                    }
-                    animatorComponent.LastHealth = health.CurrentHealth;
-                }
-                animatorComponent.ActionEffectTrigger = false;
-            }
-    */
             if (animatorComponent.Visuals.Count != 0)
             {
                 if (animatorComponent.EnableVisualsDelay >= 0)
@@ -226,6 +210,22 @@ public class UnitAnimationSystem : ComponentSystem
 
             #region Set Animator Variables
 
+            if(gameStates[0].CurrentState == GameStateEnum.planning)
+            {
+                animatorComponent.Animator.SetBool("Executed", false);
+                animatorComponent.Animator.SetBool("Planning", true);
+            }
+            else
+            {
+                animatorComponent.Animator.SetBool("Planning", false);
+            }
+                
+
+            if(animatorComponent.CurrentLockedAction)
+                animatorComponent.Animator.SetBool("HasWindup", animatorComponent.CurrentLockedAction.HasWindup);
+            else
+                animatorComponent.Animator.SetBool("HasWindup", false);
+
             animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
 
             if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
@@ -250,10 +250,13 @@ public class UnitAnimationSystem : ComponentSystem
                 animatorComponent.transform.position = Vector3.MoveTowards(animatorComponent.transform.position, serverPosition.Coords.ToUnityVector(), step);
             }
 
-            if (animatorComponent.transform.position == animatorComponent.DestinationPosition)
+            Vector3 posZeroY = new Vector3(animatorComponent.transform.position.x, 5, animatorComponent.transform.position.z);
+
+            if (posZeroY == animatorComponent.DestinationPosition)
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
+                    Debug.Log("DestinationReached");
                     unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
                     animatorComponent.Animator.SetTrigger("DestinationReached");
                     animatorComponent.DestinationPosition = Vector3.zero;
@@ -267,34 +270,17 @@ public class UnitAnimationSystem : ComponentSystem
         gameStates.Dispose();
     }
 
-    public Vector3 CoordinateToWorldPosition(uint inWorldIndex, Vector3f inCubeCoordinate)
-    {
-        Vector3 worldPos = new Vector3();
-
-        Entities.With(m_CellData).ForEach((ref WorldIndex.Component worldIndex, ref Position.Component position, ref CubeCoordinate.Component cubeCoord) =>
-        {
-            if (worldIndex.Value == inWorldIndex && Vector3fext.ToUnityVector(inCubeCoordinate) == Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate))
-            {
-                worldPos = position.Coords.ToUnityVector();
-            }
-        });
-
-        return worldPos;
-    }
-
     public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameStateEnum gameState, uint worldIndex)
     {
         if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState - 2)
         {
             if (!animatorComponent.InitialValuesSet)
             {
-                //Debug.Log("SetInitialValues");
-                if (gameState != GameStateEnum.move)
-                    animatorComponent.RotationTarget = CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-                animatorComponent.DestinationPosition = CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                animatorComponent.DestinationPosition = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f));
                 animatorComponent.InitialValuesSet = true;
             }
             animatorComponent.Animator.SetTrigger("Execute");
+            animatorComponent.Animator.SetBool("Executed", true);
             animatorComponent.ExecuteTriggerSet = true;
         }
     }
