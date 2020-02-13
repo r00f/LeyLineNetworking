@@ -130,6 +130,22 @@ namespace LeyLineHybridECS
             {
                 hexagons.Add(c);
             }
+
+            foreach (var h in hexagons)
+            {
+                var neighbours = h.GetComponent<Neighbours>().NeighboursList;
+                var offsetCoord = h.GetComponent<CoordinateDataComponent>().Value.OffsetCoordinate;
+                var cellType = h.GetComponent<CellType>();
+
+                neighbours.Clear();
+
+                foreach (var direction in _directions)
+                {
+                    Cell neighbour = Array.Find(hexagons.ToArray(), c => c.GetComponent<CoordinateDataComponent>().Value.OffsetCoordinate.Equals(CubeToOffsetCoords(CubeCoord(offsetCoord) + direction)));
+                    if (neighbour == null) continue;
+                    neighbours.Add(neighbour);
+                }
+            }
         }
 
         /// <summary>
