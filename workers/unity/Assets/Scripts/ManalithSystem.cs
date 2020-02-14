@@ -20,7 +20,7 @@ public class ManalithSystem : ComponentSystem
 
         m_ManalithData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadWrite<CircleCells.Component>(),
+            ComponentType.ReadWrite<Manalith.Component>(),
             ComponentType.ReadWrite<FactionComponent.Component>()
         );
 
@@ -80,7 +80,7 @@ public class ManalithSystem : ComponentSystem
 
         #region manaLithDataVars
         var manaLithsWorldIndex = m_ManalithData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-        var manaLithsCircle_Cells = m_ManalithData.ToComponentDataArray<CircleCells.Component>(Allocator.TempJob);
+        var manaLithsCircle_Cells = m_ManalithData.ToComponentDataArray<Manalith.Component>(Allocator.TempJob);
         var manaLithsFaction = m_ManalithData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
         #endregion
 
@@ -110,17 +110,18 @@ public class ManalithSystem : ComponentSystem
                     }
                 }
             });
-            Entities.With(m_ManalithData).ForEach((ref CircleCells.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
+            Entities.With(m_ManalithData).ForEach((ref Manalith.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
             {
                 var manalithWorldIndex = windex.Value;
                 var faction = factionref;
-                var circleCells = circleCellsref;
+                var manalithComp = circleCellsref;
 
                 if (worldIndex == manalithWorldIndex)
                 {
                     if (currentState == GameStateEnum.calculate_energy)
                     {
                         //update CircleCells
+                        manalithComp.CombinedEnergyGain = manalithComp.BaseIncome;
                         Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWindex, ref CellAttributesComponent.Component cellAtt) =>
 
                         {
@@ -129,22 +130,22 @@ public class ManalithSystem : ComponentSystem
 
                             if (manalithWorldIndex == cellWorldIndex)
                             {
-                                for (int cci = 0; cci < circleCells.CircleAttributeList.CellAttributes.Count; cci++)
+                                for (int cci = 0; cci < manalithComp.CircleAttributeList.CellAttributes.Count; cci++)
                                 {
-                                    if (Vector3fext.ToUnityVector(circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate) == Vector3fext.ToUnityVector(cellAtt.CellAttributes.Cell.CubeCoordinate))
+                                    if (Vector3fext.ToUnityVector(manalithComp.CircleAttributeList.CellAttributes[cci].CubeCoordinate) == Vector3fext.ToUnityVector(cellAtt.CellAttributes.Cell.CubeCoordinate))
                                     {
-                                        if (circleCells.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
+                                        if (manalithComp.CircleAttributeList.CellAttributes[cci].UnitOnCellId != cellAtt.CellAttributes.Cell.UnitOnCellId)
                                         {
-                                            circleCells.CircleAttributeList.CellAttributes[cci] = new CellAttribute
+                                            manalithComp.CircleAttributeList.CellAttributes[cci] = new CellAttribute
                                             {
                                                 UnitOnCellId = cellAtt.CellAttributes.Cell.UnitOnCellId,
-                                                CubeCoordinate = circleCells.CircleAttributeList.CellAttributes[cci].CubeCoordinate
+                                                CubeCoordinate = manalithComp.CircleAttributeList.CellAttributes[cci].CubeCoordinate
                                             };
 
                                             //workaround for a weird bug where inspector is not updated 
-                                            circleCells.CircleAttributeList = circleCells.CircleAttributeList;
+                                            manalithComp.CircleAttributeList = manalithComp.CircleAttributeList;
 
-                                            uint fact = UpdateFaction(circleCells, manalithWorldIndex);
+                                            uint fact = UpdateFaction(manalithComp, manalithWorldIndex);
                                             TeamColorEnum tColor = new TeamColorEnum();
 
                                             //if odd
@@ -168,7 +169,7 @@ public class ManalithSystem : ComponentSystem
                                             };
                                         }
 
-                                        UpdateUnit(cellAtt.CellAttributes.Cell.UnitOnCellId, faction.Faction);
+                                        UpdateUnit(cellAtt.CellAttributes.Cell.UnitOnCellId, faction.Faction, ref manalithComp);
                                     }
                                 }
                             }
@@ -176,7 +177,7 @@ public class ManalithSystem : ComponentSystem
                     }
                 }
                 factionref = faction;
-                circleCellsref = circleCells;
+                circleCellsref = manalithComp;
             });
         });
         #region dispose
@@ -209,7 +210,7 @@ public class ManalithSystem : ComponentSystem
         #endregion
     }
 
-    public uint UpdateFaction(CircleCells.Component circleCells, uint worldIndex)
+    public uint UpdateFaction(Manalith.Component circleCells, uint worldIndex)
     {
         int player1Units = 0;
         int player2Units = 0;
@@ -249,20 +250,27 @@ public class ManalithSystem : ComponentSystem
         }
     }
 
-    public void UpdateUnit(long inUnitId, uint faction)
+    public void UpdateUnit(long inUnitId, uint faction, ref Manalith.Component node)
     {
+        var m_node = node;
         Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
         {
-
+            
 
             if (unitId.EntityId.Id == inUnitId)
             {
                 if (unitFaction.Faction == faction)
+                {
                     energy.Harvesting = true;
+                    m_node.CombinedEnergyGain += energy.EnergyIncome;
+                }
                 else
                     energy.Harvesting = false;
             }
         });
+        node = m_node;
     }
+
+
 
 }

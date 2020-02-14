@@ -1,0 +1,11 @@
+package cell;
+
+import "cell/cell_attributes.schema";
+
+component Manalith
+{
+    id = 113;
+	cell.CellAttributeList circle_attribute_list = 1;
+	uint32 combined_energy_gain = 2;
+	uint32 base_income = 3;
+}

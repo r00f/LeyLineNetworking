@@ -65,14 +65,22 @@ namespace LeyLineHybridECS
 
         Vector3 circleCenter;
 
-        enum CircleSize
+        public enum CircleSize
         {
             Three,
             Seven
         }
 
         [SerializeField]
-        CircleSize circleSize;
+        public CircleSize circleSize;
+
+        
+        public uint baseEnergyGain;
+
+        
+        public GameObject iconprefab;
+        public float iconHightoffset;
+        //public Vector3 planePos;
 
         #if UNITY_EDITOR
 

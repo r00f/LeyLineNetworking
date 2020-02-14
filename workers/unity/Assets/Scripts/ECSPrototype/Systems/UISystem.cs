@@ -21,9 +21,10 @@ namespace LeyLineHybridECS
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
 
-        UIReferences UIRef;
+        public UIReferences UIRef{get; set;}
 
-        Settings settings;
+
+            Settings settings;
 
         protected override void OnCreate()
         {

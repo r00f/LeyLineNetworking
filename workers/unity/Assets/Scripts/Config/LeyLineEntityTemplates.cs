@@ -55,7 +55,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex)
+    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex , uint inbaseIncome)
     {
         var pos = new Position.Snapshot
         {
@@ -67,9 +67,10 @@ public static class LeyLineEntityTemplates {
             }
         };
 
-        var circle = new CircleCells.Snapshot
+        var circle = new Manalith.Snapshot
         {
-            CircleAttributeList = circleCells
+            CircleAttributeList = circleCells,
+            BaseIncome = inbaseIncome
         };
 
         var wIndex = new WorldIndex.Snapshot
