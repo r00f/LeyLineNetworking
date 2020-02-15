@@ -138,11 +138,11 @@ namespace LeyLineHybridECS
                                         switch (initData.circleSize) {
                                             case ManalithInitializer.CircleSize.Seven:
                                                 clientData.WorldPos = meshColor.transform.position + new Vector3(0, initData.iconHightoffset, 0);
-                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.HealthbarsPanel.transform);
+                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                                 break;
                                             case ManalithInitializer.CircleSize.Three:
                                                 clientData.WorldPos = meshColor.transform.position + new Vector3(1, initData.iconHightoffset, 0);
-                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.HealthbarsPanel.transform);
+                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                                 break;
                                         }
                                         clientData.ManalithEntityID = ID;

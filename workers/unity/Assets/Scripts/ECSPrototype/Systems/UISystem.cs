@@ -296,17 +296,17 @@ namespace LeyLineHybridECS
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
-                if(UIRef.HealthbarsPanel.activeSelf)
-                    UIRef.HealthbarsPanel.SetActive(false);
+                if(UIRef.IngameUIPanel.activeSelf)
+                    UIRef.IngameUIPanel.SetActive(false);
 
                 if(gameState.CurrentState == GameStateEnum.cleanup)
-                    UIRef.HealthbarsPanel.SetActive(true);
+                    UIRef.IngameUIPanel.SetActive(true);
             }
             else
             {
                 if(Input.GetButtonDown("SwitchIngameUI"))
                 {
-                    UIRef.HealthbarsPanel.SetActive(!UIRef.HealthbarsPanel.activeSelf);
+                    UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
                 }
             }
 
@@ -960,7 +960,7 @@ namespace LeyLineHybridECS
         {
             //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
 
-            healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthbarsPanel.transform);
+            healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
             //if there is no group of this unitType, create one
 
             if (!stats.IsHero)
