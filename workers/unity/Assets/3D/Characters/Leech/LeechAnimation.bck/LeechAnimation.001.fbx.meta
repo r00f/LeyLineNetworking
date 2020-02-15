@@ -1,11 +1,17 @@
 fileFormatVersion: 2
-guid: e1e15dbebf5a65c4a8661a4b349c57c2
+guid: 9996e0b63898a4d4a8dd0321485f3a54
 ModelImporter:
   serializedVersion: 26
   internalIDToNameTable:
   - first:
-      74: 1827226128182048838
-    second: Take 001
+      74: -4858689742576350415
+    second: LeechIdle
+  - first:
+      74: 6746977156738036014
+    second: LeechMove
+  - first:
+      74: -1940976898835638432
+    second: LeechSucc
   externalObjects: {}
   materials:
     importMaterials: 1
@@ -72,7 +78,7 @@ ModelImporter:
     normalSmoothingSource: 0
   referencedClips: []
   importAnimation: 1
-  copyAvatar: 1
+  copyAvatar: 0
   humanDescription:
     serializedVersion: 3
     human: []
@@ -84,13 +90,12 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.01
-    rootMotionBoneName: Root
+    globalScale: 1
+    rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 1
+    hasExtraRoot: 0
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: f3b933ea83085dc458feb74c304d3153,
-    type: 3}
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
   animationType: 2
   humanoidOversampling: 1
   additionalBone: 0

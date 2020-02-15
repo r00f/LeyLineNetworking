@@ -97,8 +97,14 @@ public class InitializeUnitsSystem : ComponentSystem
 
             //lineRenderer.lineRenderer.startColor = factionColor;
             //lineRenderer.lineRenderer.endColor = factionColor;
+            /*
+            foreach (Renderer r in teamColorMeshes.EmissionColorMeshes)
+            {
+                r.material.SetColor("_EmissiveColor", factionColor);
+            }
+            */
 
-            foreach (Renderer r in teamColorMeshes.FullColorMeshes)
+                foreach (Renderer r in teamColorMeshes.FullColorMeshes)
             {
                 if(r.material.HasProperty("_UnlitColor"))
                     r.material.SetColor("_UnlitColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_UnlitColor").a));

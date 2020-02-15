@@ -26,7 +26,7 @@ public class UIReferences : MonoBehaviour
     public Text MaxEnergyText;
 
     [Header("HealthBars")]
-    public float HealthBarYOffset;
+    //public float HealthBarYOffset;
     public GameObject HealthbarsPanel;
 
     [Header("ReadyPanel")]

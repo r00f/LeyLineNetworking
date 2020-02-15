@@ -158,7 +158,7 @@ namespace LeyLineHybridECS
                             //Transport data from manaLith into clientData.IconPrefabref
                             if (manalithFaction.Faction != 0)
                                 {
-                                    clientData.IngameIconRef.EnergyText.text = "+" + manaLith.CombinedEnergyGain;
+                                    clientData.IngameIconRef.EnergyText.text = manaLith.CombinedEnergyGain.ToString();
                                 }
                                 else
                                 {

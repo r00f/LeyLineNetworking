@@ -156,23 +156,23 @@ namespace LeyLineHybridECS
             if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
                 return;
 
+            #region GetData
+
             var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-
-
-
-            #region authPlayerData
             var authPlayersEnergy = m_AuthoritativePlayerData.ToComponentDataArray<PlayerEnergy.Component>(Allocator.TempJob);
             var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
             var authPlayersState = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            var gameState = gameStates[0];
+            var authPlayerFaction = authPlayersFaction[0].Faction;
+            var authPlayerState = authPlayersState[0];
+            var playerEnergy = authPlayersEnergy[0];
+            
+            GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
+
             #endregion
 
-            var gameState = gameStates[0];
-
-
-            if (gameState.CurrentState == GameStateEnum.waiting_for_players)
-            {
-            }
-            else
+            #region Initialize
+            if (gameState.CurrentState != GameStateEnum.waiting_for_players)
             {
                 if (UIRef.StartupPanel.activeSelf)
                 {
@@ -206,96 +206,113 @@ namespace LeyLineHybridECS
                         UIRef.StartupPanel.SetActive(false);
                     }
                 }
+            }
+            #endregion
 
-                //TURN THE WHEEL
-                //Debug.Log(UIRef.TurnWheelBig.eulerAngles.z);
-                float degreesPerFrame = UIRef.WheelRotationSpeed * Time.deltaTime;
-                float rOffset = degreesPerFrame / 2f;
+            #region TurnStepWheel
+            //TURN THE WHEEL
+            //Debug.Log(UIRef.TurnWheelBig.eulerAngles.z);
+            float degreesPerFrame = UIRef.WheelRotationSpeed * Time.deltaTime;
+            float rOffset = degreesPerFrame / 2f;
 
-                if(gameState.CurrentState != GameStateEnum.planning)
+            if (gameState.CurrentState != GameStateEnum.planning)
+            {
+                ResetEnergyBaubles();
+            }
+
+            switch (gameState.CurrentState)
+            {
+                case GameStateEnum.planning:
+                    foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
+                    {
+                        UpdateUnitGroupBauble(g, authPlayersFaction[0]);
+                    }
+
+                    if (Input.GetKeyDown(KeyCode.Alpha1))
+                    {
+                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
+                        InitializeSelectedActionTooltip(UIRef.Actions[0]);
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha2))
+                    {
+                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
+                        InitializeSelectedActionTooltip(UIRef.Actions[1]);
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha3))
+                    {
+                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
+                        InitializeSelectedActionTooltip(UIRef.Actions[2]);
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha4))
+                    {
+                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
+
+                    }
+
+                    if (UIRef.TurnWheelBig.eulerAngles.z < 360 - rOffset && UIRef.TurnWheelBig.eulerAngles.z > 180)
+                    {
+                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                    }
+                    else if (UIRef.TurnWheelBig.eulerAngles.z > rOffset && UIRef.TurnWheelBig.eulerAngles.z < 180)
+                    {
+                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
+                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
+                    }
+                    break;
+                case GameStateEnum.interrupt:
+                    ClearSelectedActionToolTip();
+                    if (UIRef.TurnWheelBig.eulerAngles.z < 78.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 78.75f + rOffset)
+                    {
+                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                    }
+                    break;
+                case GameStateEnum.attack:
+                    if (UIRef.TurnWheelBig.eulerAngles.z < 146.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 146.25f + rOffset)
+                    {
+                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                    }
+                    break;
+                case GameStateEnum.move:
+                    if (UIRef.TurnWheelBig.eulerAngles.z < 213.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 213.75f + rOffset)
+                    {
+                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                    }
+                    break;
+                case GameStateEnum.skillshot:
+                    if (UIRef.TurnWheelBig.eulerAngles.z < 280.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 280.25f + rOffset)
+                    {
+                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
+                    }
+                    break;
+            }
+            #endregion
+
+            #region SwitchIngameUI
+
+            if (gameState.CurrentState != GameStateEnum.planning)
+            {
+                if(UIRef.HealthbarsPanel.activeSelf)
+                    UIRef.HealthbarsPanel.SetActive(false);
+
+                if(gameState.CurrentState == GameStateEnum.cleanup)
+                    UIRef.HealthbarsPanel.SetActive(true);
+            }
+            else
+            {
+                if(Input.GetButtonDown("SwitchIngameUI"))
                 {
-                    ResetEnergyBaubles();
-                }
-
-                switch (gameState.CurrentState)
-                {
-                    case GameStateEnum.planning:
-                        foreach(UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
-                        {
-                            UpdateUnitGroupBauble(g, authPlayersFaction[0]);
-                        }
-
-                        if (Input.GetKeyDown(KeyCode.Alpha1))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
-                            InitializeSelectedActionTooltip(UIRef.Actions[0]);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Alpha2))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
-                            InitializeSelectedActionTooltip(UIRef.Actions[1]);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Alpha3))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
-                            InitializeSelectedActionTooltip(UIRef.Actions[2]);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Alpha4))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
-                            
-                        }
-
-                        if (UIRef.TurnWheelBig.eulerAngles.z < 360 - rOffset && UIRef.TurnWheelBig.eulerAngles.z > 180)
-                        { 
-                            UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                            UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        }
-                        else if(UIRef.TurnWheelBig.eulerAngles.z > rOffset && UIRef.TurnWheelBig.eulerAngles.z < 180)
-                        {
-                            UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
-                            UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
-                        }
-                        break;
-                    case GameStateEnum.interrupt:
-                        ClearSelectedActionToolTip();
-                        if (UIRef.TurnWheelBig.eulerAngles.z < 78.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 78.75f + rOffset)
-                        {
-                            UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                            UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        }
-                        break;
-                    case GameStateEnum.attack:
-                        if (UIRef.TurnWheelBig.eulerAngles.z < 146.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 146.25f + rOffset)
-                        {
-                            UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                            UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        }
-                        break;
-                    case GameStateEnum.move:
-                        if (UIRef.TurnWheelBig.eulerAngles.z < 213.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 213.75f + rOffset)
-                        {
-                            UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                            UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        }
-                        break;
-                    case GameStateEnum.skillshot:
-                        if (UIRef.TurnWheelBig.eulerAngles.z < 280.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 280.25f + rOffset)
-                        {
-                            UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                            UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        }
-                        break;
+                    UIRef.HealthbarsPanel.SetActive(!UIRef.HealthbarsPanel.activeSelf);
                 }
             }
 
-            var authPlayerFaction = authPlayersFaction[0].Faction;
-            var authPlayerState = authPlayersState[0];
-            var playerEnergy = authPlayersEnergy[0];
-            
-            GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
-            
+            #endregion
 
+            #region GameOver
             if (gameState.CurrentState == GameStateEnum.game_over)
             {
                 if (!UIRef.GameOverPanel.activeSelf)
@@ -317,6 +334,8 @@ namespace LeyLineHybridECS
                 }
 
             }
+            #endregion
+
             #region Unitloop
 
             Entities.With(m_UnitData).ForEach((Entity e, Healthbar healthbar, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
@@ -538,11 +557,11 @@ namespace LeyLineHybridECS
                     {
                         GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
 
-                        if (gameState.CurrentState == GameStateEnum.planning && !healthBarGO.activeSelf && isVisible.Value == 1)
+                        if (!healthBarGO.activeSelf && isVisible.Value == 1)
                         {
                             healthBarGO.SetActive(true);
                         }
-                        else if (gameState.CurrentState != GameStateEnum.planning || isVisible.Value == 0)
+                        else if (isVisible.Value == 0)
                         {
                             healthBarGO.SetActive(false);
                         }
@@ -556,12 +575,14 @@ namespace LeyLineHybridECS
                             healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
                         }
 
-                        healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, UIRef.HealthBarYOffset, 0));
+                        healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
                         SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
                     }
                 }
             });
             #endregion
+
+            #region PlayerLoops
             //this clients player
             Entities.With(m_AuthoritativePlayerData).ForEach((ref PlayerEnergy.Component authPlayerEnergy) =>
             {
@@ -651,8 +672,9 @@ namespace LeyLineHybridECS
 
                 }
             });
+            #endregion
 
-            if(gameStates[0].CurrentPlanningTime <= gameStates[0].RopeDisplayTime)
+            if (gameStates[0].CurrentPlanningTime <= gameStates[0].RopeDisplayTime)
             {
                 UIRef.RopeBar.enabled = true;
                 UIRef.RopeBar.fillAmount = gameStates[0].CurrentPlanningTime / gameStates[0].RopeDisplayTime;

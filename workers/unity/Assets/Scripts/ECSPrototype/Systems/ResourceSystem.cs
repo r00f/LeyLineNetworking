@@ -6,6 +6,7 @@ using Generic;
 using Player;
 using Unit;
 using Unity.Collections;
+using Cell;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
@@ -14,6 +15,7 @@ public class ResourceSystem : ComponentSystem
     EntityQuery m_PlayerData;
     EntityQuery m_UnitData;
     EntityQuery m_GameStateData;
+    EntityQuery m_ManalithData;
     private EntityQuery projectorGroup;
 
     Settings settings;
@@ -29,6 +31,12 @@ public class ResourceSystem : ComponentSystem
 
                ComponentType.ReadWrite<Transform>(),
                ComponentType.ReadWrite<Projector>()
+        );
+
+        m_ManalithData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadWrite<Manalith.Component>(),
+            ComponentType.ReadWrite<FactionComponent.Component>()
         );
 
         m_PlayerData = Worlds.GameLogicWorld.CreateEntityQuery(
@@ -62,12 +70,6 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) => 
         {
-            /*
-            if(gameState.CurrentState == GameStateEnum.calculate_energy)
-            {
-                ResetIncomeAdded(gameStateWorldIndex.Value);
-            }
-            else*/
             if (gameState.CurrentState == GameStateEnum.planning)
             {
                 CalculateIncome(gameStateWorldIndex.Value);
@@ -79,80 +81,33 @@ public class ResourceSystem : ComponentSystem
         });
     }
 
-    /*
-    public void ResetIncomeAdded(uint worldIndex)
-    {
-        //var workerSystem = World.GetExistingSystem<WorkerSystem>();
-        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref PlayerEnergy.Component playerEnergy) =>
-        {
-            if (playerWorldIndex.Value == worldIndex && playerEnergy.IncomeAdded == true)
-            {
-                playerEnergy.IncomeAdded = false;
-                workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("ResetIncomeAdded.")
-                .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));
-            }
-        });
-    }
-   */
-
     public void CalculateIncome(uint worldIndex)
     {
         var workerSystem = World.GetExistingSystem<WorkerSystem>();
 
-        #region unitDataVars
-        //var unitsWorldIndex = m_UnitData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-        //var unitsAction = m_UnitData.ToComponentDataArray<Actions.Component>(Allocator.TempJob);
-        //var unitsId = m_UnitData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
-        var unitsFaction = m_UnitData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-        var unitsEnergy = m_UnitData.ToComponentDataArray<Energy.Component>(Allocator.TempJob);
-        #endregion
-
-
         Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
         {
+            var pFaction = playerFaction;
+            var pEnergy = playerEnergy;
+
             if (playerWorldIndex.Value == worldIndex)
             {
-                if (playerEnergy.IncomeAdded == true)
+                if (pEnergy.IncomeAdded == true)
                 {
-                    playerEnergy.Income = playerEnergy.BaseIncome;
+                    pEnergy.Income = pEnergy.BaseIncome;
 
-                    //Income Calculation do this once at the beginning of each turn
-                    for (int ui = 0; ui < unitsEnergy.Length; ui++)
+                    Entities.With(m_ManalithData).ForEach((ref WorldIndex.Component manalithWorldIndex, ref FactionComponent.Component manalithFaction, ref Manalith.Component manalith) =>
                     {
-                        var unitFaction = unitsFaction[ui].Faction;
-                        var unitEnergy = unitsEnergy[ui];
-
-                        //if the player and the unit share the same Faction
-                        if (unitFaction == playerFaction.Faction)
+                        if (manalithFaction.Faction == pFaction.Faction)
                         {
-                            if (unitEnergy.Harvesting)
-                                playerEnergy.Income += unitEnergy.EnergyIncome;
-
-                            playerEnergy.Income -= unitEnergy.EnergyUpkeep;
+                            pEnergy.Income += manalith.CombinedEnergyGain;
                         }
-                    }
-
-                    playerEnergy.IncomeAdded = false;
-                    /*
-                    if (playerEnergy.Energy + playerEnergy.Income <= playerEnergy.MaxEnergy)
-                    {
-                        playerEnergy.Energy += playerEnergy.Income;
-                    }
-                    else
-                    {
-                        playerEnergy.Energy = playerEnergy.MaxEnergy;
-                    }
-                    */
-                    //playersEnergy[pi] = playerEnergy;
-
-                    /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("AddIncome.")
-                    .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));*/
-
+                    });
+                    pEnergy.IncomeAdded = false;
+                    playerEnergy = pEnergy;
                 }
             }
         });
-        unitsFaction.Dispose();
-        unitsEnergy.Dispose();
     }
 
     void AddIncome(uint worldIndex)

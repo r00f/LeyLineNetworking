@@ -18,6 +18,7 @@ public class UnitAnimationSystem : ComponentSystem
     EntityQuery m_TransformData;
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
+    Settings settings;
 
     protected override void OnCreate()
     {
@@ -53,6 +54,8 @@ public class UnitAnimationSystem : ComponentSystem
         ComponentType.ReadWrite<AnimatorComponent>(),
         ComponentType.ReadWrite<Transform>()
         );
+
+        settings = Resources.Load<Settings>("Settings");
     }
 
     protected override void OnStartRunning()
@@ -72,9 +75,11 @@ public class UnitAnimationSystem : ComponentSystem
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
         {
+            var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
             var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
             var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+            var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
 
             //outgoing effects (launch projectiles usw.)
             if (actions.LockedAction.Index != -3)
@@ -219,9 +224,28 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 animatorComponent.Animator.SetBool("Planning", false);
             }
-                
 
-            if(animatorComponent.CurrentLockedAction)
+            //if this unit has emissionColorMeshes set intensity to 0 / 100 when harvesting
+            if(teamColorMeshes.EmissionColorMeshes.Count != 0)
+            {
+                Color color = settings.FactionColors[(int)faction.TeamColor + 1];
+                foreach(Renderer r in teamColorMeshes.EmissionColorMeshes)
+                {
+                    if (energy.Harvesting)
+                    {
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, color * teamColorMeshes.EmissionIntensity, Time.deltaTime * teamColorMeshes.EmissionLerpTime);
+                        //r.material.SetColor("_EmissiveColor", color * 100);
+                    }
+                    else
+                    {
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.deltaTime * teamColorMeshes.EmissionLerpTime);
+                    }
+
+                    r.material.SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
+                }
+            }
+
+            if (animatorComponent.CurrentLockedAction)
                 animatorComponent.Animator.SetBool("HasWindup", animatorComponent.CurrentLockedAction.HasWindup);
             else
                 animatorComponent.Animator.SetBool("HasWindup", false);
