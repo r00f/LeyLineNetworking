@@ -219,6 +219,7 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 animatorComponent.Animator.SetBool("Executed", false);
                 animatorComponent.Animator.SetBool("Planning", true);
+                animatorComponent.Animator.ResetTrigger("Execute");
             }
             else
             {
@@ -280,9 +281,9 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
-                    Debug.Log("DestinationReached");
-                    unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
+                    //Debug.Log("DestinationReached");
                     animatorComponent.Animator.SetTrigger("DestinationReached");
+                    unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
                     animatorComponent.DestinationPosition = Vector3.zero;
                     animatorComponent.DestinationReachTriggerSet = true;
                 }

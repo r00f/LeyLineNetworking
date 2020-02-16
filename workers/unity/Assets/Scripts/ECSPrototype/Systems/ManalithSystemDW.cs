@@ -153,7 +153,9 @@ namespace LeyLineHybridECS
 
                             if (clientData.ManalithEntityID == ID)
                             {
-                                clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
+                                if(clientData.IngameIconRef)
+                                    clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
+
                                 meshColor.Color = settings.FactionColors[(int)manalithFaction.Faction];
                             //Transport data from manaLith into clientData.IconPrefabref
                             if (manalithFaction.Faction != 0)

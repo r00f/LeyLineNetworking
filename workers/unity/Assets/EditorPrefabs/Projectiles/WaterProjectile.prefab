@@ -109,10 +109,11 @@ MonoBehaviour:
   FlagForDestruction: 0
   QueuedForDestruction: 0
   ArriveInstantly: 0
+  UnitId: 0
   TransformToMove: {fileID: 5341185222269292129}
   TransformToRotate: {fileID: 5341185222269292129}
   PhysicsExplosionOrigin: {fileID: 5341185222269292129}
-  TravellingSpeed: 12
+  TravellingSpeed: 9
   MaxHeight: 1.5
   MovementDelay: 0
   Acceleration: 0
@@ -126,11 +127,8 @@ MonoBehaviour:
   BaseJoint: {fileID: 0}
   SpringJoints: []
   DestroyAfterSeconds: 0
-  ExplosionWaitTime: 0.02
-  ExplosionRadius: 1
-  ExplosionForce: 300
   BodyParticleSystem: {fileID: 3589144075304049518}
-  TrailParticleSystem: {fileID: 3761309075827653202}
+  TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 1731113839523245827}
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
@@ -230,12 +228,6 @@ ParticleSystem:
     type: 3}
   m_PrefabInstance: {fileID: 39494513322607323}
   m_PrefabAsset: {fileID: 0}
---- !u!198 &3761309075827653202 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 3800627563634833545, guid: 594df5a710bc0ca42b26217467720bac,
-    type: 3}
-  m_PrefabInstance: {fileID: 39494513322607323}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7457150774062225083
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -247,6 +239,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: WaterExplosionPSSmol
+      objectReference: {fileID: 0}
+    - target: {fileID: 390610147986653567, guid: 57d3e76a55d8c3246971622ec77fdf8d,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4478281585465839247, guid: 57d3e76a55d8c3246971622ec77fdf8d,
         type: 3}
@@ -302,11 +299,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 390610147986653567, guid: 57d3e76a55d8c3246971622ec77fdf8d,
-        type: 3}
-      propertyPath: playOnAwake
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6709067987650053585, guid: 57d3e76a55d8c3246971622ec77fdf8d,
         type: 3}

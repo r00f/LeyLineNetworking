@@ -44,7 +44,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadOnly<AnimatedPortraitReference>(),
                 ComponentType.ReadWrite<UnitComponentReferences>(),
-                ComponentType.ReadWrite<Healthbar>()
+                ComponentType.ReadWrite<UnitHeadUIReferences>()
             );
 
             m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
@@ -338,7 +338,7 @@ namespace LeyLineHybridECS
 
             #region Unitloop
 
-            Entities.With(m_UnitData).ForEach((Entity e, Healthbar healthbar, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
+            Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences healthbar, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
             {
                 uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var position = EntityManager.GetComponentObject<Transform>(e).position;
@@ -555,7 +555,7 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        GameObject healthBarGO = healthbar.UnitHeadUIInstance.transform.GetChild(0).gameObject;
+                        GameObject healthBarGO = healthbar.UnitHeadHealthBarInstance.gameObject;
 
                         if (!healthBarGO.activeSelf && isVisible.Value == 1)
                         {
@@ -576,7 +576,9 @@ namespace LeyLineHybridECS
                         }
 
                         healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
-                        SetHealthBarFillAmounts(healthBarGO.transform.GetChild(0).GetChild(1).GetComponent<Image>(), healthBarGO.transform.GetChild(0).GetChild(0).GetComponent<Image>(), health, faction.Faction);
+                        healthbar.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
+
+                        SetHealthBarFillAmounts(healthbar.UnitHeadHealthBarInstance.HealthFill, healthbar.UnitHeadHealthBarInstance.ArmorFill, health, faction.Faction);
                     }
                 }
             });
@@ -645,14 +647,16 @@ namespace LeyLineHybridECS
                 {
                     //MOVE RECTTRANSFORM BLUEREADY IN Y / X AXIS
 
-                    if (playerState.CurrentState == PlayerStateEnum.ready && UIRef.BlueReady.localPosition.x > -88f)
+                    if (playerState.CurrentState == PlayerStateEnum.ready)
                     {
-                        UIRef.BlueReady.Translate(new Vector3(0, -outSpeed, 0));
+                        if (UIRef.BlueReady.localPosition.x > -88f)
+                            UIRef.BlueReady.Translate(new Vector3(0, -outSpeed, 0));
                     }
-                    else if (playerState.CurrentState != PlayerStateEnum.ready && UIRef.BlueReady.localPosition.x < -69f)
+                    else if (gameState.CurrentState == GameStateEnum.planning)
                     {
                         //UIRef.BlueReady.localPosition = new Vector2(-69f, UIRef.BlueReady.localPosition.y);
-                        UIRef.BlueReady.Translate(new Vector3(0, inSpeed, 0));
+                        if(UIRef.BlueReady.localPosition.x < -69f)
+                            UIRef.BlueReady.Translate(new Vector3(0, inSpeed, 0));
                     }
 
                 }
@@ -660,14 +664,15 @@ namespace LeyLineHybridECS
                 {
 
                     //MOVE RECTTRANSFORM REDREADY IN Y / X AXIS                    
-                    if (playerState.CurrentState == PlayerStateEnum.ready && UIRef.RedReady.localPosition.y < 86f)
+                    if (playerState.CurrentState == PlayerStateEnum.ready)
                     {
-                        UIRef.RedReady.Translate(new Vector3(0, outSpeed, 0));
+                        if (UIRef.RedReady.localPosition.y < 86f)
+                            UIRef.RedReady.Translate(new Vector3(0, outSpeed, 0));
                     }
-                    else if (playerState.CurrentState != PlayerStateEnum.ready && UIRef.RedReady.localPosition.y > 69f)
+                    else if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        //UIRef.RedReady.localPosition = new Vector2(UIRef.RedReady.localPosition.x, 69f);
-                        UIRef.RedReady.Translate(new Vector3(0, -inSpeed, 0));
+                        if(UIRef.RedReady.localPosition.y > 69f)
+                            UIRef.RedReady.Translate(new Vector3(0, -inSpeed, 0));
                     }
 
                 }
@@ -902,7 +907,7 @@ namespace LeyLineHybridECS
 
         public void SetArmorDisplay(Entity e, uint inArmorAmount, float displayTime, bool shatter = false)
         {
-            var healthbar = EntityManager.GetComponentObject<Healthbar>(e);
+            var healthbar = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
             Text armorText = healthbar.UnitHeadUIInstance.ArmorText;
             Animator anim = healthbar.UnitHeadUIInstance.ArmorAnimator;
             GameObject armorPanel = healthbar.UnitHeadUIInstance.ArmorPanel;
@@ -918,7 +923,7 @@ namespace LeyLineHybridECS
 
         public void SetHealthFloatText(Entity e, bool positive, uint inHealthAmount, Color color)
         {
-            var healthbar = EntityManager.GetComponentObject<Healthbar>(e);
+            var healthbar = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
             Text healthText = healthbar.UnitHeadUIInstance.FloatHealthText;
             Animator anim = healthbar.UnitHeadUIInstance.FloatHealthAnimator;
 
@@ -956,11 +961,13 @@ namespace LeyLineHybridECS
 
         }
 
-        public void InitializeUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
+        public void InitializeUnitUI(UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
         {
             //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
 
-            healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
+            healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
+            healthbar.UnitHeadHealthBarInstance = Object.Instantiate(healthbar.UnitHeadHealthBarPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
+
             //if there is no group of this unitType, create one
 
             if (!stats.IsHero)
@@ -1019,12 +1026,13 @@ namespace LeyLineHybridECS
             }
         }
 
-        void CleanupUnitUI(Healthbar healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
+        void CleanupUnitUI(UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
             Object.Destroy(healthbar.UnitHeadUIInstance.gameObject);
+            Object.Destroy(healthbar.UnitHeadHealthBarInstance.gameObject);
 
-            if(!stats.IsHero && unitFaction == playerFaction)
+            if (!stats.IsHero && unitFaction == playerFaction)
             {
                 //remove unitID from unitGRPUI / delete selectUnitButton
                 UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];

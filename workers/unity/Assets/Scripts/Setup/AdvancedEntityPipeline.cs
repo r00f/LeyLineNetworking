@@ -47,7 +47,7 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     typeof(MovementAnimComponent),
     typeof(IsVisibleReferences),
     typeof(TeamColorMeshes),
-    typeof(Healthbar),
+    typeof(UnitHeadUIReferences),
     typeof(AnimatedPortraitReference),
     typeof(UnitComponentReferences),
     typeof(Moba_Camera),

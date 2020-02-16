@@ -221,7 +221,7 @@ namespace LeyLineHybridECS
 
         private float HighestExecuteTime(GameStateEnum step, uint gameStateWorldIndex)
         {
-            float highestTime = 0.3f;
+            float highestTime = 1f;
 
             Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component unitAction) =>
             {

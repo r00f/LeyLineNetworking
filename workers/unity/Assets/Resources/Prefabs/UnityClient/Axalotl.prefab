@@ -416,7 +416,10 @@ MonoBehaviour:
   HealthBarYOffset: 1.7
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
+  UnitHeadHealthBarPrefab: {fileID: 8079530597859831226, guid: 546644da0f3e8584f8c507915f61f453,
+    type: 3}
   UnitHeadUIInstance: {fileID: 0}
+  UnitHeadHealthBarInstance: {fileID: 0}
 --- !u!114 &930118610718755571
 MonoBehaviour:
   m_ObjectHideFlags: 0

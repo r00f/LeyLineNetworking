@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 6218205743971942414}
   - component: {fileID: 6218205743971942417}
   - component: {fileID: 6218205743971942415}
-  m_Layer: 0
+  m_Layer: 17
   m_Name: VisiblilityProjector
   m_TagString: Projector
   m_Icon: {fileID: 0}
@@ -225,7 +225,7 @@ GameObject:
   - component: {fileID: 6218205744133337915}
   - component: {fileID: 6218205744133337913}
   - component: {fileID: 6218205744133337912}
-  m_Layer: 8
+  m_Layer: 17
   m_Name: MapCamera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -277,7 +277,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 8448
+    m_Bits: 139520
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: 2fab33e05a143df4eb6a1d1c9a7741c9, type: 2}
   m_TargetDisplay: 0
@@ -302,7 +302,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clearColorMode: 1
-  backgroundColorHDR: {r: 0.04338732, g: 0.04433294, b: 0.047169805, a: 1}
+  backgroundColorHDR: {r: 0.01886791, g: 0.015396927, b: 0.015396927, a: 1}
   clearDepth: 1
   volumeLayerMask:
     serializedVersion: 2

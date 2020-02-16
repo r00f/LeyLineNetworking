@@ -30,6 +30,7 @@ public class UIReferences : MonoBehaviour
     public GameObject IngameUIPanel;
     public GameObject HealthBarsPanel;
     public GameObject ManalithInfoPanel;
+    public GameObject ActionEffectUIPanel;
 
     [Header("ReadyPanel")]
     public Button ReadyButton;
