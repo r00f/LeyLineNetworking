@@ -968,12 +968,12 @@ namespace LeyLineHybridECS
             healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
             healthbar.UnitHeadHealthBarInstance = Object.Instantiate(healthbar.UnitHeadHealthBarPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
 
-            //if there is no group of this unitType, create one
-
-            if (!stats.IsHero)
+            //initialize GroupUI and hero select button
+            if (unitFaction == playerFaction)
             {
-                if(unitFaction == playerFaction)
-                {
+                if (!stats.IsHero)
+            {
+
                     if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
                     {
                         //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
@@ -1018,11 +1018,11 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            }
-            else
-            {
-                UIRef.SelectHeroButton.UnitId = unitId;
-                UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                else
+                {
+                    UIRef.SelectHeroButton.UnitId = unitId;
+                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                }
             }
         }
 
