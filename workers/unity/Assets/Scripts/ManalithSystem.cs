@@ -167,8 +167,8 @@ public class ManalithSystem : ComponentSystem
                                                 Faction = fact,
                                                 TeamColor = tColor
                                             };
+                                            
                                         }
-
                                         UpdateUnit(cellAtt.CellAttributes.Cell.UnitOnCellId, faction.Faction, ref manalithComp);
                                     }
                                 }
