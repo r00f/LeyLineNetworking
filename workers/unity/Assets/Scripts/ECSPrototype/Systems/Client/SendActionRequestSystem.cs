@@ -110,18 +110,27 @@ public class SendActionRequestSystem : ComponentSystem
             //if the current selected unit wants an unitTarget
 
             //set unit action to basic move if is clicked and player has energy
-            if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+            if (unitMouseState.ClickEvent == 1)
             {
-                playerState.SelectedUnitId = unitEntityId.Id;
-
-                if (actionsData.BasicMove.Index != -3 && faction.Faction == playerFaction.Faction)
+                if(playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                 {
-                    SelectActionCommand(-2, unitEntityId.Id);
-                    m_UISystem.InitializeSelectedActionTooltip(0);
+                    playerState.SelectedUnitId = unitEntityId.Id;
+
+                    if (faction.Faction == playerFaction.Faction)
+                    {
+                        if (actionsData.BasicMove.Index != -3)
+                        {
+                            Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+                            SelectActionCommand(-2, unitEntityId.Id);
+                            m_UISystem.InitializeSelectedActionTooltip(0);
+                        }
+                    }
                 }
                 else
                 {
-                    //SelectActionCommand(0, unitEntityId.Id);
+                    SelectActionCommand(-3, unitEntityId.Id);
+                    m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitEntityId.Id);
+                    playerState.UnitTargets.Remove(unitEntityId.Id);
                 }
             }
 
@@ -231,7 +240,9 @@ public class SendActionRequestSystem : ComponentSystem
 
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHighlightingDatas = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+        var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
 
+        var playerFaction = playerFactions[0];
         var playerState = playerStates[0];
         var playerHigh = playerHighlightingDatas[0];
 
@@ -249,9 +260,11 @@ public class SendActionRequestSystem : ComponentSystem
 
                 m_CommandSystem.SendCommand(request);
 
+                Action act = actions.NullAction;
+
                 if (actionIndex >= 0)
                 {
-                    Action act = actions.OtherActions[actionIndex];
+                    act = actions.OtherActions[actionIndex];
                     if (act.Targets[0].TargetType == TargetTypeEnum.unit)
                     {
                         if (act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
@@ -260,10 +273,18 @@ public class SendActionRequestSystem : ComponentSystem
                         }
                     }
                 }
+                else
+                {
+                    if (actionIndex == -2)
+                        act = actions.BasicMove;
+                    else if (actionIndex == -1)
+                        act = actions.BasicAttack;
+                }
+
+                playerState.SelectedAction = act;
 
                 m_HighlightingSystem.ResetHighlights();
                 //playerHigh.LastHoveredCoordinate = new Vector3f(999f, 999f, 999f);
-
 
                 if (actionIndex != -3)
                 {
@@ -271,12 +292,13 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         m_HighlightingSystem.ClearPlayerState();
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
-                        playerState = m_HighlightingSystem.FillUnitTargetsList(playerHigh, playerState);
+                        playerState.TargetValid = false;
+                        m_HighlightingSystem.UpdateSelectedUnit(ref playerState, playerHigh);
+                        m_HighlightingSystem.SetNumberOfTargets(playerState);
                         playerStates[0] = playerState;
                         playerHighlightingDatas[0] = playerHigh;
                         m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
                         m_PlayerData.CopyFromComponentDataArray(playerStates);
-                        m_HighlightingSystem.UpdateSelectedUnit();
                     }
                     else
                     {
@@ -284,6 +306,7 @@ public class SendActionRequestSystem : ComponentSystem
                         m_HighlightingSystem.SetSelfTarget(entityId);
                     }
                 }
+
             }
         });
 
@@ -293,5 +316,6 @@ public class SendActionRequestSystem : ComponentSystem
         m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();
+        playerFactions.Dispose();
     }
 }

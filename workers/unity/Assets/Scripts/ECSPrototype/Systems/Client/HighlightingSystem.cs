@@ -125,9 +125,9 @@ public class HighlightingSystem : ComponentSystem
                     {
                         if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                         {
-                            playerState = FillUnitTargetsList(playerHighlightingData, playerState);
+                            playerState = FillUnitTargetsList(playerState.SelectedAction, playerHighlightingData, playerState, playerFaction.Faction);
+                            UpdateSelectedUnit(ref playerState, playerHighlightingData);
                             SetNumberOfTargets(playerState);
-                            UpdateSelectedUnit();
                         }
                         else
                         {
@@ -173,9 +173,19 @@ public class HighlightingSystem : ComponentSystem
 
     }
 
-    public PlayerState.Component FillUnitTargetsList(HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState)
+    public PlayerState.Component FillUnitTargetsList(Unit.Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, uint inFaction)
     {
-        //var hoveredCoordToUnityVector3 = Vector3fext.ToUnityVector(inHinghlightningData.HoveredCoordinate);
+        //need to call validateTarget with hoveredCoord before doing anything
+        if(!m_PathFindingSystem.ValidateTarget(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, inFaction, playerState.CachedPaths))
+        {
+            playerState.TargetValid = false;
+            //if hovered cell / unit is not valid
+            return playerState;
+        }
+        else
+        {
+            playerState.TargetValid = true;
+        }
 
         if (inHinghlightningData.AoERadius > 0)
         {
@@ -184,7 +194,7 @@ public class HighlightingSystem : ComponentSystem
             area = CellGridMethods.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius);
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
 
-            if (cubeCoordList.CubeCoordinates.Count != 1 /* && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999)*/)
+            if (cubeCoordList.CubeCoordinates.Count != 1)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
             }
@@ -195,8 +205,7 @@ public class HighlightingSystem : ComponentSystem
             ring = CellGridMethods.RingDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.RingRadius);
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring);
 
-            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            if (cubeCoordList.CubeCoordinates.Count != 1 /* && hoveredCoordToUnityVector3 != new Vector3(999, 999, 999)*/)
+            if (cubeCoordList.CubeCoordinates.Count != 1)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
 
@@ -206,8 +215,8 @@ public class HighlightingSystem : ComponentSystem
         {
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
             cubeCoordList.CubeCoordinates = CellGridMethods.LineDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate);
-            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            if (cubeCoordList.CubeCoordinates.Count != 1 /*&& hoveredCoordToUnityVector3 != new Vector3(999, 999, 999)*/)
+
+            if (cubeCoordList.CubeCoordinates.Count != 1)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
             }
@@ -219,30 +228,12 @@ public class HighlightingSystem : ComponentSystem
 
             HashSet<long> unitIds = new HashSet<long>(playerState.UnitTargets.Keys);
 
-
-            //workaround for target still being set when we should not be in the waiting_for_target playerstate anymore
-            /*if (hoveredCoordToUnityVector3 != new Vector3(999, 999, 999))
-            {
-                
-            }
-            else */
             if (unitIds.Contains(playerState.SelectedUnitId))
             {
                 playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Clear();
             }
 
             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-            /*
-            if (unitIds.Contains(playerState.SelectedUnitId) && inHinghlightningData.TargetRestrictionIndex != 2)
-            {
-                
-            }
-            else
-            {
-                playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-            }
-            */
-
         }
 
         Entities.With(m_UnitData).ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>
@@ -252,7 +243,7 @@ public class HighlightingSystem : ComponentSystem
                 if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Contains(unitCoord.CubeCoordinate))
                 {
                     //if target is not valid, remove it from UnitTargets Dict
-                    if (!m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, unitFaction.Faction))
+                    if (!m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, unitFaction.Faction))
                     {
                         playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
                     }
@@ -343,6 +334,7 @@ public class HighlightingSystem : ComponentSystem
             foreach (long l in playerState.UnitTargets.Keys)
             {
                 HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[l].CubeCoordinates);
+
                 if (targetCoordsHash.Contains(coord.CubeCoordinate))
                 {
                     nOfTargets += 1;
@@ -366,14 +358,9 @@ public class HighlightingSystem : ComponentSystem
         });
     }
 
-    public void UpdateSelectedUnit()
+    public void UpdateSelectedUnit(ref PlayerState.Component inPlayerState, HighlightingDataComponent playerHighlightingData)
     {
-        //Debug.Log("UpdateSelectedUnit");
-        var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
-        var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
-
-        var playerState = playerStates[0];
-        var playerHighlightingData = playerHighlightingDatas[0];
+        var playerState = inPlayerState;
 
         Entities.With(m_ActiveUnitData).ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref WorldIndex.Component worldIndex, ref MouseState mouseState, ref FactionComponent.Component faction)=>
         {
@@ -407,7 +394,6 @@ public class HighlightingSystem : ComponentSystem
                         }
 
                         playerState.CellsInRange = playerState.CellsInRange;
-                        playerStates[0] = playerState;
                         HighlightReachable();
                     }
                     else
@@ -420,57 +406,59 @@ public class HighlightingSystem : ComponentSystem
                         playerState.CellsInRange = playerState.CellsInRange;
                         HighlightReachable();
                     }
-
                 }
-                
-                if (playerHighlightingData.IsUnitTarget == 1)
+
+                if(playerState.TargetValid)
                 {
-                    Entities.With(m_UnitData).ForEach((LineRendererComponent hoveredLineRendererComp, ref CubeCoordinate.Component unitCoord) =>
+                    if (playerHighlightingData.IsUnitTarget == 1)
                     {
-                        if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate))
+                        Entities.With(m_UnitData).ForEach((LineRendererComponent hoveredLineRendererComp, ref CubeCoordinate.Component unitCoord) =>
                         {
-                            playerHighlightingData.LineYOffset = hoveredLineRendererComp.arcOffset.y;
+                            if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate))
+                            {
+                                playerHighlightingData.LineYOffset = hoveredLineRendererComp.arcOffset.y;
+                            }
+                        });
+                    }
+                    else
+                        playerHighlightingData.LineYOffset = 0;
+
+                    if (playerHighlightingData.PathLine == 1)
+                    {
+                        CellAttributeList Path = new CellAttributeList();
+                        Path = m_PathFindingSystem.FindPath(playerHighlightingData.HoveredCoordinate, playerState.CachedPaths);
+
+                        if (Path.CellAttributes.Count > 0)
+                        {
+                            UpdatePathLineRenderer(Path, lineRendererComp);
                         }
-                    });
-                }
-                else
-                    playerHighlightingData.LineYOffset = 0;
-
-                
-                if (playerHighlightingData.PathLine == 1)
-                {
-                    CellAttributeList Path = new CellAttributeList();
-                    Path = m_PathFindingSystem.FindPath(playerHighlightingData.HoveredCoordinate, playerState.CachedPaths);
-
-                    if (Path.CellAttributes.Count > 0)
-                    {
-                        UpdatePathLineRenderer(Path, lineRendererComp);
                     }
-                }
-                else if (playerHighlightingData.LineAoE == 0)
-                {
-
-                    //Debug.Log("HoveredPos: " + playerHighlightingData.HoveredPosition);
-                    //use Arc Line
-                    if (playerHighlightingData.HoveredPosition != Vector3.zero)
+                    else if (playerHighlightingData.LineAoE == 0)
                     {
-                        //Debug.Log("UpdateArc: " + playerHighlightingData.HoveredPosition);
-                        UpdateArcLineRenderer(playerHighlightingData.LineYOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
+                        //use Arc Line
+                        if (playerHighlightingData.HoveredPosition != Vector3.zero)
+                        {
+                            Debug.Log("UpdateArcLineRenderer");
+                            UpdateArcLineRenderer(playerHighlightingData.LineYOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
+                        }
+                        else
+                            lineRendererComp.lineRenderer.positionCount = 0;
                     }
-                    else// if (mouseState.CurrentState != MouseState.State.Neutral)
+                    else
+                    {
                         lineRendererComp.lineRenderer.positionCount = 0;
+                    }
                 }
                 else
                 {
-                    Debug.Log("SetLineRendererpositionCountTo 0");
+                    if (playerState.UnitTargets.ContainsKey(iD.EntityId.Id))
+                        playerState.UnitTargets[iD.EntityId.Id].CubeCoordinates.Clear();
                     lineRendererComp.lineRenderer.positionCount = 0;
                 }
-                
             }
         });
-        m_PlayerStateData.CopyFromComponentDataArray(playerStates);
-        playerStates.Dispose();
-        playerHighlightingDatas.Dispose();
+
+        inPlayerState = playerState;
     }
 
     void HandleMods(List<ECSActionSecondaryTargets> inMods, ref HighlightingDataComponent highLightingData)

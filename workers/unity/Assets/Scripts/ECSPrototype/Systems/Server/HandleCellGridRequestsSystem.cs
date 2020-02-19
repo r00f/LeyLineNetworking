@@ -9,6 +9,7 @@ using Generic;
 using Cell;
 using Unit;
 using Unity.Collections;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class HandleCellGridRequestsSystem : ComponentSystem
@@ -18,6 +19,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     TimerSystem m_TimerSystem;
     ResourceSystem m_ResourceSystem;
 
+    EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
@@ -165,13 +167,15 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         }
                                     }
                                     unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-
+                                    //playerState.CachedPaths = unitCellsToMark.CachedPaths;
                                     break;
                                 case UseHighlighterEnum.no_pathing:
+                                    //playerState.CachedPaths.Clear();
                                     break;
                             }
                         }
                     }
+
 
                     unitActions.LastSelected = unitActions.CurrentSelected;
                     unitCellsToMark.SetClientRange = true;
@@ -183,6 +187,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         #endregion
 
         #region set target
+
+        //VALIDATE BEHAVIOUR NEEDS TO BE MOVED TO PATHFINDING SYSTEM SO WE CAN USE IT ON CLIENT ASWELL
         var setTargetRequests = m_CommandSystem.GetRequests<Actions.SetTargetCommand.ReceivedRequest>();
 
         for (int i = 0; i < setTargetRequests.Count; i++)
@@ -203,6 +209,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                     if (unitActions.CurrentSelected.Index != -3 && unitActions.LockedAction.Index == -3)
                     {
+
                         switch (unitActions.CurrentSelected.Targets[0].TargetType)
                         {
                             case TargetTypeEnum.cell:
@@ -213,38 +220,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                                     if (cellId.EntityId.Id == id)
                                     {
-                                        bool isValidTarget = false;
-                                        if (requestingUnitCellsToMark.CachedPaths.Count != 0)
-                                        {
-                                            if (requestingUnitCellsToMark.CachedPaths.ContainsKey(cell))
-                                            {
-                                                isValidTarget = true;
-                                            }
-                                        }
-                                        else
-                                        {
-                                            bool valid = false;
-                                            foreach (CellAttributes ca in requestingUnitCellsToMark.CellsInRange)
-                                            {
-                                                if (Vector3fext.ToUnityVector(ca.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(cell.CubeCoordinate))
-                                                {
-                                                    if (requestingUnitActions.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
-                                                    {
-                                                        if (!cell.IsTaken) valid = true;
-                                                    }
-                                                    else
-                                                    {
-                                                        valid = true;
-                                                    }
-                                                }
+                                        bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, cell.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
+                                        //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(cell.CubeCoordinate));
 
-                                            }
-
-                                            isValidTarget = valid;
-
-                                        }
-
-                                        if (isValidTarget)
+                                        if (valid)
                                         {
                                             requestingUnitActions.LockedAction = requestingUnitActions.CurrentSelected;
                                             var locked = requestingUnitActions.LockedAction;
@@ -304,15 +283,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 {
                                     if (targetUnitId.EntityId.Id == id)
                                     {
-                                        bool isValidTarget = false;
-                                        foreach (CellAttributes c in requestingUnitCellsToMark.CellsInRange)
-                                        {
-                                            if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
-                                            {
-                                                isValidTarget = m_PathFindingSystem.ValidateTarget(e, requestingUnitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction);
-                                            }
-                                        }
-                                        if (isValidTarget)
+                                        bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
+                                        //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate));
+
+                                        if (valid)
                                         {
                                             requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, targetUnitId.EntityId.Id, requestingUnitFaction.Faction);
                                         }

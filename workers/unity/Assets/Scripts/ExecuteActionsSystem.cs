@@ -198,7 +198,7 @@ public class ExecuteActionsSystem : ComponentSystem
         {
             if (Coords.Contains(unitCoord.CubeCoordinate))
             {
-                if (m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)(int)restricitons, usingID, usingFaction))
+                if (m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)restricitons, usingID, usingFaction))
                 {
                     unitIds.Add(unitId.EntityId.Id);
                 }

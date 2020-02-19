@@ -79,7 +79,7 @@ namespace LeyLineHybridECS
                 var gWi = gameStateWorldIndex.Value;
                 var g = gameState;
 
-                Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
+                Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
                 {
                     if (playerWorldIndex == gWi)
                     {
@@ -95,6 +95,9 @@ namespace LeyLineHybridECS
                                     {
                                         if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                                         {
+                                            if (actions.CurrentSelected.Targets[0].Higlighter == UseHighlighterEnum.pathing)
+                                                playerState.CachedPaths = unitCellsToMark.CachedPaths;
+
                                             playerState.CurrentState = PlayerStateEnum.waiting_for_target;
                                         }
                                         //if playerState is WaitingForTarget and rightMouseButton is pressed

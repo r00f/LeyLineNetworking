@@ -189,7 +189,13 @@ public static class LeyLineEntityTemplates {
             CellsInRange = new List<CellAttribute>(),
             CachedPaths = new Dictionary<CellAttribute, CellAttributeList>(),
             UnitTargets = new Dictionary<long, CubeCoordinateList>(),
-            EndStepReady = true
+            EndStepReady = true,
+            SelectedAction = new Action
+            {
+                Targets = new List<ActionTarget>(),
+                Effects = new List<ActionEffect>(),
+                Index = -3
+            }
 
         };
 

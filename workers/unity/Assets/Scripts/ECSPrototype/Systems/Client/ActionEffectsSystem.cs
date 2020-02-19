@@ -208,7 +208,7 @@ public class ActionEffectsSystem : ComponentSystem
         {
 
             //only apply effect if target unit is valid or pass correct coordinates
-            if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)(int)action.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
+            if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)action.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
                 unitEffects.Action = action;
                 unitEffects.AttackPosition = hitTransform.position;
