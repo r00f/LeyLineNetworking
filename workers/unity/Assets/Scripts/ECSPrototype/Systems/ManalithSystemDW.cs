@@ -7,6 +7,7 @@ using Generic;
 using Player;
 using Unity.Collections;
 using System.Collections.Generic;
+using FMODUnity;
 
 namespace LeyLineHybridECS
 {
@@ -77,7 +78,8 @@ namespace LeyLineHybridECS
 
                     ComponentType.ReadWrite<MeshColor>(),
                     ComponentType.ReadWrite<ManalithClientData>(),
-                    ComponentType.ReadOnly<ManalithInitializer>()
+                    ComponentType.ReadOnly<ManalithInitializer>(),
+                    ComponentType.ReadWrite<StudioEventEmitter>()
             );
 
 
@@ -124,7 +126,7 @@ namespace LeyLineHybridECS
                     var ID = entityID[i].EntityId.Id;
                     var pos = manaLithPositions[i];
 
-                        Entities.With(m_CircleData).ForEach((ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData) =>
+                        Entities.With(m_CircleData).ForEach((ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                         {
 
                             if (clientData.ManalithEntityID == 0)
@@ -161,10 +163,13 @@ namespace LeyLineHybridECS
                             if (manalithFaction.Faction != 0)
                                 {
                                     clientData.IngameIconRef.EnergyText.text = manaLith.CombinedEnergyGain.ToString();
+                                    eventEmitter.SetParameter("Pitch", manaLith.CombinedEnergyGain);
+                                    eventEmitter.enabled = true;
                                 }
                                 else
                                 {
                                     clientData.IngameIconRef.EnergyText.text = "";
+                                    eventEmitter.enabled = false;
                                 }
                                 clientData.IngameIconRef.PlayerColorImage.color = meshColor.LerpColor;
                                 clientData.IngameIconRef.EnergyText.color = meshColor.LerpColor;
