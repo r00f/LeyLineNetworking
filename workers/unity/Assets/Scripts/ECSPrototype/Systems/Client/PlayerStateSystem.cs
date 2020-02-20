@@ -104,6 +104,7 @@ namespace LeyLineHybridECS
                                         else if(Input.GetButtonDown("Fire2"))
                                         {
                                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
+                                            //Call methods so line/target gets disabled instantly
                                             m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
                                             playerState.UnitTargets.Remove(unitId.EntityId.Id);
                                         }

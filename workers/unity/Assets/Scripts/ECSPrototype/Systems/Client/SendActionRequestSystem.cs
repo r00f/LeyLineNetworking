@@ -120,17 +120,15 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         if (actionsData.BasicMove.Index != -3)
                         {
-                            Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+                            //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
                             SelectActionCommand(-2, unitEntityId.Id);
                             m_UISystem.InitializeSelectedActionTooltip(0);
                         }
                     }
                 }
-                else
+                else if(!playerState.TargetValid)
                 {
                     SelectActionCommand(-3, unitEntityId.Id);
-                    m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitEntityId.Id);
-                    playerState.UnitTargets.Remove(unitEntityId.Id);
                 }
             }
 
@@ -142,7 +140,6 @@ public class SendActionRequestSystem : ComponentSystem
                 {
                     Vector3 TargetCoord = new Vector3(999, 999, 999);
 
-                    //IF WE WANT CELL AND CLICK UNIT USE UNIT COORD
                     if (!actionsData.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
                     {
                         Entities.With(m_ClickedUnitData).ForEach((ref CubeCoordinate.Component clickedUnitCoord) =>
@@ -159,8 +156,6 @@ public class SendActionRequestSystem : ComponentSystem
 
                         if (cellCoord != unitCoord || TargetCoord == cellCoord)
                         {
-
-                            //Debug.Log("SendCellTargetRequest");
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
@@ -168,8 +163,6 @@ public class SendActionRequestSystem : ComponentSystem
                             );
 
                             m_CommandSystem.SendCommand(request);
-                            //setTargetRequest.RequestsToSend.Add(request);
-                            //m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
                         }
 
                         m_HighlightingSystem.ResetHighlights();
@@ -177,10 +170,8 @@ public class SendActionRequestSystem : ComponentSystem
                 }
                 else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                 {
-                    //bool sent = false;
                     Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId) =>
                     {
-                        //Debug.Log("SendUnitTargetRequest");
                         var request = new Actions.SetTargetCommand.Request
                         (
                             unitEntityId,
@@ -188,31 +179,8 @@ public class SendActionRequestSystem : ComponentSystem
                         );
 
                         m_CommandSystem.SendCommand(request);
-                        //sent = true;
                         m_HighlightingSystem.ResetHighlights();
                     });
-                    /*
-                    if (!sent)
-                    {
-                        Entities.With(m_CellData).ForEach((ref SpatialEntityId cellEntityId, ref CubeCoordinate.Component cCoord, ref MarkerState cellMarkerState) =>
-                        {
-
-                            var cellCoord = Vector3fext.ToUnityVector(cCoord.CubeCoordinate);
-
-
-                            if (cellCoord != unitCoord)
-                            {
-                                var request = new Actions.SetTargetCommand.Request
-                                (
-                                    unitEntityId,
-                                    new SetTargetRequest(cellEntityId.EntityId.Id)
-                                );
-                                m_CommandSystem.SendCommand(request);
-                            }
-                            m_HighlightingSystem.ResetHighlights();
-                        });
-                    }
-                    */
                 }
             }
 
@@ -292,6 +260,7 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         m_HighlightingSystem.ClearPlayerState();
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
+                        playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerFaction.Faction);
                         playerState.TargetValid = false;
                         m_HighlightingSystem.UpdateSelectedUnit(ref playerState, playerHigh);
                         m_HighlightingSystem.SetNumberOfTargets(playerState);

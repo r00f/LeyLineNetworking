@@ -63,8 +63,6 @@ namespace LeyLineHybridECS
                 UpdateVision();
             }
 
-            //|| m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob)[0].CurrentState == GameStateEnum.planning ||
-
             var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
             var playerFactions = m_AuthorativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
 
