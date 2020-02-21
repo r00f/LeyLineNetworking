@@ -1,5 +1,23 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8292070232962533257
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637178454112925214
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-8107686300159472641
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -54,6 +72,29 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-6100842269502046967
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ActionSFX/BloodSplat
+  m_EditorClassIdentifier: 
+  Path: event:/ActionSFX/BloodSplat
+  guid: 63cd8739d679804d952f7e2d9b09c4ed
+  Banks:
+  - {fileID: -3041879764501912048}
+  IsStream: 0
+  Is3D: 1
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 10
+  Length: 2000
 --- !u!114 &-5401705559865114402
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -72,6 +113,29 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-4278630086848178532
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ActionSFX/ToungeWhip
+  m_EditorClassIdentifier: 
+  Path: event:/ActionSFX/ToungeWhip
+  guid: 2c5574f637bd1f4eac0bec20e4c0e820
+  Banks:
+  - {fileID: -3041879764501912048}
+  IsStream: 0
+  Is3D: 1
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 10
+  Length: 1306
 --- !u!114 &-3659528253992444255
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -89,7 +153,7 @@ MonoBehaviour:
   lastModified: 637178373648580143
   LoadResult: 0
   FileSizes: []
-  Exists: 1
+  Exists: 0
 --- !u!114 &-3607119571880875803
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -105,7 +169,7 @@ MonoBehaviour:
   Path: event:/Environment/Ambience
   guid: f13507d7ce60254b910372159f922894
   Banks:
-  - {fileID: -3659528253992444255}
+  - {fileID: -3041879764501912048}
   IsStream: 1
   Is3D: 0
   IsOneShot: 0
@@ -129,7 +193,42 @@ MonoBehaviour:
   Min: 0
   Max: 10
   Default: 0
+  Exists: 0
+--- !u!114 &-3041879764501912048
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637178466926483624
+  LoadResult: 0
+  FileSizes: []
   Exists: 1
+--- !u!114 &-2656605624911088927
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 0
 --- !u!114 &-2404643058009583649
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -202,18 +301,36 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EditorBanks:
   - {fileID: 8442611772918743718}
-  - {fileID: -3659528253992444255}
+  - {fileID: -3041879764501912048}
   EditorEvents:
-  - {fileID: 7541324743802153960}
   - {fileID: -3607119571880875803}
   - {fileID: 8700937748761485135}
+  - {fileID: -4278630086848178532}
+  - {fileID: -6100842269502046967}
   EditorParameters: []
   MasterBanks:
-  - {fileID: -3659528253992444255}
+  - {fileID: -3041879764501912048}
   StringsBanks:
   - {fileID: 8442611772918743718}
-  stringsBankWriteTime: 637178373648610063
+  stringsBankWriteTime: 637178466926513543
   cacheVersion: 3
+--- !u!114 &1107918798984612799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 1
 --- !u!114 &1247275136623036575
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -231,6 +348,23 @@ MonoBehaviour:
   lastModified: 637178331516630548
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &1505994868649644339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
   Exists: 0
 --- !u!114 &1840896791201832027
 MonoBehaviour:
@@ -322,6 +456,42 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &6159575467850180898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637178460059349758
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &6590212843171937075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637178449892718717
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &6884629412652704453
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,15 +542,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Path: event:/ActionEffects/ToungeWhip
   guid: 2c5574f637bd1f4eac0bec20e4c0e820
-  Banks:
-  - {fileID: -3659528253992444255}
+  Banks: []
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 0
+  Length: 1306
 --- !u!114 &8442611772918743718
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -395,11 +564,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Path: FMOD/LeyLine/Build/Desktop/Master.strings.bank
   SubDir: 
-  lastModified: 637178373648610063
+  lastModified: 637178466926513543
   LoadResult: 0
   FileSizes:
   - Name: Desktop
-    Value: 910
+    Value: 960
   Exists: 1
 --- !u!114 &8700937748761485135
 MonoBehaviour:
@@ -416,14 +585,14 @@ MonoBehaviour:
   Path: event:/Environment/Manalith
   guid: 1b61c983ba17304295bf21aae4eb3493
   Banks:
-  - {fileID: -3659528253992444255}
+  - {fileID: -3041879764501912048}
   IsStream: 0
   Is3D: 1
   IsOneShot: 0
   Parameters:
-  - {fileID: -3579907203270213676}
+  - {fileID: 1107918798984612799}
   MinDistance: 1
-  MaxDistance: 20
+  MaxDistance: 8
   Length: 4522
 --- !u!114 &8771044145279281771
 MonoBehaviour:
@@ -460,4 +629,21 @@ MonoBehaviour:
   lastModified: 637178332650724415
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &9045907958111131712
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
   Exists: 0
