@@ -5411,7 +5411,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CollisionTag: 
-  Event: event:/ActionSFX/ToungeWhip
+  Event: event:/ActionSFX/KingCroak/ToungeWhip
   PlayEvent: 1
   StopEvent: 2
   AllowFadeout: 1
@@ -5420,7 +5420,7 @@ MonoBehaviour:
   Params: []
   OverrideAttenuation: 0
   OverrideMinDistance: 1
-  OverrideMaxDistance: 20
+  OverrideMaxDistance: 10
 --- !u!1 &4265137128855694774
 GameObject:
   m_ObjectHideFlags: 0

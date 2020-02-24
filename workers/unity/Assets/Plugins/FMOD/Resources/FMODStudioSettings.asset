@@ -15,7 +15,7 @@ MonoBehaviour:
   SwitchSettingsMigration: 1
   HasSourceProject: 1
   HasPlatforms: 1
-  sourceProjectPath: FMOD\LeyLine\LeyLine.fspro
+  sourceProjectPath: FMOD/LeyLine/LeyLine.fspro
   sourceBankPath: FMOD\LeyLine\Build
   SourceBankPathUnformatted: 
   AutomaticEventLoading: 1
@@ -76,6 +76,7 @@ MonoBehaviour:
   Plugins: []
   MasterBanks:
   - Master
-  Banks: []
+  Banks:
+  - SFX
   BanksToLoad: []
   LiveUpdatePort: 9264
