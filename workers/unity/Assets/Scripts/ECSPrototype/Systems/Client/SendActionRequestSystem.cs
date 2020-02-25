@@ -91,6 +91,7 @@ public class SendActionRequestSystem : ComponentSystem
         Entities.With(m_UnitData).ForEach((Entity e, ref MouseState mouseState, ref SpatialEntityId id, ref WorldIndex.Component wIndex, ref ClientPath.Component path, ref Actions.Component actions, ref CubeCoordinate.Component uCoord) =>
         {
             var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
+            var anim = EntityManager.GetComponentObject<AnimatorComponent>(e);
             var unitMouseState = mouseState;
             var unitEntityId = id.EntityId;
             var unitWorldIndex = wIndex.Value;
@@ -121,6 +122,7 @@ public class SendActionRequestSystem : ComponentSystem
                         if (actionsData.BasicMove.Index != -3)
                         {
                             //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+                            anim.AnimationEvents.VoiceTrigger = true;
                             SelectActionCommand(-2, unitEntityId.Id);
                             m_UISystem.InitializeSelectedActionTooltip(0);
                         }
