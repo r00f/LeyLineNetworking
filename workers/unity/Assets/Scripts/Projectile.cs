@@ -6,6 +6,7 @@ using Unit;
 using Improbable;
 using UnityEngine.Animations;
 using Generic;
+using FMODUnity;
 
 public class Projectile : MonoBehaviour
 {
@@ -55,6 +56,7 @@ public class Projectile : MonoBehaviour
     public ParticleSystem BodyParticleSystem;
     public ParticleSystem TrailParticleSystem;
     public ParticleSystem ExplosionParticleSystem;
+    public StudioEventEmitter ExplosionEventEmitter;
 
 
 

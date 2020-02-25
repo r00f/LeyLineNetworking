@@ -149,7 +149,7 @@
 			<value>-5</value>
 		</property>
 		<property name="name">
-			<value>Audio 1</value>
+			<value>WaterStream</value>
 		</property>
 		<relationship name="modulators">
 			<destination>{ad019986-8f98-4089-aa9a-59235092194b}</destination>
@@ -189,7 +189,7 @@
 			<value>-5</value>
 		</property>
 		<property name="name">
-			<value>Audio 2</value>
+			<value>WhiteNoise</value>
 		</property>
 		<relationship name="modulators">
 			<destination>{13a1a8f2-fe33-44e1-b334-26ba8b43d56a}</destination>
@@ -226,7 +226,10 @@
 			<value>-80</value>
 		</property>
 		<property name="attackTime">
-			<value>720</value>
+			<value>224.358963</value>
+		</property>
+		<property name="peakValue">
+			<value>-0.577777863</value>
 		</property>
 		<property name="releaseTime">
 			<value>500</value>

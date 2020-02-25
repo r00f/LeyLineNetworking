@@ -81,6 +81,20 @@ public class UnitAnimationSystem : ComponentSystem
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
 
+            //if this caracter has a filled voice emitter field and a voice event is triggered
+            if (animatorComponent.VoiceEmitter && animatorComponent.AnimationEvents.VoiceTrigger)
+            {
+                animatorComponent.VoiceEmitter.Play();
+                animatorComponent.AnimationEvents.VoiceTrigger = false;
+            }
+
+            //if this caracter has a filled footStep emitter field and a footstep event is triggered
+            if (animatorComponent.FootStempEmitter && animatorComponent.AnimationEvents.FootStepTrigger)
+            {
+                animatorComponent.FootStempEmitter.Play();
+                animatorComponent.AnimationEvents.FootStepTrigger = false;
+            }
+
             //outgoing effects (launch projectiles usw.)
             if (actions.LockedAction.Index != -3)
             {
@@ -122,6 +136,7 @@ public class UnitAnimationSystem : ComponentSystem
                         animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f)); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
                     }
 
+
                     if (animatorComponent.AnimationEvents)
                     {
                         if (animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
@@ -129,6 +144,7 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
                             animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
                         }
+
 
                         //event triggered from animation
                         if (animatorComponent.AnimationEvents.EventTrigger)

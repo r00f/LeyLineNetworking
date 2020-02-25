@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Generic;
+using FMODUnity;
 
 public class AnimatorComponent : MonoBehaviour
 {
@@ -20,6 +21,10 @@ public class AnimatorComponent : MonoBehaviour
     public List<GameObject> Visuals;
     public float EnableVisualsDelay;
     public List<GameObject> CharacterEffects;
+
+    [Header("SoundFX")]
+    public StudioEventEmitter VoiceEmitter;
+    public StudioEventEmitter FootStempEmitter;
 
     [Header("Movement")]
     public int RotationSpeed;

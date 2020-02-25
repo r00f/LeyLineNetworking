@@ -122,6 +122,9 @@
 		<property name="pitch">
 			<value>-5.5</value>
 		</property>
+		<relationship name="fadeInCurve">
+			<destination>{6b06cad5-0ac9-4f85-be90-20c8c4e324d2}</destination>
+		</relationship>
 		<relationship name="fadeOutCurve">
 			<destination>{3aa1c1c8-49d4-408f-8ba2-8f9c3a322aac}</destination>
 		</relationship>
@@ -235,6 +238,14 @@
 	</object>
 	<object class="MixerBusPanner" id="{a83c04bc-30f7-456f-98dc-29436c021072}" />
 	<object class="MixerBusFader" id="{ad2e8f17-4bc1-4fcc-9b7d-a81c7c3faa8d}" />
+	<object class="FadeCurve" id="{6b06cad5-0ac9-4f85-be90-20c8c4e324d2}">
+		<relationship name="startPoint">
+			<destination>{86ef15ee-7c01-44d9-aea8-97faeab8dc62}</destination>
+		</relationship>
+		<relationship name="endPoint">
+			<destination>{aec0cdb3-e695-48fe-a1ef-09809c03d70f}</destination>
+		</relationship>
+	</object>
 	<object class="FadeCurve" id="{3aa1c1c8-49d4-408f-8ba2-8f9c3a322aac}">
 		<relationship name="startPoint">
 			<destination>{66decf4a-7ac7-45cb-b047-5c3a00888d5e}</destination>
@@ -313,6 +324,25 @@
 	<object class="SpatialiserEffect" id="{83954998-f293-4ba3-9d79-fcdd5a699c58}">
 		<property name="maximumDistance">
 			<value>15</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{86ef15ee-7c01-44d9-aea8-97faeab8dc62}">
+		<property name="position">
+			<value>0</value>
+		</property>
+		<property name="value">
+			<value>0</value>
+		</property>
+		<property name="curveShape">
+			<value>-0.2547189</value>
+		</property>
+	</object>
+	<object class="AutomationPoint" id="{aec0cdb3-e695-48fe-a1ef-09809c03d70f}">
+		<property name="position">
+			<value>0.070000000000000007</value>
+		</property>
+		<property name="value">
+			<value>1</value>
 		</property>
 	</object>
 	<object class="AutomationPoint" id="{66decf4a-7ac7-45cb-b047-5c3a00888d5e}">

@@ -160,6 +160,11 @@ public class ProjectileSystem : ComponentSystem
                                 ParticleSystem explosionPs = projectile.ExplosionParticleSystem;
                                 explosionPs.Play();
                             }
+
+                            if(projectile.ExplosionEventEmitter)
+                            {
+                                projectile.ExplosionEventEmitter.Play();
+                            }
                             projectile.EffectTriggered = true;
                         }
 

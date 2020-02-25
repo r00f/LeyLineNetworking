@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 6546359515611239479}
   - component: {fileID: 93931158904744250}
   - component: {fileID: 6593013996290753601}
+  - component: {fileID: -6923469273402858418}
   m_Layer: 1
   m_Name: WaterProjectile
   m_TagString: Untagged
@@ -103,7 +104,7 @@ MonoBehaviour:
     Effects: []
     ActionExecuteStep: 0
     TimeToExecute: 0
-  DestroyAtDestination: 1
+  DestroyAtDestination: 0
   DestinationReached: 0
   EffectTriggered: 0
   FlagForDestruction: 0
@@ -126,10 +127,11 @@ MonoBehaviour:
   Launched: 0
   BaseJoint: {fileID: 0}
   SpringJoints: []
-  DestroyAfterSeconds: 0
+  DestroyAfterSeconds: 2
   BodyParticleSystem: {fileID: 3589144075304049518}
   TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 1731113839523245827}
+  ExplosionEventEmitter: {fileID: 9193001755421976532}
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
@@ -147,6 +149,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &-6923469273402858418
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4896425436571225840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  Event: event:/ActionSFX/Axalotl/WaterBallLoop
+  PlayEvent: 1
+  StopEvent: 2
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 15
 --- !u!1001 &39494513322607323
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -320,6 +345,16 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5341185222269292129}
     m_Modifications:
+    - target: {fileID: -7965398785296240854, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: StopEvent
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -7965398785296240854, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: PlayEvent
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3602980402949883786, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: m_Name
@@ -394,3 +429,15 @@ ParticleSystem:
     type: 3}
   m_PrefabInstance: {fileID: 7989705018493028606}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &9193001755421976532 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: -7965398785296240854, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+    type: 3}
+  m_PrefabInstance: {fileID: 7989705018493028606}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
