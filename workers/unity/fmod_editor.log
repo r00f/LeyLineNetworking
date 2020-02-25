@@ -8,7 +8,7 @@
 [WRN] SystemI::init                            : Output requires a sample rate of 44100Hz, resampling will occur.
 [LOG] Thread::initThread                       : Init FMOD stream thread. Priority: 2, Stack Size: 98304, Semaphore: No, Sleep Time: 10, Looping: Yes.
 [LOG] Thread::initThread                       : Init FMOD mixer thread. Priority: 3, Stack Size: 81920, Semaphore: No, Sleep Time: 0, Looping: Yes.
-[LOG] AsyncManager::init                       : manager 000001BBD56CBA38 isAsync 0 updatePeriod 0.02
+[LOG] AsyncManager::init                       : manager 000001BBD56CF408 isAsync 0 updatePeriod 0.02
 [LOG] AsyncManager::init                       : done
 [LOG] PlaybackSystem::init                     : 
 [LOG] Thread::initThread                       : Init FMOD Studio sample load thread. Priority: 0, Stack Size: 98304, Semaphore: No, Sleep Time: 1, Looping: No.
@@ -19,21 +19,72 @@
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
 [LOG] PlaybackSystem::acquireMasterBus         : Setting master channel group format to 6
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] PlaybackSystem::acquireMasterBus         : Setting master channel group format to 6
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
+[LOG] SoundI::release                          : Water1.wav (000001BC78DB3618)
+[LOG] SoundI::release                          :  (000001BBABDD2F18)
+[LOG] SoundI::release                          :     ExplosionDebris1 (000001BC78DB4178)
+[LOG] SoundI::release                          :  (000001BBABDD4058)
+[LOG] SoundI::release                          :     ExplosionDebris2 (000001BC78DB3C98)
+[LOG] SoundI::release                          :  (000001BBABDD3648)
+[LOG] SoundI::release                          :     Thump1 (000001BC78DB5838)
+[LOG] SoundI::release                          :  (000001BC437D4C58)
+[LOG] SoundI::release                          :     ManalithLoop (000001BC147A80F8)
+[LOG] SoundI::release                          :  (000001BC437D4808)
+[LOG] SoundI::release                          :     Electric (000001BC147A8438)
+[LOG] SoundI::release                          :  (000001BC43404938)
+[LOG] SoundI::release                          :     MetalGrind1 (000001BC15429E08)
+[LOG] SoundI::release                          :  (000001BC43405A78)
+[LOG] SoundI::release                          :     MetalGrind2 (000001BC1542B9A8)
+[LOG] SoundI::release                          :  (000001BC43405068)
+[LOG] SoundI::release                          :     MetalGrind3 (000001BC15429FA8)
+[LOG] SoundI::release                          :  (000001BC434054B8)
+[LOG] SoundI::release                          :     MetalGrind4 (000001BC1542A488)
+[LOG] SoundI::release                          :  (000001BC434061A8)
+[LOG] SoundI::release                          :     MetalGrind5 (000001BC15429C68)
+[LOG] SoundI::release                          :  (000001BC437D5218)
+[LOG] SoundI::release                          :     Croak1 (000001BC147A6218)
+[LOG] SoundI::release                          :  (000001BC437D4F38)
+[LOG] SoundI::release                          :     Croak2 (000001BC147A9618)
+[LOG] SoundI::release                          :  (000001BC437D5388)
+[LOG] SoundI::release                          :     Croak3 (000001BC147A9AF8)
+[LOG] SoundI::release                          :  (000001BC437D4698)
+[LOG] SoundI::release                          :     Croak4 (000001BC147A8F98)
+[LOG] SoundI::release                          :  (000001BC437D5D98)
+[LOG] SoundI::release                          :     FootstepWet1 (000001BC147A8778)
+[LOG] SoundI::release                          :  (000001BC437D5948)
+[LOG] SoundI::release                          :     FootstepWet2 (000001BC147A8918)
+[LOG] SoundI::release                          :  (000001BC437D5668)
+[LOG] SoundI::release                          :     FootstepWet3 (000001BC147A6D78)
+[LOG] SoundI::release                          :  (000001BC437D5AB8)
+[LOG] SoundI::release                          :     FootstepWet4 (000001BC147A5ED8)
+[LOG] SoundI::release                          : Brrop1.wav (000001BC78DB10B8)
+[LOG] SoundI::release                          : swamp-sounds (000001BB889D5C48)
+[LOG] SoundI::release                          :     swamp-sounds (000001BC12B05388)
+[LOG] SoundI::release                          :     swamp-sounds (000001BC5CF2E088)
+[LOG] SoundI::release                          : Brrop3.wav (000001BBB8380BE8)
+[LOG] SoundI::release                          : Brrop2.wav (000001BBADD6D2A8)
+[LOG] Thread::callback                         : FMOD Studio update thread finished.
+[LOG] Thread::callback                         : FMOD Studio bank load thread finished.
+[LOG] ProfileClient::markForDead               : Closing client connection
+[LOG] Profile::disconnectAll                   : Profiler disconnecting all clients
+[LOG] FMOD_OS_Net_Read                         : Interrupted.[LOG] ProfileClient::recvThreadLoopFunction    : Socket disconnected
+[LOG] Thread::callback                         : FMOD profiler thread (send) finished.
+[LOG] Thread::callback                         : FMOD profiler thread (recv) finished.
+[LOG] Thread::callback                         : FMOD Studio sample load thread finished.
+[LOG] LiveUpdate::release                      : 
+[LOG] LiveUpdate::reset                        : Reset connection (reason Disconnected)
+[LOG] Thread::callback                         : FMOD stream thread finished.
+[LOG] Thread::callback                         : FMOD mixer thread finished.
+[LOG] Profile::disconnectAll                   : Profiler disconnecting all clients
+[LOG] SystemI::close                           : Closed.
 [LOG] Thread::callback                         : FMOD Studio bank load thread finished.
 [LOG] Thread::callback                         : FMOD Studio sample load thread finished.
 [LOG] LiveUpdate::release                      : 
 [LOG] LiveUpdate::reset                        : Reset connection (reason Disconnected)
 [LOG] Thread::callback                         : FMOD stream thread finished.
 [LOG] Thread::callback                         : FMOD mixer thread finished.
+[LOG] Thread::callback                         : FMOD nonblocking thread (0) finished.
+[LOG] Thread::callback                         : FMOD file thread finished.
 [LOG] SystemI::close                           : Closed.
