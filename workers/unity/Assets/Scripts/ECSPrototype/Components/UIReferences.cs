@@ -102,7 +102,7 @@ public class UIReferences : MonoBehaviour
     [Header("MapPanel")]
     public MinimapScript MinimapComponent;
 
-    [Header("ManaLithIcon")]
+    [Header("ManaLithUI")]
     public ManalithInfoComponent ManalithIconPrefab;
-
+    public ManalithTooltip ManalithToolTipFab;
 }

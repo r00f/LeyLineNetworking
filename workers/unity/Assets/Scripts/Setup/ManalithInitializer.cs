@@ -206,6 +206,10 @@ namespace LeyLineHybridECS
                     circleCenter = transform.position;
                     leyLineCircle.Add(occupiedCell);
                     leyLineCircle.AddRange(GetComponentInParent<Neighbours>().NeighboursList);
+                    for (int i = leyLineCircle.Count - 1; i >= 7; i--)
+                    {
+                        leyLineCircle.RemoveAt(i);
+                    }
                     foreach (Cell c in leyLineCircle)
                     {
                         c.GetComponent<EditorIsCircleCell>().Value = true;

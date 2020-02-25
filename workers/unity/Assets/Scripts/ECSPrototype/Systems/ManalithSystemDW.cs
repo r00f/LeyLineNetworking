@@ -8,6 +8,7 @@ using Player;
 using Unity.Collections;
 using System.Collections.Generic;
 using FMODUnity;
+using UnityEngine.UI;
 
 namespace LeyLineHybridECS
 {
@@ -141,13 +142,17 @@ namespace LeyLineHybridECS
                                             case ManalithInitializer.CircleSize.Seven:
                                                 clientData.WorldPos = meshColor.transform.position + new Vector3(0, initData.iconHightoffset, 0);
                                                 clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
+                                                clientData.ManalithEntityID = ID;
+                                                clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
                                                 break;
                                             case ManalithInitializer.CircleSize.Three:
                                                 clientData.WorldPos = meshColor.transform.position + new Vector3(1, initData.iconHightoffset, 0);
                                                 clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
+                                                clientData.ManalithEntityID = ID;
+                                                clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
                                                 break;
                                         }
-                                        clientData.ManalithEntityID = ID;
+                                        
 
                                     }
                                 }
@@ -155,8 +160,16 @@ namespace LeyLineHybridECS
 
                             if (clientData.ManalithEntityID == ID)
                             {
-                                if(clientData.IngameIconRef)
+                                if (clientData.IngameIconRef)
+                                {
                                     clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
+                                    if(ID == m_UISystem.UIRef.ManalithToolTipFab.ActiveManalithID)
+                                    {
+                                        //check if distance to middle of screen is bigger than screensize/height /2, if yes call turnoff manalithtooltip, if no updatepos
+
+                                        UpdateLeyLineTooltipPosition(clientData.IngameIconRef.RectTrans.anchoredPosition);
+                                    }
+                                }
 
                                 meshColor.Color = settings.FactionColors[(int)manalithFaction.Faction];
                             //Transport data from manaLith into clientData.IconPrefabref
@@ -184,37 +197,6 @@ namespace LeyLineHybridECS
                 entityID.Dispose();
                 manalithComps.Dispose();
 
-                /*      var manaLithPositions = m_ManaLithData.ToComponentDataArray<Position.Component>(Allocator.TempJob);
-                      var manaLithFactions = m_ManaLithData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-
-                      Entities.With(m_CircleData).ForEach((MeshColor meshColor) =>
-                      {
-                          var circlePos = meshColor.transform.position.sqrMagnitude;
-
-                          for (int i = 0; i < manaLithFactions.Length; i++)
-                          {
-                              var pos = manaLithPositions[i];
-                              var faction = manaLithFactions[i];
-
-                              if (pos.Coords.ToUnityVector().sqrMagnitude == circlePos)
-                              {
-                                  //Debug.Log("SetColor");
-                                  meshColor.Color = settings.FactionColors[(int)faction.Faction];
-                              }
-                          }
-                      });
-
-                      manaLithPositions.Dispose();
-                      manaLithFactions.Dispose();
-                      */
-                //Entities.With() does not seem to work with entities from other worlds
-                /*
-                Entities.With(m_ManaLithData).ForEach((ref Manalith.Component c, ref FactionComponent.Component faction, ref Position.Component position) =>
-                {
-                    Debug.Log("ManaLithData: " + m_ManaLithData.CalculateEntityCount());
-
-                });
-                */
                 Entities.With(m_CircleData).ForEach((MeshColor meshColor) =>
                 {
 
@@ -274,49 +256,114 @@ namespace LeyLineHybridECS
 
                     for (int li = 0; li < meshGradientColor.colors.Length; li++)
                     {
-                        //Debug.Log((float)li / meshGradientColor.colors.Length);
-                        //meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li / meshGradientColor.colors.Length);
                         meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float)li / meshGradientColor.colors.Length) /** meshGradientColor.EmissionMultiplier*/;
-                        /*
-                        if (li < 3)
-                        {
-                            meshGradientColor.colors[li] = emissiveColor1;
-                        }
-                        else if(li > meshGradientColor.colors.Length - 4)
-                        {
-                            meshGradientColor.colors[li] = emissiveColor2;
-                        }
-                        else
-                        {
-                            if (li % 2 == 0)
-                            {
-                                meshGradientColor.colors[li] = Color.Lerp(emissiveColor1, emissiveColor2, (float)li);
-                            }
-                            else
-                            {
-                                meshGradientColor.colors[li] = meshGradientColor.colors[li - 1];
-                            }
 
-                        }
-                                        */
+                        meshGradientColor.mesh.colors = meshGradientColor.colors;
                     }
-
-                    //meshGradientColor.m
-                    //meshGradientColor.mesh.SetColor("_EmissionColor", meshGradientColor.colors);
-                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_EmissionColor", meshGradientColor.colors);
-                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColorArray("_UnlitColorMap", meshGradientColor.colors);
-                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColorArray("_EmissiveColorMap", meshGradientColor.colors);
-                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_StartColor", c1);
-                    //meshGradientColor.GetComponent<MeshRenderer>().material.SetColor("_EndColor", c2);
-
-
-                    meshGradientColor.mesh.colors = meshGradientColor.colors;
-
-                    //}q
                 });
 
 
             }
+        }
+
+        protected void SwitchTooltip(ManalithClientData clientData)
+        {
+            ManalithTooltip Tooltip = m_UISystem.UIRef.ManalithToolTipFab;
+            if (clientData.ManalithEntityID == Tooltip.ActiveManalithID)
+            {
+                TurnOffToolTip();
+                return;
+            }
+
+            Tooltip.gameObject.SetActive(true);
+            Tooltip.ActiveManalithID = clientData.ManalithEntityID;
+            Tooltip.ManalithName.text = clientData.NodeName;
+            //Debug.Log(m_ManaLithData.CalculateEntityCount());
+
+            var facts = m_ManaLithData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+            var manaliths = m_ManaLithData.ToComponentDataArray<Manalith.Component>(Allocator.TempJob);
+            var IDs = m_ManaLithData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
+
+            for(int j = 0; j < IDs.Length; j++) {
+                var ID = IDs[j];
+                var fact = facts[j];
+                var manalith = manaliths[j];
+
+                //Debug.Log(ID.EntityId.Id);
+                if (ID.EntityId.Id == Tooltip.ActiveManalithID)
+                {
+                    //Debug.Log("Arrived at right Manalith");
+                    Tooltip.ManalithBaseEnergyGain.text = "+" + manalith.BaseIncome;
+                    if(fact.Faction != 0)
+                    {
+                        Tooltip.NodeImage.color = settings.FactionColors[(int)fact.Faction];
+                        Tooltip.ManalithBaseEnergyGain.color = settings.FactionColors[(int)fact.Faction];
+                    }
+                    else
+                    {
+                        Tooltip.NodeImage.color = settings.UIEnergyIncomeColor;
+                        Tooltip.ManalithBaseEnergyGain.color = settings.UIEnergyIncomeColor;
+                    }
+
+                    for(int i = 0; i<Tooltip.ManalithUISlots.Count; i++)
+                    {
+                        if (i < manalith.Manalithslots.Count)
+                        {
+                            Tooltip.ManalithUISlots[i].gameObject.SetActive(true);
+                            if (manalith.Manalithslots[i].OccupyingFaction != 0)
+                            {
+                                Tooltip.ManalithUISlots[i].HexFill.color = settings.FactionColors[(int)manalith.Manalithslots[i].OccupyingFaction];
+                                if (manalith.Manalithslots[i].EnergyGained > 0)
+                                {
+                                    Tooltip.ManalithUISlots[i].HexOutline.color = settings.UIEnergyIncomeColor;
+                                    Tooltip.ManalithUISlots[i].EnergyGainText.text = manalith.Manalithslots[i].EnergyGained.ToString();
+                                }
+                                else
+                                {
+                                    Tooltip.ManalithUISlots[i].HexOutline.color = Color.black;
+                                    Tooltip.ManalithUISlots[i].EnergyGainText.text = "";
+                                }
+                            }
+                            else {
+                                Tooltip.ManalithUISlots[i].HexFill.color = Color.gray;
+                                Tooltip.ManalithUISlots[i].HexOutline.color = Color.black;
+                                Tooltip.ManalithUISlots[i].EnergyGainText.text = "";
+                            }
+                        }
+                        else
+                        {
+                            Tooltip.ManalithUISlots[i].gameObject.SetActive(false);
+                        }
+                    }
+                }
+                
+            }
+            facts.Dispose();
+            IDs.Dispose();
+            manaliths.Dispose();
+
+            //set positione
+            UpdateLeyLineTooltipPosition(clientData.IngameIconRef.RectTrans.anchoredPosition);
+
+           
+            //Tooltip.RectTrans.anchoredPosition = ButtonScreenpos;
+
+
+        }
+
+        protected void UpdateLeyLineTooltipPosition(Vector2 inButtonAnchoredPosition)
+        {
+            Vector2 ScreenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            Vector2 Dir = ScreenCenter - inButtonAnchoredPosition;
+            Debug.Log("ButtonV3: " + inButtonAnchoredPosition + " ScreenCenterV3: " + ScreenCenter + " DirNormalized: " + Dir.normalized);
+            m_UISystem.UIRef.ManalithToolTipFab.RectTrans.anchoredPosition = inButtonAnchoredPosition + new Vector2(m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.width / 1.8f * Dir.normalized.x, m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.height / 1.8f * Dir.normalized.y);
+        }
+
+        protected void TurnOffToolTip()
+        {
+            m_UISystem.UIRef.ManalithToolTipFab.ActiveManalithID = 0;
+            m_UISystem.UIRef.ManalithToolTipFab.gameObject.SetActive(false);
+
         }
     }
 }

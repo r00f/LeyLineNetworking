@@ -65,13 +65,15 @@ namespace BlankProject.Editor
 
                 foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
-                    circle.CellAttributes.Add(new CellAttribute
-                    {
-                        Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
-                        IsTaken = n.GetComponent<IsTaken>().Value,
-                        MovementCost = n.GetComponent<MovementCost>().Value
-                    });
+                    if (n.GetComponent<IsTaken>().Value != true){
+                        circle.CellAttributes.Add(new CellAttribute
+                        {
+                            Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
+                            CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                            IsTaken = n.GetComponent<IsTaken>().Value,
+                            MovementCost = n.GetComponent<MovementCost>().Value
+                        });
+                    }
                 }
 
                 Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);

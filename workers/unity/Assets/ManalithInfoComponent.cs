@@ -8,4 +8,5 @@ public class ManalithInfoComponent : MonoBehaviour
     public Text EnergyText;
     public Image PlayerColorImage;
     public Button InfoButton;
+    public RectTransform RectTrans;
 }

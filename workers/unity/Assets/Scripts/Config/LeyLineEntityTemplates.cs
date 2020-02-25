@@ -67,10 +67,19 @@ public static class LeyLineEntityTemplates {
             }
         };
 
+        List<ManalithSlot> slots = new List<ManalithSlot>();
+        foreach(CellAttribute n in circleCells.CellAttributes)
+        {
+            ManalithSlot go = new ManalithSlot();
+            go.CorrespondingCell = n;
+            slots.Add(go);
+        }
+
         var circle = new Manalith.Snapshot
         {
             CircleAttributeList = circleCells,
-            BaseIncome = inbaseIncome
+            BaseIncome = inbaseIncome,
+            Manalithslots = slots
         };
 
         var wIndex = new WorldIndex.Snapshot

@@ -8,4 +8,12 @@ component Manalith
 	cell.CellAttributeList circle_attribute_list = 1;
 	uint32 combined_energy_gain = 2;
 	uint32 base_income = 3;
+	list<ManalithSlot> manalithslots = 4;
+}
+
+type ManalithSlot
+{
+	uint32 occupying_faction = 1;
+	uint32 energy_gained = 2;
+	cell.CellAttribute corresponding_cell = 3;
 }
