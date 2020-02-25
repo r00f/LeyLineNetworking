@@ -2230,6 +2230,21 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7166798920697257098, guid: af7aaffd03dcc1c41a2c489a575cd7d5,
+        type: 3}
+      propertyPath: Event
+      value: event:/ActionSFX/Axalotl/WaterConeLoop
+      objectReference: {fileID: 0}
+    - target: {fileID: 7166798920697257098, guid: af7aaffd03dcc1c41a2c489a575cd7d5,
+        type: 3}
+      propertyPath: OverrideMinDistance
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7166798920697257098, guid: af7aaffd03dcc1c41a2c489a575cd7d5,
+        type: 3}
+      propertyPath: OverrideMaxDistance
+      value: 20
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: af7aaffd03dcc1c41a2c489a575cd7d5, type: 3}
 --- !u!1 &27191128709300170 stripped
