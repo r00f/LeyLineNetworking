@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-
+using FMODUnity;
 
 public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IPointerExitHandler, IPointerEnterHandler
 {
+    [SerializeField]
+    StudioEventEmitter OnMouseEnterEmitter;
+    [SerializeField]
+    StudioEventEmitter OnMousePressEmitter;
     [SerializeField]
     UIReferences UIRef;
     [SerializeField]
@@ -30,6 +34,8 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     public void OnPointerDown(PointerEventData eventData)
     {
         //IconRectTransform.anchoredPosition = Offset;
+        if (OnMousePressEmitter)
+            OnMousePressEmitter.Play();
     }
 
     public void OnPointerUp(PointerEventData eventData)
@@ -41,6 +47,8 @@ public class ActionButton : MonoBehaviour, IPointerDownHandler, IPointerUpHandle
     {
         if(Visuals.activeSelf)
         {
+            if(OnMouseEnterEmitter)
+                OnMouseEnterEmitter.Play();
             UIRef.TTRect.anchoredPosition = new Vector2(RectTransform.anchoredPosition.x, UIRef.TTRect.anchoredPosition.y);
             UIRef.TTActionCost.text = "" + EnergyCost;
             UIRef.TTActionDescription.text = ActionDescription;

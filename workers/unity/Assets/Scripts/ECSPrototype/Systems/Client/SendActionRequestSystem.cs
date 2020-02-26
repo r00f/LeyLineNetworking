@@ -163,7 +163,7 @@ public class SendActionRequestSystem : ComponentSystem
                                 unitEntityId,
                                 new SetTargetRequest(cellEntityId.EntityId.Id)
                             );
-
+                            anim.AnimationEvents.VoiceTrigger = true;
                             m_CommandSystem.SendCommand(request);
                         }
 
@@ -180,6 +180,7 @@ public class SendActionRequestSystem : ComponentSystem
                             new SetTargetRequest(targetUnitEntityId.EntityId.Id)
                         );
 
+                        anim.AnimationEvents.VoiceTrigger = true;
                         m_CommandSystem.SendCommand(request);
                         m_HighlightingSystem.ResetHighlights();
                     });

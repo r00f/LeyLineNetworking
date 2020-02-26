@@ -18,6 +18,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-9150342903165053022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-9140677930253169952
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -52,6 +69,24 @@ MonoBehaviour:
   Min: 0
   Max: 1
   Default: 0
+  Exists: 0
+--- !u!114 &-9077965227215227711
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UISFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/UISFX.bank
+  SubDir: 
+  lastModified: 637183233765112174
+  LoadResult: 0
+  FileSizes: []
   Exists: 0
 --- !u!114 &-8847293386863124172
 MonoBehaviour:
@@ -158,6 +193,24 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-8605520136356708345
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637182343814743168
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-8604818007413082826
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,6 +224,23 @@ MonoBehaviour:
   m_Name: parameter:/WaterImpactExplosion/TimePitch
   m_EditorClassIdentifier: 
   Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-8569767637106146983
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
   Min: 0
   Max: 1
   Default: 0
@@ -209,6 +279,24 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 1
+--- !u!114 &-8477367806280320519
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637183327796817216
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-8292070232962533257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -226,6 +314,23 @@ MonoBehaviour:
   lastModified: 637178454112925214
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &-8270780563990875841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
   Exists: 0
 --- !u!114 &-8244702911350808668
 MonoBehaviour:
@@ -347,6 +452,41 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-7727643352404209798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637183351944686248
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
+--- !u!114 &-7713194219632637694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-7692178403704651538
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -365,6 +505,29 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-7668053468192707799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/UISFX/OnClick
+  m_EditorClassIdentifier: 
+  Path: event:/UISFX/OnClick
+  guid: 512e4c42cdd617479ad9afa630e47b3a
+  Banks:
+  - {fileID: -6010428842262505697}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 0
+  MaxDistance: 0
+  Length: 0
 --- !u!114 &-7660224709489296314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -487,6 +650,24 @@ MonoBehaviour:
   Min: 0
   Max: 1
   Default: 0
+  Exists: 0
+--- !u!114 &-7461007765758295697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637182486513412188
+  LoadResult: 0
+  FileSizes: []
   Exists: 0
 --- !u!114 &-7453609590343574247
 MonoBehaviour:
@@ -626,6 +807,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-7083403116665645808
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 0
 --- !u!114 &-7051739666143348095
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -662,6 +860,42 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-7028738407353798541
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637183331450063674
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-7000064961136010442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637182486513472038
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-6940063555670382026
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -673,6 +907,23 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
   m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-6711628711240702722
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
   m_EditorClassIdentifier: 
   Name: TimePitch
   Min: 0
@@ -694,7 +945,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/KingCroak/FootSteps
   guid: fcb35d533e519e49b41ede4f4890c460
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -717,6 +968,24 @@ MonoBehaviour:
   Path: FMOD/LeyLine/Build/Desktop/Master.bank
   SubDir: 
   lastModified: 637182303068916406
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-6649090956861957339
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637183327796847162
   LoadResult: 0
   FileSizes: []
   Exists: 0
@@ -752,12 +1021,12 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/WaterImpactExplosion
   guid: 31cae11476507a48ba5614cd634529da
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
   Parameters:
-  - {fileID: -7348990334995946043}
+  - {fileID: -2470663255650225972}
   MinDistance: 1
   MaxDistance: 15
   Length: 560
@@ -776,12 +1045,12 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/WaterConeLoop
   guid: 19ecc5e6450b014f99acc02c5a0706ff
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 0
   Parameters:
-  - {fileID: 1516051538118144675}
+  - {fileID: 8933966649546516388}
   MinDistance: 1
   MaxDistance: 15
   Length: 10000
@@ -853,7 +1122,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Spike/ThrustCone
   guid: 7eb6d192ccf97c4aaf8c11930af40106
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -931,6 +1200,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-6169572466766751785
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-6103695880871079325
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -988,6 +1274,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-6055887145097057442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-6055230401092276101
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1003,6 +1306,42 @@ MonoBehaviour:
   Path: FMOD/LeyLine/Build/Desktop/SFX.bank
   SubDir: 
   lastModified: 637182180465339077
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-6010428842262505697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UISFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/UISFX.bank
+  SubDir: 
+  lastModified: 637183351945823196
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
+--- !u!114 &-5999262585245153508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637182483420342113
   LoadResult: 0
   FileSizes: []
   Exists: 0
@@ -1041,6 +1380,24 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-5931223784531380297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UISFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/UISFX.bank
+  SubDir: 
+  lastModified: 637183331451210601
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-5905287602157928550
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1074,7 +1431,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/WaterBallLoop
   guid: c46eb375339983488492ef07e56c76b2
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 0
@@ -1150,6 +1507,24 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-5675137687045495933
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637183233764563368
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-5594982044586898836
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1220,6 +1595,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-5519764349723709899
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-5477173865976135368
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1254,6 +1646,41 @@ MonoBehaviour:
   lastModified: 637182167754825975
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &-5454304772228312781
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637182483420312330
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-5408776401626516574
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
   Exists: 0
 --- !u!114 &-5401705559865114402
 MonoBehaviour:
@@ -1307,6 +1734,24 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 1
+--- !u!114 &-5309227457233098644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637182486513511916
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-5215287116730262907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1340,6 +1785,23 @@ MonoBehaviour:
   Name: TimePitch
   Min: 0
   Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-5134947454726170801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
   Default: 0
   Exists: 0
 --- !u!114 &-5125610189282181626
@@ -1411,6 +1873,40 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-4941681747030099913
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-4879454108582874558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-4855848674211829552
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1428,6 +1924,24 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-4848414738009092351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637183233753616730
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-4789036971928239517
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1439,6 +1953,23 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
   m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-4741301222868701911
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
   m_EditorClassIdentifier: 
   Name: TimePitch
   Min: 0
@@ -1497,6 +2028,42 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-4579319486006874235
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637182490197033113
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-4561535533735491964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637182490196591282
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-4550916255289022972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1549,6 +2116,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-4485305878372932155
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &-4475546823958449156
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1601,6 +2185,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-4436808066548243895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 0
 --- !u!114 &-4421168248288519535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1618,6 +2219,76 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-4388743957443942379
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 0
+--- !u!114 &-4355586197420433154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-4352259290778243714
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637182349405523037
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-4299699002143402724
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637182492982496692
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
 --- !u!114 &-4278630086848178532
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1674,6 +2345,23 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-4093297319923982392
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 1
 --- !u!114 &-4077980347773226705
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1726,6 +2414,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-3833986986653698496
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-3806931640115417164
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1762,6 +2467,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-3693496156731658659
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &-3684292304915482116
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1777,7 +2499,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Spike/FootSteps
   guid: af03e00cd1337d48a26d512fd175f3bd
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -1853,7 +2575,7 @@ MonoBehaviour:
   Path: event:/Environment/Ambience
   guid: f13507d7ce60254b910372159f922894
   Banks:
-  - {fileID: -1601564113337871714}
+  - {fileID: 1680605965159160670}
   IsStream: 1
   Is3D: 0
   IsOneShot: 0
@@ -1911,7 +2633,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Generic/BloodSplat
   guid: 63cd8739d679804d952f7e2d9b09c4ed
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -1935,6 +2657,41 @@ MonoBehaviour:
   Min: 0
   Max: 1
   Default: 0
+  Exists: 0
+--- !u!114 &-3502472198675989936
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &-3490486132882722498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637183233753676851
+  LoadResult: 0
+  FileSizes: []
   Exists: 0
 --- !u!114 &-3472007141221634632
 MonoBehaviour:
@@ -1986,7 +2743,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Spike/Voice
   guid: 36f6b2cb46aa7e4ea1a93b3a331aaf18
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -2012,6 +2769,29 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-3163000821856831473
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/UISFX/OnPointerEnter
+  m_EditorClassIdentifier: 
+  Path: event:/UISFX/OnPointerEnter
+  guid: 84e584b5aa9fc74299cacb3336d982d3
+  Banks:
+  - {fileID: -6010428842262505697}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 0
+  MaxDistance: 0
+  Length: 240
 --- !u!114 &-3151646264472460714
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2047,6 +2827,24 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 1
+--- !u!114 &-2930039020394663995
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637182490196551379
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-2822772535371806496
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2116,6 +2914,24 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-2715028279138667164
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637182483425958826
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-2711612503394406340
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2168,6 +2984,47 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-2581420971775306492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/ActionSFX/Leech/Voice
+  m_EditorClassIdentifier: 
+  Path: event:/ActionSFX/Leech/Voice
+  guid: 873fc1b5e1d52a46b2d49a78d60f4cd7
+  Banks:
+  - {fileID: 439802426655026220}
+  IsStream: 0
+  Is3D: 1
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 440
+--- !u!114 &-2580248904543306575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637183327796790455
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-2503490367548048395
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2219,6 +3076,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-2470663255650225972
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &-2444899325745832864
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2360,6 +3234,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-2166039450967557576
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-2057184160005509401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2430,6 +3321,41 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &-1844535213759529872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637182349404904683
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-1792131999970063717
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-1737126825840060128
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2446,6 +3372,24 @@ MonoBehaviour:
   Min: 0
   Max: 10
   Default: 0
+  Exists: 0
+--- !u!114 &-1661606642756098099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637182486514000609
+  LoadResult: 0
+  FileSizes: []
   Exists: 0
 --- !u!114 &-1601564113337871714
 MonoBehaviour:
@@ -2482,6 +3426,59 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-1562246897360598628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
+--- !u!114 &-1550513095385633568
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637183351944636367
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
+--- !u!114 &-1475125068016014213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637183331450103575
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-1413371322584340812
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2499,6 +3496,24 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-1394937372557379957
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UISFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/UISFX.bank
+  SubDir: 
+  lastModified: 637182492983154930
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
 --- !u!114 &-1319967591126270218
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2517,6 +3532,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 1
+--- !u!114 &-1273440516338752872
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-1257187416663867461
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2585,7 +3617,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Leech/FootSteps
   guid: f688e58413b5144ea01c618f74b22c20
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -2644,6 +3676,24 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &-858979407555635738
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637182492982546562
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
 --- !u!114 &-816948886271611857
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2748,6 +3798,41 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &-511811089509376177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637183327797694879
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &-360884239067274270
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &-340000653714006444
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2824,6 +3909,24 @@ MonoBehaviour:
   MinDistance: 0
   MaxDistance: 0
   Length: 91585
+--- !u!114 &-56943874790504118
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637183233753646656
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &-27721254338238123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2856,10 +3959,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EditorBanks:
   - {fileID: 8442611772918743718}
-  - {fileID: -1601564113337871714}
-  - {fileID: -2057184160005509401}
-  - {fileID: -2443829200389059848}
-  - {fileID: -6412927731002088116}
+  - {fileID: 1680605965159160670}
+  - {fileID: -1550513095385633568}
+  - {fileID: -7727643352404209798}
+  - {fileID: 439802426655026220}
+  - {fileID: -6010428842262505697}
   EditorEvents:
   - {fileID: -3607119571880875803}
   - {fileID: 8700937748761485135}
@@ -2882,12 +3986,15 @@ MonoBehaviour:
   - {fileID: -1100479097137978992}
   - {fileID: 6506221789958332897}
   - {fileID: 8904586927704994011}
+  - {fileID: -7668053468192707799}
+  - {fileID: -3163000821856831473}
+  - {fileID: -2581420971775306492}
   EditorParameters: []
   MasterBanks:
-  - {fileID: -2057184160005509401}
+  - {fileID: -1550513095385633568}
   StringsBanks:
   - {fileID: 8442611772918743718}
-  stringsBankWriteTime: 637182364935073977
+  stringsBankWriteTime: 637183351944666278
   cacheVersion: 3
 --- !u!114 &19265042543495434
 MonoBehaviour:
@@ -2906,6 +4013,40 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &53482100670925281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 0
+--- !u!114 &115273059224736886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &116757684577795977
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2924,6 +4065,24 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &439802426655026220
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637183351945643654
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
 --- !u!114 &647339949189012957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2939,6 +4098,23 @@ MonoBehaviour:
   Name: Pitch
   Min: 0
   Max: 10
+  Default: 0
+  Exists: 0
+--- !u!114 &684957168663103881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
   Default: 0
   Exists: 0
 --- !u!114 &688923946070061845
@@ -3027,6 +4203,40 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &780830550154299776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 1
+--- !u!114 &784026120180980053
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &860164127687015701
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3095,7 +4305,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Spike/TrailSwoosh
   guid: 82c86dfa7616244784aa27423aed1852
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -3103,6 +4313,23 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 15
   Length: 1000
+--- !u!114 &1086466997532083307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &1107918798984612799
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3137,6 +4364,23 @@ MonoBehaviour:
   lastModified: 637182167754845918
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &1176077726890231145
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
   Exists: 0
 --- !u!114 &1233985581900710816
 MonoBehaviour:
@@ -3208,6 +4452,58 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &1319572452508517592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637182349405552956
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &1366130505343069715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &1458943539443801059
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &1491554260905402546
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3223,7 +4519,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Spike/SlamExplosion
   guid: 0e696e4c941bac4f91f92251c08da7fd
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -3264,6 +4560,24 @@ MonoBehaviour:
   Min: 0
   Max: 1
   Default: 0
+  Exists: 1
+--- !u!114 &1680605965159160670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637183351944596487
+  LoadResult: 0
+  FileSizes: []
   Exists: 1
 --- !u!114 &1810968715003642479
 MonoBehaviour:
@@ -3456,7 +4770,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/KingCroak/ToungeWhip
   guid: 2c5574f637bd1f4eac0bec20e4c0e820
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -3482,6 +4796,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &2297646802686817788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &2325649798598861880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3499,6 +4830,23 @@ MonoBehaviour:
   lastModified: 637182232528755757
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &2556854321957601441
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
   Exists: 0
 --- !u!114 &2559930816586834427
 MonoBehaviour:
@@ -3657,6 +5005,24 @@ MonoBehaviour:
   Max: 10
   Default: 0
   Exists: 0
+--- !u!114 &2872142435839054492
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637183331451021116
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &3017626137268741571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3814,6 +5180,57 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 1
+--- !u!114 &3459732144940678295
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &3644372563770253020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &3653047221629231092
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &3659919703409941762
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3971,6 +5388,24 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &4055876672784765916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637183331450143461
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &4066622171247700988
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4041,6 +5476,24 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &4166555344558291490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UISFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/UISFX.bank
+  SubDir: 
+  lastModified: 637183327797892813
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &4209033739084834242
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4095,6 +5548,24 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &4375081199444301360
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/SFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/SFX.bank
+  SubDir: 
+  lastModified: 637182492982965439
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
 --- !u!114 &4423045469213083615
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4148,6 +5619,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &4486688324581555516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &4574803701729846187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4200,6 +5688,24 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &4735880684880745895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Music.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Music.bank
+  SubDir: 
+  lastModified: 637182490196621514
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
 --- !u!114 &5054296598564300336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4233,14 +5739,14 @@ MonoBehaviour:
   Path: event:/ActionSFX/KingCroak/Croaks
   guid: e05cdeca5a9b994bb4ee5ca68dcf4675
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 260
+  Length: 380
 --- !u!114 &5276489857413711636
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4286,6 +5792,23 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
   m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &5418330017647619035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterImpactExplosion/TimePitch
   m_EditorClassIdentifier: 
   Name: TimePitch
   Min: 0
@@ -4342,6 +5865,23 @@ MonoBehaviour:
   Name: Pitch
   Min: 0
   Max: 10
+  Default: 0
+  Exists: 1
+--- !u!114 &5559989909203895940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitchDown
+  m_EditorClassIdentifier: 
+  Name: TimePitchDown
+  Min: 0
+  Max: 1
   Default: 0
   Exists: 1
 --- !u!114 &5564505524457490683
@@ -4448,7 +5988,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/FootSteps
   guid: 592f690b22d5e544adabb005c0c2c8be
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -4471,13 +6011,13 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/WaterSpear
   guid: 1bc59c52e792914da0f55ea0b115e8fa
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
   Parameters:
-  - {fileID: -5320759949803758189}
-  - {fileID: 5951235335266973878}
+  - {fileID: 9030477190905906628}
+  - {fileID: 5559989909203895940}
   MinDistance: 1
   MaxDistance: 15
   Length: 1500
@@ -4672,6 +6212,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &6333562217279812076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &6412845587549415011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4723,7 +6280,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Generic/ClickParticle
   guid: 5013c1e67660a24cb30f50d7d519339c
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -4800,6 +6357,23 @@ MonoBehaviour:
   lastModified: 637178449892718717
   LoadResult: 0
   FileSizes: []
+  Exists: 0
+--- !u!114 &6633459482798407090
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
   Exists: 0
 --- !u!114 &6671702163355708629
 MonoBehaviour:
@@ -4919,7 +6493,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Generic/DefenseClank
   guid: 728848a1a670d94cb9a60a90b77b9ef3
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -4977,12 +6551,12 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/WaterLaunchExplosion
   guid: a94d94feb1a38b40b8dfaed70af81448
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
   Parameters:
-  - {fileID: -8511943535799241308}
+  - {fileID: 6333562217279812076}
   MinDistance: 1
   MaxDistance: 15
   Length: 560
@@ -5001,6 +6575,24 @@ MonoBehaviour:
   Path: FMOD/LeyLine/Build/Desktop/SFX.bank
   SubDir: 
   lastModified: 637181856645143029
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &6996361215072061749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Environment.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Environment.bank
+  SubDir: 
+  lastModified: 637182483420292082
   LoadResult: 0
   FileSizes: []
   Exists: 0
@@ -5039,6 +6631,40 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &7203358676819824475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
+--- !u!114 &7222230213028821188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/Manalith/Pitch
+  m_EditorClassIdentifier: 
+  Name: Pitch
+  Min: 0
+  Max: 10
+  Default: 0
+  Exists: 0
 --- !u!114 &7275567367498408900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5056,6 +6682,41 @@ MonoBehaviour:
   lastModified: 637181899668060272
   LoadResult: 0
   FileSizes: []
+  Exists: 1
+--- !u!114 &7383436472358093804
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/Master.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/Master.bank
+  SubDir: 
+  lastModified: 637182492982516632
+  LoadResult: 0
+  FileSizes: []
+  Exists: 1
+--- !u!114 &7407410241954738520
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
   Exists: 1
 --- !u!114 &7429265060100582949
 MonoBehaviour:
@@ -5148,6 +6809,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &7714087459779869041
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &7739111635021475512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5163,6 +6841,24 @@ MonoBehaviour:
   Path: FMOD/LeyLine/Build/Desktop/SFX.bank
   SubDir: 
   lastModified: 637182208623230696
+  LoadResult: 0
+  FileSizes: []
+  Exists: 0
+--- !u!114 &7776310569663049588
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c18180ecb35941f4682ae60107b85b7c, type: 3}
+  m_Name: bank:/UISFX.bank
+  m_EditorClassIdentifier: 
+  Path: FMOD/LeyLine/Build/Desktop/UISFX.bank
+  SubDir: 
+  lastModified: 637182490197232587
   LoadResult: 0
   FileSizes: []
   Exists: 0
@@ -5253,6 +6949,23 @@ MonoBehaviour:
   Max: 1
   Default: 0
   Exists: 0
+--- !u!114 &8009793066498727741
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterLaunchExplosion/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 0
 --- !u!114 &8103707607296985884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5337,11 +7050,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Path: FMOD/LeyLine/Build/Desktop/Master.strings.bank
   SubDir: 
-  lastModified: 637182364935073977
+  lastModified: 637183351944666278
   LoadResult: 0
   FileSizes:
   - Name: Desktop
-    Value: 1996
+    Value: 2178
   Exists: 1
 --- !u!114 &8474673531683026947
 MonoBehaviour:
@@ -5426,12 +7139,12 @@ MonoBehaviour:
   Path: event:/Environment/Manalith
   guid: 1b61c983ba17304295bf21aae4eb3493
   Banks:
-  - {fileID: -1601564113337871714}
+  - {fileID: 1680605965159160670}
   IsStream: 0
   Is3D: 1
   IsOneShot: 0
   Parameters:
-  - {fileID: 4574803701729846187}
+  - {fileID: 780830550154299776}
   MinDistance: 1
   MaxDistance: 15
   Length: 4522
@@ -5538,7 +7251,7 @@ MonoBehaviour:
   Path: event:/ActionSFX/Axalotl/Voice
   guid: 59f756ea17fd714a881f94c6e9b3d399
   Banks:
-  - {fileID: -6412927731002088116}
+  - {fileID: 439802426655026220}
   IsStream: 0
   Is3D: 1
   IsOneShot: 1
@@ -5546,6 +7259,23 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 400
+--- !u!114 &8933966649546516388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterConeLoop/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &8967943006889885309
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5616,6 +7346,23 @@ MonoBehaviour:
   LoadResult: 0
   FileSizes: []
   Exists: 0
+--- !u!114 &9030477190905906628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fecb8ef7f94ca804a8ab72049b86782e, type: 3}
+  m_Name: parameter:/WaterSpear/TimePitch
+  m_EditorClassIdentifier: 
+  Name: TimePitch
+  Min: 0
+  Max: 1
+  Default: 0
+  Exists: 1
 --- !u!114 &9045907958111131712
 MonoBehaviour:
   m_ObjectHideFlags: 0
