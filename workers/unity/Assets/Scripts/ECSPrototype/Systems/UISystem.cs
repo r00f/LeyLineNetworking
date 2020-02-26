@@ -296,6 +296,11 @@ namespace LeyLineHybridECS
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
+                if (UIRef.ManalithToolTipFab.isActiveAndEnabled)
+                {
+                    UIRef.ManalithToolTipFab.ActiveManalithID = 0;
+                    UIRef.ManalithToolTipFab.gameObject.SetActive(false);
+                }
                 if(UIRef.IngameUIPanel.activeSelf)
                     UIRef.IngameUIPanel.SetActive(false);
 

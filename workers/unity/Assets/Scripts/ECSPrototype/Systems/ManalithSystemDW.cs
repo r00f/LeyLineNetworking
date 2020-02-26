@@ -165,9 +165,20 @@ namespace LeyLineHybridECS
                                     clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
                                     if(ID == m_UISystem.UIRef.ManalithToolTipFab.ActiveManalithID)
                                     {
-                                        //check if distance to middle of screen is bigger than screensize/height /2, if yes call turnoff manalithtooltip, if no updatepos
+                                        Vector2 Screenpos = new Vector2(0f, 0f);
+                                        Vector2 Anchor = clientData.IngameIconRef.RectTrans.anchoredPosition;
+                                        Debug.Log("xdist: " + (Anchor.x - Screenpos.x) + "yDist: " + (Anchor.y - Screenpos.y));
+                                        Debug.DrawLine(Screenpos, Anchor);
 
-                                        UpdateLeyLineTooltipPosition(clientData.IngameIconRef.RectTrans.anchoredPosition);
+                                        
+                                        if (((Anchor.x - Screenpos.x) > Screen.width*0.9f || (Anchor.x - Screenpos.x) < -Screen.width * 0.9f) || ((Anchor.y - Screenpos.y) > Screen.height * 0.9f || (Anchor.y - Screenpos.y) < -Screen.height * 0.9f))
+                                        {
+                                            TurnOffToolTip();
+                                        }
+                                        //check if distance to middle of screen is bigger than screensize/height /2, if yes call turnoff manalithtooltip, if no updatepos
+                                        else {
+                                            UpdateLeyLineTooltipPosition(Anchor);
+                                        }
                                     }
                                 }
 
@@ -353,7 +364,7 @@ namespace LeyLineHybridECS
 
         protected void UpdateLeyLineTooltipPosition(Vector2 inButtonAnchoredPosition)
         {
-            Vector2 ScreenCenter = new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
+            Vector2 ScreenCenter = new Vector2(0f, 0f);
             Vector2 Dir = ScreenCenter - inButtonAnchoredPosition;
             Debug.Log("ButtonV3: " + inButtonAnchoredPosition + " ScreenCenterV3: " + ScreenCenter + " DirNormalized: " + Dir.normalized);
             m_UISystem.UIRef.ManalithToolTipFab.RectTrans.anchoredPosition = inButtonAnchoredPosition + new Vector2(m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.width / 1.8f * Dir.normalized.x, m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.height / 1.8f * Dir.normalized.y);
@@ -363,7 +374,6 @@ namespace LeyLineHybridECS
         {
             m_UISystem.UIRef.ManalithToolTipFab.ActiveManalithID = 0;
             m_UISystem.UIRef.ManalithToolTipFab.gameObject.SetActive(false);
-
         }
     }
 }
