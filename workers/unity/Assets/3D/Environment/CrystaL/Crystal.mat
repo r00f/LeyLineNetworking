@@ -189,7 +189,7 @@ Material:
     - _ReceivesSSR: 1
     - _RefractionModel: 0
     - _SSRefractionProjectionModel: 0
-    - _Smoothness: 0.8
+    - _Smoothness: 0.86
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
     - _SpecularAAScreenSpaceVariance: 0.1
@@ -210,7 +210,7 @@ Material:
     - _SurfaceType: 0
     - _TexWorldScale: 1
     - _TexWorldScaleEmissive: 1
-    - _Thickness: 1
+    - _Thickness: 0
     - _ThicknessMultiplier: 1
     - _TransmissionEnable: 1
     - _TransparentBackfaceEnable: 0
@@ -230,9 +230,9 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.3773585, g: 0.33872217, b: 0.30437878, a: 1}
+    - _BaseColor: {r: 0.4513617, g: 0.5943396, b: 0.58665586, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.37735847, g: 0.33872214, b: 0.30437875, a: 1}
+    - _Color: {r: 0.45136166, g: 0.5943396, b: 0.58665586, a: 1}
     - _DiffusionProfileAsset: {r: -1.5631805e-38, g: -9.660591e-27, b: -369080640,
         a: 7.95133e-35}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
