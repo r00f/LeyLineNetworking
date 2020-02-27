@@ -585,6 +585,39 @@ namespace LeyLineHybridECS
 
                         SetHealthBarFillAmounts(healthbar.UnitHeadHealthBarInstance.HealthFill, healthbar.UnitHeadHealthBarInstance.ArmorFill, health, faction.Faction);
                     }
+                    if (healthbar.UnitHeadUIInstance.ActionDisplay != null)
+                    {
+                        if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
+                        {
+                            HeadUILockedActionDisplay display = healthbar.UnitHeadUIInstance.ActionDisplay;
+                            if (actions.LockedAction.Index == -2)
+                            {
+                                display.ActionImage.sprite = stats.BasicMove.ActionIcon;
+                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.BasicMove.ActionExecuteStep];
+                            }
+                            else if (actions.LockedAction.Index == -1)
+                            {
+                                display.ActionImage.sprite = stats.BasicAttack.ActionIcon;
+                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.BasicAttack.ActionExecuteStep];
+                            }
+                            else if (actions.LockedAction.Index < stats.Actions.Count)
+                            {
+                                display.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
+                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.Actions[actions.LockedAction.Index].ActionExecuteStep];
+                            }
+                            else
+                            {
+                                int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
+                                display.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
+                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.SpawnActions[spawnactionindex].ActionExecuteStep];
+                            }
+                            display.gameObject.SetActive(true);
+                        }
+                        else
+                        {
+                            healthbar.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+                        }
+                    }
                 }
             });
             #endregion

@@ -11,4 +11,5 @@ public class UnitHeadUI : MonoBehaviour
     public float ArmorPanelDisplayTime;
     public GameObject ArmorPanel;
     public Text ArmorText;
+    public HeadUILockedActionDisplay ActionDisplay;
 }

@@ -167,8 +167,8 @@ namespace LeyLineHybridECS
                                     {
                                         Vector2 Screenpos = new Vector2(0f, 0f);
                                         Vector2 Anchor = clientData.IngameIconRef.RectTrans.anchoredPosition;
-                                        Debug.Log("xdist: " + (Anchor.x - Screenpos.x) + "yDist: " + (Anchor.y - Screenpos.y));
-                                        Debug.DrawLine(Screenpos, Anchor);
+                                        //Debug.Log("xdist: " + (Anchor.x - Screenpos.x) + "yDist: " + (Anchor.y - Screenpos.y));
+                                        //Debug.DrawLine(Screenpos, Anchor);
 
                                         
                                         if (((Anchor.x - Screenpos.x) > Screen.width*0.9f || (Anchor.x - Screenpos.x) < -Screen.width * 0.9f) || ((Anchor.y - Screenpos.y) > Screen.height * 0.9f || (Anchor.y - Screenpos.y) < -Screen.height * 0.9f))
@@ -366,8 +366,8 @@ namespace LeyLineHybridECS
         {
             Vector2 ScreenCenter = new Vector2(0f, 0f);
             Vector2 Dir = ScreenCenter - inButtonAnchoredPosition;
-            Debug.Log("ButtonV3: " + inButtonAnchoredPosition + " ScreenCenterV3: " + ScreenCenter + " DirNormalized: " + Dir.normalized);
-            m_UISystem.UIRef.ManalithToolTipFab.RectTrans.anchoredPosition = inButtonAnchoredPosition + new Vector2(m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.width / 1.8f * Dir.normalized.x, m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.height / 1.8f * Dir.normalized.y);
+            //Debug.Log("ButtonV3: " + inButtonAnchoredPosition + " ScreenCenterV3: " + ScreenCenter + " DirNormalized: " + Dir.normalized);
+            m_UISystem.UIRef.ManalithToolTipFab.RectTrans.anchoredPosition = inButtonAnchoredPosition + new Vector2(m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.width / 1.5f * Dir.normalized.x, m_UISystem.UIRef.ManalithToolTipFab.RectTrans.rect.height / 1.5f * Dir.normalized.y);
         }
 
         protected void TurnOffToolTip()
