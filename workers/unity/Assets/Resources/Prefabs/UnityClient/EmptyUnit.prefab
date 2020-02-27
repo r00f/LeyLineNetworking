@@ -92,8 +92,8 @@ LineRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 0.09548664, g: 0.8396226, b: 0, a: 1}
-      key1: {r: 0.0940786, g: 0.8207547, b: 0, a: 1}
+      key0: {r: 0.55288696, g: 0.8584906, b: 0.51428443, a: 1}
+      key1: {r: 0.55288696, g: 0.8584906, b: 0.51428443, a: 1}
       key2: {r: 0, g: 0, b: 0, a: 0}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
@@ -263,7 +263,7 @@ MonoBehaviour:
   lineRenderer: {fileID: 1839120082220000135}
   pathOffset: {x: 0, y: 0.2, z: 0}
   arcOffset: {x: 0, y: 2.3, z: 0}
-  pathColor: {r: 0.3551203, g: 1, b: 0, a: 1}
+  pathColor: {r: 0.49528313, g: 1, b: 0.21226418, a: 0.18039216}
   arcColor: {r: 1, g: 0.4948723, b: 0, a: 1}
 --- !u!114 &8950170168944560130
 MonoBehaviour:
@@ -277,6 +277,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WeaponTransform: {fileID: 0}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 0}
   AnimationEvents: {fileID: 0}
@@ -286,6 +287,8 @@ MonoBehaviour:
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects: []
+  VoiceEmitter: {fileID: 0}
+  FootStempEmitter: {fileID: 0}
   RotationSpeed: 4
   RotateTransform: {fileID: 0}
   DestinationReachTriggerSet: 0
@@ -331,6 +334,10 @@ MonoBehaviour:
   FullColorMeshes:
   - {fileID: 517547637295688906}
   - {fileID: 3054411595258263595}
+  EmissionColorMeshes: []
+  EmissionIntensity: 0
+  EmissionLerpTime: 0
+  EmissionLerpColor: {r: 0, g: 0, b: 0, a: 0}
   color: {r: 0, g: 0, b: 0, a: 0}
   detailColorMeshes: []
   PartialColorMasks: []
@@ -389,9 +396,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  HealthBarYOffset: 0
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
+  UnitHeadHealthBarPrefab: {fileID: 0}
   UnitHeadUIInstance: {fileID: 0}
+  UnitHeadHealthBarInstance: {fileID: 0}
 --- !u!114 &930118610718755571
 MonoBehaviour:
   m_ObjectHideFlags: 0
