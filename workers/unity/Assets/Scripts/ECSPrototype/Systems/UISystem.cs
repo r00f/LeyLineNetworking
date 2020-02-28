@@ -601,11 +601,11 @@ namespace LeyLineHybridECS
 
                         SetHealthBarFillAmounts(healthbar.UnitHeadHealthBarInstance.HealthFill, healthbar.UnitHeadHealthBarInstance.ArmorFill, health, faction.Faction);
                     }
-                    if (healthbar.UnitHeadUIInstance.ActionDisplay != null)
+                    if (healthbar.UnitHeadUIInstance.ActionDisplayInstance != null)
                     {
                         if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
                         {
-                            HeadUILockedActionDisplay display = healthbar.UnitHeadUIInstance.ActionDisplay;
+                            HeadUILockedActionDisplay display = healthbar.UnitHeadUIInstance.ActionDisplayInstance;
                             if (actions.LockedAction.Index == -2)
                             {
                                 display.ActionImage.sprite = stats.BasicMove.ActionIcon;
@@ -631,7 +631,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            healthbar.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+                            healthbar.UnitHeadUIInstance.ActionDisplayInstance.gameObject.SetActive(false);
                         }
                     }
                 }
@@ -1028,9 +1028,10 @@ namespace LeyLineHybridECS
             //initialize GroupUI and hero select button
             if (unitFaction == playerFaction)
             {
-                if (!stats.IsHero)
-            {
+                healthbar.UnitHeadUIInstance.ActionDisplayInstance = Object.Instantiate(healthbar.UnitHeadUIInstance.ActionDisplayPrefab, healthbar.transform.position + new Vector3(0, 20, 0), Quaternion.identity, healthbar.UnitHeadUIInstance.transform);
 
+                if (!stats.IsHero)
+                {
                     if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
                     {
                         //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
