@@ -122,7 +122,7 @@ namespace LeyLineHybridECS
         {
             foreach (Cell c in hexGridGenerator.hexagons)
             {
-                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Size, c.transform.position);
+                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Size, c.transform.localPosition);
             }
         }
 
@@ -237,7 +237,6 @@ namespace LeyLineHybridECS
             //convert length of array to raise to world space unit
             rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
             rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
-
 
             int width = (int)rectSize.x;
             int height = (int)rectSize.y;

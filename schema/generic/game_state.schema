@@ -1,4 +1,5 @@
 package generic;
+import "generic/vector3.schema";
 
 component GameState {
 	
@@ -12,7 +13,7 @@ component GameState {
 	float current_planning_time = 7;
 	float rope_display_time = 8;
 	uint32 winner_faction = 9;
-	
+	generic.Vector2f map_center = 10;
 }
 
 enum GameStateEnum {

@@ -5,4 +5,5 @@ using UnityEngine;
 public class EditorWorldIndex : MonoBehaviour
 {
     public uint WorldIndex;
+    public Transform centerCellTransform;
 }

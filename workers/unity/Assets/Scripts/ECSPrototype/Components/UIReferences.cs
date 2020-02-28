@@ -6,6 +6,9 @@ public class UIReferences : MonoBehaviour
 {
     public Canvas Canvas;
 
+    [Header("EscapeMenu")]
+    public EscapeMenu EscapeMenu;
+
     [Header("Startup")]
     public float StartUpWaitTime = 3f;
     public GameObject StartupPanel;

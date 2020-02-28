@@ -121,7 +121,7 @@ public class HighlightingSystem : ComponentSystem
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
                     //Debug.Log("lastHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) + "currHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate));
-                    if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) && playerHighlightingData.ClickCoolDown <= 0)
+                    if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) && playerHighlightingData.InputCooldown <= 0)
                     {
                         if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                         {
@@ -137,8 +137,8 @@ public class HighlightingSystem : ComponentSystem
                         playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
                     }
 
-                    if(playerHighlightingData.ClickCoolDown >= 0)
-                        playerHighlightingData.ClickCoolDown -= Time.deltaTime;
+                    if(playerHighlightingData.InputCooldown >= 0)
+                        playerHighlightingData.InputCooldown -= Time.deltaTime;
                 }
                 else
                 {

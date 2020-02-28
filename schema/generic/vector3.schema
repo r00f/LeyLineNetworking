@@ -14,3 +14,8 @@ type Vector3i {
 	int32 z = 3;
 
 }
+
+type Vector2f {
+	float x = 1;
+	float y = 2;
+}

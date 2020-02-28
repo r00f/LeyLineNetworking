@@ -161,11 +161,11 @@ namespace LeyLineHybridECS
             #endregion
         }
 
-        public void ResetClickCoolDown(float coolDown)
+        public void ResetInputCoolDown(float coolDown)
         {
             Entities.With(m_PlayerData).ForEach((Entity e, ref HighlightingDataComponent highlightingData) =>
             {
-                highlightingData.ClickCoolDown = coolDown;
+                highlightingData.InputCooldown = coolDown;
             });
         }
 

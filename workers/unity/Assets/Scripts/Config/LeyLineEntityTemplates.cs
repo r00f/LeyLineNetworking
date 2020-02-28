@@ -17,7 +17,7 @@ public static class LeyLineEntityTemplates {
     private static readonly List<string> AllWorkerAttributes =
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
-    public static EntityTemplate GameState(Vector3f position, uint worldIndex)
+    public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter)
     {
         var gameState = new GameState.Snapshot
         {
@@ -27,7 +27,8 @@ public static class LeyLineEntityTemplates {
             CurrentWaitTime = 0f,
             PlanningTime = 60f,
             CurrentPlanningTime = 60f,
-            RopeDisplayTime = 30f
+            RopeDisplayTime = 30f,
+            MapCenter = mapCenter
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -179,7 +180,8 @@ public static class LeyLineEntityTemplates {
 
         var playerAttributes = new PlayerAttributes.Snapshot
         {
-            HeroName = "KingCroak"
+            HeroName = "KingCroak",
+            StartingUnitNames = new List<string> {"AxalotlEgg"}
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();

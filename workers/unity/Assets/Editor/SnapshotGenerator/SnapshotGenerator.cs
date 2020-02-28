@@ -48,7 +48,8 @@ namespace BlankProject.Editor
             foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
             {
                 Vector3f pos = new Vector3f(wi.transform.position.x, wi.transform.position.y, wi.transform.position.z);
-                var gameState = LeyLineEntityTemplates.GameState(pos, wi.WorldIndex);
+                Vector2f mapCenter = new Vector2f(wi.centerCellTransform.position.x, wi.centerCellTransform.position.z);
+                var gameState = LeyLineEntityTemplates.GameState(pos, wi.WorldIndex, mapCenter);
                 snapshot.AddEntity(gameState);
             }
         }

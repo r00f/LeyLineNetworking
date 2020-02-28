@@ -55,6 +55,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<HighlightingDataComponent>(),
                 ComponentType.ReadWrite<PlayerState.Component>()
                 );
 
@@ -76,6 +77,7 @@ namespace LeyLineHybridECS
         public void InitializeButtons()
         {
             UIRef = Object.FindObjectOfType<UIReferences>();
+            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
 
             for (int bi = 0; bi < UIRef.Actions.Count; bi++)
@@ -162,11 +164,13 @@ namespace LeyLineHybridECS
             var authPlayersEnergy = m_AuthoritativePlayerData.ToComponentDataArray<PlayerEnergy.Component>(Allocator.TempJob);
             var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
             var authPlayersState = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            var playerHighlightingDatas = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
             var gameState = gameStates[0];
             var authPlayerFaction = authPlayersFaction[0].Faction;
             var authPlayerState = authPlayersState[0];
             var playerEnergy = authPlayersEnergy[0];
-            
+            var playerHigh = playerHighlightingDatas[0];
+
             GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
 
             #endregion
@@ -223,30 +227,43 @@ namespace LeyLineHybridECS
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
+
                     foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                     {
                         UpdateUnitGroupBauble(g, authPlayersFaction[0]);
                     }
 
-                    if (Input.GetKeyDown(KeyCode.Alpha1))
-                    {
-                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
-                        InitializeSelectedActionTooltip(UIRef.Actions[0]);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha2))
-                    {
-                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
-                        InitializeSelectedActionTooltip(UIRef.Actions[1]);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha3))
-                    {
-                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
-                        InitializeSelectedActionTooltip(UIRef.Actions[2]);
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha4))
-                    {
-                        m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
+                    //check if inputCD on playerHighlighting is 0 and reset it
 
+                    if(playerHigh.InputCooldown <= 0)
+                    {
+                        if (Input.GetKeyDown(KeyCode.Alpha1))
+                        {
+                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
+                            InitializeSelectedActionTooltip(UIRef.Actions[0]);
+                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha2))
+                        {
+                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
+                            InitializeSelectedActionTooltip(UIRef.Actions[1]);
+                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha3))
+                        {
+                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
+                            InitializeSelectedActionTooltip(UIRef.Actions[2]);
+                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha4))
+                        {
+                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
+                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Escape))
+                        {
+                            UIRef.EscapeMenu.gameObject.SetActive(!UIRef.EscapeMenu.gameObject.activeSelf);
+                        }
                     }
 
                     if (UIRef.TurnWheelBig.eulerAngles.z < 360 - rOffset && UIRef.TurnWheelBig.eulerAngles.z > 180)
@@ -733,6 +750,7 @@ namespace LeyLineHybridECS
             authPlayersEnergy.Dispose();
             authPlayersFaction.Dispose();
             authPlayersState.Dispose();
+            playerHighlightingDatas.Dispose();
             #endregion
         }
 

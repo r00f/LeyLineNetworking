@@ -12,7 +12,7 @@ public static class CellGridMethods
         return CubeRound(AxialToCube(new Vector2(q, r)));
     }
 
-    public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2 mapCenter)
+    public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2f mapCenter)
     {
         Vector2 axial = CubeToAxial(cubeCoord);
 
@@ -20,7 +20,7 @@ public static class CellGridMethods
         var z = (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
 
         //factor in mapCenter before returning
-        return new Vector3(mapCenter.x + x, 5, mapCenter.y + z);
+        return new Vector3(mapCenter.X + x, 5, mapCenter.Y + z);
     }
 
     public static Vector3f[] DirectionsArray = new Vector3f[]{

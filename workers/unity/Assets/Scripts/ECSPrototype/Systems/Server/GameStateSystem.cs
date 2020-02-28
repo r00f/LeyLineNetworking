@@ -79,12 +79,12 @@ namespace LeyLineHybridECS
                     case GameStateEnum.waiting_for_players:
 #if UNITY_EDITOR
                        
-                        if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() == 1)
+                        if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 1)
                         {
                             gameState.CurrentState = GameStateEnum.planning;
                         }
 #else
-                        if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() == 2)
+                        if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 2)
                         {
                             gameState.CurrentState = GameStateEnum.planning;
                         }

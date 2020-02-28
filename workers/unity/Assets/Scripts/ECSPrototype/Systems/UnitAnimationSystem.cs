@@ -133,7 +133,7 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     if(gameStates[0].CurrentState == GameStateEnum.interrupt)
                     {
-                        animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f)); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                        animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
                     }
 
 
@@ -152,7 +152,7 @@ public class UnitAnimationSystem : ComponentSystem
                             if (animatorComponent.CurrentLockedAction.ProjectileFab)
                             {
                                 //THIS METHOD SUCKS
-                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f)); //CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter); //CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
                                 float targetYoffset = 0;
                                 if (animatorComponent.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
                                 {
@@ -172,7 +172,7 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (!animatorComponent.ExecuteTriggerSet)
                     {
-                        ExecuteActionAnimation(actions, animatorComponent, gameStates[0].CurrentState, worldIndex.Value);
+                        ExecuteActionAnimation(actions, animatorComponent, gameStates[0], worldIndex.Value);
                     }
                     else
                     {
@@ -311,13 +311,13 @@ public class UnitAnimationSystem : ComponentSystem
         gameStates.Dispose();
     }
 
-    public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameStateEnum gameState, uint worldIndex)
+    public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameState.Component gameState, uint worldIndex)
     {
-        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState - 2)
+        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState.CurrentState - 2)
         {
             if (!animatorComponent.InitialValuesSet)
             {
-                animatorComponent.DestinationPosition = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, new Vector2(28f, 28f));
+                animatorComponent.DestinationPosition = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
                 animatorComponent.InitialValuesSet = true;
             }
             animatorComponent.Animator.SetTrigger("Execute");

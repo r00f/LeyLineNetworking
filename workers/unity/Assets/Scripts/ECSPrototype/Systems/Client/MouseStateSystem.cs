@@ -21,12 +21,11 @@ public class MouseStateSystem : JobComponentSystem
     Settings settings;
     EntityQuery m_AuthoritativePlayerData;
     EntityQuery m_MouseStateData;
+    EntityQuery m_GameStateData;
     //PathFindingSystem m_PathFindingSystem;
     EventSystem eventSystem;
 
     PlayerStateSystem m_PlayerStateSystem;
-
-    Vector2 MapCenter = new Vector2(28f, 28f);
 
     protected override void OnCreate()
     {
@@ -34,7 +33,11 @@ public class MouseStateSystem : JobComponentSystem
         entityCommandBufferSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
         eventSystem = Object.FindObjectOfType<EventSystem>();
         settings = Resources.Load<Settings>("Settings");
-        
+
+        m_GameStateData = GetEntityQuery(
+            ComponentType.ReadOnly<GameState.Component>()
+            );
+
 
         m_MouseStateData = GetEntityQuery(
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -62,11 +65,13 @@ public class MouseStateSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_AuthoritativePlayerData.CalculateEntityCount() == 0)
+        if (m_AuthoritativePlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
         {
             Debug.Log("AuthPlayerCount = 0");
             return inputDeps;
         }
+
+        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -77,15 +82,17 @@ public class MouseStateSystem : JobComponentSystem
             float dist = Vector3.Distance(ray.origin, hit.point);
             Debug.DrawRay(ray.origin, ray.direction * dist, Color.red);
 
-            Vector2 mouseHitXZPos = (MapCenter - new Vector2(hit.point.x, hit.point.z)) * -1;
+            Vector2 mapCenter = new Vector2(gameStates[0].MapCenter.X, gameStates[0].MapCenter.Y);
+
+            Vector2 mouseHitXZPos = (mapCenter - new Vector2(hit.point.x, hit.point.z)) * -1;
 
             Vector3f posToCubeCoord = CellGridMethods.PosToCube(mouseHitXZPos);
 
-            Vector3 CubeCoordToWorldPos = CellGridMethods.CubeToPos(posToCubeCoord, MapCenter);
+            Vector3 CubeCoordToWorldPos = CellGridMethods.CubeToPos(posToCubeCoord, gameStates[0].MapCenter);
 
             if(Input.GetButtonDown("Fire1"))
             {
-                m_PlayerStateSystem.ResetClickCoolDown(0.3f);
+                m_PlayerStateSystem.ResetInputCoolDown(0.3f);
                 //instantiate mouse particle at hitPos
                 Object.Instantiate(settings.MouseClickPS, hit.point, Quaternion.identity);
             }
@@ -93,6 +100,8 @@ public class MouseStateSystem : JobComponentSystem
             {
                 m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, CubeCoordToWorldPos);
             }
+
+            gameStates.Dispose();
 
             var mouseStateJob = new MouseStateJob
             {
@@ -108,7 +117,10 @@ public class MouseStateSystem : JobComponentSystem
             return mouseStateJob.Schedule(this, inputDeps);
         }
         else
+        {
+            gameStates.Dispose();
             return inputDeps;
+        }
     }
 
     struct MouseStateJob : IJobForEachWithEntity<Position.Component, MouseState, MouseVariables, CubeCoordinate.Component, SpatialEntityId, MarkerState>

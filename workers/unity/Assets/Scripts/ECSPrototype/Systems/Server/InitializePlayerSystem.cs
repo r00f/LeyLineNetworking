@@ -64,6 +64,7 @@ namespace LeyLineHybridECS
 
             m_SpawnCellData = GetEntityQuery(
                 ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
+                ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<IsSpawn.Component>(),
@@ -133,17 +134,23 @@ namespace LeyLineHybridECS
                     //add playerAttributes.HeroSpawned bool 
                     else if(!playerAttribute.HeroSpawned)
                     {
+                        var playerAtt = playerAttribute;
                         var playerWIndex = worldIndex.WorldIndexState.Value;
                         var f = factionComp.Faction;
                         var heroName = playerAttribute.HeroName;
 
-                        Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
+                        Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord, ref CellAttributesComponent.Component cellAttribute) =>
                         {
                             if (cellWorldIndex.Value == playerWIndex)
                             {
                                 if (unitToSpawn.Faction == f && unitToSpawn.IsSpawn)
                                 {
                                     m_SpawnSystem.SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate);
+
+                                    for(int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
+                                    {
+                                        m_SpawnSystem.SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(coord.CubeCoordinate, new Vector3f(0,0,0))[i+1]);
+                                    }
                                 }
                             }
                         });
