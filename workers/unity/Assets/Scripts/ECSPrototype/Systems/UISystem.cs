@@ -23,8 +23,7 @@ namespace LeyLineHybridECS
 
         public UIReferences UIRef{get; set;}
 
-
-            Settings settings;
+        Settings settings;
 
         protected override void OnCreate()
         {
@@ -700,20 +699,20 @@ namespace LeyLineHybridECS
             {
                 if (faction.TeamColor == TeamColorEnum.blue)
                 {
-                    //MOVE RECTTRANSFORM BLUEREADY IN Y / X AXIS
+                    //remove scuffed hardcoded position checks
 
                     if (playerState.CurrentState == PlayerStateEnum.ready)
                     {
-                        if (UIRef.BlueReady.localPosition.x > -88f)
-                            UIRef.BlueReady.Translate(new Vector3(0, -outSpeed, 0));
+                        if (UIRef.BlueReady.Rect.anchoredPosition.x > UIRef.BlueReady.StartPosition.x - UIRef.BlueReady.SlideOffset.x)
+                        {
+                            UIRef.BlueReady.Rect.Translate(new Vector3(0, -outSpeed, 0));
+                        }
                     }
                     else if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        //UIRef.BlueReady.localPosition = new Vector2(-69f, UIRef.BlueReady.localPosition.y);
-                        if(UIRef.BlueReady.localPosition.x < -69f)
-                            UIRef.BlueReady.Translate(new Vector3(0, inSpeed, 0));
+                        if (UIRef.BlueReady.Rect.anchoredPosition.x < UIRef.BlueReady.StartPosition.x)
+                            UIRef.BlueReady.Rect.Translate(new Vector3(0, inSpeed, 0));
                     }
-
                 }
                 else if (faction.TeamColor == TeamColorEnum.red)
                 {
@@ -721,13 +720,15 @@ namespace LeyLineHybridECS
                     //MOVE RECTTRANSFORM REDREADY IN Y / X AXIS                    
                     if (playerState.CurrentState == PlayerStateEnum.ready)
                     {
-                        if (UIRef.RedReady.localPosition.y < 86f)
-                            UIRef.RedReady.Translate(new Vector3(0, outSpeed, 0));
+                        if (UIRef.RedReady.Rect.anchoredPosition.y < UIRef.RedReady.StartPosition.y + UIRef.RedReady.SlideOffset.y)
+                        {
+                            UIRef.RedReady.Rect.Translate(new Vector3(0, outSpeed, 0));
+                        }
                     }
                     else if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        if(UIRef.RedReady.localPosition.y > 69f)
-                            UIRef.RedReady.Translate(new Vector3(0, -inSpeed, 0));
+                        if (UIRef.RedReady.Rect.anchoredPosition.y > UIRef.RedReady.StartPosition.y)
+                            UIRef.RedReady.Rect.Translate(new Vector3(0, -inSpeed, 0));
                     }
 
                 }

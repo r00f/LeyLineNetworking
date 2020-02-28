@@ -53,8 +53,8 @@ public class UIReferences : MonoBehaviour
     public RectTransform TurnWheelSmol;
     public float ReadyOutSpeed;
     public float ReadyInSpeed;
-    public RectTransform BlueReady;
-    public RectTransform RedReady;
+    public ReadySlider BlueReady;
+    public ReadySlider RedReady;
 
 
     [Header("BottomBars")]

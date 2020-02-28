@@ -9,8 +9,8 @@ using UnityEngine.EventSystems;
 public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public bool isHovered;
-    public RectTransform Map;
     public float scale;
+    public RectTransform Map;
     public Camera MapCam;
     public HeroTransform h_Transform;
 
@@ -35,7 +35,7 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (Input.GetButton("Fire1") && isHovered) { 
             Vector2 MouseScreenPos = Input.mousePosition;
             Vector2 RectPos = Map.position;
-            Vector2 Dir = (MouseScreenPos - RectPos)/100;
+            Vector2 Dir = (MouseScreenPos - RectPos) / (Map.rect.width / scale);
             Vector3 PlanePosition = new Vector3(MapCam.transform.position.x + (MapCam.orthographicSize * Dir.x), 0 , MapCam.transform.position.z + (MapCam.orthographicSize * Dir.y));
 
             if(h_Transform != null)
