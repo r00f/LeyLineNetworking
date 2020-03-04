@@ -23,7 +23,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
     EntityQuery m_GameStateData;
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
-    EntityQuery m_SetTargetRequestData;
 
     protected override void OnCreate()
     {
@@ -209,7 +208,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                     if (unitActions.CurrentSelected.Index != -3 && unitActions.LockedAction.Index == -3)
                     {
-
                         switch (unitActions.CurrentSelected.Targets[0].TargetType)
                         {
                             case TargetTypeEnum.cell:
@@ -273,6 +271,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         }
                                         else
                                         {
+                                            //if target is invalid raise event on reqUnitActions
                                             requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
                                         }
                                     }
@@ -299,8 +298,9 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 break;
                         }
 
+                        Debug.Log("ClearCurrentSelectedAction from HandleCellGridReqSys");
+                        requestingUnitActions.CurrentSelected = requestingUnitActions.NullAction;
                         unitActions = requestingUnitActions;
-                        unitActions.CurrentSelected = unitActions.NullAction;
                     }
                 }
             });

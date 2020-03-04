@@ -5,6 +5,7 @@ using Player;
 using Unit;
 using UnityEngine;
 using Unity.Collections;
+using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
@@ -16,6 +17,7 @@ namespace LeyLineHybridECS
         EntityQuery m_GameStateData;
         SendActionRequestSystem m_ActionRequestSystem;
         HighlightingSystem m_HighlightingSystem;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
 
         protected override void OnCreate()
         {
@@ -28,6 +30,8 @@ namespace LeyLineHybridECS
 
             m_PlayerData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<Vision.Component>(),
+            ComponentType.ReadOnly<HighlightingDataComponent>(),
             ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
             ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadWrite<Moba_Camera>()
@@ -52,6 +56,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_ActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
         }
@@ -60,7 +65,6 @@ namespace LeyLineHybridECS
         protected override void OnUpdate()
         {
 
-
             if (m_PlayerData.CalculateEntityCount() == 0)
                 return;
 
@@ -68,8 +72,12 @@ namespace LeyLineHybridECS
             var playersWorldID = m_PlayerData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
             var playersCamera = m_PlayerData.ToComponentArray<Moba_Camera>();
             var playersState = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+            var playerVisions = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
             #endregion
 
+            var playerHigh = playerHighs[0];
+            var playerVision = playerVisions[0];
             var playerState = playersState[0];
             var playerWorldIndex = playersWorldID[0].Value;
             var playerCam = playersCamera[0];
@@ -95,14 +103,12 @@ namespace LeyLineHybridECS
                                     {
                                         if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                                         {
-                                            if (actions.CurrentSelected.Targets[0].Higlighter == UseHighlighterEnum.pathing)
-                                                playerState.CachedPaths = unitCellsToMark.CachedPaths;
-
                                             playerState.CurrentState = PlayerStateEnum.waiting_for_target;
                                         }
-                                        //if playerState is WaitingForTarget and rightMouseButton is pressed
-                                        else if(Input.GetButtonDown("Fire2"))
+                                        //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
+                                        if(Input.GetButtonDown("Fire2"))
                                         {
+                                            Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                                             //Call methods so line/target gets disabled instantly
                                             m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
@@ -124,7 +130,9 @@ namespace LeyLineHybridECS
                                 else
                                 {
                                     unitComponentReferences.SelectionCircleGO.SetActive(false);
-                                    if (playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
+                                    HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
+
+                                    if(visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                                     {
                                         playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                                         playerState.SelectedUnitId = unitId.EntityId.Id;
@@ -156,8 +164,10 @@ namespace LeyLineHybridECS
             #region PlayerData
             playersState[0] = playerState;
             m_PlayerData.CopyFromComponentDataArray(playersState);
+            playerVisions.Dispose();
             playersWorldID.Dispose();
             playersState.Dispose();
+            playerHighs.Dispose();
             #endregion
         }
 

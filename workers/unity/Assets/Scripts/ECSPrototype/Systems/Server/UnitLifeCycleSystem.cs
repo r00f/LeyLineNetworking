@@ -127,7 +127,6 @@ public class UnitLifeCycleSystem : ComponentSystem
                     p_Vision.RequireUpdate = true;
             });
 
-
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cellCubeCoordinate, ref WorldIndex.Component cellWorldIndex, ref CellAttributesComponent.Component cellAttribute) =>
             {
                 if (unitCubeCoordinate == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && unitWorldIndex == cellWorldIndex.Value && cellAttribute.CellAttributes.Cell.UnitOnCellId == unitStateVar.EntityId)

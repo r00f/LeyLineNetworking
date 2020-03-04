@@ -22,6 +22,7 @@ public class SendActionRequestSystem : ComponentSystem
     //EntityQuery m_SelectActionRequestData;
     CommandSystem m_CommandSystem;
     UISystem m_UISystem;
+    ILogDispatcher logger;
 
     protected override void OnCreate()
     {
@@ -31,6 +32,7 @@ public class SendActionRequestSystem : ComponentSystem
         ComponentType.ReadOnly<PlayerEnergy.Component>(),
         ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
         ComponentType.ReadWrite<PlayerState.Component>(),
+        ComponentType.ReadWrite<PlayerPathing.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<HighlightingDataComponent>()
         );
@@ -70,6 +72,7 @@ public class SendActionRequestSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
@@ -86,7 +89,9 @@ public class SendActionRequestSystem : ComponentSystem
         var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerEnergys = m_PlayerData.ToComponentDataArray<PlayerEnergy.Component>(Allocator.TempJob);
+        var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
+        var playerHigh = playerHighs[0];
         var gameState = gameStates[0];
         var playerFaction = playerFactions[0];
         var playerState = playerStates[0];
@@ -111,22 +116,16 @@ public class SendActionRequestSystem : ComponentSystem
                 {
                     if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                     {
-                        playerState.SelectedUnitId = unitEntityId.Id;
-
                         if (faction.Faction == playerFaction.Faction)
                         {
                             if (actionsData.BasicMove.Index != -3)
                             {
-                                //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+                                Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
                                 anim.AnimationEvents.VoiceTrigger = true;
                                 SelectActionCommand(-2, unitEntityId.Id);
                                 m_UISystem.InitializeSelectedActionTooltip(0);
                             }
                         }
-                    }
-                    else if (!playerState.TargetValid)
-                    {
-                        SelectActionCommand(-3, unitEntityId.Id);
                     }
                 }
 
@@ -136,23 +135,9 @@ public class SendActionRequestSystem : ComponentSystem
                 {
                     if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
                     {
-                        Vector3 TargetCoord = new Vector3(999, 999, 999);
-
-                        if (!actionsData.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
-                        {
-                            Entities.With(m_ClickedUnitData).ForEach((ref CubeCoordinate.Component clickedUnitCoord) =>
-                            {
-                                var coord = Vector3fext.ToUnityVector(clickedUnitCoord.CubeCoordinate);
-                                TargetCoord = coord;
-                            });
-                        }
-
-                        //Now only loops over the clicked cell (ClickEvent component)
                         Entities.With(m_CellData).ForEach((ref SpatialEntityId cellEntityId, ref CubeCoordinate.Component cCoord, ref MarkerState cellMarkerState) =>
                         {
-                            var cellCoord = Vector3fext.ToUnityVector(cCoord.CubeCoordinate);
-
-                            if (cellCoord != unitCoord || TargetCoord == cellCoord)
+                            if (Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate) == Vector3fext.ToUnityVector(cCoord.CubeCoordinate))
                             {
                                 var request = new Actions.SetTargetCommand.Request
                                 (
@@ -196,6 +181,7 @@ public class SendActionRequestSystem : ComponentSystem
         playerStates[0] = playerState;
         m_PlayerData.CopyFromComponentDataArray(playerStates);
         gameStates.Dispose();
+        playerHighs.Dispose();
         playerFactions.Dispose();
         playerStates.Dispose();
         playerEnergys.Dispose();
@@ -203,14 +189,14 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
-
-        //Debug.Log("SelectActionCommand");
         bool isSelfTarget = false;
 
+        var playerPathings = m_PlayerData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHighlightingDatas = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
         var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
 
+        var playerPathing = playerPathings[0];
         var playerFaction = playerFactions[0];
         var playerState = playerStates[0];
         var playerHigh = playerHighlightingDatas[0];
@@ -253,39 +239,47 @@ public class SendActionRequestSystem : ComponentSystem
                 playerState.SelectedAction = act;
 
                 m_HighlightingSystem.ResetHighlights();
-                //playerHigh.LastHoveredCoordinate = new Vector3f(999f, 999f, 999f);
 
                 if (actionIndex != -3)
                 {
                     if (!isSelfTarget)
                     {
-                        m_HighlightingSystem.ClearPlayerState();
+                        logger.HandleLog(LogType.Warning,
+                        new LogEvent("SetAction")
+                        .WithField("unitId", 1f));
+
+                        playerPathing.CellsInRange.Clear();
+                        playerPathing.CachedPaths.Clear();
+                        playerPathing.CellsInRange = playerPathing.CellsInRange;
+                        playerPathing.CachedPaths = playerPathing.CachedPaths;
+
+
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
-                        playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerFaction.Faction);
-                        playerState.TargetValid = false;
-                        m_HighlightingSystem.UpdateSelectedUnit(ref playerState, playerHigh);
+                        playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerPathing, playerFaction.Faction);
                         m_HighlightingSystem.SetNumberOfTargets(playerState);
-                        playerStates[0] = playerState;
-                        playerHighlightingDatas[0] = playerHigh;
-                        m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
-                        m_PlayerData.CopyFromComponentDataArray(playerStates);
+                        playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh);
+                        m_HighlightingSystem.HighlightReachable();
                     }
                     else
                     {
                         playerHigh.TargetRestrictionIndex = 2;
                         m_HighlightingSystem.SetSelfTarget(entityId);
                     }
-                }
 
+                    playerStates[0] = playerState;
+                    playerHighlightingDatas[0] = playerHigh;
+                    playerPathings[0] = playerPathing;
+                    m_PlayerData.CopyFromComponentDataArray(playerPathings);
+                    m_PlayerData.CopyFromComponentDataArray(playerStates);
+                    m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+                }
             }
         });
 
-        playerStates[0] = playerState;
-        playerHighlightingDatas[0] = playerHigh;
-        m_PlayerData.CopyFromComponentDataArray(playerStates);
-        m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();
+        playerPathings.Dispose();
         playerFactions.Dispose();
     }
 }

@@ -1,14 +1,11 @@
-﻿using UnityEngine;
-using Unity.Entities;
-using Unit;
+﻿using Cell;
 using Generic;
-using Player;
-using Cell;
 using Improbable.Gdk.Core;
+using Player;
 using System.Collections.Generic;
-using Improbable;
-using Unity.Collections;
-using Improbable.Gdk.TransformSynchronization;
+using Unit;
+using Unity.Entities;
+using UnityEngine;
 
 namespace LeyLineHybridECS
 {
@@ -18,6 +15,7 @@ namespace LeyLineHybridECS
         HandleCellGridRequestsSystem m_CellGridSystem;
         CleanupSystem m_CleanUpSystem;
         SpawnUnitsSystem m_SpawnSystem;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
 
         EntityQuery m_CellData;
         EntityQuery m_HeroData;
@@ -51,12 +49,15 @@ namespace LeyLineHybridECS
             );
 
             m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadWrite<Vision.Component>(),
             ComponentType.ReadOnly<PlayerAttributes.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadWrite<PlayerState.Component>()
             );
 
             m_GameStateData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadWrite<GameState.Component>()
             );
@@ -65,6 +66,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
             m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
@@ -72,21 +74,34 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            Entities.With(m_GameStateData).ForEach((ref GameState.Component gameState, ref WorldIndex.Component gameStateWorldIndex) =>
+            Entities.With(m_GameStateData).ForEach((ref GameState.Component gameState, ref WorldIndex.Component gameStateWorldIndex, ref SpatialEntityId gameStateId) =>
             {
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
 #if UNITY_EDITOR
-                       
-                        if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 1)
+                        
+                        //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
+                        if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 2)
                         {
-                            gameState.CurrentState = GameStateEnum.planning;
+                            if (gameState.CurrentWaitTime <= 0)
+                            {
+                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+                                gameState.CurrentState = GameStateEnum.cleanup;
+                            }
+                            else
+                                gameState.CurrentWaitTime -= Time.deltaTime;
                         }
 #else
-                        if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 2)
+                        if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 4)
                         {
-                            gameState.CurrentState = GameStateEnum.planning;
+                            if (gameState.CurrentWaitTime <= 0)
+                            {
+                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+                                gameState.CurrentState = GameStateEnum.cleanup;
+                            }
+                            else
+                                gameState.CurrentWaitTime -= Time.deltaTime;
                         }
 #endif
                         break;
@@ -160,16 +175,12 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.deltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
-                                gameState.CurrentState = GameStateEnum.calculate_energy;
+                                gameState.CurrentState = GameStateEnum.cleanup;
                                 gameState.HighestExecuteTime = 0;
                             }
                         }
                         break;
-                    case GameStateEnum.calculate_energy:
 
-                        gameState.CurrentPlanningTime = gameState.PlanningTime;
-                        gameState.CurrentState = GameStateEnum.cleanup;
-                        break;
                     case GameStateEnum.cleanup:
                         //check if any hero is dead to go into gameOver
                         if (CheckAnyHeroDead(gameStateWorldIndex.Value))
@@ -180,11 +191,21 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            //Debug.Log("Cleanup -> Planning");
-                            //UpdateIsTaken(gameStateWorldIndex);
-                            gameState.CurrentState = GameStateEnum.planning;
+                            Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId) =>
+                            {
+                                m_ComponentUpdateSystem.SendEvent(
+                                    new Vision.UpdateClientVisionEvent.Event(),
+                                    playerId.EntityId);
+                            });
+                            
+                            if(m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
+                                gameState.CurrentState = GameStateEnum.calculate_energy;
                         }
                         m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
+                        break;
+                    case GameStateEnum.calculate_energy:
+                        gameState.CurrentPlanningTime = gameState.PlanningTime;
+                        gameState.CurrentState = GameStateEnum.planning;
                         break;
                     case GameStateEnum.game_over:
 #if UNITY_EDITOR

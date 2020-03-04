@@ -160,7 +160,7 @@ namespace LeyLineHybridECS
 
                             if (clientData.ManalithEntityID == ID)
                             {
-                                if (clientData.IngameIconRef)
+                                if (clientData.IngameIconRef && m_UISystem.UIRef)
                                 {
                                     clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
                                     if(ID == m_UISystem.UIRef.ManalithToolTipFab.ActiveManalithID)

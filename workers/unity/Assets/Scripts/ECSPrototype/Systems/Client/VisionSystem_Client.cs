@@ -16,10 +16,12 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class VisionSystem_Client : ComponentSystem
     {
+        ILogDispatcher logger;
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
         EntityQuery m_IsVisibleData;
         EntityQuery m_AuthorativePlayerData;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
 
         protected override void OnCreate()
         {
@@ -49,6 +51,12 @@ namespace LeyLineHybridECS
             m_AuthorativePlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
         }
 
+        protected override void OnStartRunning()
+        {
+            base.OnStartRunning();
+            m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+        }
+
         protected override void OnUpdate()
         {
             if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthorativePlayerData.CalculateEntityCount() == 0)
@@ -57,8 +65,9 @@ namespace LeyLineHybridECS
             var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
             var gameState = gameStates[0];
 
+            var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
 
-            if (gameState.CurrentState == GameStateEnum.cleanup)
+            for (var i = 0; i < updateVisionEvents.Count; i++)
             {
                 UpdateVision();
             }

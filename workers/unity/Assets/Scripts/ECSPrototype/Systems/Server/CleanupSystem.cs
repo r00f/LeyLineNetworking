@@ -10,24 +10,6 @@ using Unity.Collections;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class CleanupSystem : ComponentSystem
 {
-    /*
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Health.Component> HealthData;
-        public ComponentDataArray<Actions.Component> ActionData;
-        public ComponentDataArray<WorldCommands.DeleteEntity.CommandSender> DeleteEntitySenders;
-    }
-
-    public struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<GameState.Component> GameStates;
-    }
-    */
     CommandSystem m_CommandSystem;
     ResourceSystem m_ResourceSystem;
     ExecuteActionsSystem m_ExecuteSystem;
@@ -35,6 +17,7 @@ public class CleanupSystem : ComponentSystem
 
     EntityQuery m_GameStateData;
     EntityQuery m_UnitData;
+    EntityQuery m_UnitRemovedData;
 
     protected override void OnCreate()
     {
@@ -52,6 +35,20 @@ public class CleanupSystem : ComponentSystem
         ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<GameState.Component>()
         );
+
+        var unitRemovedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+        {
+                ComponentType.ReadOnly<CubeCoordinate.Component>()
+        },
+            All = new ComponentType[]
+        {
+                typeof(UnitLifeCycleSystem.UnitStateData)
+        }
+        };
+
+        m_UnitRemovedData = GetEntityQuery(unitRemovedDesc);
     }
 
     protected override void OnStartRunning()
@@ -106,5 +103,23 @@ public class CleanupSystem : ComponentSystem
                 m_CommandSystem.SendCommand(deleteEntityRequest);
             }
         });
+    }
+
+    public bool CheckAllDeadUnitsDeleted(uint worldIndex)
+    {
+        bool allUnitsDeleted = true;
+
+        Entities.With(m_UnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref Health.Component health) =>
+        {
+            if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
+            {
+                allUnitsDeleted = false;
+            }
+        });
+
+        if (m_UnitRemovedData.CalculateEntityCount() > 0)
+            allUnitsDeleted = false;
+
+        return allUnitsDeleted;
     }
 }

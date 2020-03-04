@@ -90,6 +90,7 @@ namespace LeyLineHybridECS
             base.OnStartRunning();
             m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
         }
+
         protected override void OnUpdate()
         {
             Entities.With(m_PlayerAddedData).ForEach((Entity entity, ref WorldIndex.Component worldIndex, ref FactionComponent.Component factionComp, ref Position.Component pos, ref FactionComponent.Component playerAddedFaction, ref PlayerAttributes.Component playerAddedPlayerAttributes) =>

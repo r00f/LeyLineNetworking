@@ -24,7 +24,7 @@ public static class LeyLineEntityTemplates {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
             CalculateWaitTime = 5f,
-            CurrentWaitTime = 0f,
+            CurrentWaitTime = 5f,
             PlanningTime = 60f,
             CurrentPlanningTime = 60f,
             RopeDisplayTime = 30f,
@@ -195,10 +195,14 @@ public static class LeyLineEntityTemplates {
             Negatives = new List<Vector3f>()
         };
 
-        var playerState = new PlayerState.Snapshot
+        var playerPathing = new PlayerPathing.Snapshot
         {
             CellsInRange = new List<CellAttribute>(),
-            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>(),
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
+        };
+
+        var playerState = new PlayerState.Snapshot
+        {
             UnitTargets = new Dictionary<long, CubeCoordinateList>(),
             EndStepReady = true,
             SelectedAction = new Action
@@ -227,6 +231,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerState, client);
+        template.AddComponent(playerPathing, client);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);

@@ -1,0 +1,11 @@
+package player;
+import "cell/cell_attributes.schema";
+import "generic/vector3.schema";
+import "unit/actions.schema";
+
+component PlayerPathing {
+	
+    id = 127;
+	list<cell.CellAttribute> cells_in_range = 1;
+	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 2;
+}
