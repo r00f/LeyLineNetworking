@@ -154,19 +154,6 @@ public class ActionEffectsSystem : ComponentSystem
                             }
 
                             animatorComponent.Animator.SetTrigger("GetHit");
-
-                            if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0)
-                            {
-                                //Object.Instantiate(unitEffects.BloodParticleSystem, animatorComponent.transform.position + new Vector3(0, randomYoffset, 0), Quaternion.identity);
-                                if (unitEffects.BodyPartBloodParticleSystem)
-                                {
-                                    Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition, unitEffects.BodyPartBloodParticleSystem);
-                                }
-                                else
-                                {
-                                    Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition);
-                                }
-                            }
                             break;
 
                         case EffectTypeEnum.gain_armor:
@@ -182,6 +169,18 @@ public class ActionEffectsSystem : ComponentSystem
                     }
                 }
                 unitEffects.ActionEffectTrigger = false;
+            }
+
+            if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0 && !animatorComponent.Dead)
+            {
+                if (unitEffects.BodyPartBloodParticleSystem)
+                {
+                    Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition, unitEffects.BodyPartBloodParticleSystem);
+                }
+                else
+                {
+                    Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition);
+                }
             }
 
             animatorComponent.Animator.SetInteger("Armor", (int)unitEffects.CurrentArmor);
@@ -276,8 +275,6 @@ public class ActionEffectsSystem : ComponentSystem
     public void Death(AnimatorComponent animatorComponent, Action action, Vector3 position, GameObject bodyPartParticle = null)
     {
         var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
-        animatorComponent.Dead = true;
-
         if (bodyPartParticle)
         {
             int random = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
@@ -327,16 +324,8 @@ public class ActionEffectsSystem : ComponentSystem
                 Explode(position, e.DealDamageNested.ExplosionRadius, e.DealDamageNested.ExplosionForce, e.DealDamageNested.UpForce, ragdollHash);
             }
         }
-        //EGG DEATHEXPLOSION 
-        /*
-        if (animatorComponent.DeathExplosionPos)
-        {
-            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-            {
-                r.AddExplosionForce(animatorComponent.DeathExplosionForce, animatorComponent.DeathExplosionPos.position, animatorComponent.DeathExplosionRadius);
-            }
-        }
-        */
+
+        animatorComponent.Dead = true;
     }
 
     public void Explode(Vector3 explosionOrigin, float explosionRadius, float explosionForce, uint upForce, HashSet<Rigidbody> ragdollRigidbodies)

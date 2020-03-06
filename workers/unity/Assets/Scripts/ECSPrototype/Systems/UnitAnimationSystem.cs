@@ -151,8 +151,7 @@ public class UnitAnimationSystem : ComponentSystem
                         {
                             if (animatorComponent.CurrentLockedAction.ProjectileFab)
                             {
-                                //THIS METHOD SUCKS
-                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter); //CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter);
                                 float targetYoffset = 0;
                                 if (animatorComponent.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
                                 {
