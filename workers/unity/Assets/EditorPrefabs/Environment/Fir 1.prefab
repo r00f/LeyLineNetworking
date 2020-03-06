@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8737825120475935227}
-  - component: {fileID: 8737825120475935228}
+  - component: {fileID: 5864395290510772893}
   m_Layer: 0
   m_Name: Fir 1
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -3.015}
---- !u!205 &8737825120475935228
+--- !u!205 &5864395290510772893
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -40,16 +40,16 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8737825120475935229}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: -0.15900588, y: 2.422181, z: -0.13397312}
+  m_LocalReferencePoint: {x: -0.011069536, y: 2.422181, z: -0.13397312}
   m_Size: 5.8212
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.09762715
+  - screenRelativeHeight: 0.10330135
     fadeTransitionWidth: 0
     renderers:
-    - renderer: {fileID: 7073928196423604147}
+    - renderer: {fileID: 275055736797268015}
   m_Enabled: 1
 --- !u!136 &4351772310324813884
 CapsuleCollider:
@@ -146,9 +146,9 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 663893014899309158}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &7073928196423604147 stripped
+--- !u!23 &275055736797268015 stripped
 MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: -1504981713932161579, guid: 27fadb35e5314a448b6858b6bccf8b30,
+  m_CorrespondingSourceObject: {fileID: -8437583435759635895, guid: 27fadb35e5314a448b6858b6bccf8b30,
     type: 3}
   m_PrefabInstance: {fileID: 663893014899309158}
   m_PrefabAsset: {fileID: 0}

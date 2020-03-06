@@ -1090,7 +1090,7 @@ namespace LeyLineHybridECS
             Object.Destroy(healthbar.UnitHeadUIInstance.gameObject);
             Object.Destroy(healthbar.UnitHeadHealthBarInstance.gameObject);
 
-            if (!stats.IsHero && unitFaction == playerFaction)
+            if (!stats.IsHero && unitFaction == playerFaction && UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
             {
                 //remove unitID from unitGRPUI / delete selectUnitButton
                 UnitGroupUI unitGroup = UIRef.ExistingUnitGroups[stats.UnitTypeId];

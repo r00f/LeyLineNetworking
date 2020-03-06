@@ -19,6 +19,7 @@ MonoBehaviour:
   Description: Enters a defensive stance to prepare for incoming damage. Gains 50
     armor.
   TimeToExecute: 3
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:
@@ -41,7 +42,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 1
   ApplyToRestrictions: 2
-  ArmorAmount: 50
+  ArmorAmount: 40
 --- !u!114 &114578424212294910
 MonoBehaviour:
   m_ObjectHideFlags: 0

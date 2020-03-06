@@ -9,6 +9,7 @@ component Manalith
 	uint32 combined_energy_gain = 2;
 	uint32 base_income = 3;
 	list<ManalithSlot> manalithslots = 4;
+	bool state_change = 5;
 }
 
 type ManalithSlot

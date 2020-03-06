@@ -5000,7 +5000,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VisionRange: 2
-  BaseHealth: 50
+  BaseHealth: 40
   EnergyIncome: 0
   BasicMove: {fileID: 0}
   BasicAttack: {fileID: 0}
@@ -5083,6 +5083,8 @@ MonoBehaviour:
   - {fileID: 7550265048827665363}
   EnableVisualsDelay: 2
   CharacterEffects: []
+  VoiceEmitter: {fileID: 0}
+  FootStempEmitter: {fileID: 0}
   RotationSpeed: 0
   RotateTransform: {fileID: 7550265048827693047}
   DestinationReachTriggerSet: 0
@@ -5807,6 +5809,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a56815b5058c9848bb655b50757ba48, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  VoiceTrigger: 0
+  FootStepTrigger: 0
   EventTrigger: 0
   EffectGameObjectIndex: -1
 --- !u!54 &7204551455851060685

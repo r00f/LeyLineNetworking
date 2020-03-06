@@ -19,6 +19,7 @@ MonoBehaviour:
   Description: Devastatingly slams his weapon into the ground. Deals 55 damge to all
     enemies in the area.
   TimeToExecute: 3
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:
@@ -79,7 +80,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  DamageAmount: 90
+  DamageAmount: 70
   ExplosionRadius: 4
   ExplosionForce: 600
   UpForce: 5

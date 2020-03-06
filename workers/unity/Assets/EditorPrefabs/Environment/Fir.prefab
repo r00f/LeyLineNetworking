@@ -23,7 +23,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8737825120475935227}
-  - component: {fileID: 8737825120475935228}
+  - component: {fileID: -9020332544751184065}
   m_Layer: 0
   m_Name: Fir
   m_TagString: Untagged
@@ -46,7 +46,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &8737825120475935228
+--- !u!205 &-9020332544751184065
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,13 +54,13 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8737825120475935229}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: -0.20942914, y: 2.6008015, z: -0.030653238}
-  m_Size: 5.4639587
+  m_LocalReferencePoint: {x: -0.017828941, y: 2.3061807, z: -0.020653248}
+  m_Size: 5.8212
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.10288635
+  - screenRelativeHeight: 0.1008032
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 4265760949594616649}

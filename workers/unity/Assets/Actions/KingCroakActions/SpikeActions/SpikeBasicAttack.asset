@@ -18,6 +18,7 @@ MonoBehaviour:
   ActionName: Attack
   Description: Attacks a enemy nearby for 50 damage.
   TimeToExecute: 3
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:
@@ -40,7 +41,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  DamageAmount: 35
+  DamageAmount: 45
   ExplosionRadius: 1
   ExplosionForce: 1000
   UpForce: 10
