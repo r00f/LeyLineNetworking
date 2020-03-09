@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8737825120475935227}
-  - component: {fileID: 728613923353975047}
+  - component: {fileID: 6593683432120833065}
   m_Layer: 0
   m_Name: Fir 1
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -3.015}
---- !u!205 &728613923353975047
+--- !u!205 &6593683432120833065
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -40,13 +40,13 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8737825120475935229}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: -0.011069536, y: 2.422181, z: -0.13397312}
+  m_LocalReferencePoint: {x: 0.08842349, y: 2.422181, z: 0.1343832}
   m_Size: 5.8212
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.10245063
+  - screenRelativeHeight: 0.10354725
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 7073928196423604147}
@@ -76,6 +76,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FirHealthy2
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 27fadb35e5314a448b6858b6bccf8b30,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 4294967295
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 27fadb35e5314a448b6858b6bccf8b30,
         type: 3}

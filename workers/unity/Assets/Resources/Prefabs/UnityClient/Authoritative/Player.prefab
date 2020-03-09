@@ -297,7 +297,7 @@ MonoBehaviour:
     movement:
       lockTransitionRate: 0.05
       cameraMovementRate: 10
-      edgeHoverMovement: 0
+      edgeHoverMovement: 1
       edgeHoverOffset: 10
       defualtHeight: 5.8
       useDefualtHeight: 1
@@ -310,7 +310,7 @@ MonoBehaviour:
       cameraRotationRate: {x: 100, y: 100}
     zoom:
       invertZoom: 0
-      defaultZoom: 11
+      defaultZoom: 13
       minZoom: 8
       maxZoom: 14
       zoomRate: 12
