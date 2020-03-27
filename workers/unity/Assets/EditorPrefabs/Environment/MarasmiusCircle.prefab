@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2024865146748516341}
-  m_Layer: 8
+  m_Layer: 11
   m_Name: MarasmiusCircle
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -51,6 +51,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -122,6 +127,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.177536
       objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7301543117891962685, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
       propertyPath: displayLightIntensity
@@ -161,6 +176,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius3 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -232,6 +252,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.9023942
       objectReference: {fileID: 0}
+    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: displayLightIntensity
@@ -271,6 +301,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -342,6 +377,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.2763
       objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7301543117891962685, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
       propertyPath: displayLightIntensity
@@ -381,6 +426,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius1 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -452,6 +502,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.3517
       objectReference: {fileID: 0}
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
@@ -491,6 +551,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius3 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -562,6 +627,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.9952524
       objectReference: {fileID: 0}
+    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: displayLightIntensity
@@ -601,6 +676,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius2 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -672,6 +752,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.9168895
       objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 7301543117891962685, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
       propertyPath: displayLightIntensity
@@ -711,6 +801,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius1 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -782,6 +877,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.3690044
       objectReference: {fileID: 0}
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
@@ -821,6 +926,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -892,6 +1002,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.1983347
       objectReference: {fileID: 0}
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
@@ -931,6 +1051,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -1002,6 +1127,16 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.2706
       objectReference: {fileID: 0}
+    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
     - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: displayLightIntensity
@@ -1041,6 +1176,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Marasmius1 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -1111,6 +1251,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 1.3579227
+      objectReference: {fileID: 0}
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}

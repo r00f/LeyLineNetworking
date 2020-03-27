@@ -126,7 +126,7 @@ public static class CellGridMethods
         var n = GetDistance(origin, destination);
 
         //nudge destination
-        //destination = new Vector3f(destination.X + 1e - 6f, destination.Y + 2e-6f, destination.Z + 3e-6f);
+        destination = new Vector3f(destination.X + 0.000001f, destination.Y + 0.000002f, destination.Z + 0.000003f);
 
         for (int i = 0; i <= n; i++)
         {

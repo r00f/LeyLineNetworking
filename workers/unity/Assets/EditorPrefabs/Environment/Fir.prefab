@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8737825120475935227}
   - component: {fileID: 7177336129589608573}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: Fir
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,6 +67,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 65df63043842cd34c8a13da5f4f1f8c7,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: 65df63043842cd34c8a13da5f4f1f8c7,
         type: 3}

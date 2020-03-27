@@ -529,9 +529,12 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdatePathLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
     {
-        Color pathColorFaded = new Color(inLineRendererComp.pathColor.r, inLineRendererComp.pathColor.g, inLineRendererComp.pathColor.b, 0.1f);
-        inLineRendererComp.lineRenderer.startColor = inLineRendererComp.pathColor;
-        inLineRendererComp.lineRenderer.endColor = pathColorFaded;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(inLineRendererComp.pathColor, 0f),new GradientColorKey(inLineRendererComp.pathColor, .9f), new GradientColorKey(Color.black, 1.0f) },
+            new GradientAlphaKey[] { new GradientAlphaKey(1f, 0.0f), new GradientAlphaKey(1f, .9f), new GradientAlphaKey(0f, 1f)}
+        );
+        inLineRendererComp.lineRenderer.colorGradient = gradient;
 
         inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
         inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.pathOffset);
@@ -544,9 +547,12 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdateArcLineRenderer(float targetYOffset, Vector3 inTarget, LineRendererComponent inLineRendererComp)
     {
-        Color arcColorFaded = new Color(inLineRendererComp.arcColor.r, inLineRendererComp.arcColor.g, inLineRendererComp.arcColor.b, 0.1f);
-        inLineRendererComp.lineRenderer.startColor = arcColorFaded;
-        inLineRendererComp.lineRenderer.endColor = inLineRendererComp.arcColor;
+        Gradient gradient = new Gradient();
+        gradient.SetKeys(
+            new GradientColorKey[] { new GradientColorKey(Color.black, 0f), new GradientColorKey(inLineRendererComp.arcColor, .2f)},
+            new GradientAlphaKey[] { new GradientAlphaKey(0f, 0.0f), new GradientAlphaKey(1f, .2f)}
+        );
+        inLineRendererComp.lineRenderer.colorGradient = gradient;
 
         Vector3 arcOrigin = inLineRendererComp.transform.position + inLineRendererComp.arcOffset;
         Vector3 arcTarget = new Vector3(inTarget.x, inTarget.y + targetYOffset, inTarget.z);

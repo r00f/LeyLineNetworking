@@ -95,6 +95,11 @@ namespace LeyLineHybridECS
                         {
                             if (playerState.CurrentState != PlayerStateEnum.ready)
                             {
+                                if (Input.GetKeyDown(KeyCode.Space))
+                                {
+                                    playerState.CurrentState = PlayerStateEnum.ready;
+                                }
+
                                 if (unitId.EntityId.Id == playerState.SelectedUnitId)
                                 {
                                     playerCam.SetTargetTransform(unitComponentReferences.transform);
@@ -106,7 +111,7 @@ namespace LeyLineHybridECS
                                             playerState.CurrentState = PlayerStateEnum.waiting_for_target;
                                         }
                                         //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
-                                        if(Input.GetButtonDown("Fire2"))
+                                        if (Input.GetButtonDown("Fire2"))
                                         {
                                             Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
@@ -132,7 +137,7 @@ namespace LeyLineHybridECS
                                     unitComponentReferences.SelectionCircleGO.SetActive(false);
                                     HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
-                                    if(visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
+                                    if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                                     {
                                         playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                                         playerState.SelectedUnitId = unitId.EntityId.Id;

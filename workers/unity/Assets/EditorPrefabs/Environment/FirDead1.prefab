@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8737825120475935227}
   - component: {fileID: 2747602980022537424}
-  m_Layer: 0
+  m_Layer: 11
   m_Name: FirDead1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -67,6 +67,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_StaticEditorFlags
       value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: ea41d54fc6c197149919d109eb58f487,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: -4216859302048453862, guid: ea41d54fc6c197149919d109eb58f487,
         type: 3}

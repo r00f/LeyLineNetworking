@@ -223,6 +223,8 @@ namespace LeyLineHybridECS
                 ResetEnergyBaubles();
             }
 
+            HandleKeyCodeInput(playerHigh, gameState);
+
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
@@ -230,39 +232,6 @@ namespace LeyLineHybridECS
                     foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                     {
                         UpdateUnitGroupBauble(g, authPlayersFaction[0]);
-                    }
-
-                    //check if inputCD on playerHighlighting is 0 and reset it
-
-                    if(playerHigh.InputCooldown <= 0)
-                    {
-                        if (Input.GetKeyDown(KeyCode.Alpha1))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
-                            InitializeSelectedActionTooltip(UIRef.Actions[0]);
-                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Alpha2))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
-                            InitializeSelectedActionTooltip(UIRef.Actions[1]);
-                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Alpha3))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
-                            InitializeSelectedActionTooltip(UIRef.Actions[2]);
-                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Alpha4))
-                        {
-                            m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
-                            m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                        }
-                        else if (Input.GetKeyDown(KeyCode.Escape))
-                        {
-                            UIRef.EscapeMenu.gameObject.SetActive(!UIRef.EscapeMenu.gameObject.activeSelf);
-                        }
                     }
 
                     if (UIRef.TurnWheelBig.eulerAngles.z < 360 - rOffset && UIRef.TurnWheelBig.eulerAngles.z > 180)
@@ -753,6 +722,47 @@ namespace LeyLineHybridECS
             authPlayersState.Dispose();
             playerHighlightingDatas.Dispose();
             #endregion
+        }
+
+        void HandleKeyCodeInput(HighlightingDataComponent playerHigh, GameState.Component gameState)
+        {
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                UIRef.EscapeMenu.gameObject.SetActive(!UIRef.EscapeMenu.gameObject.activeSelf);
+            }
+
+            if (Input.GetKeyDown(KeyCode.U))
+            {
+                UIRef.Canvas.gameObject.SetActive(!UIRef.Canvas.gameObject.activeSelf);
+            }
+
+
+            if (playerHigh.InputCooldown <= 0 && gameState.CurrentState == GameStateEnum.planning)
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1))
+                {
+                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
+                    InitializeSelectedActionTooltip(UIRef.Actions[0]);
+                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha2))
+                {
+                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
+                    InitializeSelectedActionTooltip(UIRef.Actions[1]);
+                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha3))
+                {
+                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
+                    InitializeSelectedActionTooltip(UIRef.Actions[2]);
+                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha4))
+                {
+                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
+                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                }
+            }
         }
 
         void SetSelectedUnitId(long unitId)
