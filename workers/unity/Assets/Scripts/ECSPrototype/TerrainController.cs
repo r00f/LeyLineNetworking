@@ -65,7 +65,7 @@ namespace LeyLineHybridECS
         {
             //print(terrain.terrainData.GetHeight((int)getTerrainHeightCoordinates.x, (int)getTerrainHeightCoordinates.y));
             print(terrain.terrainData.alphamapWidth);
-            print(terrain.terrainData.heightmapWidth);
+            print(terrain.terrainData.heightmapResolution);
         }
 
         public void UpdateLeyLineCracks()
@@ -84,16 +84,16 @@ namespace LeyLineHybridECS
             //paint height with crackbrush at terrain position
 
             //convert length of array to raise to world space units
-            int totalXrange = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * size);
-            int totalYrange = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * size);
+            int totalXrange = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * size);
+            int totalYrange = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * size);
 
             terrainHeights = new float[totalXrange, totalYrange];
             //print(terrainHeights.Length);
             strength = new float[totalXrange, totalYrange];
             //print(totalXrange);
 
-            int xOffset = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * position.x) - totalXrange / 2;
-            int yOffset = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * position.z) - totalYrange / 2;
+            int xOffset = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * position.x) - totalXrange / 2;
+            int yOffset = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * position.z) - totalYrange / 2;
 
 
 
@@ -235,14 +235,14 @@ namespace LeyLineHybridECS
             float h = size * Mathf.Sqrt(3);
 
             //convert length of array to raise to world space unit
-            rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
-            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
+            rectSize.x = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * h);
 
             int width = (int)rectSize.x;
             int height = (int)rectSize.y;
 
-            terrainPos.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * hexPos.x) - width / 2;
-            terrainPos.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * hexPos.z) - height / 2;
+            terrainPos.x = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * hexPos.x) - width / 2;
+            terrainPos.y = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * hexPos.z) - height / 2;
 
             return terrainPos;
         }
@@ -297,8 +297,8 @@ namespace LeyLineHybridECS
             float w = size * 2;
             float h = size * Mathf.Sqrt(3);
             //convert length of array to raise to world space units
-            rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
-            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h + 1);
+            rectSize.x = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * h + 1);
 
             float [,] pixelArray = new float[(int)rectSize.y, (int)rectSize.x];
 
@@ -654,7 +654,7 @@ namespace LeyLineHybridECS
         public void SmoothTerrainHeights()
         {
 
-            float[,] smoothHeights = smooth(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight), new Vector2(terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight), 1);
+            float[,] smoothHeights = smooth(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution), new Vector2(terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution), 1);
             terrain.terrainData.SetHeights(0, 0, smoothHeights);
 
         }
@@ -745,8 +745,8 @@ namespace LeyLineHybridECS
 
         public void SetWholeTerrainHeight()
         {
-            int xRes = terrain.terrainData.heightmapWidth;
-            int yRes = terrain.terrainData.heightmapHeight;
+            int xRes = terrain.terrainData.heightmapResolution;
+            int yRes = terrain.terrainData.heightmapResolution;
 
             terrainHeights = new float[xRes, yRes];
 

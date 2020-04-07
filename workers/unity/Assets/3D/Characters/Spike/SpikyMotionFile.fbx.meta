@@ -472,9 +472,7 @@ ModelImporter:
     optimizeGameObjects: 0
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
-      copied configuration does not match position in animation file:\n\t'LeftLeg'
-      : position error = 1.723012 mm\n"
+    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: "\nClip 'SpikeMove' has import animation warnings that
       might lower retargeting quality:\nNote: Activate translation DOF on avatar to
@@ -852,7 +850,7 @@ ModelImporter:
       takeName: SpikeSweep
       internalID: 0
       firstFrame: 0
-      lastFrame: 60
+      lastFrame: 120
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -872,21 +870,21 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.31835207
+      - time: 0.20837764
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.4377468
+      - time: 0.2774641
         functionName: TriggerEvent
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.582397
+      - time: 0.31583074
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
@@ -1028,7 +1026,7 @@ ModelImporter:
       takeName: SpikeGroundSlam
       internalID: 0
       firstFrame: 0
-      lastFrame: 90
+      lastFrame: 110
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -1048,35 +1046,35 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.20461515
+      - time: 0.15138681
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.3288779
+      - time: 0.26043314
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 1
         messageOptions: 0
-      - time: 0.37651148
+      - time: 0.29004872
         functionName: TriggerEvent
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.41142455
+      - time: 0.32496178
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.90367097
+      - time: 0.8215772
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}

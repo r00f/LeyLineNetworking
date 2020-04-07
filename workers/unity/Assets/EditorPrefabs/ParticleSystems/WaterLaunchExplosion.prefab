@@ -347,8 +347,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.35
-      minScalar: 0.2
+      scalar: 0.5
+      minScalar: 0.3
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5044,8 +5044,8 @@ ParticleSystem:
     startSpeed:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 1.3
-      minScalar: 0.5
+      scalar: 1.6
+      minScalar: 1
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5160,8 +5160,8 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 3
-      scalar: 0.5
-      minScalar: 0.3
+      scalar: 0.6
+      minScalar: 0.4
       maxCurve:
         serializedVersion: 2
         m_Curve:
@@ -5536,7 +5536,7 @@ ParticleSystem:
     serializedVersion: 6
     enabled: 1
     type: 4
-    angle: 25
+    angle: 35.6
     length: 5
     boxThickness: {x: 0, y: 0, z: 0}
     radiusThickness: 0.05
@@ -5851,7 +5851,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 4
+        scalar: 2
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -5909,7 +5909,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 6
+        scalar: 4
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -5967,7 +5967,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 4
+        scalar: 3
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -6345,7 +6345,7 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxes: 0
   ColorModule:
-    enabled: 1
+    enabled: 0
     gradient:
       serializedVersion: 2
       minMaxState: 1
@@ -6353,7 +6353,7 @@ ParticleSystem:
       maxColor: {r: 1, g: 1, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
-        key0: {r: 0.43867922, g: 0.6690902, b: 1, a: 1}
+        key0: {r: 0.6650944, g: 0.8032721, b: 1, a: 1}
         key1: {r: 0.5557801, g: 0.49411762, b: 1, a: 0}
         key2: {r: 1, g: 1, b: 1, a: 0}
         key3: {r: 0, g: 0, b: 0, a: 0}
