@@ -298,7 +298,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 break;
                         }
 
-                        Debug.Log("ClearCurrentSelectedAction from HandleCellGridReqSys");
+                        //Debug.Log("ClearCurrentSelectedAction from HandleCellGridReqSys");
                         requestingUnitActions.CurrentSelected = requestingUnitActions.NullAction;
                         unitActions = requestingUnitActions;
                     }

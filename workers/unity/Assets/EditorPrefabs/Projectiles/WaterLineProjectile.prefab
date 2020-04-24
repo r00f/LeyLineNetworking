@@ -14573,7 +14573,6 @@ GameObject:
   - component: {fileID: 5341185222269292129}
   - component: {fileID: 8288337912239240116}
   - component: {fileID: 6546359515611239479}
-  - component: {fileID: 7788455314670658290}
   - component: {fileID: 93931158904744250}
   - component: {fileID: 6593013996290753601}
   - component: {fileID: 4178519868625791593}
@@ -14647,26 +14646,6 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
---- !u!114 &7788455314670658290
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4896425436571225840}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4dc51841dbe2d84fa9d56cc820ef74b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Transforms:
-  - {fileID: 4133996568520432238}
-  RotationAxis: {x: 0, y: 0, z: 1}
-  DegreesPerSecond: 1080
-  TranslationDistance: {x: 0, y: 0, z: 0}
-  TranslationTime: 0
-  ReturnToOrigin: 0
-  Continuous: 1
 --- !u!114 &93931158904744250
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14687,6 +14666,7 @@ MonoBehaviour:
     Effects: []
     ActionExecuteStep: 0
     TimeToExecute: 0
+  DestinationObjectPrefab: {fileID: 0}
   DestroyAtDestination: 0
   DestinationReached: 0
   EffectTriggered: 0
@@ -14702,6 +14682,8 @@ MonoBehaviour:
   MovementDelay: 0.1
   Acceleration: 0
   TargetYOffset: 0.5
+  DegreesPerSecond: 1080
+  AxaShieldOrbitCount: 0
   ToungeEnd: {fileID: 0}
   ToungeBase: {fileID: 0}
   LaunchForce: 0
@@ -14711,9 +14693,9 @@ MonoBehaviour:
   BaseJoint: {fileID: 0}
   SpringJoints: []
   DestroyAfterSeconds: 2
-  BodyParticleSystem: {fileID: 0}
-  TrailParticleSystem: {fileID: 3761309075827653202}
+  ParticleSystemsToStop: []
   ExplosionParticleSystem: {fileID: 3762004492379586217}
+  ExplosionEventEmitter: {fileID: 0}
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
@@ -34127,6 +34109,21 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: m_BoundingSphereOverride.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: m_BoundingSphereOverride.z
+      value: NaN
+      objectReference: {fileID: 0}
+    - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: m_BoundingSphereOverride.w
+      value: 1.02e-43
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9942b6b025c41df4aa7ccb18c0b332e8, type: 3}

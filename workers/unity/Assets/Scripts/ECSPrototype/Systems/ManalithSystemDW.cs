@@ -115,7 +115,7 @@ namespace LeyLineHybridECS
             {
                 if (m_PlayerData.CalculateEntityCount() == 0)
                 {
-                    Debug.Log("AuthPlayerCount is 0");
+                    //Debug.Log("AuthPlayerCount is 0");
                     return;
                 }
 

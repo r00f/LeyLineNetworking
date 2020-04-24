@@ -120,7 +120,7 @@ public class SendActionRequestSystem : ComponentSystem
                         {
                             if (actionsData.BasicMove.Index != -3)
                             {
-                                Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+                                //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
                                 anim.AnimationEvents.VoiceTrigger = true;
                                 SelectActionCommand(-2, unitEntityId.Id);
                                 m_UISystem.InitializeSelectedActionTooltip(0);
@@ -244,10 +244,11 @@ public class SendActionRequestSystem : ComponentSystem
                 {
                     if (!isSelfTarget)
                     {
+                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("SetAction")
                         .WithField("unitId", 1f));
-
+                        */
                         playerPathing.CellsInRange.Clear();
                         playerPathing.CachedPaths.Clear();
                         playerPathing.CellsInRange = playerPathing.CellsInRange;

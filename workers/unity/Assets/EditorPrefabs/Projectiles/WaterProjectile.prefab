@@ -104,6 +104,7 @@ MonoBehaviour:
     Effects: []
     ActionExecuteStep: 0
     TimeToExecute: 0
+  DestinationObjectPrefab: {fileID: 0}
   DestroyAtDestination: 0
   DestinationReached: 0
   EffectTriggered: 0
@@ -119,6 +120,7 @@ MonoBehaviour:
   MovementDelay: 0
   Acceleration: 0
   TargetYOffset: 0
+  DegreesPerSecond: 0
   ToungeEnd: {fileID: 0}
   ToungeBase: {fileID: 0}
   LaunchForce: 0
@@ -128,10 +130,11 @@ MonoBehaviour:
   BaseJoint: {fileID: 0}
   SpringJoints: []
   DestroyAfterSeconds: 3
+  ParticleSystemsToStop:
+  - {fileID: 3589144075304049518}
   BodyParticleSystem: {fileID: 3589144075304049518}
   TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 1731113839523245827}
-  LaunchParticleSystem: {fileID: 0}
   ExplosionEventEmitter: {fileID: 9193001755421976532}
   SpawnTransform: {fileID: 0}
   TravellingCurve: []

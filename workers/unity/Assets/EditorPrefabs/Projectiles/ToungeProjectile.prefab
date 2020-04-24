@@ -53,6 +53,7 @@ MonoBehaviour:
     Effects: []
     ActionExecuteStep: 0
     TimeToExecute: 0
+  DestinationObjectPrefab: {fileID: 0}
   DestroyAtDestination: 0
   DestinationReached: 0
   EffectTriggered: 0
@@ -68,6 +69,7 @@ MonoBehaviour:
   MovementDelay: 0.026
   Acceleration: 0
   TargetYOffset: 0
+  DegreesPerSecond: 0
   ToungeEnd: {fileID: 4688949177296653295}
   ToungeBase: {fileID: 7703656456084220977}
   LaunchForce: 40
@@ -81,9 +83,11 @@ MonoBehaviour:
   - {fileID: 6313709426211851775}
   - {fileID: 2591146601566630127}
   DestroyAfterSeconds: 0.65
+  ParticleSystemsToStop: []
   BodyParticleSystem: {fileID: 0}
   TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 4153580750195930896}
+  ExplosionEventEmitter: {fileID: 0}
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
@@ -5172,7 +5176,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.3016273
+  m_MaxDistance: 1.169091
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5258,7 +5262,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.3016273
+  m_MaxDistance: 1.169091
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5364,7 +5368,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.3016273
+  m_MaxDistance: 1.169091
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5486,7 +5490,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.3016273
+  m_MaxDistance: 1.169091
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

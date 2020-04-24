@@ -1,6 +1,7 @@
 ﻿using Generic;
 using Improbable.Gdk.Core;
 using Player;
+using System.Collections;
 using System.Collections.Generic;
 using Unit;
 using Unity.Collections;
@@ -225,6 +226,12 @@ namespace LeyLineHybridECS
 
             HandleKeyCodeInput(playerHigh, gameState);
 
+            for(int i = 0; i < UIRef.TurnStepColoredParts.Count; i++)
+            {
+                UIRef.TurnStepColoredParts[i].color = settings.TurnStepColors[i];
+            }
+
+
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
@@ -339,12 +346,6 @@ namespace LeyLineHybridECS
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
                 int actionCount = stats.Actions.Count + 2;
                 int spawnActionCount = stats.SpawnActions.Count;
-
-                if (gameState.CurrentState == GameStateEnum.planning && healthbar.UnitHeadUIInstance)
-                {
-                    if(healthbar.UnitHeadUIInstance.ArmorPanelDisplayTime != 0)
-                        healthbar.UnitHeadUIInstance.ArmorPanelDisplayTime = 0;
-                }
 
                 //WHEN TO UPDATE UNIT BUTTON
                 if (stats.SelectUnitButtonInstance)
@@ -521,7 +522,6 @@ namespace LeyLineHybridECS
                     if (!unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(true);
                 }
-
                 else
                 {
                     if (unitInfoPanel.activeSelf)
@@ -536,6 +536,20 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
+                    if (healthbar.UnitHeadUIInstance)
+                    {
+                        healthbar.UnitHeadUIInstance.FloatHealthAnimator.SetFloat("WaitTime", healthbar.HealthTextDelay);
+
+                        if (healthbar.HealthTextDelay > 0)
+                        {
+                            healthbar.HealthTextDelay -= Time.deltaTime;
+                        }
+                        else
+                        {
+                            healthbar.UnitHeadUIInstance.FloatHealthAnimator.SetBool("Delayed", false);
+                        }
+                    }
+
                     //does not get called when units get destroyed because a player disconnects
                     //
                     if (health.CurrentHealth == 0)
@@ -556,13 +570,18 @@ namespace LeyLineHybridECS
                             healthBarGO.SetActive(false);
                         }
 
-                        if(healthbar.UnitHeadUIInstance.ArmorPanelDisplayTime > 0)
+
+                        if(gameState.CurrentState == GameStateEnum.planning)
                         {
-                            healthbar.UnitHeadUIInstance.ArmorPanelDisplayTime -= Time.deltaTime;
-                        }
-                        else if(healthbar.UnitHeadUIInstance.ArmorPanel.activeSelf)
-                        {
-                            healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+                            if (healthbar.UnitHeadUIInstance.PlanningBufferTime > 0)
+                            {
+                                healthbar.UnitHeadUIInstance.PlanningBufferTime -= Time.deltaTime;
+                            }
+                            else if (healthbar.UnitHeadUIInstance.ArmorPanel.activeSelf)
+                            {
+                                healthbar.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
+                                healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+                            }
                         }
 
                         healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
@@ -975,26 +994,29 @@ namespace LeyLineHybridECS
         public void SetArmorDisplay(Entity e, uint inArmorAmount, float displayTime, bool shatter = false)
         {
             var healthbar = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
-            Text armorText = healthbar.UnitHeadUIInstance.ArmorText;
-            Animator anim = healthbar.UnitHeadUIInstance.ArmorAnimator;
-            GameObject armorPanel = healthbar.UnitHeadUIInstance.ArmorPanel;
-            armorText.text = inArmorAmount.ToString();
-            armorPanel.SetActive(true);
 
-            if(shatter)
-                anim.SetTrigger("Shatter");
+            if(healthbar.UnitHeadUIInstance)
+            {
+                Text armorText = healthbar.UnitHeadUIInstance.ArmorText;
+                Animator anim = healthbar.UnitHeadUIInstance.ArmorAnimator;
+                GameObject armorPanel = healthbar.UnitHeadUIInstance.ArmorPanel;
+                armorText.text = inArmorAmount.ToString();
+                armorPanel.SetActive(true);
 
-            healthbar.UnitHeadUIInstance.ArmorPanelDisplayTime = displayTime;
+                if (shatter)
+                    anim.SetTrigger("Shatter");
 
+                healthbar.UnitHeadUIInstance.PlanningBufferTime = displayTime;
+            }
         }
 
-        public void SetHealthFloatText(Entity e, bool positive, uint inHealthAmount, Color color)
+        public void SetHealthFloatText(Entity e, bool positive, uint inHealthAmount, Color color, float waitTime = 0f)
         {
             var healthbar = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
             Text healthText = healthbar.UnitHeadUIInstance.FloatHealthText;
             Animator anim = healthbar.UnitHeadUIInstance.FloatHealthAnimator;
 
-            if(healthText)
+            if (healthText)
             {
                 if (positive)
                 {
@@ -1006,26 +1028,24 @@ namespace LeyLineHybridECS
                 }
 
                 healthText.color = color;
-                anim.Play("HealthText", 0, 0);
-
             }
 
-            /*
-            if (isHeal)
+            if(healthbar.UnitHeadUIInstance)
             {
-                healthColor.r = Color.green.r;
-                healthColor.g = Color.green.g;
-                healthColor.b = Color.green.b;
+                if (waitTime != 0f)
+                {
+                    //Debug.Log("SetHealthFloatTextDelayed");
+                    healthbar.HealthTextDelay = waitTime;
+                    healthbar.UnitHeadUIInstance.FloatHealthAnimator.SetFloat("WaitTime", waitTime);
+                    healthbar.UnitHeadUIInstance.FloatHealthAnimator.SetBool("Delayed", true);
+                }
+                else
+                {
+                    //Debug.Log("SetHealthFloatTextDirectly");
+                    healthbar.UnitHeadUIInstance.FloatHealthAnimator.SetBool("Delayed", false);
+                    anim.Play("HealthText", 0, 0);
+                }
             }
-            else
-            {
-                healthColor.r = Color.red.r;
-                healthColor.g = Color.red.g;
-                healthColor.b = Color.red.b;
-            }
-            */
-            //Debug.Log("PlayFloatingHealthAnim");
-
         }
 
         public void InitializeUnitUI(UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
@@ -1035,6 +1055,7 @@ namespace LeyLineHybridECS
             healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
             healthbar.UnitHeadHealthBarInstance = Object.Instantiate(healthbar.UnitHeadHealthBarPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
 
+            healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
             //initialize GroupUI and hero select button
             if (unitFaction == playerFaction)
             {

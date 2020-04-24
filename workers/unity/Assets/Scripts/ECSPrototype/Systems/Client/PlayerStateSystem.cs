@@ -113,7 +113,7 @@ namespace LeyLineHybridECS
                                         //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
                                         if (Input.GetButtonDown("Fire2"))
                                         {
-                                            Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
+                                            //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                                             //Call methods so line/target gets disabled instantly
                                             m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);

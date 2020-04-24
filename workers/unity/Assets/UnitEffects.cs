@@ -9,6 +9,8 @@ public class UnitEffects : MonoBehaviour
     public GameObject BloodParticleSystem;
     public GameObject BodyPartBloodParticleSystem;
     public GameObject DefenseParticleSystem;
+    public GameObject ShieldBrakeParticleSystem;
+    public AxaShield AxaShield;
 
     [Header("GetHit")]
     public Vector3 AttackPosition;

@@ -127,7 +127,7 @@ public class ManalithSystem : ComponentSystem
 
                         if(manalithComp.StateChange)
                         {
-                            Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
+                            //Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
                             uint fact = UpdateFaction(manalithComp, manalithWorldIndex);
                             TeamColorEnum tColor = new TeamColorEnum();
 

@@ -19113,7 +19113,6 @@ GameObject:
   - component: {fileID: 28554881510831859}
   - component: {fileID: 2741505613073002963}
   - component: {fileID: 3427249461926793836}
-  - component: {fileID: 3121566293803682597}
   - component: {fileID: 433573227294233875}
   - component: {fileID: 7166798920697257098}
   m_Layer: 1
@@ -23865,26 +23864,6 @@ ParticleSystemRenderer:
   m_Mesh2: {fileID: 0}
   m_Mesh3: {fileID: 0}
   m_MaskInteraction: 0
---- !u!114 &3121566293803682597
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7588611479003218911}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4dc51841dbe2d84fa9d56cc820ef74b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Transforms:
-  - {fileID: 28554881510831859}
-  RotationAxis: {x: 0, y: 0, z: 1}
-  DegreesPerSecond: 1440
-  TranslationDistance: {x: 0, y: 0, z: 0}
-  TranslationTime: 0
-  ReturnToOrigin: 0
-  Continuous: 1
 --- !u!114 &433573227294233875
 MonoBehaviour:
   m_ObjectHideFlags: 0

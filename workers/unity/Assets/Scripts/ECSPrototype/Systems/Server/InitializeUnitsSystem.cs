@@ -25,7 +25,6 @@ public class InitializeUnitsSystem : ComponentSystem
             ComponentType.ReadWrite<UnitComponentReferences>(),
             ComponentType.ReadWrite<LineRendererComponent>(),
             ComponentType.ReadWrite<TeamColorMeshes>(),
-            ComponentType.ReadWrite<UnitMarkerGameObjects>(),
             ComponentType.ReadWrite<UnitEffects>(),
             ComponentType.ReadOnly<Health.Component>()
             );
@@ -37,7 +36,6 @@ public class InitializeUnitsSystem : ComponentSystem
 
         //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
         settings = Resources.Load<Settings>("Settings");
-
     }
 
     protected override void OnUpdate()
@@ -49,7 +47,6 @@ public class InitializeUnitsSystem : ComponentSystem
         var componentReferenceData = m_UnitData.ToComponentArray<UnitComponentReferences>();
         var lineRendererData = m_UnitData.ToComponentArray<LineRendererComponent>();
         var unitTransformData = m_UnitData.ToComponentArray<Transform>();
-        var markerObjectData = m_UnitData.ToComponentArray<UnitMarkerGameObjects>();
 
         for (int i = 0; i < unitFactionData.Length; i++)
         {
@@ -60,9 +57,6 @@ public class InitializeUnitsSystem : ComponentSystem
             var componentReferences = componentReferenceData[i];
             var lineRenderer = lineRendererData[i];
             var unitTransform = unitTransformData[i];
-            var markerObjects = markerObjectData[i];
-
-
 
             unitEffects.CurrentHealth = health.CurrentHealth;
 
@@ -70,12 +64,12 @@ public class InitializeUnitsSystem : ComponentSystem
 
             switch (unitFactionComp.TeamColor)
             {
-                case Generic.TeamColorEnum.blue:
-                    markerObjects.Outline.color = 1;
+                case TeamColorEnum.blue:
+                    //markerObjects.Outline.color = 1;
                     factionColor = settings.FactionColors[1];
                     break;
-                case Generic.TeamColorEnum.red:
-                    markerObjects.Outline.color = 2;
+                case TeamColorEnum.red:
+                    //markerObjects.Outline.color = 2;
                     factionColor = settings.FactionColors[2];
                     break;
             }

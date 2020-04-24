@@ -8,7 +8,7 @@ public class UnitHeadUI : MonoBehaviour
     public Text FloatHealthText;
     public Animator FloatHealthAnimator;
     public Animator ArmorAnimator;
-    public float ArmorPanelDisplayTime;
+    public float PlanningBufferTime;
     public GameObject ArmorPanel;
     public Text ArmorText;
     public HeadUILockedActionDisplay ActionDisplayPrefab;

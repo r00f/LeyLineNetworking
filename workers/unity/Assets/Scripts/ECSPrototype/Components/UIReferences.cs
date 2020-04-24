@@ -55,6 +55,7 @@ public class UIReferences : MonoBehaviour
     public float ReadyInSpeed;
     public ReadySlider BlueReady;
     public ReadySlider RedReady;
+    public List<Image> TurnStepColoredParts;
 
 
     [Header("BottomBars")]

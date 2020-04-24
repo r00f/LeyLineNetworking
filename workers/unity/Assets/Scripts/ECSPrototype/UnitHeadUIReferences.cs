@@ -11,4 +11,5 @@ public class UnitHeadUIReferences : MonoBehaviour
     public UnitHeadUI UnitHeadUIInstance;
     [HideInInspector]
     public HealthBar UnitHeadHealthBarInstance;
+    public float HealthTextDelay;
 }

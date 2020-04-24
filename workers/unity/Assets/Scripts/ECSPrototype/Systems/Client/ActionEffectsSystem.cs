@@ -7,6 +7,7 @@ using Generic;
 using Unit;
 using System.Collections.Generic;
 using Unity.Collections;
+using System.Collections;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
 public class ActionEffectsSystem : ComponentSystem
@@ -84,6 +85,26 @@ public class ActionEffectsSystem : ComponentSystem
 
             if(gameStates[0].CurrentState == GameStateEnum.planning)
             {
+                //handle axa shield orbits
+                if (unitEffects.AxaShield && unitEffects.AxaShield.Orbits.Count != 0)
+                {
+                    for (int i = unitEffects.AxaShield.Orbits.Count - 1; i >= 0; i--)
+                    {
+                        AxaShieldOrbit o = unitEffects.AxaShield.Orbits[i];
+
+                        foreach (ParticleSystem loopPS in o.LoopingSystems)
+                        {
+                            loopPS.Stop();
+                        }
+                        foreach (ParticleSystem explosionPS in o.ExplosionSystems)
+                        {
+                            explosionPS.Play();
+                        }
+                        Object.Destroy(o.gameObject, .2f);
+                        unitEffects.AxaShield.Orbits.Remove(o);
+                    }
+                }
+
                 unitEffects.CurrentArmor = 0;
                 unitEffects.CurrentHealth = health.CurrentHealth;
             }
@@ -105,6 +126,31 @@ public class ActionEffectsSystem : ComponentSystem
 
                             if (unitEffects.CurrentArmor > 0)
                             {
+                                //handle axa shield orbits
+                                if(unitEffects.AxaShield && unitEffects.AxaShield.Orbits.Count != 0)
+                                {
+                                    int remainingDamage = (int)damageAmount;
+
+                                    for(int i = unitEffects.AxaShield.Orbits.Count-1; i >= 0; i--)
+                                    {
+                                        AxaShieldOrbit o = unitEffects.AxaShield.Orbits[i];
+
+                                        if(remainingDamage - 10 >= 0)
+                                        {
+                                            foreach (ParticleSystem loopPS in o.LoopingSystems)
+                                            {
+                                                loopPS.Stop();
+                                            }
+                                            foreach (ParticleSystem explosionPS in o.ExplosionSystems)
+                                            {
+                                                explosionPS.Play();
+                                            }
+                                            Object.Destroy(o.gameObject, .2f);
+                                            remainingDamage -= 10;
+                                            unitEffects.AxaShield.Orbits.Remove(o);
+                                        }
+                                    }
+                                }
                                 //if we take less damage than our last amor amount
                                 if (damageAmount < unitEffects.CurrentArmor)
                                 {
@@ -118,9 +164,11 @@ public class ActionEffectsSystem : ComponentSystem
                                 {
                                     //shatter shield
                                     uint remainingDamage = damageAmount - unitEffects.CurrentArmor;
-                                    Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.identity);
-                                    m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red);
-                                    m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .4f, true);
+                                    Object.Instantiate(unitEffects.ShieldBrakeParticleSystem, unitEffects.HitPosition, Quaternion.identity);
+
+                                    m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red, 0.4f);
+
+                                    m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f, true);
                                     unitEffects.CurrentArmor = 0;
 
                                     if ((int)unitEffects.CurrentHealth - (int)remainingDamage > 0)
@@ -163,7 +211,7 @@ public class ActionEffectsSystem : ComponentSystem
                             uint armorAmount = unitEffects.Action.Effects[0].GainArmorNested.ArmorAmount;
                             //do gainArmorStuff
                             unitEffects.CurrentArmor += armorAmount;
-                            m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, 3f);
+                            m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f);
                             m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);
                             break;
                     }
@@ -190,7 +238,7 @@ public class ActionEffectsSystem : ComponentSystem
         gameStates.Dispose();
     }
 
-    public void TriggerActionEffect(Action action, long unitID, Transform hitTransform/*EffectTypeEnum inEffectType,  uint healthAmount, uint armorAmount*/)
+    public void TriggerActionEffect(Action action, long unitID, Transform hitTransform, int spawnShieldOrbits = 0/*EffectTypeEnum inEffectType,  uint healthAmount, uint armorAmount*/)
     {
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
         HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { action.Targets[0].TargetCoordinate };
@@ -206,10 +254,21 @@ public class ActionEffectsSystem : ComponentSystem
 
         Entities.With(m_UnitData).ForEach((Entity e, UnitEffects unitEffects, ref FactionComponent.Component faction) =>
         {
-
             //only apply effect if target unit is valid or pass correct coordinates
             if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)action.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
+                if(unitEffects.AxaShield && spawnShieldOrbits != 0)
+                {
+                    //if we need to spawn shieldorbits spaWN SHIELDorbits
+                    for (int i = 0; i < spawnShieldOrbits; i++)
+                    {
+                        AxaShieldOrbit go = Object.Instantiate(unitEffects.AxaShield.OrbitPrefab, unitEffects.AxaShield.transform.position, Quaternion.LookRotation(hitTransform.position - unitEffects.AxaShield.transform.position), unitEffects.AxaShield.transform);
+                        go.GetComponent<MovementAnimComponent>().RotationAxis = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), 0f);
+                        unitEffects.AxaShield.Orbits.Add(go);
+                    }
+                }
+
+
                 unitEffects.Action = action;
                 unitEffects.AttackPosition = hitTransform.position;
                 //Debug.Log("Set Unit actionEffectTrigger from actionEffectsSystem");

@@ -15,6 +15,8 @@ using UnityEngine;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HighlightingSystem : ComponentSystem
 {
+
+    Settings settings;
     PathFindingSystem m_PathFindingSystem;
     EntityQuery m_ActiveUnitData;
     EntityQuery m_UnitData;
@@ -28,6 +30,7 @@ public class HighlightingSystem : ComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
+        settings = Resources.Load<Settings>("Settings");
 
         m_CellData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
@@ -349,20 +352,6 @@ public class HighlightingSystem : ComponentSystem
                 {
                     nOfTargets += 1;
                 }
-
-                //start for setting different target markers depending on effectType - need to solve multiple targets problem
-                /*
-                for(int u = 0; u < m_ActiveUnitData.Length; u++)
-                {
-                    var unitId = m_ActiveUnitData.EntityIds[u].EntityId.Id;
-                    var selectedAction = m_ActiveUnitData.ActionsData[u].CurrentSelected;
-
-                    if(l == unitId && selectedAction.Index != -3)
-                    {
-                        markerState.CurrentTargetType = (MarkerState.TargetType)(int)selectedAction.Effects[0].EffectType;
-                    }
-                }
-                */
             }
             markerState.NumberOfTargets = nOfTargets;
         });
@@ -378,10 +367,11 @@ public class HighlightingSystem : ComponentSystem
         var playerPathing = inPlayerPathing;
         var playerState = inPlayerState;
 
-        Entities.With(m_ActiveUnitData).ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref WorldIndex.Component worldIndex, ref MouseState mouseState, ref FactionComponent.Component faction)=>
+        Entities.With(m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref WorldIndex.Component worldIndex, ref MouseState mouseState, ref FactionComponent.Component faction)=>
         {
             if (iD.EntityId.Id == playerState.SelectedUnitId)
             {
+                Actions.Component actions = EntityManager.GetComponentData<Actions.Component>(e);
                 if (mouseState.CurrentState == MouseState.State.Clicked)
                 {
                     mouseState.CurrentState = MouseState.State.Neutral;
@@ -404,10 +394,11 @@ public class HighlightingSystem : ComponentSystem
                         List<CellAttributes> go = m_PathFindingSystem.GetRadius(occCoord.CubeCoordinate, range, worldIndex.Value);
                         playerPathing.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, go, occCoord.CubeCoordinate);
 
+                        /*
                         m_LogDispatcher.HandleLog(LogType.Warning,
                         new LogEvent("OccupiedCoordinate")
                         .WithField("OccCoord", Vector3fext.ToUnityVector(occCoord.CubeCoordinate)));
-
+                        */
                         foreach (CellAttribute key in playerPathing.CachedPaths.Keys)
                         {
                             playerPathing.CellsInRange.Add(key);
@@ -415,10 +406,11 @@ public class HighlightingSystem : ComponentSystem
 
                         playerPathing.CachedPaths = playerPathing.CachedPaths;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
-
+                        /*
                         m_LogDispatcher.HandleLog(LogType.Warning,
                         new LogEvent("CellsinRange")
                         .WithField("CellsInRangeCount", playerPathing.CellsInRange.Count));
+                        */
                     }
                     else
                     {
@@ -473,8 +465,10 @@ public class HighlightingSystem : ComponentSystem
                             //use Arc Line
                             if (playerHighlightingData.HoveredPosition != Vector3.zero)
                             {
-                                Debug.Log("UpdateArcLineRenderer");
-                                UpdateArcLineRenderer(playerHighlightingData.LineYOffset, playerHighlightingData.HoveredPosition, lineRendererComp);
+                                //playerHighlightingData.tur
+                                //Debug.Log("UpdateArcLineRenderer");
+                                
+                                UpdateArcLineRenderer(playerHighlightingData.LineYOffset, playerHighlightingData.HoveredPosition, lineRendererComp, (int)actions.CurrentSelected.ActionExecuteStep);
                             }
                             else
                                 lineRendererComp.lineRenderer.positionCount = 0;
@@ -529,9 +523,11 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdatePathLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
     {
+
+        Color turnStepColor = settings.TurnStepLineColors[2];
         Gradient gradient = new Gradient();
         gradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(inLineRendererComp.pathColor, 0f),new GradientColorKey(inLineRendererComp.pathColor, .9f), new GradientColorKey(Color.black, 1.0f) },
+            new GradientColorKey[] { new GradientColorKey(turnStepColor, 0f),new GradientColorKey(turnStepColor, .9f), new GradientColorKey(Color.black, 1.0f) },
             new GradientAlphaKey[] { new GradientAlphaKey(1f, 0.0f), new GradientAlphaKey(1f, .9f), new GradientAlphaKey(0f, 1f)}
         );
         inLineRendererComp.lineRenderer.colorGradient = gradient;
@@ -545,12 +541,14 @@ public class HighlightingSystem : ComponentSystem
         }
     }
 
-    void UpdateArcLineRenderer(float targetYOffset, Vector3 inTarget, LineRendererComponent inLineRendererComp)
+    void UpdateArcLineRenderer(float targetYOffset, Vector3 inTarget, LineRendererComponent inLineRendererComp, int turnStepIndex)
     {
+        Color turnStepColor = settings.TurnStepLineColors[turnStepIndex];
+
         Gradient gradient = new Gradient();
         gradient.SetKeys(
-            new GradientColorKey[] { new GradientColorKey(Color.black, 0f), new GradientColorKey(inLineRendererComp.arcColor, .2f)},
-            new GradientAlphaKey[] { new GradientAlphaKey(0f, 0.0f), new GradientAlphaKey(1f, .2f)}
+            new GradientColorKey[] { new GradientColorKey(Color.black, 0f), new GradientColorKey(Color.black, 0.1f), new GradientColorKey(turnStepColor, .3f)},
+            new GradientAlphaKey[] { new GradientAlphaKey(0f, 0.0f), new GradientAlphaKey(0f, 0.1f), new GradientAlphaKey(1f, .3f)}
         );
         inLineRendererComp.lineRenderer.colorGradient = gradient;
 

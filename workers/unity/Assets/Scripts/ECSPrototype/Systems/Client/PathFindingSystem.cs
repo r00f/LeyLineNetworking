@@ -267,7 +267,7 @@ public class PathFindingSystem : ComponentSystem
                         if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
                         {
                             valid = ValidateUnitTarget(e, inAction.Targets[0].UnitTargetNested.UnitReq, usingUnitId, inFaction);
-                            Debug.Log("UNIT VALID IN PATHFINDING SYS: " + valid);
+                            //Debug.Log("UNIT VALID IN PATHFINDING SYS: " + valid);
                         }
                     }
                 });

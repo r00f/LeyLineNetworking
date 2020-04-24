@@ -26,8 +26,8 @@ namespace LeyLineHybridECS
             m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<MouseState>(),
-                ComponentType.ReadOnly<MarkerState>(),
-                ComponentType.ReadWrite<UnitMarkerGameObjects>()
+                ComponentType.ReadOnly<MarkerState>()
+                //ComponentType.ReadWrite<UnitMarkerGameObjects>()
                 );
 
             m_CellData = GetEntityQuery(
@@ -152,8 +152,8 @@ namespace LeyLineHybridECS
                             }
                         }
                     });
-
-                    Entities.With(m_UnitData).ForEach((UnitMarkerGameObjects unitMarkerGameObjects, ref MarkerState markerState, ref FactionComponent.Component faction, ref MouseState mouseState) =>
+                    /*
+                    Entities.With(m_UnitData).ForEach((ref MarkerState markerState, ref FactionComponent.Component faction, ref MouseState mouseState) =>
                     {
                         if (g.CurrentState != GameStateEnum.planning)
                         {
@@ -247,6 +247,7 @@ namespace LeyLineHybridECS
                             }
                         }
                     });
+                    */
                 }
             });
 

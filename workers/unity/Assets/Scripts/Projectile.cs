@@ -16,6 +16,7 @@ public class Projectile : MonoBehaviour
     */
 
     public Action Action;
+    public GameObject DestinationObjectPrefab;
 
     public bool DestroyAtDestination;
     public bool DestinationReached;
@@ -34,6 +35,8 @@ public class Projectile : MonoBehaviour
     public float MovementDelay;
     public float Acceleration;
     public float TargetYOffset;
+    public int DegreesPerSecond;
+    public int AxaShieldOrbitCount;
 
     [Header("Tounge")]
     public Rigidbody ToungeEnd;
@@ -53,8 +56,7 @@ public class Projectile : MonoBehaviour
     public int ExplosionForce;
     */
 
-    public ParticleSystem BodyParticleSystem;
-    public ParticleSystem TrailParticleSystem;
+    public List<ParticleSystem> ParticleSystemsToStop;
     public ParticleSystem ExplosionParticleSystem;
     public StudioEventEmitter ExplosionEventEmitter;
 

@@ -194,7 +194,7 @@ namespace LeyLineHybridECS
 
         public void UpdateVision()
         {
-            Debug.Log("SafetyVisionUpdate in Cleanup Step");
+            //Debug.Log("SafetyVisionUpdate in Cleanup Step");
 
             var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
             var playerVision = playerVisions[0];

@@ -472,7 +472,9 @@ ModelImporter:
     optimizeGameObjects: 0
     motionNodeName: 
     rigImportErrors: 
-    rigImportWarnings: 
+    rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
+      copied configuration does not match position in animation file:\n\t'LeftLeg'
+      : position error = 1.723149 mm\n"
     animationImportErrors: 
     animationImportWarnings: "\nClip 'SpikeMove' has import animation warnings that
       might lower retargeting quality:\nNote: Activate translation DOF on avatar to
@@ -850,7 +852,7 @@ ModelImporter:
       takeName: SpikeSweep
       internalID: 0
       firstFrame: 0
-      lastFrame: 120
+      lastFrame: 125
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -1074,7 +1076,7 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.8215772
+      - time: 0.70302767
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
@@ -1850,7 +1852,7 @@ ModelImporter:
       takeName: SpikeBasicAttack
       internalID: 0
       firstFrame: 0
-      lastFrame: 60
+      lastFrame: 80
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -1884,21 +1886,21 @@ ModelImporter:
         floatParameter: 0
         intParameter: 2
         messageOptions: 0
-      - time: 0.3090969
+      - time: 0.2726162
         functionName: TriggerEvent
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.36897925
+      - time: 0.33249855
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.42215413
+      - time: 0.38567343
         functionName: SwitchEffect
         data: 
         objectReferenceParameter: {instanceID: 0}
