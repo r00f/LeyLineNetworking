@@ -205,7 +205,7 @@ public class HighlightingSystem : ComponentSystem
             List<Vector3f> area = new List<Vector3f>();
             
             area = CellGridMethods.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius);
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(area);
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(area, (int)inAction.ActionExecuteStep);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
             {
@@ -216,7 +216,7 @@ public class HighlightingSystem : ComponentSystem
         {
             List<Vector3f> ring = new List<Vector3f>();
             ring = CellGridMethods.RingDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.RingRadius);
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring);
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring, (int)inAction.ActionExecuteStep);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
             {
@@ -226,7 +226,7 @@ public class HighlightingSystem : ComponentSystem
         }
         else if (inHinghlightningData.LineAoE == 1)
         {
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep);
             cubeCoordList.CubeCoordinates = CellGridMethods.LineDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
@@ -236,7 +236,7 @@ public class HighlightingSystem : ComponentSystem
         }
         else
         {
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>());
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep);
             cubeCoordList.CubeCoordinates.Add(inHinghlightningData.HoveredCoordinate);
 
             HashSet<long> unitIds = new HashSet<long>(playerState.UnitTargets.Keys);
@@ -343,16 +343,22 @@ public class HighlightingSystem : ComponentSystem
         Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref CubeCoordinate.Component coord) =>
         {
             uint nOfTargets = 0;
+            int turnStepIndex = 0;
 
             foreach (long l in playerState.UnitTargets.Keys)
             {
                 HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[l].CubeCoordinates);
+                int tI = playerState.UnitTargets[l].TurnStepIndex;
 
                 if (targetCoordsHash.Contains(coord.CubeCoordinate))
                 {
+                    //set markerState targetTurnStep
+                    turnStepIndex = tI;
                     nOfTargets += 1;
                 }
             }
+
+            markerState.TurnStepIndex = turnStepIndex;
             markerState.NumberOfTargets = nOfTargets;
         });
     }
@@ -733,7 +739,7 @@ public class HighlightingSystem : ComponentSystem
         //m_PlayerStateData.PlayerState[0] = playerstate;
     }
 
-    public void SetSelfTarget(long entityID)
+    public void SetSelfTarget(long entityID, int executeStep)
     {
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
 
@@ -744,7 +750,7 @@ public class HighlightingSystem : ComponentSystem
             if (iD.EntityId.Id == entityID)
             {
                 lineRendererComp.lineRenderer.positionCount = 0;
-                CubeCoordinateList list = new CubeCoordinateList(new List<Vector3f> { coord.CubeCoordinate });
+                CubeCoordinateList list = new CubeCoordinateList(new List<Vector3f> { coord.CubeCoordinate }, executeStep);
                 playerStates[0].UnitTargets.Add(iD.EntityId.Id, list);
             }
         });

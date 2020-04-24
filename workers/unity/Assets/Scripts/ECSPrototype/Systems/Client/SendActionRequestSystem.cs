@@ -264,7 +264,7 @@ public class SendActionRequestSystem : ComponentSystem
                     else
                     {
                         playerHigh.TargetRestrictionIndex = 2;
-                        m_HighlightingSystem.SetSelfTarget(entityId);
+                        m_HighlightingSystem.SetSelfTarget(entityId, (int)act.ActionExecuteStep);
                     }
 
                     playerStates[0] = playerState;

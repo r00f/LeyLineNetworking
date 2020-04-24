@@ -23,6 +23,8 @@ namespace LeyLineHybridECS
 
         public uint NumberOfTargets;
 
+        public int TurnStepIndex;
+
         public byte TargetTypeSet;
 
         public byte IsUnit;

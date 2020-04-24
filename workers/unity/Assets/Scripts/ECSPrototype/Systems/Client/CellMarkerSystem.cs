@@ -95,6 +95,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
+
                             switch (markerState.NumberOfTargets)
                             {
                                 case 0:
@@ -105,7 +106,9 @@ namespace LeyLineHybridECS
                                     if (!markerGameObjects.TargetMarker.activeSelf)
                                         markerGameObjects.TargetMarker.SetActive(true);
 
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[0];
+
+
+                                    markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex];
                                     break;
                                 case 2:
                                     markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[1];

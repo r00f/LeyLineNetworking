@@ -19,7 +19,7 @@ component PlayerState {
 type CubeCoordinateList {
 
 	list<generic.Vector3f> cube_coordinates = 1;
-
+	int32 turn_step_index = 2;
 }
 
 enum PlayerStateEnum {
