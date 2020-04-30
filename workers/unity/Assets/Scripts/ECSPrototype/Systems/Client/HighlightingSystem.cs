@@ -537,6 +537,7 @@ public class HighlightingSystem : ComponentSystem
             new GradientAlphaKey[] { new GradientAlphaKey(1f, 0.0f), new GradientAlphaKey(1f, .9f), new GradientAlphaKey(0f, 1f)}
         );
         inLineRendererComp.lineRenderer.colorGradient = gradient;
+        inLineRendererComp.lineRenderer.widthCurve = inLineRendererComp.PathLineWidthCurve;
 
         inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
         inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.pathOffset);
@@ -558,11 +559,19 @@ public class HighlightingSystem : ComponentSystem
         );
         inLineRendererComp.lineRenderer.colorGradient = gradient;
 
+
+
         Vector3 arcOrigin = inLineRendererComp.transform.position + inLineRendererComp.arcOffset;
         Vector3 arcTarget = new Vector3(inTarget.x, inTarget.y + targetYOffset, inTarget.z);
 
         Vector3[] arcPath = CalculateSinusPath(arcOrigin, arcTarget, 1);
         inLineRendererComp.lineRenderer.positionCount = arcPath.Length;
+
+        Keyframe[] keys = inLineRendererComp.ArcLineWidthCurve.keys;
+        keys[1].time = 1 - (1 / ((float)arcPath.Length - 6f));
+        keys[2].time = 1 - (1 / ((float)arcPath.Length - 5f));
+        inLineRendererComp.ArcLineWidthCurve.keys = keys;
+        inLineRendererComp.lineRenderer.widthCurve = inLineRendererComp.ArcLineWidthCurve;
 
         inLineRendererComp.lineRenderer.SetPositions(arcPath);
     }

@@ -14,6 +14,7 @@ public class CleanupSystem : ComponentSystem
     ResourceSystem m_ResourceSystem;
     ExecuteActionsSystem m_ExecuteSystem;
     TimerSystem m_TimerSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
 
     EntityQuery m_GameStateData;
     EntityQuery m_UnitData;
@@ -54,6 +55,7 @@ public class CleanupSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
         m_ExecuteSystem = World.GetExistingSystem<ExecuteActionsSystem>();
@@ -99,8 +101,18 @@ public class CleanupSystem : ComponentSystem
         {
             if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
             {
-                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
-                m_CommandSystem.SendCommand(deleteEntityRequest);
+                //RAISE CLIENT UI CLEANUP EVENT ON HEALTH COMPONENT AND DELETE ENTITY WHENEVER UI IS CLEANED ON ALL CLIENTS
+                /*
+                m_ComponentUpdateSystem.SendEvent(
+                new Health.CleanupUiEvent.Event(),
+                entityId.EntityId);
+                */
+
+                //if(m_ComponentUpdateSystem.GetEventsReceived<Health.CleanupUiEvent.Event>().Count == 0)
+                //{
+                    var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+                    m_CommandSystem.SendCommand(deleteEntityRequest);
+                //}
             }
         });
     }

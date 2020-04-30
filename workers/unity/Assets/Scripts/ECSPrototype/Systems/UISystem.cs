@@ -17,6 +17,7 @@ namespace LeyLineHybridECS
     {
         PlayerStateSystem m_PlayerStateSystem;
         SendActionRequestSystem m_SendActionRequestSystem;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
         EntityQuery m_PlayerData;
         EntityQuery m_AuthoritativePlayerData;
         EntityQuery m_GameStateData;
@@ -55,7 +56,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<HighlightingDataComponent>(),
+                ComponentType.ReadWrite<HighlightingDataComponent>(),
                 ComponentType.ReadWrite<PlayerState.Component>()
                 );
 
@@ -71,6 +72,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             InitializeButtons();
         }
 
@@ -158,6 +160,15 @@ namespace LeyLineHybridECS
             if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
                 return;
 
+            /*
+            var cleanupUIevents = m_ComponentUpdateSystem.GetEventsReceived<Health.CleanupUiEvent.Event>();
+
+            for (var i = 0; i < cleanupUIevents.Count; i++)
+            {
+                Debug.Log("CleanUpUIevet triggered yay");
+            }
+            */
+
             #region GetData
 
             var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
@@ -222,14 +233,25 @@ namespace LeyLineHybridECS
             if (gameState.CurrentState != GameStateEnum.planning)
             {
                 ResetEnergyBaubles();
+
+                for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
+                {
+                    UIRef.TurnStepFlares[i].enabled = false;
+                }
             }
 
             HandleKeyCodeInput(playerHigh, gameState);
 
-            for(int i = 0; i < UIRef.TurnStepColoredParts.Count; i++)
+            for(int i = 0; i < UIRef.SmallWheelColoredParts.Count; i++)
             {
-                UIRef.TurnStepColoredParts[i].color = settings.TurnStepColors[i];
+                UIRef.SmallWheelColoredParts[i].color = settings.TurnStepColors[i];
             }
+
+            for (int i = 0; i < UIRef.BigWheelColoredParts.Count; i++)
+            {
+                UIRef.BigWheelColoredParts[i].color = settings.TurnStepBgColors[i];
+            }
+
 
 
             switch (gameState.CurrentState)
@@ -295,15 +317,15 @@ namespace LeyLineHybridECS
                 }
                 if(UIRef.IngameUIPanel.activeSelf)
                     UIRef.IngameUIPanel.SetActive(false);
-
-                if(gameState.CurrentState == GameStateEnum.cleanup)
-                    UIRef.IngameUIPanel.SetActive(true);
             }
             else
             {
-                if(Input.GetButtonDown("SwitchIngameUI"))
+                UIRef.IngameUIPanel.SetActive(playerHigh.ShowIngameUI);
+
+                if (Input.GetButtonDown("SwitchIngameUI"))
                 {
-                    UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
+                    playerHigh.ShowIngameUI = !playerHigh.ShowIngameUI;
+                    playerHighlightingDatas[0] = playerHigh;
                 }
             }
 
@@ -502,6 +524,26 @@ namespace LeyLineHybridECS
                                 UIRef.Actions[bi].Visuals.SetActive(false);
                             }
                         }
+
+                        for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
+                        {
+                            if(actions.CurrentSelected.Index != -3)
+                            {
+                                if (i == (int)actions.CurrentSelected.ActionExecuteStep)
+                                    UIRef.TurnStepFlares[i].enabled = true;
+                                else
+                                    UIRef.TurnStepFlares[i].enabled = false;
+                            }
+                            else if (actions.LockedAction.Index != -3)
+                            {
+                                if (i == (int)actions.LockedAction.ActionExecuteStep)
+                                    UIRef.TurnStepFlares[i].enabled = true;
+                                else
+                                    UIRef.TurnStepFlares[i].enabled = false;
+                            }
+                            else
+                                UIRef.TurnStepFlares[i].enabled = false;
+                        }
                     }
                     else
                     {
@@ -550,15 +592,18 @@ namespace LeyLineHybridECS
                         }
                     }
 
-                    //does not get called when units get destroyed because a player disconnects
-                    //
                     if (health.CurrentHealth == 0)
                     {
-                        if(healthbar.UnitHeadUIInstance)
+                        //IF CURRENTSTATE CHECK DOES NO WORK DUE TO ROUNDTRIPTIME, CALL THIS METHOD IF UICLEANUP EVENT ON HEALTH COMP IS RAISED AND RESPOND WHEN ITS CLEAN
+                        if(healthbar.UnitHeadUIInstance.FlagForDestruction == false)
+                        {
                             CleanupUnitUI(healthbar, stats, unitId, faction.Faction, authPlayerFaction);
+                            //RESPOND TO EVENT SO SERVER KNOWS UNIT CAN BE DELETED
+                        }
                     }
                     else
                     {
+
                         GameObject healthBarGO = healthbar.UnitHeadHealthBarInstance.gameObject;
 
                         if (!healthBarGO.activeSelf && isVisible.Value == 1)
@@ -569,26 +614,26 @@ namespace LeyLineHybridECS
                         {
                             healthBarGO.SetActive(false);
                         }
-
-
-                        if(gameState.CurrentState == GameStateEnum.planning)
-                        {
-                            if (healthbar.UnitHeadUIInstance.PlanningBufferTime > 0)
-                            {
-                                healthbar.UnitHeadUIInstance.PlanningBufferTime -= Time.deltaTime;
-                            }
-                            else if (healthbar.UnitHeadUIInstance.ArmorPanel.activeSelf)
-                            {
-                                healthbar.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
-                                healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
-                            }
-                        }
-
-                        healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
                         healthbar.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
-
                         SetHealthBarFillAmounts(healthbar.UnitHeadHealthBarInstance.HealthFill, healthbar.UnitHeadHealthBarInstance.ArmorFill, health, faction.Faction);
                     }
+
+                    if(healthbar.UnitHeadUIInstance)
+                        healthbar.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, healthbar.HealthBarYOffset, 0));
+
+                    if (gameState.CurrentState == GameStateEnum.planning)
+                    {
+                        if (healthbar.UnitHeadUIInstance.PlanningBufferTime > 0)
+                        {
+                            healthbar.UnitHeadUIInstance.PlanningBufferTime -= Time.deltaTime;
+                        }
+                        else if (healthbar.UnitHeadUIInstance.ArmorPanel.activeSelf)
+                        {
+                            healthbar.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
+                            healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+                        }
+                    }
+
                     if (healthbar.UnitHeadUIInstance.ActionDisplayInstance != null)
                     {
                         if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
@@ -739,6 +784,8 @@ namespace LeyLineHybridECS
             authPlayersEnergy.Dispose();
             authPlayersFaction.Dispose();
             authPlayersState.Dispose();
+
+            m_AuthoritativePlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
             playerHighlightingDatas.Dispose();
             #endregion
         }
@@ -1010,6 +1057,13 @@ namespace LeyLineHybridECS
             }
         }
 
+        public void TriggerUnitDeathUI(Entity e)
+        {
+            var headUI = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
+
+             headUI.UnitHeadUIInstance.DeathBlowImage.SetActive(true);
+        }
+
         public void SetHealthFloatText(Entity e, bool positive, uint inHealthAmount, Color color, float waitTime = 0f)
         {
             var healthbar = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
@@ -1059,7 +1113,7 @@ namespace LeyLineHybridECS
             //initialize GroupUI and hero select button
             if (unitFaction == playerFaction)
             {
-                healthbar.UnitHeadUIInstance.ActionDisplayInstance = Object.Instantiate(healthbar.UnitHeadUIInstance.ActionDisplayPrefab, healthbar.transform.position + new Vector3(0, 20, 0), Quaternion.identity, healthbar.UnitHeadUIInstance.transform);
+                healthbar.UnitHeadUIInstance.ActionDisplayInstance = Object.Instantiate(healthbar.UnitHeadUIInstance.ActionDisplayPrefab, healthbar.UnitHeadUIInstance.transform.position + new Vector3(0, 20, 0), Quaternion.identity, healthbar.UnitHeadUIInstance.transform);
 
                 if (!stats.IsHero)
                 {
@@ -1118,7 +1172,8 @@ namespace LeyLineHybridECS
         void CleanupUnitUI(UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
-            Object.Destroy(healthbar.UnitHeadUIInstance.gameObject);
+            //INSTEAD OF DELETING DIRECTLY SET FlagForDestruction AND DESTROY FROM UNITCLEANUPSYSTEM AFTER
+            healthbar.UnitHeadUIInstance.FlagForDestruction = true;
             Object.Destroy(healthbar.UnitHeadHealthBarInstance.gameObject);
 
             if (!stats.IsHero && unitFaction == playerFaction && UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))

@@ -111,13 +111,18 @@ namespace LeyLineHybridECS
                                     markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex];
                                     break;
                                 case 2:
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[1];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex] + new Color(0,0,0, 0.2f);
+                                    //markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[1];
                                     break;
                                 case 3:
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[2];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex] + new Color(0, 0, 0, 0.4f);
+
+                                    //markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[2];
                                     break;
                                 case 4:
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[3];
+                                    markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex] + new Color(0, 0, 0, 0.6f);
+
+                                    //markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[3];
                                     break;
                             }
 

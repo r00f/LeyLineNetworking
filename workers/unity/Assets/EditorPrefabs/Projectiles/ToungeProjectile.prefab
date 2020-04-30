@@ -70,6 +70,7 @@ MonoBehaviour:
   Acceleration: 0
   TargetYOffset: 0
   DegreesPerSecond: 0
+  AxaShieldOrbitCount: 0
   ToungeEnd: {fileID: 4688949177296653295}
   ToungeBase: {fileID: 7703656456084220977}
   LaunchForce: 40
@@ -84,8 +85,6 @@ MonoBehaviour:
   - {fileID: 2591146601566630127}
   DestroyAfterSeconds: 0.65
   ParticleSystemsToStop: []
-  BodyParticleSystem: {fileID: 0}
-  TrailParticleSystem: {fileID: 0}
   ExplosionParticleSystem: {fileID: 4153580750195930896}
   ExplosionEventEmitter: {fileID: 0}
   SpawnTransform: {fileID: 0}
@@ -5176,7 +5175,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.169091
+  m_MaxDistance: 1.0160065
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5262,7 +5261,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.169091
+  m_MaxDistance: 1.0160065
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5368,7 +5367,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.169091
+  m_MaxDistance: 1.0160065
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5490,7 +5489,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.169091
+  m_MaxDistance: 1.0160065
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

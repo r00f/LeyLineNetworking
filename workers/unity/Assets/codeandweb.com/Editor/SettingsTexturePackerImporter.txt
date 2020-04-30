@@ -2,6 +2,8 @@ version: 2
 importPivots: 1
 tpsheetFileNames:
 - Assets/codeandweb.com/Example/SpriteSheet/sprites.tpsheet
+- Assets/UI/Textures/DeathUI/DeathSkull.tpsheet
+- Assets/UI/Textures/DeathUI/DeathX.tpsheet
 - Assets/UI/Textures/HeadUIShield/ShieldCrack.tpsheet
 - Assets/UI/Textures/UnitPortraits/Axalotl/Axalotl.tpsheet
 - Assets/UI/Textures/UnitPortraits/Axalotl/AxalotlPlayerColor.tpsheet
@@ -14,6 +16,8 @@ tpsheetFileNames:
 - Assets/UI/Textures/UnitPortraits/Spike/SpikePlayerColor.tpsheet
 textureFileNames:
 - Assets/codeandweb.com/Example/SpriteSheet/sprites.png
+- Assets/UI/Textures/DeathUI/DeathSkull.png
+- Assets/UI/Textures/DeathUI/DeathX.png
 - Assets/UI/Textures/HeadUIShield/ShieldCrack.png
 - Assets/UI/Textures/UnitPortraits/Axalotl/Axalotl.png
 - Assets/UI/Textures/UnitPortraits/Axalotl/AxalotlPlayerColor.png
@@ -26,6 +30,8 @@ textureFileNames:
 - Assets/UI/Textures/UnitPortraits/Spike/SpikePlayerColor.png
 normalmapFileNames:
 - Assets/codeandweb.com/Example/SpriteSheet/sprites_n.png
+- 
+- 
 - 
 - 
 - 

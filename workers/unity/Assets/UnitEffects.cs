@@ -6,6 +6,7 @@ using UnityEngine;
 
 public class UnitEffects : MonoBehaviour
 {
+    public bool DisplayDeathSkull;
     public GameObject BloodParticleSystem;
     public GameObject BodyPartBloodParticleSystem;
     public GameObject DefenseParticleSystem;

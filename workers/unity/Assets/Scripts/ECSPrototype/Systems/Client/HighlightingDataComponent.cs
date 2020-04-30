@@ -13,6 +13,7 @@ public struct HighlightingDataComponent : IComponentData
     public byte PathingRange;
     public byte IsUnitTarget;
     public byte PathLine;
+    public bool ShowIngameUI;
     public float InputCooldown;
     public Vector3f HoveredCoordinate;
     public Vector3f LastHoveredCoordinate;

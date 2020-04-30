@@ -4852,7 +4852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HealthBarYOffset: 1.1
+  HealthBarYOffset: 1.3
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
   UnitHeadHealthBarPrefab: {fileID: 8079530597859831226, guid: 546644da0f3e8584f8c507915f61f453,
@@ -4991,6 +4991,7 @@ MonoBehaviour:
   MeshRenderer: {fileID: 7550265048825398549}
   GameObjects:
   - {fileID: 7550265048827665367}
+  - {fileID: 2867170926118719819}
 --- !u!114 &4367961099226942553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5016,6 +5017,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc08744a1a99a82479225403b767022a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimCurveTimeDebug: 0
+  PathLineWidthCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.22
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  ArcLineWidthCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0.25
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 0.7577494
+      value: 0.4
+      inSlope: 0.64718336
+      outSlope: -5.536286
+      tangentMode: 65
+      weightedMode: 0
+      inWeight: 0.053694803
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.83
+      value: 0
+      inSlope: -5.536286
+      outSlope: 0.212485
+      tangentMode: 69
+      weightedMode: 0
+      inWeight: 0.22083327
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
   lineRenderer: {fileID: 2702179696659885382}
   pathOffset: {x: 0, y: 0.2, z: 0}
   arcOffset: {x: 0, y: 1.2, z: 0}
@@ -5033,6 +5083,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b0f8c96b65f0b47a375a65b1bcd83e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DisplayDeathSkull: 0
   BloodParticleSystem: {fileID: 1393841048670574437, guid: 4233759ae060dcf45b46bda562f15480,
     type: 3}
   BodyPartBloodParticleSystem: {fileID: 0}
@@ -5810,6 +5861,12 @@ SpriteRenderer:
     type: 3}
   m_PrefabInstance: {fileID: 6648402166185070677}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2867170926118719819 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8901894970336887070, guid: 100ce833a7e1c224990c370409597f62,
+    type: 3}
+  m_PrefabInstance: {fileID: 6648402166185070677}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7352173986783908262
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6050,12 +6107,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
---- !u!23 &7550265048825398539 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 2300028, guid: e92f6362d6f75964e8ca2af4bea3a123,
-    type: 3}
-  m_PrefabInstance: {fileID: 7550265048827567479}
-  m_PrefabAsset: {fileID: 0}
 --- !u!23 &7550265048825398545 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 2300006, guid: e92f6362d6f75964e8ca2af4bea3a123,
@@ -6140,15 +6191,15 @@ MeshRenderer:
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &7550265048827665347 stripped
+--- !u!1 &7550265048827665329 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 100020, guid: e92f6362d6f75964e8ca2af4bea3a123,
+  m_CorrespondingSourceObject: {fileID: 100038, guid: e92f6362d6f75964e8ca2af4bea3a123,
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}
---- !u!23 &7550265048825398771 stripped
-MeshRenderer:
-  m_CorrespondingSourceObject: {fileID: 2300036, guid: e92f6362d6f75964e8ca2af4bea3a123,
+--- !u!1 &7550265048827665347 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 100020, guid: e92f6362d6f75964e8ca2af4bea3a123,
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}
@@ -6218,15 +6269,15 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &7550265048827665329 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 100038, guid: e92f6362d6f75964e8ca2af4bea3a123,
-    type: 3}
-  m_PrefabInstance: {fileID: 7550265048827567479}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7550265048827693047 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 400000, guid: e92f6362d6f75964e8ca2af4bea3a123,
+    type: 3}
+  m_PrefabInstance: {fileID: 7550265048827567479}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7550265048825398771 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2300036, guid: e92f6362d6f75964e8ca2af4bea3a123,
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}
@@ -6281,6 +6332,12 @@ GameObject:
 --- !u!1 &7550265048827665353 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 100030, guid: e92f6362d6f75964e8ca2af4bea3a123,
+    type: 3}
+  m_PrefabInstance: {fileID: 7550265048827567479}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7550265048825398539 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2300028, guid: e92f6362d6f75964e8ca2af4bea3a123,
     type: 3}
   m_PrefabInstance: {fileID: 7550265048827567479}
   m_PrefabAsset: {fileID: 0}

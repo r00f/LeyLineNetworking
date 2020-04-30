@@ -34,6 +34,7 @@ namespace LeyLineHybridECS
         [Header("Action Information")]
         public Sprite ActionIcon;
         public Projectile ProjectileFab;
+        [TextArea]
         public string ActionName;
         public string Description;
         public float TimeToExecute;

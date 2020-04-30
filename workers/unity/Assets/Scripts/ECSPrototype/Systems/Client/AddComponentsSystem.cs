@@ -132,14 +132,15 @@ public class AddComponentsSystem : ComponentSystem
 
         Entities.With(m_PlayerAddedData).ForEach((Entity entity, HeroTransform htrans, ref WorldIndex.Component pWorldIndex) =>
         {
-            //if (pWorldIndex.Value == authPlayerWorldIndex)
-            //{
-                HighlightingDataComponent highlightingData = new HighlightingDataComponent();
-                PostUpdateCommands.AddComponent(entity, highlightingData);
-                m_UIReferences.MinimapComponent.h_Transform = htrans;
-                
+            HighlightingDataComponent highlightingData = new HighlightingDataComponent
+            {
+                ShowIngameUI = true
 
-            //}
+            };
+
+            PostUpdateCommands.AddComponent(entity, highlightingData);
+            m_UIReferences.MinimapComponent.h_Transform = htrans;
+
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
         });

@@ -52,7 +52,8 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     typeof(UnitComponentReferences),
     typeof(Moba_Camera),
     typeof(GarbageCollectorComponent),
-    typeof(UnitEffects)
+    typeof(UnitEffects),
+    typeof(UnitHeadUI)
     };
 
     public AdvancedEntityPipeline(Worker worker, string authPlayer, string nonAuthPlayer,

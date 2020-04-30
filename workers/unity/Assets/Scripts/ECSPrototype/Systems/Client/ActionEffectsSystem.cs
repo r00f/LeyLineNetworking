@@ -185,18 +185,18 @@ public class ActionEffectsSystem : ComponentSystem
                             else
                             {
                                 Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
-                                m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
-                                animatorComponent.Animator.SetTrigger("GetHit");
 
-                                //Debug.Log((int)unitEffects.CurrentHealth - (int)unitEffects.Action.Effects[0].DealDamageNested.DamageAmount);
-
+                                //if the unit survives
                                 if ((int)unitEffects.CurrentHealth - (int)damageAmount > 0)
                                 {
+                                    m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
+                                    animatorComponent.Animator.SetTrigger("GetHit");
                                     unitEffects.CurrentHealth -= damageAmount;
                                 }
                                 else
                                 {
-                                    //Debug.Log("unitEffects.CurrentHealth Negative Set To 0");
+                                    if(unitEffects.DisplayDeathSkull)
+                                        m_UISystem.TriggerUnitDeathUI(e);
                                     unitEffects.CurrentHealth = 0;
                                 }
                             }
