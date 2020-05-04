@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UnitHeadUIReferences : MonoBehaviour
 {
-
+    public uint IncomingDamage;
     public float HealthBarYOffset;
     public UnitHeadUI UnitHeadUIPrefab;
     public HealthBar UnitHeadHealthBarPrefab;

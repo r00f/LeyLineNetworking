@@ -295,7 +295,7 @@ MonoBehaviour:
     cameraLocked: 0
     lockTargetTransform: {fileID: 0}
     movement:
-      lockTransitionRate: 0.05
+      lockTransitionRate: 1
       cameraMovementRate: 10
       edgeHoverMovement: 1
       edgeHoverOffset: 10

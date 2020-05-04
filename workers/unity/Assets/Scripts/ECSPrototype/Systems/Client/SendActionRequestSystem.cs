@@ -267,6 +267,7 @@ public class SendActionRequestSystem : ComponentSystem
                         m_HighlightingSystem.SetSelfTarget(entityId, (int)act.ActionExecuteStep);
                     }
 
+                    playerState.UnitTargets = playerState.UnitTargets;
                     playerStates[0] = playerState;
                     playerHighlightingDatas[0] = playerHigh;
                     playerPathings[0] = playerPathing;
@@ -276,7 +277,6 @@ public class SendActionRequestSystem : ComponentSystem
                 }
             }
         });
-
 
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();

@@ -11,6 +11,7 @@ public class UnitEffects : MonoBehaviour
     public GameObject BodyPartBloodParticleSystem;
     public GameObject DefenseParticleSystem;
     public GameObject ShieldBrakeParticleSystem;
+    public ParticleSystem SecondWindParticleSystemInstance;
     public AxaShield AxaShield;
 
     [Header("GetHit")]

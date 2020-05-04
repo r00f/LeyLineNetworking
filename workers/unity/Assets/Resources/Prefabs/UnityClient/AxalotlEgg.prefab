@@ -4852,6 +4852,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IncomingDamage: 0
   HealthBarYOffset: 1.3
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
@@ -4949,7 +4950,7 @@ MonoBehaviour:
   DestinationPosition: {x: 0, y: 0, z: 0}
   Dead: 0
   DeathEventTrigger: 0
-  ObjectsToDisable:
+  DisableOnDeathObjects:
   - {fileID: 7550265048827665363}
   RagdollRigidBodies:
   - {fileID: 1987310172331638348}
@@ -5091,6 +5092,7 @@ MonoBehaviour:
     type: 3}
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
+  SecondWindParticleSystemInstance: {fileID: 0}
   AxaShield: {fileID: 4760567433196348802}
   AttackPosition: {x: 0, y: 0, z: 0}
   HitPosition: {x: 0, y: 0, z: 0}
@@ -5566,6 +5568,7 @@ MonoBehaviour:
   VoiceTrigger: 0
   FootStepTrigger: 0
   EventTrigger: 0
+  EventTriggered: 0
   EffectGameObjectIndex: -1
 --- !u!54 &7204551455851060685
 Rigidbody:

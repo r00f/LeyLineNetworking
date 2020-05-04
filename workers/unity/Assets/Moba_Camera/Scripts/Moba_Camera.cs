@@ -442,7 +442,7 @@ public class Moba_Camera : MonoBehaviour {
 				}
 				
 				// Lerp between the target and current position
-				requirements.pivot.position = Vector3.Lerp(requirements.pivot.position, target, settings.movement.lockTransitionRate);
+				requirements.pivot.position = Vector3.Lerp(requirements.pivot.position, target, settings.movement.lockTransitionRate * Time.deltaTime);
 			}	
 		}
 		else

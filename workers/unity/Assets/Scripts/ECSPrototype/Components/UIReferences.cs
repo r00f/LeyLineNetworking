@@ -18,8 +18,7 @@ public class UIReferences : MonoBehaviour
     public SelectUnitButton SelectHeroButton;
     public Text TopEnergyText;
     public Image TopEnergyFill;
-    public Image TopHealthFill;
-    public Image TopArmorFill;
+    public HealthBar HeroHealthBar;
     public Image HeroPortraitPlayerColor;
 
     [Header("EnergyBarPanel")]
@@ -62,8 +61,7 @@ public class UIReferences : MonoBehaviour
 
     [Header("BottomBars")]
     public Text HealthText;
-    public Image HealthFill;
-    public Image ArmorFill;
+    public HealthBar PortraitHealthBar;
     //public GameObject HeroEnergyPanel;
 
     [Header("ButtonLists")]

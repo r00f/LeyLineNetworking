@@ -7,6 +7,7 @@ public class AnimationEvents : MonoBehaviour
     public bool VoiceTrigger;
     public bool FootStepTrigger;
     public bool EventTrigger;
+    public bool EventTriggered;
     public int EffectGameObjectIndex;
 
     public void TriggerEvent()

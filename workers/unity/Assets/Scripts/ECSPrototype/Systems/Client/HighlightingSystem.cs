@@ -205,7 +205,7 @@ public class HighlightingSystem : ComponentSystem
             List<Vector3f> area = new List<Vector3f>();
             
             area = CellGridMethods.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius);
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(area, (int)inAction.ActionExecuteStep);
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(area, (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
             {
@@ -216,7 +216,7 @@ public class HighlightingSystem : ComponentSystem
         {
             List<Vector3f> ring = new List<Vector3f>();
             ring = CellGridMethods.RingDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.RingRadius);
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring, (int)inAction.ActionExecuteStep);
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(ring, (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
             {
@@ -226,7 +226,7 @@ public class HighlightingSystem : ComponentSystem
         }
         else if (inHinghlightningData.LineAoE == 1)
         {
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep);
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount);
             cubeCoordList.CubeCoordinates = CellGridMethods.LineDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
@@ -236,7 +236,7 @@ public class HighlightingSystem : ComponentSystem
         }
         else
         {
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep);
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount);
             cubeCoordList.CubeCoordinates.Add(inHinghlightningData.HoveredCoordinate);
 
             HashSet<long> unitIds = new HashSet<long>(playerState.UnitTargets.Keys);
@@ -264,6 +264,7 @@ public class HighlightingSystem : ComponentSystem
             }
         });
 
+        playerState.TargetDictChange = true;
         return playerState;
     }
 
@@ -487,7 +488,10 @@ public class HighlightingSystem : ComponentSystem
                     else
                     {
                         if (playerState.UnitTargets.ContainsKey(iD.EntityId.Id))
+                        {
                             playerState.UnitTargets[iD.EntityId.Id].CubeCoordinates.Clear();
+                            playerState.TargetDictChange = true;
+                        }
                         lineRendererComp.lineRenderer.positionCount = 0;
                     }
                 }
@@ -621,6 +625,7 @@ public class HighlightingSystem : ComponentSystem
             return;
 
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+        var playerState = playerStates[0];
         var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
         HashSet<long> unitIdHash = new HashSet<long>(playerStates[0].UnitTargets.Keys);
@@ -633,7 +638,9 @@ public class HighlightingSystem : ComponentSystem
                 if (unitIdHash.Contains(unitId.EntityId.Id) && playerHighlightingDatas[0].TargetRestrictionIndex != 2)
                 {
                     ResetUnitHighLights(e, playerStates[0], unitId.EntityId.Id);
-                    playerStates[0].UnitTargets.Remove(unitId.EntityId.Id);
+                    playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                    playerState.TargetDictChange = true;
+                    playerStates[0] = playerState;
                 }
             }
         });
@@ -684,13 +691,15 @@ public class HighlightingSystem : ComponentSystem
     public void HighlightReachable()
     {
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+        var playerState = playerStates[0];
         var playerPathings = m_PlayerStateData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
 
         //remove selected unit target from player UnitTargets Dict 
-        if (playerStates[0].UnitTargets.ContainsKey(playerStates[0].SelectedUnitId))
+        if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
         {
-            playerStates[0].UnitTargets.Remove(playerStates[0].SelectedUnitId);
-            //m_PlayerStateData.PlayerState[0] = playerState;
+            playerState.UnitTargets.Remove(playerState.SelectedUnitId);
+            playerState.TargetDictChange = true;
+            playerStates[0] = playerState;
         }
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
 
@@ -751,22 +760,26 @@ public class HighlightingSystem : ComponentSystem
     public void SetSelfTarget(long entityID, int executeStep)
     {
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+        var playerState = playerStates[0];
 
-        playerStates[0].UnitTargets.Remove(entityID);
+        playerState.UnitTargets.Remove(entityID);
 
         Entities.With(m_ActiveUnitData).ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component coord) =>
         {
             if (iD.EntityId.Id == entityID)
             {
                 lineRendererComp.lineRenderer.positionCount = 0;
-                CubeCoordinateList list = new CubeCoordinateList(new List<Vector3f> { coord.CubeCoordinate }, executeStep);
-                playerStates[0].UnitTargets.Add(iD.EntityId.Id, list);
+                CubeCoordinateList list = new CubeCoordinateList(new List<Vector3f> { coord.CubeCoordinate }, executeStep, 0);
+                playerState.UnitTargets.Add(iD.EntityId.Id, list);
+
             }
         });
 
         //playerStates[0].CellsInRange.Clear();
-        //playerStates[0].CachedPaths.Clear();
-
+        //playerStates[0].UnitTargets = playerStates[0].UnitTargets;
+        //playerStates[0].TargetDictChange = true;
+        playerState.TargetDictChange = true;
+        playerStates[0] = playerState;
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
         SetNumberOfTargets(playerStates[0]);
         playerStates.Dispose();

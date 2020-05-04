@@ -102,6 +102,9 @@ namespace LeyLineHybridECS
 
                                 if (unitId.EntityId.Id == playerState.SelectedUnitId)
                                 {
+                                    if(Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
+                                        playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+
                                     playerCam.SetTargetTransform(unitComponentReferences.transform);
 
                                     if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)

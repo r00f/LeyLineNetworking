@@ -14,12 +14,14 @@ component PlayerState {
 	bool end_step_ready = 8;
 	unit.Action selected_action = 9;
 	bool target_valid = 10;
+	bool target_dict_change = 11;
 }
 
 type CubeCoordinateList {
 
 	list<generic.Vector3f> cube_coordinates = 1;
 	int32 turn_step_index = 2;
+	int32 damage_amount = 3;
 }
 
 enum PlayerStateEnum {

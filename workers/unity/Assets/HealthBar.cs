@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class HealthBar : MonoBehaviour
 {
+    public float IncomingDamage;
     public Image HealthFill;
     public Image ArmorFill;
+    public Image DamageFill;
+    public RectTransform HealthBarRect;
+    public RectTransform DamageRect;
 }

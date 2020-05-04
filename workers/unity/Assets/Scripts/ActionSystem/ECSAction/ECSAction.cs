@@ -36,6 +36,7 @@ namespace LeyLineHybridECS
         public Projectile ProjectileFab;
         [TextArea]
         public string ActionName;
+        [TextArea]
         public string Description;
         public float TimeToExecute;
         public bool HasWindup;

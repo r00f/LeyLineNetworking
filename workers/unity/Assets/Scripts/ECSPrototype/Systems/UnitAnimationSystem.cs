@@ -157,7 +157,7 @@ public class UnitAnimationSystem : ComponentSystem
                                 {
                                     targetYoffset = 1.3f;
                                 }
-                                m_ActionEffectsSystem.LaunchProjectile(animatorComponent.CurrentLockedAction.ProjectileFab, animatorComponent.ProjectileSpawnOrigin, targetPos, actions.LockedAction, id.EntityId.Id, targetYoffset);
+                                m_ActionEffectsSystem.LaunchProjectile(animatorComponent.CurrentLockedAction.ProjectileFab, animatorComponent.ProjectileSpawnOrigin, targetPos, actions.LockedAction, id.EntityId.Id, coord.CubeCoordinate, targetYoffset);
                             }
                             else
                             {
@@ -165,6 +165,7 @@ public class UnitAnimationSystem : ComponentSystem
                                 m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform);
                             }
 
+                            animatorComponent.AnimationEvents.EventTriggered = true;
                             animatorComponent.AnimationEvents.EventTrigger = false;
                         }
                     }
@@ -226,6 +227,8 @@ public class UnitAnimationSystem : ComponentSystem
                     animatorComponent.Animator.ResetTrigger("Execute");
                     animatorComponent.ExecuteTriggerSet = false;
                 }
+                if (animatorComponent.AnimationEvents.EventTriggered)
+                    animatorComponent.AnimationEvents.EventTriggered = false;
             }
 
             #region Set Animator Variables
