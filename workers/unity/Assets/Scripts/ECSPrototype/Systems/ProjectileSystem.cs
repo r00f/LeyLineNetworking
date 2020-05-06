@@ -179,6 +179,9 @@ public class ProjectileSystem : ComponentSystem
 
                             if (projectile.ExplosionParticleSystem)
                             {
+                                if (projectile.ParentExplosionToWorld)
+                                    projectile.ExplosionParticleSystem.transform.parent = projectile.transform.parent;
+
                                 ParticleSystem explosionPs = projectile.ExplosionParticleSystem;
                                 explosionPs.Play();
                             }
@@ -187,6 +190,12 @@ public class ProjectileSystem : ComponentSystem
                             {
                                 projectile.ExplosionEventEmitter.Play();
                             }
+
+                            foreach (GameObject go in projectile.DisableAtDestinationObjects)
+                            {
+                                go.SetActive(false);
+                            }
+
                             projectile.EffectTriggered = true;
                         }
 
@@ -205,8 +214,14 @@ public class ProjectileSystem : ComponentSystem
 
                 if (projectile.FlagForDestruction && !projectile.QueuedForDestruction)
                 {
-                    if (projectile.ToungeEnd)
-                        projectile.gameObject.SetActive(false);
+
+                    foreach (GameObject go in projectile.DisableBeforeDestructionObjects)
+                    {
+                        go.SetActive(false);
+                    }
+                    
+                    //if (projectile.ToungeEnd)
+                    //projectile.gameObject.SetActive(false);
                     GameObject.Destroy(projectile.gameObject, 0.5f);
                     projectile.QueuedForDestruction = true;
                     //PostUpdateCommands.DestroyEntity(entity);

@@ -37,6 +37,8 @@ public class Projectile : MonoBehaviour
     public float TargetYOffset;
     public int DegreesPerSecond;
     public int AxaShieldOrbitCount;
+    public List<GameObject> DisableAtDestinationObjects;
+    public List<GameObject> DisableBeforeDestructionObjects;
 
     [Header("Tounge")]
     public Rigidbody ToungeEnd;
@@ -59,7 +61,7 @@ public class Projectile : MonoBehaviour
     public List<ParticleSystem> ParticleSystemsToStop;
     public ParticleSystem ExplosionParticleSystem;
     public StudioEventEmitter ExplosionEventEmitter;
-
+    public bool ParentExplosionToWorld;
 
 
     public Transform SpawnTransform;

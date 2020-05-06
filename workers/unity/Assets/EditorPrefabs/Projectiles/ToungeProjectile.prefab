@@ -71,6 +71,9 @@ MonoBehaviour:
   TargetYOffset: 0
   DegreesPerSecond: 0
   AxaShieldOrbitCount: 0
+  DisableAtDestinationObjects: []
+  DisableBeforeDestructionObjects:
+  - {fileID: 4265137128855694756}
   ToungeEnd: {fileID: 4688949177296653295}
   ToungeBase: {fileID: 7703656456084220977}
   LaunchForce: 40
@@ -5175,7 +5178,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4309257
+  m_MaxDistance: 1.1671975
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5261,7 +5264,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4309257
+  m_MaxDistance: 1.1671975
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5367,7 +5370,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4309257
+  m_MaxDistance: 1.1671975
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5489,7 +5492,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.4309257
+  m_MaxDistance: 1.1671975
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
