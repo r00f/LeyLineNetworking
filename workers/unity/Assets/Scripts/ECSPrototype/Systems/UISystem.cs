@@ -24,6 +24,7 @@ namespace LeyLineHybridECS
         EntityQuery m_AuthoritativePlayerData;
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
+        float ayy = 0f;
 
         public UIReferences UIRef{get; set;}
 
@@ -714,15 +715,18 @@ namespace LeyLineHybridECS
                     {
                         UIRef.ReadyButton.interactable = true;
                     }
-
+                    
+                    //energyFill.fillAmount = Mathf.SmoothDamp(energyFill.fillAmount, currentEnergy / maxEnergy, ref ayy, 1f);
                     energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, Time.deltaTime);
 
                     if (energyFill.fillAmount >= currentEnergy / maxEnergy - .003f)
                     {
+                        //incomeFill.fillAmount = Mathf.SmoothStep(incomeFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, 1f);
                         incomeFill.fillAmount = Mathf.Lerp(incomeFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, Time.deltaTime);
                     }
                 }
-
+                //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
+                //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
                 energyFill.fillAmount = Mathf.Lerp(energyFill.fillAmount, currentEnergy / maxEnergy, Time.deltaTime);
 
                 currentEnergyText.text = currentEnergy.ToString();
@@ -1036,7 +1040,7 @@ namespace LeyLineHybridECS
             uint combinedMaxHealth = health.MaxHealth + health.Armor;
             float healthPercentage = 1 - (float)health.Armor / combinedMaxHealth;
             float combinedPercentage = 1;
-
+            
             if (combinedHealth < health.MaxHealth)
             {
                 combinedPercentage = (float)combinedHealth / combinedMaxHealth;
@@ -1053,8 +1057,8 @@ namespace LeyLineHybridECS
                 healthBar.ArmorFill.fillAmount = 0;
             }
 
-            healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / health.CurrentHealth, Time.deltaTime);
-            healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.HealthFill.fillAmount)) +3f, 0);
+            healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.deltaTime);
+            healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - combinedPercentage)) +3f, 0);
             authPlayersFaction.Dispose();
         }
 
@@ -1133,6 +1137,9 @@ namespace LeyLineHybridECS
 
             healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
             healthbar.UnitHeadHealthBarInstance = Object.Instantiate(healthbar.UnitHeadHealthBarPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
+            
+            if(healthbar.UnitHeadHealthBarInstance.PlayerColor)
+                healthbar.UnitHeadHealthBarInstance.PlayerColor.color = settings.FactionColors[(int)unitFaction];
 
             healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
             //initialize GroupUI and hero select button

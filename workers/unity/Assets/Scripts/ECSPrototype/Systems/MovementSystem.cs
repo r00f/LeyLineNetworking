@@ -55,17 +55,6 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            //var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-            //var gameStateWorldIndexes = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-           
-            /*#region unit data
-
-            var unitCellsToMarks = m_UnitData.ToComponentDataArray<CellsToMark.Component>(Allocator.TempJob);
-            var movementVarData = m_UnitData.ToComponentDataArray<MovementVariables.Component>(Allocator.TempJob);
-            int i = 0;
-            #endregion
-            */
-
             Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref WorldIndex.Component unitWorldIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
             {
                 var movementVariables = m;
@@ -142,9 +131,9 @@ namespace LeyLineHybridECS
         {
             Entities.With(m_UnitData).ForEach((ref SpatialEntityId otherUnitId, ref Actions.Component otherUnitActions, ref WorldIndex.Component otherUnitWorldIndex) =>
             {
-                if (worldIndex == otherUnitWorldIndex.Value && unitId != otherUnitId.EntityId.Id)
+                if (worldIndex == otherUnitWorldIndex.Value && unitId != otherUnitId.EntityId.Id && otherUnitActions.LockedAction.Index != -3 && unitActions.LockedAction.Index != -3)
                 {
-                    if (otherUnitActions.LockedAction.Index != -3 && Vector3fext.ToUnityVector(otherUnitActions.LockedAction.Targets[0].TargetCoordinate) == Vector3fext.ToUnityVector(unitActions.LockedAction.Targets[0].TargetCoordinate))
+                    if (Vector3fext.ToUnityVector(otherUnitActions.LockedAction.Targets[0].TargetCoordinate) == Vector3fext.ToUnityVector(unitActions.LockedAction.Targets[0].TargetCoordinate))
                     {
                         if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                         {
@@ -157,17 +146,14 @@ namespace LeyLineHybridECS
                                 {
                                     unitActions = CullPath(unitActions);
                                 }
-                                //Debug.Log("MoveTimesTheSame");
                             }
                             else if (unitMoveTime > otherUnitMoveTime)
                             {
                                 unitActions = CullPath(unitActions);
-                                //Debug.Log("UnitSlower, Cull path");
                             }
                         }
                         else if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
                         {
-                            //Debug.Log("SpawnCullPath");
                             unitActions = CullPath(unitActions);
                         }
                     }
@@ -178,17 +164,31 @@ namespace LeyLineHybridECS
 
         private Actions.Component CullPath(Actions.Component unitActions)
         {
-            var coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
-            unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(coordCount - 1);
-            coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
-
-            if(coordCount != 0)
+            var coordCount = 0;
+            if(unitActions.LockedAction.Targets.Count != 0)
             {
-                Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[coordCount - 1].CubeCoordinate;
-                var t = unitActions.LockedAction.Targets[0];
-                t.TargetCoordinate = newTarget;
-                unitActions.LockedAction.Targets[0] = t;
-                unitActions.LockedAction = unitActions.LockedAction;
+                if (unitActions.LockedAction.Targets[0].Mods.Count != 0)
+                    coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+            }
+
+            if (coordCount != 0)
+            {
+                unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(coordCount - 1);
+                coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+
+                if(coordCount != 0)
+                {
+                    Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[coordCount - 1].CubeCoordinate;
+                    var t = unitActions.LockedAction.Targets[0];
+                    t.TargetCoordinate = newTarget;
+                    unitActions.LockedAction.Targets[0] = t;
+                    unitActions.LockedAction = unitActions.LockedAction;
+                }
+                else
+                {
+                    unitActions.LockedAction = unitActions.NullAction;
+                }
+
             }
             else
             {

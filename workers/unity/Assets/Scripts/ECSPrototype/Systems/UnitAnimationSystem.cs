@@ -196,6 +196,11 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if (animatorComponent.EnableVisualsDelay >= 0)
                 {
+                    foreach (GameObject g in animatorComponent.Visuals)
+                    {
+                        if(g.activeSelf)
+                            g.SetActive(false);
+                    }
                     animatorComponent.EnableVisualsDelay -= Time.deltaTime;
                 }
                 else if (!animatorComponent.Dead)

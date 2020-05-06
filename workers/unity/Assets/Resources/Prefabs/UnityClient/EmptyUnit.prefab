@@ -139,7 +139,7 @@ MonoBehaviour:
   DestinationPosition: {x: 0, y: 0, z: 0}
   Dead: 0
   DeathEventTrigger: 0
-  ObjectsToDisable: []
+  DisableOnDeathObjects: []
   RagdollRigidBodies:
   - {fileID: 0}
   - {fileID: 0}
@@ -239,10 +239,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6e406b3fab66de149989bd88375401ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IncomingDamage: 0
   HealthBarYOffset: 0
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
-  UnitHeadHealthBarPrefab: {fileID: 0}
+  UnitHeadHealthBarPrefab: {fileID: 8079530597859831226, guid: b70e178b7eff5a546bb4da6f716f8711,
+    type: 3}
   UnitHeadUIInstance: {fileID: 0}
   UnitHeadHealthBarInstance: {fileID: 0}
   HealthTextDelay: 0

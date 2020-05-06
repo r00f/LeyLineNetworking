@@ -18,6 +18,7 @@ MonoBehaviour:
   ActionName: Move
   Description: Moves towards a destination.
   TimeToExecute: 3
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:
@@ -37,7 +38,7 @@ MonoBehaviour:
   m_Name: T_Cell(Clone)
   m_EditorClassIdentifier: 
   HighlighterToUse: 0
-  targettingRange: 2
+  targettingRange: 3
   energyCost: 0
   ModToAdd: {fileID: 0}
   SecondaryTargets:

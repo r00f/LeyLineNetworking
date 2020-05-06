@@ -493,7 +493,7 @@ public class Moba_Camera : MonoBehaviour {
 				target.y = requirements.pivot.position.y;
 			
 			if((target - current).magnitude > 0.2f){
-				Vector3 shift = Vector3.Lerp(current, target, settings.movement.lockTransitionRate);
+				Vector3 shift = Vector3.Lerp(current, target, settings.movement.lockTransitionRate * Time.deltaTime);
 				requirements.pivot.position = new Vector3(requirements.pivot.position.x, shift.y, requirements.pivot.position.z);
 			}
 		}	
