@@ -20,6 +20,7 @@ public class InitializeUnitsSystem : ComponentSystem
 
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
+            ComponentType.ReadOnly<Unit_BaseDataSet>(),
             ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<UnitComponentReferences>(),
@@ -42,6 +43,7 @@ public class InitializeUnitsSystem : ComponentSystem
     {
         var healthData = m_UnitData.ToComponentDataArray<Health.Component>(Allocator.TempJob);
         var unitFactionData = m_UnitData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+        var unitStatData = m_UnitData.ToComponentArray<Unit_BaseDataSet>();
         var unitEffectsData = m_UnitData.ToComponentArray<UnitEffects>();
         var teamColorMesheData = m_UnitData.ToComponentArray<TeamColorMeshes>();
         var componentReferenceData = m_UnitData.ToComponentArray<UnitComponentReferences>();
@@ -50,6 +52,7 @@ public class InitializeUnitsSystem : ComponentSystem
 
         for (int i = 0; i < unitFactionData.Length; i++)
         {
+            var stats = unitStatData[i];
             var health = healthData[i];
             var unitEffects = unitEffectsData[i];
             var unitFactionComp = unitFactionData[i];
@@ -125,7 +128,7 @@ public class InitializeUnitsSystem : ComponentSystem
             }
             Entities.With(m_PlayerData).ForEach((HeroTransform heroTransform, ref FactionComponent.Component playerFactionComp) =>
             {
-                if (playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
+                if (stats.IsHero && playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
                 {
                     heroTransform.Transform = unitTransform;
                 }

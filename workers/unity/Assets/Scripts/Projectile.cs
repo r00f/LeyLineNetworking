@@ -10,46 +10,52 @@ using FMODUnity;
 
 public class Projectile : MonoBehaviour
 {
-    /*
-    public uint ArmorAmount;
-    public uint HealthAmount;
-    */
-
-    public Action Action;
+    //currently only used for axa shield
     public GameObject DestinationObjectPrefab;
+    public GameObject DestinationExplosionPrefab;
+    public Transform ExplosionSpawnTransform;
+    public CollisionDetectionComponent CollisionDetection;
 
-    public bool DestroyAtDestination;
-    public bool DestinationReached;
-    public bool EffectTriggered;
-    public bool FlagForDestruction;
-    public bool QueuedForDestruction;
+    public float TargetYOffset;
     public bool ArriveInstantly;
+    public float MovementDelay;
+    public float DestroyAfterSeconds;
+    public bool DestroyAtDestination;
 
-    public long UnitId;
 
+    [Header ("Transform Projectile")]
     public Transform TransformToMove;
     public Transform TransformToRotate;
     public Transform PhysicsExplosionOrigin;
     public float TravellingSpeed;
     public float MaxHeight;
-    public float MovementDelay;
     public float Acceleration;
-    public float TargetYOffset;
+
     public int DegreesPerSecond;
     public int AxaShieldOrbitCount;
     public List<GameObject> DisableAtDestinationObjects;
     public List<GameObject> DisableBeforeDestructionObjects;
 
-    [Header("Tounge")]
-    public Rigidbody ToungeEnd;
-    public Rigidbody ToungeBase;
+    [Header("Physics Projectile")]
+    public ForceMode LaunchForceMode;
+    public List<Rigidbody> RigidbodiesToLaunch;
+    //public Rigidbody ToungeEnd;
+    //public Rigidbody ToungeBase;
     public int LaunchForce;
+
+    [Header("Tounge")]
     public int ContractSpeed;
     public int ContractUpForce;
-    public bool Launched;
-    public Joint BaseJoint;
+    //public Joint BaseJoint;
     public List<SpringJoint> SpringJoints;
-    public float DestroyAfterSeconds;
+
+    [HideInInspector]
+    public bool Launched;
+
+    public float ParticleSystemsStopWaitTime;
+    public List<ParticleSystem> ParticleSystemsToStop;
+    public ParticleSystem ExplosionParticleSystem;
+    public StudioEventEmitter ExplosionEventEmitter;
 
     /*
     [Header("Impact Physics Explosion")]
@@ -58,12 +64,20 @@ public class Projectile : MonoBehaviour
     public int ExplosionForce;
     */
 
-    public List<ParticleSystem> ParticleSystemsToStop;
-    public ParticleSystem ExplosionParticleSystem;
-    public StudioEventEmitter ExplosionEventEmitter;
-    public bool ParentExplosionToWorld;
-
-
+    //Internal vars
+    [HideInInspector]
+    public Action Action;
+    [HideInInspector]
+    public bool DestinationReached;
+    [HideInInspector]
+    public bool EffectTriggered;
+    [HideInInspector]
+    public bool FlagForDestruction;
+    [HideInInspector]
+    public long UnitId;
+    [HideInInspector]
+    public bool QueuedForDestruction;
+    [HideInInspector]
     public Transform SpawnTransform;
     [HideInInspector]
     public List<Vector3> TravellingCurve;
@@ -73,5 +87,7 @@ public class Projectile : MonoBehaviour
     public bool IsTravelling;
     [HideInInspector]
     public float MovementPercentage;
+
+
 
 }

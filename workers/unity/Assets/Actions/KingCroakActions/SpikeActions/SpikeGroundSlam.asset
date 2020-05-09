@@ -16,7 +16,7 @@ MonoBehaviour:
   ActionIcon: {fileID: 21300000, guid: cb68a2fdc7d1a7b49a949385f46b1c70, type: 3}
   ProjectileFab: {fileID: 0}
   ActionName: Slam
-  Description: Slams his weapon into the ground. Deals <color=red>70</color> damge
+  Description: Slams his weapon into the ground. Deals <color=red>60</color> damge
     to all enemies in the area.
   TimeToExecute: 4
   HasWindup: 0
@@ -80,7 +80,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  DamageAmount: 70
+  DamageAmount: 60
   ExplosionRadius: 4
   ExplosionForce: 600
   UpForce: 5

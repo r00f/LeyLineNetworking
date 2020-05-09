@@ -6,7 +6,10 @@ using UnityEngine.UI;
 public class HealthBar : MonoBehaviour
 {
     public float IncomingDamage;
-    public Image PlayerColor;
+    public GameObject HealthBarGo;
+    public GameObject PlayerColorGo;
+    public Image HoveredImage;
+    public Image PlayerColorImage;
     public Image HealthFill;
     public Image ArmorFill;
     public Image DamageFill;

@@ -5633,7 +5633,7 @@ ParticleSystem:
           m_PostInfinity: 2
           m_RotationOrder: 4
   EmissionModule:
-    enabled: 1
+    enabled: 0
     serializedVersion: 4
     rateOverTime:
       serializedVersion: 2
@@ -14658,6 +14658,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DestinationObjectPrefab: {fileID: 0}
+  DestinationExplosionPrefab: {fileID: 4723404049532625160, guid: 57d3e76a55d8c3246971622ec77fdf8d,
+    type: 3}
+  ExplosionSpawnTransform: {fileID: 5341185222269292129}
+  CollisionDetection: {fileID: 0}
+  TargetYOffset: 0.5
+  ArriveInstantly: 1
+  MovementDelay: 0.1
+  DestroyAfterSeconds: 1
+  DestroyAtDestination: 0
+  TransformToMove: {fileID: 5341185222269292129}
+  TransformToRotate: {fileID: 5341185222269292129}
+  PhysicsExplosionOrigin: {fileID: 5341185222269292129}
+  TravellingSpeed: 0
+  MaxHeight: 0
+  Acceleration: 0
+  DegreesPerSecond: 1080
+  AxaShieldOrbitCount: 0
+  DisableAtDestinationObjects: []
+  DisableBeforeDestructionObjects: []
+  LaunchForceMode: 0
+  RigidbodiesToLaunch: []
+  LaunchForce: 0
+  ContractSpeed: 0
+  ContractUpForce: 0
+  SpringJoints: []
+  Launched: 0
+  ParticleSystemsStopWaitTime: 0.001
+  ParticleSystemsToStop:
+  - {fileID: 3761309075827653202}
+  - {fileID: 4086960071161034896}
+  - {fileID: 3676166716103695577}
+  ExplosionParticleSystem: {fileID: 3762004492379586217}
+  ExplosionEventEmitter: {fileID: 0}
   Action:
     Name: 
     CombinedCost: 0
@@ -14666,36 +14700,11 @@ MonoBehaviour:
     Effects: []
     ActionExecuteStep: 0
     TimeToExecute: 0
-  DestinationObjectPrefab: {fileID: 0}
-  DestroyAtDestination: 0
   DestinationReached: 0
   EffectTriggered: 0
   FlagForDestruction: 0
-  QueuedForDestruction: 0
-  ArriveInstantly: 1
   UnitId: 0
-  TransformToMove: {fileID: 5341185222269292129}
-  TransformToRotate: {fileID: 5341185222269292129}
-  PhysicsExplosionOrigin: {fileID: 5341185222269292129}
-  TravellingSpeed: 0
-  MaxHeight: 0
-  MovementDelay: 0.1
-  Acceleration: 0
-  TargetYOffset: 0.5
-  DegreesPerSecond: 1080
-  AxaShieldOrbitCount: 0
-  ToungeEnd: {fileID: 0}
-  ToungeBase: {fileID: 0}
-  LaunchForce: 0
-  ContractSpeed: 0
-  ContractUpForce: 0
-  Launched: 0
-  BaseJoint: {fileID: 0}
-  SpringJoints: []
-  DestroyAfterSeconds: 2
-  ParticleSystemsToStop: []
-  ExplosionParticleSystem: {fileID: 3762004492379586217}
-  ExplosionEventEmitter: {fileID: 0}
+  QueuedForDestruction: 0
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
@@ -34055,6 +34064,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: WaterExplosionPS
       objectReference: {fileID: 0}
+    - target: {fileID: 8567822036391782397, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5596479015441426445, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -34113,17 +34127,37 @@ PrefabInstance:
     - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: m_BoundingSphereOverride.x
-      value: 0
+      value: 1.470954e-39
       objectReference: {fileID: 0}
     - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: m_BoundingSphereOverride.z
-      value: NaN
+      value: 1.471246e-39
       objectReference: {fileID: 0}
     - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: m_BoundingSphereOverride.w
-      value: 1.02e-43
+      value: 1.471369e-39
+      objectReference: {fileID: 0}
+    - target: {fileID: 7355465557063344492, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: m_BoundingSphereOverride.y
+      value: 1.4711e-39
+      objectReference: {fileID: 0}
+    - target: {fileID: 3357390275044352851, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 22475325049645645, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1330846010300755426, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9942b6b025c41df4aa7ccb18c0b332e8, type: 3}

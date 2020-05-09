@@ -45,6 +45,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  DestinationObjectPrefab: {fileID: 0}
+  DestinationExplosionPrefab: {fileID: 0}
+  ExplosionSpawnTransform: {fileID: 0}
+  CollisionDetection: {fileID: 0}
+  TargetYOffset: 0
+  ArriveInstantly: 1
+  MovementDelay: 0.026
+  DestroyAfterSeconds: 0.65
+  DestroyAtDestination: 0
+  TransformToMove: {fileID: 0}
+  TransformToRotate: {fileID: 1199834125490395627}
+  PhysicsExplosionOrigin: {fileID: 4265137128855466384}
+  TravellingSpeed: 0
+  MaxHeight: 0
+  Acceleration: 0
+  DegreesPerSecond: 0
+  AxaShieldOrbitCount: 0
+  DisableAtDestinationObjects: []
+  DisableBeforeDestructionObjects:
+  - {fileID: 4265137128855694756}
+  LaunchForceMode: 1
+  RigidbodiesToLaunch:
+  - {fileID: 4688949177296653295}
+  LaunchForce: 40
+  ContractSpeed: 35
+  ContractUpForce: 100
+  SpringJoints:
+  - {fileID: 6796338131472732308}
+  - {fileID: 5043565909834758946}
+  - {fileID: 6313709426211851775}
+  - {fileID: 2591146601566630127}
+  Launched: 0
+  ParticleSystemsStopWaitTime: 0
+  ParticleSystemsToStop: []
+  ExplosionParticleSystem: {fileID: 4153580750195930896}
+  ExplosionEventEmitter: {fileID: 0}
   Action:
     Name: 
     CombinedCost: 0
@@ -53,43 +89,11 @@ MonoBehaviour:
     Effects: []
     ActionExecuteStep: 0
     TimeToExecute: 0
-  DestinationObjectPrefab: {fileID: 0}
-  DestroyAtDestination: 0
   DestinationReached: 0
   EffectTriggered: 0
   FlagForDestruction: 0
-  QueuedForDestruction: 0
-  ArriveInstantly: 1
   UnitId: 0
-  TransformToMove: {fileID: 0}
-  TransformToRotate: {fileID: 1199834125490395627}
-  PhysicsExplosionOrigin: {fileID: 4265137128855466384}
-  TravellingSpeed: 0
-  MaxHeight: 0
-  MovementDelay: 0.026
-  Acceleration: 0
-  TargetYOffset: 0
-  DegreesPerSecond: 0
-  AxaShieldOrbitCount: 0
-  DisableAtDestinationObjects: []
-  DisableBeforeDestructionObjects:
-  - {fileID: 4265137128855694756}
-  ToungeEnd: {fileID: 4688949177296653295}
-  ToungeBase: {fileID: 7703656456084220977}
-  LaunchForce: 40
-  ContractSpeed: 35
-  ContractUpForce: 100
-  Launched: 0
-  BaseJoint: {fileID: 0}
-  SpringJoints:
-  - {fileID: 6796338131472732308}
-  - {fileID: 5043565909834758946}
-  - {fileID: 6313709426211851775}
-  - {fileID: 2591146601566630127}
-  DestroyAfterSeconds: 0.65
-  ParticleSystemsToStop: []
-  ExplosionParticleSystem: {fileID: 4153580750195930896}
-  ExplosionEventEmitter: {fileID: 0}
+  QueuedForDestruction: 0
   SpawnTransform: {fileID: 0}
   TravellingCurve: []
   CurrentTargetId: 0
@@ -5178,7 +5182,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1671975
+  m_MaxDistance: 0.30887568
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5264,7 +5268,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1671975
+  m_MaxDistance: 0.30887568
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5370,7 +5374,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1671975
+  m_MaxDistance: 0.30887568
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5492,7 +5496,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1671975
+  m_MaxDistance: 0.30887568
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

@@ -68,125 +68,118 @@ public class ProjectileSystem : ComponentSystem
         {
             Entities.With(m_ProjectileData).ForEach((Entity entity, Projectile projectile, Transform transform) =>
             {
-            if (projectile.DegreesPerSecond != 0)
-                transform.RotateAround(transform.position, transform.forward, projectile.DegreesPerSecond * Time.deltaTime);
-
-            if (projectile.DestroyAfterSeconds != 0)
-            {
-                if (projectile.DestroyAfterSeconds > 0.05f)
+                if(projectile.CollisionDetection)
                 {
-                    projectile.DestroyAfterSeconds -= Time.deltaTime;
-                }
-                else
-                {
-                    projectile.FlagForDestruction = true;
-                }
-            }
-            if (projectile.ToungeEnd)
-            {
-                if (!projectile.Launched && projectile.TravellingCurve.Count != 0)
-                {
-                    projectile.MovementDelay *= Vector3.Distance(projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset, projectile.ToungeEnd.position);
-                    Vector3 direction = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset - projectile.ToungeEnd.position;
-                    projectile.ToungeEnd.AddForce(direction * projectile.LaunchForce, ForceMode.Impulse);
-                    projectile.Launched = true;
-                }
-            }
-
-            if (projectile.MovementDelay > 0)
-            {
-                projectile.MovementDelay -= Time.deltaTime;
-            }
-            else if (projectile.IsTravelling)
-            {
-                if (projectile.ArriveInstantly)
-                {
-                    if (!projectile.ToungeEnd)
-                        transform.position = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset;
-
-                    projectile.DestinationReached = true;
-                }
-                else if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 2)
-                {
-                    float dist = Vector3.Distance(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1]);
-                    if (projectile.MovementPercentage >= 1f)
+                    if (projectile.CollisionDetection.HasCollided)
                     {
-                        projectile.MovementPercentage = 0;
-                        projectile.CurrentTargetId++;
+                        projectile.DestinationReached = true;
+                        projectile.FlagForDestruction = true;
+                    }
+                }
+
+                if (projectile.DestroyAfterSeconds != 0)
+                {
+                    if (projectile.DestroyAfterSeconds > 0.05f)
+                    {
+                        projectile.DestroyAfterSeconds -= Time.deltaTime;
                     }
                     else
                     {
-                        projectile.MovementPercentage += Time.deltaTime * projectile.TravellingSpeed / dist;
-                        if (!projectile.ToungeEnd)
-                        {
-                            Vector3 pos = Vector3.Lerp(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1], projectile.MovementPercentage);
-                            transform.position = pos;
-                        }
+                        projectile.FlagForDestruction = true;
                     }
                 }
-                else
+
+                if (!projectile.Launched && projectile.TravellingCurve.Count != 0)
                 {
-                    projectile.DestinationReached = true;
+                    foreach (Rigidbody r in projectile.RigidbodiesToLaunch)
+                    {
+                        projectile.MovementDelay *= Vector3.Distance(projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset, r.position);
+                        Vector3 direction = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset - r.position;
+                        r.AddForce(direction * projectile.LaunchForce, projectile.LaunchForceMode);
+                    }
+                    projectile.Launched = true;
                 }
 
-                if (projectile.DestinationReached)
+                if (projectile.DegreesPerSecond != 0 && !projectile.DestinationReached)
+                    transform.RotateAround(transform.position, transform.forward, projectile.DegreesPerSecond * Time.deltaTime);
+
+                if (projectile.MovementDelay > 0)
                 {
-                    //tounge contraction
-                    if (projectile.SpringJoints.Count != 0)
+                    projectile.MovementDelay -= Time.deltaTime;
+                }
+                else if (projectile.IsTravelling)
+                {
+
+
+                    if (projectile.ArriveInstantly)
                     {
-                        projectile.ToungeEnd.AddForce(Vector3.up * projectile.ContractUpForce, ForceMode.Acceleration);
-                        foreach (SpringJoint s in projectile.SpringJoints)
-                        {
-                            s.maxDistance = Mathf.Lerp(s.maxDistance, 0, Time.deltaTime * projectile.ContractSpeed);
-                        }
+                        if (projectile.RigidbodiesToLaunch.Count == 0)
+                            transform.position = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset;
+
+                        projectile.DestinationReached = true;
                     }
-
-
-                        foreach (ParticleSystem p in projectile.ParticleSystemsToStop)
-                        {
-                            p.Stop();
-                        }
-
-                    if (!projectile.EffectTriggered)
+                    else if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 2)
                     {
-
-                            //if this action applies a uniteffect (Axa Shield) instantiate
-                            /*
-                            if (projectile.DestinationObjectPrefab)
+                        float dist = Vector3.Distance(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1]);
+                        if (projectile.MovementPercentage >= 1f)
+                        {
+                            projectile.MovementPercentage = 0;
+                            projectile.CurrentTargetId++;
+                        }
+                        else
+                        {
+                            projectile.MovementPercentage += Time.deltaTime * projectile.TravellingSpeed / dist;
+                            if (projectile.RigidbodiesToLaunch.Count == 0)
                             {
-                                Vector3 destPos = projectile.TravellingCurve[projectile.TravellingCurve.Count - 1] + Vector3.up * projectile.TargetYOffset;
-                                GameObject destObject = Object.Instantiate(projectile.DestinationObjectPrefab, destPos, Quaternion.identity);
-
-                                //spawn orbits into uniteffects>AxaShield
-                                //spawn lingering effect into target unit transform if there is none / add more orbits if 
-
-                                if (destObject.GetComponent<AxaShield>())
-                                {
-                                    //Align all orbits with projectile position
-                                    
-                                    foreach (Transform t in destObject.GetComponent<AxaShield>().Orbits)
-                                    {
-                                        Debug.Log("InitOrbitRotation");
-                                        t.rotation = Quaternion.LookRotation(transform.position - destPos);
-                                    }
-                                    
-                                }
+                                Vector3 pos = Vector3.Lerp(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1], projectile.MovementPercentage);
+                                transform.position = pos;
                             }
-                            */
+                        }
+                    }
+                    else
+                    {
+                        projectile.DestinationReached = true;
+                    }
 
-                            //Debug.Log("TriggerActionEffect from Projetile");
+                    if (projectile.DestinationReached)
+                    {
+                        //tounge contraction
+                        if (projectile.SpringJoints.Count != 0)
+                        {
+                            foreach (Rigidbody r in projectile.RigidbodiesToLaunch)
+                            {
+                                r.AddForce(Vector3.up * projectile.ContractUpForce, ForceMode.Acceleration);
+
+                            }
+                            foreach (SpringJoint s in projectile.SpringJoints)
+                            {
+                                s.maxDistance = Mathf.Lerp(s.maxDistance, 0, Time.deltaTime * projectile.ContractSpeed);
+                            }
+                        }
+
+                        if(projectile.ParticleSystemsStopWaitTime > 0)
+                        {
+                            projectile.ParticleSystemsStopWaitTime -= Time.deltaTime;
+
+                        }
+                        else
+                        {
+                            foreach (ParticleSystem p in projectile.ParticleSystemsToStop)
+                            {
+                                p.Stop();
+                            }
+                        }
+
+                        if (!projectile.EffectTriggered)
+                        {
                             m_ActionEffectSystem.TriggerActionEffect(projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, projectile.AxaShieldOrbitCount);
 
-                            if (projectile.ExplosionParticleSystem)
+                            if(projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
                             {
-                                if (projectile.ParentExplosionToWorld)
-                                    projectile.ExplosionParticleSystem.transform.parent = projectile.transform.parent;
-
-                                ParticleSystem explosionPs = projectile.ExplosionParticleSystem;
-                                explosionPs.Play();
+                                Object.Instantiate(projectile.DestinationExplosionPrefab, projectile.ExplosionSpawnTransform.position, Quaternion.identity, projectile.transform.parent);
                             }
 
-                            if(projectile.ExplosionEventEmitter)
+                            if (projectile.ExplosionEventEmitter)
                             {
                                 projectile.ExplosionEventEmitter.Play();
                             }
@@ -219,15 +212,10 @@ public class ProjectileSystem : ComponentSystem
                     {
                         go.SetActive(false);
                     }
-                    
-                    //if (projectile.ToungeEnd)
-                    //projectile.gameObject.SetActive(false);
                     GameObject.Destroy(projectile.gameObject, 0.5f);
                     projectile.QueuedForDestruction = true;
-                    //PostUpdateCommands.DestroyEntity(entity);
                 }
             });
-
 
             Entities.With(m_MoveAnimData).ForEach((Entity entity, MovementAnimComponent anim, Transform transform) =>
             {
@@ -252,21 +240,4 @@ public class ProjectileSystem : ComponentSystem
             });
         }
     }
-
-    /*
-    void TriggerUnitActionEffect(EffectTypeEnum inEffectType, HashSet<Vector3f> inCubeCoordinates)
-    {
-        var animatorComponents = m_UnitData.ToComponentArray<AnimatorComponent>(); 
-
-        for(int i = 0; i < animatorComponents.Length; i++)
-        {
-            var animatorComponent = animatorComponents[i];
-
-            if (inCubeCoordinates.Contains(animatorComponent.LastStationaryCoordinate) && !animatorComponent.ActionEffectTrigger)
-            {
-                animatorComponent.ActionEffectTrigger = true;
-            }
-        }
-    }
-    */
 }

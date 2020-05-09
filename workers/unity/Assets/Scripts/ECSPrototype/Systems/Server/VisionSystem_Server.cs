@@ -17,6 +17,7 @@ public class VisionSystem_Server : ComponentSystem
     //HandleCellGridRequestsSystem m_GridSystem;
     ILogDispatcher logger;
 
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_UnitData;
     EntityQuery m_PlayerData;
     EntityQuery m_CellData;
@@ -58,6 +59,7 @@ public class VisionSystem_Server : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
     }
@@ -126,7 +128,7 @@ public class VisionSystem_Server : ComponentSystem
                     }
                 });
 
-                Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
+                Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction, ref SpatialEntityId p_id) =>
                 {
                     if (p_Vision.RequireUpdate)
                     {
@@ -143,6 +145,10 @@ public class VisionSystem_Server : ComponentSystem
                         p_Vision.Positives = p_Vision.Positives;
                         p_Vision.Negatives = p_Vision.Negatives;
                         p_Vision.Lastvisible = p_Vision.Lastvisible;
+
+                        m_ComponentUpdateSystem.SendEvent(
+                        new Vision.UpdateClientVisionEvent.Event(),
+                        p_id.EntityId);
 
                         p_Vision.RequireUpdate = false;
 

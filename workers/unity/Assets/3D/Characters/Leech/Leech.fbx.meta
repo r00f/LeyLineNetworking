@@ -460,7 +460,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 0.8
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
@@ -517,162 +517,162 @@ ModelImporter:
       scale: {x: 1, y: 1, z: 1}
     - name: Head
       parentName: Root
-      position: {x: -0, y: 0.00048000002, z: 0.0024}
+      position: {x: -0, y: 0.00059999997, z: 0.0030000003}
       rotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
       scale: {x: 1.000001, y: 1, z: 1.000001}
     - name: mSpike
       parentName: Head
-      position: {x: -0.00036680631, y: 0.0006061425, z: 6.6757204e-11}
+      position: {x: -0.00045850777, y: 0.00075767795, z: 8.34465e-11}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Teeth
       parentName: Head
-      position: {x: 0.00018161353, y: -0.000013302826, z: 0.00000021808624}
+      position: {x: 0.00022701688, y: -0.00001662853, z: 0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth1
       parentName: Teeth
-      position: {x: 0.000040332696, y: -1.1162483e-10, z: -0.00000021808624}
+      position: {x: 0.00005041586, y: -1.39531e-10, z: -0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth2
       parentName: Teeth
-      position: {x: 0.000040332696, y: -1.1162483e-10, z: -0.00000021808624}
+      position: {x: 0.00005041586, y: -1.39531e-10, z: -0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth3
       parentName: Teeth
-      position: {x: 0.000040332696, y: -1.1162483e-10, z: -0.00000021808624}
+      position: {x: 0.00005041586, y: -1.39531e-10, z: -0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth4
       parentName: Teeth
-      position: {x: -0.000040332816, y: -0.0000006443497, z: -0.000000054612165}
+      position: {x: -0.000050416016, y: -0.000000805437, z: -0.00000006826519}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth5
       parentName: Teeth
-      position: {x: -0.000040332816, y: -0.0000006443497, z: -0.000000054612165}
+      position: {x: -0.000050416016, y: -0.000000805437, z: -0.00000006826519}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth6
       parentName: Teeth
-      position: {x: -0.000040332816, y: -0.0000006443497, z: -0.000000054612165}
+      position: {x: -0.000050416016, y: -0.000000805437, z: -0.00000006826519}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth7
       parentName: Teeth
-      position: {x: -0.000040332816, y: -0.0000006443497, z: -0.000000054612165}
+      position: {x: -0.000050416016, y: -0.000000805437, z: -0.00000006826519}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth8
       parentName: Teeth
-      position: {x: -0.000040332816, y: -0.0000006443497, z: -0.000000054612165}
+      position: {x: -0.000050416016, y: -0.000000805437, z: -0.00000006826519}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth9
       parentName: Teeth
-      position: {x: -0.000040332816, y: -0.0000006443497, z: -0.000000054612165}
+      position: {x: -0.000050416016, y: -0.000000805437, z: -0.00000006826519}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth10
       parentName: Teeth
-      position: {x: 0.000040332696, y: -1.1162483e-10, z: -0.00000021808624}
+      position: {x: 0.00005041586, y: -1.39531e-10, z: -0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth11
       parentName: Teeth
-      position: {x: 0.000040332696, y: -1.1162483e-10, z: -0.00000021808624}
+      position: {x: 0.00005041586, y: -1.39531e-10, z: -0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mTooth12
       parentName: Teeth
-      position: {x: 0.000040332696, y: -1.1162483e-10, z: -0.00000021808624}
+      position: {x: 0.00005041586, y: -1.39531e-10, z: -0.0000002726077}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Head 1
       parentName: Head
-      position: {x: -0.0006989959, y: 0, z: 2.2427432e-20}
+      position: {x: -0.00087374495, y: 0, z: 2.8034285e-20}
       rotation: {x: 0.0000018529041, y: -0, z: -0, w: 1}
       scale: {x: 1.0000005, y: 1, z: 1.0000005}
     - name: FeatherLeather
       parentName: Head 1
-      position: {x: -0.0017010042, y: -0.0004784043, z: 0.0000000017728747}
+      position: {x: -0.002126255, y: -0.00059800537, z: 0.000000002216093}
       rotation: {x: 0.00941075, y: 0.04300749, z: -0.8601814, w: 0.5080845}
       scale: {x: 1, y: 1, z: 1}
     - name: pTorus1
       parentName: FeatherLeather
-      position: {x: 0.0017153063, y: 0.00050195993, z: 3.808745e-19}
+      position: {x: 0.0021441325, y: 0.0006274499, z: 4.7609306e-19}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mFeathersPlayerColor
       parentName: FeatherLeather
-      position: {x: 0.001326926, y: 0.0010180877, z: 0.00006542278}
+      position: {x: 0.0016586574, y: 0.0012726092, z: 0.00008177846}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mFeatherBones
       parentName: FeatherLeather
-      position: {x: 0.0013140945, y: 0.0010240047, z: 0.000066073735}
+      position: {x: 0.0016426181, y: 0.0012800058, z: 0.00008259217}
       rotation: {x: 0, y: -0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: mSpike1
       parentName: Head 1
-      position: {x: -0.0017010042, y: -0.0004784043, z: 0.0000000017728747}
+      position: {x: -0.002126255, y: -0.00059800537, z: 0.000000002216093}
       rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Tail1
       parentName: Head 1
-      position: {x: -0.0008761554, y: -0.000000003219828, z: -0.0000000032468521}
+      position: {x: -0.0010951941, y: -0.0000000040247845, z: -0.0000000040585646}
       rotation: {x: 0.0000019794234, y: -0.0000020020154, z: -0.5336146, w: 0.8457278}
       scale: {x: 1.0000006, y: 1, z: 1.0000006}
     - name: mSpike2
       parentName: Tail1
-      position: {x: -0.00082484883, y: -0.00047840105, z: 0.0000000050197273}
+      position: {x: -0.001031061, y: -0.0005980011, z: 0.000000006274659}
       rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Tail2
       parentName: Tail1
-      position: {x: -0.00089632085, y: -1.6342482e-18, z: -0.000000003321593}
+      position: {x: -0.0011204007, y: -2.04281e-18, z: -0.0000000041519903}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000005, y: 1, z: 1.0000005}
     - name: mSpike3
       parentName: Tail2
-      position: {x: 0.000071472015, y: -0.00047840105, z: 0.0000000083413205}
+      position: {x: 0.00008933999, y: -0.0005980011, z: 0.00000001042665}
       rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Tail3
       parentName: Tail2
-      position: {x: -0.00091845513, y: -6.3238305e-18, z: -0.0000000034036192}
+      position: {x: -0.0011480686, y: -7.904788e-18, z: -0.0000000042545225}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000006, y: 1, z: 1.0000006}
     - name: mSpike4
       parentName: Tail3
-      position: {x: 0.0009899272, y: -0.00047840105, z: 0.00000001174494}
+      position: {x: 0.001237409, y: -0.0005980011, z: 0.000000014681174}
       rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
       scale: {x: 1, y: 1, z: 1}
     - name: Tail4
       parentName: Tail3
-      position: {x: -0.00091869995, y: -3.4106053e-18, z: -0.0000000034045256}
+      position: {x: -0.0011483746, y: -4.263256e-18, z: -0.0000000042556567}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000005, y: 1, z: 1.0000005}
     - name: Tail5
       parentName: Tail4
-      position: {x: -0.000925774, y: -4.547474e-18, z: -0.0000000034307408}
+      position: {x: -0.0011572171, y: -5.6843417e-18, z: -0.0000000042884256}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000006, y: 1, z: 1.0000006}
     - name: Tail6
       parentName: Tail5
-      position: {x: -0.00068429566, y: -3.275602e-17, z: -0.0000000025358688}
+      position: {x: -0.0008553694, y: -4.094502e-17, z: -0.0000000031698357}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000005, y: 1, z: 1.0000005}
     - name: Tail7
       parentName: Tail6
-      position: {x: -0.00062915287, y: -1.0302869e-17, z: -0.0000000023315199}
+      position: {x: -0.00078644115, y: -1.2878584e-17, z: -0.0000000029143994}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000006, y: 1, z: 1.0000006}
     - name: Tail8
       parentName: Tail7
-      position: {x: -0.0006350171, y: -1.6089607e-11, z: -0.0000000023532516}
+      position: {x: -0.0007937713, y: -2.0112008e-11, z: -0.0000000029415639}
       rotation: {x: -0, y: -0, z: -0, w: 1}
       scale: {x: 1.0000005, y: 1, z: 1.0000005}
     armTwist: 0.5
@@ -682,7 +682,7 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    globalScale: 0.008
+    globalScale: 0.01
     rootMotionBoneName: 
     hasTranslationDoF: 0
     hasExtraRoot: 1

@@ -8,12 +8,14 @@ using LeyLineHybridECS;
 using System.Collections.Generic;
 using Unity.Collections;
 using Cell;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : ComponentSystem
 {
     ActionEffectsSystem m_ActionEffectsSystem;
     UISystem m_UISystem;
+    EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     EntityQuery m_TransformData;
     EntityQuery m_UnitData;
@@ -55,6 +57,13 @@ public class UnitAnimationSystem : ComponentSystem
         ComponentType.ReadWrite<Transform>()
         );
 
+        m_PlayerData = GetEntityQuery(
+        ComponentType.ReadOnly<HeroTransform>(),
+        ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+        ComponentType.ReadOnly<FactionComponent.Component>()
+        );
+        m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
+
         settings = Resources.Load<Settings>("Settings");
     }
 
@@ -68,10 +77,14 @@ public class UnitAnimationSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        if (m_GameStateData.CalculateEntityCount() == 0)
+        if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
             return;
 
+
+        var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
         var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+
+        var playerHeroTransform = playerHeroTransforms[0];
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
         {
@@ -196,6 +209,15 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if (animatorComponent.EnableVisualsDelay >= 0)
                 {
+                    //initially rotate visuals AWAY from hero(so leech makes more sense)
+                    if(playerHeroTransform.Transform)
+                    {
+                        Vector3 dir = animatorComponent.RotateTransform.position - playerHeroTransform.Transform.position;
+                        dir.y = 0;
+                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(dir);
+                    }
+
+                    //animatorComponent.RotateTransform.rotation
                     foreach (GameObject g in animatorComponent.Visuals)
                     {
                         if(g.activeSelf)

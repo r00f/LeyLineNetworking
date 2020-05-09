@@ -14,7 +14,5 @@ public class UnitHeadUI : MonoBehaviour
     public GameObject DeathBlowImage;
     public GameObject ArmorPanel;
     public Text ArmorText;
-    public HeadUILockedActionDisplay ActionDisplayPrefab;
-    [HideInInspector]
-    public HeadUILockedActionDisplay ActionDisplayInstance;
+    public HeadUILockedActionDisplay ActionDisplay;
 }
