@@ -73,17 +73,19 @@ namespace LeyLineHybridECS
                 UpdateVision();
             }
 
-            //REDUCED AMOUNT OF OBJECTS THAT ARE IN VISIBLEDATA 650 x if (isVisibleComp.RequireUpdate == 1) uses .5ms while doing nothing at all
-            Entities.With(m_RequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
+            if(m_RequireVisibleUpdateData.CalculateEntityCount() > 0)
             {
-                MeshRenderer meshRenderer = isVisibleGOs.MeshRenderer;
-                List<GameObject> gameObjects = isVisibleGOs.GameObjects;
-                Collider collider = isVisibleGOs.Collider;
-                byte isVisible = isVisibleComp.Value;
+                //REDUCED AMOUNT OF OBJECTS THAT ARE IN VISIBLEDATA 650 x if (isVisibleComp.RequireUpdate == 1) uses .5ms while doing nothing at all
+                Entities.With(m_RequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
+                {
+                    MeshRenderer meshRenderer = isVisibleGOs.MeshRenderer;
+                    List<GameObject> gameObjects = isVisibleGOs.GameObjects;
+                    Collider collider = isVisibleGOs.Collider;
+                    byte isVisible = isVisibleComp.Value;
 
-                //use RequireVisibleUpdate flag comp instead of RequireUpdate check
-                //if (isVisibleComp.RequireUpdate == 1)
-                //{
+                    //use RequireVisibleUpdate flag comp instead of RequireUpdate check
+                    //if (isVisibleComp.RequireUpdate == 1)
+                    //{
                     Color color = new Color();
 
                     if (meshRenderer.material.HasProperty("_UnlitColor"))
@@ -123,9 +125,9 @@ namespace LeyLineHybridECS
                             }
                             else
                             {
-                            //REMOVE FLAG
-                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                            //isVisibleComp.RequireUpdate = 0;
+                                //REMOVE FLAG
+                                PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
+                                //isVisibleComp.RequireUpdate = 0;
                             }
                         }
                     }
@@ -138,10 +140,10 @@ namespace LeyLineHybridECS
                                 g.SetActive(false);
                             }
                             collider.enabled = false;
-                        //REMOVE REQUIRE UPDATE FLAG COMPONENT
-                        PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
+                            //REMOVE REQUIRE UPDATE FLAG COMPONENT
+                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
 
-                        //isVisibleComp.RequireUpdate = 0;
+                            //isVisibleComp.RequireUpdate = 0;
                         }
                         else
                         {
@@ -150,15 +152,15 @@ namespace LeyLineHybridECS
                                 g.SetActive(true);
                             }
                             collider.enabled = true;
-                        //REMOVE REQUIRE UPDATE FLAG COMPONENT
-                        PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
+                            //REMOVE REQUIRE UPDATE FLAG COMPONENT
+                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
 
-                        //isVisibleComp.RequireUpdate = 0;
+                            //isVisibleComp.RequireUpdate = 0;
                         }
                     }
-                //}
-            });
-
+                    //}
+                });
+            }
         }
 
         public void UpdateVision()
