@@ -23,10 +23,6 @@ namespace LeyLineHybridECS
         protected override void OnCreate()
         {
             base.OnCreate();
-            m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadWrite<CellAttributesComponent.Component>()
-            );
 
             m_GameStateData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
@@ -55,76 +51,65 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
+
+            if (m_GameStateData.CalculateEntityCount() == 0)
+                return;
+
+            var gameStateWindexData = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+            var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+            var gameStateWIndex = gameStateWindexData[0];
+            var gameState = gameStateData[0];
+
+
             Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref WorldIndex.Component unitWorldIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
             {
-                var movementVariables = m;
-                var unitWindex = unitWorldIndex.Value;
-                var actions = actionsData;
                 var unitID = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
-                var pos = position;
-                var vis = vision;
-                var cor = coord;
-                
+
                 if (actionsData.LockedAction.Index == -2)
                 {
                     var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
-                    Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
-                    {
-                        if (unitWindex == gameStateWorldIndex.Value)
-                        {
-                            if (gameState.CurrentState == GameStateEnum.interrupt)
-                            {
-                                //PATH CULLING
-                                actions = CompareCullableActions(actions, gameStateWorldIndex.Value, unitID);
-                                //actionsDatas[i] = actionsData;
-                            }
-                            else if (gameState.CurrentState == GameStateEnum.move)
-                            {
-                                if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
-                                {
-                                    //instead of lerping towards next pos in path, set pos and wait for client to catch up
-                                    if (movementVariables.TimeLeft >= 0)
-                                    {
-                                        movementVariables.TimeLeft -= Time.deltaTime;
-                                    }
-                                    else
-                                    {
-                                        pos.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
 
-                                        if (currentPath.Count == 1)
-                                        {
-                                            movementVariables.TimeLeft = 0;
-                                        }
-                                        else
-                                        {
-                                            movementVariables.TimeLeft = actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
-                                        }
-                                        cor.CubeCoordinate = currentPath[0].CubeCoordinate;
-                                        /*
-                                        logger.HandleLog(LogType.Warning,
-                                        new LogEvent("Set Unit ReqUpdate from MovementSystem")
-                                        .WithField("AYAYA", "AYAYA"));
-                                        */
-                                        vis.RequireUpdate = true;
-                                        currentPath.RemoveAt(0);
-                                    }
-                                }
-                            }
-                            /*else if (gameStates[gi].CurrentState == GameStateEnum.calculate_energy)
+                    if (gameState.CurrentState == GameStateEnum.interrupt)
+                    {
+                        actionsData = CompareCullableActions(actionsData, gameStateWIndex.Value, unitID);
+                    }
+                    else if (gameState.CurrentState == GameStateEnum.move)
+                    {
+                        if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
+                        {
+                            //instead of lerping towards next pos in path, set pos and wait for client to catch up
+                            if (m.TimeLeft >= 0)
                             {
-                                cellsToMark.CachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-                                cellsToMark.CellsInRange = new List<CellAttributes>();
-                                unitCellsToMarks[i] = cellsToMark;
-                            }*/
+                                m.TimeLeft -= Time.deltaTime;
+                            }
+                            else
+                            {
+                                position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
+
+                                if (currentPath.Count == 1)
+                                {
+                                    m.TimeLeft = 0;
+                                }
+                                else
+                                {
+                                    m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
+                                }
+                                coord.CubeCoordinate = currentPath[0].CubeCoordinate;
+                                /*
+                                logger.HandleLog(LogType.Warning,
+                                new LogEvent("Set Unit ReqUpdate from MovementSystem")
+                                .WithField("AYAYA", "AYAYA"));
+                                */
+                                vision.RequireUpdate = true;
+                                currentPath.RemoveAt(0);
+                            }
                         }
-                    });
-                    position = pos;
-                    m = movementVariables;
-                    vision = vis;
-                    coord = cor;
-                    actionsData = actions;
+                    }
                 }
             });
+
+            gameStateWindexData.Dispose();
+            gameStateData.Dispose();
         }
 
         private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)

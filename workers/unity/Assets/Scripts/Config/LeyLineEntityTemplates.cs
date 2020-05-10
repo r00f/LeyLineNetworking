@@ -104,6 +104,7 @@ public static class LeyLineEntityTemplates {
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
 
+        
         var pos = new Position.Snapshot
         {
             Coords = new Coordinates
@@ -113,6 +114,7 @@ public static class LeyLineEntityTemplates {
                 Z = position.Z
             }
         };
+        
 
         var coord = new CubeCoordinate.Snapshot
         {
@@ -198,7 +200,8 @@ public static class LeyLineEntityTemplates {
         var playerPathing = new PlayerPathing.Snapshot
         {
             CellsInRange = new List<CellAttribute>(),
-            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>(),
+            CoordinatesInRange = new List<Vector3f>()
         };
 
         var playerState = new PlayerState.Snapshot

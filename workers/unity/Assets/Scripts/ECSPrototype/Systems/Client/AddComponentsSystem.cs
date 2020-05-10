@@ -71,7 +71,7 @@ public class AddComponentsSystem : ComponentSystem
                 ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<UnitEffects>(),
-                ComponentType.ReadWrite<AnimatorComponent>()
+                ComponentType.ReadOnly<AnimatorComponent>()
 
             }
         };
@@ -103,7 +103,7 @@ public class AddComponentsSystem : ComponentSystem
             {
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<PlayerState.Component>(),
-                ComponentType.ReadWrite<HeroTransform>()
+                ComponentType.ReadOnly<HeroTransform>()
             }
         };
 
@@ -188,11 +188,14 @@ public class AddComponentsSystem : ComponentSystem
                 IsUnit = 0
             };
 
+            RequireMarkerUpdate requireMarkerUpdate = new RequireMarkerUpdate();
+
+
             PostUpdateCommands.AddComponent(entity, mouseVars);
             PostUpdateCommands.AddComponent(entity, mouseState);
             PostUpdateCommands.AddComponent(entity, markerState);
             PostUpdateCommands.AddComponent(entity, isVisible);
-
+            PostUpdateCommands.AddComponent(entity, requireMarkerUpdate);
 
             /*
             //PostUpdateCommands.AddComponent(entity, new NonUniformScale());

@@ -16,6 +16,8 @@ using UnityEngine;
 public class HighlightingSystem : ComponentSystem
 {
 
+    private EndSimulationEntityCommandBufferSystem entityCommandBufferSystem;
+
     Settings settings;
     PathFindingSystem m_PathFindingSystem;
     EntityQuery m_ActiveUnitData;
@@ -30,6 +32,7 @@ public class HighlightingSystem : ComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
+        entityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         settings = Resources.Load<Settings>("Settings");
 
         m_CellData = GetEntityQuery(
@@ -39,7 +42,7 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<MarkerState>()
+            ComponentType.ReadOnly<MarkerState>()
             );
 
         m_GameStateData = GetEntityQuery(
@@ -75,8 +78,8 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Position.Component>(),
-            ComponentType.ReadWrite<MouseState>(),
-            ComponentType.ReadWrite<MarkerState>()
+            ComponentType.ReadOnly<MouseState>(),
+            ComponentType.ReadOnly<MarkerState>()
             );
 
         m_PlayerStateData = GetEntityQuery(
@@ -101,8 +104,13 @@ public class HighlightingSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        if (m_PlayerStateData.CalculateEntityCount() == 0)
+        if (m_PlayerStateData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
             return;
+
+        EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
+        var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+        var gameState = gameStateData[0];
 
         #region playerStateData
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
@@ -123,59 +131,61 @@ public class HighlightingSystem : ComponentSystem
         //used to increase performance - does not work for clearing old AoE when selecting new action yet
         //HashSet<Vector3f> extendedCoordsInRangeHash = new HashSet<Vector3f>(m_CellGrid.CircleDraw(playerState.SelectedUnitCoordinate, playerHighlightingData.Range + playerHighlightingData.AoERadius + playerHighlightingData.RingRadius));
 
-        Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
+        if (gameState.CurrentState == GameStateEnum.planning)
         {
-            if (playerWorldIndex == gameStateWorldIndex.Value)
+            //Debug.Log("lastHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) + "currHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate));
+            if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) && playerHighlightingData.InputCooldown <= 0)
             {
-                if (gameState.CurrentState == GameStateEnum.planning)
+                if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
-                    //Debug.Log("lastHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) + "currHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate));
-                    if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) && playerHighlightingData.InputCooldown <= 0)
-                    {
-                        if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
-                        {
-                            playerState = FillUnitTargetsList(playerState.SelectedAction, playerHighlightingData, playerState, playerPathing, playerFaction.Faction);
-                            playerPathing = UpdateSelectedUnit(playerState, playerPathing, playerHighlightingData);
-                            SetNumberOfTargets(playerState);
-                            playerStates[0] = playerState;
-                            playerPathings[0] = playerPathing;
-                            m_PlayerStateData.CopyFromComponentDataArray(playerPathings);
-                            m_PlayerStateData.CopyFromComponentDataArray(playerStates);
+                    HashSet<Vector3f> currentActionTargetHash = new HashSet<Vector3f>();
 
-                        }
-                        else
-                        {
-                            ResetHighlights();
-                        }
+                    if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+                        currentActionTargetHash = new HashSet<Vector3f>(playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates);
+                    currentActionTargetHash.Add(playerHighlightingData.LastHoveredCoordinate);
 
-                        playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
-                    }
+                    playerState = FillUnitTargetsList(playerState.SelectedAction, playerHighlightingData, playerState, playerPathing, playerFaction.Faction);
+                    playerPathing = UpdateSelectedUnit(playerState, playerPathing, playerHighlightingData);
+                    SetNumberOfTargets(playerState, currentActionTargetHash);
+                    playerStates[0] = playerState;
+                    playerPathings[0] = playerPathing;
+                    m_PlayerStateData.CopyFromComponentDataArray(playerPathings);
+                    m_PlayerStateData.CopyFromComponentDataArray(playerStates);
 
-                    if(playerHighlightingData.InputCooldown >= 0)
-                        playerHighlightingData.InputCooldown -= Time.deltaTime;
-
-                    playerHighlightingDatas[0] = playerHighlightingData;
-                    m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
                 }
                 else
                 {
-
-                    Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState) =>
-                    {
-                        if (markerState.NumberOfTargets > 0)
-                        {
-                            markerState.NumberOfTargets = 0;
-                        }
-                    });
-
-                    Entities.With(m_ActiveUnitData).ForEach((LineRendererComponent lineRenderer) =>
-                    {
-                        lineRenderer.lineRenderer.positionCount = 0;
-                    });
+                    ResetHighlights();
                 }
-            }
-        });
 
+                playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
+            }
+
+            if (playerHighlightingData.InputCooldown >= 0)
+                playerHighlightingData.InputCooldown -= Time.deltaTime;
+
+            playerHighlightingDatas[0] = playerHighlightingData;
+            m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
+        }
+        else
+        {
+
+            Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState) =>
+            {
+                if (markerState.NumberOfTargets > 0 || markerState.CurrentState == MarkerState.State.Hovered)
+                {
+                    markerState.NumberOfTargets = 0;
+                    commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+                }
+            });
+
+            Entities.With(m_ActiveUnitData).ForEach((LineRendererComponent lineRenderer) =>
+            {
+                lineRenderer.lineRenderer.positionCount = 0;
+            });
+        }
+
+        gameStateData.Dispose();
         #region playerStateData
         playerPathings.Dispose();
         playerStates.Dispose();
@@ -339,9 +349,11 @@ public class HighlightingSystem : ComponentSystem
         return h;
     }
 
-    public void SetNumberOfTargets(PlayerState.Component playerState)
+    public void SetNumberOfTargets(PlayerState.Component playerState, HashSet<Vector3f> lastHoveredCoords)
     {
-        Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref CubeCoordinate.Component coord) =>
+        EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
+        Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref CubeCoordinate.Component coord) =>
         {
             uint nOfTargets = 0;
             int turnStepIndex = 0;
@@ -353,14 +365,20 @@ public class HighlightingSystem : ComponentSystem
 
                 if (targetCoordsHash.Contains(coord.CubeCoordinate))
                 {
-                    //set markerState targetTurnStep
                     turnStepIndex = tI;
                     nOfTargets += 1;
+                    commandBuffer.AddComponent(e, new RequireMarkerUpdate());
                 }
             }
 
             markerState.TurnStepIndex = turnStepIndex;
             markerState.NumberOfTargets = nOfTargets;
+
+            if(lastHoveredCoords.Contains(coord.CubeCoordinate))
+            {
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+            }
+
         });
     }
 
@@ -409,8 +427,10 @@ public class HighlightingSystem : ComponentSystem
                         foreach (CellAttribute key in playerPathing.CachedPaths.Keys)
                         {
                             playerPathing.CellsInRange.Add(key);
+                            playerPathing.CoordinatesInRange.Add(key.CubeCoordinate);
                         }
 
+                        playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
                         playerPathing.CachedPaths = playerPathing.CachedPaths;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
                         /*
@@ -425,7 +445,9 @@ public class HighlightingSystem : ComponentSystem
                         foreach (CellAttributes c in go)
                         {
                             playerPathing.CellsInRange.Add(c.Cell);
+                            playerPathing.CoordinatesInRange.Add(c.Cell.CubeCoordinate);
                         }
+                        playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
                     }
                 }
@@ -628,6 +650,9 @@ public class HighlightingSystem : ComponentSystem
         var playerState = playerStates[0];
         var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
+
+        EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
         HashSet<long> unitIdHash = new HashSet<long>(playerStates[0].UnitTargets.Keys);
 
         Entities.With(m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
@@ -645,16 +670,18 @@ public class HighlightingSystem : ComponentSystem
             }
         });
 
-        Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
                 mouseState.CurrentState = MouseState.State.Neutral;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
             }
             if (markerState.CurrentState != (MarkerState.State)(int)mouseState.CurrentState)
             {
                 markerState.CurrentState = (MarkerState.State)(int)mouseState.CurrentState;
-                markerState.IsSet = 0;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+                //markerState.IsSet = 0;
             }
         });
 
@@ -671,19 +698,22 @@ public class HighlightingSystem : ComponentSystem
         if (playerState.UnitTargets.ContainsKey(unitId) && playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
         {
             ResetMarkerNumberOfTargets(playerState.UnitTargets[unitId].CubeCoordinates);
+
         }
     }
 
     public void ResetMarkerNumberOfTargets(List<Vector3f> cubeCoords)
     {
         HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoords);
+        EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-        Entities.With(m_MarkerStateData).ForEach((ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
             if (coordHash.Contains(coord.CubeCoordinate) && markerState.NumberOfTargets > 0)
             {
                 mouseState.CurrentState = MouseState.State.Neutral;
-                markerState.NumberOfTargets -= 1;
+                markerState.NumberOfTargets = 0;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
             }
         });
     }
@@ -694,6 +724,9 @@ public class HighlightingSystem : ComponentSystem
         var playerState = playerStates[0];
         var playerPathings = m_PlayerStateData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
 
+        EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
+
         //remove selected unit target from player UnitTargets Dict 
         if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
         {
@@ -701,28 +734,31 @@ public class HighlightingSystem : ComponentSystem
             playerState.TargetDictChange = true;
             playerStates[0] = playerState;
         }
+
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
 
-        Entities.With(m_MarkerStateData).ForEach((ref MarkerState marker, ref CubeCoordinate.Component coord) =>
+        HashSet<Vector3f> playerCellsInRangeHash = new HashSet<Vector3f>(playerPathings[0].CoordinatesInRange);
+
+        Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState marker, ref CubeCoordinate.Component coord) =>
         {
             if (marker.CurrentState == MarkerState.State.Hovered || marker.CurrentState == MarkerState.State.Clicked)
             {
                 marker.CurrentState = MarkerState.State.Neutral;
-                marker.IsSet = 0;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+            }
+            
+            if (playerCellsInRangeHash.Contains(coord.CubeCoordinate))
+            {
+                marker.CurrentState = MarkerState.State.Reachable;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
             }
 
-            foreach (CellAttribute c in playerPathings[0].CellsInRange)
-            {
-                if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(c.CubeCoordinate))
-                {
-                    marker.CurrentState = MarkerState.State.Reachable;
-                    marker.IsSet = 0;
-                }
-            }
         });
 
-        playerPathings.Dispose();
+
         playerStates.Dispose();
+        playerPathings.Dispose();
+
     }
 
     public void ClearPlayerState()
@@ -781,7 +817,7 @@ public class HighlightingSystem : ComponentSystem
         playerState.TargetDictChange = true;
         playerStates[0] = playerState;
         m_PlayerStateData.CopyFromComponentDataArray(playerStates);
-        SetNumberOfTargets(playerStates[0]);
+        SetNumberOfTargets(playerStates[0], new HashSet<Vector3f>());
         playerStates.Dispose();
 
 

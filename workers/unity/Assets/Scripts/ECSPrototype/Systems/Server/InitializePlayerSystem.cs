@@ -63,8 +63,8 @@ namespace LeyLineHybridECS
 
 
             m_SpawnCellData = GetEntityQuery(
-                ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
-                ComponentType.ReadOnly<CellAttributesComponent.Component>(),
+                //ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
+                //ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<IsSpawn.Component>(),
@@ -140,7 +140,7 @@ namespace LeyLineHybridECS
                         var f = factionComp.Faction;
                         var heroName = playerAttribute.HeroName;
 
-                        Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord, ref CellAttributesComponent.Component cellAttribute) =>
+                        Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
                         {
                             if (cellWorldIndex.Value == playerWIndex)
                             {

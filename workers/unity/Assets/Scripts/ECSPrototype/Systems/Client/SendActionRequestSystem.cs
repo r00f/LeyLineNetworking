@@ -8,6 +8,7 @@ using Player;
 using UnityEngine;
 using Improbable;
 using Unity.Collections;
+using System.Collections.Generic;
 
 //Update after playerState selected unit has been set
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
@@ -237,7 +238,6 @@ public class SendActionRequestSystem : ComponentSystem
                 }
 
                 playerState.SelectedAction = act;
-
                 m_HighlightingSystem.ResetHighlights();
 
                 if (actionIndex != -3)
@@ -249,15 +249,15 @@ public class SendActionRequestSystem : ComponentSystem
                         new LogEvent("SetAction")
                         .WithField("unitId", 1f));
                         */
+                        m_HighlightingSystem.ResetMarkerNumberOfTargets(playerPathing.CoordinatesInRange);
+                        playerPathing.CoordinatesInRange.Clear();
                         playerPathing.CellsInRange.Clear();
                         playerPathing.CachedPaths.Clear();
+                        playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
                         playerPathing.CachedPaths = playerPathing.CachedPaths;
-
-
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
                         playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerPathing, playerFaction.Faction);
-                        m_HighlightingSystem.SetNumberOfTargets(playerState);
                         playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh);
                         m_HighlightingSystem.HighlightReachable();
                     }
@@ -274,9 +274,17 @@ public class SendActionRequestSystem : ComponentSystem
                     m_PlayerData.CopyFromComponentDataArray(playerPathings);
                     m_PlayerData.CopyFromComponentDataArray(playerStates);
                     m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+
+                    m_HighlightingSystem.SetNumberOfTargets(playerState, new HashSet<Vector3f>(playerPathing.CoordinatesInRange));
+
+                }
+                else
+                {
+                    m_HighlightingSystem.ResetMarkerNumberOfTargets(playerPathing.CoordinatesInRange);
                 }
             }
         });
+
 
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();
