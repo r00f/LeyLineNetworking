@@ -141,7 +141,6 @@ public class AddComponentsSystem : ComponentSystem
             PostUpdateCommands.AddComponent(entity, highlightingData);
             m_UIReferences.MinimapComponent.h_Transform = htrans;
 
-
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
         });
 
