@@ -130,14 +130,10 @@ namespace LeyLineHybridECS
                                     playerState.CurrentState = PlayerStateEnum.unit_selected;
                                 }
                             }
-
-                            if (!unitComponentReferences.SelectionCircleGO.activeSelf)
-                                unitComponentReferences.SelectionCircleGO.SetActive(true);
-
                         }
                         else
                         {
-                            unitComponentReferences.SelectionCircleGO.SetActive(false);
+
                             if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                             {
                                 playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;

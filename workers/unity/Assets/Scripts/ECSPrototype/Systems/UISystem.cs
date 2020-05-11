@@ -812,8 +812,7 @@ namespace LeyLineHybridECS
             authPlayersEnergy.Dispose();
             authPlayersFaction.Dispose();
             authPlayersState.Dispose();
-
-            //m_AuthoritativePlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+            m_AuthoritativePlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
             playerHighlightingDatas.Dispose();
             #endregion
         }

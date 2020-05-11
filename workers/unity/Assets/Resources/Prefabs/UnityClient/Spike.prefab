@@ -738,23 +738,13 @@ MonoBehaviour:
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 5049950378277404256}
   AxaShield: {fileID: 202638360942825131}
-  AttackPosition: {x: 0, y: 0, z: 0}
   HitPosition: {x: 0, y: 0, z: 0}
-  Action:
-    Name: 
-    CombinedCost: 0
-    Index: 0
-    Targets: []
-    Effects: []
-    ActionExecuteStep: 0
-    TimeToExecute: 0
   CurrentArmor: 0
   CurrentHealth: 0
   LastStationaryCoordinate:
     X: 0
     Y: 0
     Z: 0
-  ActionEffectTrigger: 0
 --- !u!1 &4556677313927109637
 GameObject:
   m_ObjectHideFlags: 0
@@ -2388,7 +2378,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_Layer
@@ -2448,15 +2438,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.69359
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.69359
+      value: 0.7
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 51c255269242ba748954e29d496625c5, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.69359
+      value: 0.7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 51c255269242ba748954e29d496625c5, type: 3}

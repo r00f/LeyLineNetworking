@@ -60,6 +60,7 @@ public class UnitAnimationSystem : ComponentSystem
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<HeroTransform>(),
         ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+        ComponentType.ReadOnly<HighlightingDataComponent>(),
         ComponentType.ReadOnly<FactionComponent.Component>()
         );
         m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
@@ -80,11 +81,12 @@ public class UnitAnimationSystem : ComponentSystem
         if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
             return;
 
-
+        var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
         var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
         var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
         var playerHeroTransform = playerHeroTransforms[0];
+        var playerHigh = playerHighs[0];
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
         {
@@ -93,6 +95,7 @@ public class UnitAnimationSystem : ComponentSystem
             var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+            var unitComponentReferences = EntityManager.GetComponentObject<UnitComponentReferences>(e);
 
             //if this caracter has a filled voice emitter field and a voice event is triggered
             if (animatorComponent.VoiceEmitter && animatorComponent.AnimationEvents.VoiceTrigger)
@@ -262,12 +265,32 @@ public class UnitAnimationSystem : ComponentSystem
 
             if(gameStates[0].CurrentState == GameStateEnum.planning)
             {
+                unitComponentReferences.SelectionCircleGO.SetActive(true);
+
+                if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                {
+                    if (((int)faction.Faction & 1) == 1)
+                    {
+                        //odd
+                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 3);
+                    }
+                    else
+                    {
+                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 3);
+                    }
+                }
+                else
+                {
+                    unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
+                }
+
                 animatorComponent.Animator.SetBool("Executed", false);
                 animatorComponent.Animator.SetBool("Planning", true);
                 animatorComponent.Animator.ResetTrigger("Execute");
             }
             else
             {
+                unitComponentReferences.SelectionCircleGO.SetActive(false);
                 animatorComponent.Animator.SetBool("Planning", false);
             }
 
@@ -337,6 +360,7 @@ public class UnitAnimationSystem : ComponentSystem
             #endregion
         });
 
+        playerHighs.Dispose();
         gameStates.Dispose();
     }
 

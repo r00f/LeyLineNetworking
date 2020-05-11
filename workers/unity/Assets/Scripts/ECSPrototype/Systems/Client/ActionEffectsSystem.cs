@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using Unity.Collections;
 using System.Collections;
 using Player;
+using System.Linq;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
 public class ActionEffectsSystem : ComponentSystem
@@ -120,15 +121,14 @@ public class ActionEffectsSystem : ComponentSystem
                     unitEffects.CurrentArmor = 0;
                     unitEffects.CurrentHealth = health.CurrentHealth;
                 }
-                //FeedBack to incoming Attacks / Heals
-                if (unitEffects.ActionEffectTrigger)
+
+                //DOES THE SAME FOR EACH GETHITEFFECT IN LIST (TWO DAMAGE NUMBERS AT THE SAME TIME) - ADD BEHAVIOUR TO ADD DAMAGE NUBERS AND ONLY DISPLAY 1 EFFECT 
+                for (int i = 0; i < unitEffects.GetHitEffects.Count; i++)
                 {
-                    unitEffects.HitPosition = unitCollider.ClosestPoint(unitEffects.AttackPosition);
-                    Vector3 dir = unitEffects.AttackPosition - unitEffects.HitPosition;
+                    unitEffects.HitPosition = unitCollider.ClosestPoint(unitEffects.GetHitEffects.ElementAt(i).Value);
+                    Vector3 dir = unitEffects.GetHitEffects.ElementAt(i).Value - unitEffects.HitPosition;
 
-                    //float randomYoffset = Random.Range(0.5f, 1f);
-
-                    foreach (ActionEffect effect in unitEffects.Action.Effects)
+                    foreach (ActionEffect effect in unitEffects.GetHitEffects.ElementAt(i).Key.Effects)
                     {
                         switch (effect.EffectType)
                         {
@@ -143,9 +143,9 @@ public class ActionEffectsSystem : ComponentSystem
                                     {
                                         int remainingDamage = (int)damageAmount;
 
-                                        for (int i = unitEffects.AxaShield.Orbits.Count - 1; i >= 0; i--)
+                                        for (int j = unitEffects.AxaShield.Orbits.Count - 1; j >= 0; j--)
                                         {
-                                            AxaShieldOrbit o = unitEffects.AxaShield.Orbits[i];
+                                            AxaShieldOrbit o = unitEffects.AxaShield.Orbits[j];
 
                                             if (remainingDamage - 10 >= 0)
                                             {
@@ -209,7 +209,7 @@ public class ActionEffectsSystem : ComponentSystem
                                         unitEffects.CurrentHealth = 0;
                                     }
                                 }
-                                
+
 
                                 animatorComponent.Animator.SetTrigger("GetHit");
 
@@ -220,7 +220,7 @@ public class ActionEffectsSystem : ComponentSystem
 
                                 //enter defensive stance in animator
 
-                                uint armorAmount = unitEffects.Action.Effects[0].GainArmorNested.ArmorAmount;
+                                uint armorAmount = unitEffects.GetHitEffects.ElementAt(i).Key.Effects[0].GainArmorNested.ArmorAmount;
                                 //do gainArmorStuff
                                 unitEffects.CurrentArmor += armorAmount;
                                 m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f);
@@ -229,68 +229,65 @@ public class ActionEffectsSystem : ComponentSystem
                         }
                     }
 
-                    unitEffects.ActionEffectTrigger = false;
-                }
-
-                //DEATH 
-                if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0 && !animatorComponent.Dead)
-                {
-                    if(actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.Action.ActionExecuteStep)
+                    if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0 && !animatorComponent.Dead)
                     {
-                        //NORMAL DEATH - INSTANTLY DIE
-                        if (unitEffects.DisplayDeathSkull)
-                            m_UISystem.TriggerUnitDeathUI(e);
-
-                        if (unitEffects.BodyPartBloodParticleSystem)
+                        if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.GetHitEffects.ElementAt(i).Key.ActionExecuteStep)
                         {
-                            Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition, unitEffects.BodyPartBloodParticleSystem);
-                        }
-                        else
-                        {
-                            Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition);
-                        }
-                    }
-                    else
-                    {
-                        //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
-
-                        //if(animatorComponent.) if character is not red turn it red
-                        if(unitEffects.SecondWindParticleSystemInstance)
-                        {
-                            ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                            if(!ps.isPlaying)
-                                ps.Play();
-                        }
-
-                        if (animatorComponent.AnimationEvents.EventTriggered)
-                        {
-                            
-                            if (unitEffects.SecondWindParticleSystemInstance)
-                            {
-                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                                if (ps.isPlaying)
-                                    ps.Stop();
-                            }
-                            
-
+                            //NORMAL DEATH - INSTANTLY DIE
                             if (unitEffects.DisplayDeathSkull)
                                 m_UISystem.TriggerUnitDeathUI(e);
 
                             if (unitEffects.BodyPartBloodParticleSystem)
                             {
-                                Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition, unitEffects.BodyPartBloodParticleSystem);
+                                Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value, unitEffects.BodyPartBloodParticleSystem);
                             }
                             else
                             {
-                                Death(animatorComponent, unitEffects.Action, unitEffects.AttackPosition);
+                                Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value);
+                            }
+                        }
+                        else
+                        {
+                            //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
+
+                            //if(animatorComponent.) if character is not red turn it red
+                            if (unitEffects.SecondWindParticleSystemInstance)
+                            {
+                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
+
+                                if (!ps.isPlaying)
+                                    ps.Play();
+                            }
+
+                            if (animatorComponent.AnimationEvents.EventTriggered)
+                            {
+
+                                if (unitEffects.SecondWindParticleSystemInstance)
+                                {
+                                    ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
+
+                                    if (ps.isPlaying)
+                                        ps.Stop();
+                                }
+
+
+                                if (unitEffects.DisplayDeathSkull)
+                                    m_UISystem.TriggerUnitDeathUI(e);
+
+                                if (unitEffects.BodyPartBloodParticleSystem)
+                                {
+                                    Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value, unitEffects.BodyPartBloodParticleSystem);
+                                }
+                                else
+                                {
+                                    Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value);
+                                }
                             }
                         }
                     }
+                    unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
                 }
             }
-
             animatorComponent.Animator.SetInteger("Armor", (int)unitEffects.CurrentArmor);
         });
 
@@ -298,17 +295,17 @@ public class ActionEffectsSystem : ComponentSystem
         gameStates.Dispose();
     }
 
-    public void TriggerActionEffect(Action action, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
+    public void TriggerActionEffect(Action inAction, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
     {
         var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
         var playerVisionHash = new HashSet<Vector3f>(playerVisionData[0].CellsInVisionrange);
 
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
-        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { action.Targets[0].TargetCoordinate };
+        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { inAction.Targets[0].TargetCoordinate };
 
-        if (action.Targets[0].Mods.Count != 0)
+        if (inAction.Targets[0].Mods.Count != 0)
         {
-            foreach (CoordinatePositionPair p in action.Targets[0].Mods[0].CoordinatePositionPairs)
+            foreach (CoordinatePositionPair p in inAction.Targets[0].Mods[0].CoordinatePositionPairs)
             {
                 coordsToTrigger.Add(p.CubeCoordinate);
             }
@@ -317,25 +314,22 @@ public class ActionEffectsSystem : ComponentSystem
 
         Entities.With(m_UnitData).ForEach((Entity e, UnitEffects unitEffects, ref FactionComponent.Component faction, ref CubeCoordinate.Component cubeCoord) =>
         {
-            if (playerVisionHash.Contains(cubeCoord.CubeCoordinate))
+        if (playerVisionHash.Contains(cubeCoord.CubeCoordinate))
+        {
+            //only apply effect if target unit is valid or pass correct coordinates
+            if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)inAction.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
-                //only apply effect if target unit is valid or pass correct coordinates
-                if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)action.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
+                if (unitEffects.AxaShield && spawnShieldOrbits != 0)
                 {
-                    if (unitEffects.AxaShield && spawnShieldOrbits != 0)
+                    //if we need to spawn shieldorbits spaWN SHIELDorbits
+                    for (int i = 0; i < spawnShieldOrbits; i++)
                     {
-                        //if we need to spawn shieldorbits spaWN SHIELDorbits
-                        for (int i = 0; i < spawnShieldOrbits; i++)
-                        {
-                            AxaShieldOrbit go = Object.Instantiate(unitEffects.AxaShield.OrbitPrefab, unitEffects.AxaShield.transform.position, Quaternion.LookRotation(hitTransform.position - unitEffects.AxaShield.transform.position), unitEffects.AxaShield.transform);
-                            go.GetComponent<MovementAnimComponent>().RotationAxis = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), 0f);
-                            unitEffects.AxaShield.Orbits.Add(go);
-                        }
+                        AxaShieldOrbit go = Object.Instantiate(unitEffects.AxaShield.OrbitPrefab, unitEffects.AxaShield.transform.position, Quaternion.LookRotation(hitTransform.position - unitEffects.AxaShield.transform.position), unitEffects.AxaShield.transform);
+                        go.GetComponent<MovementAnimComponent>().RotationAxis = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), 0f);
+                        unitEffects.AxaShield.Orbits.Add(go);
                     }
-                    unitEffects.Action = action;
-                    unitEffects.AttackPosition = hitTransform.position;
-                    //Debug.Log("Set Unit actionEffectTrigger from actionEffectsSystem");
-                    unitEffects.ActionEffectTrigger = true;
+                }
+                    unitEffects.GetHitEffects.Add(inAction, hitTransform.position);
                 }
             }
         });
