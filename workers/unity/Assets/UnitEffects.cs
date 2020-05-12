@@ -18,6 +18,7 @@ public class UnitEffects : MonoBehaviour
 
     [Header("GetHit")]
     public Dictionary<Action, Vector3> GetHitEffects = new Dictionary<Action, Vector3>();
+    public KeyValuePair<Action, Vector3> CurrentGetHitEffect;
     //public List<GetHitEffect> GetHitEffects;
     public Vector3 HitPosition;
     public uint CurrentArmor;

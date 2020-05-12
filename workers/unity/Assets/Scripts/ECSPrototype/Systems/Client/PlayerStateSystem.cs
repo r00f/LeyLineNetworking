@@ -100,8 +100,17 @@ namespace LeyLineHybridECS
 
                     Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
                     {
+                        var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+
                         if (unitId.EntityId.Id == playerState.SelectedUnitId)
                         {
+                            foreach(ParticleSystem p in teamColorMeshes.ParticleSystems)
+                            {
+                                if(!p.isPlaying)
+                                    p.Play();
+                            }
+                            
+
                             if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                                 playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
 
@@ -133,7 +142,11 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-
+                            foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
+                            {
+                                if (p.isPlaying)
+                                    p.Stop();
+                            }
                             if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                             {
                                 playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;

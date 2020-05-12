@@ -13,6 +13,12 @@ public class HealthBar : MonoBehaviour
     public Image HealthFill;
     public Image ArmorFill;
     public Image DamageFill;
+    public Image Parts;
     public RectTransform HealthBarRect;
     public RectTransform DamageRect;
+
+    public void Start()
+    {
+        Parts.material = Instantiate(Parts.material);
+    }
 }

@@ -1043,27 +1043,52 @@ namespace LeyLineHybridECS
             var playerFaction = authPlayersFaction[0].Faction;
             uint combinedHealth = health.CurrentHealth + health.Armor;
             uint combinedMaxHealth = health.MaxHealth + health.Armor;
-            float healthPercentage = 1 - (float)health.Armor / combinedMaxHealth;
-            float combinedPercentage = 1;
+            float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
+            float armorPercentage = (float)health.Armor / combinedMaxHealth;
+            //float combinedPercentage = 1;
             
-            if (combinedHealth < health.MaxHealth)
-            {
-                combinedPercentage = (float)combinedHealth / combinedMaxHealth;
-            }
+
 
             if (unitFaction == playerFaction)
             {
-                healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, combinedPercentage * healthPercentage, Time.deltaTime);
-                healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, combinedPercentage, Time.deltaTime);
+                if (combinedHealth < health.MaxHealth)
+                {
+                    //
+                    //DONT SCALE
+
+                    if (healthBar.Parts)
+                        healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 25f, 1f);
+                    
+                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.deltaTime);
+                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.deltaTime);
+                }
+                else
+                {
+                    if (healthBar.Parts)
+                        healthBar.Parts.material.mainTextureScale = new Vector2((float)combinedMaxHealth / 25f, 1f);
+
+                    //SCALE
+                    //float combinedPercentage = (float)combinedHealth / combinedMaxHealth;
+
+                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.deltaTime);
+                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.deltaTime);
+
+                }
             }
             else
             {
-                healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, (float)health.CurrentHealth / health.MaxHealth, Time.deltaTime);
+                healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.deltaTime);
                 healthBar.ArmorFill.fillAmount = 0;
             }
 
+            //DEFINE 1 PART HEALTH AMOUNT INCREMENTS (1 PART = N HEALTH);
+
+
+            //ONLY USE COMBINED AMOUNTS IF UNIT IS OUR UNIT
             healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.deltaTime);
-            healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - combinedPercentage)) +3f, 0);
+            healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.ArmorFill.fillAmount)) +3f, 0);
+
+
             authPlayersFaction.Dispose();
         }
 

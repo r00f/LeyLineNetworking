@@ -229,65 +229,71 @@ public class ActionEffectsSystem : ComponentSystem
                         }
                     }
 
-                    if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0 && !animatorComponent.Dead)
+                    unitEffects.CurrentGetHitEffect = unitEffects.GetHitEffects.ElementAt(i);
+                    unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
+                }
+
+                if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0 && !animatorComponent.Dead)
+                {
+                    if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.CurrentGetHitEffect.Key.ActionExecuteStep)
                     {
-                        if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.GetHitEffects.ElementAt(i).Key.ActionExecuteStep)
+                        //NORMAL DEATH - INSTANTLY DIE
+                        if (unitEffects.DisplayDeathSkull)
+                            m_UISystem.TriggerUnitDeathUI(e);
+
+                        if (unitEffects.BodyPartBloodParticleSystem)
                         {
-                            //NORMAL DEATH - INSTANTLY DIE
+                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.BodyPartBloodParticleSystem);
+                        }
+                        else
+                        {
+                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value);
+                        }
+
+                        //unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
+                    }
+                    else
+                    {
+                        //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
+
+                        //if(animatorComponent.) if character is not red turn it red
+                        if (unitEffects.SecondWindParticleSystemInstance)
+                        {
+                            ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
+
+                            if (!ps.isPlaying)
+                                ps.Play();
+                        }
+
+                        if (animatorComponent.AnimationEvents.EventTriggered)
+                        {
+                            if (unitEffects.SecondWindParticleSystemInstance)
+                            {
+                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
+
+                                if (ps.isPlaying)
+                                    ps.Stop();
+                            }
+
                             if (unitEffects.DisplayDeathSkull)
                                 m_UISystem.TriggerUnitDeathUI(e);
 
                             if (unitEffects.BodyPartBloodParticleSystem)
                             {
-                                Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value, unitEffects.BodyPartBloodParticleSystem);
+                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.BodyPartBloodParticleSystem);
                             }
                             else
                             {
-                                Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value);
-                            }
-                        }
-                        else
-                        {
-                            //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
-
-                            //if(animatorComponent.) if character is not red turn it red
-                            if (unitEffects.SecondWindParticleSystemInstance)
-                            {
-                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                                if (!ps.isPlaying)
-                                    ps.Play();
+                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value);
                             }
 
-                            if (animatorComponent.AnimationEvents.EventTriggered)
-                            {
+                            //unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
 
-                                if (unitEffects.SecondWindParticleSystemInstance)
-                                {
-                                    ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                                    if (ps.isPlaying)
-                                        ps.Stop();
-                                }
-
-
-                                if (unitEffects.DisplayDeathSkull)
-                                    m_UISystem.TriggerUnitDeathUI(e);
-
-                                if (unitEffects.BodyPartBloodParticleSystem)
-                                {
-                                    Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value, unitEffects.BodyPartBloodParticleSystem);
-                                }
-                                else
-                                {
-                                    Death(animatorComponent, unitEffects.GetHitEffects.ElementAt(i).Key, unitEffects.GetHitEffects.ElementAt(i).Value);
-                                }
-                            }
                         }
                     }
-                    unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
                 }
             }
+
             animatorComponent.Animator.SetInteger("Armor", (int)unitEffects.CurrentArmor);
         });
 

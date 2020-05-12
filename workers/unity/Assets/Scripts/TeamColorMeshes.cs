@@ -5,6 +5,8 @@ using UnityEngine;
 public class TeamColorMeshes : MonoBehaviour
 {
     [SerializeField]
+    public List<ParticleSystem> ParticleSystems = new List<ParticleSystem>();
+    [SerializeField]
     public List<Renderer> FullColorMeshes = new List<Renderer>();
     [SerializeField]
     public List<Renderer> EmissionColorMeshes = new List<Renderer>();

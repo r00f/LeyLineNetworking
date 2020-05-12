@@ -92,20 +92,17 @@ public class InitializeUnitsSystem : ComponentSystem
 
             }
 
-            //lineRenderer.lineRenderer.startColor = factionColor;
-            //lineRenderer.lineRenderer.endColor = factionColor;
-            /*
-            foreach (Renderer r in teamColorMeshes.EmissionColorMeshes)
+            foreach(ParticleSystem p in teamColorMeshes.ParticleSystems)
             {
-                r.material.SetColor("_EmissiveColor", factionColor);
+                ParticleSystem.MainModule main = p.main;
+                main.startColor = new Color(factionColor.r, factionColor.g, factionColor.b, main.startColor.color.a);
             }
-            */
 
-                foreach (Renderer r in teamColorMeshes.FullColorMeshes)
+            foreach (Renderer r in teamColorMeshes.FullColorMeshes)
             {
-                if(r.material.HasProperty("_UnlitColor"))
+                if (r.material.HasProperty("_UnlitColor"))
                     r.material.SetColor("_UnlitColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_UnlitColor").a));
-                else if(r.material.HasProperty("_BaseColor"))
+                else if (r.material.HasProperty("_BaseColor"))
                     r.material.SetColor("_BaseColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_BaseColor").a));
 
                 if (r is SpriteRenderer)
