@@ -288,6 +288,8 @@ MonoBehaviour:
   Parts: {fileID: 5392520681743991861}
   HealthBarRect: {fileID: 3393780134547834387}
   DamageRect: {fileID: 4704398437626791239}
+  HealthSectionsSmall: {fileID: 2800000, guid: c5ffc014165a44540a2773273108b02c, type: 3}
+  HealthSectionsBig: {fileID: 2800000, guid: ebad4d4c5cdf3ca46a337683406e3662, type: 3}
 --- !u!1 &5254466746627108125
 GameObject:
   m_ObjectHideFlags: 0
@@ -473,7 +475,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.000023246, y: 0.14}
+  m_AnchoredPosition: {x: 0.000022888184, y: 0.13999939}
   m_SizeDelta: {x: -24.52, y: -89.75}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &246052695636028881

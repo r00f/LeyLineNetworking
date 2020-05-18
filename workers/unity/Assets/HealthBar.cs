@@ -16,6 +16,8 @@ public class HealthBar : MonoBehaviour
     public Image Parts;
     public RectTransform HealthBarRect;
     public RectTransform DamageRect;
+    public Texture HealthSectionsSmall;
+    public Texture HealthSectionsBig;
 
     public void Start()
     {

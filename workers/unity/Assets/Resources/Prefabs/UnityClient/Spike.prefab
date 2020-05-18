@@ -684,7 +684,8 @@ MonoBehaviour:
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 2
-  UnitTypeSprite: {fileID: 21300000, guid: 2cdaf9a824088ad4a8faa3308b3b1b5b, type: 3}
+  UnitGroupSprite: {fileID: 21300000, guid: 2cdaf9a824088ad4a8faa3308b3b1b5b, type: 3}
+  UnitSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: a96a44df607be8f4788a3988c567db88, type: 2}
   - {fileID: 11400000, guid: 34500273954a8db4fa63e5b5c96d0cc6, type: 2}

@@ -318,7 +318,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   VisionRange: 5
-  BaseHealth: 50
+  BaseHealth: 60
   EnergyIncome: 0
   BasicMove: {fileID: 11400000, guid: 2f99df2ec1034d44283d60d18630f201, type: 2}
   BasicAttack: {fileID: 11400000, guid: 443eec8ad1de14349bb4a317428cecdd, type: 2}
@@ -326,7 +326,8 @@ MonoBehaviour:
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 1
-  UnitTypeSprite: {fileID: 21300000, guid: ab4c4e6a2ceb8d5418f9159668c08067, type: 3}
+  UnitGroupSprite: {fileID: 21300000, guid: ab4c4e6a2ceb8d5418f9159668c08067, type: 3}
+  UnitSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: a72c35accda75e04f99f83bc961569aa, type: 2}
   - {fileID: 11400000, guid: 04bf5d6236464cc40a0483a0815c4926, type: 2}

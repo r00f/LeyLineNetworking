@@ -344,24 +344,24 @@ public class ActionEffectsSystem : ComponentSystem
 
     }
 
-    public void LaunchProjectile(Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f cubeCoordinate, float yOffset = 0)
+    public void LaunchProjectile(Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
     {
         var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
         var playerVisionHash = new HashSet<Vector3f>(playerVisionData[0].CellsInVisionrange);
 
-        bool containsTarget = false;
+        bool AoEcontainsTarget = false;
 
-
-        if (inAction.Targets[0].Mods.Count != 0 && !containsTarget)
+        if (inAction.Targets[0].Mods.Count != 0 && !AoEcontainsTarget)
         {
             foreach (CoordinatePositionPair p in inAction.Targets[0].Mods[0].CoordinatePositionPairs)
             {
                 if (playerVisionHash.Contains(p.CubeCoordinate))
-                    containsTarget = true;
+                    AoEcontainsTarget = true;
             }
         }
 
-        if (containsTarget || playerVisionHash.Contains(cubeCoordinate))
+        //if any coord in an AoE is visible or Launching unit is visible or target unit is visible, spawn a projectile
+        if (AoEcontainsTarget || playerVisionHash.Contains(inAction.Targets[0].TargetCoordinate) || playerVisionHash.Contains(originCoord))
         {
             //save targetPosition / targetYOffset on units?
             Vector3 offSetTarget = new Vector3(targetPos.x, targetPos.y + yOffset, targetPos.z);

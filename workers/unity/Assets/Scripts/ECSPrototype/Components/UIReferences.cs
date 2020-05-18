@@ -59,8 +59,10 @@ public class UIReferences : MonoBehaviour
     public List<Image> TurnStepFlares;
 
 
-    [Header("BottomBars")]
-    public Text HealthText;
+    [Header("UnitPortraitInfoPanel")]
+    public Text PortraitHealthText;
+    public Text PortraitArmorText;
+    public Text PortraitRegenText;
     public HealthBar PortraitHealthBar;
     //public GameObject HeroEnergyPanel;
 
@@ -68,8 +70,13 @@ public class UIReferences : MonoBehaviour
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
     public GameObject SpawnToggleGO;
-    public Toggle ActionsToggle;
-    public Toggle SpawnActionsToggle;
+    public GameObject ActionButtonGroup;
+    public GameObject SpawnButtonGroup;
+    public GameObject ActionsButton;
+    public GameObject SpawnButton;
+
+    //public Toggle ActionsToggle;
+    //public Toggle SpawnActionsToggle;
     //public List<Toggle> TurnStateToggles;
 
     [Header("SelectedActionToolTip")]

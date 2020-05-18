@@ -16,7 +16,6 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class UISystem : ComponentSystem
     {
-        IDictionary<float, float> IDictTest;
         PlayerStateSystem m_PlayerStateSystem;
         SendActionRequestSystem m_SendActionRequestSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
@@ -24,7 +23,6 @@ namespace LeyLineHybridECS
         EntityQuery m_AuthoritativePlayerData;
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
-        float ayy = 0f;
 
         public UIReferences UIRef{get; set;}
 
@@ -363,23 +361,20 @@ namespace LeyLineHybridECS
                 int spawnActionCount = stats.SpawnActions.Count;
 
                 //ONE TIME WHENEVER authPlayerState.UnitTargets.Count changes
-                
-                    var damagePreviewAmount = 0;
-                    for (int i = 0; i < authPlayerState.UnitTargets.Count; i++)
+
+                var damagePreviewAmount = 0;
+                for (int i = 0; i < authPlayerState.UnitTargets.Count; i++)
+                {
+                    CubeCoordinateList cubeCoordinateList = authPlayerState.UnitTargets.ElementAt(i).Value;
+                    HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoordinateList.CubeCoordinates);
+
+                    if (coordHash.Contains(coord.CubeCoordinate))
                     {
-                        CubeCoordinateList cubeCoordinateList = authPlayerState.UnitTargets.ElementAt(i).Value;
-                        HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoordinateList.CubeCoordinates);
-
-                        if (coordHash.Contains(coord.CubeCoordinate))
-                        {
-                            damagePreviewAmount += cubeCoordinateList.DamageAmount;
-                        }
+                        damagePreviewAmount += cubeCoordinateList.DamageAmount;
                     }
+                }
 
-                    unitHeadUIRef.IncomingDamage = (uint)damagePreviewAmount;
-                
-
-                //}
+                unitHeadUIRef.IncomingDamage = (uint)damagePreviewAmount;
 
                 if (stats.SelectUnitButtonInstance)
                     UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
@@ -387,7 +382,9 @@ namespace LeyLineHybridECS
                 //set topLeft healthBar values for this players hero
                 if (stats.IsHero && faction.Faction == authPlayerFaction)
                 {
-                    SetHealthBarFillAmounts(unitHeadUIRef,UIRef.HeroHealthBar, health, faction.Faction);
+                    if (unitHeadUIRef.UnitHeadHealthBarInstance)
+                        EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.HeroHealthBar, faction.Faction, authPlayerFaction);
+                    //SetHealthBarFillAmounts(unitHeadUIRef,UIRef.HeroHealthBar, health, faction.Faction, authPlayerFaction);
 
                     if(gameState.CurrentState == GameStateEnum.planning)
                     {
@@ -411,14 +408,22 @@ namespace LeyLineHybridECS
 
                     if (health.Armor > 0 && faction.Faction == authPlayerFaction)
                     {
-                        UIRef.HealthText.text = currentMaxHealth + " +" + health.Armor;
+
+                        UIRef.PortraitArmorText.enabled = true;
+                        UIRef.PortraitHealthText.text = currentMaxHealth;
+                        UIRef.PortraitArmorText.text = health.Armor.ToString();
+
+                        //UIRef.PortraitHealthText.text = currentMaxHealth + " +" + health.Armor;
                     }
                     else
                     {
-                        UIRef.HealthText.text = currentMaxHealth;
+                        UIRef.PortraitArmorText.enabled = false;
+                        UIRef.PortraitHealthText.text = currentMaxHealth;
                     }
 
-                    SetHealthBarFillAmounts(unitHeadUIRef, UIRef.PortraitHealthBar, health, faction.Faction);
+                    if(unitHeadUIRef.UnitHeadHealthBarInstance)
+                        EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.PortraitHealthBar, faction.Faction, authPlayerFaction);
+                    //SetHealthBarFillAmounts(unitHeadUIRef, , health, faction.Faction, authPlayerFaction);
 
                     if (factionColor == TeamColorEnum.blue)
                     {
@@ -435,9 +440,18 @@ namespace LeyLineHybridECS
                     {
                         if (stats.SpawnActions.Count == 0)
                         {
-                            UIRef.SpawnActionsToggle.isOn = false;
-                            UIRef.ActionsToggle.isOn = true;
-                            UIRef.SpawnToggleGO.SetActive(false);
+                            if(UIRef.SpawnButtonGroup.activeSelf)
+                            {
+                                UIRef.ActionButtonGroup.SetActive(true);
+                                UIRef.SpawnButtonGroup.SetActive(false);
+                            }
+
+                            if (UIRef.SpawnToggleGO.activeSelf)
+                            {
+                                UIRef.ActionsButton.SetActive(false);
+                                UIRef.SpawnButton.SetActive(true);
+                                UIRef.SpawnToggleGO.SetActive(false);
+                            }
                         }
                         else
                         {
@@ -581,6 +595,8 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
+                    if (UIRef.SpawnToggleGO.activeSelf)
+                        UIRef.SpawnToggleGO.SetActive(false);
                     if (unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(false);
                 }
@@ -618,7 +634,6 @@ namespace LeyLineHybridECS
                     {
 
                         GameObject healthBarGO = unitHeadUIRef.UnitHeadHealthBarInstance.gameObject;
-                        //ADD ADVANCED HEALTHBAR VISIBILITY (ONLY DISPLAY IF DAMAGED/DAMAGE PREVIEW
 
                         if (isVisible.Value == 1)
                         {
@@ -633,15 +648,13 @@ namespace LeyLineHybridECS
                             else if (unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled)
                                 unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled = false;
 
-                            if (health.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || health.Armor > 0)
+                            if (health.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && faction.Faction == authPlayerFaction))
                             {
                                 if(!unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
                                     unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(true);
                             }
                             else if(unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
                                 unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(false);
-
-
                         }
                         else
                         {
@@ -650,7 +663,7 @@ namespace LeyLineHybridECS
                         }
 
                         unitHeadUIRef.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
-                        SetHealthBarFillAmounts(unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction);
+                        SetHealthBarFillAmounts(unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
                     }
 
                     if(unitHeadUIRef.UnitHeadUIInstance)
@@ -705,6 +718,7 @@ namespace LeyLineHybridECS
                     
                 }
             });
+
             #endregion
 
             #region PlayerLoops
@@ -732,6 +746,8 @@ namespace LeyLineHybridECS
                     UIRef.LeftEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.LeftEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.deltaTime);
                 }
             }
+
+
             //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
             //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
             UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.deltaTime);
@@ -741,6 +757,14 @@ namespace LeyLineHybridECS
 
             if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
+                if (UIRef.PortraitHealthBar.gameObject.activeSelf)
+                {
+                    UIRef.PortraitHealthText.enabled = false;
+                    UIRef.PortraitArmorText.enabled = false;
+                    UIRef.PortraitRegenText.enabled = false;
+                    UIRef.PortraitHealthBar.gameObject.SetActive(false);
+                }
+
                 for (int bi = 0; bi < UIRef.Actions.Count; bi++)
                 {
                     UIRef.Actions[bi].Visuals.SetActive(false);
@@ -749,6 +773,16 @@ namespace LeyLineHybridECS
                 for (int si = 0; si < UIRef.SpawnActions.Count; si++)
                 {
                     UIRef.SpawnActions[si].Visuals.SetActive(false);
+                }
+            }
+            else
+            {
+                if (!UIRef.PortraitHealthBar.gameObject.activeSelf)
+                {
+                    UIRef.PortraitHealthText.enabled = true;
+                    //UIRef.PortraitArmorText.enabled = true;
+                    //UIRef.PortraitRegenText.enabled = true;
+                    UIRef.PortraitHealthBar.gameObject.SetActive(true);
                 }
             }
 
@@ -1034,62 +1068,77 @@ namespace LeyLineHybridECS
             inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, inPercentage, Time.deltaTime);
         }
 
-        public void SetHealthBarFillAmounts(UnitHeadUIReferences unitHeadUiRef, HealthBar healthBar, Health.Component health, uint unitFaction)
+        public void EqualizeHealthBarFillAmounts(HealthBar fromHealthBar, HealthBar toHealthBar, uint unitFaction, uint playerFaction)
         {
-            #region authPlayerData
-            var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-            #endregion
+            toHealthBar.HealthFill.fillAmount = fromHealthBar.HealthFill.fillAmount;
+            toHealthBar.ArmorFill.fillAmount = fromHealthBar.ArmorFill.fillAmount;
+            toHealthBar.DamageFill.fillAmount = fromHealthBar.DamageFill.fillAmount;
 
-            var playerFaction = authPlayersFaction[0].Faction;
-            uint combinedHealth = health.CurrentHealth + health.Armor;
-            uint combinedMaxHealth = health.MaxHealth + health.Armor;
+            if (unitFaction == playerFaction)
+            {
+                toHealthBar.DamageRect.offsetMax = new Vector2((-toHealthBar.HealthBarRect.rect.width * (1 - fromHealthBar.ArmorFill.fillAmount)) + 3f, 0);
+            }
+            else
+            {
+                toHealthBar.DamageRect.offsetMax = new Vector2((-toHealthBar.HealthBarRect.rect.width * (1 - toHealthBar.HealthFill.fillAmount)) + 3f, 0);
+            }
+
+            if (toHealthBar.Parts)
+            {
+                toHealthBar.Parts.material.mainTextureScale = fromHealthBar.Parts.material.mainTextureScale;
+                toHealthBar.Parts.material.mainTexture = fromHealthBar.Parts.material.mainTexture;
+                toHealthBar.Parts.SetMaterialDirty();
+            }
+        }
+
+        public void SetHealthBarFillAmounts(UnitHeadUIReferences unitHeadUiRef, HealthBar healthBar, Health.Component health, uint unitFaction, uint playerFaction)
+        {
+            float combinedHealth = health.CurrentHealth + health.Armor;
             float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
-            float armorPercentage = (float)health.Armor / combinedMaxHealth;
-            //float combinedPercentage = 1;
-            
+            float armorPercentage = (float)health.Armor / combinedHealth;
 
+            if (combinedHealth >= 100)
+            {
+                healthBar.Parts.material.SetTexture("_MainTex", healthBar.HealthSectionsBig);
+                healthBar.Parts.SetMaterialDirty();
+            }
+            else
+            {
+                healthBar.Parts.material.SetTexture("_MainTex", healthBar.HealthSectionsSmall);
+                healthBar.Parts.SetMaterialDirty();
+            }
 
             if (unitFaction == playerFaction)
             {
                 if (combinedHealth < health.MaxHealth)
                 {
-                    //
                     //DONT SCALE
-
-                    if (healthBar.Parts)
-                        healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 25f, 1f);
+                    healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
                     
                     healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.deltaTime);
                     healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.deltaTime);
                 }
                 else
                 {
-                    if (healthBar.Parts)
-                        healthBar.Parts.material.mainTextureScale = new Vector2((float)combinedMaxHealth / 25f, 1f);
-
-                    //SCALE
-                    //float combinedPercentage = (float)combinedHealth / combinedMaxHealth;
+                    healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
 
                     healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.deltaTime);
                     healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.deltaTime);
-
                 }
+
+                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.deltaTime);
+                healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.ArmorFill.fillAmount)) + 3f, 0);
             }
             else
             {
+                healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+
                 healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.deltaTime);
                 healthBar.ArmorFill.fillAmount = 0;
+
+                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / (float)health.CurrentHealth, Time.deltaTime);
+                healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.HealthFill.fillAmount)) + 3f, 0);
             }
-
-            //DEFINE 1 PART HEALTH AMOUNT INCREMENTS (1 PART = N HEALTH);
-
-
-            //ONLY USE COMBINED AMOUNTS IF UNIT IS OUR UNIT
-            healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.deltaTime);
-            healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.ArmorFill.fillAmount)) +3f, 0);
-
-
-            authPlayersFaction.Dispose();
         }
 
         public void SetArmorDisplay(Entity e, uint inArmorAmount, float displayTime, bool shatter = false)
@@ -1185,14 +1234,20 @@ namespace LeyLineHybridECS
                     {
                         //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
                         UnitGroupUI unitGroup = Object.Instantiate(UIRef.UnitGroupPrefab, UIRef.UnitGroupsParent.transform);
-                        unitGroup.UnitTypeImage.sprite = stats.UnitTypeSprite;
+                        unitGroup.UnitTypeImage.sprite = stats.UnitGroupSprite;
                         //if faction is even set to factionColors 1 if odd to factioncolors2
                         unitGroup.EnergyFill.color = settings.FactionColors[(int)playerFaction];
                         unitGroup.EnergyGainFill.color = settings.UIEnergyIncomeColor;
                         SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
                         unitButton.UnitId = unitId;
                         unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
-                        unitButton.UnitIcon.sprite = stats.UnitTypeSprite;
+
+                        if(stats.UnitSprite)
+                            unitButton.UnitIcon.sprite = stats.UnitSprite;
+                        else
+                            unitButton.UnitIcon.sprite = stats.UnitGroupSprite;
+
+
                         if (!unitGroup.SelectUnitButtons.Contains(unitButton))
                             unitGroup.SelectUnitButtons.Add(unitButton);
                         stats.SelectUnitButtonInstance = unitButton;
@@ -1213,7 +1268,12 @@ namespace LeyLineHybridECS
                             SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
                             unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];
                             unitButton.UnitId = unitId;
-                            unitButton.UnitIcon.sprite = stats.UnitTypeSprite;
+
+                            if (stats.UnitSprite)
+                                unitButton.UnitIcon.sprite = stats.UnitSprite;
+                            else
+                                unitButton.UnitIcon.sprite = stats.UnitGroupSprite;
+
                             if (!unitGroup.SelectUnitButtons.Contains(unitButton))
                                 unitGroup.SelectUnitButtons.Add(unitButton);
                             stats.SelectUnitButtonInstance = unitButton;

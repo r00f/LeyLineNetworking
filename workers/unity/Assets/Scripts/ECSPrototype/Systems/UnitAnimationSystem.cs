@@ -45,6 +45,7 @@ public class UnitAnimationSystem : ComponentSystem
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly <WorldIndex.Component>(),
+        ComponentType.ReadOnly<IsVisible>(),
         ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<Actions.Component>(),
@@ -96,6 +97,7 @@ public class UnitAnimationSystem : ComponentSystem
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
             var unitComponentReferences = EntityManager.GetComponentObject<UnitComponentReferences>(e);
+            var visible = EntityManager.GetComponentData<IsVisible>(e);
 
             //if this caracter has a filled voice emitter field and a voice event is triggered
             if (animatorComponent.VoiceEmitter && animatorComponent.AnimationEvents.VoiceTrigger)
@@ -265,23 +267,27 @@ public class UnitAnimationSystem : ComponentSystem
 
             if(gameStates[0].CurrentState == GameStateEnum.planning)
             {
-                unitComponentReferences.SelectionCircleGO.SetActive(true);
 
-                if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                if(visible.Value == 1)
                 {
-                    if (((int)faction.Faction & 1) == 1)
+                    unitComponentReferences.SelectionCircleGO.SetActive(true);
+
+                    if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
                     {
-                        //odd
-                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 3);
+                        if (((int)faction.Faction & 1) == 1)
+                        {
+                            //odd
+                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 3);
+                        }
+                        else
+                        {
+                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 3);
+                        }
                     }
                     else
                     {
-                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 3);
+                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
                     }
-                }
-                else
-                {
-                    unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
                 }
 
                 animatorComponent.Animator.SetBool("Executed", false);

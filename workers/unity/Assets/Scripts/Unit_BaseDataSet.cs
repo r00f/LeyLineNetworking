@@ -15,7 +15,8 @@ public class Unit_BaseDataSet : MonoBehaviour
     public bool IsHero;
     public bool UIInitialized;
     public uint UnitTypeId;
-    public Sprite UnitTypeSprite;
+    public Sprite UnitGroupSprite;
+    public Sprite UnitSprite;
     public List<ECSAction> Actions;
     public List<ECSAction> SpawnActions;
 

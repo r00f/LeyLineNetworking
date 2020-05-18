@@ -109,8 +109,6 @@ public class ProjectileSystem : ComponentSystem
                 }
                 else if (projectile.IsTravelling)
                 {
-
-
                     if (projectile.ArriveInstantly)
                     {
                         if (projectile.RigidbodiesToLaunch.Count == 0)
