@@ -9,6 +9,7 @@ using UnityEngine;
 using Improbable;
 using Unity.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 //Update after playerState selected unit has been set
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
@@ -204,6 +205,13 @@ public class SendActionRequestSystem : ComponentSystem
 
         playerState.SelectedActionId = actionIndex;
 
+        var lastSelectedActionTargets = new List<Vector3f>();
+
+        if (playerState.UnitTargets.Keys.Contains(entityId))
+        {
+            lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates);
+        }
+
         Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
             if (idComponent.EntityId.Id == entityId)
@@ -239,17 +247,12 @@ public class SendActionRequestSystem : ComponentSystem
 
                 playerState.SelectedAction = act;
                 m_HighlightingSystem.ResetHighlights();
+                m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
                 if (actionIndex != -3)
                 {
                     if (!isSelfTarget)
                     {
-                        /*
-                        logger.HandleLog(LogType.Warning,
-                        new LogEvent("SetAction")
-                        .WithField("unitId", 1f));
-                        */
-                        m_HighlightingSystem.ResetMarkerNumberOfTargets(playerPathing.CoordinatesInRange);
                         playerPathing.CoordinatesInRange.Clear();
                         playerPathing.CellsInRange.Clear();
                         playerPathing.CachedPaths.Clear();
@@ -266,25 +269,18 @@ public class SendActionRequestSystem : ComponentSystem
                         playerHigh.TargetRestrictionIndex = 2;
                         m_HighlightingSystem.SetSelfTarget(entityId, (int)act.ActionExecuteStep);
                     }
-
-                    playerState.UnitTargets = playerState.UnitTargets;
-                    playerStates[0] = playerState;
-                    playerHighlightingDatas[0] = playerHigh;
-                    playerPathings[0] = playerPathing;
-                    m_PlayerData.CopyFromComponentDataArray(playerPathings);
-                    m_PlayerData.CopyFromComponentDataArray(playerStates);
-                    m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
-
-                    m_HighlightingSystem.SetNumberOfTargets(playerState, new HashSet<Vector3f>(playerPathing.CoordinatesInRange));
-
-                }
-                else
-                {
-                    m_HighlightingSystem.ResetMarkerNumberOfTargets(playerPathing.CoordinatesInRange);
                 }
             }
         });
 
+        playerState.UnitTargets = playerState.UnitTargets;
+        playerStates[0] = playerState;
+        playerHighlightingDatas[0] = playerHigh;
+        playerPathings[0] = playerPathing;
+
+        m_PlayerData.CopyFromComponentDataArray(playerPathings);
+        m_PlayerData.CopyFromComponentDataArray(playerStates);
+        m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
 
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();

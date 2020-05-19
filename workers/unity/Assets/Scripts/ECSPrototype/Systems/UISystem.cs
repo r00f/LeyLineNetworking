@@ -16,6 +16,7 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class UISystem : ComponentSystem
     {
+        HighlightingSystem m_HighlightingSystem;
         PlayerStateSystem m_PlayerStateSystem;
         SendActionRequestSystem m_SendActionRequestSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
@@ -57,7 +58,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadWrite<HighlightingDataComponent>(),
+                ComponentType.ReadOnly<HighlightingDataComponent>(),
                 ComponentType.ReadWrite<PlayerState.Component>()
                 );
 
@@ -73,6 +74,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             InitializeButtons();
         }
@@ -81,6 +83,7 @@ namespace LeyLineHybridECS
         {
             UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
+            UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
 
             for (int bi = 0; bi < UIRef.Actions.Count; bi++)
@@ -88,6 +91,8 @@ namespace LeyLineHybridECS
                 ActionButton ab = UIRef.Actions[bi];
                 ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
                 ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab); });
+                ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
+                
             }
 
             for (int si = 0; si < UIRef.SpawnActions.Count; si++)
@@ -95,6 +100,7 @@ namespace LeyLineHybridECS
                 ActionButton ab = UIRef.SpawnActions[si];
                 ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
                 ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab); });
+                ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
         }
 
@@ -232,7 +238,7 @@ namespace LeyLineHybridECS
                 }
             }
 
-            HandleKeyCodeInput(playerHigh, gameState);
+            
 
             for(int i = 0; i < UIRef.SmallWheelColoredParts.Count; i++)
             {
@@ -311,12 +317,6 @@ namespace LeyLineHybridECS
             else
             {
                 UIRef.IngameUIPanel.SetActive(playerHigh.ShowIngameUI);
-
-                if (Input.GetButtonDown("SwitchIngameUI"))
-                {
-                    playerHigh.ShowIngameUI = !playerHigh.ShowIngameUI;
-                    playerHighlightingDatas[0] = playerHigh;
-                }
             }
 
             #endregion
@@ -732,6 +732,8 @@ namespace LeyLineHybridECS
             }
             else
             {
+                HandleKeyCodeInput();
+
                 if (!UIRef.ReadyButton.interactable)
                 {
                     UIRef.ReadyButton.interactable = true;
@@ -780,8 +782,6 @@ namespace LeyLineHybridECS
                 if (!UIRef.PortraitHealthBar.gameObject.activeSelf)
                 {
                     UIRef.PortraitHealthText.enabled = true;
-                    //UIRef.PortraitArmorText.enabled = true;
-                    //UIRef.PortraitRegenText.enabled = true;
                     UIRef.PortraitHealthBar.gameObject.SetActive(true);
                 }
             }
@@ -846,13 +846,27 @@ namespace LeyLineHybridECS
             authPlayersEnergy.Dispose();
             authPlayersFaction.Dispose();
             authPlayersState.Dispose();
-            m_AuthoritativePlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+            //playerHighlightingDatas[0] = playerHigh;
+            //m_AuthoritativePlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
             playerHighlightingDatas.Dispose();
             #endregion
         }
 
-        void HandleKeyCodeInput(HighlightingDataComponent playerHigh, GameState.Component gameState)
+        void HandleKeyCodeInput()
         {
+            if(Input.GetKeyDown(KeyCode.Q))
+            {
+                if(UIRef.ActionsButton.activeSelf)
+                    UIRef.ActionsButton.GetComponent<Button>().onClick.Invoke();
+                else
+                    UIRef.SpawnButton.GetComponent<Button>().onClick.Invoke();
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                UIRef.ReadyButton.onClick.Invoke();
+            }
+
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 UIRef.EscapeMenu.gameObject.SetActive(!UIRef.EscapeMenu.gameObject.activeSelf);
@@ -863,31 +877,50 @@ namespace LeyLineHybridECS
                 UIRef.Canvas.gameObject.SetActive(!UIRef.Canvas.gameObject.activeSelf);
             }
 
-
-            if (playerHigh.InputCooldown <= 0 && gameState.CurrentState == GameStateEnum.planning)
+            if(UIRef.ActionButtonGroup.activeSelf)
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1))
                 {
-                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[0].ActionIndex, UIRef.Actions[0].UnitId);
-                    InitializeSelectedActionTooltip(UIRef.Actions[0]);
-                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                    UIRef.Actions[0].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha2))
                 {
-                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[1].ActionIndex, UIRef.Actions[1].UnitId);
-                    InitializeSelectedActionTooltip(UIRef.Actions[1]);
-                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                    UIRef.Actions[1].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha3))
                 {
-                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[2].ActionIndex, UIRef.Actions[2].UnitId);
-                    InitializeSelectedActionTooltip(UIRef.Actions[2]);
-                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                    UIRef.Actions[2].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha4))
                 {
-                    m_SendActionRequestSystem.SelectActionCommand(UIRef.Actions[3].ActionIndex, UIRef.Actions[3].UnitId);
-                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                    UIRef.Actions[3].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha5))
+                {
+                    UIRef.Actions[4].Button.onClick.Invoke();
+                }
+            }
+            else
+            {
+                if (Input.GetKeyDown(KeyCode.Alpha1))
+                {
+                    UIRef.SpawnActions[0].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha2))
+                {
+                    UIRef.SpawnActions[1].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha3))
+                {
+                    UIRef.SpawnActions[2].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha4))
+                {
+                    UIRef.SpawnActions[3].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha5))
+                {
+                    UIRef.SpawnActions[4].Button.onClick.Invoke();
                 }
             }
         }

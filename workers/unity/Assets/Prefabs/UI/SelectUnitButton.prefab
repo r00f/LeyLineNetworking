@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 6053807225873892311}
   - component: {fileID: 4580321023970950126}
   - component: {fileID: 673512704128048922}
+  - component: {fileID: 2662906090931416109}
   m_Layer: 5
   m_Name: SelectUnitButton
   m_TagString: Untagged
@@ -112,6 +113,20 @@ MonoBehaviour:
   UnitIcon: {fileID: 197409628849534251}
   UnitButton: {fileID: 4580321023970950126}
   UnitId: 0
+--- !u!114 &2662906090931416109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2284335731201693628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c457a6aa052e7a47974df211fd72f0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  OnPointerEnterEventPath: event:/UISFX/OnPointerEnter
+  OnPointerDownEventPath: event:/UISFX/OnPointerEnter
 --- !u!1 &3599689451784617649
 GameObject:
   m_ObjectHideFlags: 0

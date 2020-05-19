@@ -1122,15 +1122,16 @@ MonoBehaviour:
   IsHero: 1
   UIInitialized: 0
   UnitTypeId: 0
-  UnitTypeSprite: {fileID: 0}
+  UnitGroupSprite: {fileID: 0}
+  UnitSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
   SpawnActions:
   - {fileID: 11400000, guid: cf378819988d7874c80f53c1f72a1695, type: 2}
   - {fileID: 11400000, guid: 06d8c3eca471abd4197edf42c50687ac, type: 2}
   - {fileID: 11400000, guid: c318f34339668004eb9e5f1fe39df3c6, type: 2}
-  - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
   - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
+  - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
 --- !u!114 &1130299993275380547
 MonoBehaviour:
   m_ObjectHideFlags: 0

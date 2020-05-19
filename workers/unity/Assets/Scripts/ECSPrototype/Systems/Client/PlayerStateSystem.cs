@@ -91,11 +91,6 @@ namespace LeyLineHybridECS
             {
                 if (playerState.CurrentState != PlayerStateEnum.ready)
                 {
-                    if (Input.GetKeyDown(KeyCode.Space))
-                    {
-                        playerState.CurrentState = PlayerStateEnum.ready;
-                    }
-
                     HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
                     Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>

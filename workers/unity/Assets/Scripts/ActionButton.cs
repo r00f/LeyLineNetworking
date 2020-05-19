@@ -8,8 +8,6 @@ using FMODUnity;
 public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHandler
 {
     [SerializeField]
-    StudioEventEmitter OnMouseEnterEmitter;
-    [SerializeField]
     UIReferences UIRef;
     [SerializeField]
     RectTransform RectTransform;
@@ -33,8 +31,6 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
     {
         if(Visuals.activeSelf)
         {
-            if(OnMouseEnterEmitter)
-                OnMouseEnterEmitter.Play();
             UIRef.TTRect.anchoredPosition = new Vector2(RectTransform.anchoredPosition.x, UIRef.TTRect.anchoredPosition.y);
             UIRef.TTActionCost.text = "" + EnergyCost;
             UIRef.TTActionDescription.text = ActionDescription;

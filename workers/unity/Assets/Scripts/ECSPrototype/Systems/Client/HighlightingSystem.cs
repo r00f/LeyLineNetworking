@@ -128,16 +128,20 @@ public class HighlightingSystem : ComponentSystem
 
         var activeUnitLineRenderers = m_ActiveUnitData.ToComponentArray<LineRendererComponent>();
 
-        //used to increase performance - does not work for clearing old AoE when selecting new action yet
-        //HashSet<Vector3f> extendedCoordsInRangeHash = new HashSet<Vector3f>(m_CellGrid.CircleDraw(playerState.SelectedUnitCoordinate, playerHighlightingData.Range + playerHighlightingData.AoERadius + playerHighlightingData.RingRadius));
-
         if (gameState.CurrentState == GameStateEnum.planning)
         {
-            //Debug.Log("lastHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) + "currHovered: " + Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate));
-            if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate) && playerHighlightingData.InputCooldown <= 0)
+            //MOVE THIS ELSEWHERE
+            if (Input.GetButtonDown("SwitchIngameUI"))
+            {
+                playerHighlightingData.ShowIngameUI = !playerHighlightingData.ShowIngameUI;
+            }
+
+            if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate)) //&& playerHighlightingData.InputCooldown <= 0)
             {
                 if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
+                    //Debug.Log("HighlightingSys PlayerHighAoE: " + playerHighlightingData.AoERadius);
+
                     HashSet<Vector3f> currentActionTargetHash = new HashSet<Vector3f>();
 
                     if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
@@ -151,7 +155,6 @@ public class HighlightingSystem : ComponentSystem
                     playerPathings[0] = playerPathing;
                     m_PlayerStateData.CopyFromComponentDataArray(playerPathings);
                     m_PlayerStateData.CopyFromComponentDataArray(playerStates);
-
                 }
                 else
                 {
@@ -159,13 +162,8 @@ public class HighlightingSystem : ComponentSystem
                 }
 
                 playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
+
             }
-
-            if (playerHighlightingData.InputCooldown >= 0)
-                playerHighlightingData.InputCooldown -= Time.deltaTime;
-
-            playerHighlightingDatas[0] = playerHighlightingData;
-            m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
         }
         else
         {
@@ -184,6 +182,9 @@ public class HighlightingSystem : ComponentSystem
                 lineRenderer.lineRenderer.positionCount = 0;
             });
         }
+
+        playerHighlightingDatas[0] = playerHighlightingData;
+        m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
 
         gameStateData.Dispose();
         #region playerStateData
@@ -231,7 +232,6 @@ public class HighlightingSystem : ComponentSystem
             if (cubeCoordList.CubeCoordinates.Count != 1)
             {
                 playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
-
             }
         }
         else if (inHinghlightningData.LineAoE == 1)
@@ -650,7 +650,6 @@ public class HighlightingSystem : ComponentSystem
         var playerState = playerStates[0];
         var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
-
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
         HashSet<long> unitIdHash = new HashSet<long>(playerStates[0].UnitTargets.Keys);
@@ -682,6 +681,11 @@ public class HighlightingSystem : ComponentSystem
                 markerState.CurrentState = (MarkerState.State)(int)mouseState.CurrentState;
                 commandBuffer.AddComponent(e, new RequireMarkerUpdate());
                 //markerState.IsSet = 0;
+            }
+            if(markerState.CurrentState == MarkerState.State.Reachable)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
             }
         });
 
