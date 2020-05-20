@@ -12,7 +12,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SendActionRequestSystem))]
 public class HighlightingSystem : ComponentSystem
 {
 
@@ -158,7 +158,12 @@ public class HighlightingSystem : ComponentSystem
                 }
                 else
                 {
-                    ResetHighlights();
+                    if (playerHighlightingData.SelectActionBuffer > 0)
+                    {
+                        playerHighlightingData.SelectActionBuffer--;
+                    }
+                    else
+                        ResetHighlights();
                 }
 
                 playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
@@ -646,6 +651,7 @@ public class HighlightingSystem : ComponentSystem
         if (m_PlayerStateData.CalculateEntityCount() == 0)
             return;
 
+        Debug.Log("ResetHighLights");
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerState = playerStates[0];
         var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);

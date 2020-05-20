@@ -22,6 +22,7 @@ public struct HighlightingDataComponent : IComponentData
     public uint EffectRestrictionIndex;
     public float LineYOffset;
     public int TurnStepIndex;
+    public int SelectActionBuffer;
 }
 
 

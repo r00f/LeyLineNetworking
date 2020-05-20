@@ -273,6 +273,8 @@ public class SendActionRequestSystem : ComponentSystem
             }
         });
 
+        playerHigh.SelectActionBuffer = 3;
+
         playerState.UnitTargets = playerState.UnitTargets;
         playerStates[0] = playerState;
         playerHighlightingDatas[0] = playerHigh;
