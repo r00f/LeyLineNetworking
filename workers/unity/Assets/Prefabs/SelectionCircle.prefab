@@ -194,12 +194,12 @@ PrefabInstance:
     - target: {fileID: 2780574938063097886, guid: a0677132d7154364db5d81900d030ddb,
         type: 3}
       propertyPath: InitialModule.startSize.minScalar
-      value: 0.03
+      value: 0.04
       objectReference: {fileID: 0}
     - target: {fileID: 2780574938063097886, guid: a0677132d7154364db5d81900d030ddb,
         type: 3}
       propertyPath: InitialModule.startSize.scalar
-      value: 0.04
+      value: 0.05
       objectReference: {fileID: 0}
     - target: {fileID: 2780574938063097886, guid: a0677132d7154364db5d81900d030ddb,
         type: 3}
@@ -220,6 +220,16 @@ PrefabInstance:
         type: 3}
       propertyPath: InitialModule.startSpeed.scalar
       value: 0.22
+      objectReference: {fileID: 0}
+    - target: {fileID: 2780574938063097886, guid: a0677132d7154364db5d81900d030ddb,
+        type: 3}
+      propertyPath: simulationSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2780574938063097886, guid: a0677132d7154364db5d81900d030ddb,
+        type: 3}
+      propertyPath: prewarm
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7699073070201052262, guid: a0677132d7154364db5d81900d030ddb,
         type: 3}
