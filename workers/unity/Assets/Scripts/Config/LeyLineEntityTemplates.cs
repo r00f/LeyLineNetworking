@@ -169,9 +169,9 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Player(string workerId, byte[] serializedArguments)
+    public static EntityTemplate Player(EntityId entityId, string workerId, byte[] serializedArguments)
     {
-        var client = $"workerId:{workerId}";
+        var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
         var energy = new PlayerEnergy.Snapshot
         {
@@ -220,17 +220,19 @@ public static class LeyLineEntityTemplates {
         var wIndex = new WorldIndex.Snapshot();
 
         var pos = new Position.Snapshot { Coords = new Coordinates() };
-        var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
-        var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
-        var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
+        //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
+        //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
+        //var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
 
 
         var template = new EntityTemplate();
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
+        /*
         template.AddComponent(clientHeartbeat, client);
         template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
+        */
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerState, client);
@@ -240,12 +242,13 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
+        PlayerLifecycleHelper.AddPlayerLifecycleComponents(template, workerId, WorkerUtils.UnityGameLogic);
         return template;
     }
 
     public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
     {
-        var client = workerId;
+        var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
         var turnTimer = new TurnTimer.Snapshot
         {

@@ -90,7 +90,7 @@ public class VisionSystem_Server : ComponentSystem
 
                     if(u_Vision.InitialWaitTime > 0)
                     {
-                        u_Vision.InitialWaitTime -= Time.deltaTime;
+                        u_Vision.InitialWaitTime -= Time.DeltaTime;
                         if (u_Vision.InitialWaitTime <= 0)
                             u_Vision.RequireUpdate = true;
                     }

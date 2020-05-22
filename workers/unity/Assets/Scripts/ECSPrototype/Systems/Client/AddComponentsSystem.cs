@@ -37,9 +37,9 @@ public class AddComponentsSystem : ComponentSystem
 
     protected override void OnCreate()
     {
-        base.OnCreateManager();
+        base.OnCreate();
 
-        em = World.Active.EntityManager;
+        em = World.EntityManager;
         settings = Resources.Load<Settings>("Settings");
 
         var projectileAddedDesc = new EntityQueryDesc
@@ -112,10 +112,8 @@ public class AddComponentsSystem : ComponentSystem
         m_PlayerStateData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+            ComponentType.ReadOnly<PlayerState.HasAuthority>()
             );
-
-        m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
     }
 

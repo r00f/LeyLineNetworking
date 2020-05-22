@@ -49,10 +49,8 @@ namespace LeyLineHybridECS
             m_AuthorativePlayerData = GetEntityQuery(
                 ComponentType.ReadOnly<Vision.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+                ComponentType.ReadOnly<PlayerState.HasAuthority>()
                 );
-
-            m_AuthorativePlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
         }
 
         protected override void OnStartRunning()
@@ -97,7 +95,7 @@ namespace LeyLineHybridECS
                         {
                             if (meshRenderer.material.GetColor("_UnlitColor").a > 0)
                             {
-                                color.a = meshRenderer.material.GetColor("_UnlitColor").a - isVisibleComp.LerpSpeed * Time.deltaTime;
+                                color.a = meshRenderer.material.GetColor("_UnlitColor").a - isVisibleComp.LerpSpeed * Time.DeltaTime;
                                 meshRenderer.material.SetColor("_UnlitColor", color);
                             }
                             else
@@ -120,7 +118,7 @@ namespace LeyLineHybridECS
 
                             if (meshRenderer.material.GetColor("_UnlitColor").a < 1)
                             {
-                                color.a = meshRenderer.material.GetColor("_UnlitColor").a + isVisibleComp.LerpSpeed * Time.deltaTime;
+                                color.a = meshRenderer.material.GetColor("_UnlitColor").a + isVisibleComp.LerpSpeed * Time.DeltaTime;
                                 meshRenderer.material.SetColor("_UnlitColor", color);
                             }
                             else

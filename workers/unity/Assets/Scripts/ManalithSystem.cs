@@ -26,14 +26,11 @@ public class ManalithSystem : ComponentSystem
         );
 
         m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
+            ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<CellAttributesComponent.Component>(),
             ComponentType.ReadOnly<IsCircleCell.Component>()
         );
-
-        m_CellData.SetFilter(CellAttributesComponent.ComponentAuthority.Authoritative);
-
 
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),

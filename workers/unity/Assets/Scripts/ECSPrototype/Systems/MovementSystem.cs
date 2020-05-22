@@ -80,7 +80,7 @@ namespace LeyLineHybridECS
                             //instead of lerping towards next pos in path, set pos and wait for client to catch up
                             if (m.TimeLeft >= 0)
                             {
-                                m.TimeLeft -= Time.deltaTime;
+                                m.TimeLeft -= Time.DeltaTime;
                             }
                             else
                             {

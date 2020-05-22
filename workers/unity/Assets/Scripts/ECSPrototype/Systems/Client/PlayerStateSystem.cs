@@ -32,12 +32,11 @@ namespace LeyLineHybridECS
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Vision.Component>(),
             ComponentType.ReadOnly<HighlightingDataComponent>(),
-            ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadWrite<Moba_Camera>()
             );
 
-            m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
             m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),

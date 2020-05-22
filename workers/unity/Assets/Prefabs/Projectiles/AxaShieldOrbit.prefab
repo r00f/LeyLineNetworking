@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 9014066614812652089}
   - component: {fileID: 9014066614812652088}
   - component: {fileID: 383558302395188594}
-  - component: {fileID: 9014066614812652091}
+  - component: {fileID: 383948876989799979}
   m_Layer: 0
   m_Name: AxaShieldOrbit
   m_TagString: Untagged
@@ -70,7 +70,7 @@ MonoBehaviour:
   - {fileID: 177956903504473417}
   ExplosionSystems:
   - {fileID: 7208509928289479142}
---- !u!114 &9014066614812652091
+--- !u!114 &383948876989799979
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -79,9 +79,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 9014066614812652094}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ConversionMode: 1
 --- !u!1001 &6438847206493973428
 PrefabInstance:
   m_ObjectHideFlags: 0

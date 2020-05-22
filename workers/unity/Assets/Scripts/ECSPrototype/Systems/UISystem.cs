@@ -31,7 +31,7 @@ namespace LeyLineHybridECS
 
         protected override void OnCreate()
         {
-            base.OnCreateManager();
+            base.OnCreate();
             m_PlayerStateSystem = World.GetExistingSystem<PlayerStateSystem>();
             m_SendActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             settings = Resources.Load<Settings>("Settings");
@@ -55,14 +55,13 @@ namespace LeyLineHybridECS
                 );
 
             m_AuthoritativePlayerData = Worlds.ClientWorld.CreateEntityQuery(
-                ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+                ComponentType.ReadOnly<PlayerState.HasAuthority>(),
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<HighlightingDataComponent>(),
                 ComponentType.ReadWrite<PlayerState.Component>()
                 );
 
-            m_AuthoritativePlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
             m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
@@ -83,7 +82,7 @@ namespace LeyLineHybridECS
         {
             UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
-            UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
+            //UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
 
             for (int bi = 0; bi < UIRef.Actions.Count; bi++)
@@ -195,7 +194,7 @@ namespace LeyLineHybridECS
                     }
                     if (UIRef.StartUpWaitTime > 0)
                     {
-                        UIRef.StartUpWaitTime -= Time.deltaTime;
+                        UIRef.StartUpWaitTime -= Time.DeltaTime;
                     }
                     else
                     {
@@ -225,7 +224,7 @@ namespace LeyLineHybridECS
             #region TurnStepWheel
             //TURN THE WHEEL
             //Debug.Log(UIRef.TurnWheelBig.eulerAngles.z);
-            float degreesPerFrame = UIRef.WheelRotationSpeed * Time.deltaTime;
+            float degreesPerFrame = UIRef.WheelRotationSpeed * Time.DeltaTime;
             float rOffset = degreesPerFrame / 2f;
 
             if (gameState.CurrentState != GameStateEnum.planning)
@@ -615,7 +614,7 @@ namespace LeyLineHybridECS
 
                         if (unitHeadUIRef.HealthTextDelay > 0)
                         {
-                            unitHeadUIRef.HealthTextDelay -= Time.deltaTime;
+                            unitHeadUIRef.HealthTextDelay -= Time.DeltaTime;
                         }
                         else
                         {
@@ -673,7 +672,7 @@ namespace LeyLineHybridECS
                     {
                         if (unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime > 0)
                         {
-                            unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.deltaTime;
+                            unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.DeltaTime;
                         }
                         else if (unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.activeSelf)
                         {
@@ -740,19 +739,19 @@ namespace LeyLineHybridECS
                 }
 
                 //energyFill.fillAmount = Mathf.SmoothDamp(energyFill.fillAmount, currentEnergy / maxEnergy, ref ayy, 1f);
-                UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.deltaTime);
+                UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
                 if (UIRef.LeftCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
                 {
                     //incomeFill.fillAmount = Mathf.SmoothStep(incomeFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, 1f);
-                    UIRef.LeftEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.LeftEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.deltaTime);
+                    UIRef.LeftEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.LeftEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.DeltaTime);
                 }
             }
 
 
             //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
             //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
-            UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.deltaTime);
+            UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
             UIRef.CurrentEnergyText.text = playerEnergy.Energy.ToString();
             UIRef.MaxEnergyText.text = playerEnergy.MaxEnergy.ToString();
@@ -786,8 +785,8 @@ namespace LeyLineHybridECS
                 }
             }
 
-            float outSpeed = UIRef.ReadyOutSpeed * Time.deltaTime;
-            float inSpeed = UIRef.ReadyInSpeed * Time.deltaTime;
+            float outSpeed = UIRef.ReadyOutSpeed * Time.DeltaTime;
+            float inSpeed = UIRef.ReadyInSpeed * Time.DeltaTime;
 
             //all players
             Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
@@ -1098,7 +1097,7 @@ namespace LeyLineHybridECS
 
         public void LerpEnergyFillAmount(Image inEnergyFill, float inPercentage)
         {
-            inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, inPercentage, Time.deltaTime);
+            inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, inPercentage, Time.DeltaTime);
         }
 
         public void EqualizeHealthBarFillAmounts(HealthBar fromHealthBar, HealthBar toHealthBar, uint unitFaction, uint playerFaction)
@@ -1148,28 +1147,28 @@ namespace LeyLineHybridECS
                     //DONT SCALE
                     healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
                     
-                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.deltaTime);
-                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.deltaTime);
+                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
+                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.DeltaTime);
                 }
                 else
                 {
                     healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
 
-                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.deltaTime);
-                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.deltaTime);
+                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.DeltaTime);
+                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.DeltaTime);
                 }
 
-                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.deltaTime);
+                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.DeltaTime);
                 healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.ArmorFill.fillAmount)) + 3f, 0);
             }
             else
             {
                 healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
 
-                healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.deltaTime);
+                healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
                 healthBar.ArmorFill.fillAmount = 0;
 
-                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / (float)health.CurrentHealth, Time.deltaTime);
+                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / (float)health.CurrentHealth, Time.DeltaTime);
                 healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.HealthFill.fillAmount)) + 3f, 0);
             }
         }

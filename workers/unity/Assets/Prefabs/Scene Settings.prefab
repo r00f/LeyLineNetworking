@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 983386785569934740}
   - component: {fileID: 4035518029916782721}
-  - component: {fileID: 4743065055767641098}
   m_Layer: 0
   m_Name: Scene Settings
   m_TagString: Untagged
@@ -49,20 +48,3 @@ MonoBehaviour:
   blendDistance: 0
   weight: 1
   sharedProfile: {fileID: 11400000, guid: 1a42955bbe5598d48b162b577d2a9d62, type: 2}
---- !u!114 &4743065055767641098
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4514597717377753631}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 441482e8936e35048a1dffac814e3ef8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Profile: {fileID: 11400000, guid: 1a42955bbe5598d48b162b577d2a9d62, type: 2}
-  m_StaticLightingSkyUniqueID: 2
-  m_SkySettings: {fileID: 0}
-  m_SkySettingsFromProfile: {fileID: -6478572056145412600, guid: 1a42955bbe5598d48b162b577d2a9d62,
-    type: 2}

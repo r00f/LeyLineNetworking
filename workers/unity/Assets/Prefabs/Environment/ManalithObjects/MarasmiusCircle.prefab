@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &184055204
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 184055205}
+  m_Layer: 8
+  m_Name: FlyArgaicCircle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &184055205
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 184055204}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.9979992, y: 0.059000254, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 6441115939145160579}
+  - {fileID: 6441115937416310115}
+  m_Father: {fileID: 2024865146748516341}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2024865146748516330
 GameObject:
   m_ObjectHideFlags: 0
@@ -37,9 +69,100 @@ Transform:
   - {fileID: 2717752226550430897}
   - {fileID: 2717752226644876149}
   - {fileID: 6005340647688165870}
+  - {fileID: 184055205}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &2024865145160189561
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 184055205}
+    m_Modifications:
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 1.1519985
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.042999744
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.11100006
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.07762313
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.24701555
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.062386785
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.96388066
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 10.397
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 28.313002
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -4.7770004
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.41073298
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.41073295
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.41073304
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+        type: 3}
+      propertyPath: m_Name
+      value: FlyArgaic2 (2)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9085127a4dc4b5a4a8366f63802a74e2, type: 3}
+--- !u!4 &6441115937416310115 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: 9085127a4dc4b5a4a8366f63802a74e2,
+    type: 3}
+  m_PrefabInstance: {fileID: 2024865145160189561}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &2024865145390209202
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -47,15 +170,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius2
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -137,15 +275,20 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_Name
+      value: Marasmius2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -157,7 +300,13 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 721cccea7cfa246459d96bd8f565f302, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 721cccea7cfa246459d96bd8f565f302, type: 3}
 --- !u!4 &2717752227781826510 stripped
 Transform:
@@ -172,15 +321,35 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
-        type: 3}
-      propertyPath: m_Name
-      value: Marasmius3 (2)
-      objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: displayLightIntensity
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -252,25 +421,25 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.9023942
       objectReference: {fileID: 0}
-    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
-        type: 3}
-      propertyPath: m_Layer
-      value: 11
-      objectReference: {fileID: 0}
     - target: {fileID: 4603789903118776261, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_Name
+      value: Marasmius3 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -282,7 +451,13 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 1503464067264a24a9f5e422ff553643, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 1503464067264a24a9f5e422ff553643, type: 3}
 --- !u!4 &2717752227018988173 stripped
 Transform:
@@ -297,15 +472,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius2 (1)
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -387,15 +577,20 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_Name
+      value: Marasmius2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -407,7 +602,13 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 721cccea7cfa246459d96bd8f565f302, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 721cccea7cfa246459d96bd8f565f302, type: 3}
 --- !u!4 &2717752227227093001 stripped
 Transform:
@@ -422,15 +623,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius1 (1)
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -502,12 +718,17 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.3517
       objectReference: {fileID: 0}
-    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Name
+      value: Marasmius1 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
@@ -515,7 +736,7 @@ PrefabInstance:
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -527,12 +748,18 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_BounceIntensity
+      value: 0.01
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
 --- !u!4 &2717752227281095980 stripped
 Transform:
@@ -547,15 +774,35 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
-        type: 3}
-      propertyPath: m_Name
-      value: Marasmius3 (1)
-      objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: displayLightIntensity
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -627,25 +874,25 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.9952524
       objectReference: {fileID: 0}
-    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
-        type: 3}
-      propertyPath: m_Layer
-      value: 11
-      objectReference: {fileID: 0}
     - target: {fileID: 4603789903118776261, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_Name
+      value: Marasmius3 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -657,7 +904,13 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 1503464067264a24a9f5e422ff553643, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 1503464067264a24a9f5e422ff553643, type: 3}
 --- !u!4 &2717752226241585878 stripped
 Transform:
@@ -672,15 +925,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius2 (2)
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -762,15 +1030,20 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 721cccea7cfa246459d96bd8f565f302,
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_Name
+      value: Marasmius2 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
         type: 3}
@@ -782,7 +1055,13 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9056501643825904301, guid: 721cccea7cfa246459d96bd8f565f302,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 721cccea7cfa246459d96bd8f565f302, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 721cccea7cfa246459d96bd8f565f302, type: 3}
 --- !u!4 &2717752226550430897 stripped
 Transform:
@@ -797,15 +1076,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius1 (2)
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -877,12 +1171,17 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.3690044
       objectReference: {fileID: 0}
-    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Name
+      value: Marasmius1 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
@@ -890,7 +1189,7 @@ PrefabInstance:
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -902,12 +1201,18 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_BounceIntensity
+      value: 0.01
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
 --- !u!4 &2717752226644876149 stripped
 Transform:
@@ -922,15 +1227,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius1
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -1002,12 +1322,17 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.1983347
       objectReference: {fileID: 0}
-    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Name
+      value: Marasmius1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
@@ -1015,7 +1340,7 @@ PrefabInstance:
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -1027,12 +1352,18 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_BounceIntensity
+      value: 0.01
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
 --- !u!4 &2717752225816294611 stripped
 Transform:
@@ -1047,15 +1378,35 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
-        type: 3}
-      propertyPath: m_Name
-      value: Marasmius3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Layer
       value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: displayLightIntensity
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -1127,25 +1478,25 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.2706
       objectReference: {fileID: 0}
-    - target: {fileID: 1041319983480528782, guid: 1503464067264a24a9f5e422ff553643,
-        type: 3}
-      propertyPath: m_Layer
-      value: 11
-      objectReference: {fileID: 0}
     - target: {fileID: 4603789903118776261, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 1503464067264a24a9f5e422ff553643,
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_Name
+      value: Marasmius3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
         type: 3}
@@ -1157,13 +1508,109 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9056501643825904301, guid: 1503464067264a24a9f5e422ff553643,
+        type: 3}
+      propertyPath: m_BounceIntensity
+      value: 0.01
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 1503464067264a24a9f5e422ff553643, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 1503464067264a24a9f5e422ff553643, type: 3}
 --- !u!4 &2717752225969617981 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4156436937139015548, guid: 1503464067264a24a9f5e422ff553643,
     type: 3}
   m_PrefabInstance: {fileID: 2024865146799256385}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &2024865146853342361
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 184055205}
+    m_Modifications:
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.977
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.052
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.321
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0.035373256
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.47514987
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0.08947809
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.87462854
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 1.327
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 56.899002
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: -10.964001
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.66125846
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.5672011
+      objectReference: {fileID: 0}
+    - target: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_LocalScale.z
+      value: 0.6612585
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: a2b17478855dca5408f5553d8417a2c8,
+        type: 3}
+      propertyPath: m_Name
+      value: FlyArgaic3 (3)
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a2b17478855dca5408f5553d8417a2c8, type: 3}
+--- !u!4 &6441115939145160579 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -4216859302048453862, guid: a2b17478855dca5408f5553d8417a2c8,
+    type: 3}
+  m_PrefabInstance: {fileID: 2024865146853342361}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7708439486640756370
 PrefabInstance:
@@ -1172,15 +1619,30 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2024865146748516341}
     m_Modifications:
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Name
-      value: Marasmius1 (3)
+      propertyPath: displayLightIntensity
+      value: 25
       objectReference: {fileID: 0}
-    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: m_Layer
-      value: 11
+      propertyPath: m_Version
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Intensity
+      value: 20000
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_MinFilterSize
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_ShadowResolution.m_Level
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4156436937139015548, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -1252,12 +1714,17 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 1.3579227
       objectReference: {fileID: 0}
-    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
       objectReference: {fileID: 0}
-    - target: {fileID: 4603789903118776261, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Name
+      value: Marasmius1 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 7842387229292556039, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Layer
       value: 11
@@ -1265,7 +1732,7 @@ PrefabInstance:
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
       propertyPath: m_Intensity
-      value: 1.9894367
+      value: 1591.5494
       objectReference: {fileID: 0}
     - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
@@ -1277,12 +1744,18 @@ PrefabInstance:
       propertyPath: m_SpotAngle
       value: 115.85
       objectReference: {fileID: 0}
-    - target: {fileID: 3751144466700142018, guid: 24e482e94a113c74491291fd1b39ee9e,
+    - target: {fileID: 9056501643825904301, guid: 24e482e94a113c74491291fd1b39ee9e,
         type: 3}
-      propertyPath: displayLightIntensity
-      value: 25
+      propertyPath: m_BounceIntensity
+      value: 0.01
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 9217579609433124347, guid: 24e482e94a113c74491291fd1b39ee9e,
+        type: 3}
+      propertyPath: m_Layer
+      value: 11
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 5819288761217278835, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 24e482e94a113c74491291fd1b39ee9e, type: 3}
 --- !u!4 &6005340647688165870 stripped
 Transform:

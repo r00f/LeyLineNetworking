@@ -33,7 +33,7 @@ namespace LeyLineHybridECS
                 All = new ComponentType[] 
                 {
                     ComponentType.ReadOnly<PlayerAttributes.Component>(),
-                    ComponentType.ReadOnly<PlayerAttributes.ComponentAuthority>(),
+                    ComponentType.ReadOnly<PlayerAttributes.HasAuthority>(),
                     ComponentType.ReadWrite<Position.Component>(),
                     ComponentType.ReadWrite<WorldIndex.Component>(),
                     ComponentType.ReadWrite<FactionComponent.Component>()
@@ -41,8 +41,6 @@ namespace LeyLineHybridECS
             };
 
             m_PlayerAddedData = GetEntityQuery(playerAddedDesc);
-
-            m_PlayerAddedData.SetFilter(PlayerAttributes.ComponentAuthority.Authoritative);
 
             var playerRemovedDesc = new EntityQueryDesc
             {
@@ -63,7 +61,7 @@ namespace LeyLineHybridECS
 
 
             m_SpawnCellData = GetEntityQuery(
-                //ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
+                //ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
                 //ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),

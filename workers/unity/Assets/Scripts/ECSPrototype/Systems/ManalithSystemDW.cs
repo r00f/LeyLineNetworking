@@ -35,11 +35,10 @@ namespace LeyLineHybridECS
                     m_UISystem = Worlds.ClientWorld.World.GetExistingSystem<UISystem>();
 
                     m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
-                        ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+                        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
                         ComponentType.ReadOnly<FactionComponent.Component>(),
                         ComponentType.ReadOnly<WorldIndex.Component>()
                     );
-                    m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
                     m_GameControllerData = Worlds.ClientWorld.CreateEntityQuery(
 
@@ -214,13 +213,15 @@ namespace LeyLineHybridECS
                     if (meshColor.LerpColor != meshColor.Color)
                         meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
 
-                    Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
-                    meshColor.MeshRenderer.material.SetColor("_UnlitColor", emissionColor);
-                    meshColor.MeshRenderer.material.SetColor("_EmissiveColor", emissionColor);
+                    //Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
+                    meshColor.MeshRenderer.material.SetColor("_UnlitColor", meshColor.LerpColor);
+                    //meshColor.MeshRenderer.material.EnableKeyword("_EMISSION");
+                    meshColor.MeshRenderer.material.SetColor("_EmissiveColor", meshColor.LerpColor * meshColor.MeshRenderer.material.GetFloat("_EmissiveIntensity"));
+                    //meshColor.MeshRenderer.UpdateGIMaterials();
 
                     foreach (MeshRenderer r in meshColor.EmissionColorRenderers)
-                    {   
-                        r.material.SetColor("_EmissiveColor", emissionColor);
+                    {
+                        r.material.SetColor("_EmissiveColor", meshColor.LerpColor * r.material.GetFloat("_EmissiveIntensity"));
                     }
 
                     foreach (Light l in meshColor.Lights)

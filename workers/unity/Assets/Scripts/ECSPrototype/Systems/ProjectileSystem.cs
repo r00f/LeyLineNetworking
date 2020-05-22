@@ -51,10 +51,9 @@ public class ProjectileSystem : ComponentSystem
 
                 m_GameStateDate = Worlds.ClientWorld.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>(),
-                    ComponentType.ReadOnly<GameState.ComponentAuthority>()
+                    ComponentType.ReadOnly<GameState.HasAuthority>()
                 );
 
-                m_GameStateDate.SetFilter(GameState.ComponentAuthority.Authoritative);
                 initialized = true;
             }
         }
@@ -81,7 +80,7 @@ public class ProjectileSystem : ComponentSystem
                 {
                     if (projectile.DestroyAfterSeconds > 0.05f)
                     {
-                        projectile.DestroyAfterSeconds -= Time.deltaTime;
+                        projectile.DestroyAfterSeconds -= Time.DeltaTime;
                     }
                     else
                     {
@@ -101,11 +100,11 @@ public class ProjectileSystem : ComponentSystem
                 }
 
                 if (projectile.DegreesPerSecond != 0 && !projectile.DestinationReached)
-                    transform.RotateAround(transform.position, transform.forward, projectile.DegreesPerSecond * Time.deltaTime);
+                    transform.RotateAround(transform.position, transform.forward, projectile.DegreesPerSecond * Time.DeltaTime);
 
                 if (projectile.MovementDelay > 0)
                 {
-                    projectile.MovementDelay -= Time.deltaTime;
+                    projectile.MovementDelay -= Time.DeltaTime;
                 }
                 else if (projectile.IsTravelling)
                 {
@@ -126,7 +125,7 @@ public class ProjectileSystem : ComponentSystem
                         }
                         else
                         {
-                            projectile.MovementPercentage += Time.deltaTime * projectile.TravellingSpeed / dist;
+                            projectile.MovementPercentage += Time.DeltaTime * projectile.TravellingSpeed / dist;
                             if (projectile.RigidbodiesToLaunch.Count == 0)
                             {
                                 Vector3 pos = Vector3.Lerp(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1], projectile.MovementPercentage);
@@ -151,13 +150,13 @@ public class ProjectileSystem : ComponentSystem
                             }
                             foreach (SpringJoint s in projectile.SpringJoints)
                             {
-                                s.maxDistance = Mathf.Lerp(s.maxDistance, 0, Time.deltaTime * projectile.ContractSpeed);
+                                s.maxDistance = Mathf.Lerp(s.maxDistance, 0, Time.DeltaTime * projectile.ContractSpeed);
                             }
                         }
 
                         if(projectile.ParticleSystemsStopWaitTime > 0)
                         {
-                            projectile.ParticleSystemsStopWaitTime -= Time.deltaTime;
+                            projectile.ParticleSystemsStopWaitTime -= Time.DeltaTime;
 
                         }
                         else
@@ -218,21 +217,21 @@ public class ProjectileSystem : ComponentSystem
             Entities.With(m_MoveAnimData).ForEach((Entity entity, MovementAnimComponent anim, Transform transform) =>
             {
                 if (anim.DegreesPerSecond != 0)
-                    transform.RotateAround(transform.position, transform.right + anim.RotationAxis, anim.DegreesPerSecond * Time.deltaTime);
+                    transform.RotateAround(transform.position, transform.right + anim.RotationAxis, anim.DegreesPerSecond * Time.DeltaTime);
 
                 if(anim.RandomizeAxis != Vector3.zero)
                 {
                     if (anim.RandomizeAxis.x != 0)
                     {
-                        anim.RotationAxis.x = Mathf.Lerp(anim.RotationAxis.x, anim.RotationAxis.x + Random.Range(-.1f, .1f), Time.deltaTime);
+                        anim.RotationAxis.x = Mathf.Lerp(anim.RotationAxis.x, anim.RotationAxis.x + Random.Range(-.1f, .1f), Time.DeltaTime);
                     }
                     if (anim.RandomizeAxis.y != 0)
                     {
-                        anim.RotationAxis.y = Mathf.Lerp(anim.RotationAxis.y, anim.RotationAxis.y + Random.Range(-.1f, .1f), Time.deltaTime);
+                        anim.RotationAxis.y = Mathf.Lerp(anim.RotationAxis.y, anim.RotationAxis.y + Random.Range(-.1f, .1f), Time.DeltaTime);
                     }
                     if (anim.RandomizeAxis.z != 0)
                     {
-                        anim.RotationAxis.z = Mathf.Lerp(anim.RotationAxis.z, anim.RotationAxis.z += Random.Range(-.1f, .1f), Time.deltaTime);
+                        anim.RotationAxis.z = Mathf.Lerp(anim.RotationAxis.z, anim.RotationAxis.z += Random.Range(-.1f, .1f), Time.DeltaTime);
                     }
                 }
             });

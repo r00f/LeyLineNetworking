@@ -32,13 +32,12 @@ public class SendActionRequestSystem : ComponentSystem
 
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<PlayerEnergy.Component>(),
-        ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
         ComponentType.ReadWrite<PlayerState.Component>(),
         ComponentType.ReadWrite<PlayerPathing.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<HighlightingDataComponent>()
         );
-        m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
@@ -120,13 +119,13 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         if (faction.Faction == playerFaction.Faction)
                         {
-                            if (actionsData.BasicMove.Index != -3)
-                            {
+                            //if (actionsData.BasicMove.Index != -3)
+                            //{
                                 //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
                                 anim.AnimationEvents.VoiceTrigger = true;
-                                SelectActionCommand(-2, unitEntityId.Id);
-                                m_UISystem.InitializeSelectedActionTooltip(0);
-                            }
+                                SelectActionCommand(-3, unitEntityId.Id);
+                                //m_UISystem.InitializeSelectedActionTooltip(0);
+                            //}
                         }
                     }
                 }
@@ -150,7 +149,7 @@ public class SendActionRequestSystem : ComponentSystem
                                 m_CommandSystem.SendCommand(request);
                             }
 
-                            m_HighlightingSystem.ResetHighlights();
+                            m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
                         });
                     }
                     else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
@@ -165,7 +164,7 @@ public class SendActionRequestSystem : ComponentSystem
 
                             anim.AnimationEvents.VoiceTrigger = true;
                             m_CommandSystem.SendCommand(request);
-                            m_HighlightingSystem.ResetHighlights();
+                            m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
                         });
                     }
                 }
@@ -212,6 +211,9 @@ public class SendActionRequestSystem : ComponentSystem
             lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates);
         }
 
+        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+        m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
+
         Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
             if (idComponent.EntityId.Id == entityId)
@@ -246,8 +248,6 @@ public class SendActionRequestSystem : ComponentSystem
                 }
 
                 playerState.SelectedAction = act;
-                m_HighlightingSystem.ResetHighlights();
-                m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
                 if (actionIndex != -3)
                 {
@@ -262,7 +262,7 @@ public class SendActionRequestSystem : ComponentSystem
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
                         playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerPathing, playerFaction.Faction);
                         playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh);
-                        m_HighlightingSystem.HighlightReachable();
+                        m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing);
                     }
                     else
                     {
@@ -273,6 +273,7 @@ public class SendActionRequestSystem : ComponentSystem
             }
         });
 
+        //
         playerHigh.SelectActionBuffer = 3;
 
         playerState.UnitTargets = playerState.UnitTargets;

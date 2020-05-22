@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1199834125490395627}
   - component: {fileID: 8820592072953713341}
-  - component: {fileID: 6904204656751084124}
+  - component: {fileID: 624359500354215446}
   m_Layer: 16
   m_Name: ToungeProjectile
   m_TagString: Untagged
@@ -99,7 +99,7 @@ MonoBehaviour:
   CurrentTargetId: 0
   IsTravelling: 0
   MovementPercentage: 0
---- !u!114 &6904204656751084124
+--- !u!114 &624359500354215446
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -108,9 +108,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1199834125489964491}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ConversionMode: 1
 --- !u!1 &2211747367441822814
 GameObject:
   m_ObjectHideFlags: 0
@@ -4875,6 +4876,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5062,6 +5064,7 @@ SkinnedMeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -5182,7 +5185,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1690907
+  m_MaxDistance: 1.016007
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5268,7 +5271,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1690907
+  m_MaxDistance: 1.016007
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5374,7 +5377,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1690907
+  m_MaxDistance: 1.016007
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5496,7 +5499,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.1690907
+  m_MaxDistance: 1.016007
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5564,6 +5567,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

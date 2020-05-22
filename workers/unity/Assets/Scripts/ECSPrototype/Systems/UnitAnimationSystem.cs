@@ -60,11 +60,10 @@ public class UnitAnimationSystem : ComponentSystem
 
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<HeroTransform>(),
-        ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
         ComponentType.ReadOnly<HighlightingDataComponent>(),
         ComponentType.ReadOnly<FactionComponent.Component>()
         );
-        m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
         settings = Resources.Load<Settings>("Settings");
     }
@@ -228,7 +227,7 @@ public class UnitAnimationSystem : ComponentSystem
                         if(g.activeSelf)
                             g.SetActive(false);
                     }
-                    animatorComponent.EnableVisualsDelay -= Time.deltaTime;
+                    animatorComponent.EnableVisualsDelay -= Time.DeltaTime;
                 }
                 else if (!animatorComponent.Dead)
                 {
@@ -277,11 +276,11 @@ public class UnitAnimationSystem : ComponentSystem
                         if (((int)faction.Faction & 1) == 1)
                         {
                             //odd
-                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 3);
+                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 30000);
                         }
                         else
                         {
-                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 3);
+                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 30000);
                         }
                     }
                     else
@@ -308,12 +307,12 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     if (energy.Harvesting)
                     {
-                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, color * teamColorMeshes.EmissionIntensity, Time.deltaTime * teamColorMeshes.EmissionLerpTime);
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, color * teamColorMeshes.EmissionIntensity, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
                         //r.material.SetColor("_EmissiveColor", color * 100);
                     }
                     else
                     {
-                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.deltaTime * teamColorMeshes.EmissionLerpTime);
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
                     }
 
                     r.material.SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
@@ -341,9 +340,9 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 float step;
                 if (actions.LockedAction.Index != -3)
-                    step = (Time.deltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
+                    step = (Time.DeltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
                 else
-                    step = Time.deltaTime * 1.732f;
+                    step = Time.DeltaTime * 1.732f;
 
                 //move
                 animatorComponent.transform.position = Vector3.MoveTowards(animatorComponent.transform.position, serverPosition.Coords.ToUnityVector(), step);
@@ -389,7 +388,7 @@ public class UnitAnimationSystem : ComponentSystem
     {
         Vector3 targetDir = targetPosition - originTransform.position;
         targetDir.y = 0;
-        float rotSpeed = Time.deltaTime * rotationSpeed;
+        float rotSpeed = Time.DeltaTime * rotationSpeed;
         Vector3 direction = Vector3.RotateTowards(originTransform.forward, targetDir, rotSpeed, 0.0f);
         
         return direction;

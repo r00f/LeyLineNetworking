@@ -33,15 +33,13 @@ public class ActionEffectsSystem : ComponentSystem
 
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<Vision.Component>(),
-        ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+        ComponentType.ReadOnly<PlayerState.HasAuthority>()
         );
-
-        m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<Health.Component>(),
-        ComponentType.ReadOnly<Collider>(),
+        ComponentType.ReadOnly<CapsuleCollider>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
         ComponentType.ReadWrite<UnitEffects>()
@@ -82,6 +80,7 @@ public class ActionEffectsSystem : ComponentSystem
 
         if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
         {
+            Debug.Log("OOF");
             playerVisionData.Dispose();
             gameStates.Dispose();
             return;
@@ -91,7 +90,7 @@ public class ActionEffectsSystem : ComponentSystem
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
         {
-            var unitCollider = EntityManager.GetComponentObject<Collider>(e);
+            var unitCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
             if(playerVisionHash.Contains(coord.CubeCoordinate))

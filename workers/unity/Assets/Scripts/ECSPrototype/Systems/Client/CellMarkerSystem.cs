@@ -50,10 +50,8 @@ namespace LeyLineHybridECS
 
             m_PlayerStateData = GetEntityQuery(
                 ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+                ComponentType.ReadOnly<PlayerState.HasAuthority>()
             );
-
-            m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
         }
 

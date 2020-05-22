@@ -12,7 +12,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SendActionRequestSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HighlightingSystem : ComponentSystem
 {
 
@@ -87,12 +87,10 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadWrite<PlayerPathing.Component>(),
-            ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadOnly<PlayerEnergy.Component>(),
             ComponentType.ReadWrite<HighlightingDataComponent>()
             );
-
-        m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
     }
 
     protected override void OnStartRunning()
@@ -163,7 +161,7 @@ public class HighlightingSystem : ComponentSystem
                         playerHighlightingData.SelectActionBuffer--;
                     }
                     else
-                        ResetHighlights();
+                        ResetHighlights(ref playerState, playerHighlightingData);
                 }
 
                 playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
@@ -646,34 +644,29 @@ public class HighlightingSystem : ComponentSystem
         return yPosArray;
     }
 
-    public void ResetHighlights()
+    public void ResetHighlights(ref PlayerState.Component playerState, HighlightingDataComponent playerHigh)
     {
-        if (m_PlayerStateData.CalculateEntityCount() == 0)
-            return;
-
-        Debug.Log("ResetHighLights");
-        var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
-        var playerState = playerStates[0];
-        var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+        var p = playerState;
 
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-        HashSet<long> unitIdHash = new HashSet<long>(playerStates[0].UnitTargets.Keys);
+        HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
         Entities.With(m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
         {
             //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
             if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3)
             {
-                if (unitIdHash.Contains(unitId.EntityId.Id) && playerHighlightingDatas[0].TargetRestrictionIndex != 2)
+                if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, playerStates[0], unitId.EntityId.Id);
-                    playerState.UnitTargets.Remove(unitId.EntityId.Id);
-                    playerState.TargetDictChange = true;
-                    playerStates[0] = playerState;
+                    ResetUnitHighLights(e, p, unitId.EntityId.Id);
+                    p.UnitTargets.Remove(unitId.EntityId.Id);
+                    p.TargetDictChange = true;
                 }
             }
         });
+
+        playerState = p;
 
         Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
@@ -694,10 +687,6 @@ public class HighlightingSystem : ComponentSystem
                 commandBuffer.AddComponent(e, new RequireMarkerUpdate());
             }
         });
-
-        m_PlayerStateData.CopyFromComponentDataArray(playerStates);
-        playerStates.Dispose();
-        playerHighlightingDatas.Dispose();
     }
 
     public void ResetUnitHighLights(Entity e, PlayerState.Component playerState, long unitId)
@@ -728,11 +717,13 @@ public class HighlightingSystem : ComponentSystem
         });
     }
 
-    public void HighlightReachable()
+    public void HighlightReachable(ref PlayerState.Component playerState, ref PlayerPathing.Component playerPathing)
     {
+        /*
         var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerState = playerStates[0];
         var playerPathings = m_PlayerStateData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
+        */
 
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
@@ -742,12 +733,12 @@ public class HighlightingSystem : ComponentSystem
         {
             playerState.UnitTargets.Remove(playerState.SelectedUnitId);
             playerState.TargetDictChange = true;
-            playerStates[0] = playerState;
+            //playerStates[0] = playerState;
         }
 
-        m_PlayerStateData.CopyFromComponentDataArray(playerStates);
+        //m_PlayerStateData.CopyFromComponentDataArray(playerStates);
 
-        HashSet<Vector3f> playerCellsInRangeHash = new HashSet<Vector3f>(playerPathings[0].CoordinatesInRange);
+        HashSet<Vector3f> playerCellsInRangeHash = new HashSet<Vector3f>(playerPathing.CoordinatesInRange);
 
         Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState marker, ref CubeCoordinate.Component coord) =>
         {
@@ -765,9 +756,6 @@ public class HighlightingSystem : ComponentSystem
 
         });
 
-
-        playerStates.Dispose();
-        playerPathings.Dispose();
 
     }
 

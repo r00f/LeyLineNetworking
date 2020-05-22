@@ -4723,6 +4723,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -9487,6 +9488,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -14481,6 +14483,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -14574,8 +14577,8 @@ GameObject:
   - component: {fileID: 8288337912239240116}
   - component: {fileID: 6546359515611239479}
   - component: {fileID: 93931158904744250}
-  - component: {fileID: 6593013996290753601}
   - component: {fileID: 4178519868625791593}
+  - component: {fileID: -2331136369334461771}
   m_Layer: 1
   m_Name: WaterLineProjectile
   m_TagString: Untagged
@@ -14622,6 +14625,7 @@ MeshRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 1
   m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -14710,18 +14714,6 @@ MonoBehaviour:
   CurrentTargetId: 0
   IsTravelling: 0
   MovementPercentage: 0
---- !u!114 &6593013996290753601
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4896425436571225840}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &4178519868625791593
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14745,6 +14737,19 @@ MonoBehaviour:
   OverrideAttenuation: 0
   OverrideMinDistance: 1
   OverrideMaxDistance: 20
+--- !u!114 &-2331136369334461771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4896425436571225840}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConversionMode: 1
 --- !u!1 &6751321098411512485
 GameObject:
   m_ObjectHideFlags: 0
@@ -19468,6 +19473,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -24462,6 +24468,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -29233,6 +29240,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -34004,6 +34012,7 @@ ParticleSystemRenderer:
   m_MotionVectors: 1
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
+  m_RayTracingMode: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -34059,15 +34068,25 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5341185222269292129}
     m_Modifications:
+    - target: {fileID: 22475325049645645, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1330846010300755426, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3357390275044352851, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+        type: 3}
+      propertyPath: playOnAwake
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 3602980402949883786, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: m_Name
       value: WaterExplosionPS
-      objectReference: {fileID: 0}
-    - target: {fileID: 8567822036391782397, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
-        type: 3}
-      propertyPath: playOnAwake
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5596479015441426445, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
@@ -34144,17 +34163,7 @@ PrefabInstance:
       propertyPath: m_BoundingSphereOverride.y
       value: 1.4711e-39
       objectReference: {fileID: 0}
-    - target: {fileID: 3357390275044352851, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
-        type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22475325049645645, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
-        type: 3}
-      propertyPath: playOnAwake
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1330846010300755426, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
+    - target: {fileID: 8567822036391782397, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
         type: 3}
       propertyPath: playOnAwake
       value: 0
@@ -34174,11 +34183,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5341185222269292129}
     m_Modifications:
-    - target: {fileID: 4723404049532625160, guid: 57d3e76a55d8c3246971622ec77fdf8d,
-        type: 3}
-      propertyPath: m_Name
-      value: WaterLaunchExplosion
-      objectReference: {fileID: 0}
     - target: {fileID: 4478281585465839247, guid: 57d3e76a55d8c3246971622ec77fdf8d,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -34233,6 +34237,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4723404049532625160, guid: 57d3e76a55d8c3246971622ec77fdf8d,
+        type: 3}
+      propertyPath: m_Name
+      value: WaterLaunchExplosion
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 57d3e76a55d8c3246971622ec77fdf8d, type: 3}

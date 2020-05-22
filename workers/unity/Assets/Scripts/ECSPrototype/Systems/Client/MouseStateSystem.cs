@@ -50,11 +50,10 @@ public class MouseStateSystem : JobComponentSystem
 
         m_AuthoritativePlayerData = GetEntityQuery(
             ComponentType.ReadWrite<PlayerState.Component>(),
-            ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<HighlightingDataComponent>()
         );
-        m_AuthoritativePlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
     }
 
     protected override void OnStartRunning()

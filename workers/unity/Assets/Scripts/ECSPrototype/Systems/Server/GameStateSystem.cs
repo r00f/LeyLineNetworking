@@ -90,7 +90,7 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
                             else
-                                gameState.CurrentWaitTime -= Time.deltaTime;
+                                gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
 #else
                         if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 4)
@@ -101,7 +101,7 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
                             else
-                                gameState.CurrentWaitTime -= Time.deltaTime;
+                                gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
 #endif
                         break;
@@ -113,7 +113,7 @@ namespace LeyLineHybridECS
                         }
                         else if (AnyPlayerReady(gameStateWorldIndex.Value))
                         {
-                            gameState.CurrentPlanningTime -= Time.deltaTime;
+                            gameState.CurrentPlanningTime -= Time.DeltaTime;
                         }
                         break;
                     case GameStateEnum.interrupt:
@@ -124,7 +124,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 gameState.CurrentState = GameStateEnum.attack;
@@ -140,7 +140,7 @@ namespace LeyLineHybridECS
 
                         else
                         {
-                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateIsTaken(gameStateWorldIndex.Value);
@@ -156,7 +156,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateIsTaken(gameStateWorldIndex.Value);
@@ -172,7 +172,7 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            gameState.HighestExecuteTime -= Time.deltaTime;
+                            gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 gameState.CurrentState = GameStateEnum.cleanup;
