@@ -17,8 +17,9 @@ MonoBehaviour:
   ProjectileFab: {fileID: 93931158904744250, guid: 3daa959709b1105418d1a0291feda0dc,
     type: 3}
   ActionName: Attack
-  ToolTip: 
+  Description: 
   TimeToExecute: 3
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:
@@ -41,7 +42,10 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  damageAmount: 1
+  DamageAmount: 0
+  ExplosionRadius: 0
+  ExplosionForce: 0
+  UpForce: 0
 --- !u!114 &114273308848104638
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -56,7 +60,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
   targettingRange: 1
-  energyCost: 3
+  energyCost: 999
   ModToAdd: {fileID: 0}
   SecondaryTargets: []
   Restrictions: 4

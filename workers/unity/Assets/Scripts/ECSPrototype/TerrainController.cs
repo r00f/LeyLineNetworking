@@ -159,7 +159,7 @@ namespace LeyLineHybridECS
                                 prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
                                 color = Color.black,
                                 heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
-                                widthScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                                widthScale = 1,
                                 rotation = UnityEngine.Random.Range(0f, randomGrasRotationMax)
                             };
 

@@ -31,6 +31,7 @@ namespace LeyLineHybridECS
         [SerializeField]
         MeshFilter leyLineCircleMeshFilter;
 
+        /*
         [SerializeField]
         MeshRenderer leyLineCircleMeshRenderer;
 
@@ -38,6 +39,7 @@ namespace LeyLineHybridECS
         ParticleSystem circlePs;
         [SerializeField]
         ParticleSystem pathPs;
+        */
 
         [SerializeField]
         List<Cell> leyLinePath = new List<Cell>();
@@ -291,10 +293,11 @@ namespace LeyLineHybridECS
             leyLinePathRenderer.BakeMesh(leyLinePathMesh, projectorCam);
 
 
-            ParticleSystem pPs = pathPs;
-            var pathShapeModule = pPs.shape;
-            pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
-            pathShapeModule.mesh = leyLinePathMesh;
+            //ParticleSystem pPs = pathPs;
+            //var pathShapeModule = pPs.shape;
+            //pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
+            //pathShapeModule.mesh = leyLinePathMesh;
+
             leyLinePathMeshFilter.mesh = leyLinePathMesh;
             leyLinePathRenderer.enabled = false;
         }
@@ -306,13 +309,14 @@ namespace LeyLineHybridECS
             leyLineCircleRenderer.BakeMesh(leyLineCircleMesh, projectorCam);
 
 
-            ParticleSystem cPs = circlePs;
-            var circleShapeModule = cPs.shape;
+            //ParticleSystem cPs = circlePs;
+            //var circleShapeModule = cPs.shape;
+            //circleShapeModule.shapeType = ParticleSystemShapeType.Mesh;
+            //circleShapeModule.mesh = leyLineCircleMesh;
 
-            circleShapeModule.shapeType = ParticleSystemShapeType.Mesh;
-            circleShapeModule.mesh = leyLineCircleMesh;
             leyLineCircleMeshFilter.mesh = leyLineCircleMesh;
             leyLineCircleRenderer.enabled = false;
+
         }
 
         public void CalculateCircle(float radius)
