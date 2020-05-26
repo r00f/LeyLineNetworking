@@ -181,6 +181,11 @@ public class ProjectileSystem : ComponentSystem
                                 projectile.ExplosionEventEmitter.Play();
                             }
 
+                            if(projectile.ExplosionParticleSystem)
+                            {
+                                projectile.ExplosionParticleSystem.Play();
+                            }
+
                             foreach (GameObject go in projectile.DisableAtDestinationObjects)
                             {
                                 go.SetActive(false);
@@ -216,7 +221,7 @@ public class ProjectileSystem : ComponentSystem
 
             Entities.With(m_MoveAnimData).ForEach((Entity entity, MovementAnimComponent anim, Transform transform) =>
             {
-                if (anim.DegreesPerSecond != 0)
+                if (anim.DegreesPerSecond != 0 && transform)
                     transform.RotateAround(transform.position, transform.right + anim.RotationAxis, anim.DegreesPerSecond * Time.DeltaTime);
 
                 if(anim.RandomizeAxis != Vector3.zero)

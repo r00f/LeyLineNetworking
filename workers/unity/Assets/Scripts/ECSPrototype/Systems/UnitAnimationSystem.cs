@@ -315,7 +315,7 @@ public class UnitAnimationSystem : ComponentSystem
                         teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
                     }
 
-                    r.material.SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
+                    r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
                 }
             }
 
