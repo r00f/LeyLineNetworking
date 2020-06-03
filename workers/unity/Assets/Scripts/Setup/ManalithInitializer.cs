@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections;
 using UnityEngine.UI;
 using UnityEditor;
+using Unity.Mathematics;
 
 namespace LeyLineHybridECS
 {
@@ -45,6 +46,12 @@ namespace LeyLineHybridECS
         List<Cell> leyLinePath = new List<Cell>();
 
         public List<Cell> leyLineCircle = new List<Cell>();
+
+
+        [SerializeField]
+        public List<float3> leyLinePathCoords = new List<float3>();
+
+        public List<float3> leyLineCircleCoords = new List<float3>();
 
         [HideInInspector]
         public List<LineRenderer> connectedLeyLineRenderers = new List<LineRenderer>();
@@ -339,6 +346,24 @@ namespace LeyLineHybridECS
         }
 
         #endregion
+
+        public void FillPathCoordinatesList()
+        {
+            leyLinePathCoords.Clear();
+            foreach(Cell c in leyLinePath)
+            {
+                leyLinePathCoords.Add(c.transform.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+            }
+        }
+
+        public void FillCircleCoordinatesList()
+        {
+            leyLineCircleCoords.Clear();
+            foreach (Cell c in leyLineCircle)
+            {
+                leyLineCircleCoords.Add(c.transform.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+            }
+        }
 
         #region PathFinding
 

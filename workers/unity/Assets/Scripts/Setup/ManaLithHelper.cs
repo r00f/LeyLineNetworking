@@ -33,6 +33,15 @@ namespace LeyLineHybridECS
                 myTarget.MoveTransform();
             }
 
+            if (GUILayout.Button("Fill Circle Coords"))
+            {
+                myTarget.FillCircleCoordinatesList();
+            }
+            if (GUILayout.Button("Fill Path Coords"))
+            {
+                myTarget.FillPathCoordinatesList();
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
 

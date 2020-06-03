@@ -112,6 +112,10 @@ public class UIReferences : MonoBehaviour
 
     [Header("MapPanel")]
     public MinimapScript MinimapComponent;
+    public GameObject MiniMapCellTilesPanel;
+    public GameObject MiniMapUnitTilesPanel;
+    public GameObject MiniMapManalithTilesPanel;
+    public GameObject MiniMapPlayerTilePanel;
 
     [Header("ManaLithUI")]
     public ManalithInfoComponent ManalithIconPrefab;

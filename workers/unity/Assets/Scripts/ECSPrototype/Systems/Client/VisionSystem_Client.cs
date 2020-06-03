@@ -171,17 +171,26 @@ namespace LeyLineHybridECS
 
             HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
-            Entities.With(m_UnitData).ForEach((Entity e, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible visible) =>
+            Entities.With(m_UnitData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible visible) =>
             {
+                UpdateUnitMapTilePosition(coord.CubeCoordinate, ref isVisibleGOs);
                 if (faction.Faction != playerFaction)
                 {
                     if (visionCoordsHash.Contains(coord.CubeCoordinate))
                     {
+                        if (isVisibleGOs.MiniMapTileInstance)
+                        {
+                            isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(true);
+                            if (isVisibleGOs.MiniMapTileInstance.UnitBecomeVisiblePingPS)
+                                isVisibleGOs.MiniMapTileInstance.UnitBecomeVisiblePingPS.Play();
+                        }
                         visible.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                     }
                     else
                     {
+                        if (isVisibleGOs.MiniMapTileInstance)
+                            isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(false);
                         visible.Value = 0;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                     }
@@ -195,6 +204,10 @@ namespace LeyLineHybridECS
                 {
                     if (isVisibleComp.Value == 0)
                     {
+                        if (isVisibleGOs.MiniMapTileInstance)
+                        {
+                            isVisibleGOs.MiniMapTileInstance.TileImage.color = isVisibleGOs.MiniMapTileInstance.TileColor;
+                        }
                         isVisibleComp.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                         //EntityManager.AddComponentData(e,  RequireVisibleUpdate);
@@ -206,6 +219,8 @@ namespace LeyLineHybridECS
                 {
                     if (isVisibleComp.Value == 1)
                     {
+                        if (isVisibleGOs.MiniMapTileInstance)
+                            isVisibleGOs.MiniMapTileInstance.TileImage.color = isVisibleGOs.MiniMapTileInstance.TileInvisibleColor;
                         isVisibleComp.Value = 0;
                         //ADD REQUIRE UPDATE FLAG COMPONENT
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
@@ -218,47 +233,57 @@ namespace LeyLineHybridECS
             playerVisions.Dispose();
         }
 
-        /*
-        public void UpdateVision()
+        void UpdateUnitMapTilePosition(Vector3f coord, ref IsVisibleReferences isVisibleRef)
         {
-            var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-            var playerVision = playerVisions[0];
-
-            Entities.With(m_IsVisibleData).ForEach((IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
-            {
-                var coord = Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate);
-                byte isVisible = isVisibleComp.Value;
-
-                if (isVisibleComp.RequireUpdate == 0)
-                {
-                    //only compare when serverSide playerVision is updated
-                    if (isVisible == 0)
-                    {
-                        foreach (Vector3f c in playerVision.Positives)
-                        {
-                            if (Vector3fext.ToUnityVector(c) == coord)
-                            {
-                                isVisibleComp.Value = 1;
-                                isVisibleComp.RequireUpdate = 1;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        foreach (Vector3f c in playerVision.Negatives)
-                        {
-                            if (Vector3fext.ToUnityVector(c) == coord)
-                            {
-                                isVisibleComp.Value = 0;
-                                isVisibleComp.RequireUpdate = 1;
-                            }
-                        }
-                    }
-                }
-            });
-
-            playerVisions.Dispose();
+            float offsetMultiplier = 5.8f;
+            //Instantiate MiniMapTile into Map
+            Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
+            Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
+            if(isVisibleRef.MiniMapTileInstance)
+                isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
         }
-        */
-    }
+
+            /*
+            public void UpdateVision()
+            {
+                var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
+                var playerVision = playerVisions[0];
+
+                Entities.With(m_IsVisibleData).ForEach((IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
+                {
+                    var coord = Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate);
+                    byte isVisible = isVisibleComp.Value;
+
+                    if (isVisibleComp.RequireUpdate == 0)
+                    {
+                        //only compare when serverSide playerVision is updated
+                        if (isVisible == 0)
+                        {
+                            foreach (Vector3f c in playerVision.Positives)
+                            {
+                                if (Vector3fext.ToUnityVector(c) == coord)
+                                {
+                                    isVisibleComp.Value = 1;
+                                    isVisibleComp.RequireUpdate = 1;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            foreach (Vector3f c in playerVision.Negatives)
+                            {
+                                if (Vector3fext.ToUnityVector(c) == coord)
+                                {
+                                    isVisibleComp.Value = 0;
+                                    isVisibleComp.RequireUpdate = 1;
+                                }
+                            }
+                        }
+                    }
+                });
+
+                playerVisions.Dispose();
+            }
+            */
+        }
 }

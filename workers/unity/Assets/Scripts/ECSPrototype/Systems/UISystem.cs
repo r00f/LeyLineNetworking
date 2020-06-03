@@ -75,12 +75,12 @@ namespace LeyLineHybridECS
             base.OnStartRunning();
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+            UIRef = Object.FindObjectOfType<UIReferences>();
             InitializeButtons();
         }
 
         public void InitializeButtons()
         {
-            UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
             //UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
             UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
@@ -353,6 +353,7 @@ namespace LeyLineHybridECS
                 var position = EntityManager.GetComponentObject<Transform>(e).position;
                 var energy = EntityManager.GetComponentData<Energy.Component>(e);
                 var lineRenderer = EntityManager.GetComponentObject<LineRendererComponent>(e);
+                var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
                 var animatedPortrait = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClip;
                 var factionColor = faction.TeamColor;
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
@@ -622,11 +623,12 @@ namespace LeyLineHybridECS
                         }
                     }
 
+                    //TODO: CLEANUP UNIT UI BEFORE UNIT GETS DELETED BECAUSE CLIENT LEFT
                     if (health.CurrentHealth == 0)
                     {
                         if(unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
                         {
-                            CleanupUnitUI(unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
+                            CleanupUnitUI(isVisibleRef, unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
                         }
                     }
                     else
@@ -1327,8 +1329,20 @@ namespace LeyLineHybridECS
                 Object.Destroy(healthbar.UnitHeadUIInstance.ActionDisplay.gameObject);
         }
 
-        void CleanupUnitUI(UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
+        void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
+
+            if (isVisibleRef.MiniMapTileInstance)
+            {
+                if (isVisibleRef.MiniMapTileInstance.DeathCrossPrefab)
+                {
+                    var cross = Object.Instantiate(isVisibleRef.MiniMapTileInstance.DeathCrossPrefab, isVisibleRef.MiniMapTileInstance.TileRect.position, Quaternion.identity, isVisibleRef.MiniMapTileInstance.transform.parent);
+                    Object.Destroy(cross, 3f);
+                }
+
+                Object.Destroy(isVisibleRef.MiniMapTileInstance.gameObject, 0.5f);
+            }
+
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
             //INSTEAD OF DELETING DIRECTLY SET FlagForDestruction AND DESTROY FROM UNITCLEANUPSYSTEM AFTER
             healthbar.UnitHeadUIInstance.FlagForDestruction = true;

@@ -85,6 +85,16 @@ namespace LeyLineHybridECS
             var playerWorldIndex = playersWorldID[0].Value;
             var playerCam = playersCamera[0];
 
+            if (playerCam.PlayerMapTileInstance)
+            {
+                playerCam.PlayerMapTileInstance.TileRect.anchoredPosition = (new Vector2(gameState.MapCenter.X, gameState.MapCenter.Y) - new Vector2(playerCam.transform.position.x, playerCam.transform.position.z)) * -5.8f;
+                //Equalize rot with player rot
+                Vector3 compassRotation = playerCam.PlayerMapTileInstance.TileRect.eulerAngles;
+                compassRotation.z = -playerCam.transform.eulerAngles.y;
+                playerCam.PlayerMapTileInstance.TileRect.eulerAngles = compassRotation;
+
+            }
+
 
             if (gameState.CurrentState == GameStateEnum.planning)
             {

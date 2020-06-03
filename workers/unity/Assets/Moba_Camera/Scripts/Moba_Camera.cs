@@ -201,9 +201,13 @@ public class Moba_Camera : MonoBehaviour {
 	public Moba_Camera_Requirements requirements	= new Moba_Camera_Requirements();
 	public Moba_Camera_Inputs inputs				= new Moba_Camera_Inputs();
 	public Moba_Camera_Settings settings			= new Moba_Camera_Settings();
-		
-	// The Current Zoom value for the camera; Not shown in Inspector
-	private float _currentZoomAmount			= 0.0f;
+
+    public MiniMapTile PlayerMapTilePrefab;
+    [HideInInspector]
+    public MiniMapTile PlayerMapTileInstance;
+
+    // The Current Zoom value for the camera; Not shown in Inspector
+    private float _currentZoomAmount			= 0.0f;
 	public float currentZoomAmount {
 		get {
 			return _currentZoomAmount;
@@ -242,6 +246,8 @@ public class Moba_Camera : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
+        //Canvas canvas = FindObjectOfType<Canvas>();
+        //canvas.worldCamera = requirements.camera;
         heroTransform = GetComponent<HeroTransform>();
 		
 		if(!requirements.pivot || !requirements.offset || !requirements.camera) {

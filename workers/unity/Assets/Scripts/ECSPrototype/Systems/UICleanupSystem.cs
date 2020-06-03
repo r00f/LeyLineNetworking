@@ -18,7 +18,7 @@ public class UICleanupSystem : ComponentSystem
     {
         Entities.With(m_HeadUIData).ForEach((UnitHeadUI headUI) =>
         {
-            if(headUI.FlagForDestruction)
+            if(headUI && headUI.FlagForDestruction)
             {
                 Object.Destroy(headUI.gameObject, headUI.DestroyWaitTime);
             }

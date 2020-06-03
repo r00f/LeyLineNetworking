@@ -40,7 +40,8 @@ namespace LeyLineHybridECS
             m_NewCellData = GetEntityQuery(
                 ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
                 ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-                ComponentType.ReadWrite<MarkerGameObjects>()
+                ComponentType.ReadWrite<MarkerGameObjects>(),
+                ComponentType.ReadWrite<IsVisibleReferences>()
                 );
 
             m_GameStateData = GetEntityQuery(
@@ -59,20 +60,38 @@ namespace LeyLineHybridECS
         {
             base.OnStartRunning();
             settings = Resources.Load<Settings>("Settings");
-
         }
 
         protected override void OnUpdate()
         {
+            /*
             if(m_NewCellData.CalculateEntityCount() > 0)
             {
-                Entities.With(m_NewCellData).ForEach((MarkerGameObjects markerGameObjects, ref CellAttributesComponent.Component cellAtt) =>
+                Entities.With(m_NewCellData).ForEach((Entity e, MarkerGameObjects markerGameObjects, ref CellAttributesComponent.Component cellAtt) =>
                 {
                     int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-                    markerGameObjects.MapMarkerRenderer.material.SetColor("_BaseColor", settings.MapCellColors[colorIndex]);
-                });
-            }
+                    var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
 
+                    float offsetMultiplier = UIRef.MinimapComponent.Map.sizeDelta.x / isVisibleRef.MiniMapTilePrefab.TileRect.sizeDelta.x / 2;
+                    //Instantiate MiniMapTile into Map
+                    Vector3 pos = CellGridMethods.CubeToPos(cellAtt.CellAttributes.Cell.CubeCoordinate, new Vector2f(0f, 0f));
+                    Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
+                    isVisibleRef.MiniMapTileInstance = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, UIRef.MiniMapTilesPanel.transform);
+                    isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
+
+                    isVisibleRef.MiniMapTileInstance.TileColor = settings.MapCellColors[colorIndex];
+                    //init gray if not water
+                    if (cellAtt.CellAttributes.CellMapColorIndex != 5)
+                        isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
+                    //init blue if water
+                    else
+                        isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTileInstance.TileColor;
+
+                    isVisibleRef.MiniMapTileInstance.TileColor = settings.MapCellColors[colorIndex];
+                });
+                
+            }
+            */
             if (m_GameStateData.CalculateEntityCount() == 0)
                 return;
 

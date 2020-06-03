@@ -8,16 +8,19 @@ namespace LeyLineHybridECS
 
         public MeshColor ManalithColor;
         public MeshColor ConnectedManalithColor;
+        public MeshFilter PathMeshFilter;
+        [HideInInspector]
         public Mesh mesh;
         public Vector2[] uv;
         public Gradient Gradient;
+        public Gradient MapGradient;
         //[ColorUsage(true, true)]
         public Color[] colors;
         public float EmissionMultiplier;
 
         void Start()
         {
-            mesh = GetComponent<MeshFilter>().mesh;
+            mesh = PathMeshFilter.mesh;
             uv = mesh.uv;
             colors = new Color[uv.Length];
         }

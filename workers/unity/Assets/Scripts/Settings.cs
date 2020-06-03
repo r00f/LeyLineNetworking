@@ -6,6 +6,7 @@ using UnityEngine;
 public class Settings : ScriptableObject
 {
     public List<Color> FactionColors;
+    public List<Color> FactionMapColors;
     public List<Color> MapCellColors;
     public List<Color> TurnStepColors;
     public List<Color> TurnStepBgColors;

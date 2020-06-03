@@ -10,6 +10,9 @@ namespace LeyLineHybridECS
         public Color Color;
         [ColorUsage(true, true)]
         public Color LerpColor;
+
+        public Color MapColor;
+        public Color MapLerpColor;
         public MeshRenderer MeshRenderer;
         public List<MeshRenderer> EmissionColorRenderers;
         public List<Light> Lights;

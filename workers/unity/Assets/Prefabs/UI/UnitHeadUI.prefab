@@ -641,7 +641,7 @@ GameObject:
   - component: {fileID: 8395842537746816604}
   - component: {fileID: 9094335062476615034}
   - component: {fileID: 7821097187023044147}
-  - component: {fileID: -8071369434412066482}
+  - component: {fileID: -7044084226772031160}
   m_Layer: 5
   m_Name: UnitHeadUI
   m_TagString: Untagged
@@ -702,7 +702,7 @@ MonoBehaviour:
   ArmorPanel: {fileID: 2703932069359298339}
   ArmorText: {fileID: 5679632020839264197}
   ActionDisplay: {fileID: 3021548649424407165}
---- !u!114 &-8071369434412066482
+--- !u!114 &-7044084226772031160
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -711,9 +711,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 6185683490695699564}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5bf10cdea1344482e91a4f2b58506b77, type: 3}
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ConversionMode: 1
 --- !u!1 &6564718093604812962
 GameObject:
   m_ObjectHideFlags: 0
@@ -980,16 +981,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8395842537746816604}
     m_Modifications:
-    - target: {fileID: 2561428741265738805, guid: ead50767a77c3a64e8e5b1aa578ca201,
-        type: 3}
-      propertyPath: m_Name
-      value: HeadUIActionLocked
-      objectReference: {fileID: 0}
-    - target: {fileID: 2561428741265738805, guid: ead50767a77c3a64e8e5b1aa578ca201,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1711002208918128213, guid: ead50767a77c3a64e8e5b1aa578ca201,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1094,6 +1085,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 2561428741265738805, guid: ead50767a77c3a64e8e5b1aa578ca201,
+        type: 3}
+      propertyPath: m_Name
+      value: HeadUIActionLocked
+      objectReference: {fileID: 0}
+    - target: {fileID: 2561428741265738805, guid: ead50767a77c3a64e8e5b1aa578ca201,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ead50767a77c3a64e8e5b1aa578ca201, type: 3}
