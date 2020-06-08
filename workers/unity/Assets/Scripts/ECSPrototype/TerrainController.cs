@@ -158,7 +158,7 @@ namespace LeyLineHybridECS
                             TreeInstance treeInstance = new TreeInstance()
                             {
                                 prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
-                                color = Color.black,
+                                color = Color.white,
                                 lightmapColor = Color.white,
                                 heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
                                 widthScale = 1,
@@ -177,8 +177,8 @@ namespace LeyLineHybridECS
             }
 
             //add grass to treeList before setting terrain.treeInstances
-
-            terrain.terrainData.treeInstances = treeList.ToArray();
+            terrain.terrainData.SetTreeInstances(treeList.ToArray(), false);
+            //terrain.terrainData.treeInstances = treeList.ToArray();
             terrain.Flush();
         }
 

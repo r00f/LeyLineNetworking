@@ -17,16 +17,24 @@ namespace LeyLineHybridECS
     public class VisionSystem_Client : ComponentSystem
     {
         ILogDispatcher logger;
-        EntityQuery m_GameStateData;
+        //EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
         EntityQuery m_IsVisibleData;
         EntityQuery m_RequireVisibleUpdateData;
         EntityQuery m_AuthorativePlayerData;
         ComponentUpdateSystem m_ComponentUpdateSystem;
+        Camera ProjectorCamera;
 
         protected override void OnCreate()
         {
             base.OnCreate();
+
+            /*
+            m_GameStateData = GetEntityQuery(
+            ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<WorldIndex.Component>()
+            );
+            */
 
             m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -57,6 +65,7 @@ namespace LeyLineHybridECS
         {
             base.OnStartRunning();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+            ProjectorCamera = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
         }
 
         protected override void OnUpdate()
@@ -64,7 +73,15 @@ namespace LeyLineHybridECS
             if (m_AuthorativePlayerData.CalculateEntityCount() == 0)
                 return;
 
+            //var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+            //var gameState = gameStateData[0];
+
             var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
+
+            //if(gameState.CurrentState == GameStateEnum.move || gameState.CurrentState == GameStateEnum.cleanup)
+                
+            //else
+                //ProjectorCamera.enabled = false;
 
             for (var i = 0; i < updateVisionEvents.Count; i++)
             {
@@ -73,6 +90,7 @@ namespace LeyLineHybridECS
 
             if(m_RequireVisibleUpdateData.CalculateEntityCount() > 0)
             {
+                ProjectorCamera.enabled = true;
                 //REDUCED AMOUNT OF OBJECTS THAT ARE IN VISIBLEDATA 650 x if (isVisibleComp.RequireUpdate == 1) uses .5ms while doing nothing at all
                 Entities.With(m_RequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
                 {
@@ -159,6 +177,13 @@ namespace LeyLineHybridECS
                     //}
                 });
             }
+            else
+            {
+                ProjectorCamera.enabled = false;
+            }
+
+
+            //gameStateData.Dispose();
         }
 
         public void UpdateVision()
