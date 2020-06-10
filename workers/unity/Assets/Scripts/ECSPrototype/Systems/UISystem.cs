@@ -332,9 +332,9 @@ namespace LeyLineHybridECS
                         UIRef.GameOverPanel.SetActive(true);
                     }
 
-                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.deltaTime);
-                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.deltaTime);
-                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.deltaTime);
+                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
+                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
+                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
                 }
                 else if (gameState.WinnerFaction == authPlayerFaction)
                 {
@@ -352,9 +352,9 @@ namespace LeyLineHybridECS
                         UIRef.DefeatPanel.SetActive(true);
                         UIRef.GameOverPanel.SetActive(true);
                     }
-                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.deltaTime);
-                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.deltaTime);
-                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.deltaTime);
+                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
+                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
+                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
                 }
 
 
