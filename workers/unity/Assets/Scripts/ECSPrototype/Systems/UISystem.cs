@@ -323,25 +323,43 @@ namespace LeyLineHybridECS
             #region GameOver
             if (gameState.CurrentState == GameStateEnum.game_over)
             {
-                if (!UIRef.GameOverPanel.activeSelf)
+
+                if (gameState.WinnerFaction == 0)
                 {
-                    if(gameState.WinnerFaction == 0)
+                    if (!UIRef.GameOverPanel.activeSelf)
                     {
                         UIRef.DrawPanel.SetActive(true);
+                        UIRef.GameOverPanel.SetActive(true);
                     }
-                    else if(gameState.WinnerFaction == authPlayerFaction)
+
+                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.deltaTime);
+                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.deltaTime);
+                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.deltaTime);
+                }
+                else if (gameState.WinnerFaction == authPlayerFaction)
+                {
+                    if (!UIRef.GameOverPanel.activeSelf)
                     {
                         UIRef.VictoryPanel.SetActive(true);
+                        UIRef.GameOverPanel.SetActive(true);
                     }
-                    else
+
+                }
+                else
+                {
+                    if (!UIRef.GameOverPanel.activeSelf)
                     {
                         UIRef.DefeatPanel.SetActive(true);
+                        UIRef.GameOverPanel.SetActive(true);
                     }
-
-                    UIRef.GameOverPanel.SetActive(true);
+                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.deltaTime);
+                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.deltaTime);
+                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.deltaTime);
                 }
 
+
             }
+
             #endregion
             
             #region Unitloop
@@ -1131,7 +1149,7 @@ namespace LeyLineHybridECS
             float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
             float armorPercentage = (float)health.Armor / combinedHealth;
 
-            if (combinedHealth >= 100)
+            if (health.MaxHealth + health.Armor >= 100)
             {
                 healthBar.Parts.material.SetTexture("_MainTex", healthBar.HealthSectionsBig);
                 healthBar.Parts.SetMaterialDirty();
@@ -1334,7 +1352,7 @@ namespace LeyLineHybridECS
 
             if (isVisibleRef.MiniMapTileInstance)
             {
-                if (isVisibleRef.MiniMapTileInstance.DeathCrossPrefab)
+                if (isVisibleRef.MiniMapTileInstance.DeathCrossPrefab && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
                 {
                     var cross = Object.Instantiate(isVisibleRef.MiniMapTileInstance.DeathCrossPrefab, isVisibleRef.MiniMapTileInstance.TileRect.position, Quaternion.identity, isVisibleRef.MiniMapTileInstance.transform.parent);
                     Object.Destroy(cross, 3f);

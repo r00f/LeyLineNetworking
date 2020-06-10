@@ -199,7 +199,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Collider: {fileID: 771660692032844721}
   MeshRenderer: {fileID: 0}
-  GameObjects: []
+  GameObjects:
+  - {fileID: 1706615932949122912}
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
