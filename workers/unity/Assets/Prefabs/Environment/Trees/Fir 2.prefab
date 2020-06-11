@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8737825120475935227}
-  - component: {fileID: 9030238475839664598}
+  - component: {fileID: 3796834004364257769}
   m_Layer: 11
   m_Name: Fir 2
   m_TagString: Untagged
@@ -33,7 +33,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &9030238475839664598
+--- !u!205 &3796834004364257769
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -47,7 +47,7 @@ LODGroup:
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
   m_LODs:
-  - screenRelativeHeight: 0.20149998
+  - screenRelativeHeight: 0.24810635
     fadeTransitionWidth: 0
     renderers:
     - renderer: {fileID: 6200409588646194212}
@@ -122,6 +122,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FirDyingLOD1
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: d7e42f2037abb9c4c9a5e0d0cd61cf60,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d7e42f2037abb9c4c9a5e0d0cd61cf60, type: 3}
@@ -203,6 +208,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FirDying
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 3f165eb7f1497bf4fbd393a9830ad127,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3f165eb7f1497bf4fbd393a9830ad127, type: 3}

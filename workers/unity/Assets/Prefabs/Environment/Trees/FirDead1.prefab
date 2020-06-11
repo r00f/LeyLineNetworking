@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8737825120475935227}
-  - component: {fileID: -5933497923427398201}
+  - component: {fileID: 2665504775441894348}
   m_Layer: 11
   m_Name: FirDead1
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &-5933497923427398201
+--- !u!205 &2665504775441894348
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -117,6 +117,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: FirDead2
+      objectReference: {fileID: 0}
+    - target: {fileID: -927199367670048503, guid: 06745a7fa31548a4f8388114cd670997,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 06745a7fa31548a4f8388114cd670997, type: 3}

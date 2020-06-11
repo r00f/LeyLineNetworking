@@ -237,9 +237,6 @@ public class AddComponentsSystem : ComponentSystem
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
             unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
-            //int colorIndex = faction.Faction;
-
-
 
             PopulateMap(m_UIReferences.MiniMapUnitTilesPanel.transform, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
 
@@ -275,7 +272,13 @@ public class AddComponentsSystem : ComponentSystem
                     isVisible.RequireUpdate = 1;
                 }
 
-                MarkerState markerState = new MarkerState
+                if (isVisible.Value == 1)
+                {
+                    foreach (GameObject g in isVisibleRef.GameObjects)
+                        g.SetActive(true);
+                }
+
+            MarkerState markerState = new MarkerState
                 {
                     CurrentTargetType = MarkerState.TargetType.Neutral,
                     IsSet = 0,

@@ -118,6 +118,13 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
         }
 
         var gameObject = Object.Instantiate(prefab, position, Quaternion.identity);
+
+        if(gameObject.GetComponent<IsVisibleReferences>())
+        {
+            foreach (GameObject g in gameObject.GetComponent<IsVisibleReferences>().GameObjects)
+                g.SetActive(false);
+        }
+
         gameObject.name = $"{prefab.name}(SpatialOS: {entity.SpatialOSEntityId}, Worker: {worker.WorkerType})";
 
         gameObjectsCreated.Add(entity.SpatialOSEntityId, gameObject);
