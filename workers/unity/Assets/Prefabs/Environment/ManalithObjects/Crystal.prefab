@@ -203,6 +203,7 @@ MonoBehaviour:
   showAdditionalSettings: 0
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
+  m_AreaLightEmissiveMeshLayer: -1
 --- !u!1 &6400304578940293258
 GameObject:
   m_ObjectHideFlags: 0
@@ -259,6 +260,7 @@ GameObject:
   - component: {fileID: 6788087691789027403}
   - component: {fileID: 2553302898876772989}
   - component: {fileID: 8094004399980777092}
+  - component: {fileID: 1352881104091652372}
   m_Layer: 0
   m_Name: Crystal
   m_TagString: Untagged
@@ -329,3 +331,20 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &1352881104091652372
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7525365523662486104}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b287518373f8be64c859b37feb3723e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: Crystal
+  EmissionColorRenderers: []
+  Lights:
+  - {fileID: 1967673935719432154}
+  ParticleSystems: []

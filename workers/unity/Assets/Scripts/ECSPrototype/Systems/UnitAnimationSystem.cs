@@ -348,9 +348,9 @@ public class UnitAnimationSystem : ComponentSystem
                 animatorComponent.transform.position = Vector3.MoveTowards(animatorComponent.transform.position, serverPosition.Coords.ToUnityVector(), step);
             }
 
-            Vector3 posZeroY = new Vector3(animatorComponent.transform.position.x, 5, animatorComponent.transform.position.z);
+            Vector2 posXZ = new Vector2(animatorComponent.transform.position.x, animatorComponent.transform.position.z);
 
-            if (posZeroY == animatorComponent.DestinationPosition)
+            if (posXZ == animatorComponent.DestinationPosition)
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
@@ -375,7 +375,8 @@ public class UnitAnimationSystem : ComponentSystem
         {
             if (!animatorComponent.InitialValuesSet)
             {
-                animatorComponent.DestinationPosition = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
+                var pos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
+                animatorComponent.DestinationPosition = new Vector2(pos.x, pos.z);
                 animatorComponent.InitialValuesSet = true;
             }
             animatorComponent.Animator.SetTrigger("Execute");

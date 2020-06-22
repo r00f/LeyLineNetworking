@@ -18,6 +18,7 @@ MonoBehaviour:
   ActionName: Move
   Description: Moves towards a destination.
   TimeToExecute: 3
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:
@@ -63,7 +64,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 0
-  TimePerCell: 1
+  TimePerCell: 0.5
   pathIndex: 0
 --- !u!114 &114881820163587974
 MonoBehaviour:

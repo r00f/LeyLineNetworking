@@ -14,9 +14,10 @@ namespace LeyLineHybridECS
         public Color MapColor;
         public Color MapLerpColor;
         public MeshRenderer MeshRenderer;
-        public List<MeshRenderer> EmissionColorRenderers;
-        public List<Light> Lights;
-        public List<ParticleSystem> ParticleSystems;
+        //public List<MeshRenderer> EmissionColorRenderers;
+        //public List<Light> Lights;
+        public ParticleSystem CirclePs;
+        public ManalithObject ManaLithObject;
         public float EmissionMultiplier;
     }
 

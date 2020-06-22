@@ -20,7 +20,7 @@ public static class CellGridMethods
         var z = (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
 
         //factor in mapCenter before returning
-        return new Vector3(mapCenter.X + x, 5, mapCenter.Y + z);
+        return new Vector3(mapCenter.X + x, 3.1f, mapCenter.Y + z);
     }
 
     public static Vector3f[] DirectionsArray = new Vector3f[]{

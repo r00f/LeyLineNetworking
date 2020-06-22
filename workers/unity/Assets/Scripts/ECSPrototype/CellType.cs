@@ -9,6 +9,7 @@ namespace LeyLineHybridECS
     [ExecuteInEditMode()]
     public class CellType : MonoBehaviour
     {
+        public int ManalithChainIndex;
         [SerializeField]
         IsTaken isTaken;
         [SerializeField]
@@ -98,6 +99,7 @@ namespace LeyLineHybridECS
                                 */
                                 GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[i], transform.position, Quaternion.identity, transform);
                                 objectsOnTile.Add(go);
+
                             }
 
                         }
@@ -112,8 +114,24 @@ namespace LeyLineHybridECS
                             go.transform.parent = transform;
                             go.transform.position = transform.position;
                             */
-                            GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[c], transform.position, Quaternion.identity, transform);
-                            objectsOnTile.Add(go);
+                            
+                            if (thisCellsTerrain.terrain_Name == "Manalith")
+                            {
+                                var manaLithParent = GameObject.Find("Manaliths").transform;
+                                var manaLithGroup = manaLithParent.GetComponent<ManalithGroup>();
+                                GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[c], transform.position, Quaternion.identity, manaLithParent);
+                                var initializer = go.GetComponent<ManalithInitializer>();
+                                initializer.occupiedCell = GetComponent<Cell>();
+                                go.transform.SetSiblingIndex(ManalithChainIndex);
+                                manaLithGroup.ManalithInitializers[ManalithChainIndex] = initializer;
+                                manaLithGroup.ConnectManalithInitializerScripts();
+                                objectsOnTile.Add(go);
+                            }
+                            else
+                            {
+                                GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[c], transform.position, Quaternion.identity, transform);
+                                objectsOnTile.Add(go);
+                            }
                         }
                     }
                 }

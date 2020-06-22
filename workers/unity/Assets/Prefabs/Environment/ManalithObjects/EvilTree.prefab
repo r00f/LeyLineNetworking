@@ -9681,6 +9681,7 @@ MonoBehaviour:
   showAdditionalSettings: 0
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
+  m_AreaLightEmissiveMeshLayer: -1
 --- !u!1 &1678845798657752772
 GameObject:
   m_ObjectHideFlags: 0
@@ -19245,6 +19246,7 @@ GameObject:
   - component: {fileID: 1398912073942626423}
   - component: {fileID: 7940665972880689729}
   - component: {fileID: 4399560310132717240}
+  - component: {fileID: -6041944179797856941}
   m_Layer: 9
   m_Name: EvilTree
   m_TagString: Untagged
@@ -19315,6 +19317,31 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+--- !u!114 &-6041944179797856941
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2680405691785282148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b287518373f8be64c859b37feb3723e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: Evil Tree
+  EmissionColorRenderers:
+  - {fileID: 4399560310132717240}
+  Lights: []
+  ParticleSystems:
+  - {fileID: 4701489527702748183}
+  - {fileID: 7113076679562852420}
+  - {fileID: 3714231724751616507}
+  - {fileID: 895829990664147073}
+  - {fileID: 3077740765812786785}
+  - {fileID: 1260412137998269119}
+  - {fileID: 7408854794284931109}
+  - {fileID: 3359247098606622892}
 --- !u!1 &3932945958268860577
 GameObject:
   m_ObjectHideFlags: 0

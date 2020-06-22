@@ -201,6 +201,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2771033465022004493}
+  - component: {fileID: 4886992596355156186}
   m_Layer: 0
   m_Name: WiccanAltar
   m_TagString: Untagged
@@ -230,6 +231,29 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4886992596355156186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166407675354664734}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b287518373f8be64c859b37feb3723e0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Name: Wiccan Altar
+  EmissionColorRenderers:
+  - {fileID: 7931028867508395775}
+  Lights:
+  - {fileID: 8399567323374377720}
+  - {fileID: 8466909157554939925}
+  - {fileID: 3579118304177796817}
+  ParticleSystems:
+  - {fileID: 7137647474574746508}
+  - {fileID: 7137647473935745719}
+  - {fileID: 7137647475747233839}
 --- !u!1 &1560034815550551705
 GameObject:
   m_ObjectHideFlags: 0
@@ -544,6 +568,7 @@ MonoBehaviour:
   showAdditionalSettings: 0
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
+  m_AreaLightEmissiveMeshLayer: -1
 --- !u!1 &3439720113341296872
 GameObject:
   m_ObjectHideFlags: 0
@@ -1221,6 +1246,7 @@ MonoBehaviour:
   showAdditionalSettings: 0
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
+  m_AreaLightEmissiveMeshLayer: -1
 --- !u!1 &6541376591928347855
 GameObject:
   m_ObjectHideFlags: 0
@@ -15957,6 +15983,7 @@ MonoBehaviour:
   showAdditionalSettings: 0
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
+  m_AreaLightEmissiveMeshLayer: -1
 --- !u!1 &7961463794725464589
 GameObject:
   m_ObjectHideFlags: 0
@@ -16015,7 +16042,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 52cb410367c9bf04482f048f23ad6e51, type: 2}
+  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

@@ -53,6 +53,11 @@ public class TerrainControllerHelper : Editor
                 myTarget.SetWholeTerrainTexture();
             }
 
+            if (GUILayout.Button("Update all Terrain Tiles"))
+            {
+                myTarget.UpdateAllMapTiles();
+            }
+
             serializedObject.ApplyModifiedProperties();
         }
 

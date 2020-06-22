@@ -17,18 +17,20 @@ namespace LeyLineHybridECS
         DijkstraPathfinding pathFinder;
         HexagonalHexGridGenerator gridGenerator;
         Transform manaLithParent;
+        public bool meshGenerated;
 
-        Cell occupiedCell;
+        [SerializeField, HideInInspector]
+        public Cell occupiedCell;
 
         [SerializeField]
         LineRenderer leyLinePathRenderer;
-        [SerializeField]
-        LineRenderer leyLineCircleRenderer;
+        //[SerializeField]
+        //LineRenderer leyLineCircleRenderer;
         Mesh leyLinePathMesh;
         Mesh leyLineCircleMesh;
 
         [SerializeField]
-        MeshFilter leyLinePathMeshFilter;
+        public MeshFilter leyLinePathMeshFilter;
         [SerializeField]
         MeshFilter leyLineCircleMeshFilter;
 
@@ -57,10 +59,10 @@ namespace LeyLineHybridECS
         public List<LineRenderer> connectedLeyLineRenderers = new List<LineRenderer>();
 
         [SerializeField]
-        ManalithInitializer connectedManaLith;
+        public ManalithInitializer connectedManaLith;
 
-        [SerializeField]
-        List<Cell> otherManaliths = new List<Cell>();
+        //[SerializeField]
+        //List<Cell> otherManaliths = new List<Cell>();
 
         [SerializeField]
         [Range(3, 256)]
@@ -108,10 +110,10 @@ namespace LeyLineHybridECS
             //ConnectManaLith();
         }
 
-        public void MoveTransform()
+        public void GenerateMeshes()
         {
-            manaLithParent = GameObject.Find("Manaliths").transform;
-            transform.parent = manaLithParent;
+            //manaLithParent = GameObject.Find("Manaliths").transform;
+            //transform.parent = manaLithParent;
 
             if(leyLinePathMeshFilter.sharedMesh != null)
             {
@@ -127,9 +129,9 @@ namespace LeyLineHybridECS
 
                 var mesh = Resources.Load("ManalithMeshes/" + assetName);
                 leyLinePathMeshFilter.sharedMesh = (Mesh)mesh;
-
             }
 
+            /*
             if(leyLineCircleMeshFilter.sharedMesh != null)
             {
                 //create unique name for the asset
@@ -147,6 +149,7 @@ namespace LeyLineHybridECS
                 var mesh = Resources.Load("ManalithMeshes/" + assetName);
                 leyLineCircleMeshFilter.sharedMesh = (Mesh)mesh;
             }
+            */
 
         }
 
@@ -156,7 +159,7 @@ namespace LeyLineHybridECS
             terrainController = FindObjectOfType<TerrainController>();
             terrainController.leyLineCrackPositions.Clear();
 
-            otherManaliths.Clear();
+            //otherManaliths.Clear();
             /*
             foreach (ManalithInitializer m in FindObjectsOfType<ManalithInitializer>())
             {
@@ -165,12 +168,17 @@ namespace LeyLineHybridECS
             }
             otherManaliths = otherManaliths.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).ToList();
             */
+
+            //if this manalith has no connected Manalith, destroy MeshGradientColor component on pressing connect
+            if(!connectedManaLith && transform.GetComponent<MeshGradientColor>())
+            {
+                DestroyImmediate(transform.GetComponent<MeshGradientColor>());
+            }
             projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
             gridGenerator = FindObjectOfType<HexagonalHexGridGenerator>();
             pathFinder = new DijkstraPathfinding();
-            occupiedCell = GetComponentInParent<Cell>();
 
-            leyLineCircleMesh = new Mesh();
+            //leyLineCircleMesh = new Mesh();
             leyLinePathMesh = new Mesh();
 
 
@@ -178,6 +186,10 @@ namespace LeyLineHybridECS
 
 
             terrainController.UpdateLeyLineCracks();
+
+            FillCircleCoordinatesList();
+            FillPathCoordinatesList();
+
 
             //UpdateLeyLinePath();
             //RemovePathOverLap();
@@ -197,7 +209,8 @@ namespace LeyLineHybridECS
                 case CircleSize.Three:
                     circleCenter = transform.position + new Vector3(occupiedCell.GetComponent<CellDimensions>().Value.x / 2, 0, 0);
                     leyLineCircle.Add(occupiedCell);
-                    leyLineCircle.AddRange(GetComponentInParent<Neighbours>().NeighboursList);
+                    if(leyLineCircle.Count == 1)
+                        leyLineCircle.AddRange(occupiedCell.GetComponent<Neighbours>().NeighboursList);
                     for (int i = leyLineCircle.Count - 1; i >= 3; i--)
                     {
                         leyLineCircle.RemoveAt(i);
@@ -214,7 +227,8 @@ namespace LeyLineHybridECS
                 case CircleSize.Seven:
                     circleCenter = transform.position;
                     leyLineCircle.Add(occupiedCell);
-                    leyLineCircle.AddRange(GetComponentInParent<Neighbours>().NeighboursList);
+                    if (leyLineCircle.Count == 1)
+                        leyLineCircle.AddRange(occupiedCell.GetComponent<Neighbours>().NeighboursList);
                     for (int i = leyLineCircle.Count - 1; i >= 7; i--)
                     {
                         leyLineCircle.RemoveAt(i);
@@ -237,10 +251,10 @@ namespace LeyLineHybridECS
 
             if (connectedManaLith != null && connectedManaLith != this)
             {
-                leyLinePathRenderer.GetComponent<MeshGradientColor>().ManalithColor = GetComponent<MeshColor>();
-                leyLinePathRenderer.GetComponent<MeshGradientColor>().ConnectedManalithColor = connectedManaLith.GetComponent<MeshColor>();
+                leyLinePathRenderer.GetComponentInParent<MeshGradientColor>().ManalithColor = GetComponent<MeshColor>();
+                leyLinePathRenderer.GetComponentInParent<MeshGradientColor>().ConnectedManalithColor = connectedManaLith.GetComponent<MeshColor>();
                 leyLinePathRenderer.gameObject.SetActive(true);
-                leyLinePath.AddRange(FindPath(gridGenerator.hexagons.ToArray(), connectedManaLith.GetComponentInParent<Cell>()));
+                leyLinePath.AddRange(FindPath(gridGenerator.hexagons.ToArray(), connectedManaLith.occupiedCell));
                 leyLinePath.Add(occupiedCell);
                 leyLinePath.Reverse();
                 RemovePathOverLap();
@@ -313,7 +327,7 @@ namespace LeyLineHybridECS
         {
 
             CalculateCircle(Vector3.Distance(circleCenter, leyLineCircle[1].transform.position));
-            leyLineCircleRenderer.BakeMesh(leyLineCircleMesh, projectorCam);
+            //leyLineCircleRenderer.BakeMesh(leyLineCircleMesh, projectorCam);
 
 
             //ParticleSystem cPs = circlePs;
@@ -321,14 +335,14 @@ namespace LeyLineHybridECS
             //circleShapeModule.shapeType = ParticleSystemShapeType.Mesh;
             //circleShapeModule.mesh = leyLineCircleMesh;
 
-            leyLineCircleMeshFilter.mesh = leyLineCircleMesh;
-            leyLineCircleRenderer.enabled = false;
+            //leyLineCircleMeshFilter.mesh = leyLineCircleMesh;
+            //leyLineCircleRenderer.enabled = false;
 
         }
 
         public void CalculateCircle(float radius)
         {
-            leyLineCircleRenderer.positionCount = circleSegments;
+            //leyLineCircleRenderer.positionCount = circleSegments;
 
             float deltaTheta = (float)(2.0 * Mathf.PI) / circleSegments;
             float theta = 0f;
@@ -340,7 +354,7 @@ namespace LeyLineHybridECS
                 Vector3 pos = new Vector3(x, 0, z) + circleCenter;
                 if (!terrainController.leyLineCrackPositions.Contains(pos))
                     terrainController.leyLineCrackPositions.Add(pos + offset - new Vector3 (0, 0.1f, 0));
-                leyLineCircleRenderer.SetPosition(i, pos + offset - transform.position);
+                //leyLineCircleRenderer.SetPosition(i, pos + offset - transform.position);
                 theta += deltaTheta;
             }
         }

@@ -17,6 +17,9 @@ namespace LeyLineHybridECS
         HexagonalHexGridGenerator hexGridGenerator;
 
         [SerializeField]
+        float resolutionHeight;
+
+        [SerializeField]
         float hexXrangeMultiplier;
 
         [SerializeField]
@@ -60,6 +63,15 @@ namespace LeyLineHybridECS
 
 
         #if UNITY_EDITOR
+
+        public void UpdateAllMapTiles()
+        {
+            foreach(Cell c in hexGridGenerator.hexagons)
+            {
+                c.GetComponent<CellType>().UpdateTerrain();
+            }
+
+        }
 
         public void GetTerrainHeight()
         {
@@ -108,10 +120,10 @@ namespace LeyLineHybridECS
                     strength[x, y] = 1 - textureToUse.GetPixelBilinear(x / (float)totalXrange, y / (float)totalYrange).a;
 
                     if(strength[x,y] == 0)
-                        terrainHeights[x, y] = strength[x, y] + (position.y / 600);
+                        terrainHeights[x, y] = strength[x, y] + (position.y / resolutionHeight);
                     else
                     {
-                        terrainHeights[x, y] = terrain.terrainData.GetHeight(xOffset + y, yOffset + x) / 600;
+                        terrainHeights[x, y] = terrain.terrainData.GetHeight(xOffset + y, yOffset + x) / resolutionHeight;
                     }
                 }
             }
@@ -187,7 +199,7 @@ namespace LeyLineHybridECS
 
             float xCenter = 1 / terrain.terrainData.size.x * hexPos.x;
             float zCenter = 1 / terrain.terrainData.size.z * hexPos.z;
-            float yCenter = hexPos.y / 600;
+            float yCenter = hexPos.y / resolutionHeight;
 
             treeInstance.position = new Vector3(xCenter, yCenter, zCenter);
 
@@ -330,7 +342,7 @@ namespace LeyLineHybridECS
                 {
                     if (y >= (height / 2) - xRange / 2 && y <= (height / 2) + xRange / 2)
                     //if the point to raise is not a part of the hex, set it to be the position it had before
-                    pixelArray[y, x] = hexPos.y / 600;
+                    pixelArray[y, x] = hexPos.y / resolutionHeight;
                     
                     else
                     {
@@ -361,7 +373,7 @@ namespace LeyLineHybridECS
                                 offsetPos = new Vector3(w / 2, 0, h / 2);
                             }
                         }
-                        pixelArray[y, x] = terrain.SampleHeight(hexPos + offsetPos) / 600;
+                        pixelArray[y, x] = terrain.SampleHeight(hexPos + offsetPos) / resolutionHeight;
                     }
                     
                 }
@@ -759,7 +771,7 @@ namespace LeyLineHybridECS
                 for (int y = 0; y < yRes; y++)
                 {
                     //since I could not find MeshResolution > Terrain Height access from code I hardcoded it
-                    terrainHeights[x, y] = height / 600;
+                    terrainHeights[x, y] = (height - transform.position.y) / resolutionHeight;
                 }
             }
 

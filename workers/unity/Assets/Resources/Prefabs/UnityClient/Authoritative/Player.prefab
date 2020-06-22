@@ -271,14 +271,17 @@ MonoBehaviour:
       cameraMovementRate: 10
       edgeHoverMovement: 1
       edgeHoverOffset: 10
-      defualtHeight: 5.8
+      defualtHeight: 4
       useDefualtHeight: 1
       useLockTargetHeight: 1
     rotation:
       constRotationRate: 1
       lockRotationX: 1
       lockRotationY: 0
-      defualtRotation: {x: -45, y: 0}
+      zoomRotationMultiplier: 1.5
+      increasedZoomRotationMultiplier: 5
+      increaseZoomRotTreshhold: 10
+      defualtRotation: {x: -35, y: 0}
       cameraRotationRate: {x: 100, y: 100}
     zoom:
       invertZoom: 0
@@ -290,6 +293,7 @@ MonoBehaviour:
   PlayerMapTilePrefab: {fileID: 3617814909377836915, guid: ba192c6a5e3fc844490fb02ca435d515,
     type: 3}
   PlayerMapTileInstance: {fileID: 0}
+  _currentZoomAmount: 0
 --- !u!114 &566376838980519233
 MonoBehaviour:
   m_ObjectHideFlags: 0

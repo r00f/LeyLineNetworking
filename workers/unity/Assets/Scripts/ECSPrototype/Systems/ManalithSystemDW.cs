@@ -245,23 +245,28 @@ namespace LeyLineHybridECS
                     meshColor.MeshRenderer.material.SetColor("_EmissiveColor", meshColor.LerpColor * meshColor.MeshRenderer.material.GetFloat("_EmissiveIntensity"));
                     //meshColor.MeshRenderer.UpdateGIMaterials();
 
-                    foreach (MeshRenderer r in meshColor.EmissionColorRenderers)
+                    foreach (MeshRenderer r in meshColor.ManaLithObject.EmissionColorRenderers)
                     {
                         r.material.SetColor("_EmissiveColor", meshColor.LerpColor * r.material.GetFloat("_EmissiveIntensity"));
                     }
 
-                    foreach (Light l in meshColor.Lights)
+                    foreach (Light l in meshColor.ManaLithObject.Lights)
                     {
                         l.color = meshColor.LerpColor;
                     }
 
-                    foreach (ParticleSystem p in meshColor.ParticleSystems)
+                    foreach (ParticleSystem p in meshColor.ManaLithObject.ParticleSystems)
                     {
                         var mainModule = p.main;
 
                         if (mainModule.startColor.color != meshColor.LerpColor)
                             mainModule.startColor = meshColor.LerpColor;
                     }
+
+                    var circlePsMain = meshColor.CirclePs.main;
+
+                    if (circlePsMain.startColor.color != meshColor.LerpColor)
+                        circlePsMain.startColor = meshColor.LerpColor;
 
                 });
 

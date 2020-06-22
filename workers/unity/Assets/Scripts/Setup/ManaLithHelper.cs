@@ -28,11 +28,11 @@ namespace LeyLineHybridECS
                 myTarget.ConnectManaLith();
             }
 
-            if (GUILayout.Button("Move Transform"))
+            if (GUILayout.Button("Generate Meshes"))
             {
-                myTarget.MoveTransform();
+                myTarget.GenerateMeshes();
             }
-
+            /*
             if (GUILayout.Button("Fill Circle Coords"))
             {
                 myTarget.FillCircleCoordinatesList();
@@ -41,7 +41,7 @@ namespace LeyLineHybridECS
             {
                 myTarget.FillPathCoordinatesList();
             }
-
+            */
             serializedObject.ApplyModifiedProperties();
         }
 

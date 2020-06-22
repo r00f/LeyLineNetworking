@@ -164,9 +164,12 @@ public class Moba_Camera_Settings_Rotation {
 	// Lock the rotations axies
 	public bool lockRotationX 			= true;
 	public bool lockRotationY 			= true;
-	
-	// rotation that is used when the game starts
-	public Vector2 defualtRotation		= new Vector2(-45.0f, 0.0f);
+
+    public float zoomRotationMultiplier;
+    public float increasedZoomRotationMultiplier;
+    public float increaseZoomRotTreshhold;
+    // rotation that is used when the game starts
+    public Vector2 defualtRotation		= new Vector2(-45.0f, 0.0f);
 	
 	// How fast the camera rotates
 	public Vector2 cameraRotationRate	= new Vector2(100.0f, 100.0f);
@@ -207,7 +210,7 @@ public class Moba_Camera : MonoBehaviour {
     public MiniMapTile PlayerMapTileInstance;
 
     // The Current Zoom value for the camera; Not shown in Inspector
-    private float _currentZoomAmount			= 0.0f;
+    public float _currentZoomAmount			= 0.0f;
 	public float currentZoomAmount {
 		get {
 			return _currentZoomAmount;
@@ -391,7 +394,7 @@ public class Moba_Camera : MonoBehaviour {
 					changeInCamera = true;
 				}
 			}
-			
+
 			if(!settings.rotation.lockRotationY) {
 				float deltaMouseHorizontal = Input.GetAxis(inputs.axis.DeltaMouseHorizontal);
 				if(deltaMouseHorizontal != 0.0f) {
@@ -406,10 +409,29 @@ public class Moba_Camera : MonoBehaviour {
 				}
 			}
 		}
+
+        if (settings.rotation.lockRotationX)
+        {
+            //if lockRotationX is set to true(no user input set X rotation), calculate changeInRotation with camera height
+
+            if(currentZoomAmount >= settings.rotation.increaseZoomRotTreshhold)
+                _currentCameraRotation.x = settings.rotation.defualtRotation.x - currentZoomAmount * settings.rotation.zoomRotationMultiplier;
+            else
+            {
+                settings.rotation.increasedZoomRotationMultiplier = settings.rotation.zoomRotationMultiplier - (settings.rotation.increaseZoomRotTreshhold - currentZoomAmount);
+
+                _currentCameraRotation.x = settings.rotation.defualtRotation.x - currentZoomAmount * settings.rotation.increasedZoomRotationMultiplier;
+
+            }
+        }
+        else
+        {
+            _currentCameraRotation.x += changeInRotationX * settings.rotation.cameraRotationRate.x * Time.deltaTime;
+        }
+
+            // apply change in Y rotation
+        _currentCameraRotation.y += changeInRotationY * settings.rotation.cameraRotationRate.y * Time.deltaTime;
 		
-		// apply change in Y rotation
-		_currentCameraRotation.y += changeInRotationY * settings.rotation.cameraRotationRate.y * Time.deltaTime;
-		_currentCameraRotation.x += changeInRotationX * settings.rotation.cameraRotationRate.x * Time.deltaTime;
 	}
 	
 	void CalculateCameraMovement() {

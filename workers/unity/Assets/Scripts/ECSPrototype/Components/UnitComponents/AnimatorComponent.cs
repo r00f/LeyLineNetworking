@@ -31,7 +31,7 @@ public class AnimatorComponent : MonoBehaviour
     public Transform RotateTransform;
     public bool DestinationReachTriggerSet;
     public Vector3 RotationTarget;
-    public Vector3 DestinationPosition;
+    public Vector2 DestinationPosition;
 
     [Header("Death")]
     public bool Dead;
