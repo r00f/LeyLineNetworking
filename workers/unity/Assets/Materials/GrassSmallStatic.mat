@@ -24,7 +24,7 @@ Material:
   m_Shader: {fileID: 4800000, guid: 6e4ae4064600d784cac1e41a9e6f2e59, type: 3}
   m_ShaderKeywords: _ALPHATEST_ON _NORMALMAP_TANGENT_SPACE
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 0
+  m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2450
   stringTagMap:
@@ -43,7 +43,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseColorMap:
-        m_Texture: {fileID: 2800000, guid: 8f8677e70203ddb44ba33aa133e19674, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2ef45b4a73b57a54caee8166b4a8f6fe, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BentNormalMap:
@@ -83,7 +83,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 8f8677e70203ddb44ba33aa133e19674, type: 3}
+        m_Texture: {fileID: 2800000, guid: 2ef45b4a73b57a54caee8166b4a8f6fe, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskMap:
@@ -201,7 +201,7 @@ Material:
     - _ReceivesSSR: 1
     - _RefractionModel: 0
     - _SSRefractionProjectionModel: 0
-    - _Smoothness: 0.5
+    - _Smoothness: 0.211
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
     - _SpecularAAScreenSpaceVariance: 0.1
