@@ -14,12 +14,16 @@ public class TerrainType : ScriptableObject
     public int textureIndex;
     public Vector2 TreeIndexMinMax;
     public Vector2 GrassAmountMinMax;
+    public Vector2 NeighbourIndexMinMax;
+    public Vector2 NeighbourAmountMinMax;
     public string terrain_Name;
     public int additionalCost;
     [Range (-15.0f, 15.0f)]
     public float yOffset;
     public bool Walkable = true;
     public bool spawnAllAssets = false;
+    [Range(0, 100)]
+    public int probabilityToSpawnNeighbourAsset;
     [Range(0, 100)]
     public int probabilityToSpawnAsset;
     public bool obstructVision = false;

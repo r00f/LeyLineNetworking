@@ -17,11 +17,14 @@ MonoBehaviour:
   textureIndex: 1
   TreeIndexMinMax: {x: 4, y: 5}
   GrassAmountMinMax: {x: 0, y: 0}
+  NeighbourIndexMinMax: {x: 13, y: 13}
+  NeighbourAmountMinMax: {x: 1, y: 2}
   terrain_Name: DeadForest
   additionalCost: 0
   yOffset: 0.1
   Walkable: 0
   spawnAllAssets: 0
+  probabilityToSpawnNeighbourAsset: 35
   probabilityToSpawnAsset: 100
   obstructVision: 0
   assets_to_Spawn: []

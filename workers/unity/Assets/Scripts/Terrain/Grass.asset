@@ -17,11 +17,14 @@ MonoBehaviour:
   textureIndex: 1
   TreeIndexMinMax: {x: 8, y: 10}
   GrassAmountMinMax: {x: 0, y: 0}
+  NeighbourIndexMinMax: {x: 0, y: 0}
+  NeighbourAmountMinMax: {x: 0, y: 0}
   terrain_Name: 
   additionalCost: 0
   yOffset: 0.1
   Walkable: 1
   spawnAllAssets: 0
+  probabilityToSpawnNeighbourAsset: 0
   probabilityToSpawnAsset: 0
   obstructVision: 0
   assets_to_Spawn: []

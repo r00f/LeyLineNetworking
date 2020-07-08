@@ -26,7 +26,10 @@ namespace LeyLineHybridECS
         float height;
 
         [SerializeField]
-        int textureIndex;
+        int floodTextureIndex;
+
+        [SerializeField]
+        int slopeTextureIndex;
 
         [SerializeField]
         int firVariantCount;
@@ -146,9 +149,20 @@ namespace LeyLineHybridECS
             {
                 TerrainType terrainType = c.GetComponent<CellType>().thisCellsTerrain;
 
-                if (terrainType.TreeIndexMinMax.x != 0)
+                if(terrainType.NeighbourAmountMinMax.y != 0)
                 {
-                    if (terrainType.GrassAmountMinMax.x == 0)
+                    int grassAmount = UnityEngine.Random.Range((int)terrainType.NeighbourAmountMinMax.x, (int)terrainType.NeighbourAmountMinMax.y + 1);
+
+                    foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                    {
+                        if (n.GetComponent<CellType>().thisCellsTerrain.Walkable && UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnNeighbourAsset)
+                            SpawnGrassPatch(grassAmount, n, terrainType.NeighbourIndexMinMax);
+                    }
+                }
+
+                if (terrainType.TreeIndexMinMax.y != 0)
+                {
+                    if (terrainType.GrassAmountMinMax.y == 0)
                     {
                         TreeInstance treeInstance = new TreeInstance()
                         {
@@ -165,24 +179,16 @@ namespace LeyLineHybridECS
                     {
                         int grassAmount = UnityEngine.Random.Range((int)terrainType.GrassAmountMinMax.x, (int)terrainType.GrassAmountMinMax.y + 1);
 
-                        for (int i = 0; i < grassAmount; i++)
+                        if (terrainType.probabilityToSpawnAsset != 0)
                         {
-                            TreeInstance treeInstance = new TreeInstance()
+                            if (UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnAsset)
                             {
-                                prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
-                                color = Color.white,
-                                lightmapColor = Color.white,
-                                heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
-                                widthScale = 1,
-                                rotation = UnityEngine.Random.Range(0f, randomGrasRotationMax)
-                            };
-
-                            //can spawn at same place
-                            Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * grassCircleRange;
-
-                            Vector3 pos = c.transform.position - transform.parent.position + new Vector3(randomOffset.x, 0, randomOffset.y);
-
-                            SpawnHexagonTree(pos, treeInstance);
+                                SpawnGrassPatch(grassAmount, c, terrainType.TreeIndexMinMax);
+                            }
+                        }
+                        else
+                        {
+                            SpawnGrassPatch(grassAmount, c, terrainType.TreeIndexMinMax);
                         }
                     }
                 }
@@ -192,6 +198,30 @@ namespace LeyLineHybridECS
             terrain.terrainData.SetTreeInstances(treeList.ToArray(), false);
             //terrain.terrainData.treeInstances = treeList.ToArray();
             terrain.Flush();
+        }
+
+        public void SpawnGrassPatch(int grassAmount, Cell c, Vector2 treeIndexMinMax)
+        {
+            for (int i = 0; i < grassAmount; i++)
+            {
+                TreeInstance treeInstance = new TreeInstance()
+                {
+                    prototypeIndex = UnityEngine.Random.Range((int)treeIndexMinMax.x, (int)treeIndexMinMax.y + 1) - 1,
+                    color = Color.white,
+                    lightmapColor = Color.white,
+                    heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                    widthScale = 1,
+                    rotation = UnityEngine.Random.Range(0f, randomGrasRotationMax)
+                };
+
+                //can spawn at same place
+                Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * grassCircleRange;
+
+                Vector3 pos = c.transform.position - transform.parent.position + new Vector3(randomOffset.x, 0, randomOffset.y);
+
+                SpawnHexagonTree(pos, treeInstance);
+            }
+
         }
 
         public void SpawnHexagonTree(Vector3 hexPos, TreeInstance treeInstance)
@@ -563,7 +593,7 @@ namespace LeyLineHybridECS
                     // by 90 to get an alpha blending value in the range 0..1.
                     var frac = angle / 90.0;
                     //slope texture
-                    map[y, x, 3] = (float)frac;
+                    map[y, x, slopeTextureIndex] = (float)frac;
                     //non slope texture
                     map[y, x, GetMainTextureAtTerrainPos(new Vector2(x, y))] = (float)(1 - frac);
                 }
@@ -791,7 +821,7 @@ namespace LeyLineHybridECS
             {
                 for (int y = 0; y < yRes; y++)
                 {
-                    alphaMap[x, y, textureIndex] = 1;
+                    alphaMap[x, y, floodTextureIndex] = 1;
                 }
             }
 
