@@ -65,11 +65,22 @@ namespace LeyLineHybridECS
         float[,] strength;
 
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
+
+
+        public void UpdateAllMapTileTextures()
+        {
+            foreach (Cell c in hexGridGenerator.hexagons)
+            {
+                c.GetComponent<CellType>().UpdateTerrainTexture();
+            }
+
+        }
+
 
         public void UpdateAllMapTiles()
         {
-            foreach(Cell c in hexGridGenerator.hexagons)
+            foreach (Cell c in hexGridGenerator.hexagons)
             {
                 c.GetComponent<CellType>().UpdateTerrain();
             }

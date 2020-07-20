@@ -47,6 +47,10 @@ namespace LeyLineHybridECS
             //myHexagon = GetComponent<MyHexagon>();
         }
 
+        public void UpdateTerrainTexture()
+        {
+            terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
+        }
 
         //This thing here should be called when a new TerrainType is set
         //Converts all the info stored on that type into what is on the tile and spawns objects

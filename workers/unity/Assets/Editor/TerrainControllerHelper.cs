@@ -51,6 +51,7 @@ public class TerrainControllerHelper : Editor
             if (GUILayout.Button("Set Whole Terrain Texture"))
             {
                 myTarget.SetWholeTerrainTexture();
+                myTarget.UpdateAllMapTileTextures();
             }
 
             if (GUILayout.Button("Update all Terrain Tiles"))

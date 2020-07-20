@@ -7,6 +7,11 @@ ModelImporter:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
+      name: LeyLine
+    second: {fileID: 2100000, guid: 534cd82ab43fe344c9df7de29daa4211, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
       name: lambert1
     second: {fileID: 2100000, guid: 399303c33bff6314e9a93f9de15b74a8, type: 2}
   materials:
