@@ -349,36 +349,12 @@ public static class LeyLineEntityTemplates {
 
     static Actions.Snapshot SetActions (Unit_BaseDataSet inStats){
 
-        Action myBasicAttack = new Action();
-        myBasicAttack.Targets = new List<ActionTarget>();
-        myBasicAttack.Effects = new List<ActionEffect>();
-        Action myBasicMove = new Action();
-        myBasicMove.Targets = new List<ActionTarget>();
-        myBasicMove.Effects = new List<ActionEffect>();
         Action myNullableAction = new Action();
         myNullableAction.Index = -3;
         myNullableAction.Targets = new List<ActionTarget>();
         myNullableAction.Effects = new List<ActionEffect>();
         List<Action> myOtherActions = new List<Action>();
 
-
-        if (inStats.BasicMove != null)
-        {
-            myBasicMove = SetAction(inStats.BasicMove, -2);
-        }
-        else
-        {
-            myBasicMove = myNullableAction;
-        }
-
-        if (inStats.BasicAttack != null)
-        {
-            myBasicAttack = SetAction(inStats.BasicAttack, -1);
-        }
-        else
-        {
-            myBasicAttack = myNullableAction;
-        }
 
         for (int i = 0; i < inStats.Actions.Count; i++)
         {
@@ -392,9 +368,7 @@ public static class LeyLineEntityTemplates {
 
         var newActions = new Actions.Snapshot
         {
-            BasicMove = myBasicMove,
-            BasicAttack = myBasicAttack,
-            OtherActions = myOtherActions,
+            ActionsList = myOtherActions,
             NullAction = myNullableAction,
             CurrentSelected = myNullableAction,
             LastSelected = myNullableAction,

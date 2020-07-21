@@ -298,14 +298,6 @@ public class HighlightingSystem : ComponentSystem
                 {
                     case -3:
                         break;
-                    case -2:
-                        target = actions.BasicMove.Targets[0];
-                        effect = actions.BasicMove.Effects[0];
-                        break;
-                    case -1:
-                        target = actions.BasicAttack.Targets[0];
-                        effect = actions.BasicAttack.Effects[0];
-                        break;
                 }
             }
             else

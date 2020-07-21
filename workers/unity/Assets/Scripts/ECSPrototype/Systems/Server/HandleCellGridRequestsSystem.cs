@@ -97,16 +97,16 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     {
                         if (index >= 0)
                         {
-                            var a = unitActions.OtherActions[index];
-                            a.CombinedCost = CalculateCombinedCost(unitActions.OtherActions[index].Targets[0]);
-                            unitActions.OtherActions[index] = a;
+                            var a = unitActions.ActionsList[index];
+                            a.CombinedCost = CalculateCombinedCost(unitActions.ActionsList[index].Targets[0]);
+                            unitActions.ActionsList[index] = a;
 
-                            if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.OtherActions[index].CombinedCost) >= 0)
+                            if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.ActionsList[index].CombinedCost) >= 0)
                             {
-                                actionToSelect = unitActions.OtherActions[index];
+                                actionToSelect = unitActions.ActionsList[index];
                             }
                         }
-                        else
+                        /*else
                         {
                             if (index == -2)
                             {
@@ -130,7 +130,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     actionToSelect = unitActions.BasicAttack;
                                 }
                             }
-                        }
+                        }*/
                     }
 
                     unitActions.CurrentSelected = actionToSelect;

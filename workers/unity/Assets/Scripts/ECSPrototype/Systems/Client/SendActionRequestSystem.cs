@@ -230,7 +230,7 @@ public class SendActionRequestSystem : ComponentSystem
 
                 if (actionIndex >= 0)
                 {
-                    act = actions.OtherActions[actionIndex];
+                    act = actions.ActionsList[actionIndex];
                     if (act.Targets[0].TargetType == TargetTypeEnum.unit)
                     {
                         if (act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
@@ -239,13 +239,13 @@ public class SendActionRequestSystem : ComponentSystem
                         }
                     }
                 }
-                else
+                /*else
                 {
                     if (actionIndex == -2)
                         act = actions.BasicMove;
                     else if (actionIndex == -1)
                         act = actions.BasicAttack;
-                }
+                }*/
 
                 playerState.SelectedAction = act;
 

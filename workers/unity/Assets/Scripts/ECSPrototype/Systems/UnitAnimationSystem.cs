@@ -136,12 +136,12 @@ public class UnitAnimationSystem : ComponentSystem
                         {
                             case -3:
                                 break;
-                            case -2:
+                            /*case -2:
                                 animatorComponent.CurrentLockedAction = basedata.BasicMove;
                                 break;
                             case -1:
                                 animatorComponent.CurrentLockedAction = basedata.BasicAttack;
-                                break;
+                                break;*/
                         }
                     }
                 }

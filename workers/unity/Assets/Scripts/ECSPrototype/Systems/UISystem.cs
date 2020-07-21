@@ -115,7 +115,7 @@ namespace LeyLineHybridECS
                 inButton.Icon.sprite = inBaseData.SpawnActions[inIndex].ActionIcon;
                 inButton.ActionIndex = inBaseData.Actions.Count + inIndex;
             }
-            else if(hasBasicAction)
+            /*else if(hasBasicAction)
             {
                 if(inIndex == 0)
                 {
@@ -144,7 +144,7 @@ namespace LeyLineHybridECS
                     inButton.Icon.sprite = inBaseData.Actions[inIndex - 2].ActionIcon;
                     inButton.ActionIndex = inIndex - 2;
                 }
-            }
+            }*/
             else
             {
                 inButton.ExecuteStepIndex = (int)inBaseData.Actions[inIndex].ActionExecuteStep;
@@ -375,7 +375,7 @@ namespace LeyLineHybridECS
                 var animatedPortrait = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClip;
                 var factionColor = faction.TeamColor;
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
-                int actionCount = stats.Actions.Count + 2;
+                int actionCount = stats.Actions.Count;
                 int spawnActionCount = stats.SpawnActions.Count;
 
                 //ONE TIME WHENEVER authPlayerState.UnitTargets.Count changes
@@ -505,7 +505,7 @@ namespace LeyLineHybridECS
                             {
                                 UIRef.Actions[bi].Visuals.SetActive(true);
 
-                                if (stats.BasicMove != null && stats.BasicAttack != null)
+                                /*if (stats.BasicMove != null && stats.BasicAttack != null)
                                 {
                                     if (bi == 0)
                                     {
@@ -544,9 +544,10 @@ namespace LeyLineHybridECS
 
                                     UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, true);
                                 }
-                                else
-                                {
-                                    if (bi < actionCount - 2)
+                                */
+                                //else
+                                //{
+                                    if (bi < actionCount)
                                     {
                                         if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost)
                                         {
@@ -563,7 +564,7 @@ namespace LeyLineHybridECS
                                         UIRef.Actions[bi].Visuals.SetActive(false);
                                     }
                                 }
-                            }
+                            //}
                             else
                             {
                                 UIRef.Actions[bi].Visuals.SetActive(false);
@@ -706,17 +707,7 @@ namespace LeyLineHybridECS
                         if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
                         {
                             HeadUILockedActionDisplay display = unitHeadUIRef.UnitHeadUIInstance.ActionDisplay;
-                            if (actions.LockedAction.Index == -2)
-                            {
-                                display.ActionImage.sprite = stats.BasicMove.ActionIcon;
-                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.BasicMove.ActionExecuteStep];
-                            }
-                            else if (actions.LockedAction.Index == -1)
-                            {
-                                display.ActionImage.sprite = stats.BasicAttack.ActionIcon;
-                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.BasicAttack.ActionExecuteStep];
-                            }
-                            else if (actions.LockedAction.Index < stats.Actions.Count)
+                            if (actions.LockedAction.Index < stats.Actions.Count)
                             {
                                 display.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
                                 display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.Actions[actions.LockedAction.Index].ActionExecuteStep];

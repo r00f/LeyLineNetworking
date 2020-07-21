@@ -566,11 +566,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 800862004979978160}
+  - component: {fileID: 3289465276142304449}
   - component: {fileID: 8898852741660551068}
   - component: {fileID: 8950170168944560130}
   - component: {fileID: 4440954350749950428}
   - component: {fileID: 9121732361173887378}
-  - component: {fileID: 3289465276142304449}
   - component: {fileID: 1130299993275380547}
   - component: {fileID: 930118610718755571}
   - component: {fileID: 5764804077693253567}
@@ -604,6 +604,30 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3289465276142304449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4245292855223164028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce3a8fbf57d589e408be1be498ac8db5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VisionRange: 2
+  BaseHealth: 40
+  EnergyIncome: 2
+  SelectUnitButtonInstance: {fileID: 0}
+  IsHero: 0
+  UIInitialized: 0
+  UnitTypeId: 0
+  UnitGroupSprite: {fileID: 21300000, guid: d63b8726f83628148be1211926226345, type: 3}
+  UnitSprite: {fileID: 0}
+  Actions:
+  - {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
+  SpawnActions: []
 --- !u!114 &8898852741660551068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -699,7 +723,7 @@ MonoBehaviour:
   RotateTransform: {fileID: 5548772758455220403}
   DestinationReachTriggerSet: 0
   RotationTarget: {x: 0, y: 0, z: 0}
-  DestinationPosition: {x: 0, y: 0, z: 0}
+  DestinationPosition: {x: 0, y: 0}
   Dead: 0
   DeathEventTrigger: 0
   DisableOnDeathObjects: []
@@ -767,32 +791,6 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
---- !u!114 &3289465276142304449
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4245292855223164028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce3a8fbf57d589e408be1be498ac8db5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  VisionRange: 2
-  BaseHealth: 40
-  EnergyIncome: 2
-  BasicMove: {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
-  BasicAttack: {fileID: 11400000, guid: aa6430d08a077914e84dbee4738282d4, type: 2}
-  SelectUnitButtonInstance: {fileID: 0}
-  IsHero: 0
-  UIInitialized: 0
-  UnitTypeId: 0
-  UnitGroupSprite: {fileID: 21300000, guid: d63b8726f83628148be1211926226345, type: 3}
-  UnitSprite: {fileID: 0}
-  Actions:
-  - {fileID: 11400000, guid: 148eb327cdf0fe54baab53706435daa7, type: 2}
-  SpawnActions: []
 --- !u!114 &1130299993275380547
 MonoBehaviour:
   m_ObjectHideFlags: 0

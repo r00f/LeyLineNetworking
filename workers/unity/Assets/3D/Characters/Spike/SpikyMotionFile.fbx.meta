@@ -1383,10 +1383,10 @@ ModelImporter:
       additiveReferencePoseFrame: 0
     - serializedVersion: 16
       name: SpikeDefensiveIn
-      takeName: Defensive
+      takeName: SpikeDefensive
       internalID: 0
       firstFrame: 1
-      lastFrame: 45.3
+      lastFrame: 15
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -1545,7 +1545,7 @@ ModelImporter:
       additiveReferencePoseFrame: 0.9
     - serializedVersion: 16
       name: SpikeDefensive
-      takeName: Defensive
+      takeName: SpikeDefensive
       internalID: 0
       firstFrame: 15
       lastFrame: 45
@@ -1700,7 +1700,7 @@ ModelImporter:
       additiveReferencePoseFrame: 0.9
     - serializedVersion: 16
       name: SpikeParry
-      takeName: Parry
+      takeName: SpikeParry
       internalID: 0
       firstFrame: 0
       lastFrame: 30

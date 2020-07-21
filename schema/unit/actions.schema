@@ -6,14 +6,12 @@ import "cell/cell_attributes.schema";
 component Actions{
 	
     id = 125;
-	Action basic_move = 1;
-	Action basic_attack = 2;
-	list<Action> other_actions = 3;
-	Action current_selected = 4;
-	Action last_selected = 5;
-	Action locked_action = 6;
-	Action null_action = 7;
-	bool executed = 8;
+	list<Action> actions_list = 1;
+	Action current_selected = 2;
+	Action last_selected = 3;
+	Action locked_action = 4;
+	Action null_action = 5;
+	bool executed = 6;
 	command SelectActionResponse select_action_command(SelectActionRequest);
 	command SetTargetResponse set_target_command(SetTargetRequest);
 }

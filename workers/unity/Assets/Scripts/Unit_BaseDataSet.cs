@@ -9,8 +9,6 @@ public class Unit_BaseDataSet : MonoBehaviour
     public uint VisionRange;
     public uint BaseHealth;
     public uint EnergyIncome;
-    public ECSAction BasicMove;
-    public ECSAction BasicAttack;
     public SelectUnitButton SelectUnitButtonInstance;
     public bool IsHero;
     public bool UIInitialized;

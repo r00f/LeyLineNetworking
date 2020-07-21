@@ -65,7 +65,7 @@ namespace LeyLineHybridECS
             {
                 var unitID = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
 
-                if (actionsData.LockedAction.Index == -2)
+                if (actionsData.LockedAction.Index == 0)
                 {
                     var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
 

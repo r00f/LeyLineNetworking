@@ -892,11 +892,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 800862004979978160}
+  - component: {fileID: 3289465276142304449}
   - component: {fileID: 8898852741660551068}
   - component: {fileID: 8950170168944560130}
   - component: {fileID: 4440954350749950428}
   - component: {fileID: 9121732361173887378}
-  - component: {fileID: 3289465276142304449}
   - component: {fileID: 1130299993275380547}
   - component: {fileID: 930118610718755571}
   - component: {fileID: 5764804077693253567}
@@ -930,6 +930,35 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3289465276142304449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4245292855223164028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce3a8fbf57d589e408be1be498ac8db5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VisionRange: 3
+  BaseHealth: 160
+  EnergyIncome: 4
+  SelectUnitButtonInstance: {fileID: 0}
+  IsHero: 1
+  UIInitialized: 0
+  UnitTypeId: 0
+  UnitGroupSprite: {fileID: 0}
+  UnitSprite: {fileID: 0}
+  Actions:
+  - {fileID: 11400000, guid: 8fa6cd2aaaa8e02459cc97c4cf951ae2, type: 2}
+  - {fileID: 11400000, guid: a522648c58fd9b44fa672d200d7834a7, type: 2}
+  - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
+  SpawnActions:
+  - {fileID: 11400000, guid: cf378819988d7874c80f53c1f72a1695, type: 2}
+  - {fileID: 11400000, guid: 06d8c3eca471abd4197edf42c50687ac, type: 2}
+  - {fileID: 11400000, guid: c318f34339668004eb9e5f1fe39df3c6, type: 2}
 --- !u!114 &8898852741660551068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1026,7 +1055,7 @@ MonoBehaviour:
   RotateTransform: {fileID: 5548772758455220403}
   DestinationReachTriggerSet: 0
   RotationTarget: {x: 0, y: 0, z: 0}
-  DestinationPosition: {x: 0, y: 0, z: 0}
+  DestinationPosition: {x: 0, y: 0}
   Dead: 0
   DeathEventTrigger: 0
   DisableOnDeathObjects: []
@@ -1105,35 +1134,6 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
---- !u!114 &3289465276142304449
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4245292855223164028}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ce3a8fbf57d589e408be1be498ac8db5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  VisionRange: 3
-  BaseHealth: 160
-  EnergyIncome: 4
-  BasicMove: {fileID: 11400000, guid: 8fa6cd2aaaa8e02459cc97c4cf951ae2, type: 2}
-  BasicAttack: {fileID: 11400000, guid: a522648c58fd9b44fa672d200d7834a7, type: 2}
-  SelectUnitButtonInstance: {fileID: 0}
-  IsHero: 1
-  UIInitialized: 0
-  UnitTypeId: 0
-  UnitGroupSprite: {fileID: 0}
-  UnitSprite: {fileID: 0}
-  Actions:
-  - {fileID: 11400000, guid: 3383f88abcb202341a84e5b319dcd352, type: 2}
-  SpawnActions:
-  - {fileID: 11400000, guid: cf378819988d7874c80f53c1f72a1695, type: 2}
-  - {fileID: 11400000, guid: 06d8c3eca471abd4197edf42c50687ac, type: 2}
-  - {fileID: 11400000, guid: c318f34339668004eb9e5f1fe39df3c6, type: 2}
 --- !u!114 &1130299993275380547
 MonoBehaviour:
   m_ObjectHideFlags: 0
