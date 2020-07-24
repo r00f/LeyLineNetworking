@@ -280,13 +280,13 @@ MonoBehaviour:
       lockRotationY: 0
       zoomRotationMultiplier: 1.5
       increasedZoomRotationMultiplier: 5
-      increaseZoomRotTreshhold: 10
+      increaseZoomRotTreshhold: 12
       defualtRotation: {x: -35, y: 0}
       cameraRotationRate: {x: 100, y: 100}
     zoom:
       invertZoom: 0
       defaultZoom: 13
-      minZoom: 8
+      minZoom: 6
       maxZoom: 16
       zoomRate: 12
       constZoomRate: 1
