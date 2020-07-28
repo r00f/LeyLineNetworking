@@ -34,8 +34,8 @@ namespace LeyLineHybridECS
         [SerializeField]
         int firVariantCount;
 
-        [SerializeField]
-        Vector2 treeHeightMinMax;
+        //[SerializeField]
+        //Vector2 treeHeightMinMax;
 
         [SerializeField]
         Vector2 grassHeightMinMax;
@@ -160,7 +160,15 @@ namespace LeyLineHybridECS
             {
                 TerrainType terrainType = c.GetComponent<CellType>().thisCellsTerrain;
 
-                if(terrainType.NeighbourAmountMinMax.y != 0)
+                int treeRot = 0;
+
+                if (terrainType.RandomTreeRotationIncrement != 0)
+                {
+                    treeRot = UnityEngine.Random.Range(0, 360 / terrainType.RandomTreeRotationIncrement) * terrainType.RandomTreeRotationIncrement;
+                }
+
+
+                if (terrainType.NeighbourAmountMinMax.y != 0)
                 {
                     int grassAmount = UnityEngine.Random.Range((int)terrainType.NeighbourAmountMinMax.x, (int)terrainType.NeighbourAmountMinMax.y + 1);
 
@@ -178,11 +186,11 @@ namespace LeyLineHybridECS
                         TreeInstance treeInstance = new TreeInstance()
                         {
                             prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
-                            color = Color.white,
-                            lightmapColor = Color.white,
-                            heightScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
-                            widthScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
-                            rotation = UnityEngine.Random.Range(0f, 360f)
+                            //color = Color.white,
+                            //lightmapColor = Color.white,
+                            heightScale = UnityEngine.Random.Range(terrainType.TreeHeightMinMax.x, terrainType.TreeHeightMinMax.y),
+                            widthScale = 1,
+                            rotation = treeRot
                         };
                         SpawnHexagonTree(c.transform.position - transform.parent.position, treeInstance);
                     }

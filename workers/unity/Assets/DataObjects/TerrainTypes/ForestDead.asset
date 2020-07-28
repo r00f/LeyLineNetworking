@@ -14,7 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapCellIconIndex: 1
   MapCellColorIndex: 1
+  RandomTreeRotationIncrement: 10
   textureIndex: 6
+  TreeHeightMinMax: {x: 1, y: 1.3}
   TreeIndexMinMax: {x: 4, y: 5}
   GrassAmountMinMax: {x: 0, y: 0}
   NeighbourIndexMinMax: {x: 13, y: 13}

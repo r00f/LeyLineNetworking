@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class ManalithClientData : MonoBehaviour
 {
+    public MeshRenderer ManalithHoveredMesh;
     public ManalithInfoComponent IngameIconRef { get; set; }
     public long ManalithEntityID = 0;
     public Vector3 WorldPos;

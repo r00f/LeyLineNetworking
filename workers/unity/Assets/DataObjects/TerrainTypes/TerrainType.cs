@@ -11,7 +11,10 @@ public class TerrainType : ScriptableObject
     //public int treeIndex;
     //public float detailSpawnPercentage;
     //public int detailIndex;
+    public int RandomTreeRotationIncrement;
+    //public bool RandomTreeRotation;
     public int textureIndex;
+    public Vector2 TreeHeightMinMax;
     public Vector2 TreeIndexMinMax;
     public Vector2 GrassAmountMinMax;
     public Vector2 NeighbourIndexMinMax;
