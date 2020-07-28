@@ -26,6 +26,7 @@ public class HighlightingSystem : ComponentSystem
     EntityQuery m_MarkerStateData;
     EntityQuery m_PlayerStateData;
     EntityQuery m_GameStateData;
+    EntityQuery m_HoveredData;
 
     ILogDispatcher m_LogDispatcher;
 
@@ -34,6 +35,7 @@ public class HighlightingSystem : ComponentSystem
         base.OnCreate();
         entityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         settings = Resources.Load<Settings>("Settings");
+
 
         m_CellData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
@@ -91,6 +93,13 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<PlayerEnergy.Component>(),
             ComponentType.ReadWrite<HighlightingDataComponent>()
             );
+
+
+        m_HoveredData = GetEntityQuery(
+            ComponentType.ReadOnly<CubeCoordinate.Component>(),
+            ComponentType.ReadOnly<HoveredState>()
+            );
+
     }
 
     protected override void OnStartRunning()
@@ -188,6 +197,12 @@ public class HighlightingSystem : ComponentSystem
 
         playerHighlightingDatas[0] = playerHighlightingData;
         m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
+
+
+     
+
+        //Debug.Log(m_HoveredData.CalculateEntityCount());
+        // When clicked hovered marker isnt removed <= Bug! Wrong Check in MouseState.
 
         gameStateData.Dispose();
         #region playerStateData

@@ -38,6 +38,7 @@ namespace LeyLineHybridECS
                     m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
                         ComponentType.ReadOnly<PlayerState.HasAuthority>(),
                         ComponentType.ReadOnly<FactionComponent.Component>(),
+                        ComponentType.ReadOnly<HighlightingDataComponent>(),
                         ComponentType.ReadOnly<WorldIndex.Component>()
                     );
 
@@ -127,6 +128,7 @@ namespace LeyLineHybridECS
                 var entityID = m_ManaLithData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
 
                 var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+                var playerHighlightingDatas = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
                 var playerFaction = playerFactions[0];
 
@@ -140,6 +142,7 @@ namespace LeyLineHybridECS
 
                     Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                     {
+
                         if (clientData.ManalithEntityID == 0)
                         {
                             var circlePos = meshColor.transform.position.sqrMagnitude;
@@ -182,6 +185,25 @@ namespace LeyLineHybridECS
 
                         if (clientData.ManalithEntityID == ID)
                         {
+                            #region EnableDisableManalithHovered
+                            bool manalithIsHovered = false;
+                            foreach (CellAttribute c in manaLith.CircleAttributeList.CellAttributes)
+                            {
+                                if (Vector3fext.ToUnityVector(playerHighlightingDatas[0].HoveredCoordinate) == Vector3fext.ToUnityVector(c.CubeCoordinate))
+                                    manalithIsHovered = true;
+                            }
+                            if (manalithIsHovered)
+                            {
+                                clientData.ManalithHoveredMesh.enabled = true;
+                                clientData.ManalithHoveredMesh.material.SetColor("_BaseColor", meshColor.LerpColor);
+                            }
+                            else
+                            {
+                                clientData.ManalithHoveredMesh.enabled = false;
+                            }
+
+                            #endregion
+
                             if (clientData.IngameIconRef && m_UISystem.UIRef)
                             {
                                 clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
@@ -295,6 +317,7 @@ namespace LeyLineHybridECS
                 entityID.Dispose();
                 manalithComps.Dispose();
                 playerFactions.Dispose();
+                playerHighlightingDatas.Dispose();
             }
         }
 

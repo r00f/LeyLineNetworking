@@ -152,12 +152,15 @@ public class MouseStateSystem : JobComponentSystem
                 {
                     if (mouseState.CurrentState != MouseState.State.Hovered)
                     {
+                        ECBuffer.AddComponent(index, entity, new HoveredState());
                         mouseState.CurrentState = MouseState.State.Hovered;
                     }
                 }
             }
             else if(mouseState.CurrentState != MouseState.State.Clicked && mouseState.CurrentState != MouseState.State.Neutral)
             {
+                if (mouseState.CurrentState == MouseState.State.Hovered)
+                    ECBuffer.RemoveComponent(index, entity, typeof(HoveredState));
                 mouseState.CurrentState = MouseState.State.Neutral;
             }
 
