@@ -10,6 +10,7 @@ component Manalith
 	uint32 base_income = 3;
 	list<ManalithSlot> manalithslots = 4;
 	bool state_change = 5;
+	event ManalithFactionChange manalith_faction_change_event;
 }
 
 type ManalithSlot
@@ -17,4 +18,9 @@ type ManalithSlot
 	uint32 occupying_faction = 1;
 	uint32 energy_gained = 2;
 	cell.CellAttribute corresponding_cell = 3;
+}
+
+type ManalithFactionChange
+{
+
 }

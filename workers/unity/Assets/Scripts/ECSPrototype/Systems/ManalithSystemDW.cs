@@ -23,6 +23,7 @@ namespace LeyLineHybridECS
         EntityQuery m_ProjectorData;
         EntityQuery m_PlayerData;
         EntityQuery m_GameControllerData;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
 
         Settings settings;
         bool initialized;
@@ -33,6 +34,7 @@ namespace LeyLineHybridECS
             {
                 if (!initialized)
                 {
+                    m_ComponentUpdateSystem = Worlds.ClientWorld.World.GetExistingSystem<ComponentUpdateSystem>();
                     m_UISystem = Worlds.ClientWorld.World.GetExistingSystem<UISystem>();
 
                     m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
@@ -133,15 +135,19 @@ namespace LeyLineHybridECS
                 var playerFaction = playerFactions[0];
 
 
+
+
                 for (int i = 0; i < manaLithFactions.Length; i++)
                 {
                     var manalithFaction = manaLithFactions[i];
                     var manaLith = manalithComps[i];
                     var ID = entityID[i].EntityId.Id;
                     var pos = manaLithPositions[i];
+                    
 
                     Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                     {
+
 
                         if (clientData.ManalithEntityID == 0)
                         {
@@ -183,8 +189,12 @@ namespace LeyLineHybridECS
                             }
                         }
 
+
+
                         if (clientData.ManalithEntityID == ID)
                         {
+
+
                             #region EnableDisableManalithHovered
                             bool manalithIsHovered = false;
                             foreach (CellAttribute c in manaLith.CircleAttributeList.CellAttributes)
@@ -226,7 +236,23 @@ namespace LeyLineHybridECS
                             meshColor.MapColor = settings.FactionMapColors[(int)manalithFaction.Faction];
                             meshColor.Color = settings.FactionColors[(int)manalithFaction.Faction];
 
+                            var manalithFactionChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Manalith.ManalithFactionChangeEvent.Event>();
+                            for (int q = 0; q < manalithFactionChangeEvents.Count; q++)
+                            {
 
+                                var EventID = manalithFactionChangeEvents[q].EntityId.Id;
+                                if (ID == EventID)
+                                {
+                                    Debug.Log("Got the event, now get the entity id of it??");
+                                    foreach (ParticleSystem p in meshColor.ManaLithObject.OneShotParticleSystems)
+                                    {
+                                        p.startColor = meshColor.Color;
+                                        p.Play();
+                                    }
+                                }
+
+
+                            }
                             //Transport data from manaLith into clientData.IconPrefabref
                             if (manalithFaction.Faction == playerFaction.Faction)
                             {

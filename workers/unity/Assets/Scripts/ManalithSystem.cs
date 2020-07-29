@@ -10,6 +10,7 @@ using UnityEngine;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : ComponentSystem
 {
+    private ComponentUpdateSystem componentUpdateSystem;
     private EntityQuery m_ManalithData;
     private EntityQuery m_CellData;
     private EntityQuery m_UnitData;
@@ -19,8 +20,11 @@ public class ManalithSystem : ComponentSystem
     {
         base.OnCreate();
 
+        componentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+
         m_ManalithData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadWrite<Manalith.Component>(),
             ComponentType.ReadWrite<FactionComponent.Component>()
         );
@@ -67,7 +71,7 @@ public class ManalithSystem : ComponentSystem
             var worldIndex = gameStateWorldIndex.Value;
             var currentState = gameState.CurrentState;
 
-            Entities.With(m_ManalithData).ForEach((ref Manalith.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
+            Entities.With(m_ManalithData).ForEach((ref SpatialEntityId entityId, ref Manalith.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
             {
                 var manalithWorldIndex = windex.Value;
                 var faction = factionref;
@@ -124,7 +128,8 @@ public class ManalithSystem : ComponentSystem
 
                         if(manalithComp.StateChange)
                         {
-                            //Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
+                            var oldFact = factionref.Faction;
+                            Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
                             uint fact = UpdateFaction(manalithComp, manalithWorldIndex);
                             TeamColorEnum tColor = new TeamColorEnum();
 
@@ -155,10 +160,21 @@ public class ManalithSystem : ComponentSystem
                                 UpdateUnit(slot.CorrespondingCell.UnitOnCellId, faction.Faction, ref manalithComp);
                             }
 
+                         
+
+
+                            manalithComp.StateChange = false;
+
                             factionref = faction;
                             circleCellsref = manalithComp;
 
-                            manalithComp.StateChange = false;
+                            if (oldFact != faction.Faction)
+                            {
+                                componentUpdateSystem.SendEvent(
+                                 new Manalith.ManalithFactionChangeEvent.Event(),
+                                 entityId.EntityId);
+
+                            }
                         }
                     }
                 }

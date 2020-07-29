@@ -8,4 +8,5 @@ public class ManalithObject : MonoBehaviour
     public List<MeshRenderer> EmissionColorRenderers;
     public List<Light> Lights;
     public List<ParticleSystem> ParticleSystems;
+    public List<ParticleSystem> OneShotParticleSystems;
 }

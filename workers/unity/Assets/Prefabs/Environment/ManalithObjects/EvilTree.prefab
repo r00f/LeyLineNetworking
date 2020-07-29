@@ -19993,6 +19993,7 @@ Transform:
   m_Children:
   - {fileID: 160286591871172161}
   - {fileID: 3113894989231920131}
+  - {fileID: 4189337295862314377}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -20078,6 +20079,10 @@ MonoBehaviour:
   - {fileID: 1260412137998269119}
   - {fileID: 7408854794284931109}
   - {fileID: 3359247098606622892}
+  OneShotParticleSystems:
+  - {fileID: 5756925364806333362}
+  - {fileID: 2316735597606393130}
+  - {fileID: 2380276146194672336}
 --- !u!1 &3932945958268860577
 GameObject:
   m_ObjectHideFlags: 0
@@ -44758,3 +44763,96 @@ MonoBehaviour:
   m_AreaLightEmissiveMeshShadowCastingMode: 0
   m_AreaLightEmissiveMeshMotionVectorGenerationMode: 0
   m_AreaLightEmissiveMeshLayer: -1
+--- !u!1001 &4342539235651648619
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 1398912073942626423}
+    m_Modifications:
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.060047314
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.07999992
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.095888495
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.4404563
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0.55317116
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0.55317116
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: -0.4404563
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_RootOrder
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: -90
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3493966478987180170, guid: 9eed409acaf4472459d96514eb424390,
+        type: 3}
+      propertyPath: m_Name
+      value: ManalithBigCaptureSwoosh
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 9eed409acaf4472459d96514eb424390, type: 3}
+--- !u!4 &4189337295862314377 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 459446869070531042, guid: 9eed409acaf4472459d96514eb424390,
+    type: 3}
+  m_PrefabInstance: {fileID: 4342539235651648619}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &5756925364806333362 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8333763172238479321, guid: 9eed409acaf4472459d96514eb424390,
+    type: 3}
+  m_PrefabInstance: {fileID: 4342539235651648619}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2316735597606393130 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2046180887370049857, guid: 9eed409acaf4472459d96514eb424390,
+    type: 3}
+  m_PrefabInstance: {fileID: 4342539235651648619}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2380276146194672336 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2110988548083717819, guid: 9eed409acaf4472459d96514eb424390,
+    type: 3}
+  m_PrefabInstance: {fileID: 4342539235651648619}
+  m_PrefabAsset: {fileID: 0}

@@ -83,7 +83,7 @@ namespace LeyLineHybridECS
             //else
                 //ProjectorCamera.enabled = false;
 
-            for (var i = 0; i < updateVisionEvents.Count; i++)
+            if(updateVisionEvents.Count > 0)
             {
                 UpdateVision();
             }
