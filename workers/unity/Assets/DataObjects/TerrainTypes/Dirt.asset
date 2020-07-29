@@ -14,14 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapCellIconIndex: 0
   MapCellColorIndex: 0
+  RandomTreeRotationIncrement: 0
   textureIndex: 2
-  TreeIndexMinMax: {x: 12, y: 12}
-  GrassAmountMinMax: {x: 2, y: 3}
+  TreeHeightMinMax: {x: 0, y: 0}
+  DetailObjectIndexRanges:
+  - {x: 12, y: 12}
+  - {x: 18, y: 21}
+  DetailObjectAmounts:
+  - {x: 2, y: 3}
+  - {x: 1, y: 2}
+  DetailObjectSpawnProbabilities: 0500000014000000
+  TreeIndexMinMax: {x: 0, y: 0}
+  GrassAmountMinMax: {x: 0, y: 0}
+  NeighbourIndexMinMax: {x: 0, y: 0}
+  NeighbourAmountMinMax: {x: 0, y: 0}
   terrain_Name: 
   additionalCost: 0
   yOffset: 0
   Walkable: 1
   spawnAllAssets: 0
-  probabilityToSpawnAsset: 5
+  probabilityToSpawnNeighbourAsset: 0
+  probabilityToSpawnAsset: 0
   obstructVision: 0
   assets_to_Spawn: []

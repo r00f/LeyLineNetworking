@@ -15,6 +15,9 @@ public class TerrainType : ScriptableObject
     //public bool RandomTreeRotation;
     public int textureIndex;
     public Vector2 TreeHeightMinMax;
+    public List<Vector2> DetailObjectIndexRanges;
+    public List<Vector2> DetailObjectAmounts;
+    public List<int> DetailObjectSpawnProbabilities;
     public Vector2 TreeIndexMinMax;
     public Vector2 GrassAmountMinMax;
     public Vector2 NeighbourIndexMinMax;

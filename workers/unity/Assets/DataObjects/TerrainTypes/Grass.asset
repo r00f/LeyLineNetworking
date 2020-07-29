@@ -14,10 +14,19 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapCellIconIndex: 2
   MapCellColorIndex: 2
-  RandomTreeRotation: 0
+  RandomTreeRotationIncrement: 20
   textureIndex: 1
   TreeHeightMinMax: {x: 1, y: 1.2}
-  TreeIndexMinMax: {x: 8, y: 10}
+  DetailObjectIndexRanges:
+  - {x: 8, y: 10}
+  - {x: 18, y: 21}
+  - {x: 14, y: 14}
+  DetailObjectAmounts:
+  - {x: 1, y: 1}
+  - {x: 1, y: 3}
+  - {x: 1, y: 1}
+  DetailObjectSpawnProbabilities: 64000000140000000a000000
+  TreeIndexMinMax: {x: 0, y: 0}
   GrassAmountMinMax: {x: 0, y: 0}
   NeighbourIndexMinMax: {x: 0, y: 0}
   NeighbourAmountMinMax: {x: 0, y: 0}

@@ -179,6 +179,19 @@ namespace LeyLineHybridECS
                     }
                 }
 
+                if(terrainType.DetailObjectIndexRanges.Count != 0 && terrainType.DetailObjectAmounts.Count != 0 && terrainType.DetailObjectSpawnProbabilities.Count != 0)
+                {
+                    for(int i = 0; i < terrainType.DetailObjectIndexRanges.Count; i++)
+                    {
+                        int grassAmount = (int)UnityEngine.Random.Range(terrainType.DetailObjectAmounts[i].x, terrainType.DetailObjectAmounts[i].y);
+
+                        if (UnityEngine.Random.Range(0, 100) <= terrainType.DetailObjectSpawnProbabilities[i])
+                        {
+                            SpawnGrassPatch(grassAmount, c, terrainType.DetailObjectIndexRanges[i]);
+                        }
+                    }
+                }
+
                 if (terrainType.TreeIndexMinMax.y != 0)
                 {
                     if (terrainType.GrassAmountMinMax.y == 0)

@@ -14,9 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   MapCellIconIndex: 3
   MapCellColorIndex: 3
+  RandomTreeRotationIncrement: 30
   textureIndex: 3
-  TreeIndexMinMax: {x: 0, y: 0}
-  GrassAmountMinMax: {x: 0, y: 0}
+  TreeHeightMinMax: {x: 1, y: 1.5}
+  DetailObjectIndexRanges: []
+  TreeIndexMinMax: {x: 18, y: 21}
+  GrassAmountMinMax: {x: 2, y: 3}
   NeighbourIndexMinMax: {x: 0, y: 0}
   NeighbourAmountMinMax: {x: 0, y: 0}
   terrain_Name: 
@@ -25,6 +28,6 @@ MonoBehaviour:
   Walkable: 1
   spawnAllAssets: 0
   probabilityToSpawnNeighbourAsset: 0
-  probabilityToSpawnAsset: 0
+  probabilityToSpawnAsset: 10
   obstructVision: 0
   assets_to_Spawn: []
