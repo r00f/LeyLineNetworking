@@ -40,8 +40,8 @@ namespace LeyLineHybridECS
         [SerializeField]
         Vector2 grassHeightMinMax;
 
-        [SerializeField]
-        float grassCircleRange;
+        //[SerializeField]
+        //float grassCircleRange;
 
         [SerializeField]
         int randomGrasRotationMax;
@@ -175,7 +175,7 @@ namespace LeyLineHybridECS
                     foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
                     {
                         if (n.GetComponent<CellType>().thisCellsTerrain.Walkable && UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnNeighbourAsset)
-                            SpawnGrassPatch(grassAmount, n, terrainType.NeighbourIndexMinMax);
+                            SpawnDetailPatch(grassAmount, n, terrainType.NeighbourIndexMinMax, 0.8f);
                     }
                 }
 
@@ -187,7 +187,11 @@ namespace LeyLineHybridECS
 
                         if (UnityEngine.Random.Range(0, 100) <= terrainType.DetailObjectSpawnProbabilities[i])
                         {
-                            SpawnGrassPatch(grassAmount, c, terrainType.DetailObjectIndexRanges[i]);
+                            float randomRange = 0f;
+                            if (terrainType.DetailObjectRanges.Count != 0)
+                                randomRange = UnityEngine.Random.Range(terrainType.DetailObjectRanges[i].x, terrainType.DetailObjectRanges[i].y);
+
+                            SpawnDetailPatch(grassAmount, c, terrainType.DetailObjectIndexRanges[i], randomRange, treeRot);
                         }
                     }
                 }
@@ -215,12 +219,12 @@ namespace LeyLineHybridECS
                         {
                             if (UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnAsset)
                             {
-                                SpawnGrassPatch(grassAmount, c, terrainType.TreeIndexMinMax);
+                                SpawnDetailPatch(grassAmount, c, terrainType.TreeIndexMinMax, 0);
                             }
                         }
                         else
                         {
-                            SpawnGrassPatch(grassAmount, c, terrainType.TreeIndexMinMax);
+                            SpawnDetailPatch(grassAmount, c, terrainType.TreeIndexMinMax, 0);
                         }
                     }
                 }
@@ -232,7 +236,7 @@ namespace LeyLineHybridECS
             terrain.Flush();
         }
 
-        public void SpawnGrassPatch(int grassAmount, Cell c, Vector2 treeIndexMinMax)
+        public void SpawnDetailPatch(int grassAmount, Cell c, Vector2 treeIndexMinMax, float spawnCircleRange, float randomRotation = 0f)
         {
             for (int i = 0; i < grassAmount; i++)
             {
@@ -243,11 +247,11 @@ namespace LeyLineHybridECS
                     lightmapColor = Color.white,
                     heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
                     widthScale = 1,
-                    rotation = UnityEngine.Random.Range(0f, randomGrasRotationMax)
+                    rotation = randomRotation
                 };
 
                 //can spawn at same place
-                Vector2 randomOffset = UnityEngine.Random.insideUnitCircle * grassCircleRange;
+                Vector2 randomOffset = UnityEngine.Random.insideUnitCircle.normalized * spawnCircleRange;
 
                 Vector3 pos = c.transform.position - transform.parent.position + new Vector3(randomOffset.x, 0, randomOffset.y);
 

@@ -24,6 +24,9 @@ MonoBehaviour:
   - {x: 2, y: 3}
   - {x: 1, y: 2}
   DetailObjectSpawnProbabilities: 0500000014000000
+  DetailObjectRanges:
+  - {x: 0.5, y: 0.7}
+  - {x: 0.2, y: 0.8}
   TreeIndexMinMax: {x: 0, y: 0}
   GrassAmountMinMax: {x: 0, y: 0}
   NeighbourIndexMinMax: {x: 0, y: 0}

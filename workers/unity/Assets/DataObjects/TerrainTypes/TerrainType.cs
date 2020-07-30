@@ -18,6 +18,7 @@ public class TerrainType : ScriptableObject
     public List<Vector2> DetailObjectIndexRanges;
     public List<Vector2> DetailObjectAmounts;
     public List<int> DetailObjectSpawnProbabilities;
+    public List<Vector2> DetailObjectRanges;
     public Vector2 TreeIndexMinMax;
     public Vector2 GrassAmountMinMax;
     public Vector2 NeighbourIndexMinMax;
@@ -26,6 +27,8 @@ public class TerrainType : ScriptableObject
     public int additionalCost;
     [Range (-15.0f, 15.0f)]
     public float yOffset;
+    [Range(-15.0f, 15.0f)]
+    public float cellTerrainYOffset;
     public bool Walkable = true;
     public bool spawnAllAssets = false;
     [Range(0, 100)]
