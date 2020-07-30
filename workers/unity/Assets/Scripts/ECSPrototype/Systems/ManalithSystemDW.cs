@@ -244,6 +244,7 @@ namespace LeyLineHybridECS
                                 if (ID == EventID)
                                 {
                                     Debug.Log("Got the event, now get the entity id of it??");
+                                    meshColor.ManaLithObject.GainControlSoundEmitter.Play();
                                     foreach (ParticleSystem p in meshColor.ManaLithObject.OneShotParticleSystems)
                                     {
                                         p.startColor = meshColor.Color;

@@ -5205,8 +5205,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/Environment/Manalith
-  PlayEvent: 0
-  StopEvent: 0
+  PlayEvent: 11
+  StopEvent: 12
   AllowFadeout: 1
   TriggerOnce: 0
   Preload: 0
@@ -5226,7 +5226,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f67a9305442d2b45a6eaecdad3c917d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ManalithHoveredObject: {fileID: 2715234512003508766}
+  ManalithHoveredMesh: {fileID: 0}
   ManalithEntityID: 0
   WorldPos: {x: 0, y: 0, z: 0}
   TooltipBackgroundImage: {fileID: 0}
@@ -10101,12 +10101,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c12aaa8dd4a24b04eabae9c32a7be133, type: 3}
---- !u!1 &2715234512003508766 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2554125536787883735, guid: c12aaa8dd4a24b04eabae9c32a7be133,
-    type: 3}
-  m_PrefabInstance: {fileID: 494376452593503433}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &6208816081139872921 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5833926882855516240, guid: c12aaa8dd4a24b04eabae9c32a7be133,

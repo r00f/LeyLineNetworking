@@ -262,6 +262,7 @@ MonoBehaviour:
   - {fileID: 4817473631364247808}
   - {fileID: 3249660904717260696}
   - {fileID: 3186260639156119650}
+  GainControlSoundEmitter: {fileID: 3135520902620489022}
 --- !u!1 &1560034815550551705
 GameObject:
   m_ObjectHideFlags: 0
@@ -16879,12 +16880,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 230696bd37fb6244b86b7cbc57dc5b66, type: 3}
---- !u!4 &3971097020639901499 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1172100671523277868, guid: 230696bd37fb6244b86b7cbc57dc5b66,
+--- !u!114 &3135520902620489022 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 926496117586107945, guid: 230696bd37fb6244b86b7cbc57dc5b66,
     type: 3}
   m_PrefabInstance: {fileID: 2835025769044785943}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!198 &4817473631364247808 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 7314710375872121367, guid: 230696bd37fb6244b86b7cbc57dc5b66,
@@ -16900,6 +16907,12 @@ ParticleSystem:
 --- !u!198 &3186260639156119650 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 824114484557353845, guid: 230696bd37fb6244b86b7cbc57dc5b66,
+    type: 3}
+  m_PrefabInstance: {fileID: 2835025769044785943}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &3971097020639901499 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 1172100671523277868, guid: 230696bd37fb6244b86b7cbc57dc5b66,
     type: 3}
   m_PrefabInstance: {fileID: 2835025769044785943}
   m_PrefabAsset: {fileID: 0}
