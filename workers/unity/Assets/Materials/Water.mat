@@ -12,7 +12,7 @@ Material:
     type: 3}
   m_ShaderKeywords: _BLENDMODE_ALPHA _ENABLE_FOG_ON_TRANSPARENT _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: 2999
   stringTagMap:
@@ -116,7 +116,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - Vector1_952BF38C: 200
+    - Vector1_952BF38C: 1500
     - _AORemapMax: 1
     - _AORemapMin: 0
     - _ATDistance: 1
@@ -136,7 +136,7 @@ Material:
     - _CullMode: 2
     - _CullModeForward: 2
     - _Cutoff: 0.5
-    - _Depth: 0.1
+    - _Depth: 0.3
     - _DepthOffsetEnable: 0
     - _DetailAlbedoScale: 1
     - _DetailNormalScale: 1
@@ -172,9 +172,9 @@ Material:
     - _EnableGeometricSpecularAA: 0
     - _EnableSpecularOcclusion: 0
     - _EnergyConservingSpecularColor: 1
-    - _FoamDistance: 0.25
-    - _FoamStr: 0.7
-    - _FoamTiling: 20
+    - _FoamDistance: 0.6
+    - _FoamStr: 1
+    - _FoamTiling: 12
     - _HdrpVersion: 2
     - _HeightAmplitude: 0.02
     - _HeightCenter: 0.5
@@ -194,7 +194,7 @@ Material:
     - _Metallic: 0
     - _NormalMapSpace: 0
     - _NormalScale: 1
-    - _NormalStrength: 2
+    - _NormalStrength: 0.4
     - _NormalTile: 0.07
     - _PPDLodThreshold: 5
     - _PPDMaxSamples: 15
@@ -206,7 +206,7 @@ Material:
     - _RenderQueueType: 5
     - _RequireSplitLighting: 0
     - _SSRefractionProjectionModel: 0
-    - _Smoothness: 0.3
+    - _Smoothness: 0.25
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
     - _SpecularAAScreenSpaceVariance: 0.1
@@ -242,10 +242,10 @@ Material:
     - _UVEmissive: 0
     - _UseEmissiveIntensity: 0
     - _UseShadowThreshold: 0
-    - _WaveHeight: -0.05
-    - _WaveScale: -1.4
-    - _WaveSpeed: -10
-    - _WaveTile: 0.3
+    - _WaveHeight: 0.2
+    - _WaveScale: 0.2
+    - _WaveSpeed: 70
+    - _WaveTile: -1
     - _ZTestDepthEqualForOpaque: 4
     - _ZTestGBuffer: 4
     - _ZTestModeDistortion: 4
@@ -254,13 +254,13 @@ Material:
     - _bluStr: 0.003
     - _blurDist: 2
     m_Colors:
-    - Color_B930EA2C: {r: 0.78431374, g: 0.6130178, b: 0.5137255, a: 1}
+    - Color_B930EA2C: {r: 0.27266523, g: 0.3679245, b: 0.26900142, a: 1}
     - _BaseColor: {r: 0.13817179, g: 0.21698093, b: 0.17922094, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.13817176, g: 0.2169809, b: 0.17922091, a: 1}
-    - _ColorA: {r: 0.032707367, g: 0.14150941, b: 0.032707367, a: 1}
-    - _ColorB: {r: 0.16981131, g: 0.15515308, b: 0.02322891, a: 1}
-    - _DepthColor: {r: 0.05660376, g: 0.11320752, b: 0, a: 1}
+    - _ColorA: {r: 0.18525274, g: 0.21698111, b: 0.18525274, a: 1}
+    - _ColorB: {r: 0.2138672, g: 0.2264151, b: 0.16981132, a: 1}
+    - _DepthColor: {r: 0.35473478, g: 0.3679245, b: 0.26900142, a: 1}
     - _DiffusionProfileAsset: {r: -3.110872e-17, g: -1.8157844e+22, b: 8.936132e+29,
         a: 1.5976006e-12}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
@@ -269,9 +269,9 @@ Material:
     - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
-    - _PanDirection: {r: 0.2, g: 0.1, b: 0, a: 0}
+    - _PanDirection: {r: 0.4, g: 0, b: 0, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Stretch: {r: 1.7, g: 0.7, b: 0, a: 0}
+    - _Stretch: {r: 5, g: 3, b: 0, a: 0}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _TransmittanceColor: {r: 1, g: 1, b: 1, a: 1}
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
