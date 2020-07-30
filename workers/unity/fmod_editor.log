@@ -2,13 +2,12 @@
 [LOG] Manager::init                            : maxchannels = 256 studioflags = 00000006 flags 00000000 extradriverdata 0000000000000000.
 [LOG] SystemI::init                            : Initialize version=20007 (107206), maxchannels=256, flags=0x00020000
 [LOG] SystemI::setOutputInternal               : Setting output to 'FMOD WASAPI Output'
-[LOG] OutputWASAPI::init                       : Mix Format (WAVEFORMATEX): wFormatTag=0xFFFE, nChannels=2, nSamplesPerSec=44100, nAvgBytesPerSec=352800, nBlockAlign=8, wBitsPerSample=32, cbSize=22.
+[LOG] OutputWASAPI::init                       : Mix Format (WAVEFORMATEX): wFormatTag=0xFFFE, nChannels=2, nSamplesPerSec=48000, nAvgBytesPerSec=384000, nBlockAlign=8, wBitsPerSample=32, cbSize=22.
 [LOG] OutputWASAPI::init                       : Mix Format (WAVEFORMATEXTENSIBLE): wValidBitsPerSample=32, dwChannelMask=0x00000003, SubFormat=00000003-0000-0010-8000-00AA00389B71.
-[LOG] OutputWASAPI::init                       : Output buffer size: 3760 samples, latency: 0.00ms, period: 10.00ms, DSP buffer: 1024 * 4
-[WRN] SystemI::init                            : Output requires a sample rate of 44100Hz, resampling will occur.
+[LOG] OutputWASAPI::init                       : Output buffer size: 4096 samples, latency: 0.00ms, period: 10.00ms, DSP buffer: 1024 * 4
 [LOG] Thread::initThread                       : Init FMOD stream thread. Priority: 2, Stack Size: 98304, Semaphore: No, Sleep Time: 10, Looping: Yes.
 [LOG] Thread::initThread                       : Init FMOD mixer thread. Priority: 3, Stack Size: 81920, Semaphore: No, Sleep Time: 0, Looping: Yes.
-[LOG] AsyncManager::init                       : manager 0000029389F0FA48 isAsync 0 updatePeriod 0.02
+[LOG] AsyncManager::init                       : manager 000001BBDBBC6398 isAsync 0 updatePeriod 0.02
 [LOG] AsyncManager::init                       : done
 [LOG] PlaybackSystem::init                     : 
 [LOG] Thread::initThread                       : Init FMOD Studio sample load thread. Priority: 0, Stack Size: 98304, Semaphore: No, Sleep Time: 1, Looping: No.
@@ -23,128 +22,10 @@
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
 [LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] Thread::initThread                       : Init FMOD profiler thread (recv). Priority: 0, Stack Size: 131072, Semaphore: No, Sleep Time: 0, Looping: No.
-[LOG] Thread::initThread                       : Init FMOD profiler thread (send). Priority: 0, Stack Size: 131072, Semaphore: No, Sleep Time: 0, Looping: No.
-[LOG] LiveUpdate::clientConnected              : client = 00000293AC741928
-[LOG] LiveUpdate::readPacket                   : Recieved init packet from client 00000293AC741928
-[LOG] LiveUpdate::readPacket                   : Accepting init message for client 00000293AC741928
-[LOG] LiveUpdate::transitionToConnected        : 
-[LOG] Manager::sendConnectTimeHash             : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::sendBankHash                 : 
-[LOG] LiveUpdate::acceptInitPacket             : Client 00000293AC741928 connected, entering connected state
-[LOG] Manager::receiveLiveUpdateBank           : Received live update bank path: fmod:///remote/C:/Users/dwuer/AppData/Local/FMOD Studio/UnsavedProjects/Hotswap-VaHUhT/hotswap_0.bank
-[LOG] ProfileRemoteFile::fileOpen              : Attemping to open remote file 'C:/Users/dwuer/AppData/Local/FMOD Studio/UnsavedProjects/Hotswap-VaHUhT/hotswap_0.bank'
-[LOG] Manager::readBank                        : fileversion = 125, compatVersion = 119 (oldest = 44, newest = 125)
-[LOG] SoundI::release                          :  (000002906C9C7578)
-[LOG] SoundI::release                          :     LeyLineCaptureBASS02 (00000292295984A8)
-[LOG] SystemI::createSoundInternal             : Create name='fmod:///remote/D:/UnityProjects/LeyLine/gdk-unity-project/workers/unity/FMOD/LeyLine/Assets/LeyLineCaptureBASS02.mp3', mode=0x0200C202
-[LOG] SystemI::createSoundInternal             : exinfo->cbsize             = 224
-[LOG] SystemI::createSoundInternal             : exinfo->initialseekpostype = 1
-[LOG] ProfileRemoteFile::fileOpen              : Attemping to open remote file 'D:/UnityProjects/LeyLine/gdk-unity-project/workers/unity/FMOD/LeyLine/Assets/LeyLineCaptureBASS02.mp3'
-[LOG] SystemI::DSPCodecPoolRegister            : register codec pool for pool type 3
-[LOG] SystemI::createSoundInternal             : Sample 0/0: name='(null)', format=2, channels=2, frequency=44100, lengthbytes=73141, lengthpcm=201600, pcmblocksize=1152, loopstart=0, loopend=0, mode=0x00000000, channelmask=0x00000000, channelorder=0, peakvolume=0.000000.
-[LOG] SystemI::createSound                     : filename = FMOD\LeyLine\Build\Desktop/Environment.bank : mode 02010082
-[LOG] SystemI::createSound                     : FMOD_NONBLOCKING specified.  Putting into queue to be opened asynchronously!
-[LOG] SystemI::createSound                     : setdata soundi = 000002922F1F9108 : node = 000002907672F960
-[LOG] SystemI::createSound                     : add node to async list : head = 000002922AD59058.  list count = 0
-[LOG] AsyncThread::threadFunc                  : Starting Asynchronous operation on sound 000002922F1F9108
-[LOG] SystemI::createSoundInternal             :     Create name='FMOD\LeyLine\Build\Desktop/Environment.bank', mode=0x02010082
-[LOG] SystemI::createSoundInternal             :     exinfo->cbsize             = 224
-[LOG] SystemI::createSoundInternal             :     exinfo->length             = 1382144
-[LOG] SystemI::createSoundInternal             :     exinfo->fileoffset         = 5888
-[LOG] SystemI::createSoundInternal             :     exinfo->numsubsounds       = 1
-[LOG] SystemI::createSoundInternal             :     exinfo->inclusionlist      = 000002907672FA70
-[LOG] SystemI::createSoundInternal             :     exinfo->inclusionlistnum   = 1
-[LOG] SystemI::createSoundInternal             :     exinfo->suggestedsoundtype = 5
-[LOG] SystemI::createSoundInternal             :     exinfo->initialseekpostype = 1
-[LOG] SystemI::createSoundInternal             :     Stream 0/1: name='swamp-sounds', format=2, channels=2, frequency=48000, lengthbytes=1257504, lengthpcm=4396094, pcmblocksize=0, loopstart=0, loopend=0, mode=0x00000000, channelmask=0x00000000, channelorder=0, peakvolume=0.258881.
-[LOG] AsyncThread::threadFunc                  : Finished Asynchronous operation on sound 000002922F1F9108
-[LOG] SoundI::getSubSound                      : sound 000002922F1F9108.  Subsound index 0 / 1
-[LOG] SoundI::release                          : swamp-sounds (000002922F1F9E88)
-[LOG] SoundI::release                          :     swamp-sounds (00000292295972C8)
-[LOG] SoundI::release                          :     swamp-sounds (0000029076AC8D38)
-[LOG] SystemI::createSound                     : filename = FMOD\LeyLine\Build\Desktop/Environment.bank : mode 02010082
-[LOG] SystemI::createSound                     : FMOD_NONBLOCKING specified.  Putting into queue to be opened asynchronously!
-[LOG] SystemI::createSound                     : setdata soundi = 000002922D987208 : node = 0000029389364D60
-[LOG] SystemI::createSound                     : add node to async list : head = 000002922AD59058.  list count = 0
-[LOG] AsyncThread::threadFunc                  : Starting Asynchronous operation on sound 000002922D987208
-[LOG] SystemI::createSoundInternal             :     Create name='FMOD\LeyLine\Build\Desktop/Environment.bank', mode=0x02010082
-[LOG] SystemI::createSoundInternal             :     exinfo->cbsize             = 224
-[LOG] SystemI::createSoundInternal             :     exinfo->length             = 1382144
-[LOG] SystemI::createSoundInternal             :     exinfo->fileoffset         = 5888
-[LOG] SystemI::createSoundInternal             :     exinfo->numsubsounds       = 1
-[LOG] SystemI::createSoundInternal             :     exinfo->inclusionlist      = 0000029389364E70
-[LOG] SystemI::createSoundInternal             :     exinfo->inclusionlistnum   = 1
-[LOG] SystemI::createSoundInternal             :     exinfo->suggestedsoundtype = 5
-[LOG] SystemI::createSoundInternal             :     exinfo->initialseekpostype = 1
-[LOG] SystemI::createSoundInternal             :     Stream 0/1: name='swamp-sounds', format=2, channels=2, frequency=48000, lengthbytes=1257504, lengthpcm=4396094, pcmblocksize=0, loopstart=0, loopend=0, mode=0x00000000, channelmask=0x00000000, channelorder=0, peakvolume=0.258881.
-[LOG] AsyncThread::threadFunc                  : Finished Asynchronous operation on sound 000002922D987208
-[LOG] SoundI::getSubSound                      : sound 000002922D987208.  Subsound index 0 / 1
-[LOG] SoundI::release                          : swamp-sounds (000002922F1F9108)
-[LOG] SoundI::release                          :     swamp-sounds (00000292295953E8)
-[LOG] SoundI::release                          :     swamp-sounds (0000029231A6C858)
-[LOG] SoundI::release                          : swamp-sounds (000002922D987208)
-[LOG] SoundI::release                          :     swamp-sounds (0000029229597E28)
-[LOG] SoundI::release                          :     swamp-sounds (00000290767FA788)
-[LOG] SoundI::release                          :  (00000293596D20E8)
-[LOG] SoundI::release                          :     ExplosionDebris1 (000002922AD57508)
-[LOG] SoundI::release                          :  (00000293596D1F78)
-[LOG] SoundI::release                          :     ExplosionDebris2 (000002922AD59248)
-[LOG] SoundI::release                          :  (00000293596D1E08)
-[LOG] SoundI::release                          :     Thump1 (000002922AD58A28)
-[LOG] SoundI::release                          :  (00000292C1421318)
-[LOG] SoundI::release                          :     Croak1 (000002922AD56668)
-[LOG] SoundI::release                          :  (00000292C14201D8)
-[LOG] SoundI::release                          :     Croak2 (000002922AD59728)
-[LOG] SoundI::release                          :  (00000292C14215F8)
-[LOG] SoundI::release                          :     Croak3 (000002922AD56328)
-[LOG] SoundI::release                          :  (00000292C1420BE8)
-[LOG] SoundI::release                          :     Croak4 (000002922AD564C8)
-[LOG] SoundI::release                          :  (0000029389E008B8)
-[LOG] SoundI::release                          :     FootstepWet1 (000002922AD57028)
-[LOG] SoundI::release                          :  (000002906C9C6E48)
-[LOG] SoundI::release                          :     FootstepWet2 (000002922AD57368)
-[LOG] SoundI::release                          :  (000002906C9C69F8)
-[LOG] SoundI::release                          :     FootstepWet3 (000002922AD56B48)
-[LOG] SoundI::release                          :  (000002906C9C65A8)
-[LOG] SoundI::release                          :     FootstepWet4 (000002922AD571C8)
-[LOG] SoundI::release                          :  (00000292C1421488)
-[LOG] SoundI::release                          :     Tick1 (000002922AD598C8)
-[LOG] SoundI::release                          :  (00000292C14204B8)
-[LOG] SoundI::release                          :     Tick2 (000002922AD59A68)
-[LOG] SoundI::release                          :  (00000292C1420348)
-[LOG] SoundI::release                          :     Tick3 (000002922AD57848)
-[LOG] SoundI::release                          :  (00000292C1420798)
-[LOG] SoundI::release                          :     SwordUnSheathe1 (000002922AD56808)
-[LOG] SoundI::release                          :  (00000292C1420628)
-[LOG] SoundI::release                          :     ManalithLoop (000002922AD59C08)
-[LOG] SoundI::release                          : LeyLineCaptureBASS02.mp3 (0000029229598B28)
-[LOG] Thread::callback                         : FMOD Studio update thread finished.
-[LOG] Thread::callback                         : FMOD Studio bank load thread finished.
-[LOG] ProfileClient::markForDead               : Closing client connection
-[LOG] Profile::disconnectAll                   : Profiler disconnecting all clients
-[LOG] Thread::callback                         : FMOD profiler thread (send) finished.
-[LOG] FMOD_OS_Net_Read                         : Interrupted.[LOG] ProfileClient::recvThreadLoopFunction    : Socket disconnected
-[LOG] Thread::callback                         : FMOD profiler thread (recv) finished.
-[LOG] Thread::callback                         : FMOD Studio sample load thread finished.
-[LOG] LiveUpdate::release                      : 
-[LOG] LiveUpdate::reset                        : Reset connection (reason Disconnected)
-[LOG] Thread::callback                         : FMOD stream thread finished.
-[LOG] Thread::callback                         : FMOD mixer thread finished.
-[LOG] Profile::disconnectAll                   : Profiler disconnecting all clients
-[LOG] SystemI::close                           : Closed.
 [LOG] Thread::callback                         : FMOD Studio bank load thread finished.
 [LOG] Thread::callback                         : FMOD Studio sample load thread finished.
 [LOG] LiveUpdate::release                      : 
 [LOG] LiveUpdate::reset                        : Reset connection (reason Disconnected)
 [LOG] Thread::callback                         : FMOD stream thread finished.
 [LOG] Thread::callback                         : FMOD mixer thread finished.
-[LOG] Thread::callback                         : FMOD nonblocking thread (0) finished.
-[LOG] Thread::callback                         : FMOD file thread finished.
 [LOG] SystemI::close                           : Closed.
