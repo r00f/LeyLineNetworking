@@ -25,7 +25,7 @@ MonoBehaviour:
   - {x: 1, y: 1}
   - {x: 1, y: 3}
   - {x: 1, y: 1}
-  DetailObjectSpawnProbabilities: 64000000140000000a000000
+  DetailObjectSpawnProbabilities: 640000001400000005000000
   DetailObjectRanges:
   - {x: 0, y: 0}
   - {x: 0.5, y: 0.8}
@@ -37,6 +37,8 @@ MonoBehaviour:
   terrain_Name: 
   additionalCost: 0
   yOffset: 0.1
+  cellTerrainYOffset: 0
+  DetailObjectSpawnYOffset: 0
   Walkable: 1
   spawnAllAssets: 0
   probabilityToSpawnNeighbourAsset: 0

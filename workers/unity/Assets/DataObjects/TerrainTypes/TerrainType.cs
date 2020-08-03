@@ -29,6 +29,9 @@ public class TerrainType : ScriptableObject
     public float yOffset;
     [Range(-15.0f, 15.0f)]
     public float cellTerrainYOffset;
+    [Range(-1.0f, 1.0f)]
+    public float DetailObjectSpawnYOffset;
+    public Vector2 DetailObjectSpawnYOffsetMinMax;
     public bool Walkable = true;
     public bool spawnAllAssets = false;
     [Range(0, 100)]

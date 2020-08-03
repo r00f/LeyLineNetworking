@@ -52,13 +52,25 @@ namespace LeyLineHybridECS
             terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
         }
 
+        public void ApplyCellOffset()
+        {
+            pos3D.Value = new Position3D
+            {
+                Value = new Vector3(pos3D.Value.Value.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.Value.Value.z)
+            };
+            //pos3D.Value.y = transform.parent.position.y + height;
+            transform.localPosition = new Vector3(transform.localPosition.x, thisCellsTerrain.yOffset + terrainHeightOffset, transform.localPosition.z);
+        }
+
         //This thing here should be called when a new TerrainType is set
         //Converts all the info stored on that type into what is on the tile and spawns objects
         public void UpdateTerrain()
         {
-
             if (thisCellsTerrain != null)
             {
+
+                terrainHeightOffset = thisCellsTerrain.cellTerrainYOffset;
+
                 pos3D.Value = new Position3D
                 {
                     Value = new Vector3(pos3D.Value.Value.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.Value.Value.z)
