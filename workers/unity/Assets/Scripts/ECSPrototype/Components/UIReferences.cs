@@ -6,6 +6,8 @@ public class UIReferences : MonoBehaviour
 {
     public Canvas Canvas;
 
+    public GameObject UIMainPanel;
+
     [Header("EscapeMenu")]
     public EscapeMenu EscapeMenu;
 

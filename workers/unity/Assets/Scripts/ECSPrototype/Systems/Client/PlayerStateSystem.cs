@@ -29,6 +29,7 @@ namespace LeyLineHybridECS
             );
 
             m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Vision.Component>(),
             ComponentType.ReadOnly<HighlightingDataComponent>(),
@@ -75,10 +76,13 @@ namespace LeyLineHybridECS
             var playersState = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
             var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
             var playerVisions = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
+            var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
             #endregion
 
             var gameState = gameStateData[0];
 
+
+            var playerFact = playerFactions[0];
             var playerHigh = playerHighs[0];
             var playerVision = playerVisions[0];
             var playerState = playersState[0];
@@ -95,6 +99,8 @@ namespace LeyLineHybridECS
 
             }
 
+            if (playerCam.playerFaction != playerFact.Faction)
+                playerCam.playerFaction = playerFact.Faction;
 
             if (gameState.CurrentState == GameStateEnum.planning)
             {
@@ -185,6 +191,7 @@ namespace LeyLineHybridECS
             playersWorldID.Dispose();
             playersState.Dispose();
             playerHighs.Dispose();
+            playerFactions.Dispose();
             #endregion
         }
 

@@ -11,7 +11,9 @@
         "Improbable.Gdk.GameObjectCreation",
         "Unity.Transforms",
         "Unity.Timeline",
-        "Improbable.Gdk.BuildSystem"
+        "Improbable.Gdk.BuildSystem",
+        "Cinemachine",
+        "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -20,5 +22,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

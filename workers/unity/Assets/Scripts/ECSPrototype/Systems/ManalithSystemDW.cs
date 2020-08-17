@@ -205,7 +205,7 @@ namespace LeyLineHybridECS
                             if (manalithIsHovered)
                             {
                                 clientData.ManalithHoveredMesh.enabled = true;
-                                clientData.ManalithHoveredMesh.material.SetColor("_BaseColor", meshColor.LerpColor);
+                                clientData.ManalithHoveredMesh.material.SetColor("_UnlitColor", meshColor.LerpColor);
                             }
                             else
                             {

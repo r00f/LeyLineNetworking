@@ -50,6 +50,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Helper Classes
@@ -59,7 +61,8 @@ public class Moba_Camera_Requirements
 	// Objects that are requirements for the script to work
 	public Transform pivot 	= null;
 	public Transform offset = null;
-	public Camera camera 	= null;
+	public CinemachineVirtualCamera virtualCam 	= null;
+    
 }
 
 [System.Serializable]
@@ -197,6 +200,8 @@ public class Moba_Camera_Settings_Zoom {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Moba_Camera Class
 public class Moba_Camera : MonoBehaviour {
+
+    public uint playerFaction = 0;
 	// Use fixed update
 	public bool useFixedUpdate			= false;
 	
@@ -253,7 +258,7 @@ public class Moba_Camera : MonoBehaviour {
         //canvas.worldCamera = requirements.camera;
         heroTransform = GetComponent<HeroTransform>();
 		
-		if(!requirements.pivot || !requirements.offset || !requirements.camera) {
+		if(!requirements.pivot || !requirements.offset || !requirements.virtualCam) {
 			string missingRequirements = "";
 			if(requirements.pivot == null) {
 				missingRequirements += " / Pivot";
@@ -265,7 +270,7 @@ public class Moba_Camera : MonoBehaviour {
 				this.enabled = false;
 			}
 			
-			if(requirements.camera == null) {
+			if(requirements.virtualCam == null) {
 				missingRequirements += " / Camera";
 				this.enabled = false;
 			}
@@ -617,7 +622,7 @@ public class Moba_Camera : MonoBehaviour {
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Get Variables from outside script
-	public Camera GetCamera() {
-		return requirements.camera;
+	public CinemachineVirtualCamera GetCamera() {
+		return requirements.virtualCam;
 	}
 }

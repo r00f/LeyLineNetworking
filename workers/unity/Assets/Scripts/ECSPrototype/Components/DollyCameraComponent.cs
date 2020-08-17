@@ -1,0 +1,118 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using Cinemachine;
+using System.Linq;
+using Generic;
+using Unity.Entities;
+using UnityEngine.Rendering.HighDefinition;
+
+public class DollyCameraComponent : MonoBehaviour
+{
+    [SerializeField]
+    CinemachineVirtualCamera dollyCam;
+    [SerializeField]
+    CinemachineBrain cameraBrain;
+    [SerializeField]
+    float UIDisplayDelatTime;
+    [SerializeField]
+    float decalProjectorLerpInSpeed;
+    [SerializeField]
+    DecalProjector decalProjector;
+    [SerializeField]
+    UIReferences uiReferences;
+    [SerializeField]
+    AnimationCurve speedCurve;
+    [SerializeField]
+    uint pathEndOffset;
+
+    float cameraSpeed;
+    float distancePercentage;
+    uint playerFaction = 0;
+    CinemachineTrackedDolly trackedDolly;
+    CinemachineSmoothPath smoothPath;
+    List<CinemachineSmoothPath.Waypoint> pathWaypoints;
+    Moba_Camera playerCam;
+    bool directionSet;
+
+
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        trackedDolly = dollyCam.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachineTrackedDolly;
+        smoothPath = trackedDolly.m_Path as CinemachineSmoothPath;
+        pathWaypoints = smoothPath.m_Waypoints.ToList();
+        trackedDolly.m_PathPosition = 0;
+        dollyCam.Priority = 11;
+        /*
+        Debug.Log("REVERSECAMPATH");
+        pathWaypoints.Reverse();
+        smoothPath.m_Waypoints = pathWaypoints.ToArray();
+        */
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (GameObject.FindGameObjectWithTag("Player"))
+        {
+            playerCam = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Moba_Camera>();
+        }
+        if (!playerCam)
+            return;
+
+        if(playerCam.playerFaction != 0 && playerFaction == 0)
+        {
+
+            if (pathWaypoints.Count != 0)
+            {
+                //if faction is odd, reverse path
+                if ((playerCam.playerFaction & 1) == 0)
+                {
+                    Debug.Log("REVERSECAMPATH");
+                    pathWaypoints.Reverse();
+                    smoothPath.m_Waypoints = pathWaypoints.ToArray();
+                    smoothPath.InvalidateDistanceCache();
+                }
+
+                playerFaction = playerCam.playerFaction;
+               
+                directionSet = true;
+            }
+
+        }
+        
+        if(smoothPath.m_Waypoints.Length != 0 && directionSet)
+        {
+            if (trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset)
+            {
+                //reach end of path start transition to mobaCam
+                dollyCam.Priority = 9;
+                decalProjector.fadeFactor += decalProjectorLerpInSpeed * Time.deltaTime;
+
+                if(UIDisplayDelatTime > 0)
+                    UIDisplayDelatTime -= Time.deltaTime;
+                else if(!cameraBrain.IsBlending)
+                {
+                    uiReferences.UIMainPanel.SetActive(true);
+                }
+            }
+            else
+            {
+                //path movement lock player cam
+                distancePercentage = trackedDolly.m_PathPosition / smoothPath.m_Waypoints.Length;
+                cameraSpeed = speedCurve.Evaluate(distancePercentage);
+
+
+                uiReferences.UIMainPanel.SetActive(false);
+                playerCam.settings.cameraLocked = true;
+                trackedDolly.m_PathPosition += cameraSpeed * Time.deltaTime;
+
+            }
+
+            //if(trackedDolly.m_PathPosition < smoothPath.m_Waypoints.Length)
+
+        }
+    }
+}
