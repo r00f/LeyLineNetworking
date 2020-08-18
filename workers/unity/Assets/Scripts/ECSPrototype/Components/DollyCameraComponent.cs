@@ -31,7 +31,7 @@ public class DollyCameraComponent : MonoBehaviour
     Vector2 mapTitleStartEndPoints;
     [SerializeField]
     TextMesh mapTitleTextMesh;
-
+    [SerializeField]
     float cameraSpeed;
     float distancePercentage;
     uint playerFaction = 0;
@@ -40,6 +40,8 @@ public class DollyCameraComponent : MonoBehaviour
     List<CinemachineSmoothPath.Waypoint> pathWaypoints;
     Moba_Camera playerCam;
     bool directionSet;
+    [SerializeField]
+    bool endPath;
 
 
 
@@ -52,12 +54,6 @@ public class DollyCameraComponent : MonoBehaviour
         trackedDolly.m_PathPosition = 0;
         dollyCam.Priority = 11;
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
-
-        /*
-        Debug.Log("REVERSECAMPATH");
-        pathWaypoints.Reverse();
-        smoothPath.m_Waypoints = pathWaypoints.ToArray();
-        */
     }
 
     // Update is called once per frame
@@ -70,11 +66,8 @@ public class DollyCameraComponent : MonoBehaviour
         if (!playerCam)
             return;
 
-
-
-        if(playerCam.playerFaction != 0 && playerFaction == 0)
+        if (playerCam.playerFaction != 0 && playerFaction == 0)
         {
-
             if (pathWaypoints.Count != 0)
             {
                 //if faction is odd, reverse path
@@ -88,48 +81,68 @@ public class DollyCameraComponent : MonoBehaviour
                 }
 
                 playerFaction = playerCam.playerFaction;
-               
+
                 directionSet = true;
             }
 
         }
 
-
-        
-        if(smoothPath.m_Waypoints.Length != 0 && directionSet)
+        if(directionSet)
         {
-            if (trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset)
+            if (smoothPath.m_Waypoints.Length != 0)
             {
-                //reach end of path start transition to mobaCam
-                dollyCam.Priority = 9;
-                decalProjector.fadeFactor += decalProjectorLerpInSpeed * Time.deltaTime;
-
-                if(UIDisplayDelatTime > 0)
-                    UIDisplayDelatTime -= Time.deltaTime;
-                else if(!cameraBrain.IsBlending)
+                if (trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset || Input.anyKeyDown)
                 {
-                    uiReferences.UIMainPanel.SetActive(true);
+                    endPath = true;
                 }
+            }
+
+            if (!endPath)
+            {
+                MoveCameraAlongDollyPath();
             }
             else
             {
-                if(trackedDolly.m_PathPosition >= mapTitleStartEndPoints.x && trackedDolly.m_PathPosition <= mapTitleStartEndPoints.y)
-                {
-                    mapTitleTextMesh.color += new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
-                }
-                else if(mapTitleTextMesh.color.a != 0)
-                {
-                    mapTitleTextMesh.color -= new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
-                }
-
-                //path movement lock player cam
-                distancePercentage = trackedDolly.m_PathPosition / smoothPath.m_Waypoints.Length;
-                cameraSpeed = speedCurve.Evaluate(distancePercentage);
-                uiReferences.UIMainPanel.SetActive(false);
-                playerCam.settings.cameraLocked = true;
-                trackedDolly.m_PathPosition += cameraSpeed * Time.deltaTime;
-
+                TransitionToPlayerCamera();
             }
         }
     }
+
+    void MoveCameraAlongDollyPath()
+    {
+        if (trackedDolly.m_PathPosition >= mapTitleStartEndPoints.x && trackedDolly.m_PathPosition <= mapTitleStartEndPoints.y)
+        {
+            mapTitleTextMesh.color += new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
+        }
+        else if (mapTitleTextMesh.color.a != 0)
+        {
+            mapTitleTextMesh.color -= new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
+        }
+
+        //path movement lock player cam
+        distancePercentage = trackedDolly.m_PathPosition / smoothPath.m_Waypoints.Length;
+        cameraSpeed = speedCurve.Evaluate(distancePercentage);
+        uiReferences.UIMainPanel.SetActive(false);
+        playerCam.settings.cameraLocked = true;
+        trackedDolly.m_PathPosition += cameraSpeed * Time.deltaTime;
+    }
+
+    void TransitionToPlayerCamera()
+    {
+        if (mapTitleTextMesh.color.a != 0)
+        {
+            mapTitleTextMesh.color -= new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
+        }
+        //reach end of path start transition to mobaCam
+        dollyCam.Priority = 9;
+        decalProjector.fadeFactor += decalProjectorLerpInSpeed * Time.deltaTime;
+
+        if (UIDisplayDelatTime > 0)
+            UIDisplayDelatTime -= Time.deltaTime;
+        else if (!cameraBrain.IsBlending)
+        {
+            uiReferences.UIMainPanel.SetActive(true);
+        }
+    }
+
 }
