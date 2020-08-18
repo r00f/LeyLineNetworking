@@ -18,6 +18,8 @@ public class DollyCameraComponent : MonoBehaviour
     [SerializeField]
     float decalProjectorLerpInSpeed;
     [SerializeField]
+    float mapTitleLerpSpeed;
+    [SerializeField]
     DecalProjector decalProjector;
     [SerializeField]
     UIReferences uiReferences;
@@ -25,6 +27,10 @@ public class DollyCameraComponent : MonoBehaviour
     AnimationCurve speedCurve;
     [SerializeField]
     uint pathEndOffset;
+    [SerializeField]
+    Vector2 mapTitleStartEndPoints;
+    [SerializeField]
+    TextMesh mapTitleTextMesh;
 
     float cameraSpeed;
     float distancePercentage;
@@ -45,6 +51,8 @@ public class DollyCameraComponent : MonoBehaviour
         pathWaypoints = smoothPath.m_Waypoints.ToList();
         trackedDolly.m_PathPosition = 0;
         dollyCam.Priority = 11;
+        mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
+
         /*
         Debug.Log("REVERSECAMPATH");
         pathWaypoints.Reverse();
@@ -62,6 +70,8 @@ public class DollyCameraComponent : MonoBehaviour
         if (!playerCam)
             return;
 
+
+
         if(playerCam.playerFaction != 0 && playerFaction == 0)
         {
 
@@ -71,6 +81,7 @@ public class DollyCameraComponent : MonoBehaviour
                 if ((playerCam.playerFaction & 1) == 0)
                 {
                     Debug.Log("REVERSECAMPATH");
+                    mapTitleTextMesh.transform.eulerAngles = mapTitleTextMesh.transform.eulerAngles + new Vector3(0, 180, 0);
                     pathWaypoints.Reverse();
                     smoothPath.m_Waypoints = pathWaypoints.ToArray();
                     smoothPath.InvalidateDistanceCache();
@@ -82,6 +93,8 @@ public class DollyCameraComponent : MonoBehaviour
             }
 
         }
+
+
         
         if(smoothPath.m_Waypoints.Length != 0 && directionSet)
         {
@@ -100,19 +113,23 @@ public class DollyCameraComponent : MonoBehaviour
             }
             else
             {
+                if(trackedDolly.m_PathPosition >= mapTitleStartEndPoints.x && trackedDolly.m_PathPosition <= mapTitleStartEndPoints.y)
+                {
+                    mapTitleTextMesh.color += new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
+                }
+                else if(mapTitleTextMesh.color.a != 0)
+                {
+                    mapTitleTextMesh.color -= new Color(0, 0, 0, Time.deltaTime * mapTitleLerpSpeed);
+                }
+
                 //path movement lock player cam
                 distancePercentage = trackedDolly.m_PathPosition / smoothPath.m_Waypoints.Length;
                 cameraSpeed = speedCurve.Evaluate(distancePercentage);
-
-
                 uiReferences.UIMainPanel.SetActive(false);
                 playerCam.settings.cameraLocked = true;
                 trackedDolly.m_PathPosition += cameraSpeed * Time.deltaTime;
 
             }
-
-            //if(trackedDolly.m_PathPosition < smoothPath.m_Waypoints.Length)
-
         }
     }
 }
