@@ -54,6 +54,7 @@ public class DollyCameraComponent : MonoBehaviour
         trackedDolly.m_PathPosition = 0;
         dollyCam.Priority = 11;
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
+        uiReferences.UIMainPanel.SetActive(false);
     }
 
     // Update is called once per frame
@@ -63,7 +64,7 @@ public class DollyCameraComponent : MonoBehaviour
         {
             playerCam = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Moba_Camera>();
         }
-        if (!playerCam)
+        if (!playerCam || uiReferences.StartupPanel.activeSelf)
             return;
 
         if (playerCam.playerFaction != 0 && playerFaction == 0)
@@ -73,7 +74,7 @@ public class DollyCameraComponent : MonoBehaviour
                 //if faction is odd, reverse path
                 if ((playerCam.playerFaction & 1) == 0)
                 {
-                    Debug.Log("REVERSECAMPATH");
+                    //Debug.Log("REVERSECAMPATH");
                     mapTitleTextMesh.transform.eulerAngles = mapTitleTextMesh.transform.eulerAngles + new Vector3(0, 180, 0);
                     pathWaypoints.Reverse();
                     smoothPath.m_Waypoints = pathWaypoints.ToArray();

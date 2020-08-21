@@ -66,7 +66,7 @@ public class MouseStateSystem : JobComponentSystem
     {
         if (m_AuthoritativePlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
         {
-            Debug.Log("AuthPlayerCount = 0");
+            //Debug.Log("AuthPlayerCount = 0");
             return inputDeps;
         }
 

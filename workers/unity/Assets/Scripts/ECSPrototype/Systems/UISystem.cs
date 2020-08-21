@@ -9,6 +9,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 
 namespace LeyLineHybridECS
 {
@@ -83,7 +84,7 @@ namespace LeyLineHybridECS
         {
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
             //UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
-            UIRef.ReadyButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.ready); });
+            UIRef.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.CacelGraceTime); });
 
             for (int bi = 0; bi < UIRef.Actions.Count; bi++)
             {
@@ -156,7 +157,7 @@ namespace LeyLineHybridECS
             }
 
             inButton.UnitId = (int)inUnitId;
-            inButton.TurnStepBauble.color = settings.TurnStepColors[inButton.ExecuteStepIndex];
+            inButton.TurnStepBauble.color = settings.TurnStepColors[inButton.ExecuteStepIndex + 1];
 
             return inButton;
         }
@@ -186,6 +187,7 @@ namespace LeyLineHybridECS
             #region Initialize
             if (gameState.CurrentState != GameStateEnum.waiting_for_players)
             {
+                //RETARDED IF REQUIRES STARTUPPANEL TO BE ACTIVE TO WORK
                 if (UIRef.StartupPanel.activeSelf)
                 {
                     if (!UIRef.MatchReadyPanel.activeSelf)
@@ -201,6 +203,9 @@ namespace LeyLineHybridECS
                         switch (authPlayersFaction[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
+                                UIRef.FriendlyColor = settings.FactionColors[1];
+                                UIRef.EnemyColor = settings.FactionColors[2];
+                                UIRef.ManaConnector.color = settings.FactionColors[1];
                                 UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[1];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[1];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[1];
@@ -208,11 +213,45 @@ namespace LeyLineHybridECS
 
                                 break;
                             case TeamColorEnum.red:
+                                UIRef.FriendlyColor = settings.FactionColors[2];
+                                UIRef.EnemyColor = settings.FactionColors[1];
+                                UIRef.ManaConnector.color = settings.FactionColors[2];
                                 UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[2];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[2];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[2];
                                 UIRef.SAEnergyFill.color = settings.FactionColors[2];
                                 break;
+                        }
+
+                        UIRef.FriendlyReady.PlayerColorImage.color = UIRef.FriendlyColor;
+                        UIRef.FriendlyReadyLight.color = UIRef.FriendlyColor;
+                        UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
+                        UIRef.FriendlyRope.color = UIRef.FriendlyColor;
+
+                        UIRef.EnemyReady.PlayerColorImage.color = UIRef.EnemyColor;
+                        UIRef.EnemyReadyLight.color = UIRef.EnemyColor;
+                        UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
+                        UIRef.EnemyRope.color = UIRef.EnemyColor;
+
+                        UIRef.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
+                        UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
+                        UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
+
+                        var fBurst = UIRef.FriendlyReadyBurstPS.main;
+                        fBurst.startColor = UIRef.FriendlyColor;
+                        var eBurst = UIRef.EnemyReadyBurstPS.main;
+                        eBurst.startColor = UIRef.EnemyColor;
+
+                        foreach (ParticleSystem p in UIRef.FriendlyFillBarParticle.ParticleSystems)
+                        {
+                            var main = p.main;
+                            main.startColor = UIRef.FriendlyColor;
+                        }
+
+                        foreach (ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
+                        {
+                            var main = p.main;
+                            main.startColor = UIRef.EnemyColor;
                         }
 
                         UIRef.StartupPanel.SetActive(false);
@@ -237,11 +276,12 @@ namespace LeyLineHybridECS
                 }
             }
 
-            
 
-            for(int i = 0; i < UIRef.SmallWheelColoredParts.Count; i++)
+            //RESETTING ALL THE COLORS ALL THE TIME RETARDATION
+        
+            for (int i = 0; i < UIRef.SmallWheelColoredParts.Count; i++)
             {
-                UIRef.SmallWheelColoredParts[i].color = settings.TurnStepColors[i];
+                UIRef.SmallWheelColoredParts[i].color = settings.TurnStepColors[i + 1];
             }
 
             for (int i = 0; i < UIRef.BigWheelColoredParts.Count; i++)
@@ -261,41 +301,65 @@ namespace LeyLineHybridECS
                     if (UIRef.TurnWheelBig.eulerAngles.z < 360 - rOffset && UIRef.TurnWheelBig.eulerAngles.z > 180)
                     {
                         UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
                     }
                     else if (UIRef.TurnWheelBig.eulerAngles.z > rOffset && UIRef.TurnWheelBig.eulerAngles.z < 180)
                     {
                         UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
-                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
                     }
                     break;
                 case GameStateEnum.interrupt:
+                    
+                    if(UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.interruptFired)
+                    {
+                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
+                        UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.interruptFired;
+                    }
+
+
                     ClearSelectedActionToolTip();
                     if (UIRef.TurnWheelBig.eulerAngles.z < 78.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 78.75f + rOffset)
                     {
                         UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
                     }
                     break;
                 case GameStateEnum.attack:
+
+                    if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.attackFired)
+                    {
+                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
+                        UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.attackFired;
+                    }
+
                     if (UIRef.TurnWheelBig.eulerAngles.z < 146.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 146.25f + rOffset)
                     {
                         UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
                     }
                     break;
                 case GameStateEnum.move:
+                    if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.moveFired)
+                    {
+                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
+                        UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.moveFired;
+                    }
+
                     if (UIRef.TurnWheelBig.eulerAngles.z < 213.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 213.75f + rOffset)
                     {
                         UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
                     }
                     break;
                 case GameStateEnum.skillshot:
+                    if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.skillshotFired)
+                    {
+                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
+                        UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
+                    }
                     if (UIRef.TurnWheelBig.eulerAngles.z < 280.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 280.25f + rOffset)
                     {
                         UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                        UIRef.TurnWheelSmol.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
                     }
                     break;
             }
@@ -710,13 +774,13 @@ namespace LeyLineHybridECS
                             if (actions.LockedAction.Index < stats.Actions.Count)
                             {
                                 display.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
-                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.Actions[actions.LockedAction.Index].ActionExecuteStep];
+                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
                             }
                             else
                             {
                                 int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
                                 display.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
-                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.SpawnActions[spawnactionindex].ActionExecuteStep];
+                                display.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
                             }
                             display.gameObject.SetActive(true);
                         }
@@ -735,18 +799,18 @@ namespace LeyLineHybridECS
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
-                if (UIRef.ReadyButton.interactable)
+                if (UIRef.GOButtonScript.Button.interactable)
                 {
-                    UIRef.ReadyButton.interactable = false;
+                    UIRef.GOButtonScript.Button.interactable = false;
                 }
             }
             else
             {
                 HandleKeyCodeInput();
 
-                if (!UIRef.ReadyButton.interactable)
+                if (!UIRef.GOButtonScript.Button.interactable)
                 {
-                    UIRef.ReadyButton.interactable = true;
+                    UIRef.GOButtonScript.Button.interactable = true;
                 }
 
                 //energyFill.fillAmount = Mathf.SmoothDamp(energyFill.fillAmount, currentEnergy / maxEnergy, ref ayy, 1f);
@@ -796,47 +860,130 @@ namespace LeyLineHybridECS
                 }
             }
 
+            UIRef.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
+
             float outSpeed = UIRef.ReadyOutSpeed * Time.DeltaTime;
             float inSpeed = UIRef.ReadyInSpeed * Time.DeltaTime;
 
             //all players
             Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
             {
-                if (faction.TeamColor == TeamColorEnum.blue)
+                if (playerState.CurrentState == PlayerStateEnum.ready)
                 {
-                    //remove scuffed hardcoded position checks
+                    UIRef.GOButtonScript.SetLightsToPlayerColor(UIRef.FriendlyColor);
 
-                    if (playerState.CurrentState == PlayerStateEnum.ready)
+                    if(authPlayerFaction == faction.Faction)
                     {
-                        if (UIRef.BlueReady.Rect.anchoredPosition.x > UIRef.BlueReady.StartPosition.x - UIRef.BlueReady.SlideOffset.x)
+                        if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.readyFired && gameState.CurrentState == GameStateEnum.planning)
                         {
-                            UIRef.BlueReady.Rect.Translate(new Vector3(0, -outSpeed, 0));
+                            FireStepChangedEffects("Waiting", UIRef.FriendlyColor);
+                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
+                        }
+
+                        if (UIRef.FriendlyReady.Rect.anchoredPosition.y < UIRef.FriendlyReady.StartPosition.y + UIRef.FriendlyReady.SlideOffset.y)
+                        {
+                            UIRef.FriendlyReady.Rect.Translate(new Vector3(0, outSpeed, 0));
+                        }
+                        else
+                        {
+                            if(!UIRef.FriendlyReadyBurstPS.isPlaying)
+                            {
+                                //UIRef.FriendlyReadyBurstPS.time = 0;
+                                UIRef.FriendlyReadyBurstPS.Play();
+                            }
+
+                            UIRef.FriendlyReadyLight.enabled = true;
+                            UIRef.FriendlyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
+
+                            if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
+                            {
+                                foreach (ParticleSystem p in UIRef.FriendlyFillBarParticle.ParticleSystems)
+                                {
+                                    p.time = 0;
+                                    p.Stop();
+                                }
+
+                            }
+                            else
+                            {
+                                foreach (ParticleSystem p in UIRef.FriendlyFillBarParticle.ParticleSystems)
+                                {
+                                    p.Play();
+                                }
+                            }
+
+                            UIRef.FriendlyFillBarParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyFillBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyFillBarParticle.Rect.anchoredPosition.y);
+                            UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                         }
                     }
-                    else if (gameState.CurrentState == GameStateEnum.planning)
+                    else
                     {
-                        if (UIRef.BlueReady.Rect.anchoredPosition.x < UIRef.BlueReady.StartPosition.x)
-                            UIRef.BlueReady.Rect.Translate(new Vector3(0, inSpeed, 0));
-                    }
-                }
-                else if (faction.TeamColor == TeamColorEnum.red)
-                {
-
-                    //MOVE RECTTRANSFORM REDREADY IN Y / X AXIS                    
-                    if (playerState.CurrentState == PlayerStateEnum.ready)
-                    {
-                        if (UIRef.RedReady.Rect.anchoredPosition.y < UIRef.RedReady.StartPosition.y + UIRef.RedReady.SlideOffset.y)
+                        if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.readyFired && gameState.CurrentState == GameStateEnum.planning)
                         {
-                            UIRef.RedReady.Rect.Translate(new Vector3(0, outSpeed, 0));
+                            FireStepChangedEffects("Enemy Waiting", UIRef.EnemyColor);
+                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
+                        }
+
+                        if (!UIRef.EnemyReadyBurstPS.isPlaying)
+                        {
+                            //UIRef.EnemyReadyBurstPS.time = 0;
+                            UIRef.EnemyReadyBurstPS.Play();
+                        }
+
+                        UIRef.EnemyReadyLight.enabled = true;
+
+                        UIRef.EnemyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
+
+                        if(UIRef.EnemyReadySwoosh.fillAmount == 0 || UIRef.EnemyReadySwoosh.fillAmount == 1)
+                        {
+
+                            foreach(ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
+                            {
+                                p.Stop();
+                            }
+                            
+                        }
+                        else
+                        {
+                            UIRef.EnemyFillBarParticle.Rect.anchoredPosition = new Vector2(UIRef.EnemyReadySwoosh.fillAmount * UIRef.EnemyFillBarParticle.ParentRect.sizeDelta.x, UIRef.EnemyFillBarParticle.Rect.anchoredPosition.y);
+                            foreach (ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
+                            {
+                                p.Play();
+                            }
+                        }
+
+                        if (UIRef.EnemyReadySwoosh.fillAmount >= 1 && UIRef.EnemyReady.Rect.anchoredPosition.x > UIRef.EnemyReady.StartPosition.x - UIRef.EnemyReady.SlideOffset.x)
+                        {
+
+                            UIRef.EnemyReady.Rect.Translate(new Vector3(0, -outSpeed, 0));
+                            UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                         }
                     }
-                    else if (gameState.CurrentState == GameStateEnum.planning)
-                    {
-                        if (UIRef.RedReady.Rect.anchoredPosition.y > UIRef.RedReady.StartPosition.y)
-                            UIRef.RedReady.Rect.Translate(new Vector3(0, -inSpeed, 0));
-                    }
-
                 }
+                else if (gameState.CurrentState == GameStateEnum.planning)
+                {
+                    if (authPlayerFaction == faction.Faction)
+                    {
+                        if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
+                        {
+                            FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[(int)gameState.CurrentState -1]);
+                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
+                        }
+
+                        UIRef.FriendlyReadyLight.enabled = false;
+                        UIRef.EnemyReadyLight.enabled = false;
+                        UIRef.FriendlyReadySwoosh.fillAmount -= UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
+                        UIRef.EnemyReadySwoosh.fillAmount -= UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
+                        UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
+
+
+                        if (UIRef.EnemyReady.Rect.anchoredPosition.x < UIRef.EnemyReady.StartPosition.x)
+                            UIRef.EnemyReady.Rect.Translate(new Vector3(0, inSpeed, 0));
+                        if (UIRef.FriendlyReady.Rect.anchoredPosition.y > UIRef.FriendlyReady.StartPosition.y)
+                            UIRef.FriendlyReady.Rect.Translate(new Vector3(0, -inSpeed, 0));
+                    }
+                }
+
             });
             #endregion
 
@@ -862,6 +1009,21 @@ namespace LeyLineHybridECS
             #endregion
         }
 
+        void FireStepChangedEffects(string stateName, Color effectColor)
+        {
+            //SET TEXT COLOR / STRING
+            UIRef.TurnStateText.color = effectColor;
+            UIRef.TurnStateText.text = char.ToUpper(stateName[0]) + stateName.Substring(1);
+            //FIRE PARTICLES
+            foreach (ParticleSystem p in UIRef.CowExhaleParticleSystems)
+            {
+                ParticleSystem.MainModule main = p.main;
+                main.startColor = effectColor;
+                p.time = 0;
+                p.Play();
+            }
+        }
+
         void HandleKeyCodeInput()
         {
             if(Input.GetKeyDown(KeyCode.Q))
@@ -874,7 +1036,7 @@ namespace LeyLineHybridECS
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                UIRef.ReadyButton.onClick.Invoke();
+                UIRef.GOButtonScript.Button.onClick.Invoke();
             }
 
             if (Input.GetKeyDown(KeyCode.Escape))

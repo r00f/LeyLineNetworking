@@ -243,7 +243,7 @@ namespace LeyLineHybridECS
                                 var EventID = manalithFactionChangeEvents[q].EntityId.Id;
                                 if (ID == EventID)
                                 {
-                                    Debug.Log("Got the event, now get the entity id of it??");
+                                    //Debug.Log("Got the event, now get the entity id of it??");
                                     meshColor.ManaLithObject.GainControlSoundEmitter.Play();
                                     foreach (ParticleSystem p in meshColor.ManaLithObject.OneShotParticleSystems)
                                     {
@@ -541,7 +541,7 @@ namespace LeyLineHybridECS
 
             if(isVisibleRef.MiniMapTileInstance.UILineRenderer)
             {
-                Debug.Log("Populate UI Line Renderer Positions");
+                //Debug.Log("Populate UI Line Renderer Positions");
                 //isVisibleRef.MiniMapTileInstance.UILineRenderer.set
                 isVisibleRef.MiniMapTileInstance.UILineRenderer.Points = new Vector2[initData.leyLinePathCoords.Count];
 

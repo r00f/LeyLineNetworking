@@ -80,7 +80,7 @@ public class ActionEffectsSystem : ComponentSystem
 
         if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
         {
-            Debug.Log("OOF");
+            //Debug.Log("OOF");
             playerVisionData.Dispose();
             gameStates.Dispose();
             return;

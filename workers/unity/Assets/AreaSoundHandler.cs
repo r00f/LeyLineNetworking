@@ -36,7 +36,7 @@ public class AreaSoundHandler : MonoBehaviour
         {
             if (other.CompareTag(areaTags[i]))
             {
-                Debug.Log("Player entered area tagged with: " + areaTags[i] + ".");
+                //Debug.Log("Player entered area tagged with: " + areaTags[i] + ".");
                 areaEmitters[i].enabled = true;
             }
         }

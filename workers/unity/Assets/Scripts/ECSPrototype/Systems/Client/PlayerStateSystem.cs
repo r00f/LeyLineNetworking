@@ -32,7 +32,7 @@ namespace LeyLineHybridECS
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Vision.Component>(),
-            ComponentType.ReadOnly<HighlightingDataComponent>(),
+            ComponentType.ReadWrite<HighlightingDataComponent>(),
             ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadWrite<Moba_Camera>()
@@ -80,8 +80,6 @@ namespace LeyLineHybridECS
             #endregion
 
             var gameState = gameStateData[0];
-
-
             var playerFact = playerFactions[0];
             var playerHigh = playerHighs[0];
             var playerVision = playerVisions[0];
@@ -96,16 +94,33 @@ namespace LeyLineHybridECS
                 Vector3 compassRotation = playerCam.PlayerMapTileInstance.TileRect.eulerAngles;
                 compassRotation.z = -playerCam.transform.eulerAngles.y;
                 playerCam.PlayerMapTileInstance.TileRect.eulerAngles = compassRotation;
-
             }
 
             if (playerCam.playerFaction != playerFact.Faction)
                 playerCam.playerFaction = playerFact.Faction;
 
+            var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
+
+            if (updateVisionEvents.Count > 0)
+            {
+                Debug.Log("ResetCancelStateToFalse");
+                playerHigh.CancelState = false;
+            }
+
             if (gameState.CurrentState == GameStateEnum.planning)
             {
                 if (playerState.CurrentState != PlayerStateEnum.ready)
                 {
+                    if (playerHigh.CancelState)
+                    {
+                        if (playerHigh.CancelTime >= 0)
+                            playerHigh.CancelTime -= Time.DeltaTime;
+                        else
+                        {
+                            playerState.CurrentState = PlayerStateEnum.ready;
+                        }
+                    }
+
                     HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
                     Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
@@ -142,12 +157,9 @@ namespace LeyLineHybridECS
                                     playerState.UnitTargets.Remove(unitId.EntityId.Id);
                                 }
                             }
-                            else
+                            else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
                             {
-                                if (playerState.CurrentState != PlayerStateEnum.unit_selected)
-                                {
-                                    playerState.CurrentState = PlayerStateEnum.unit_selected;
-                                }
+                                playerState.CurrentState = PlayerStateEnum.unit_selected;
                             }
                         }
                         else
@@ -165,9 +177,10 @@ namespace LeyLineHybridECS
                         }
                     });
                 }
-                else if (playerState.SelectedUnitId != 0)
+                else
                 {
-                    playerState.SelectedUnitId = 0;
+                    if (playerState.SelectedUnitId != 0)
+                        playerState.SelectedUnitId = 0;
                 }
             }
             else
@@ -184,6 +197,8 @@ namespace LeyLineHybridECS
             }
 
             #region Dispose
+            playerHighs[0] = playerHigh;
+            m_PlayerData.CopyFromComponentDataArray(playerHighs);
             playersState[0] = playerState;
             m_PlayerData.CopyFromComponentDataArray(playersState);
             gameStateData.Dispose();
@@ -212,9 +227,22 @@ namespace LeyLineHybridECS
             });
         }
 
+        public void ResetCancelTimer(float timeToCancel)
+        {
+            var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+            var playerHigh = playerHighs[0];
+
+            playerHigh.CancelTime = timeToCancel;
+            playerHigh.CancelState = !playerHigh.CancelState;
+
+            playerHighs[0] = playerHigh;
+            m_PlayerData.CopyFromComponentDataArray(playerHighs);
+            playerHighs.Dispose();
+        }
+
         public void SetPlayerState(PlayerStateEnum state)
         {
-            //Debug.Log("SetPlayerStateMethodCall");
+
             #region PlayerData
             var playersWorldID = m_PlayerData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
             var playersState = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
@@ -224,7 +252,6 @@ namespace LeyLineHybridECS
             {
                 return;
             }
-
             var playerState = playersState[0];
             
             if(playerState.CurrentState != state)
@@ -232,7 +259,11 @@ namespace LeyLineHybridECS
                 playerState.CurrentState = state;
             }
 
+            Debug.Log("SetPlayerStateMethodCall: " + playerState.CurrentState);
+
+            playerState.CurrentState = playerState.CurrentState;
             playersState[0] = playerState;
+            Debug.Log("SetPlayerStateMethodCallApplied: " + playersState[0].CurrentState);
             #region PlayerData
             m_PlayerData.CopyFromComponentDataArray(playersState);
             playersWorldID.Dispose();

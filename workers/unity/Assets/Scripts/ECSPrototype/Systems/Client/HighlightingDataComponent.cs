@@ -15,6 +15,8 @@ public struct HighlightingDataComponent : IComponentData
     public byte PathLine;
     public bool ShowIngameUI;
     public float InputCooldown;
+    public bool CancelState;
+    public float CancelTime;
     public Vector3f HoveredCoordinate;
     public Vector3f LastHoveredCoordinate;
     public Vector3 HoveredPosition;

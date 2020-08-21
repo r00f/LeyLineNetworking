@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class ReadySlider : MonoBehaviour
 {
+    public Image PlayerColorImage;
     public RectTransform Rect;
     public Vector2 StartPosition;
     public Vector2 SlideOffset;

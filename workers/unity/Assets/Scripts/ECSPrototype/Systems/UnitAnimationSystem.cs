@@ -178,7 +178,7 @@ public class UnitAnimationSystem : ComponentSystem
                             }
                             else
                             {
-                                Debug.Log("Trigger Action Effect: " + animatorComponent.Animator.GetInteger("ActionIndexInt"));
+                                //Debug.Log("Trigger Action Effect: " + animatorComponent.Animator.GetInteger("ActionIndexInt"));
                                 m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform);
                             }
 

@@ -14,6 +14,7 @@ component GameState {
 	float rope_display_time = 8;
 	uint32 winner_faction = 9;
 	generic.Vector2f map_center = 10;
+	uint32 turn_counter = 11;
 }
 
 enum GameStateEnum {

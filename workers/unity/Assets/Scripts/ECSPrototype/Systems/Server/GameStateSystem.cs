@@ -80,12 +80,13 @@ namespace LeyLineHybridECS
                 {
                     case GameStateEnum.waiting_for_players:
 #if UNITY_EDITOR
-                        
+                        //Debug.Log("WaitingForPlayers");
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 2)
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
+                                gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
@@ -97,6 +98,7 @@ namespace LeyLineHybridECS
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
+                                gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
@@ -199,7 +201,10 @@ namespace LeyLineHybridECS
                             });
                             
                             if(m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
+                            {
+                                gameState.TurnCounter++;
                                 gameState.CurrentState = GameStateEnum.calculate_energy;
+                            }
                         }
                         m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
                         break;
@@ -214,6 +219,10 @@ namespace LeyLineHybridECS
                         break;
                 }
 #if UNITY_EDITOR
+                if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
+                {
+                    gameState.CurrentState = GameStateEnum.waiting_for_players;
+                }
 #else
 
                 if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)

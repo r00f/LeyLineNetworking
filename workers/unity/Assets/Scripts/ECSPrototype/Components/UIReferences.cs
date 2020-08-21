@@ -6,6 +6,7 @@ public class UIReferences : MonoBehaviour
 {
     public Canvas Canvas;
 
+    public Animator SlideOutUIAnimator;
     public GameObject UIMainPanel;
 
     [Header("EscapeMenu")]
@@ -17,6 +18,7 @@ public class UIReferences : MonoBehaviour
     public GameObject MatchReadyPanel;
 
     [Header("TopLeftHeroPanel")]
+    public Image ManaConnector;
     public SelectUnitButton SelectHeroButton;
     public Text TopEnergyText;
     public Image TopEnergyFill;
@@ -36,9 +38,7 @@ public class UIReferences : MonoBehaviour
     public GameObject ManalithInfoPanel;
     public GameObject ActionEffectUIPanel;
 
-    [Header("ReadyPanel")]
-    public Button ReadyButton;
-    public Image RopeBar;
+
 
     [Header("UnitPortrait")]
     public GameObject InfoEnabledPanel;
@@ -47,19 +47,6 @@ public class UIReferences : MonoBehaviour
 
     [Header("UnitStats")]
     public Text UnitStats;
-
-    [Header("TurnWheel")]
-    public float WheelRotationSpeed;
-    public RectTransform TurnWheelBig;
-    public RectTransform TurnWheelSmol;
-    public float ReadyOutSpeed;
-    public float ReadyInSpeed;
-    public ReadySlider BlueReady;
-    public ReadySlider RedReady;
-    public List<Image> SmallWheelColoredParts;
-    public List<Image> BigWheelColoredParts;
-    public List<Image> TurnStepFlares;
-
 
     [Header("UnitPortraitInfoPanel")]
     public Text PortraitHealthText;
@@ -122,4 +109,55 @@ public class UIReferences : MonoBehaviour
     [Header("ManaLithUI")]
     public ManalithInfoComponent ManalithIconPrefab;
     public ManalithTooltip ManalithToolTipFab;
+
+    [Header("ReadyPanel")]
+    public float ReadyImpulseLerpSpeed;
+    public Image FriendlyReadyLight;
+    public Image EnemyReadyLight;
+    public Image FriendlyReadySwoosh;
+    public Image EnemyReadySwoosh;
+    public Image FriendlyRope;
+    public Image EnemyRope;
+    public Text TurnStateText;
+    public Animator GOButtonAnimator;
+    public float CacelGraceTime;
+    //public Button GOButton;
+    public GOButton GOButtonScript;
+    public Image RopeBar;
+    [HideInInspector]
+    public Color FriendlyColor;
+    [HideInInspector]
+    public Color EnemyColor;
+    [HideInInspector]
+    public string CurrentStateString;
+
+    [Header("ParticleSystems")]
+    public List<ParticleSystem> CowExhaleParticleSystems;
+    public FillBarParticleComponent FriendlyFillBarParticle;
+    public FillBarParticleComponent EnemyFillBarParticle;
+    public ParticleSystem FriendlyReadyBurstPS;
+    public ParticleSystem EnemyReadyBurstPS;
+
+    [Header("TurnWheel")]
+    public float WheelRotationSpeed;
+    public RectTransform TurnWheelBig;
+    //public RectTransform TurnWheelSmol;
+    public float ReadyOutSpeed;
+    public float ReadyInSpeed;
+    public ReadySlider EnemyReady;
+    public ReadySlider FriendlyReady;
+    public List<Image> SmallWheelColoredParts;
+    public List<Image> BigWheelColoredParts;
+    public List<Image> TurnStepFlares;
+    public UIEffectsFired CurrentEffectsFiredState;
+
+    public enum UIEffectsFired
+    {
+        planning,
+        readyFired,
+        interruptFired,
+        attackFired,
+        moveFired,
+        skillshotFired
+    }
 }
