@@ -108,21 +108,25 @@ namespace LeyLineHybridECS
 #endif
                         break;
                     case GameStateEnum.planning:
-                        if (AllPlayersReady(gameStateWorldIndex.Value) || gameState.CurrentPlanningTime <= 0)
+                        //DEBUGGING INSTA ROPE
+                        #if UNITY_EDITOR
+                        gameState.CurrentRopeTime -= Time.DeltaTime;
+                        #endif
+                        if (AllPlayersReady(gameStateWorldIndex.Value) || gameState.CurrentRopeTime <= 0)
                         {
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.interrupt;
                         }
                         else if (AnyPlayerReady(gameStateWorldIndex.Value))
                         {
-                            gameState.CurrentPlanningTime -= Time.DeltaTime;
+                            gameState.CurrentRopeTime -= Time.DeltaTime;
                         }
                         break;
                     case GameStateEnum.interrupt:
 
                         if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex.Value);
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex.Value, gameState.MinExecuteStepTime);
                         }
                         else
                         {
@@ -137,7 +141,7 @@ namespace LeyLineHybridECS
                     case GameStateEnum.attack:
                         if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex.Value);
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex.Value, gameState.MinExecuteStepTime);
                         }
 
                         else
@@ -154,7 +158,7 @@ namespace LeyLineHybridECS
                     case GameStateEnum.move:
                         if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex.Value);
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex.Value, gameState.MinExecuteStepTime);
                         }
                         else
                         {
@@ -170,7 +174,7 @@ namespace LeyLineHybridECS
                     case GameStateEnum.skillshot:
                         if (gameState.HighestExecuteTime == 0)
                         {
-                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex.Value);
+                            gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex.Value, gameState.MinExecuteStepTime);
                         }
                         else
                         {
@@ -203,13 +207,18 @@ namespace LeyLineHybridECS
                             if(m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
                             {
                                 gameState.TurnCounter++;
+
+                                m_ComponentUpdateSystem.SendEvent(
+                                new GameState.CleanupStateEvent.Event(),
+                                gameStateId.EntityId);
+
                                 gameState.CurrentState = GameStateEnum.calculate_energy;
                             }
                         }
                         m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
                         break;
                     case GameStateEnum.calculate_energy:
-                        gameState.CurrentPlanningTime = gameState.PlanningTime;
+                        gameState.CurrentRopeTime = gameState.RopeTime;
                         gameState.CurrentState = GameStateEnum.planning;
                         break;
                     case GameStateEnum.game_over:
@@ -249,9 +258,9 @@ namespace LeyLineHybridECS
             return b;
         }
 
-        private float HighestExecuteTime(GameStateEnum step, uint gameStateWorldIndex)
+        private float HighestExecuteTime(GameStateEnum step, uint gameStateWorldIndex, float minStepTime)
         {
-            float highestTime = 1f;
+            float highestTime = minStepTime;
 
             Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component unitAction) =>
             {

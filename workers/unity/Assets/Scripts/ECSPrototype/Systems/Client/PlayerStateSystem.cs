@@ -99,14 +99,13 @@ namespace LeyLineHybridECS
             if (playerCam.playerFaction != playerFact.Faction)
                 playerCam.playerFaction = playerFact.Faction;
 
-            var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
+            var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
-            if (updateVisionEvents.Count > 0)
+            if (cleanUpStateEvents.Count > 0)
             {
-                Debug.Log("ResetCancelStateToFalse");
                 playerHigh.CancelState = false;
             }
-
+            
             if (gameState.CurrentState == GameStateEnum.planning)
             {
                 if (playerState.CurrentState != PlayerStateEnum.ready)

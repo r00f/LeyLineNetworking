@@ -17,5 +17,9 @@ public class Settings : ScriptableObject
     public List<Texture2D> ParialColorMasks;
     public GameObject MouseClickPS;
     public GameObject ExplosionDebugSphere;
+
+    [Header("GamePlaySettings")]
+    public float MinimumExecuteTime;
+    public float RopeTime;
     
 }

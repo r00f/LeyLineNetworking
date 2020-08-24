@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   FactionColors:
   - {r: 0.65882355, g: 0.65882355, b: 0.39607847, a: 1}
-  - {r: 0, g: 0.39607847, b: 1, a: 1}
+  - {r: 0, g: 0.5218282, b: 1, a: 1}
   - {r: 1, g: 0, b: 0.015686275, a: 1}
   FactionMapColors:
   - {r: 0.7924528, g: 0.7924528, b: 0.35510856, a: 1}
-  - {r: 0, g: 0.35811377, b: 1, a: 1}
+  - {r: 0, g: 0.52156866, b: 1, a: 1}
   - {r: 1, g: 0, b: 0.015686275, a: 1}
   MapCellColors:
   - {r: 0.5, g: 0.3927378, b: 0.23820755, a: 1}
@@ -57,3 +57,5 @@ MonoBehaviour:
     type: 3}
   ExplosionDebugSphere: {fileID: 3937053955492011579, guid: ab8f5f369440e964fa69633247f76f25,
     type: 3}
+  MinimumExecuteTime: 1.5
+  RopeTime: 25

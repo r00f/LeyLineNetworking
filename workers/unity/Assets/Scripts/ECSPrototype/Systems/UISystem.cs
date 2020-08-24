@@ -184,6 +184,33 @@ namespace LeyLineHybridECS
 
             #endregion
 
+
+            var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+
+            if (cleanUpStateEvents.Count > 0)
+            {
+                Debug.Log("UICleanupEventFromGameState");
+                if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
+                {
+                    FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0]);
+                    UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
+                }
+                //UIRef.FriendlyReadyBurstPS.time = 0;
+                //UIRef.EnemyReadyBurstPS.time = 0;
+                //.FriendlyRope.fillAmount = 0;
+                //UIRef.EnemyRope.fillAmount = 0;
+                //UIRef.EnemyRope.color = UIRef.EnemyColor;
+                //UIRef.FriendlyRope.color = UIRef.FriendlyColor;
+                UIRef.FriendlyReadyDot.enabled = false;
+                UIRef.EnemyReadyDot.enabled = false;
+                UIRef.FriendlyReadySwoosh.fillAmount = 0;
+                UIRef.EnemyReadySwoosh.fillAmount = 0;
+                UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
+                UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
+                UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
+                UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
+            }
+
             #region Initialize
             if (gameState.CurrentState != GameStateEnum.waiting_for_players)
             {
@@ -224,12 +251,12 @@ namespace LeyLineHybridECS
                         }
 
                         UIRef.FriendlyReady.PlayerColorImage.color = UIRef.FriendlyColor;
-                        UIRef.FriendlyReadyLight.color = UIRef.FriendlyColor;
+                        UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
                         UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
                         UIRef.FriendlyRope.color = UIRef.FriendlyColor;
 
                         UIRef.EnemyReady.PlayerColorImage.color = UIRef.EnemyColor;
-                        UIRef.EnemyReadyLight.color = UIRef.EnemyColor;
+                        UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
                         UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
                         UIRef.EnemyRope.color = UIRef.EnemyColor;
 
@@ -309,7 +336,7 @@ namespace LeyLineHybridECS
                     break;
                 case GameStateEnum.interrupt:
                     
-                    if(UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.interruptFired)
+                    if(UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
                     {
                         //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
@@ -823,7 +850,6 @@ namespace LeyLineHybridECS
                 }
             }
 
-
             //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
             //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
             UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
@@ -874,26 +900,29 @@ namespace LeyLineHybridECS
 
                     if(authPlayerFaction == faction.Faction)
                     {
-                        if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.readyFired && gameState.CurrentState == GameStateEnum.planning)
-                        {
-                            FireStepChangedEffects("Waiting", UIRef.FriendlyColor);
-                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
-                        }
-
+                        //Slide out first if friendly
                         if (UIRef.FriendlyReady.Rect.anchoredPosition.y < UIRef.FriendlyReady.StartPosition.y + UIRef.FriendlyReady.SlideOffset.y)
                         {
                             UIRef.FriendlyReady.Rect.Translate(new Vector3(0, outSpeed, 0));
                         }
                         else
                         {
-                            if(!UIRef.FriendlyReadyBurstPS.isPlaying)
+                            if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning)
                             {
-                                //UIRef.FriendlyReadyBurstPS.time = 0;
+                                FireStepChangedEffects("Waiting", UIRef.FriendlyColor);
+                                UIRef.FriendlyReadyDot.enabled = true;
+                                UIRef.FriendlyReadyBurstPS.time = 0;
                                 UIRef.FriendlyReadyBurstPS.Play();
+                                UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
                             }
 
-                            UIRef.FriendlyReadyLight.enabled = true;
                             UIRef.FriendlyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
+
+                            if(UIRef.FriendlyReadySwoosh.fillAmount == 1)
+                            {
+                                UIRef.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                                UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                            }
 
                             if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
                             {
@@ -918,30 +947,23 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.readyFired && gameState.CurrentState == GameStateEnum.planning)
+                        if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning)
                         {
                             FireStepChangedEffects("Enemy Waiting", UIRef.EnemyColor);
+                            UIRef.EnemyReadyDot.enabled = true;
+                            UIRef.EnemyReadyBurstPS.time = 0;
+                            UIRef.EnemyReadyBurstPS.Play();
                             UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
                         }
 
-                        if (!UIRef.EnemyReadyBurstPS.isPlaying)
-                        {
-                            //UIRef.EnemyReadyBurstPS.time = 0;
-                            UIRef.EnemyReadyBurstPS.Play();
-                        }
-
-                        UIRef.EnemyReadyLight.enabled = true;
-
                         UIRef.EnemyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
 
-                        if(UIRef.EnemyReadySwoosh.fillAmount == 0 || UIRef.EnemyReadySwoosh.fillAmount == 1)
+                        if (UIRef.EnemyReadySwoosh.fillAmount == 0 || UIRef.EnemyReadySwoosh.fillAmount == 1)
                         {
-
                             foreach(ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
                             {
                                 p.Stop();
                             }
-                            
                         }
                         else
                         {
@@ -954,7 +976,8 @@ namespace LeyLineHybridECS
 
                         if (UIRef.EnemyReadySwoosh.fillAmount >= 1 && UIRef.EnemyReady.Rect.anchoredPosition.x > UIRef.EnemyReady.StartPosition.x - UIRef.EnemyReady.SlideOffset.x)
                         {
-
+                            UIRef.EnemyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                            UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
                             UIRef.EnemyReady.Rect.Translate(new Vector3(0, -outSpeed, 0));
                             UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                         }
@@ -964,16 +987,6 @@ namespace LeyLineHybridECS
                 {
                     if (authPlayerFaction == faction.Faction)
                     {
-                        if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
-                        {
-                            FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[(int)gameState.CurrentState -1]);
-                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
-                        }
-
-                        UIRef.FriendlyReadyLight.enabled = false;
-                        UIRef.EnemyReadyLight.enabled = false;
-                        UIRef.FriendlyReadySwoosh.fillAmount -= UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
-                        UIRef.EnemyReadySwoosh.fillAmount -= UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
                         UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
 
 
@@ -983,19 +996,63 @@ namespace LeyLineHybridECS
                             UIRef.FriendlyReady.Rect.Translate(new Vector3(0, -inSpeed, 0));
                     }
                 }
-
             });
             #endregion
 
-            if (gameStates[0].CurrentPlanningTime <= gameStates[0].RopeDisplayTime)
+            //Handle Ropes
+            if(gameStates[0].CurrentRopeTime < gameStates[0].RopeTime)
             {
-                UIRef.RopeBar.enabled = true;
-                UIRef.RopeBar.fillAmount = gameStates[0].CurrentPlanningTime / gameStates[0].RopeDisplayTime;
+                UIRef.RopeTimeText.text = "0:" + ((int)gameState.CurrentRopeTime).ToString("D2");
+                UIRef.RopeTimeText.enabled = true;
+
+                if (gameState.CurrentState == GameStateEnum.planning)
+                {
+                    UIRef.EnemyRope.color = UIRef.EnemyColor;
+                    UIRef.FriendlyRope.color = UIRef.FriendlyColor;
+
+                    if (authPlayerState.CurrentState == PlayerStateEnum.ready)
+                    {
+                        if(!playerHigh.CancelState)
+                        {
+                            UIRef.RopeTimeText.color = UIRef.FriendlyColor;
+                            UIRef.EnemyRope.fillAmount = 0;
+                            UIRef.FriendlyRope.fillAmount = 1 - (gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
+                        }
+                    }
+                    else
+                    {
+                        UIRef.RopeTimeText.color = UIRef.EnemyColor;
+                        UIRef.FriendlyRope.fillAmount = 0;
+                        UIRef.EnemyRope.fillAmount = 1 - (gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
+                    }
+                }
+                else
+                {
+                    UIRef.RopeTimeText.enabled = false;
+                    if (UIRef.FriendlyRope.fillAmount < 1 - UIRef.EnemyRope.fillAmount)
+                    {
+                        UIRef.FriendlyRope.fillAmount += Time.DeltaTime * UIRef.RopeEndLerpSpeed;
+                    }
+                    else
+                    {
+                        UIRef.FriendlyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
+                    }
+
+                    if (UIRef.EnemyRope.fillAmount < 1 - UIRef.FriendlyRope.fillAmount)
+                    {
+                        UIRef.EnemyRope.fillAmount += Time.DeltaTime * UIRef.RopeEndLerpSpeed;
+                    }
+                    else
+                    {
+                        UIRef.EnemyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
+                    }
+                }
             }
             else
             {
-                UIRef.RopeBar.enabled = false;
+                UIRef.RopeTimeText.enabled = false;
             }
+                
 
             gameStates.Dispose();
 

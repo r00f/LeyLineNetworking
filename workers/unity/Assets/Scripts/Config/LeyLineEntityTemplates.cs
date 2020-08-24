@@ -11,24 +11,28 @@ using Unit;
 using LeyLineHybridECS;
 using static LeyLineHybridECS.ECSAction;
 using Improbable.Gdk.PlayerLifecycle;
+using UnityEngine;
 
 public static class LeyLineEntityTemplates {
 
     private static readonly List<string> AllWorkerAttributes =
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
+    static Settings settings;
+
     public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter)
     {
+        settings = Resources.Load<Settings>("Settings");
         var gameState = new GameState.Snapshot
         {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
             CalculateWaitTime = .5f,
             CurrentWaitTime = .5f,
-            PlanningTime = 60f,
-            CurrentPlanningTime = 60f,
-            RopeDisplayTime = 30f,
-            MapCenter = mapCenter
+            RopeTime = settings.RopeTime,
+            CurrentRopeTime = 30f,
+            MapCenter = mapCenter,
+            MinExecuteStepTime = settings.MinimumExecuteTime
         };
 
         var wIndex = new WorldIndex.Snapshot

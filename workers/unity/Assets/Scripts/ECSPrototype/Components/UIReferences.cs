@@ -111,9 +111,13 @@ public class UIReferences : MonoBehaviour
     public ManalithTooltip ManalithToolTipFab;
 
     [Header("ReadyPanel")]
+    public float ReadySwooshFadeOutSpeed;
+    public float RopeEndFadeOutSpeed;
     public float ReadyImpulseLerpSpeed;
-    public Image FriendlyReadyLight;
-    public Image EnemyReadyLight;
+    public float RopeEndLerpSpeed;
+    public Text RopeTimeText;
+    public Image FriendlyReadyDot;
+    public Image EnemyReadyDot;
     public Image FriendlyReadySwoosh;
     public Image EnemyReadySwoosh;
     public Image FriendlyRope;
@@ -121,9 +125,7 @@ public class UIReferences : MonoBehaviour
     public Text TurnStateText;
     public Animator GOButtonAnimator;
     public float CacelGraceTime;
-    //public Button GOButton;
     public GOButton GOButtonScript;
-    public Image RopeBar;
     [HideInInspector]
     public Color FriendlyColor;
     [HideInInspector]
