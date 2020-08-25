@@ -137,6 +137,8 @@ public class UIReferences : MonoBehaviour
     public List<ParticleSystem> CowExhaleParticleSystems;
     public FillBarParticleComponent FriendlyFillBarParticle;
     public FillBarParticleComponent EnemyFillBarParticle;
+    public FillBarParticleComponent FriendlyRopeBarParticle;
+    public FillBarParticleComponent EnemyRopeBarParticle;
     public ParticleSystem FriendlyReadyBurstPS;
     public ParticleSystem EnemyReadyBurstPS;
 
@@ -146,8 +148,8 @@ public class UIReferences : MonoBehaviour
     //public RectTransform TurnWheelSmol;
     public float ReadyOutSpeed;
     public float ReadyInSpeed;
-    public ReadySlider EnemyReady;
-    public ReadySlider FriendlyReady;
+    public ReadySlider EnemyReadySlider;
+    public ReadySlider FriendlyReadySlider;
     public List<Image> SmallWheelColoredParts;
     public List<Image> BigWheelColoredParts;
     public List<Image> TurnStepFlares;

@@ -189,22 +189,20 @@ namespace LeyLineHybridECS
 
             if (cleanUpStateEvents.Count > 0)
             {
-                Debug.Log("UICleanupEventFromGameState");
                 if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
                 {
                     FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0]);
                     UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
                 }
-                //UIRef.FriendlyReadyBurstPS.time = 0;
-                //UIRef.EnemyReadyBurstPS.time = 0;
-                //.FriendlyRope.fillAmount = 0;
-                //UIRef.EnemyRope.fillAmount = 0;
-                //UIRef.EnemyRope.color = UIRef.EnemyColor;
-                //UIRef.FriendlyRope.color = UIRef.FriendlyColor;
+
+                UIRef.FriendlyReadySlider.BurstPlayed = false;
+                UIRef.EnemyReadySlider.BurstPlayed = false;
+
                 UIRef.FriendlyReadyDot.enabled = false;
                 UIRef.EnemyReadyDot.enabled = false;
                 UIRef.FriendlyReadySwoosh.fillAmount = 0;
                 UIRef.EnemyReadySwoosh.fillAmount = 0;
+
                 UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
                 UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
                 UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
@@ -250,12 +248,12 @@ namespace LeyLineHybridECS
                                 break;
                         }
 
-                        UIRef.FriendlyReady.PlayerColorImage.color = UIRef.FriendlyColor;
+                        UIRef.FriendlyReadySlider.PlayerColorImage.color = UIRef.FriendlyColor;
                         UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
                         UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
                         UIRef.FriendlyRope.color = UIRef.FriendlyColor;
 
-                        UIRef.EnemyReady.PlayerColorImage.color = UIRef.EnemyColor;
+                        UIRef.EnemyReadySlider.PlayerColorImage.color = UIRef.EnemyColor;
                         UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
                         UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
                         UIRef.EnemyRope.color = UIRef.EnemyColor;
@@ -269,17 +267,17 @@ namespace LeyLineHybridECS
                         var eBurst = UIRef.EnemyReadyBurstPS.main;
                         eBurst.startColor = UIRef.EnemyColor;
 
-                        foreach (ParticleSystem p in UIRef.FriendlyFillBarParticle.ParticleSystems)
-                        {
-                            var main = p.main;
-                            main.startColor = UIRef.FriendlyColor;
-                        }
+                        var main = UIRef.FriendlyFillBarParticle.LoopPS.main;
+                        main.startColor = UIRef.FriendlyColor;
 
-                        foreach (ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
-                        {
-                            var main = p.main;
-                            main.startColor = UIRef.EnemyColor;
-                        }
+                        var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
+                        main1.startColor = UIRef.FriendlyColor;
+                        
+                        var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
+                        main2.startColor = UIRef.EnemyColor;
+
+                        var main3 = UIRef.EnemyFillBarParticle.LoopPS.main;
+                        main3.startColor = UIRef.EnemyColor;
 
                         UIRef.StartupPanel.SetActive(false);
                     }
@@ -888,9 +886,6 @@ namespace LeyLineHybridECS
 
             UIRef.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
 
-            float outSpeed = UIRef.ReadyOutSpeed * Time.DeltaTime;
-            float inSpeed = UIRef.ReadyInSpeed * Time.DeltaTime;
-
             //all players
             Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
             {
@@ -901,9 +896,15 @@ namespace LeyLineHybridECS
                     if(authPlayerFaction == faction.Faction)
                     {
                         //Slide out first if friendly
-                        if (UIRef.FriendlyReady.Rect.anchoredPosition.y < UIRef.FriendlyReady.StartPosition.y + UIRef.FriendlyReady.SlideOffset.y)
+                        if (UIRef.FriendlyReadySlider.Rect.anchoredPosition.y < UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y)
                         {
-                            UIRef.FriendlyReady.Rect.Translate(new Vector3(0, outSpeed, 0));
+                            if(!UIRef.FriendlyReadySlider.BurstPlayed)
+                            {
+                                UIRef.FriendlyReadySlider.BurstPS.time = 0;
+                                UIRef.FriendlyReadySlider.BurstPS.Play();
+                                UIRef.FriendlyReadySlider.BurstPlayed = true;
+                            }
+                            UIRef.FriendlyReadySlider.Rect.Translate(new Vector3(0, UIRef.ReadyOutSpeed * Time.DeltaTime, 0));
                         }
                         else
                         {
@@ -926,19 +927,13 @@ namespace LeyLineHybridECS
 
                             if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
                             {
-                                foreach (ParticleSystem p in UIRef.FriendlyFillBarParticle.ParticleSystems)
-                                {
-                                    p.time = 0;
-                                    p.Stop();
-                                }
 
+                                UIRef.FriendlyFillBarParticle.LoopPS.time = 0;
+                                UIRef.FriendlyFillBarParticle.LoopPS.Stop();
                             }
                             else
                             {
-                                foreach (ParticleSystem p in UIRef.FriendlyFillBarParticle.ParticleSystems)
-                                {
-                                    p.Play();
-                                }
+                                UIRef.FriendlyFillBarParticle.LoopPS.Play();
                             }
 
                             UIRef.FriendlyFillBarParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyFillBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyFillBarParticle.Rect.anchoredPosition.y);
@@ -960,25 +955,25 @@ namespace LeyLineHybridECS
 
                         if (UIRef.EnemyReadySwoosh.fillAmount == 0 || UIRef.EnemyReadySwoosh.fillAmount == 1)
                         {
-                            foreach(ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
-                            {
-                                p.Stop();
-                            }
+                            UIRef.EnemyFillBarParticle.LoopPS.Stop();
                         }
                         else
                         {
-                            UIRef.EnemyFillBarParticle.Rect.anchoredPosition = new Vector2(UIRef.EnemyReadySwoosh.fillAmount * UIRef.EnemyFillBarParticle.ParentRect.sizeDelta.x, UIRef.EnemyFillBarParticle.Rect.anchoredPosition.y);
-                            foreach (ParticleSystem p in UIRef.EnemyFillBarParticle.ParticleSystems)
-                            {
-                                p.Play();
-                            }
+                            UIRef.EnemyFillBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.EnemyReadySwoosh.fillAmount * UIRef.EnemyFillBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyFillBarParticle.Rect.anchoredPosition.y);
+                            UIRef.EnemyFillBarParticle.LoopPS.Play();
                         }
 
-                        if (UIRef.EnemyReadySwoosh.fillAmount >= 1 && UIRef.EnemyReady.Rect.anchoredPosition.x > UIRef.EnemyReady.StartPosition.x - UIRef.EnemyReady.SlideOffset.x)
+                        if (UIRef.EnemyReadySwoosh.fillAmount >= 1 && UIRef.EnemyReadySlider.Rect.anchoredPosition.x > UIRef.EnemyReadySlider.StartPosition.x - UIRef.EnemyReadySlider.SlideOffset.x)
                         {
+                            if (!UIRef.EnemyReadySlider.BurstPlayed)
+                            {
+                                UIRef.EnemyReadySlider.BurstPS.time = 0;
+                                UIRef.EnemyReadySlider.BurstPS.Play();
+                                UIRef.EnemyReadySlider.BurstPlayed = true;
+                            }
                             UIRef.EnemyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
                             UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                            UIRef.EnemyReady.Rect.Translate(new Vector3(0, -outSpeed, 0));
+                            UIRef.EnemyReadySlider.Rect.Translate(new Vector3(0, -UIRef.ReadyOutSpeed * Time.DeltaTime, 0));
                             UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                         }
                     }
@@ -989,11 +984,10 @@ namespace LeyLineHybridECS
                     {
                         UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
 
-
-                        if (UIRef.EnemyReady.Rect.anchoredPosition.x < UIRef.EnemyReady.StartPosition.x)
-                            UIRef.EnemyReady.Rect.Translate(new Vector3(0, inSpeed, 0));
-                        if (UIRef.FriendlyReady.Rect.anchoredPosition.y > UIRef.FriendlyReady.StartPosition.y)
-                            UIRef.FriendlyReady.Rect.Translate(new Vector3(0, -inSpeed, 0));
+                        if (UIRef.EnemyReadySlider.Rect.anchoredPosition.x < UIRef.EnemyReadySlider.StartPosition.x)
+                            UIRef.EnemyReadySlider.Rect.Translate(new Vector3(0, UIRef.ReadyInSpeed * Time.DeltaTime, 0));
+                        if (UIRef.FriendlyReadySlider.Rect.anchoredPosition.y > UIRef.FriendlyReadySlider.StartPosition.y)
+                            UIRef.FriendlyReadySlider.Rect.Translate(new Vector3(0, -UIRef.ReadyInSpeed * Time.DeltaTime, 0));
                     }
                 }
             });
@@ -1002,6 +996,9 @@ namespace LeyLineHybridECS
             //Handle Ropes
             if(gameStates[0].CurrentRopeTime < gameStates[0].RopeTime)
             {
+                UIRef.EnemyRopeBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.EnemyRope.fillAmount * UIRef.EnemyRopeBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyRopeBarParticle.Rect.anchoredPosition.y);
+                UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyRope.fillAmount * UIRef.FriendlyRopeBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition.y);
+
                 UIRef.RopeTimeText.text = "0:" + ((int)gameState.CurrentRopeTime).ToString("D2");
                 UIRef.RopeTimeText.enabled = true;
 
@@ -1012,7 +1009,9 @@ namespace LeyLineHybridECS
 
                     if (authPlayerState.CurrentState == PlayerStateEnum.ready)
                     {
-                        if(!playerHigh.CancelState)
+                        UIRef.FriendlyRopeBarParticle.LoopPS.Play(false);
+
+                        if (!playerHigh.CancelState)
                         {
                             UIRef.RopeTimeText.color = UIRef.FriendlyColor;
                             UIRef.EnemyRope.fillAmount = 0;
@@ -1021,6 +1020,7 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
+                        UIRef.EnemyRopeBarParticle.LoopPS.Play(false);
                         UIRef.RopeTimeText.color = UIRef.EnemyColor;
                         UIRef.FriendlyRope.fillAmount = 0;
                         UIRef.EnemyRope.fillAmount = 1 - (gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
@@ -1029,12 +1029,20 @@ namespace LeyLineHybridECS
                 else
                 {
                     UIRef.RopeTimeText.enabled = false;
+
                     if (UIRef.FriendlyRope.fillAmount < 1 - UIRef.EnemyRope.fillAmount)
                     {
                         UIRef.FriendlyRope.fillAmount += Time.DeltaTime * UIRef.RopeEndLerpSpeed;
                     }
                     else
                     {
+                        if(UIRef.FriendlyRope.color.a == 1)
+                        {
+                            //BURST
+                            UIRef.FriendlyRopeBarParticle.LoopPS.Stop();
+                            UIRef.FriendlyRopeBarParticle.BurstPS.time = 0;
+                            UIRef.FriendlyRopeBarParticle.BurstPS.Play();
+                        }
                         UIRef.FriendlyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
                     }
 
@@ -1044,15 +1052,23 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
+                        if (UIRef.EnemyRope.color.a == 1)
+                        {
+                            //BURST
+                            UIRef.EnemyRopeBarParticle.LoopPS.Stop();
+                            UIRef.EnemyRopeBarParticle.BurstPS.time = 0;
+                            UIRef.EnemyRopeBarParticle.BurstPS.Play();
+                        }
                         UIRef.EnemyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
                     }
                 }
             }
             else
             {
+                UIRef.FriendlyRopeBarParticle.LoopPS.Stop();
+                UIRef.EnemyRopeBarParticle.LoopPS.Stop();
                 UIRef.RopeTimeText.enabled = false;
             }
-                
 
             gameStates.Dispose();
 

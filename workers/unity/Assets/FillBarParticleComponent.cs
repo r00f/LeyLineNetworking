@@ -5,7 +5,9 @@ using UnityEngine;
 public class FillBarParticleComponent : MonoBehaviour
 {
     [SerializeField]
-    public List<ParticleSystem> ParticleSystems;
+    public ParticleSystem LoopPS;
+    [SerializeField]
+    public ParticleSystem BurstPS;
     [SerializeField]
     public RectTransform Rect;
     [SerializeField]
