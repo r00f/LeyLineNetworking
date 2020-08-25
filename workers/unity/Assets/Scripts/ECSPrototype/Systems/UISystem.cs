@@ -285,11 +285,7 @@ namespace LeyLineHybridECS
             }
             #endregion
 
-            #region TurnStepWheel
-            //TURN THE WHEEL
-            //Debug.Log(UIRef.TurnWheelBig.eulerAngles.z);
-            float degreesPerFrame = UIRef.WheelRotationSpeed * Time.DeltaTime;
-            float rOffset = degreesPerFrame / 2f;
+            #region TurnStepEffects
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
@@ -314,6 +310,8 @@ namespace LeyLineHybridECS
                 UIRef.BigWheelColoredParts[i].color = settings.TurnStepBgColors[i];
             }
 
+            UIRef.TurnWheelAnimator.SetInteger("TurnStep", (int)gameState.CurrentState - 1);
+
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
@@ -321,15 +319,6 @@ namespace LeyLineHybridECS
                     foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                     {
                         UpdateUnitGroupBauble(g, authPlayersFaction[0]);
-                    }
-
-                    if (UIRef.TurnWheelBig.eulerAngles.z < 360 - rOffset && UIRef.TurnWheelBig.eulerAngles.z > 180)
-                    {
-                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                    }
-                    else if (UIRef.TurnWheelBig.eulerAngles.z > rOffset && UIRef.TurnWheelBig.eulerAngles.z < 180)
-                    {
-                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, -degreesPerFrame), Space.Self);
                     }
                     break;
                 case GameStateEnum.interrupt:
@@ -343,10 +332,6 @@ namespace LeyLineHybridECS
 
 
                     ClearSelectedActionToolTip();
-                    if (UIRef.TurnWheelBig.eulerAngles.z < 78.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 78.75f + rOffset)
-                    {
-                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                    }
                     break;
                 case GameStateEnum.attack:
 
@@ -356,11 +341,6 @@ namespace LeyLineHybridECS
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.attackFired;
                     }
-
-                    if (UIRef.TurnWheelBig.eulerAngles.z < 146.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 146.25f + rOffset)
-                    {
-                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                    }
                     break;
                 case GameStateEnum.move:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.moveFired)
@@ -369,11 +349,6 @@ namespace LeyLineHybridECS
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.moveFired;
                     }
-
-                    if (UIRef.TurnWheelBig.eulerAngles.z < 213.75f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 213.75f + rOffset)
-                    {
-                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
-                    }
                     break;
                 case GameStateEnum.skillshot:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.skillshotFired)
@@ -381,10 +356,6 @@ namespace LeyLineHybridECS
                         //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1]);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
-                    }
-                    if (UIRef.TurnWheelBig.eulerAngles.z < 280.25f - rOffset || UIRef.TurnWheelBig.eulerAngles.z > 280.25f + rOffset)
-                    {
-                        UIRef.TurnWheelBig.Rotate(new Vector3(0f, 0f, degreesPerFrame), Space.Self);
                     }
                     break;
             }

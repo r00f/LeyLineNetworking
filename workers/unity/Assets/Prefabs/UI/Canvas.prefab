@@ -200,6 +200,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3170145626398464626}
   - component: {fileID: 718283153750764141}
+  - component: {fileID: 4512047426905710567}
   m_Layer: 5
   m_Name: TurnWheelBig
   m_TagString: Untagged
@@ -228,7 +229,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 103.66998, y: -100.34999}
+  m_AnchoredPosition: {x: 103.66995, y: -100.3501}
   m_SizeDelta: {x: 307.34, y: 303.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &718283153750764141
@@ -239,6 +240,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 235371912813869712}
   m_CullTransparentMesh: 0
+--- !u!95 &4512047426905710567
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 235371912813869712}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 0ea9eef9bebc29d489a01e5de5699c7e, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &261043139939998506
 GameObject:
   m_ObjectHideFlags: 0
@@ -67549,6 +67569,7 @@ MonoBehaviour:
   EnemyRopeBarParticle: {fileID: 2706773907765100888}
   FriendlyReadyBurstPS: {fileID: 7941126544578518245}
   EnemyReadyBurstPS: {fileID: 5767522767366570727}
+  TurnWheelAnimator: {fileID: 4512047426905710567}
   WheelRotationSpeed: 120
   TurnWheelBig: {fileID: 3170145626398464626}
   ReadyOutSpeed: 80
