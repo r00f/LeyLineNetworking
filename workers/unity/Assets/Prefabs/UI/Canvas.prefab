@@ -87287,6 +87287,8 @@ MonoBehaviour:
   - {fileID: 5586519373922579454}
   CurrentEffectsFiredState: 0
   ReadySoundEventPath: event:/UISFX/ReadyIndicator
+  OpponentReadySoundEventPath: event:/UISFX/EnemyReadyIndicator
+  ExecuteStepChangePath: event:/UISFX/ExecuteStepChange
 --- !u!1 &7926929094423171271
 GameObject:
   m_ObjectHideFlags: 0

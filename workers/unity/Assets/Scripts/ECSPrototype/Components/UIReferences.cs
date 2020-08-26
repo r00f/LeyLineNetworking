@@ -155,6 +155,8 @@ public class UIReferences : MonoBehaviour
 
     [Header("SoundEventPaths")]
     public string ReadySoundEventPath;
+    public string OpponentReadySoundEventPath;
+    public string ExecuteStepChangePath;
 
     public enum UIEffectsFired
     {
