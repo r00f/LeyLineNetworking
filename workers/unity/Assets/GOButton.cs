@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using FMODUnity;
 
 [RequireComponent(typeof(Button))]
 public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -33,9 +34,13 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public Image LightFlare;
     [SerializeField]
     public Image LightInner;
+    [SerializeField]
+    public StudioEventEmitter CancelStateEmitter;
 
     [HideInInspector]
     public bool PlayerInCancelState;
+    [HideInInspector]
+    public bool PlayerReady;
 
     bool hovered;
 
@@ -61,6 +66,19 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void Update()
     {
         animator.SetBool("Cancel", PlayerInCancelState);
+
+        if (PlayerInCancelState && !PlayerReady)
+        {
+            if (!CancelStateEmitter.IsPlaying())
+                CancelStateEmitter.Play();
+        }
+        else
+        {
+            if (CancelStateEmitter.IsPlaying())
+                CancelStateEmitter.Stop();
+        }
+
+
 
         if (hovered && Button.interactable)
         {

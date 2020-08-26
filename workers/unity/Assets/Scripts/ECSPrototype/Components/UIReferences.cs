@@ -153,6 +153,9 @@ public class UIReferences : MonoBehaviour
     public List<Image> TurnStepFlares;
     public UIEffectsFired CurrentEffectsFiredState;
 
+    [Header("SoundEventPaths")]
+    public string ReadySoundEventPath;
+
     public enum UIEffectsFired
     {
         planning,

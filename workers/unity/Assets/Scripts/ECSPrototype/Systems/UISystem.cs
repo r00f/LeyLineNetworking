@@ -1,4 +1,5 @@
-﻿using Generic;
+﻿using FMODUnity;
+using Generic;
 using Improbable.Gdk.Core;
 using Player;
 using System.Collections;
@@ -819,6 +820,8 @@ namespace LeyLineHybridECS
                 }
             }
 
+
+
             //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
             //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
             UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
@@ -863,9 +866,9 @@ namespace LeyLineHybridECS
                 if (playerState.CurrentState == PlayerStateEnum.ready)
                 {
                     UIRef.GOButtonScript.SetLightsToPlayerColor(UIRef.FriendlyColor);
-
                     if(authPlayerFaction == faction.Faction)
                     {
+                        UIRef.GOButtonScript.PlayerReady = true;
                         //Slide out first if friendly
                         if (UIRef.FriendlyReadySlider.Rect.anchoredPosition.y < UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y)
                         {
@@ -881,6 +884,7 @@ namespace LeyLineHybridECS
                         {
                             if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning)
                             {
+                                RuntimeManager.PlayOneShot(UIRef.ReadySoundEventPath);
                                 FireStepChangedEffects("Waiting", UIRef.FriendlyColor);
                                 UIRef.FriendlyReadyDot.enabled = true;
                                 UIRef.FriendlyReadyBurstPS.time = 0;
@@ -913,6 +917,7 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
+                        
                         if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning)
                         {
                             FireStepChangedEffects("Enemy Waiting", UIRef.EnemyColor);
@@ -953,8 +958,8 @@ namespace LeyLineHybridECS
                 {
                     if (authPlayerFaction == faction.Faction)
                     {
+                        UIRef.GOButtonScript.PlayerReady = false;
                         UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
-
                         if (UIRef.EnemyReadySlider.Rect.anchoredPosition.x < UIRef.EnemyReadySlider.StartPosition.x)
                             UIRef.EnemyReadySlider.Rect.Translate(new Vector3(0, UIRef.ReadyInSpeed * Time.DeltaTime, 0));
                         if (UIRef.FriendlyReadySlider.Rect.anchoredPosition.y > UIRef.FriendlyReadySlider.StartPosition.y)
