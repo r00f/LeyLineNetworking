@@ -192,7 +192,7 @@ namespace LeyLineHybridECS
             {
                 if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
                 {
-                    FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.ExecuteStepChangePath);
+                    FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.PlanningSlideInPath);
                     UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
                 }
 
@@ -969,8 +969,10 @@ namespace LeyLineHybridECS
             #endregion
 
             //Handle Ropes
-            if(gameStates[0].CurrentRopeTime < gameStates[0].RopeTime)
+            if (gameStates[0].CurrentRopeTime < gameStates[0].RopeTime)
             {
+
+
                 UIRef.EnemyRopeBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.EnemyRope.fillAmount * UIRef.EnemyRopeBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyRopeBarParticle.Rect.anchoredPosition.y);
                 UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyRope.fillAmount * UIRef.FriendlyRopeBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition.y);
 
@@ -979,6 +981,13 @@ namespace LeyLineHybridECS
 
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
+                    if (!UIRef.RopeLoopEmitter.IsPlaying())
+                        UIRef.RopeLoopEmitter.Play();
+
+
+                    UIRef.RopeLoopEmitter.SetParameter("FadeInFastTikTok", 1 - gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
+
+
                     UIRef.EnemyRope.color = UIRef.EnemyColor;
                     UIRef.FriendlyRope.color = UIRef.FriendlyColor;
 
@@ -1011,7 +1020,7 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        if(UIRef.FriendlyRope.color.a == 1)
+                        if (UIRef.FriendlyRope.color.a == 1)
                         {
                             //BURST
                             UIRef.FriendlyRopeBarParticle.LoopPS.Stop();
@@ -1040,9 +1049,15 @@ namespace LeyLineHybridECS
             }
             else
             {
+                UIRef.RopeLoopEmitter.Stop();
                 UIRef.FriendlyRopeBarParticle.LoopPS.Stop();
                 UIRef.EnemyRopeBarParticle.LoopPS.Stop();
                 UIRef.RopeTimeText.enabled = false;
+            }
+
+            if(gameState.CurrentState != GameStateEnum.planning)
+            {
+                UIRef.RopeLoopEmitter.Stop();
             }
 
             gameStates.Dispose();

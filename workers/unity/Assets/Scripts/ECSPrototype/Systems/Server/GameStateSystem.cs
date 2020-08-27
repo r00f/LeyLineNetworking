@@ -112,7 +112,13 @@ namespace LeyLineHybridECS
                         #if UNITY_EDITOR
                         gameState.CurrentRopeTime -= Time.DeltaTime;
                         #endif
-                        if (AllPlayersReady(gameStateWorldIndex.Value) || gameState.CurrentRopeTime <= 0)
+                        if(gameState.CurrentRopeTime <= 0)
+                        {
+                            m_ComponentUpdateSystem.SendEvent(
+                            new GameState.RopeEndEvent.Event(),
+                            gameStateId.EntityId);
+                        }
+                        if (AllPlayersReady(gameStateWorldIndex.Value))
                         {
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.interrupt;

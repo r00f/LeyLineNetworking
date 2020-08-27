@@ -16,6 +16,12 @@ component GameState {
 	uint32 turn_counter = 10;
 	float min_execute_step_time = 11;
 	event Cleanup cleanup_state_event;
+	event RopeEnd rope_end_event;
+}
+
+type RopeEnd
+{
+
 }
 
 type Cleanup

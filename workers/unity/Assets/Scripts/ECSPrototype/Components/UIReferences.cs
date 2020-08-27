@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using FMODUnity;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -126,12 +127,14 @@ public class UIReferences : MonoBehaviour
     public Animator GOButtonAnimator;
     public float CacelGraceTime;
     public GOButton GOButtonScript;
+    public StudioEventEmitter RopeLoopEmitter;
     [HideInInspector]
     public Color FriendlyColor;
     [HideInInspector]
     public Color EnemyColor;
     [HideInInspector]
     public string CurrentStateString;
+
 
     [Header("ParticleSystems")]
     public List<ParticleSystem> CowExhaleParticleSystems;
@@ -157,6 +160,7 @@ public class UIReferences : MonoBehaviour
     public string ReadySoundEventPath;
     public string OpponentReadySoundEventPath;
     public string ExecuteStepChangePath;
+    public string PlanningSlideInPath;
 
     public enum UIEffectsFired
     {
