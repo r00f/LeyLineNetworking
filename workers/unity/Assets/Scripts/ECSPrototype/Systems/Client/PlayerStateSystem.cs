@@ -18,6 +18,7 @@ namespace LeyLineHybridECS
         SendActionRequestSystem m_ActionRequestSystem;
         HighlightingSystem m_HighlightingSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
+        public UIReferences UIRef { get; set; }
 
         protected override void OnCreate()
         {
@@ -56,6 +57,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            UIRef = Object.FindObjectOfType<UIReferences>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_ActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
@@ -107,8 +109,6 @@ namespace LeyLineHybridECS
                 playerHigh.CancelState = false;
             }
 
-
-            
             if (gameState.CurrentState == GameStateEnum.planning)
             {
                 if (ropeEndEvents.Count == 0)
@@ -123,7 +123,11 @@ namespace LeyLineHybridECS
                             {
                                 playerState.CurrentState = PlayerStateEnum.ready;
                             }
+
+                            UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - playerHigh.CancelTime / 3);
                         }
+                        //else
+                            //UIRef.GOButtonAnimator.SetFloat("CancelTimer", 0);
 
                         HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 

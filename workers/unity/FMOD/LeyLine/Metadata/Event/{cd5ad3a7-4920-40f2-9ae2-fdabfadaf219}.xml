@@ -106,7 +106,7 @@
 			<value>0.016433806201187902</value>
 		</property>
 		<property name="pitch">
-			<value>-3.4000001</value>
+			<value>-11</value>
 		</property>
 		<relationship name="audioFile">
 			<destination>{2ca27b36-b479-41e7-9a8d-d87f68ea56f9}</destination>
@@ -114,7 +114,7 @@
 	</object>
 	<object class="EventMixerGroup" id="{4fa8c047-22b7-47d3-8a0f-d704f22fed5a}">
 		<property name="volume">
-			<value>-26</value>
+			<value>-7.5</value>
 		</property>
 		<property name="name">
 			<value>StoneGrind</value>
@@ -131,10 +131,10 @@
 	</object>
 	<object class="SingleSound" id="{cdface3d-6ff4-41c0-baaa-ccc7d634db02}">
 		<property name="length">
-			<value>0.70000000000000007</value>
+			<value>0.68000000000000005</value>
 		</property>
 		<property name="pitch">
-			<value>-20.5</value>
+			<value>-24</value>
 		</property>
 		<relationship name="fadeOutCurve">
 			<destination>{51a1ffed-3c20-4731-b9bd-4c68889fdc31}</destination>
@@ -145,7 +145,7 @@
 	</object>
 	<object class="EventMixerGroup" id="{15ae4035-2f7e-4a17-aeb7-ae1464dd947d}">
 		<property name="volume">
-			<value>-22</value>
+			<value>-7.5</value>
 		</property>
 		<property name="name">
 			<value>LOWBRRRRRR</value>
@@ -191,7 +191,7 @@
 	<object class="MixerBusFader" id="{89b3299c-d890-48d1-8353-95da04cd1608}" />
 	<object class="AutomationPoint" id="{30c09d33-a57e-4d96-b187-cacbfbba62d2}">
 		<property name="position">
-			<value>0.50000000000000011</value>
+			<value>0.48000000000000009</value>
 		</property>
 		<property name="value">
 			<value>1</value>
@@ -202,7 +202,7 @@
 	</object>
 	<object class="AutomationPoint" id="{757f4d7d-2607-4771-bf08-3429bb09bdda}">
 		<property name="position">
-			<value>0.70000000000000007</value>
+			<value>0.68000000000000005</value>
 		</property>
 		<property name="value">
 			<value>0</value>

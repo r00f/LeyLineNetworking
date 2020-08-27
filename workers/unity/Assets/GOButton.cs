@@ -43,6 +43,13 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public bool PlayerReady;
 
     bool hovered;
+    public bool RotatingBack;
+
+
+    int cancelCloseToOpenHash;
+    int cancelOpenHash;
+    int rotateBackHash;
+    int rotateToGoHash;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -59,6 +66,11 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public void Start()
     {
         var button = GetComponent<Button>();
+
+        rotateToGoHash = Animator.StringToHash("Base Layer.RotateBack -> Base Layer.GO");
+        cancelCloseToOpenHash = Animator.StringToHash("Base Layer.Cancel -> Base Layer.CancelOpen");
+        cancelOpenHash = Animator.StringToHash("Base Layer.CancelOpen");
+        rotateBackHash = Animator.StringToHash("Base Layer.RotateBack");
         button.onClick.AddListener(delegate { OnClick(); });
         LightInner.color = new Color(LightInner.color.r, LightInner.color.g, LightInner.color.b, 0);
     }
@@ -66,6 +78,14 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private void Update()
     {
         animator.SetBool("Cancel", PlayerInCancelState);
+        animator.SetBool("Ready", PlayerReady);
+
+        if ((animator.GetCurrentAnimatorStateInfo(0).fullPathHash == rotateBackHash || animator.GetCurrentAnimatorStateInfo(0).fullPathHash == cancelOpenHash || animator.GetAnimatorTransitionInfo(0).fullPathHash == cancelCloseToOpenHash) && animator.GetAnimatorTransitionInfo(0).fullPathHash != rotateToGoHash)
+        {
+            RotatingBack = true;
+        }
+        else
+            RotatingBack = false;
 
         if (PlayerInCancelState && !PlayerReady)
         {

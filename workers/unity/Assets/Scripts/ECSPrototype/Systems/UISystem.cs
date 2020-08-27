@@ -805,10 +805,17 @@ namespace LeyLineHybridECS
             {
                 HandleKeyCodeInput();
 
-                if (!UIRef.GOButtonScript.Button.interactable)
+                if(!UIRef.GOButtonScript.RotatingBack)
                 {
-                    UIRef.GOButtonScript.Button.interactable = true;
+                    if (!UIRef.GOButtonScript.Button.interactable)
+                    {
+                        UIRef.GOButtonScript.Button.interactable = true;
+                    }
                 }
+                else
+                    UIRef.GOButtonScript.Button.interactable = false;
+
+
 
                 //energyFill.fillAmount = Mathf.SmoothDamp(energyFill.fillAmount, currentEnergy / maxEnergy, ref ayy, 1f);
                 UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
@@ -1100,7 +1107,8 @@ namespace LeyLineHybridECS
 
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                UIRef.GOButtonScript.Button.onClick.Invoke();
+                if(UIRef.GOButtonScript.Button.interactable)
+                    UIRef.GOButtonScript.Button.onClick.Invoke();
             }
 
             if (Input.GetKeyDown(KeyCode.Escape))
