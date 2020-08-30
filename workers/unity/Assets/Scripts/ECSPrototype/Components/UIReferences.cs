@@ -19,7 +19,7 @@ public class UIReferences : MonoBehaviour
     public GameObject MatchReadyPanel;
 
     [Header("TopLeftHeroPanel")]
-    public Image ManaConnector;
+    //public Image ManaConnector;
     public SelectUnitButton SelectHeroButton;
     public Text TopEnergyText;
     public Image TopEnergyFill;
@@ -88,11 +88,19 @@ public class UIReferences : MonoBehaviour
     public List<Sprite> ExecuteStepSprites;
 
     [Header("UnitGroups")]
+    public float GroupBaubleFillUpSpeed;
+    public float GroupBaubleFillDownSpeed;
+    public float EnergyConnectorPositiveSpeed;
+    public float EnergyConnectorNegativeSpeed;
     public List<UnitGroupUI> UnitGroups;
     public SelectUnitButton UnitButtonPrefab;
+    public UnitGroupUI UnitGroupPeasantPrefab;
     public UnitGroupUI UnitGroupPrefab;
     public GameObject UnitGroupsParent;
     public Dictionary<uint, UnitGroupUI> ExistingUnitGroups = new Dictionary<uint, UnitGroupUI>();
+    public Image EnergyConnectorPlayerColorFill;
+    public Image EnergyConnectorNegativeFill;
+
 
     [Header("GameOver")]
     public GameObject GameOverPanel;

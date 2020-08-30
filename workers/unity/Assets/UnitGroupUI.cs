@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class UnitGroupUI : MonoBehaviour
 {
 
+    public float PositiveLerpTime;
+    public float NegativeLerpTime;
     public GameObject UnitsPanel;
     public Image UnitTypeImage;
     public Image EnergyFill;
@@ -15,6 +17,9 @@ public class UnitGroupUI : MonoBehaviour
     public Text EnergyChangeText;
     public List<long> ExistingUnitIds = new List<long>();
     public List<SelectUnitButton> SelectUnitButtons;
+    public bool FillEvent;
+    public int CombinedEnergyCost;
+    public int LastCombinedEnergyCost;
 
     public void SwitchPanelActive()
     {

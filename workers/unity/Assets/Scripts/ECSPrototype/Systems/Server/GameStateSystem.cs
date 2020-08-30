@@ -109,9 +109,9 @@ namespace LeyLineHybridECS
                         break;
                     case GameStateEnum.planning:
                         //DEBUGGING INSTA ROPE
-                        #if UNITY_EDITOR
-                        gameState.CurrentRopeTime -= Time.DeltaTime;
-                        #endif
+                        //#if UNITY_EDITOR
+                        //gameState.CurrentRopeTime -= Time.DeltaTime;
+                        //#endif
                         if(gameState.CurrentRopeTime <= 0)
                         {
                             m_ComponentUpdateSystem.SendEvent(

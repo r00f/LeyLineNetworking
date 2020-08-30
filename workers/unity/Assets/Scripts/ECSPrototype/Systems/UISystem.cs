@@ -231,7 +231,6 @@ namespace LeyLineHybridECS
                             case TeamColorEnum.blue:
                                 UIRef.FriendlyColor = settings.FactionColors[1];
                                 UIRef.EnemyColor = settings.FactionColors[2];
-                                UIRef.ManaConnector.color = settings.FactionColors[1];
                                 UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[1];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[1];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[1];
@@ -241,7 +240,6 @@ namespace LeyLineHybridECS
                             case TeamColorEnum.red:
                                 UIRef.FriendlyColor = settings.FactionColors[2];
                                 UIRef.EnemyColor = settings.FactionColors[1];
-                                UIRef.ManaConnector.color = settings.FactionColors[2];
                                 UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[2];
                                 UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[2];
                                 UIRef.TopEnergyFill.color = settings.FactionColors[2];
@@ -253,6 +251,7 @@ namespace LeyLineHybridECS
                         UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
                         UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
                         UIRef.FriendlyRope.color = UIRef.FriendlyColor;
+                        UIRef.EnergyConnectorPlayerColorFill.color = UIRef.FriendlyColor;
 
                         UIRef.EnemyReadySlider.PlayerColorImage.color = UIRef.EnemyColor;
                         UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
@@ -316,10 +315,9 @@ namespace LeyLineHybridECS
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
-
                     foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                     {
-                        UpdateUnitGroupBauble(g, authPlayersFaction[0]);
+                        UpdateUnitGroupBauble(g, authPlayersFaction[0], g.transform.GetSiblingIndex());
                     }
                     break;
                 case GameStateEnum.interrupt:
@@ -1219,7 +1217,7 @@ namespace LeyLineHybridECS
             }
         }
 
-        void UpdateUnitGroupBauble(UnitGroupUI unitGroupUI, FactionComponent.Component faction)
+        void UpdateUnitGroupBauble(UnitGroupUI unitGroupUI, FactionComponent.Component faction, int index)
         {
             //int totalCost = 0;
             int combinedAmount = 0;
@@ -1240,23 +1238,74 @@ namespace LeyLineHybridECS
                 combinedAmount += selectButton.EnergyAmountChange;
             }
 
-            percentageToFill /= unitGroupUI.SelectUnitButtons.Count;
-            percentageGainFill /= unitGroupUI.SelectUnitButtons.Count;
+            unitGroupUI.CombinedEnergyCost = combinedAmount;
 
-            
-            if (combinedAmount > 0)
+            //Combined cost change
+            if(unitGroupUI.CombinedEnergyCost != unitGroupUI.LastCombinedEnergyCost)
             {
-                unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
-        //        unitGroupUI.EnergyFill.color = settings.UIEnergyIncomeColor;
+                percentageToFill /= unitGroupUI.SelectUnitButtons.Count;
+                percentageGainFill /= unitGroupUI.SelectUnitButtons.Count;
+                UIRef.EnergyConnectorNegativeFill.fillAmount = 0;
+                UIRef.EnergyConnectorPlayerColorFill.fillAmount = 0;
+                unitGroupUI.PositiveLerpTime = 0;
+                unitGroupUI.NegativeLerpTime = 0;
+                unitGroupUI.FillEvent = true;
+                unitGroupUI.LastCombinedEnergyCost = unitGroupUI.CombinedEnergyCost;
             }
-            else
+
+            if(unitGroupUI.FillEvent)
             {
-                unitGroupUI.EnergyChangeText.text = combinedAmount.ToString();
-             //   unitGroupUI.EnergyFill.color = settings.FactionColors[(int)faction.TeamColor + 1];
+                //GAIN
+                if (combinedAmount > 0)
+                {
+
+                    unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
+                    unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                    unitGroupUI.EnergyFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                    unitGroupUI.EnergyGainFill.fillAmount = Mathf.Lerp(0, percentageGainFill, unitGroupUI.PositiveLerpTime);
+
+                    if(unitGroupUI.PositiveLerpTime >= 1)
+                        unitGroupUI.FillEvent = false;
+                }
+                //COST
+                else
+                {
+                    unitGroupUI.EnergyChangeText.text = combinedAmount.ToString();
+                    //RETURN ENERGY UP
+                    if (unitGroupUI.EnergyFill.fillAmount > percentageToFill)
+                    {
+                        unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
+
+                        unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                        UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0.11f + 0.17f * index, 0, unitGroupUI.NegativeLerpTime);
+                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0.11f + 0.17f * index, 0, unitGroupUI.PositiveLerpTime);
+                        unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(1, percentageToFill, unitGroupUI.PositiveLerpTime);
+
+                        if (unitGroupUI.NegativeLerpTime >= 1)
+                        {
+                            unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                        }
+                    }
+                    else if (unitGroupUI.EnergyFill.fillAmount < percentageToFill)
+                    {
+                        //COST ENERGY DOWN
+                        unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
+                        unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0, 0.11f + 0.17f * index, unitGroupUI.PositiveLerpTime);
+
+                        if (UIRef.EnergyConnectorPlayerColorFill.fillAmount >= 0.11f + 0.17f * index - 0.001f)
+                        {
+                            unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                            UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0, 0.11f + 0.17f * index, unitGroupUI.NegativeLerpTime);
+                            unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(0, percentageToFill, unitGroupUI.NegativeLerpTime);
+                        }
+                    }
+                    else
+                    {
+                        unitGroupUI.FillEvent = false;
+                    }
+                }
             }
-            
-            LerpEnergyFillAmount(unitGroupUI.EnergyFill, percentageToFill);
-            LerpEnergyFillAmount(unitGroupUI.EnergyGainFill, percentageGainFill);
         }
 
         void UpdateCircleBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText)
@@ -1274,7 +1323,7 @@ namespace LeyLineHybridECS
             if (actions.LockedAction.Index != -3)
             {
                 if (inEnergyFill.fillAmount < 1)
-                    LerpEnergyFillAmount(inEnergyFill, 1);
+                    inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, 1, Time.DeltaTime);
 
                 inEnergyText.text = actions.LockedAction.CombinedCost.ToString();
 
@@ -1282,7 +1331,7 @@ namespace LeyLineHybridECS
             else
             {
                 if (inEnergyFill.fillAmount > 0)
-                    LerpEnergyFillAmount(inEnergyFill, 0);
+                    inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, 0, Time.DeltaTime);
             }
         }
 
@@ -1311,7 +1360,8 @@ namespace LeyLineHybridECS
             if(EnergyChangeAmount != 0)
             {
                 if (inEnergyFill.fillAmount < 1)
-                    LerpEnergyFillAmount(inEnergyFill, 1);
+                    inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, 1, Time.DeltaTime);
+
                 if(EnergyChangeAmount > 0)
                 {
                     inEnergyText.text = "+" + EnergyChangeAmount.ToString();
@@ -1327,22 +1377,17 @@ namespace LeyLineHybridECS
             {
                 inEnergyText.text = "0";
                 if (inEnergyFill.fillAmount > 0)
-                    LerpEnergyFillAmount(inEnergyFill, 0);
+                    inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, 0, Time.DeltaTime);
             }
     }
 
         public void ResetEnergyBaubles()
         {
-            LerpEnergyFillAmount(UIRef.SAEnergyFill, 0);
-            LerpEnergyFillAmount(UIRef.TopEnergyFill, 0);
+            UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
+            UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
 
             UIRef.TopEnergyText.text = 0.ToString();
             UIRef.SAEnergyText.text = 0.ToString();
-        }
-
-        public void LerpEnergyFillAmount(Image inEnergyFill, float inPercentage)
-        {
-            inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, inPercentage, Time.DeltaTime);
         }
 
         public void EqualizeHealthBarFillAmounts(HealthBar fromHealthBar, HealthBar toHealthBar, uint unitFaction, uint playerFaction)
@@ -1509,8 +1554,21 @@ namespace LeyLineHybridECS
                 {
                     if (!UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
                     {
+                        UnitGroupUI unitGroup;
                         //spawn a group into groups parent and add it to the ExistingUnitGroups Dict
-                        UnitGroupUI unitGroup = Object.Instantiate(UIRef.UnitGroupPrefab, UIRef.UnitGroupsParent.transform);
+
+                        //if peasant
+                        if (stats.EnergyIncome > 0)
+                        {
+                            //Set Dict position = child position
+                            unitGroup = Object.Instantiate(UIRef.UnitGroupPeasantPrefab, UIRef.UnitGroupsParent.transform);
+                            unitGroup.transform.SetAsFirstSibling();
+                        }
+                        else
+                        {
+                            unitGroup = Object.Instantiate(UIRef.UnitGroupPrefab, UIRef.UnitGroupsParent.transform);
+                        }
+
                         unitGroup.UnitTypeImage.sprite = stats.UnitGroupSprite;
                         //if faction is even set to factionColors 1 if odd to factioncolors2
                         unitGroup.EnergyFill.color = settings.FactionColors[(int)playerFaction];
@@ -1527,6 +1585,7 @@ namespace LeyLineHybridECS
 
                         if (!unitGroup.SelectUnitButtons.Contains(unitButton))
                             unitGroup.SelectUnitButtons.Add(unitButton);
+
                         stats.SelectUnitButtonInstance = unitButton;
                         //problematic if unit has a locked action
                         //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
@@ -1534,6 +1593,9 @@ namespace LeyLineHybridECS
                         unitGroup.ExistingUnitIds.Add(unitId);
                         unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
+                        //IF PEASANT SET AS FIRST SIBLING
+
+
                     }
                     else
                     {
