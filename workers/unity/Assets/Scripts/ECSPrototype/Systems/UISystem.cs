@@ -185,7 +185,6 @@ namespace LeyLineHybridECS
 
             #endregion
 
-
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
             if (cleanUpStateEvents.Count > 0)

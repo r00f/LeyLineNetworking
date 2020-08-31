@@ -56,7 +56,7 @@ public class UIReferences : MonoBehaviour
     public HealthBar PortraitHealthBar;
     //public GameObject HeroEnergyPanel;
 
-    [Header("ButtonLists")]
+    [Header("Actions")]
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
     public GameObject SpawnToggleGO;

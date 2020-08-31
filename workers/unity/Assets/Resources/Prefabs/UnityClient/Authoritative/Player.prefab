@@ -96,7 +96,7 @@ MonoBehaviour:
   m_LookAt: {fileID: 0}
   m_Follow: {fileID: 0}
   m_Lens:
-    FieldOfView: 40
+    FieldOfView: 60
     OrthographicSize: 10
     NearClipPlane: 0.1
     FarClipPlane: 5000
@@ -209,16 +209,16 @@ MonoBehaviour:
       constRotationRate: 1
       lockRotationX: 1
       lockRotationY: 0
-      zoomRotationMultiplier: 1.5
+      zoomRotationMultiplier: 2
       increasedZoomRotationMultiplier: 5
-      increaseZoomRotTreshhold: 12
+      increaseZoomRotTreshhold: 11
       defualtRotation: {x: -35, y: 0}
       cameraRotationRate: {x: 100, y: 100}
     zoom:
       invertZoom: 0
-      defaultZoom: 16.5
+      defaultZoom: 14
       minZoom: 6
-      maxZoom: 18
+      maxZoom: 15
       zoomRate: 12
       constZoomRate: 1
   PlayerMapTilePrefab: {fileID: 3617814909377836915, guid: ba192c6a5e3fc844490fb02ca435d515,
