@@ -44,6 +44,7 @@ public class UIReferences : MonoBehaviour
     [Header("UnitPortrait")]
     public GameObject InfoEnabledPanel;
     public Image PortraitPlayerColor;
+    public Image PortraitPlayerColorGlow;
     public SetPortraitClip AnimatedPortrait;
 
     [Header("UnitStats")]
@@ -59,23 +60,18 @@ public class UIReferences : MonoBehaviour
     [Header("Actions")]
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
-    public GameObject SpawnToggleGO;
+    public SwapActionGroupButton ActionSwichButton;
     public GameObject ActionButtonGroup;
     public GameObject SpawnButtonGroup;
-    public GameObject ActionsButton;
-    public GameObject SpawnButton;
-
-    //public Toggle ActionsToggle;
-    //public Toggle SpawnActionsToggle;
-    //public List<Toggle> TurnStateToggles;
 
     [Header("SelectedActionToolTip")]
+    public GameObject SAInfoPanel;
     public Text SAActionName;
     public Text SAActionDescription;
     public Text SAEnergyText;
+    public Text SACooldownText;
     public Image SAExecuteStepIcon;
-    public Image SAExecuteStepBackGround;
-    public Image SAEnergyFill;
+    //public Image SAEnergyFill;
 
     [Header("ToolTip")]
     public GameObject TTPanel;

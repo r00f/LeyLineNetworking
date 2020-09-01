@@ -15,10 +15,13 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
     RectTransform IconRectTransform;
     [SerializeField]
     Vector2 Offset;
+    [SerializeField]
+    ButtonSelectedHandler SelectHandler;
     [Header("Component References")]
     public GameObject Visuals;
     public Image Icon;
     public Image TurnStepBauble;
+    public Image SelectedGlow;
     public int ExecuteStepIndex;
     public string ActionName;
     public string ActionDescription;
@@ -26,11 +29,25 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
     public uint EnergyCost;
     public int ActionIndex;
     public int UnitId;
+    public bool Hovered;
+
+    private void Update()
+    {
+        if(!SelectHandler.Selected && !Hovered)
+        {
+            SelectedGlow.enabled = false;
+        }
+        else
+        {
+            SelectedGlow.enabled = true;
+        }
+    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         if(Visuals.activeSelf)
         {
+            Hovered = true;
             UIRef.TTRect.anchoredPosition = new Vector2(RectTransform.anchoredPosition.x, UIRef.TTRect.anchoredPosition.y);
             UIRef.TTActionCost.text = "" + EnergyCost;
             UIRef.TTActionDescription.text = ActionDescription;
@@ -42,6 +59,7 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
 
     public void OnPointerExit(PointerEventData eventData)
     {
+        Hovered = false;
         UIRef.TTPanel.SetActive(false);
         //IconRectTransform.anchoredPosition = new Vector2(0, 0);
     }

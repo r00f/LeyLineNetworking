@@ -9,6 +9,8 @@ using Unit;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 
@@ -18,6 +20,7 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class UISystem : ComponentSystem
     {
+        //EventSystem m_EventSystem;
         HighlightingSystem m_HighlightingSystem;
         PlayerStateSystem m_PlayerStateSystem;
         SendActionRequestSystem m_SendActionRequestSystem;
@@ -34,6 +37,8 @@ namespace LeyLineHybridECS
         protected override void OnCreate()
         {
             base.OnCreate();
+            //m_EventSystem = Object.FindObjectOfType<EventSystem>();
+
             m_PlayerStateSystem = World.GetExistingSystem<PlayerStateSystem>();
             m_SendActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             settings = Resources.Load<Settings>("Settings");
@@ -117,36 +122,6 @@ namespace LeyLineHybridECS
                 inButton.Icon.sprite = inBaseData.SpawnActions[inIndex].ActionIcon;
                 inButton.ActionIndex = inBaseData.Actions.Count + inIndex;
             }
-            /*else if(hasBasicAction)
-            {
-                if(inIndex == 0)
-                {
-                    inButton.EnergyCost = 0;
-                    inButton.ExecuteStepIndex = (int)inBaseData.BasicMove.ActionExecuteStep;
-                    inButton.ActionDescription = inBaseData.BasicMove.Description;
-                    inButton.ActionName = inBaseData.BasicMove.ActionName;
-                    inButton.Icon.sprite = inBaseData.BasicMove.ActionIcon;
-                    inButton.ActionIndex = -2;
-                }
-                else if(inIndex == 1)
-                {
-                    inButton.ExecuteStepIndex = (int)inBaseData.BasicAttack.ActionExecuteStep;
-                    inButton.EnergyCost = inBaseData.BasicAttack.Targets[0].energyCost;
-                    inButton.ActionDescription = inBaseData.BasicAttack.Description;
-                    inButton.ActionName = inBaseData.BasicAttack.ActionName;
-                    inButton.Icon.sprite = inBaseData.BasicAttack.ActionIcon;
-                    inButton.ActionIndex = -1;
-                }
-                else
-                {
-                    inButton.ExecuteStepIndex = (int)inBaseData.Actions[inIndex - 2].ActionExecuteStep;
-                    inButton.EnergyCost = inBaseData.Actions[inIndex - 2].Targets[0].energyCost;
-                    inButton.ActionDescription = inBaseData.Actions[inIndex - 2].Description;
-                    inButton.ActionName = inBaseData.Actions[inIndex - 2].ActionName;
-                    inButton.Icon.sprite = inBaseData.Actions[inIndex - 2].ActionIcon;
-                    inButton.ActionIndex = inIndex - 2;
-                }
-            }*/
             else
             {
                 inButton.ExecuteStepIndex = (int)inBaseData.Actions[inIndex].ActionExecuteStep;
@@ -156,8 +131,8 @@ namespace LeyLineHybridECS
                 inButton.Icon.sprite = inBaseData.Actions[inIndex].ActionIcon;
                 inButton.ActionIndex = inIndex;
             }
-
             inButton.UnitId = (int)inUnitId;
+            inButton.SelectedGlow.color = settings.TurnStepColors[inButton.ExecuteStepIndex + 1];
             inButton.TurnStepBauble.color = settings.TurnStepColors[inButton.ExecuteStepIndex + 1];
 
             return inButton;
@@ -230,21 +205,20 @@ namespace LeyLineHybridECS
                             case TeamColorEnum.blue:
                                 UIRef.FriendlyColor = settings.FactionColors[1];
                                 UIRef.EnemyColor = settings.FactionColors[2];
-                                UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[1];
-                                UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[1];
-                                UIRef.TopEnergyFill.color = settings.FactionColors[1];
-                                UIRef.SAEnergyFill.color = settings.FactionColors[1];
-
                                 break;
                             case TeamColorEnum.red:
                                 UIRef.FriendlyColor = settings.FactionColors[2];
                                 UIRef.EnemyColor = settings.FactionColors[1];
-                                UIRef.HeroPortraitPlayerColor.color = settings.FactionColors[2];
-                                UIRef.LeftCurrentEnergyFill.color = settings.FactionColors[2];
-                                UIRef.TopEnergyFill.color = settings.FactionColors[2];
-                                UIRef.SAEnergyFill.color = settings.FactionColors[2];
                                 break;
                         }
+
+                        UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
+                        UIRef.PortraitPlayerColor.color = UIRef.FriendlyColor;
+                        UIRef.PortraitPlayerColorGlow.color = UIRef.FriendlyColor;
+
+                        UIRef.LeftCurrentEnergyFill.color = UIRef.FriendlyColor;
+                        UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
+                        //UIRef.SAEnergyFill.color = UIRef.FriendlyColor;
 
                         UIRef.FriendlyReadySlider.PlayerColorImage.color = UIRef.FriendlyColor;
                         UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
@@ -470,11 +444,12 @@ namespace LeyLineHybridECS
                 
                 if (authPlayerState.SelectedUnitId == unitId)
                 {
+                    /*
                     if (gameState.CurrentState == GameStateEnum.planning)
                     {
                         UpdateCircleBauble(lineRenderer, actions, UIRef.SAEnergyFill, UIRef.SAEnergyText);
                     }
-
+                    */
                     //SEPERATE CODE THAT ONLY NEEDS TO BE DONE ON UNIT SELECTION (SET BUTTON INFO USW)
 
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
@@ -501,17 +476,6 @@ namespace LeyLineHybridECS
                         EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.PortraitHealthBar, faction.Faction, authPlayerFaction);
                     //SetHealthBarFillAmounts(unitHeadUIRef, , health, faction.Faction, authPlayerFaction);
 
-                    if (factionColor == TeamColorEnum.blue)
-                    {
-                        if (UIRef.PortraitPlayerColor.color != settings.FactionColors[1])
-                            UIRef.PortraitPlayerColor.color = settings.FactionColors[1];
-                    }
-                    else if (factionColor == TeamColorEnum.red)
-                    {
-                        if (UIRef.PortraitPlayerColor.color != settings.FactionColors[2])
-                            UIRef.PortraitPlayerColor.color = settings.FactionColors[2];
-                    }
-
                     if (faction.Faction == authPlayerFaction)
                     {
                         if (stats.SpawnActions.Count == 0)
@@ -522,16 +486,16 @@ namespace LeyLineHybridECS
                                 UIRef.SpawnButtonGroup.SetActive(false);
                             }
 
-                            if (UIRef.SpawnToggleGO.activeSelf)
+                            if (UIRef.ActionSwichButton.gameObject.activeSelf)
                             {
-                                UIRef.ActionsButton.SetActive(false);
-                                UIRef.SpawnButton.SetActive(true);
-                                UIRef.SpawnToggleGO.SetActive(false);
+                                if(UIRef.ActionSwichButton.ButtonInverted)
+                                    UIRef.ActionSwichButton.InvertButton();
+                                UIRef.ActionSwichButton.gameObject.SetActive(false);
                             }
                         }
                         else
                         {
-                            UIRef.SpawnToggleGO.SetActive(true);
+                            UIRef.ActionSwichButton.gameObject.SetActive(true);
                         }
 
                         #region FILL UI BUTTON INFO
@@ -672,8 +636,8 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    if (UIRef.SpawnToggleGO.activeSelf)
-                        UIRef.SpawnToggleGO.SetActive(false);
+                    if (UIRef.ActionSwichButton.gameObject.activeSelf)
+                        UIRef.ActionSwichButton.gameObject.SetActive(false);
                     if (unitInfoPanel.activeSelf)
                         unitInfoPanel.SetActive(false);
                 }
@@ -1094,12 +1058,9 @@ namespace LeyLineHybridECS
 
         void HandleKeyCodeInput()
         {
-            if(Input.GetKeyDown(KeyCode.Q))
+            if(Input.GetKeyDown(KeyCode.Q) && UIRef.ActionSwichButton.gameObject.activeSelf)
             {
-                if(UIRef.ActionsButton.activeSelf)
-                    UIRef.ActionsButton.GetComponent<Button>().onClick.Invoke();
-                else
-                    UIRef.SpawnButton.GetComponent<Button>().onClick.Invoke();
+                UIRef.ActionSwichButton.Button.onClick.Invoke();
             }
 
             if (Input.GetKeyDown(KeyCode.Space))
@@ -1122,46 +1083,66 @@ namespace LeyLineHybridECS
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1))
                 {
+                    UIRef.Actions[0].Button.Select();
                     UIRef.Actions[0].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha2))
                 {
+                    UIRef.Actions[1].Button.Select();
                     UIRef.Actions[1].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha3))
                 {
+                    UIRef.Actions[2].Button.Select();
                     UIRef.Actions[2].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha4))
                 {
+                    UIRef.Actions[3].Button.Select();
                     UIRef.Actions[3].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha5))
                 {
+                    UIRef.Actions[4].Button.Select();
                     UIRef.Actions[4].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha6))
+                {
+                    UIRef.Actions[5].Button.Select();
+                    UIRef.Actions[5].Button.onClick.Invoke();
                 }
             }
             else
             {
                 if (Input.GetKeyDown(KeyCode.Alpha1))
                 {
+                    UIRef.SpawnActions[0].Button.Select();
                     UIRef.SpawnActions[0].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha2))
                 {
+                    UIRef.SpawnActions[1].Button.Select();
                     UIRef.SpawnActions[1].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha3))
                 {
+                    UIRef.SpawnActions[2].Button.Select();
                     UIRef.SpawnActions[2].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha4))
                 {
+                    UIRef.SpawnActions[3].Button.Select();
                     UIRef.SpawnActions[3].Button.onClick.Invoke();
                 }
                 else if (Input.GetKeyDown(KeyCode.Alpha5))
                 {
+                    UIRef.SpawnActions[4].Button.Select();
                     UIRef.SpawnActions[4].Button.onClick.Invoke();
+                }
+                else if (Input.GetKeyDown(KeyCode.Alpha6))
+                {
+                    UIRef.SpawnActions[5].Button.Select();
+                    UIRef.SpawnActions[5].Button.onClick.Invoke();
                 }
             }
         }
@@ -1382,11 +1363,11 @@ namespace LeyLineHybridECS
 
         public void ResetEnergyBaubles()
         {
-            UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
-            UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
+            //UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
+            UIRef.TopEnergyFill.fillAmount = Mathf.Lerp(UIRef.TopEnergyFill.fillAmount, 0, Time.DeltaTime);
 
             UIRef.TopEnergyText.text = 0.ToString();
-            UIRef.SAEnergyText.text = 0.ToString();
+            //UIRef.SAEnergyText.text = 0.ToString();
         }
 
         public void EqualizeHealthBarFillAmounts(HealthBar fromHealthBar, HealthBar toHealthBar, uint unitFaction, uint playerFaction)
@@ -1676,29 +1657,29 @@ namespace LeyLineHybridECS
             UIRef.SAActionDescription.text = actionButton.ActionDescription;
             UIRef.SAActionName.text = actionButton.ActionName;
             UIRef.SAExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[actionButton.ExecuteStepIndex];
-            UIRef.SAExecuteStepBackGround.color = settings.TurnStepBgColors[actionButton.ExecuteStepIndex];
+            UIRef.SAExecuteStepIcon.color = settings.TurnStepBgColors[actionButton.ExecuteStepIndex];
+            UIRef.SAInfoPanel.SetActive(true);
         }
 
         public void InitializeSelectedActionTooltip(int index)
         {
-            UIRef.SAExecuteStepBackGround.enabled = true;
-            UIRef.SAExecuteStepIcon.enabled = true;
             UIRef.SAEnergyText.text = UIRef.Actions[index].EnergyCost.ToString();
             UIRef.SAActionDescription.text = UIRef.Actions[index].ActionDescription;
             UIRef.SAActionName.text = UIRef.Actions[index].ActionName;
             UIRef.SAExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[UIRef.Actions[index].ExecuteStepIndex];
-            UIRef.SAExecuteStepBackGround.color = settings.TurnStepBgColors[UIRef.Actions[index].ExecuteStepIndex];
+            UIRef.SAExecuteStepIcon.color = settings.TurnStepBgColors[UIRef.Actions[index].ExecuteStepIndex];
+            UIRef.SAInfoPanel.SetActive(true);
         }
 
-        void ClearSelectedActionToolTip()
+        public void ClearSelectedActionToolTip()
         {
+            UIRef.SAInfoPanel.SetActive(false);
             UIRef.SAActionName.text = "";
             UIRef.SAActionDescription.text = "";
-            UIRef.SAExecuteStepBackGround.enabled = false;
-            UIRef.SAExecuteStepIcon.enabled = false;
             UIRef.SAEnergyText.text = "0";
+            UIRef.SACooldownText.text = "0";
+            
         }
-
     }
 }
 

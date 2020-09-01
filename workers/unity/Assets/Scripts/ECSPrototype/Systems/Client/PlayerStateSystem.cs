@@ -17,6 +17,7 @@ namespace LeyLineHybridECS
         EntityQuery m_GameStateData;
         SendActionRequestSystem m_ActionRequestSystem;
         HighlightingSystem m_HighlightingSystem;
+        UISystem m_UISystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         public UIReferences UIRef { get; set; }
 
@@ -58,6 +59,7 @@ namespace LeyLineHybridECS
         {
             base.OnStartRunning();
             UIRef = Object.FindObjectOfType<UIReferences>();
+            m_UISystem = World.GetExistingSystem<UISystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_ActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
@@ -143,6 +145,9 @@ namespace LeyLineHybridECS
                                         p.Play();
                                 }
 
+                                if(mouseState.ClickEvent == 1)
+                                    m_UISystem.ClearSelectedActionToolTip();
+
 
                                 if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                                     playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
@@ -163,6 +168,7 @@ namespace LeyLineHybridECS
                                         //Call methods so line/target gets disabled instantly
                                         m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
                                         playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                                        m_UISystem.ClearSelectedActionToolTip();
                                     }
                                 }
                                 else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
@@ -181,6 +187,8 @@ namespace LeyLineHybridECS
                                 {
                                     playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                                     playerState.SelectedUnitId = unitId.EntityId.Id;
+                                    //Clear ActionTooltip on UnitSelect
+                                    m_UISystem.ClearSelectedActionToolTip();
                                 }
                             }
                         });
