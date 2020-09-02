@@ -88,6 +88,9 @@ namespace LeyLineHybridECS
 
         public void InitializeButtons()
         {
+            UIRef.MainMenuButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.EscapeMenu.gameObject); });
+            UIRef.HelpButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.HelpPanel); });
+            UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.SkillTreePanel); });
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
             //UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
             UIRef.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.CacelGraceTime); });
@@ -203,20 +206,28 @@ namespace LeyLineHybridECS
                         switch (authPlayersFaction[0].TeamColor)
                         {
                             case TeamColorEnum.blue:
+                                UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[0];
                                 UIRef.FriendlyColor = settings.FactionColors[1];
                                 UIRef.EnemyColor = settings.FactionColors[2];
                                 break;
                             case TeamColorEnum.red:
+                                UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[1];
                                 UIRef.FriendlyColor = settings.FactionColors[2];
                                 UIRef.EnemyColor = settings.FactionColors[1];
                                 break;
                         }
 
+                        //UIRef.FriendlyIncomeColor = (UIRef.FriendlyColor + Color.white * 2 + settings.FactionColors[0]) / 4;
+                        UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
+                        UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
+
+                        //UIRef.CurrentMaxEnergyText.color = UIRef.FriendlyColor;
+
                         UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
                         UIRef.PortraitPlayerColor.color = UIRef.FriendlyColor;
                         UIRef.PortraitPlayerColorGlow.color = UIRef.FriendlyColor;
 
-                        UIRef.LeftCurrentEnergyFill.color = UIRef.FriendlyColor;
+                        UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
                         UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
                         //UIRef.SAEnergyFill.color = UIRef.FriendlyColor;
 
@@ -438,7 +449,7 @@ namespace LeyLineHybridECS
 
                     if(gameState.CurrentState == GameStateEnum.planning)
                     {
-                        UpdateHeroBauble(lineRenderer, actions, UIRef.TopEnergyFill, UIRef.TopEnergyText, energy, faction);
+                        UpdateHeroBauble(lineRenderer, actions, UIRef.TopEnergyFill, UIRef.HeroBaubleEnergyText, energy, faction, (int)playerEnergy.BaseIncome);
                     }
                 }
                 
@@ -779,12 +790,12 @@ namespace LeyLineHybridECS
 
 
                 //energyFill.fillAmount = Mathf.SmoothDamp(energyFill.fillAmount, currentEnergy / maxEnergy, ref ayy, 1f);
-                UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
+                UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
-                if (UIRef.LeftCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
+                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
                 {
                     //incomeFill.fillAmount = Mathf.SmoothStep(incomeFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, 1f);
-                    UIRef.LeftEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.LeftEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.DeltaTime);
+                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.DeltaTime);
                 }
             }
 
@@ -792,10 +803,10 @@ namespace LeyLineHybridECS
 
             //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
             //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
-            UIRef.LeftCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.LeftCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
+            UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
-            UIRef.CurrentEnergyText.text = playerEnergy.Energy.ToString();
-            UIRef.MaxEnergyText.text = playerEnergy.MaxEnergy.ToString();
+            UIRef.CurrentMaxEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
+            UIRef.TotalEnergyIncomeText.text = "+" + playerEnergy.Income.ToString();
 
             if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
@@ -1056,6 +1067,11 @@ namespace LeyLineHybridECS
             }
         }
 
+        void InvertMenuPanelActive(GameObject menuPanel)
+        {
+            menuPanel.SetActive(!menuPanel.activeSelf);
+        }
+
         void HandleKeyCodeInput()
         {
             if(Input.GetKeyDown(KeyCode.Q) && UIRef.ActionSwichButton.gameObject.activeSelf)
@@ -1071,7 +1087,7 @@ namespace LeyLineHybridECS
 
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                UIRef.EscapeMenu.gameObject.SetActive(!UIRef.EscapeMenu.gameObject.activeSelf);
+                InvertMenuPanelActive(UIRef.EscapeMenu.gameObject);
             }
 
             if (Input.GetKeyDown(KeyCode.U))
@@ -1183,7 +1199,7 @@ namespace LeyLineHybridECS
             if(unitButton.EnergyAmountChange > 0)
             {
                 unitButton.EnergyFill.enabled = true;
-                unitButton.EnergyFill.color = settings.UIEnergyIncomeColor;
+                unitButton.EnergyFill.color = UIRef.FriendlyIncomeColor;
             }
             else if(unitButton.EnergyAmountChange < 0)
             {
@@ -1315,9 +1331,10 @@ namespace LeyLineHybridECS
             }
         }
 
-        void UpdateHeroBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText, Energy.Component inEnergy, FactionComponent.Component inFaction)
+        void UpdateHeroBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText, Energy.Component inEnergy, FactionComponent.Component inFaction, int baseManaGain)
         {
-            int EnergyChangeAmount = 0;
+            int EnergyChangeAmount = baseManaGain;
+
             if (inEnergy.Harvesting)
             {
                 EnergyChangeAmount += (int)inEnergy.EnergyIncome;
@@ -1345,7 +1362,7 @@ namespace LeyLineHybridECS
                 if(EnergyChangeAmount > 0)
                 {
                     inEnergyText.text = "+" + EnergyChangeAmount.ToString();
-                    inEnergyFill.color = settings.UIEnergyIncomeColor;
+                    inEnergyFill.color = UIRef.FriendlyIncomeColor;
                 }
                 else
                 {
@@ -1366,7 +1383,7 @@ namespace LeyLineHybridECS
             //UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
             UIRef.TopEnergyFill.fillAmount = Mathf.Lerp(UIRef.TopEnergyFill.fillAmount, 0, Time.DeltaTime);
 
-            UIRef.TopEnergyText.text = 0.ToString();
+            UIRef.HeroBaubleEnergyText.text = 0.ToString();
             //UIRef.SAEnergyText.text = 0.ToString();
         }
 
@@ -1552,7 +1569,7 @@ namespace LeyLineHybridECS
                         unitGroup.UnitTypeImage.sprite = stats.UnitGroupSprite;
                         //if faction is even set to factionColors 1 if odd to factioncolors2
                         unitGroup.EnergyFill.color = settings.FactionColors[(int)playerFaction];
-                        unitGroup.EnergyGainFill.color = settings.UIEnergyIncomeColor;
+                        unitGroup.EnergyGainFill.color = UIRef.FriendlyIncomeColor;
                         SelectUnitButton unitButton = Object.Instantiate(UIRef.UnitButtonPrefab, unitGroup.UnitsPanel.transform);
                         unitButton.UnitId = unitId;
                         unitButton.EnergyFill.color = settings.FactionColors[(int)playerFaction];

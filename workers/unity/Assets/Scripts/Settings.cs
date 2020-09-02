@@ -6,12 +6,14 @@ using UnityEngine;
 public class Settings : ScriptableObject
 {
     public List<Color> FactionColors;
+    public List<Color> FactionIncomeColors;
     public List<Color> FactionMapColors;
     public List<Color> MapCellColors;
     public List<Color> TurnStepColors;
     public List<Color> TurnStepBgColors;
     public List<Color> TurnStepLineColors;
-    public Color UIEnergyIncomeColor;
+
+    public Color UINeutralColor;
     public Mesh TestMesh;
     public Material TestMat;
     public List<Texture2D> ParialColorMasks;

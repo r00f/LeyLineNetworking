@@ -414,8 +414,8 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        Tooltip.NodeImage.color = settings.UIEnergyIncomeColor;
-                        Tooltip.ManalithBaseEnergyGain.color = settings.UIEnergyIncomeColor;
+                        Tooltip.NodeImage.color = settings.UINeutralColor;
+                        Tooltip.ManalithBaseEnergyGain.color = settings.UINeutralColor;
                     }
 
                     for(int i = 0; i<Tooltip.ManalithUISlots.Count; i++)
@@ -430,7 +430,7 @@ namespace LeyLineHybridECS
 
                                 if (manalith.Manalithslots[i].EnergyGained > 0 && manalith.Manalithslots[i].OccupyingFaction == playerFaction.Faction)
                                 {
-                                    Tooltip.ManalithUISlots[i].HexOutline.color = settings.UIEnergyIncomeColor;
+                                    Tooltip.ManalithUISlots[i].HexOutline.color = settings.UINeutralColor;
                                     Tooltip.ManalithUISlots[i].EnergyGainText.text = manalith.Manalithslots[i].EnergyGained.ToString();
                                 }
                                 else

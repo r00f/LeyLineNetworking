@@ -8,7 +8,16 @@ public class UIReferences : MonoBehaviour
     public Canvas Canvas;
 
     public Animator SlideOutUIAnimator;
+
+    [Header("MenuPanels")]
     public GameObject UIMainPanel;
+    public GameObject HelpPanel;
+    public GameObject SkillTreePanel;
+
+    [Header("MenuButtons")]
+    public MenuButton MainMenuButton;
+    public MenuButton HelpButton;
+    public MenuButton SkilltreeButton;
 
     [Header("EscapeMenu")]
     public EscapeMenu EscapeMenu;
@@ -19,27 +28,24 @@ public class UIReferences : MonoBehaviour
     public GameObject MatchReadyPanel;
 
     [Header("TopLeftHeroPanel")]
-    //public Image ManaConnector;
     public SelectUnitButton SelectHeroButton;
-    public Text TopEnergyText;
+    public Text HeroBaubleEnergyText;
     public Image TopEnergyFill;
     public HealthBar HeroHealthBar;
     public Image HeroPortraitPlayerColor;
 
     [Header("EnergyBarPanel")]
-    public Image LeftEnergyIncomeFill;
-    public Image LeftCurrentEnergyFill;
-    public Text CurrentEnergyText;
-    public Text MaxEnergyText;
+    public Image HeroEnergyIncomeFill;
+    public Image HeroCurrentEnergyFill;
+    public Text CurrentMaxEnergyText;
+    //public Text MaxEnergyText;
+    public Text TotalEnergyIncomeText;
 
     [Header("InGameUI")]
-    //public float HealthBarYOffset;
     public GameObject IngameUIPanel;
     public GameObject HealthBarsPanel;
     public GameObject ManalithInfoPanel;
     public GameObject ActionEffectUIPanel;
-
-
 
     [Header("UnitPortrait")]
     public GameObject InfoEnabledPanel;
@@ -55,7 +61,6 @@ public class UIReferences : MonoBehaviour
     public Text PortraitArmorText;
     public Text PortraitRegenText;
     public HealthBar PortraitHealthBar;
-    //public GameObject HeroEnergyPanel;
 
     [Header("Actions")]
     public List<ActionButton> Actions;
@@ -71,7 +76,6 @@ public class UIReferences : MonoBehaviour
     public Text SAEnergyText;
     public Text SACooldownText;
     public Image SAExecuteStepIcon;
-    //public Image SAEnergyFill;
 
     [Header("ToolTip")]
     public GameObject TTPanel;
@@ -132,6 +136,8 @@ public class UIReferences : MonoBehaviour
     public float CacelGraceTime;
     public GOButton GOButtonScript;
     public StudioEventEmitter RopeLoopEmitter;
+
+    public Color FriendlyIncomeColor;
     [HideInInspector]
     public Color FriendlyColor;
     [HideInInspector]
