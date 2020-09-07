@@ -100,6 +100,7 @@ public class UIReferences : MonoBehaviour
     public Dictionary<uint, UnitGroupUI> ExistingUnitGroups = new Dictionary<uint, UnitGroupUI>();
     public Image EnergyConnectorPlayerColorFill;
     public Image EnergyConnectorNegativeFill;
+    public Vector2 ECFillAmounts;
 
 
     [Header("GameOver")]

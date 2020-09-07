@@ -30,7 +30,7 @@ public class SetPortraitClip : MonoBehaviour
             //Debug.Log(animatorOverrideController.animationClips[0].name);
             //List<KeyValuePair<AnimationClip, AnimationClip>> anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             //anims.Add(new KeyValuePair<AnimationClip,AnimationClip>(animatorOverrideController.animationClips[0], portraitAnimationClip));
-            animatorOverrideController["AnimatedPortraitTest"] = portraitAnimationClip;
+            animatorOverrideController["KingCroakPortrait"] = portraitAnimationClip;
             //Debug.Log(portraitAnimationClip.name);
             //var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             //anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(animatorOverrideController.clips[0].originalClip, portraitAnimationClip));

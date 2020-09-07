@@ -1273,8 +1273,8 @@ namespace LeyLineHybridECS
                         unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
 
                         unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                        UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0.11f + 0.17f * index, 0, unitGroupUI.NegativeLerpTime);
-                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0.11f + 0.17f * index, 0, unitGroupUI.PositiveLerpTime);
+                        UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, 0, unitGroupUI.NegativeLerpTime);
+                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, 0, unitGroupUI.PositiveLerpTime);
                         unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(1, percentageToFill, unitGroupUI.PositiveLerpTime);
 
                         if (unitGroupUI.NegativeLerpTime >= 1)
@@ -1287,12 +1287,12 @@ namespace LeyLineHybridECS
                         //COST ENERGY DOWN
                         unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
                         unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0, 0.11f + 0.17f * index, unitGroupUI.PositiveLerpTime);
+                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0, UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, unitGroupUI.PositiveLerpTime);
 
-                        if (UIRef.EnergyConnectorPlayerColorFill.fillAmount >= 0.11f + 0.17f * index - 0.001f)
+                        if (UIRef.EnergyConnectorPlayerColorFill.fillAmount >= UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index - 0.001f)
                         {
                             unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                            UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0, 0.11f + 0.17f * index, unitGroupUI.NegativeLerpTime);
+                            UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0, UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, unitGroupUI.NegativeLerpTime);
                             unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(0, percentageToFill, unitGroupUI.NegativeLerpTime);
                         }
                     }
