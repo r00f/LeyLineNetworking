@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UnitGroupUI : MonoBehaviour
 {
-
+    public bool CleanupReset;
     public float PositiveLerpTime;
     public float NegativeLerpTime;
     public GameObject UnitsPanel;

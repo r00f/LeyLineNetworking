@@ -21,6 +21,7 @@ public class UnitEffects : MonoBehaviour
     public KeyValuePair<Action, Vector3> CurrentGetHitEffect;
     //public List<GetHitEffect> GetHitEffects;
     public Vector3 HitPosition;
+    public uint CombinedArmor;
     public uint CurrentArmor;
     public uint CurrentHealth;
     public Vector3f LastStationaryCoordinate;

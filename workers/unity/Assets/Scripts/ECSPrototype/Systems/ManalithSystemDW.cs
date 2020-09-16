@@ -14,6 +14,7 @@ using Unity.Mathematics;
 namespace LeyLineHybridECS
 {
     //[DisableAutoCreation]
+    [UpdateInGroup(typeof(PresentationSystemGroup))]
     public class ManalithSystemDW : ComponentSystem
     {
         UISystem m_UISystem;
@@ -118,7 +119,7 @@ namespace LeyLineHybridECS
         {
             if(WorldsInitialized())
             {
-                if (m_PlayerData.CalculateEntityCount() == 0)
+                if (m_PlayerData.CalculateEntityCount() == 0 || m_GameControllerData.CalculateEntityCount() == 0)
                 {
                     //Debug.Log("AuthPlayerCount is 0");
                     return;
@@ -132,6 +133,10 @@ namespace LeyLineHybridECS
                 var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
                 var playerHighlightingDatas = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
+                var gameStates = m_GameControllerData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+
+
+                var gameState = gameStates[0];
                 var playerFaction = playerFactions[0];
 
 
@@ -159,7 +164,7 @@ namespace LeyLineHybridECS
                                     switch (initData.circleSize)
                                     {
                                         case ManalithInitializer.CircleSize.Seven:
-                                            clientData.WorldPos = meshColor.transform.position + new Vector3(0, initData.iconHightoffset, 0);
+                                            clientData.WorldPos = clientData.UIElementTransform.position;
                                             clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                             clientData.ManalithEntityID = ID;
                                             clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
@@ -170,7 +175,7 @@ namespace LeyLineHybridECS
                                             }
                                             break;
                                         case ManalithInitializer.CircleSize.Three:
-                                            clientData.WorldPos = meshColor.transform.position + new Vector3(1, initData.iconHightoffset, 0);
+                                            clientData.WorldPos = clientData.UIElementTransform.position;
                                             clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                             clientData.ManalithEntityID = ID;
                                             clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
@@ -202,7 +207,8 @@ namespace LeyLineHybridECS
                                 if (Vector3fext.ToUnityVector(playerHighlightingDatas[0].HoveredCoordinate) == Vector3fext.ToUnityVector(c.CubeCoordinate))
                                     manalithIsHovered = true;
                             }
-                            if (manalithIsHovered)
+
+                            if (manalithIsHovered && gameState.CurrentState == GameStateEnum.planning)
                             {
                                 clientData.ManalithHoveredMesh.enabled = true;
                                 clientData.ManalithHoveredMesh.material.SetColor("_UnlitColor", meshColor.LerpColor);
@@ -345,6 +351,7 @@ namespace LeyLineHybridECS
                 manalithComps.Dispose();
                 playerFactions.Dispose();
                 playerHighlightingDatas.Dispose();
+                gameStates.Dispose();
             }
         }
 

@@ -17,7 +17,7 @@ using UnityEngine.UI.Extensions;
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation]
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [UpdateInGroup(typeof(PresentationSystemGroup))]
     public class UISystem : ComponentSystem
     {
         //EventSystem m_EventSystem;
@@ -92,8 +92,11 @@ namespace LeyLineHybridECS
             UIRef.HelpButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.HelpPanel); });
             UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.SkillTreePanel); });
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
-            //UIRef.ReadyButton.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
+
+
             UIRef.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.CacelGraceTime); });
+            UIRef.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.waiting); });
+            UIRef.GOButtonScript.Button.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
 
             for (int bi = 0; bi < UIRef.Actions.Count; bi++)
             {
@@ -167,10 +170,29 @@ namespace LeyLineHybridECS
 
             if (cleanUpStateEvents.Count > 0)
             {
+                Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction) =>
+                {
+                    var energy = EntityManager.GetComponentData<Energy.Component>(e);
+                    var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+
+                    if (stats.SelectUnitButtonInstance)
+                    {
+                        UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
+                    }
+
+                    ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
+                });
+
+
                 if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
                 {
                     FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.PlanningSlideInPath);
                     UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
+                }
+
+                foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
+                {
+                    g.CleanupReset = true;
                 }
 
                 UIRef.FriendlyReadySlider.BurstPlayed = false;
@@ -180,6 +202,15 @@ namespace LeyLineHybridECS
                 UIRef.EnemyReadyDot.enabled = false;
                 UIRef.FriendlyReadySwoosh.fillAmount = 0;
                 UIRef.EnemyReadySwoosh.fillAmount = 0;
+
+                UIRef.RopeSlamOneTime = false;
+                UIRef.RopeEndsLerpTime = 0;
+
+                UIRef.FriendlyRope.fillAmount = 0;
+                UIRef.EnemyRope.fillAmount = 0;
+
+                UIRef.EnemyRope.color = UIRef.EnemyColor;
+                UIRef.FriendlyRope.color = UIRef.FriendlyColor;
 
                 UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
                 UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
@@ -251,7 +282,7 @@ namespace LeyLineHybridECS
                         var eBurst = UIRef.EnemyReadyBurstPS.main;
                         eBurst.startColor = UIRef.EnemyColor;
 
-                        var main = UIRef.FriendlyFillBarParticle.LoopPS.main;
+                        var main = UIRef.FriendlyReadySwooshParticle.LoopPS.main;
                         main.startColor = UIRef.FriendlyColor;
 
                         var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
@@ -260,7 +291,7 @@ namespace LeyLineHybridECS
                         var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
                         main2.startColor = UIRef.EnemyColor;
 
-                        var main3 = UIRef.EnemyFillBarParticle.LoopPS.main;
+                        var main3 = UIRef.EnemyReadySwooshParticle.LoopPS.main;
                         main3.startColor = UIRef.EnemyColor;
 
                         UIRef.StartupPanel.SetActive(false);
@@ -269,18 +300,17 @@ namespace LeyLineHybridECS
             }
             #endregion
 
+            HandleKeyCodeInput(gameState.CurrentState);
+
             #region TurnStepEffects
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
-                ResetEnergyBaubles();
-
                 for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
                 {
                     UIRef.TurnStepFlares[i].enabled = false;
                 }
             }
-
 
             //RESETTING ALL THE COLORS ALL THE TIME RETARDATION
         
@@ -353,12 +383,8 @@ namespace LeyLineHybridECS
                     UIRef.ManalithToolTipFab.ActiveManalithID = 0;
                     UIRef.ManalithToolTipFab.gameObject.SetActive(false);
                 }
-                if(UIRef.IngameUIPanel.activeSelf)
-                    UIRef.IngameUIPanel.SetActive(false);
-            }
-            else
-            {
-                UIRef.IngameUIPanel.SetActive(playerHigh.ShowIngameUI);
+                //if(UIRef.IngameUIPanel.activeSelf)
+                    //UIRef.IngameUIPanel.SetActive(false);
             }
 
             #endregion
@@ -445,7 +471,6 @@ namespace LeyLineHybridECS
                 {
                     if (unitHeadUIRef.UnitHeadHealthBarInstance)
                         EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.HeroHealthBar, faction.Faction, authPlayerFaction);
-                    //SetHealthBarFillAmounts(unitHeadUIRef,UIRef.HeroHealthBar, health, faction.Faction, authPlayerFaction);
 
                     if(gameState.CurrentState == GameStateEnum.planning)
                     {
@@ -455,16 +480,24 @@ namespace LeyLineHybridECS
                 
                 if (authPlayerState.SelectedUnitId == unitId)
                 {
-                    /*
-                    if (gameState.CurrentState == GameStateEnum.planning)
+                    UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
+
+                    if (actions.CurrentSelected.Index == -3 && actions.LockedAction.Index == -3)
                     {
-                        UpdateCircleBauble(lineRenderer, actions, UIRef.SAEnergyFill, UIRef.SAEnergyText);
+                        UIRef.SAInfoPanel.SetActive(false);
                     }
-                    */
+                    else
+                    {
+                        UIRef.SAInfoPanel.SetActive(true);
+                    }
                     //SEPERATE CODE THAT ONLY NEEDS TO BE DONE ON UNIT SELECTION (SET BUTTON INFO USW)
 
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
+                    {
+                        UIRef.PortraitNameText.text = stats.UnitName;
                         UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
+                    }
+     
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
 
@@ -475,7 +508,6 @@ namespace LeyLineHybridECS
                         UIRef.PortraitHealthText.text = currentMaxHealth;
                         UIRef.PortraitArmorText.text = health.Armor.ToString();
 
-                        //UIRef.PortraitHealthText.text = currentMaxHealth + " +" + health.Armor;
                     }
                     else
                     {
@@ -485,7 +517,6 @@ namespace LeyLineHybridECS
 
                     if(unitHeadUIRef.UnitHeadHealthBarInstance)
                         EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.PortraitHealthBar, faction.Faction, authPlayerFaction);
-                    //SetHealthBarFillAmounts(unitHeadUIRef, , health, faction.Faction, authPlayerFaction);
 
                     if (faction.Faction == authPlayerFaction)
                     {
@@ -497,16 +528,16 @@ namespace LeyLineHybridECS
                                 UIRef.SpawnButtonGroup.SetActive(false);
                             }
 
-                            if (UIRef.ActionSwichButton.gameObject.activeSelf)
+                            if (UIRef.SwapActionButton.gameObject.activeSelf)
                             {
-                                if(UIRef.ActionSwichButton.ButtonInverted)
-                                    UIRef.ActionSwichButton.InvertButton();
-                                UIRef.ActionSwichButton.gameObject.SetActive(false);
+                                if(UIRef.SwapActionButton.ButtonInverted)
+                                    UIRef.SwapActionButton.InvertButton();
+                                UIRef.SwapActionButton.gameObject.SetActive(false);
                             }
                         }
                         else
                         {
-                            UIRef.ActionSwichButton.gameObject.SetActive(true);
+                            UIRef.SwapActionButton.gameObject.SetActive(true);
                         }
 
                         #region FILL UI BUTTON INFO
@@ -538,66 +569,23 @@ namespace LeyLineHybridECS
                             {
                                 UIRef.Actions[bi].Visuals.SetActive(true);
 
-                                /*if (stats.BasicMove != null && stats.BasicAttack != null)
+                                if (bi < actionCount)
                                 {
-                                    if (bi == 0)
+                                    if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost)
                                     {
-                                        if (playerEnergy.Energy == 0 && actions.LockedAction.Index == -3)// && lockedAction.cost <= stats.BasicMove.cost
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = false;
-                                        }
-                                        else
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = true;
-                                        }
-                                    }
-                                    else if (bi == 1)
-                                    {
-                                        if (stats.BasicAttack.Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost)
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = false;
-                                        }
-                                        else
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = true;
-                                        }
-                                    }
-                                    //all other actions
-                                    else
-                                    {
-                                        if (stats.Actions[bi - 2].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost)
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = false;
-                                        }
-                                        else
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = true;
-                                        }
-                                    }
-
-                                    UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, true);
-                                }
-                                */
-                                //else
-                                //{
-                                    if (bi < actionCount)
-                                    {
-                                        if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost)
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = false;
-                                        }
-                                        else
-                                        {
-                                            UIRef.Actions[bi].Button.interactable = true;
-                                        }
-                                        UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, false);
+                                        UIRef.Actions[bi].Button.interactable = false;
                                     }
                                     else
                                     {
-                                        UIRef.Actions[bi].Visuals.SetActive(false);
+                                        UIRef.Actions[bi].Button.interactable = true;
                                     }
+                                    UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, false);
                                 }
-                            //}
+                                else
+                                {
+                                    UIRef.Actions[bi].Visuals.SetActive(false);
+                                }
+                            }
                             else
                             {
                                 UIRef.Actions[bi].Visuals.SetActive(false);
@@ -643,16 +631,20 @@ namespace LeyLineHybridECS
                 if (authPlayerState.SelectedUnitId != 0)
                 {
                     if (!unitInfoPanel.activeSelf)
+                    {
                         unitInfoPanel.SetActive(true);
+                    }
+                        
                 }
                 else
                 {
-                    if (UIRef.ActionSwichButton.gameObject.activeSelf)
-                        UIRef.ActionSwichButton.gameObject.SetActive(false);
+                    if (UIRef.SwapActionButton.gameObject.activeSelf)
+                        UIRef.SwapActionButton.gameObject.SetActive(false);
                     if (unitInfoPanel.activeSelf)
+                    {
                         unitInfoPanel.SetActive(false);
+                    }
                 }
-
 
                 if (!stats.UIInitialized)
                 {
@@ -675,7 +667,6 @@ namespace LeyLineHybridECS
                         }
                     }
 
-                    //TODO: CLEANUP UNIT UI BEFORE UNIT GETS DELETED BECAUSE CLIENT LEFT
                     if (health.CurrentHealth == 0)
                     {
                         if(unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
@@ -685,14 +676,12 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-
                         GameObject healthBarGO = unitHeadUIRef.UnitHeadHealthBarInstance.gameObject;
 
                         if (isVisible.Value == 1)
                         {
                             if(!healthBarGO.activeSelf)
                                 healthBarGO.SetActive(true);
-
 
                             if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
                             {
@@ -716,7 +705,6 @@ namespace LeyLineHybridECS
                         }
 
                         unitHeadUIRef.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
-                        SetHealthBarFillAmounts(unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
                     }
 
                     if(unitHeadUIRef.UnitHeadUIInstance)
@@ -724,6 +712,8 @@ namespace LeyLineHybridECS
 
                     if (gameState.CurrentState == GameStateEnum.planning)
                     {
+                        SetHealthBarFillAmounts(unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
+
                         if (unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime > 0)
                         {
                             unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.DeltaTime;
@@ -775,33 +765,23 @@ namespace LeyLineHybridECS
             }
             else
             {
-                HandleKeyCodeInput();
-
-                if(!UIRef.GOButtonScript.RotatingBack)
+                if (authPlayerState.CurrentState == PlayerStateEnum.ready || UIRef.GOButtonScript.RotatingBack)
                 {
-                    if (!UIRef.GOButtonScript.Button.interactable)
-                    {
-                        UIRef.GOButtonScript.Button.interactable = true;
-                    }
+                    UIRef.GOButtonScript.Button.interactable = false;
                 }
                 else
-                    UIRef.GOButtonScript.Button.interactable = false;
+                {
+                    UIRef.GOButtonScript.Button.interactable = true;
+                }
 
-
-
-                //energyFill.fillAmount = Mathf.SmoothDamp(energyFill.fillAmount, currentEnergy / maxEnergy, ref ayy, 1f);
                 UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
                 if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
                 {
-                    //incomeFill.fillAmount = Mathf.SmoothStep(incomeFill.fillAmount, (currentEnergy + energyIncome) / maxEnergy, 1f);
                     UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.DeltaTime);
                 }
             }
 
-
-
-            //energyFill.fillAmount = Mathf.SmoothStep(energyFill.fillAmount, currentEnergy / maxEnergy, 1f);
             //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
             UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
@@ -810,13 +790,19 @@ namespace LeyLineHybridECS
 
             if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
-                if (UIRef.PortraitHealthBar.gameObject.activeSelf)
+                if(authPlayerState.SelectedUnitId == 0)
                 {
-                    UIRef.PortraitHealthText.enabled = false;
-                    UIRef.PortraitArmorText.enabled = false;
-                    UIRef.PortraitRegenText.enabled = false;
-                    UIRef.PortraitHealthBar.gameObject.SetActive(false);
+                    if (UIRef.PortraitHealthBar.gameObject.activeSelf)
+                    {
+                        UIRef.PortraitHealthText.enabled = false;
+                        UIRef.PortraitArmorText.enabled = false;
+                        UIRef.PortraitRegenText.enabled = false;
+                        UIRef.PortraitHealthBar.gameObject.SetActive(false);
+                    }
                 }
+
+                UIRef.SwapActionButton.gameObject.SetActive(false);
+
 
                 for (int bi = 0; bi < UIRef.Actions.Count; bi++)
                 {
@@ -837,87 +823,94 @@ namespace LeyLineHybridECS
                 }
             }
 
-            UIRef.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
-
             //all players
             Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
             {
-                if (playerState.CurrentState == PlayerStateEnum.ready)
+                if (authPlayerFaction == faction.Faction)
                 {
-                    UIRef.GOButtonScript.SetLightsToPlayerColor(UIRef.FriendlyColor);
-                    if(authPlayerFaction == faction.Faction)
+                    if (playerState.CurrentState == PlayerStateEnum.ready)
                     {
+                        UIRef.GOButtonScript.SetLightsToPlayerColor(UIRef.FriendlyColor);
                         UIRef.GOButtonScript.PlayerReady = true;
                         //Slide out first if friendly
-                        if (UIRef.FriendlyReadySlider.Rect.anchoredPosition.y < UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y)
+                        if (UIRef.FriendlyReadySlider.LerpTime < 1)
                         {
-                            if(!UIRef.FriendlyReadySlider.BurstPlayed)
+                            UIRef.FriendlyReadySlider.LerpTime += UIRef.ReadyOutSpeed * Time.DeltaTime;
+                            if (!UIRef.FriendlyReadySlider.BurstPlayed)
                             {
                                 UIRef.FriendlyReadySlider.BurstPS.time = 0;
                                 UIRef.FriendlyReadySlider.BurstPS.Play();
                                 UIRef.FriendlyReadySlider.BurstPlayed = true;
                             }
-                            UIRef.FriendlyReadySlider.Rect.Translate(new Vector3(0, UIRef.ReadyOutSpeed * Time.DeltaTime, 0));
+                            UIRef.FriendlyReadySlider.Rect.anchoredPosition = new Vector3(UIRef.FriendlyReadySlider.StartPosition.x, Mathf.Lerp(UIRef.FriendlyReadySlider.StartPosition.y, UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y, UIRef.FriendlyReadySlider.LerpTime), 0);
                         }
                         else
                         {
-                            if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning)
+                            if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning || UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.enemyReadyFired)
                             {
-
                                 FireStepChangedEffects("Waiting", UIRef.FriendlyColor, UIRef.ReadySoundEventPath);
                                 UIRef.FriendlyReadyDot.enabled = true;
                                 UIRef.FriendlyReadyBurstPS.time = 0;
                                 UIRef.FriendlyReadyBurstPS.Play();
                                 UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
                             }
-
                             UIRef.FriendlyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
-
-                            if(UIRef.FriendlyReadySwoosh.fillAmount == 1)
-                            {
-                                UIRef.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                                UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                            }
 
                             if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
                             {
-
-                                UIRef.FriendlyFillBarParticle.LoopPS.time = 0;
-                                UIRef.FriendlyFillBarParticle.LoopPS.Stop();
+                                UIRef.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                                UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                                UIRef.FriendlyReadySwooshParticle.LoopPS.time = 0;
+                                UIRef.FriendlyReadySwooshParticle.LoopPS.Stop();
                             }
                             else
                             {
-                                UIRef.FriendlyFillBarParticle.LoopPS.Play();
+                                UIRef.FriendlyReadySwooshParticle.LoopPS.Play();
                             }
 
-                            UIRef.FriendlyFillBarParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyFillBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyFillBarParticle.Rect.anchoredPosition.y);
+                            UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyReadySwooshParticle.ParentRect.sizeDelta.x, UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition.y);
                             UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                         }
                     }
-                    else
+                    else if (gameState.CurrentState == GameStateEnum.planning)
                     {
+                        UIRef.GOButtonScript.PlayerReady = false;
+                        UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
+
+                        if (UIRef.FriendlyReadySlider.LerpTime > 0)
+                        {
+                            UIRef.FriendlyReadySlider.LerpTime -= UIRef.ReadyInSpeed * Time.DeltaTime;
+                            UIRef.FriendlyReadySlider.Rect.anchoredPosition = new Vector3(UIRef.FriendlyReadySlider.StartPosition.x, Mathf.Lerp(UIRef.FriendlyReadySlider.StartPosition.y, UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y, UIRef.FriendlyReadySlider.LerpTime), 0);
+                        }
+                    }
+                }
+                else
+                {
+                    if (playerState.CurrentState == PlayerStateEnum.ready)
+                    {
+                        UIRef.OpponentReady = true;
                         if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning)
                         {
                             FireStepChangedEffects("Enemy Waiting", UIRef.EnemyColor, UIRef.OpponentReadySoundEventPath);
                             UIRef.EnemyReadyDot.enabled = true;
                             UIRef.EnemyReadyBurstPS.time = 0;
                             UIRef.EnemyReadyBurstPS.Play();
-                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
+                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.enemyReadyFired;
                         }
 
                         UIRef.EnemyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
 
-                        if (UIRef.EnemyReadySwoosh.fillAmount == 0 || UIRef.EnemyReadySwoosh.fillAmount == 1)
+                        if (UIRef.EnemyReadySwoosh.fillAmount == 1 || UIRef.EnemyReadySwoosh.fillAmount == 0)
                         {
-                            UIRef.EnemyFillBarParticle.LoopPS.Stop();
+                            UIRef.EnemyReadySwooshParticle.LoopPS.Stop();
                         }
                         else
                         {
-                            UIRef.EnemyFillBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.EnemyReadySwoosh.fillAmount * UIRef.EnemyFillBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyFillBarParticle.Rect.anchoredPosition.y);
-                            UIRef.EnemyFillBarParticle.LoopPS.Play();
+                            UIRef.EnemyReadySwooshParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.EnemyReadySwoosh.fillAmount * UIRef.EnemyReadySwooshParticle.ParentRect.sizeDelta.x), UIRef.EnemyReadySwooshParticle.Rect.anchoredPosition.y);
+                            UIRef.EnemyReadySwooshParticle.LoopPS.Play();
                         }
 
-                        if (UIRef.EnemyReadySwoosh.fillAmount >= 1 && UIRef.EnemyReadySlider.Rect.anchoredPosition.x > UIRef.EnemyReadySlider.StartPosition.x - UIRef.EnemyReadySlider.SlideOffset.x)
+                        if (UIRef.EnemyReadySwoosh.fillAmount >= 1)
                         {
                             if (!UIRef.EnemyReadySlider.BurstPlayed)
                             {
@@ -926,63 +919,58 @@ namespace LeyLineHybridECS
                                 UIRef.EnemyReadySlider.BurstPlayed = true;
                             }
                             UIRef.EnemyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                            UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                            UIRef.EnemyReadySlider.Rect.Translate(new Vector3(0, -UIRef.ReadyOutSpeed * Time.DeltaTime, 0));
-                            UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
+                            UIRef.EnemyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+
+                            if (UIRef.EnemyReadySlider.LerpTime < 1)
+                            {
+                                UIRef.EnemyReadySlider.LerpTime += UIRef.ReadyOutSpeed * Time.DeltaTime;
+                                UIRef.EnemyReadySlider.Rect.anchoredPosition = new Vector3(Mathf.Lerp(UIRef.EnemyReadySlider.StartPosition.x, UIRef.EnemyReadySlider.StartPosition.x + UIRef.EnemyReadySlider.SlideOffset.x, UIRef.EnemyReadySlider.LerpTime), UIRef.EnemyReadySlider.StartPosition.y, 0);
+                            }
                         }
                     }
-                }
-                else if (gameState.CurrentState == GameStateEnum.planning)
-                {
-                    if (authPlayerFaction == faction.Faction)
+                    else if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        UIRef.GOButtonScript.PlayerReady = false;
-                        UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
-                        if (UIRef.EnemyReadySlider.Rect.anchoredPosition.x < UIRef.EnemyReadySlider.StartPosition.x)
-                            UIRef.EnemyReadySlider.Rect.Translate(new Vector3(0, UIRef.ReadyInSpeed * Time.DeltaTime, 0));
-                        if (UIRef.FriendlyReadySlider.Rect.anchoredPosition.y > UIRef.FriendlyReadySlider.StartPosition.y)
-                            UIRef.FriendlyReadySlider.Rect.Translate(new Vector3(0, -UIRef.ReadyInSpeed * Time.DeltaTime, 0));
+                        UIRef.OpponentReady = false;
+                        if (UIRef.EnemyReadySlider.LerpTime > 0)
+                        {
+                            UIRef.EnemyReadySlider.LerpTime -= UIRef.ReadyInSpeed * Time.DeltaTime;
+                            UIRef.EnemyReadySlider.Rect.anchoredPosition = new Vector3(Mathf.Lerp(UIRef.EnemyReadySlider.StartPosition.x, UIRef.EnemyReadySlider.StartPosition.x + UIRef.EnemyReadySlider.SlideOffset.x, UIRef.EnemyReadySlider.LerpTime), UIRef.EnemyReadySlider.StartPosition.y, 0);
+                        }
                     }
                 }
             });
             #endregion
 
+            UIRef.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
+
             //Handle Ropes
             if (gameStates[0].CurrentRopeTime < gameStates[0].RopeTime)
             {
-
-
                 UIRef.EnemyRopeBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.EnemyRope.fillAmount * UIRef.EnemyRopeBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyRopeBarParticle.Rect.anchoredPosition.y);
                 UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyRope.fillAmount * UIRef.FriendlyRopeBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition.y);
 
                 UIRef.RopeTimeText.text = "0:" + ((int)gameState.CurrentRopeTime).ToString("D2");
-                UIRef.RopeTimeText.enabled = true;
 
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
+                    UIRef.RopeTimeText.enabled = true;
+
                     if (!UIRef.RopeLoopEmitter.IsPlaying())
                         UIRef.RopeLoopEmitter.Play();
 
-
                     UIRef.RopeLoopEmitter.SetParameter("FadeInFastTikTok", 1 - gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
-
-
-                    UIRef.EnemyRope.color = UIRef.EnemyColor;
-                    UIRef.FriendlyRope.color = UIRef.FriendlyColor;
 
                     if (authPlayerState.CurrentState == PlayerStateEnum.ready)
                     {
                         UIRef.FriendlyRopeBarParticle.LoopPS.Play(false);
+                        UIRef.RopeTimeText.color = UIRef.FriendlyColor;
 
-                        if (!playerHigh.CancelState)
-                        {
-                            UIRef.RopeTimeText.color = UIRef.FriendlyColor;
-                            UIRef.EnemyRope.fillAmount = 0;
+                        if(!UIRef.OpponentReady)
                             UIRef.FriendlyRope.fillAmount = 1 - (gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
-                        }
                     }
                     else
                     {
+                        //GETTING ROPED
                         UIRef.EnemyRopeBarParticle.LoopPS.Play(false);
                         UIRef.RopeTimeText.color = UIRef.EnemyColor;
                         UIRef.FriendlyRope.fillAmount = 0;
@@ -991,11 +979,26 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    UIRef.RopeTimeText.enabled = false;
-
-                    if (UIRef.FriendlyRope.fillAmount < 1 - UIRef.EnemyRope.fillAmount)
+                    //Find Center and Lerp both ropes to Center
+                    if (!UIRef.RopeSlamOneTime)
                     {
-                        UIRef.FriendlyRope.fillAmount += Time.DeltaTime * UIRef.RopeEndLerpSpeed;
+                        UIRef.EnemyRopeEndFillAmount = UIRef.EnemyRope.fillAmount;
+                        UIRef.FriendlyRopeEndFillAmount = UIRef.FriendlyRope.fillAmount;
+                        UIRef.RopeFillsEndDist = (1 - UIRef.FriendlyRopeEndFillAmount - UIRef.EnemyRopeEndFillAmount) / 2f;
+
+                        UIRef.RopeTimeText.enabled = false;
+                        UIRef.RopeSlamOneTime = true;
+                    }
+
+                    if (UIRef.RopeEndsLerpTime < 1)
+                    {
+                        if(UIRef.RopeSlamOneTime)
+                        {
+                            UIRef.RopeEndsLerpTime += Time.DeltaTime * UIRef.RopeEndLerpSpeed;
+                            UIRef.FriendlyRope.fillAmount = Mathf.Lerp(UIRef.FriendlyRopeEndFillAmount, UIRef.FriendlyRopeEndFillAmount + UIRef.RopeFillsEndDist, UIRef.RopeEndsLerpTime);
+                            UIRef.EnemyRope.fillAmount = Mathf.Lerp(UIRef.EnemyRopeEndFillAmount, UIRef.EnemyRopeEndFillAmount + UIRef.RopeFillsEndDist, UIRef.RopeEndsLerpTime);
+                        }
+
                     }
                     else
                     {
@@ -1006,15 +1009,7 @@ namespace LeyLineHybridECS
                             UIRef.FriendlyRopeBarParticle.BurstPS.time = 0;
                             UIRef.FriendlyRopeBarParticle.BurstPS.Play();
                         }
-                        UIRef.FriendlyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
-                    }
 
-                    if (UIRef.EnemyRope.fillAmount < 1 - UIRef.FriendlyRope.fillAmount)
-                    {
-                        UIRef.EnemyRope.fillAmount += Time.DeltaTime * UIRef.RopeEndLerpSpeed;
-                    }
-                    else
-                    {
                         if (UIRef.EnemyRope.color.a == 1)
                         {
                             //BURST
@@ -1022,6 +1017,8 @@ namespace LeyLineHybridECS
                             UIRef.EnemyRopeBarParticle.BurstPS.time = 0;
                             UIRef.EnemyRopeBarParticle.BurstPS.Play();
                         }
+
+                        UIRef.FriendlyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
                         UIRef.EnemyRope.color -= new Color(0, 0, 0, UIRef.RopeEndFadeOutSpeed * Time.DeltaTime);
                     }
                 }
@@ -1072,17 +1069,11 @@ namespace LeyLineHybridECS
             menuPanel.SetActive(!menuPanel.activeSelf);
         }
 
-        void HandleKeyCodeInput()
+        void HandleKeyCodeInput(GameStateEnum gameState)
         {
-            if(Input.GetKeyDown(KeyCode.Q) && UIRef.ActionSwichButton.gameObject.activeSelf)
+            if (Input.GetButtonDown("SwitchIngameUI"))
             {
-                UIRef.ActionSwichButton.Button.onClick.Invoke();
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                if(UIRef.GOButtonScript.Button.interactable)
-                    UIRef.GOButtonScript.Button.onClick.Invoke();
+                UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
             }
 
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -1095,70 +1086,86 @@ namespace LeyLineHybridECS
                 UIRef.Canvas.gameObject.SetActive(!UIRef.Canvas.gameObject.activeSelf);
             }
 
-            if(UIRef.ActionButtonGroup.activeSelf)
+            if(gameState == GameStateEnum.planning)
             {
-                if (Input.GetKeyDown(KeyCode.Alpha1))
+
+                if (Input.GetKeyDown(KeyCode.Space))
                 {
-                    UIRef.Actions[0].Button.Select();
-                    UIRef.Actions[0].Button.onClick.Invoke();
+                    if (UIRef.GOButtonScript.Button.interactable)
+                        UIRef.GOButtonScript.Button.onClick.Invoke();
                 }
-                else if (Input.GetKeyDown(KeyCode.Alpha2))
+
+
+                if (Input.GetKeyDown(KeyCode.Q) && UIRef.SwapActionButton.gameObject.activeSelf)
                 {
-                    UIRef.Actions[1].Button.Select();
-                    UIRef.Actions[1].Button.onClick.Invoke();
+                    UIRef.SwapActionButton.Button.onClick.Invoke();
                 }
-                else if (Input.GetKeyDown(KeyCode.Alpha3))
+
+                if (UIRef.ActionButtonGroup.activeSelf)
                 {
-                    UIRef.Actions[2].Button.Select();
-                    UIRef.Actions[2].Button.onClick.Invoke();
+                    if (Input.GetKeyDown(KeyCode.Alpha1))
+                    {
+                        UIRef.Actions[0].Button.Select();
+                        UIRef.Actions[0].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha2))
+                    {
+                        UIRef.Actions[1].Button.Select();
+                        UIRef.Actions[1].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha3))
+                    {
+                        UIRef.Actions[2].Button.Select();
+                        UIRef.Actions[2].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha4))
+                    {
+                        UIRef.Actions[3].Button.Select();
+                        UIRef.Actions[3].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha5))
+                    {
+                        UIRef.Actions[4].Button.Select();
+                        UIRef.Actions[4].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha6))
+                    {
+                        UIRef.Actions[5].Button.Select();
+                        UIRef.Actions[5].Button.onClick.Invoke();
+                    }
                 }
-                else if (Input.GetKeyDown(KeyCode.Alpha4))
+                else
                 {
-                    UIRef.Actions[3].Button.Select();
-                    UIRef.Actions[3].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha5))
-                {
-                    UIRef.Actions[4].Button.Select();
-                    UIRef.Actions[4].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha6))
-                {
-                    UIRef.Actions[5].Button.Select();
-                    UIRef.Actions[5].Button.onClick.Invoke();
-                }
-            }
-            else
-            {
-                if (Input.GetKeyDown(KeyCode.Alpha1))
-                {
-                    UIRef.SpawnActions[0].Button.Select();
-                    UIRef.SpawnActions[0].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha2))
-                {
-                    UIRef.SpawnActions[1].Button.Select();
-                    UIRef.SpawnActions[1].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha3))
-                {
-                    UIRef.SpawnActions[2].Button.Select();
-                    UIRef.SpawnActions[2].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha4))
-                {
-                    UIRef.SpawnActions[3].Button.Select();
-                    UIRef.SpawnActions[3].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha5))
-                {
-                    UIRef.SpawnActions[4].Button.Select();
-                    UIRef.SpawnActions[4].Button.onClick.Invoke();
-                }
-                else if (Input.GetKeyDown(KeyCode.Alpha6))
-                {
-                    UIRef.SpawnActions[5].Button.Select();
-                    UIRef.SpawnActions[5].Button.onClick.Invoke();
+                    if (Input.GetKeyDown(KeyCode.Alpha1))
+                    {
+                        UIRef.SpawnActions[0].Button.Select();
+                        UIRef.SpawnActions[0].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha2))
+                    {
+                        UIRef.SpawnActions[1].Button.Select();
+                        UIRef.SpawnActions[1].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha3))
+                    {
+                        UIRef.SpawnActions[2].Button.Select();
+                        UIRef.SpawnActions[2].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha4))
+                    {
+                        UIRef.SpawnActions[3].Button.Select();
+                        UIRef.SpawnActions[3].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha5))
+                    {
+                        UIRef.SpawnActions[4].Button.Select();
+                        UIRef.SpawnActions[4].Button.onClick.Invoke();
+                    }
+                    else if (Input.GetKeyDown(KeyCode.Alpha6))
+                    {
+                        UIRef.SpawnActions[5].Button.Select();
+                        UIRef.SpawnActions[5].Button.onClick.Invoke();
+                    }
                 }
             }
         }
@@ -1249,62 +1256,84 @@ namespace LeyLineHybridECS
                 unitGroupUI.LastCombinedEnergyCost = unitGroupUI.CombinedEnergyCost;
             }
 
-            if(unitGroupUI.FillEvent)
+            if (unitGroupUI.CleanupReset)
             {
-                //GAIN
+                //Instantly reset all the Values from cleanup
                 if (combinedAmount > 0)
                 {
-
+                    Debug.Log("CombinedAmount greater than 0 in cleanupEvent");
                     unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
-                    unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                    unitGroupUI.EnergyFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                    unitGroupUI.EnergyGainFill.fillAmount = Mathf.Lerp(0, percentageGainFill, unitGroupUI.PositiveLerpTime);
-
-                    if(unitGroupUI.PositiveLerpTime >= 1)
-                        unitGroupUI.FillEvent = false;
+                    unitGroupUI.EnergyFill.fillAmount = 0;
+                    unitGroupUI.EnergyGainFill.fillAmount = 1;
                 }
-                //COST
                 else
                 {
                     unitGroupUI.EnergyChangeText.text = combinedAmount.ToString();
-                    //RETURN ENERGY UP
-                    if (unitGroupUI.EnergyFill.fillAmount > percentageToFill)
+                    unitGroupUI.EnergyFill.fillAmount = 0;
+                    unitGroupUI.EnergyGainFill.fillAmount = 0;
+                }
+
+                unitGroupUI.CleanupReset = false;
+            }
+
+            else if (unitGroupUI.FillEvent)
+            {
+                    //GAIN
+                    if (combinedAmount > 0)
                     {
-                        unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
 
-                        unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                        UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, 0, unitGroupUI.NegativeLerpTime);
-                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, 0, unitGroupUI.PositiveLerpTime);
-                        unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(1, percentageToFill, unitGroupUI.PositiveLerpTime);
+                        unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
+                        unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                        unitGroupUI.EnergyFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                        unitGroupUI.EnergyGainFill.fillAmount = Mathf.Lerp(0, percentageGainFill, unitGroupUI.PositiveLerpTime);
 
-                        if (unitGroupUI.NegativeLerpTime >= 1)
-                        {
-                            unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                        }
+                        if (unitGroupUI.PositiveLerpTime >= 1)
+                            unitGroupUI.FillEvent = false;
                     }
-                    else if (unitGroupUI.EnergyFill.fillAmount < percentageToFill)
-                    {
-                        //COST ENERGY DOWN
-                        unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
-                        unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                        UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0, UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, unitGroupUI.PositiveLerpTime);
-
-                        if (UIRef.EnergyConnectorPlayerColorFill.fillAmount >= UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index - 0.001f)
-                        {
-                            unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
-                            UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0, UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, unitGroupUI.NegativeLerpTime);
-                            unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(0, percentageToFill, unitGroupUI.NegativeLerpTime);
-                        }
-                    }
+                    //COST
                     else
                     {
-                        unitGroupUI.FillEvent = false;
+                        unitGroupUI.EnergyChangeText.text = combinedAmount.ToString();
+                        //RETURN ENERGY UP
+                        if (unitGroupUI.EnergyFill.fillAmount > percentageToFill)
+                        {
+                            unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
+
+                            unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                            UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, 0, unitGroupUI.NegativeLerpTime);
+                            UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, 0, unitGroupUI.PositiveLerpTime);
+                            unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(1, percentageToFill, unitGroupUI.PositiveLerpTime);
+
+                            if (unitGroupUI.NegativeLerpTime >= 1)
+                            {
+                                unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                            }
+                        }
+                        else if (unitGroupUI.EnergyFill.fillAmount < percentageToFill)
+                        {
+                            //COST ENERGY DOWN
+                            unitGroupUI.PositiveLerpTime += UIRef.EnergyConnectorPositiveSpeed * Time.DeltaTime;
+                            unitGroupUI.EnergyGainFill.fillAmount -= UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                            UIRef.EnergyConnectorPlayerColorFill.fillAmount = Mathf.Lerp(0, UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, unitGroupUI.PositiveLerpTime);
+
+                            if (UIRef.EnergyConnectorPlayerColorFill.fillAmount >= UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index - 0.001f)
+                            {
+                                unitGroupUI.NegativeLerpTime += UIRef.EnergyConnectorNegativeSpeed * Time.DeltaTime;
+                                UIRef.EnergyConnectorNegativeFill.fillAmount = Mathf.Lerp(0, UIRef.ECFillAmounts.x + UIRef.ECFillAmounts.y * index, unitGroupUI.NegativeLerpTime);
+                                unitGroupUI.EnergyFill.fillAmount = Mathf.Lerp(0, percentageToFill, unitGroupUI.NegativeLerpTime);
+                            }
+                        }
+                        else
+                        {
+                            unitGroupUI.FillEvent = false;
+                        }
                     }
-                }
+                
             }
         }
 
-        void UpdateCircleBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText)
+
+        void UpdateSAEnergyText(LineRendererComponent lineRenderer, Actions.Component actions, Text inEnergyText)
         {
             //hacky fix to set current cost of move with linerenderer.count
             if (actions.CurrentSelected.Index == -2)
@@ -1318,16 +1347,7 @@ namespace LeyLineHybridECS
 
             if (actions.LockedAction.Index != -3)
             {
-                if (inEnergyFill.fillAmount < 1)
-                    inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, 1, Time.DeltaTime);
-
                 inEnergyText.text = actions.LockedAction.CombinedCost.ToString();
-
-            }
-            else
-            {
-                if (inEnergyFill.fillAmount > 0)
-                    inEnergyFill.fillAmount = Mathf.Lerp(inEnergyFill.fillAmount, 0, Time.DeltaTime);
             }
         }
 
@@ -1392,6 +1412,7 @@ namespace LeyLineHybridECS
             toHealthBar.HealthFill.fillAmount = fromHealthBar.HealthFill.fillAmount;
             toHealthBar.ArmorFill.fillAmount = fromHealthBar.ArmorFill.fillAmount;
             toHealthBar.DamageFill.fillAmount = fromHealthBar.DamageFill.fillAmount;
+            toHealthBar.BgFill.fillAmount = fromHealthBar.BgFill.fillAmount;
 
             if (unitFaction == playerFaction)
             {
@@ -1410,11 +1431,21 @@ namespace LeyLineHybridECS
             }
         }
 
+        public void ResetHealthBarFillAmounts(HealthBar healthBar, Health.Component health)
+        {
+            float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
+            healthBar.ArmorFill.fillAmount = 0;
+            healthBar.BgFill.fillAmount = 0;
+            healthBar.DamageFill.fillAmount = 0;
+            healthBar.HealthFill.fillAmount = healthPercentage;
+        }
+
         public void SetHealthBarFillAmounts(UnitHeadUIReferences unitHeadUiRef, HealthBar healthBar, Health.Component health, uint unitFaction, uint playerFaction)
         {
             float combinedHealth = health.CurrentHealth + health.Armor;
             float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
             float armorPercentage = (float)health.Armor / combinedHealth;
+            healthBar.BgFill.fillAmount = 0;
 
             if (health.MaxHealth + health.Armor >= 100)
             {
@@ -1675,7 +1706,7 @@ namespace LeyLineHybridECS
             UIRef.SAActionName.text = actionButton.ActionName;
             UIRef.SAExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[actionButton.ExecuteStepIndex];
             UIRef.SAExecuteStepIcon.color = settings.TurnStepBgColors[actionButton.ExecuteStepIndex];
-            UIRef.SAInfoPanel.SetActive(true);
+            //UIRef.SAInfoPanel.SetActive(true);
         }
 
         public void InitializeSelectedActionTooltip(int index)
@@ -1685,7 +1716,7 @@ namespace LeyLineHybridECS
             UIRef.SAActionName.text = UIRef.Actions[index].ActionName;
             UIRef.SAExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[UIRef.Actions[index].ExecuteStepIndex];
             UIRef.SAExecuteStepIcon.color = settings.TurnStepBgColors[UIRef.Actions[index].ExecuteStepIndex];
-            UIRef.SAInfoPanel.SetActive(true);
+            //UIRef.SAInfoPanel.SetActive(true);
         }
 
         public void ClearSelectedActionToolTip()

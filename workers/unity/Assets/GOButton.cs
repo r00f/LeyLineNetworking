@@ -77,8 +77,10 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 
     private void Update()
     {
-        animator.SetBool("Cancel", PlayerInCancelState);
         animator.SetBool("Ready", PlayerReady);
+        if(!PlayerReady)
+            animator.SetBool("Cancel", PlayerInCancelState);
+
 
         if ((animator.GetCurrentAnimatorStateInfo(0).fullPathHash == rotateBackHash || animator.GetCurrentAnimatorStateInfo(0).fullPathHash == cancelOpenHash || animator.GetAnimatorTransitionInfo(0).fullPathHash == cancelCloseToOpenHash) && animator.GetAnimatorTransitionInfo(0).fullPathHash != rotateToGoHash)
         {

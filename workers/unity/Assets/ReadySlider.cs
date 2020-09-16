@@ -11,4 +11,5 @@ public class ReadySlider : MonoBehaviour
     public Vector2 SlideOffset;
     public ParticleSystem BurstPS;
     public bool BurstPlayed;
+    public float LerpTime;
 }

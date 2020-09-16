@@ -462,6 +462,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ce3a8fbf57d589e408be1be498ac8db5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  UnitName: Spike
   VisionRange: 4
   BaseHealth: 80
   EnergyIncome: 0
@@ -746,6 +747,7 @@ MonoBehaviour:
   SecondWindParticleSystemInstance: {fileID: 5049950378277404256}
   AxaShield: {fileID: 202638360942825131}
   HitPosition: {x: 0, y: 0, z: 0}
+  CombinedArmor: 0
   CurrentArmor: 0
   CurrentHealth: 0
   LastStationaryCoordinate:

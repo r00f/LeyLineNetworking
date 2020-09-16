@@ -106,31 +106,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 actionToSelect = unitActions.ActionsList[index];
                             }
                         }
-                        /*else
-                        {
-                            if (index == -2)
-                            {
-                                var a = unitActions.BasicMove;
-                                a.CombinedCost = CalculateCombinedCost(unitActions.BasicMove.Targets[0]);
-                                unitActions.BasicMove = a;
-
-                                if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.BasicMove.CombinedCost) >= 0)
-                                {
-                                    actionToSelect = unitActions.BasicMove;
-                                }
-                            }
-                            else if (index == -1)
-                            {
-                                var a = unitActions.BasicAttack;
-                                a.CombinedCost = CalculateCombinedCost(unitActions.BasicAttack.Targets[0]);
-                                unitActions.BasicAttack = a;
-
-                                if (m_ResourceSystem.CheckPlayerEnergy(unitFaction.Faction, unitActions.BasicAttack.CombinedCost) >= 0)
-                                {
-                                    actionToSelect = unitActions.BasicAttack;
-                                }
-                            }
-                        }*/
                     }
 
                     unitActions.CurrentSelected = actionToSelect;

@@ -125,84 +125,82 @@ namespace LeyLineHybridECS
                             {
                                 playerState.CurrentState = PlayerStateEnum.ready;
                             }
-
                             UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - playerHigh.CancelTime / 3);
                         }
-                        //else
-                            //UIRef.GOButtonAnimator.SetFloat("CancelTimer", 0);
-
-                        HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
-
-                        Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
+                        else
                         {
-                            var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+                            HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
-                            if (unitId.EntityId.Id == playerState.SelectedUnitId)
+                            Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
                             {
-                                foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
+                                var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+
+                                if (unitId.EntityId.Id == playerState.SelectedUnitId)
                                 {
-                                    if (!p.isPlaying)
-                                        p.Play();
-                                }
-
-                                if(mouseState.ClickEvent == 1)
-                                    m_UISystem.ClearSelectedActionToolTip();
-
-
-                                if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
-                                    playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
-
-                                playerCam.SetTargetTransform(unitComponentReferences.transform);
-
-                                if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
-                                {
-                                    if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                                    foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
                                     {
-                                        playerState.CurrentState = PlayerStateEnum.waiting_for_target;
+                                        if (!p.isPlaying)
+                                            p.Play();
                                     }
-                                    //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
-                                    if (Input.GetButtonDown("Fire2"))
+
+                                    if (mouseState.ClickEvent == 1)
+                                        m_UISystem.ClearSelectedActionToolTip();
+
+
+                                    if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
+                                        playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+
+                                    playerCam.SetTargetTransform(unitComponentReferences.transform);
+
+                                    if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
                                     {
-                                        //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
-                                        m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
-                                        //Call methods so line/target gets disabled instantly
-                                        m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
-                                        playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                                        if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                                        {
+                                            playerState.CurrentState = PlayerStateEnum.waiting_for_target;
+                                        }
+                                        //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
+                                        if (Input.GetButtonDown("Fire2"))
+                                        {
+                                            //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
+                                            m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
+                                            //Call methods so line/target gets disabled instantly
+                                            m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
+                                            playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                                            m_UISystem.ClearSelectedActionToolTip();
+                                        }
+                                    }
+                                    else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
+                                    {
+                                        playerState.CurrentState = PlayerStateEnum.unit_selected;
+                                    }
+                                }
+                                else
+                                {
+                                    foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
+                                    {
+                                        if (p.isPlaying)
+                                            p.Stop();
+                                    }
+                                    if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
+                                    {
+                                        playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+                                        playerState.SelectedUnitId = unitId.EntityId.Id;
+                                        //Clear ActionTooltip on UnitSelect
                                         m_UISystem.ClearSelectedActionToolTip();
                                     }
                                 }
-                                else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
-                                {
-                                    playerState.CurrentState = PlayerStateEnum.unit_selected;
-                                }
-                            }
-                            else
-                            {
-                                foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
-                                {
-                                    if (p.isPlaying)
-                                        p.Stop();
-                                }
-                                if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
-                                {
-                                    playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
-                                    playerState.SelectedUnitId = unitId.EntityId.Id;
-                                    //Clear ActionTooltip on UnitSelect
-                                    m_UISystem.ClearSelectedActionToolTip();
-                                }
-                            }
-                        });
+                            });
+                        }
                     }
                     else
                     {
                         if (playerState.SelectedUnitId != 0)
                             playerState.SelectedUnitId = 0;
                     }
-
                 }
                 else
                 {
-                    Debug.Log("Force Ready from rope end Event");
+                    m_HighlightingSystem.ResetHighlights();
                     playerState.CurrentState = PlayerStateEnum.ready;
                 }
 
@@ -255,13 +253,19 @@ namespace LeyLineHybridECS
         {
             var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
             var playerHigh = playerHighs[0];
+            var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            var playerState = playerStates[0];
 
-            playerHigh.CancelTime = timeToCancel;
-            playerHigh.CancelState = !playerHigh.CancelState;
+            if(playerState.CurrentState != PlayerStateEnum.ready)
+            {
+                playerHigh.CancelTime = timeToCancel;
+                playerHigh.CancelState = !playerHigh.CancelState;
+            }
 
             playerHighs[0] = playerHigh;
             m_PlayerData.CopyFromComponentDataArray(playerHighs);
             playerHighs.Dispose();
+            playerStates.Dispose();
         }
 
         public void SetPlayerState(PlayerStateEnum state)
@@ -278,16 +282,16 @@ namespace LeyLineHybridECS
             }
             var playerState = playersState[0];
             
-            if(playerState.CurrentState != state)
+            if(playerState.CurrentState != state && playerState.CurrentState != PlayerStateEnum.ready)
             {
                 playerState.CurrentState = state;
             }
 
-            Debug.Log("SetPlayerStateMethodCall: " + playerState.CurrentState);
+            //Debug.Log("SetPlayerStateMethodCall: " + playerState.CurrentState);
 
             playerState.CurrentState = playerState.CurrentState;
             playersState[0] = playerState;
-            Debug.Log("SetPlayerStateMethodCallApplied: " + playersState[0].CurrentState);
+            //Debug.Log("SetPlayerStateMethodCallApplied: " + playersState[0].CurrentState);
             #region PlayerData
             m_PlayerData.CopyFromComponentDataArray(playersState);
             playersWorldID.Dispose();

@@ -137,12 +137,6 @@ public class HighlightingSystem : ComponentSystem
 
         if (gameState.CurrentState == GameStateEnum.planning)
         {
-            //MOVE THIS ELSEWHERE
-            if (Input.GetButtonDown("SwitchIngameUI"))
-            {
-                playerHighlightingData.ShowIngameUI = !playerHighlightingData.ShowIngameUI;
-            }
-
             if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate)) //&& playerHighlightingData.InputCooldown <= 0)
             {
                 if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
@@ -695,6 +689,69 @@ public class HighlightingSystem : ComponentSystem
             }
         });
     }
+
+    public void ResetHighlights()
+    {
+        var playerStates = m_PlayerStateData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+        var playerHighlightingDatas = m_PlayerStateData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+
+        var playerHigh = playerHighlightingDatas[0];
+        var playerState = playerStates[0];
+
+        EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
+        HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
+
+        Entities.With(m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
+        {
+            if(actions.CurrentSelected.Index != -3)
+            {
+                actions.CurrentSelected = actions.NullAction;
+            }
+            //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
+            if (actions.LockedAction.Index == -3)
+            {
+                if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
+                {
+                    ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
+                    playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                    playerState.TargetDictChange = true;
+                }
+            }
+        });
+
+        Entities.With(m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        {
+            if (mouseState.CurrentState == MouseState.State.Clicked)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+            }
+            if (markerState.CurrentState != (MarkerState.State)(int)mouseState.CurrentState)
+            {
+                markerState.CurrentState = (MarkerState.State)(int)mouseState.CurrentState;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+                //markerState.IsSet = 0;
+            }
+            if (markerState.CurrentState == MarkerState.State.Reachable)
+            {
+                mouseState.CurrentState = MouseState.State.Neutral;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+            }
+        });
+
+
+        playerState.UnitTargets = playerState.UnitTargets;
+        playerStates[0] = playerState;
+        playerHighlightingDatas[0] = playerHigh;
+
+        m_PlayerStateData.CopyFromComponentDataArray(playerStates);
+        m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
+
+        playerHighlightingDatas.Dispose();
+        playerStates.Dispose();
+    }
+
 
     public void ResetUnitHighLights(Entity e, PlayerState.Component playerState, long unitId)
     {

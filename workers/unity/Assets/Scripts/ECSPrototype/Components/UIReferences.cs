@@ -9,6 +9,8 @@ public class UIReferences : MonoBehaviour
 
     public Animator SlideOutUIAnimator;
 
+    public bool OpponentReady;
+
     [Header("MenuPanels")]
     public GameObject UIMainPanel;
     public GameObject HelpPanel;
@@ -52,6 +54,7 @@ public class UIReferences : MonoBehaviour
     public Image PortraitPlayerColor;
     public Image PortraitPlayerColorGlow;
     public SetPortraitClip AnimatedPortrait;
+    public Text PortraitNameText;
 
     [Header("UnitStats")]
     public Text UnitStats;
@@ -65,7 +68,7 @@ public class UIReferences : MonoBehaviour
     [Header("Actions")]
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
-    public SwapActionGroupButton ActionSwichButton;
+    public SwapActionGroupButton SwapActionButton;
     public GameObject ActionButtonGroup;
     public GameObject SpawnButtonGroup;
 
@@ -121,6 +124,7 @@ public class UIReferences : MonoBehaviour
     public ManalithTooltip ManalithToolTipFab;
 
     [Header("ReadyPanel")]
+    public float RopeFillsEndDist;
     public float ReadySwooshFadeOutSpeed;
     public float RopeEndFadeOutSpeed;
     public float ReadyImpulseLerpSpeed;
@@ -138,6 +142,15 @@ public class UIReferences : MonoBehaviour
     public GOButton GOButtonScript;
     public StudioEventEmitter RopeLoopEmitter;
 
+    [HideInInspector]
+    public bool RopeSlamOneTime;
+    [HideInInspector]
+    public float FriendlyRopeEndFillAmount;
+    [HideInInspector]
+    public float EnemyRopeEndFillAmount;
+    [HideInInspector]
+    public float RopeEndsLerpTime;
+
     public Color FriendlyIncomeColor;
     [HideInInspector]
     public Color FriendlyColor;
@@ -149,8 +162,8 @@ public class UIReferences : MonoBehaviour
 
     [Header("ParticleSystems")]
     public List<ParticleSystem> CowExhaleParticleSystems;
-    public FillBarParticleComponent FriendlyFillBarParticle;
-    public FillBarParticleComponent EnemyFillBarParticle;
+    public FillBarParticleComponent FriendlyReadySwooshParticle;
+    public FillBarParticleComponent EnemyReadySwooshParticle;
     public FillBarParticleComponent FriendlyRopeBarParticle;
     public FillBarParticleComponent EnemyRopeBarParticle;
     public ParticleSystem FriendlyReadyBurstPS;
@@ -176,6 +189,7 @@ public class UIReferences : MonoBehaviour
     public enum UIEffectsFired
     {
         planning,
+        enemyReadyFired,
         readyFired,
         interruptFired,
         attackFired,

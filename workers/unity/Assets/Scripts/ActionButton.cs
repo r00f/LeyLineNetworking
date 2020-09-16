@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using FMODUnity;
+using System;
 
 public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHandler
 {
@@ -51,7 +52,7 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
             UIRef.TTRect.anchoredPosition = new Vector2(RectTransform.anchoredPosition.x, UIRef.TTRect.anchoredPosition.y);
             UIRef.TTActionCost.text = "" + EnergyCost;
             UIRef.TTActionDescription.text = ActionDescription;
-            UIRef.TTActionName.text = ActionName;
+            UIRef.TTActionName.text = ActionName.Replace(" ", Environment.NewLine);
             UIRef.TTExecuteStepImage.sprite = UIRef.ExecuteStepSprites[ExecuteStepIndex];
             UIRef.TTPanel.SetActive(true);
         }

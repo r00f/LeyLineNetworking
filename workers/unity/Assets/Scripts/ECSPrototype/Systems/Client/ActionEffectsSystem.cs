@@ -42,6 +42,7 @@ public class ActionEffectsSystem : ComponentSystem
         ComponentType.ReadOnly<CapsuleCollider>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
+        ComponentType.ReadWrite<UnitHeadUIReferences>(),
         ComponentType.ReadWrite<UnitEffects>()
         );
 
@@ -90,6 +91,7 @@ public class ActionEffectsSystem : ComponentSystem
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
         {
+            var unitHeadUIRef = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
             var unitCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
@@ -117,6 +119,7 @@ public class ActionEffectsSystem : ComponentSystem
                         }
                     }
 
+                    unitEffects.CombinedArmor = 0;
                     unitEffects.CurrentArmor = 0;
                     unitEffects.CurrentHealth = health.CurrentHealth;
                 }
@@ -162,7 +165,7 @@ public class ActionEffectsSystem : ComponentSystem
                                             }
                                         }
                                     }
-                                    //if we take less damage than our last amor amount
+
                                     if (damageAmount < unitEffects.CurrentArmor)
                                     {
                                         //do armor damage Stuff
@@ -180,6 +183,7 @@ public class ActionEffectsSystem : ComponentSystem
                                         m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red, 0.4f);
 
                                         m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f, true);
+
                                         unitEffects.CurrentArmor = 0;
 
                                         if ((int)unitEffects.CurrentHealth - (int)remainingDamage > 0)
@@ -188,7 +192,6 @@ public class ActionEffectsSystem : ComponentSystem
                                         }
                                         else
                                         {
-                                            //Debug.Log("unitEffects.CurrentHealth Negative Set To 0");
                                             unitEffects.CurrentHealth = 0;
                                         }
                                     }
@@ -196,6 +199,7 @@ public class ActionEffectsSystem : ComponentSystem
                                 else
                                 {
                                     Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
+
 
                                     //if the unit survives
                                     if ((int)unitEffects.CurrentHealth - (int)damageAmount > 0)
@@ -210,6 +214,18 @@ public class ActionEffectsSystem : ComponentSystem
                                 }
 
 
+                                if (unitHeadUIRef.UnitHeadHealthBarInstance)
+                                {
+                                    if (unitEffects.CurrentHealth + unitEffects.CurrentArmor >= health.MaxHealth)
+                                    {
+                                        unitHeadUIRef.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float)(unitEffects.CurrentHealth + unitEffects.CurrentArmor) / (health.MaxHealth + unitEffects.CombinedArmor));
+                                    }
+                                    else
+                                    {
+                                        unitHeadUIRef.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float)(unitEffects.CurrentHealth + unitEffects.CurrentArmor) / health.MaxHealth);
+                                    }
+                                }
+
                                 animatorComponent.Animator.SetTrigger("GetHit");
 
 
@@ -221,6 +237,7 @@ public class ActionEffectsSystem : ComponentSystem
 
                                 uint armorAmount = unitEffects.GetHitEffects.ElementAt(i).Key.Effects[0].GainArmorNested.ArmorAmount;
                                 //do gainArmorStuff
+                                unitEffects.CombinedArmor += armorAmount;
                                 unitEffects.CurrentArmor += armorAmount;
                                 m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f);
                                 m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);

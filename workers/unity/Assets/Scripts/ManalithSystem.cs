@@ -62,124 +62,116 @@ public class ManalithSystem : ComponentSystem
 
     }
 
+    public void UpdateManaliths(uint worldIndex)
+    {
+        Entities.With(m_ManalithData).ForEach((ref SpatialEntityId entityId, ref Manalith.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
+        {
+            var manalithWorldIndex = windex.Value;
+            var faction = factionref;
+            var manalithComp = circleCellsref;
+
+            if (worldIndex == manalithWorldIndex)
+            {
+                manalithComp.CombinedEnergyGain = manalithComp.BaseIncome;
+
+                for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
+                {
+                    var slot = manalithComp.Manalithslots[cci];
+
+                    //unit on slot
+                    if (slot.CorrespondingCell.UnitOnCellId != 0)
+                    {
+                        bool unitAlive = false;
+
+                        Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref Energy.Component energy) =>
+                        {
+                            if (worldIndex == unitWorldIndex.Value)
+                            {
+                                if (slot.CorrespondingCell.UnitOnCellId == unitId.EntityId.Id)
+                                {
+                                    unitAlive = true;
+                                    //if unit is still alive and has walked off the slot
+                                    if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) != Vector3fext.ToUnityVector(slot.CorrespondingCell.CubeCoordinate))
+                                    {
+                                        UpdateManalithSlots(ref manalithComp, cci, 0);
+                                        energy.Harvesting = false;
+                                    }
+                                }
+                            }
+                        });
+                        if (!unitAlive)
+                        {
+                            UpdateManalithSlots(ref manalithComp, cci, 0);
+                        }
+                    }
+
+                    Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId) =>
+                    {
+                        if (worldIndex == unitWorldIndex.Value)
+                        {
+                            if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(slot.CorrespondingCell.CubeCoordinate))
+                            {
+                                UpdateManalithSlots(ref manalithComp, cci, unitId.EntityId.Id);
+                            }
+                        }
+                    });
+                }
+
+                if (manalithComp.StateChange)
+                {
+                    var oldFact = factionref.Faction;
+                    //Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
+                    uint fact = UpdateFaction(manalithComp, manalithWorldIndex);
+                    TeamColorEnum tColor = new TeamColorEnum();
+
+                    //if odd
+                    if (fact == 0)
+                    {
+                        tColor = TeamColorEnum.blue;
+                    }
+                    else if (fact % 2 == 1)
+                    {
+                        tColor = TeamColorEnum.blue;
+                    }
+                    else if (fact % 2 == 0)
+                    {
+                        tColor = TeamColorEnum.red;
+                    }
+
+                    faction = new FactionComponent.Component
+                    {
+                        Faction = fact,
+                        TeamColor = tColor
+                    };
+
+                    for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
+                    {
+                        var slot = manalithComp.Manalithslots[cci];
+
+                        UpdateUnit(slot.CorrespondingCell.UnitOnCellId, faction.Faction, ref manalithComp);
+                    }
+
+                    manalithComp.StateChange = false;
+
+                    factionref = faction;
+                    circleCellsref = manalithComp;
+
+                    if (oldFact != faction.Faction)
+                    {
+                        componentUpdateSystem.SendEvent(
+                         new Manalith.ManalithFactionChangeEvent.Event(),
+                         entityId.EntityId);
+
+                    }
+                }
+            }
+        });
+    }
+
 
     protected override void OnUpdate()
     {
-        //reset unit harvesting if they have a locked moveaction
-        Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
-        {
-            var worldIndex = gameStateWorldIndex.Value;
-            var currentState = gameState.CurrentState;
 
-            Entities.With(m_ManalithData).ForEach((ref SpatialEntityId entityId, ref Manalith.Component circleCellsref, ref FactionComponent.Component factionref, ref WorldIndex.Component windex) =>
-            {
-                var manalithWorldIndex = windex.Value;
-                var faction = factionref;
-                var manalithComp = circleCellsref;
-
-                if (worldIndex == manalithWorldIndex)
-                {
-                    if (currentState == GameStateEnum.calculate_energy)
-                    {
-                        manalithComp.CombinedEnergyGain = manalithComp.BaseIncome;
-
-                        for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
-                        {
-                            var slot = manalithComp.Manalithslots[cci];
-
-                            //unit on slot
-                            if(slot.CorrespondingCell.UnitOnCellId != 0)
-                            {
-                                bool unitAlive = false;
-
-                                Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref Energy.Component energy) =>
-                                {
-                                    if (worldIndex == unitWorldIndex.Value)
-                                    {
-                                        if (slot.CorrespondingCell.UnitOnCellId == unitId.EntityId.Id)
-                                        {
-                                            unitAlive = true;
-                                            //if unit is still alive and has walked off the slot
-                                            if(Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) != Vector3fext.ToUnityVector(slot.CorrespondingCell.CubeCoordinate))
-                                            {
-                                                UpdateManalithSlots(ref manalithComp, cci, 0);
-                                                energy.Harvesting = false;
-                                            }
-                                        }
-                                    }
-                                });
-                                if(!unitAlive)
-                                {
-                                    UpdateManalithSlots(ref manalithComp, cci, 0);
-                                }
-                            }
-
-                            Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId) =>
-                            {
-                                if (worldIndex == unitWorldIndex.Value)
-                                {
-                                    if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(slot.CorrespondingCell.CubeCoordinate))
-                                    {
-                                        UpdateManalithSlots(ref manalithComp, cci, unitId.EntityId.Id);
-                                    }
-                                }
-                            });
-                        }
-
-                        if(manalithComp.StateChange)
-                        {
-                            var oldFact = factionref.Faction;
-                            Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
-                            uint fact = UpdateFaction(manalithComp, manalithWorldIndex);
-                            TeamColorEnum tColor = new TeamColorEnum();
-
-                            //if odd
-                            if (fact == 0)
-                            {
-                                tColor = TeamColorEnum.blue;
-                            }
-                            else if (fact % 2 == 1)
-                            {
-                                tColor = TeamColorEnum.blue;
-                            }
-                            else if (fact % 2 == 0)
-                            {
-                                tColor = TeamColorEnum.red;
-                            }
-
-                            faction = new FactionComponent.Component
-                            {
-                                Faction = fact,
-                                TeamColor = tColor
-                            };
-
-                            for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
-                            {
-                                var slot = manalithComp.Manalithslots[cci];
-
-                                UpdateUnit(slot.CorrespondingCell.UnitOnCellId, faction.Faction, ref manalithComp);
-                            }
-
-                         
-
-
-                            manalithComp.StateChange = false;
-
-                            factionref = faction;
-                            circleCellsref = manalithComp;
-
-                            if (oldFact != faction.Faction)
-                            {
-                                componentUpdateSystem.SendEvent(
-                                 new Manalith.ManalithFactionChangeEvent.Event(),
-                                 entityId.EntityId);
-
-                            }
-                        }
-                    }
-                }
-            });
-        });
     }   
 
     public void UpdateManalithSlots(ref Manalith.Component manalith, int slotIndex, long unitId)

@@ -5,6 +5,8 @@ using LeyLineHybridECS;
 
 public class Unit_BaseDataSet : MonoBehaviour
 {
+
+    public string UnitName;
     [Range(0, 20)]
     public uint VisionRange;
     public uint BaseHealth;

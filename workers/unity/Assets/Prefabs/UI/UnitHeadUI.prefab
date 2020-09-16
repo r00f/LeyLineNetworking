@@ -981,6 +981,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 8395842537746816604}
     m_Modifications:
+    - target: {fileID: 995841464636074914, guid: ead50767a77c3a64e8e5b1aa578ca201,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1711002208918128213, guid: ead50767a77c3a64e8e5b1aa578ca201,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1094,6 +1099,16 @@ PrefabInstance:
     - target: {fileID: 2561428741265738805, guid: ead50767a77c3a64e8e5b1aa578ca201,
         type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3460029105467767738, guid: ead50767a77c3a64e8e5b1aa578ca201,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6360590472503043404, guid: ead50767a77c3a64e8e5b1aa578ca201,
+        type: 3}
+      propertyPath: m_RaycastTarget
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

@@ -12,6 +12,8 @@ namespace LeyLineHybridECS
     [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class GameStateSystem : ComponentSystem
     {
+        ResourceSystem m_ResourceSystem;
+        ManalithSystem m_ManalithSystem;
         HandleCellGridRequestsSystem m_CellGridSystem;
         CleanupSystem m_CleanUpSystem;
         SpawnUnitsSystem m_SpawnSystem;
@@ -66,6 +68,8 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
+            m_ManalithSystem = World.GetExistingSystem<ManalithSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
@@ -203,6 +207,11 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
+                            gameState.CurrentRopeTime = gameState.RopeTime;
+                            m_ManalithSystem.UpdateManaliths(gameStateWorldIndex.Value);
+                            m_ResourceSystem.CalculateIncome(gameStateWorldIndex.Value);
+
+                            //Resour
                             Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId) =>
                             {
                                 m_ComponentUpdateSystem.SendEvent(
@@ -224,7 +233,6 @@ namespace LeyLineHybridECS
                         m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
                         break;
                     case GameStateEnum.calculate_energy:
-                        gameState.CurrentRopeTime = gameState.RopeTime;
                         gameState.CurrentState = GameStateEnum.planning;
                         break;
                     case GameStateEnum.game_over:

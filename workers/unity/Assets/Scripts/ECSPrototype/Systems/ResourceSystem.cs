@@ -70,11 +70,7 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) => 
         {
-            if (gameState.CurrentState == GameStateEnum.planning)
-            {
-                CalculateIncome(gameStateWorldIndex.Value);
-            }
-            else if (gameState.CurrentState == GameStateEnum.interrupt)
+            if (gameState.CurrentState == GameStateEnum.interrupt)
             {
                 AddIncome(gameStateWorldIndex.Value);
             }
@@ -103,6 +99,8 @@ public class ResourceSystem : ComponentSystem
                             pEnergy.Income += manalith.CombinedEnergyGain;
                         }
                     });
+
+                    //Debug.Log("CalculateIncome: " + pEnergy.Income);
                     pEnergy.IncomeAdded = false;
                     playerEnergy = pEnergy;
                 }
@@ -118,6 +116,8 @@ public class ResourceSystem : ComponentSystem
             {
                 if (energyComp.IncomeAdded == false)
                 {
+                    //Debug.Log("Add Income: " + energyComp.Income);
+
                     if (energyComp.Energy + energyComp.Income < energyComp.MaxEnergy)
                     {
                         energyComp.Energy += energyComp.Income;
@@ -137,7 +137,7 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_PlayerData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
         {
-            if (playerFaction == faction.Faction && energyComp.IncomeAdded == false)
+            if (playerFaction == faction.Faction)
             {
                 if (energyComp.Energy + energyAmount < energyComp.MaxEnergy)
                 {
@@ -147,8 +147,6 @@ public class ResourceSystem : ComponentSystem
                 {
                     energyComp.Energy = energyComp.MaxEnergy;
                 }
-
-                energyComp.IncomeAdded = true;
             }
         });
     }
