@@ -248,19 +248,13 @@ namespace LeyLineHybridECS
                                 break;
                         }
 
-                        //UIRef.FriendlyIncomeColor = (UIRef.FriendlyColor + Color.white * 2 + settings.FactionColors[0]) / 4;
                         UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
                         UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
 
-                        //UIRef.CurrentMaxEnergyText.color = UIRef.FriendlyColor;
-
                         UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
-                        UIRef.PortraitPlayerColor.color = UIRef.FriendlyColor;
-                        UIRef.PortraitPlayerColorGlow.color = UIRef.FriendlyColor;
 
                         UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
                         UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
-                        //UIRef.SAEnergyFill.color = UIRef.FriendlyColor;
 
                         UIRef.FriendlyReadySlider.PlayerColorImage.color = UIRef.FriendlyColor;
                         UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
@@ -482,21 +476,15 @@ namespace LeyLineHybridECS
                 {
                     UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
 
-                    if (actions.CurrentSelected.Index == -3 && actions.LockedAction.Index == -3)
-                    {
-                        UIRef.SAInfoPanel.SetActive(false);
-                    }
-                    else
-                    {
-                        UIRef.SAInfoPanel.SetActive(true);
-                    }
-                    //SEPERATE CODE THAT ONLY NEEDS TO BE DONE ON UNIT SELECTION (SET BUTTON INFO USW)
-
                     if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
                     {
                         UIRef.PortraitNameText.text = stats.UnitName;
                         UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
                     }
+                    //else
+                    //{
+                        //UIRef.AnimatedPortrait.OverrideAnimSet = false;
+                    //}
      
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
@@ -520,6 +508,21 @@ namespace LeyLineHybridECS
 
                     if (faction.Faction == authPlayerFaction)
                     {
+                        //if (UIRef.AnimatedPortrait.OverrideAnimSet)
+                        //{
+                            UIRef.PortraitPlayerColor.color = UIRef.FriendlyColor;
+                            UIRef.PortraitPlayerColorGlow.color = UIRef.FriendlyColor;
+                        //}
+
+                        if (actions.CurrentSelected.Index == -3 && actions.LockedAction.Index == -3)
+                        {
+                            UIRef.SAInfoPanel.SetActive(false);
+                        }
+                        else
+                        {
+                            UIRef.SAInfoPanel.SetActive(true);
+                        }
+
                         if (stats.SpawnActions.Count == 0)
                         {
                             if(UIRef.SpawnButtonGroup.activeSelf)
@@ -616,6 +619,13 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
+                        //if (UIRef.AnimatedPortrait.OverrideAnimSet)
+                        //{
+                            UIRef.PortraitPlayerColor.color = UIRef.EnemyColor;
+                            UIRef.PortraitPlayerColorGlow.color = UIRef.EnemyColor;
+                        //}
+                        UIRef.SAInfoPanel.SetActive(false);
+
                         for (int bi = 0; bi < UIRef.Actions.Count; bi++)
                         {
                             UIRef.Actions[bi].Visuals.SetActive(false);

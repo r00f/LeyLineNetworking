@@ -84,6 +84,7 @@ public class ExecuteActionsSystem : ComponentSystem
                                 if ((int)a.LockedAction.ActionExecuteStep == 2 && !a.Executed)
                                 {
                                     ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
+                                    a.Executed = true;
                                 }
                                 break;
                             case GameStateEnum.skillshot:
@@ -169,25 +170,7 @@ public class ExecuteActionsSystem : ComponentSystem
             }
         }
     }
-    /*
-    public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, Vector3f cubeCoord)
-    {
-        for (int i = 0; i < m_CellData.Length; i++)
-        {
-            var coord = m_CellData.CoordinateData[i].CubeCoordinate;
-            var unitToSpawn = m_CellData.UnitToSpawnData[i];
 
-            if (coord == cubeCoord)
-            {
-                //Debug.Log("SetUnitSpawn at coordinate: " + cubeCoord);
-                unitToSpawn.Faction = unitFaction.Faction;
-                unitToSpawn.TeamColor = unitFaction.TeamColor;
-                unitToSpawn.UnitName = unitName;
-                m_CellData.UnitToSpawnData[i] = unitToSpawn;
-            }
-        }
-    }
-    */
 
     public List<long> AreaToUnitIDConversion(List<Vector3f> inCoords, ApplyToRestrictionsEnum restricitons, long usingID, uint usingFaction)
     {

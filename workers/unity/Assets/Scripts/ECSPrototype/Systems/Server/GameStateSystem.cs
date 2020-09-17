@@ -83,8 +83,7 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
-#if UNITY_EDITOR
-                        //Debug.Log("WaitingForPlayers");
+                        #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 2)
                         {
@@ -97,7 +96,7 @@ namespace LeyLineHybridECS
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
-#else
+                        #else
                         if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 4)
                         {
                             if (gameState.CurrentWaitTime <= 0)
@@ -159,7 +158,6 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
-                                UpdateIsTaken(gameStateWorldIndex.Value);
                                 gameState.CurrentState = GameStateEnum.move;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -175,7 +173,6 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
-                                UpdateIsTaken(gameStateWorldIndex.Value);
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -201,17 +198,13 @@ namespace LeyLineHybridECS
                         //check if any hero is dead to go into gameOver
                         if (CheckAnyHeroDead(gameStateWorldIndex.Value))
                         {
-                            //UpdateIsTaken(gameStateWorldIndex);
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex.Value);
                             gameState.CurrentState = GameStateEnum.game_over;
                         }
                         else
                         {
                             gameState.CurrentRopeTime = gameState.RopeTime;
-                            m_ManalithSystem.UpdateManaliths(gameStateWorldIndex.Value);
-                            m_ResourceSystem.CalculateIncome(gameStateWorldIndex.Value);
 
-                            //Resour
                             Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId) =>
                             {
                                 m_ComponentUpdateSystem.SendEvent(
@@ -222,6 +215,10 @@ namespace LeyLineHybridECS
                             if(m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
                             {
                                 gameState.TurnCounter++;
+                                UpdateIsTaken(gameStateWorldIndex.Value);
+                                m_CleanUpSystem.ClearAllLockedActions(gameStateWorldIndex.Value);
+                                m_ManalithSystem.UpdateManaliths(gameStateWorldIndex.Value);
+                                m_ResourceSystem.CalculateIncome(gameStateWorldIndex.Value);
 
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.CleanupStateEvent.Event(),
@@ -284,7 +281,7 @@ namespace LeyLineHybridECS
                 {
                     if ((int)lockedAction.ActionExecuteStep == (int)step - 2)
                     {
-                        if (step == GameStateEnum.move)
+                        if (step == GameStateEnum.move && lockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                         {
                             float unitMoveTime = lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1);
                             if (unitMoveTime > highestTime)
@@ -321,7 +318,6 @@ namespace LeyLineHybridECS
 
         private void UpdateIsTaken(uint gameStateWorldIndex)
         {
-            //Debug.Log("UpdateIsTaken");
             Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
             HashSet<Vector3f> unitCoordHash = new HashSet<Vector3f>();
 
@@ -329,13 +325,20 @@ namespace LeyLineHybridECS
             {
                 if (gameStateWorldIndex == worldIndex.Value)
                 {
-                    //if (actions.LockedAction.Index != -3 && actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
-                    //{
+                    if (actions.LockedAction.Index != -3 && actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                    {
                         if (!unitDict.ContainsKey(cubeCoord.CubeCoordinate))
+                        {
+                            unitDict.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate, entityId.EntityId.Id);
                             unitDict.Add(cubeCoord.CubeCoordinate, entityId.EntityId.Id);
+                        }
+                            
                         if (!unitCoordHash.Contains(cubeCoord.CubeCoordinate))
+                        {
+                            unitCoordHash.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate);
                             unitCoordHash.Add(cubeCoord.CubeCoordinate);
-                    //}
+                        }
+                    }
                 }
             });
 
@@ -343,7 +346,6 @@ namespace LeyLineHybridECS
             {
                 if (gameStateWorldIndex == cellWorldIndex.Value)
                 {
-                    //unitCoordHash is filled with unitCoords that have a move planned died
                     if (unitCoordHash.Contains(cellCubeCoordinate.CubeCoordinate))
                     {
                         long id = unitDict[cellCubeCoordinate.CubeCoordinate];
@@ -352,13 +354,11 @@ namespace LeyLineHybridECS
                         {
                             cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, true, id, cellWorldIndex.Value);
                             cellAtt.CellAttributes = cellAtt.CellAttributes;
-                            //Debug.Log("SetTaken");
                         }
-                        else if (cellAtt.CellAttributes.Cell.IsTaken && !cellAtt.CellAttributes.Cell.ObstructVision)
+                        else if (cellAtt.CellAttributes.Cell.IsTaken)
                         {
                             cellAtt.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAtt.CellAttributes, false, 0, cellWorldIndex.Value);
                             cellAtt.CellAttributes = cellAtt.CellAttributes;
-                            //Debug.Log("ReSetTaken: " + m_CellData.CellAttributes[i].CellAttributes.Cell.UnitOnCellId);
                         }
                     }
                 }

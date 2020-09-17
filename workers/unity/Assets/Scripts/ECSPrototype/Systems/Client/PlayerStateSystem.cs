@@ -143,10 +143,6 @@ namespace LeyLineHybridECS
                                             p.Play();
                                     }
 
-                                    if (mouseState.ClickEvent == 1)
-                                        m_UISystem.ClearSelectedActionToolTip();
-
-
                                     if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                                         playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
 

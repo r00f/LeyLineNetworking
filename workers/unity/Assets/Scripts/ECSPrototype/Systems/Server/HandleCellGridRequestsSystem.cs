@@ -224,6 +224,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                                         {
                                                             mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
                                                         }
+                                                        mod.PathNested.OriginCoordinate = requestingUnitCoord.CubeCoordinate;
                                                         requestingUnitActions.LockedAction.Targets[0].Mods[0] = mod;
                                                         locked.CombinedCost = CalculateCombinedCost(t);
                                                         break;

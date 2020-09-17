@@ -131,7 +131,6 @@ public class UnitLifeCycleSystem : ComponentSystem
             {
                 if (unitCubeCoordinate == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && unitWorldIndex == cellWorldIndex.Value && cellAttribute.CellAttributes.Cell.UnitOnCellId == unitStateVar.EntityId)
                 {
-                    //Debug.Log("CleanUpUnit with id: " + unitState.EntityId);
                     cellAttribute.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAttribute.CellAttributes, false, 0, cellWorldIndex.Value);
                 }
             });

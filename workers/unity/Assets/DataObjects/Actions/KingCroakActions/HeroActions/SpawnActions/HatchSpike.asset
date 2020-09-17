@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: HatchSpike
   m_EditorClassIdentifier: 
-  ActionExecuteStep: 3
+  ActionExecuteStep: 2
   ActionIcon: {fileID: 21300000, guid: 2cdaf9a824088ad4a8faa3308b3b1b5b, type: 3}
   ProjectileFab: {fileID: 0}
   ActionName: Hatch Spike
@@ -77,7 +77,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 0
   targettingRange: 0
-  energyCost: 4
+  energyCost: 8
   ModToAdd: {fileID: 0}
   SecondaryTargets: []
   Restrictions: 2

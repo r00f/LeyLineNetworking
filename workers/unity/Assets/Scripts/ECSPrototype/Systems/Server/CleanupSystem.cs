@@ -69,7 +69,7 @@ public class CleanupSystem : ComponentSystem
             if (gameState.CurrentState == GameStateEnum.cleanup)
             {
                 m_TimerSystem.SubstractTurnDurations(WorldIndex.Value);
-                ClearAllLockedActions(WorldIndex.Value);
+
                 m_ResourceSystem.ResetArmor(WorldIndex.Value);
             }
         });

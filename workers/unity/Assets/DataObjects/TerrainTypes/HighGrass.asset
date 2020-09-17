@@ -32,6 +32,8 @@ MonoBehaviour:
   additionalCost: 0
   yOffset: 0.1
   cellTerrainYOffset: 0
+  DetailObjectSpawnYOffset: 0
+  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
   Walkable: 1
   spawnAllAssets: 0
   probabilityToSpawnNeighbourAsset: 0

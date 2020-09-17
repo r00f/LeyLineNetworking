@@ -179,10 +179,10 @@ public static class LeyLineEntityTemplates {
 
         var energy = new PlayerEnergy.Snapshot
         {
-            MaxEnergy = 40,
-            Energy = 20,
-            BaseIncome = 3,
-            Income = 3
+            MaxEnergy = 80,
+            Energy = 40,
+            BaseIncome = 6,
+            Income = 6
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot

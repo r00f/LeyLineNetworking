@@ -67,44 +67,50 @@ namespace LeyLineHybridECS
 
                 if (actionsData.LockedAction.Index != -3 && actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
                 {
-                    var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
+                    if(actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
+                    {
+                        var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
 
-                    if (gameState.CurrentState == GameStateEnum.interrupt)
-                    {
-                        actionsData = CompareCullableActions(actionsData, gameStateWIndex.Value, unitID);
-                    }
-                    else if (gameState.CurrentState == GameStateEnum.move)
-                    {
-                        if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
+                        if (gameState.CurrentState == GameStateEnum.interrupt)
                         {
-                            //instead of lerping towards next pos in path, set pos and wait for client to catch up
-                            if (m.TimeLeft >= 0)
+                            actionsData = CompareCullableActions(actionsData, gameStateWIndex.Value, unitID);
+                        }
+                        else if (gameState.CurrentState == GameStateEnum.move)
+                        {
+                            if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
                             {
-                                m.TimeLeft -= Time.DeltaTime;
-                            }
-                            else
-                            {
-                                position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
-
-                                if (currentPath.Count == 1)
+                                //instead of lerping towards next pos in path, set pos and wait for client to catch up
+                                if (m.TimeLeft >= 0)
                                 {
-                                    m.TimeLeft = 0;
+                                    m.TimeLeft -= Time.DeltaTime;
                                 }
                                 else
                                 {
-                                    m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
+                                    position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
+
+                                    if (currentPath.Count == 1)
+                                    {
+                                        m.TimeLeft = 0;
+                                    }
+                                    else
+                                    {
+                                        m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
+                                    }
+                                    coord.CubeCoordinate = currentPath[0].CubeCoordinate;
+                                    /*
+                                    logger.HandleLog(LogType.Warning,
+                                    new LogEvent("Set Unit ReqUpdate from MovementSystem")
+                                    .WithField("AYAYA", "AYAYA"));
+                                    */
+                                    vision.RequireUpdate = true;
+                                    currentPath.RemoveAt(0);
+                                    //Debug.Log("CoordPosPair cound after RemoveAt: " + actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count);
                                 }
-                                coord.CubeCoordinate = currentPath[0].CubeCoordinate;
-                                /*
-                                logger.HandleLog(LogType.Warning,
-                                new LogEvent("Set Unit ReqUpdate from MovementSystem")
-                                .WithField("AYAYA", "AYAYA"));
-                                */
-                                vision.RequireUpdate = true;
-                                currentPath.RemoveAt(0);
                             }
                         }
                     }
+
+
                 }
             });
 

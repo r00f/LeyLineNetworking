@@ -7,6 +7,8 @@ public class SetPortraitClip : MonoBehaviour
     [SerializeField]
     public AnimationClip portraitAnimationClip;
 
+    public bool OverrideAnimSet;
+
     protected AnimatorOverrideController animatorOverrideController;
     protected Animator animator;
    
@@ -30,7 +32,9 @@ public class SetPortraitClip : MonoBehaviour
             //Debug.Log(animatorOverrideController.animationClips[0].name);
             //List<KeyValuePair<AnimationClip, AnimationClip>> anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             //anims.Add(new KeyValuePair<AnimationClip,AnimationClip>(animatorOverrideController.animationClips[0], portraitAnimationClip));
+
             animatorOverrideController["KingCroakPortrait"] = portraitAnimationClip;
+            OverrideAnimSet = true;
             //Debug.Log(portraitAnimationClip.name);
             //var anims = new List<KeyValuePair<AnimationClip, AnimationClip>>();
             //anims.Add(new KeyValuePair<AnimationClip, AnimationClip>(animatorOverrideController.clips[0].originalClip, portraitAnimationClip));
