@@ -43,7 +43,7 @@ namespace LeyLineHybridECS
             m_SendActionRequestSystem = World.GetExistingSystem<SendActionRequestSystem>();
             settings = Resources.Load<Settings>("Settings");
 
-            m_UnitData = Worlds.ClientWorld.CreateEntityQuery(
+            m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<Unit_BaseDataSet>(),
@@ -54,14 +54,15 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadOnly<AnimatedPortraitReference>(),
                 ComponentType.ReadWrite<UnitComponentReferences>(),
-                ComponentType.ReadWrite<UnitHeadUIReferences>()
+                ComponentType.ReadWrite<UnitHeadUIReferences>(),
+                ComponentType.ReadWrite<UnitEffects>()
             );
 
-            m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
+            m_GameStateData = GetEntityQuery(
                 ComponentType.ReadOnly<GameState.Component>()
                 );
 
-            m_AuthoritativePlayerData = Worlds.ClientWorld.CreateEntityQuery(
+            m_AuthoritativePlayerData = GetEntityQuery(
                 ComponentType.ReadOnly<PlayerState.HasAuthority>(),
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
@@ -70,7 +71,7 @@ namespace LeyLineHybridECS
                 );
 
 
-            m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
+            m_PlayerData = GetEntityQuery(
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<PlayerState.Component>()
@@ -337,7 +338,6 @@ namespace LeyLineHybridECS
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.interruptFired;
                     }
 
-
                     ClearSelectedActionToolTip();
                     break;
                 case GameStateEnum.attack:
@@ -440,22 +440,24 @@ namespace LeyLineHybridECS
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
                 int actionCount = stats.Actions.Count;
                 int spawnActionCount = stats.SpawnActions.Count;
+                var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
-                //ONE TIME WHENEVER authPlayerState.UnitTargets.Count changes
-
-                var damagePreviewAmount = 0;
-                for (int i = 0; i < authPlayerState.UnitTargets.Count; i++)
+                if (gameState.CurrentState == GameStateEnum.planning)
                 {
-                    CubeCoordinateList cubeCoordinateList = authPlayerState.UnitTargets.ElementAt(i).Value;
-                    HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoordinateList.CubeCoordinates);
-
-                    if (coordHash.Contains(coord.CubeCoordinate))
+                    var damagePreviewAmount = 0;
+                    for (int i = 0; i < authPlayerState.UnitTargets.Count; i++)
                     {
-                        damagePreviewAmount += cubeCoordinateList.DamageAmount;
-                    }
-                }
+                        CubeCoordinateList cubeCoordinateList = authPlayerState.UnitTargets.ElementAt(i).Value;
+                        HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoordinateList.CubeCoordinates);
 
-                unitHeadUIRef.IncomingDamage = (uint)damagePreviewAmount;
+                        if (coordHash.Contains(coord.CubeCoordinate))
+                        {
+                            damagePreviewAmount += cubeCoordinateList.DamageAmount;
+                        }
+                    }
+
+                    unitHeadUIRef.IncomingDamage = (uint)damagePreviewAmount;
+                }
 
                 if (stats.SelectUnitButtonInstance)
                     UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
@@ -476,16 +478,19 @@ namespace LeyLineHybridECS
                 {
                     UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
 
-                    if (UIRef.AnimatedPortrait.portraitAnimationClip.name != animatedPortrait.name)
+                    if (UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortrait.GetHashCode())
+                    {
+                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortrait;
+                    }
+                    else
                     {
                         UIRef.PortraitNameText.text = stats.UnitName;
-                        UIRef.AnimatedPortrait.portraitAnimationClip = animatedPortrait;
+                        UIRef.PortraitPlayerColorGlow.enabled = true;
+                        UIRef.PortraitNameText.enabled = true;
+                        UIRef.AnimatedPortrait.GenericImage.enabled = true;
+                        UIRef.AnimatedPortrait.PlayerColorImage.enabled = true;
                     }
-                    //else
-                    //{
-                        //UIRef.AnimatedPortrait.OverrideAnimSet = false;
-                    //}
-     
+
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
 
@@ -619,11 +624,9 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        //if (UIRef.AnimatedPortrait.OverrideAnimSet)
-                        //{
-                            UIRef.PortraitPlayerColor.color = UIRef.EnemyColor;
-                            UIRef.PortraitPlayerColorGlow.color = UIRef.EnemyColor;
-                        //}
+                        UIRef.PortraitPlayerColor.color = UIRef.EnemyColor;
+                        UIRef.PortraitPlayerColorGlow.color = UIRef.EnemyColor;
+
                         UIRef.SAInfoPanel.SetActive(false);
 
                         for (int bi = 0; bi < UIRef.Actions.Count; bi++)
@@ -638,22 +641,15 @@ namespace LeyLineHybridECS
                     }
                 }
                 
-                if (authPlayerState.SelectedUnitId != 0)
-                {
-                    if (!unitInfoPanel.activeSelf)
-                    {
-                        unitInfoPanel.SetActive(true);
-                    }
-                        
-                }
-                else
+                if (authPlayerState.SelectedUnitId == 0)
                 {
                     if (UIRef.SwapActionButton.gameObject.activeSelf)
                         UIRef.SwapActionButton.gameObject.SetActive(false);
-                    if (unitInfoPanel.activeSelf)
-                    {
-                        unitInfoPanel.SetActive(false);
-                    }
+
+                    UIRef.PortraitPlayerColorGlow.enabled = false;
+                    UIRef.PortraitNameText.enabled = false;
+                    UIRef.AnimatedPortrait.GenericImage.enabled = false;
+                    UIRef.AnimatedPortrait.PlayerColorImage.enabled = false;
                 }
 
                 if (!stats.UIInitialized)
@@ -677,7 +673,7 @@ namespace LeyLineHybridECS
                         }
                     }
 
-                    if (health.CurrentHealth == 0)
+                    if (unitEffects.CurrentHealth == 0)
                     {
                         if(unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
                         {
@@ -700,13 +696,17 @@ namespace LeyLineHybridECS
                             else if (unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled)
                                 unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled = false;
 
-                            if (health.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && faction.Faction == authPlayerFaction))
+                            if (unitEffects.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && faction.Faction == authPlayerFaction))
                             {
                                 if(!unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
                                     unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(true);
                             }
                             else if(unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
+                            {
+                                Debug.Log(unitHeadUIRef.IncomingDamage);
                                 unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(false);
+                            }
+
                         }
                         else
                         {
@@ -720,7 +720,7 @@ namespace LeyLineHybridECS
                     if(unitHeadUIRef.UnitHeadUIInstance)
                         unitHeadUIRef.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
 
-                    if (gameState.CurrentState == GameStateEnum.planning)
+                    if (gameState.CurrentState == GameStateEnum.planning || gameState.CurrentState == GameStateEnum.game_over)
                     {
                         SetHealthBarFillAmounts(unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
 
@@ -1342,7 +1342,6 @@ namespace LeyLineHybridECS
             }
         }
 
-
         void UpdateSAEnergyText(LineRendererComponent lineRenderer, Actions.Component actions, Text inEnergyText)
         {
             //hacky fix to set current cost of move with linerenderer.count
@@ -1689,7 +1688,7 @@ namespace LeyLineHybridECS
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
             //INSTEAD OF DELETING DIRECTLY SET FlagForDestruction AND DESTROY FROM UNITCLEANUPSYSTEM AFTER
             healthbar.UnitHeadUIInstance.FlagForDestruction = true;
-            Object.Destroy(healthbar.UnitHeadHealthBarInstance.gameObject);
+            healthbar.UnitHeadHealthBarInstance.gameObject.SetActive(false);
 
             if (!stats.IsHero && unitFaction == playerFaction && UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
             {

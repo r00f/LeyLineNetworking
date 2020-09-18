@@ -234,7 +234,7 @@ namespace LeyLineHybridECS
                         break;
                     case GameStateEnum.game_over:
 #if UNITY_EDITOR
-                        gameState.CurrentState = GameStateEnum.waiting_for_players;
+                        //gameState.CurrentState = GameStateEnum.waiting_for_players;
 #endif
                         break;
                 }
