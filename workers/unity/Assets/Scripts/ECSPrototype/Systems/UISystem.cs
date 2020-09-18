@@ -703,7 +703,6 @@ namespace LeyLineHybridECS
                             }
                             else if(unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
                             {
-                                Debug.Log(unitHeadUIRef.IncomingDamage);
                                 unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(false);
                             }
 

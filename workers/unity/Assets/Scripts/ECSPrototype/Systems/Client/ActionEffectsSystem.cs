@@ -216,6 +216,15 @@ public class ActionEffectsSystem : ComponentSystem
 
                                 if (unitHeadUIRef.UnitHeadHealthBarInstance)
                                 {
+                                    if(unitHeadUIRef.IncomingDamage - damageAmount >= 0)
+                                    {
+                                        unitHeadUIRef.IncomingDamage -= damageAmount;
+                                    }
+                                    else
+                                    {
+                                        unitHeadUIRef.IncomingDamage = 0;
+                                    }
+
                                     if (unitEffects.CurrentHealth + unitEffects.CurrentArmor >= health.MaxHealth)
                                     {
                                         unitHeadUIRef.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float)(unitEffects.CurrentHealth + unitEffects.CurrentArmor) / (health.MaxHealth + unitEffects.CombinedArmor));
