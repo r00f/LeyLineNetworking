@@ -15,4 +15,6 @@ public class UnitHeadUI : MonoBehaviour
     public GameObject ArmorPanel;
     public Text ArmorText;
     public HeadUILockedActionDisplay ActionDisplay;
+    public HealthBar HealthBar;
+
 }

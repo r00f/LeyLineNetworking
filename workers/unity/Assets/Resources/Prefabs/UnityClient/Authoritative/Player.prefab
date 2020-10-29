@@ -176,6 +176,8 @@ MonoBehaviour:
     useKeyCodeInputs: 1
     keycodes:
       RotateCamera: 325
+      CameraRotateLeft: 113
+      CameraRotateRight: 101
       LockCamera: 102
       characterFocus: 0
       CameraMoveLeft: 97
@@ -219,11 +221,14 @@ MonoBehaviour:
       defaultZoom: 15
       minZoom: 6
       maxZoom: 16
-      zoomRate: 12
+      zoomRate: 2
+      zoomLerpRate: 3
       constZoomRate: 1
   PlayerMapTilePrefab: {fileID: 3617814909377836915, guid: ba192c6a5e3fc844490fb02ca435d515,
     type: 3}
   PlayerMapTileInstance: {fileID: 0}
+  _lastZoomAmount: 0
+  _nextZoomAmount: 0
   _currentZoomAmount: 0
 --- !u!114 &566376838980519233
 MonoBehaviour:

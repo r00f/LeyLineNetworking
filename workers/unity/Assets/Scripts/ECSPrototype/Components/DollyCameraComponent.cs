@@ -22,7 +22,7 @@ public class DollyCameraComponent : MonoBehaviour
     [SerializeField]
     DecalProjector decalProjector;
     [SerializeField]
-    UIReferences uiReferences;
+    UIReferences UIRef;
     [SerializeField]
     AnimationCurve speedCurve;
     [SerializeField]
@@ -54,7 +54,7 @@ public class DollyCameraComponent : MonoBehaviour
         trackedDolly.m_PathPosition = 0;
         dollyCam.Priority = 11;
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
-        uiReferences.UIMainPanel.SetActive(false);
+        UIRef.UIMainPanel.SetActive(false);
     }
 
     // Update is called once per frame
@@ -64,7 +64,7 @@ public class DollyCameraComponent : MonoBehaviour
         {
             playerCam = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Moba_Camera>();
         }
-        if (!playerCam || uiReferences.StartupPanel.activeSelf)
+        if (!playerCam || UIRef.StartupPanel.activeSelf)
             return;
 
         if (playerCam.playerFaction != 0 && playerFaction == 0)
@@ -123,7 +123,7 @@ public class DollyCameraComponent : MonoBehaviour
         //path movement lock player cam
         distancePercentage = trackedDolly.m_PathPosition / smoothPath.m_Waypoints.Length;
         cameraSpeed = speedCurve.Evaluate(distancePercentage);
-        uiReferences.UIMainPanel.SetActive(false);
+        UIRef.UIMainPanel.SetActive(false);
         playerCam.settings.cameraLocked = true;
         trackedDolly.m_PathPosition += cameraSpeed * Time.deltaTime;
     }
@@ -140,9 +140,9 @@ public class DollyCameraComponent : MonoBehaviour
 
         if (UIDisplayDelatTime > 0)
             UIDisplayDelatTime -= Time.deltaTime;
-        else if (!cameraBrain.IsBlending)
+        else if (!cameraBrain.IsBlending && UIRef.UIActive)
         {
-            uiReferences.UIMainPanel.SetActive(true);
+            UIRef.UIMainPanel.SetActive(true);
         }
     }
 

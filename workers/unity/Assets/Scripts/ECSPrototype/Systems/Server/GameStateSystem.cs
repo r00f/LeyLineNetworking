@@ -211,11 +211,12 @@ namespace LeyLineHybridECS
                                     new Vision.UpdateClientVisionEvent.Event(),
                                     playerId.EntityId);
                             });
-                            
-                            if(m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
+
+                            UpdateMovedUnitCells(gameStateWorldIndex.Value);
+                                
+                            if (m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
                             {
                                 gameState.TurnCounter++;
-                                UpdateIsTaken(gameStateWorldIndex.Value);
                                 m_CleanUpSystem.ClearAllLockedActions(gameStateWorldIndex.Value);
                                 m_ManalithSystem.UpdateManaliths(gameStateWorldIndex.Value);
                                 m_ResourceSystem.CalculateIncome(gameStateWorldIndex.Value);
@@ -227,7 +228,6 @@ namespace LeyLineHybridECS
                                 gameState.CurrentState = GameStateEnum.calculate_energy;
                             }
                         }
-                        m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
                         break;
                     case GameStateEnum.calculate_energy:
                         gameState.CurrentState = GameStateEnum.planning;
@@ -316,10 +316,12 @@ namespace LeyLineHybridECS
             return b;
         }
 
-        private void UpdateIsTaken(uint gameStateWorldIndex)
+        private void UpdateMovedUnitCells(uint gameStateWorldIndex)
         {
             Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
             HashSet<Vector3f> unitCoordHash = new HashSet<Vector3f>();
+
+            //Debug.Log(m_UnitData.CalculateEntityCount());
 
             Entities.With(m_UnitData).ForEach((ref WorldIndex.Component worldIndex, ref CubeCoordinate.Component cubeCoord, ref SpatialEntityId entityId, ref Actions.Component actions) =>
             {
@@ -327,6 +329,7 @@ namespace LeyLineHybridECS
                 {
                     if (actions.LockedAction.Index != -3 && actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                     {
+                        //Debug.Log("UnitHasAPath");
                         if (!unitDict.ContainsKey(cubeCoord.CubeCoordinate))
                         {
                             unitDict.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate, entityId.EntityId.Id);
@@ -363,6 +366,8 @@ namespace LeyLineHybridECS
                     }
                 }
             });
+
+            m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex);
         }
 
         private uint FindWinnerFaction(uint gameStateWorldIndex)

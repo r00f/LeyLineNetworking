@@ -628,7 +628,13 @@ MonoBehaviour:
   UnitSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
-  SpawnActions: []
+  SpawnActions:
+  - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
+  - {fileID: 11400000, guid: 08777fa115aee2d4cb5eb8d1c355252e, type: 2}
+  - {fileID: 11400000, guid: 0cbeddf0d1006c64891a8c9756757b3e, type: 2}
+  - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
+  - {fileID: 11400000, guid: bf22d741f918cc54098242b30df15793, type: 2}
+  - {fileID: 11400000, guid: ea4d4556e2ba6e641b505f5c9dfa03fe, type: 2}
 --- !u!114 &8898852741660551068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -805,7 +811,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
-  HealthBarYOffset: 1
+  HealthBarYOffset: 1.2
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
   UnitHeadHealthBarPrefab: {fileID: 8079530597859831226, guid: b70e178b7eff5a546bb4da6f716f8711,

@@ -67,6 +67,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<HighlightingDataComponent>(),
+                ComponentType.ReadWrite<Moba_Camera>(),
                 ComponentType.ReadWrite<PlayerState.Component>()
                 );
 
@@ -157,6 +158,11 @@ namespace LeyLineHybridECS
             var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
             var authPlayersState = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
             var playerHighlightingDatas = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+
+            var authPlayerCameras = m_AuthoritativePlayerData.ToComponentArray<Moba_Camera>();
+            var authPlayerCam = authPlayerCameras[0];
+
+
             var gameState = gameStates[0];
             var authPlayerFaction = authPlayersFaction[0].Faction;
             var authPlayerState = authPlayersState[0];
@@ -181,13 +187,18 @@ namespace LeyLineHybridECS
                         UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
                     }
 
-                    ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
+                    if(unitHeadUIRef.UnitHeadHealthBarInstance)
+                        ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
                 });
 
 
                 if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
                 {
-                    FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.PlanningSlideInPath);
+                    if(UIRef.EscapeMenu.TurnOverrideInputField.text == "")
+                        FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.PlanningSlideInPath);
+                    else
+                        FireStepChangedEffects("Turn " + UIRef.EscapeMenu.TurnOverrideInputField.text, settings.TurnStepColors[0], UIRef.PlanningSlideInPath);
+
                     UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
                 }
 
@@ -680,7 +691,7 @@ namespace LeyLineHybridECS
                             CleanupUnitUI(isVisibleRef, unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
                         }
                     }
-                    else
+                    else if(unitHeadUIRef.UnitHeadUIInstance)
                     {
                         GameObject healthBarGO = unitHeadUIRef.UnitHeadHealthBarInstance.gameObject;
 
@@ -712,25 +723,29 @@ namespace LeyLineHybridECS
                             if (healthBarGO.activeSelf)
                                 healthBarGO.SetActive(false);
                         }
-
-                        unitHeadUIRef.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
                     }
 
-                    if(unitHeadUIRef.UnitHeadUIInstance)
+                    if(unitHeadUIRef.UnitHeadUIInstance && unitHeadUIRef.UnitHeadHealthBarInstance)
+                    {
                         unitHeadUIRef.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
+                        unitHeadUIRef.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
+                        SetHealthBarFillAmounts(gameState.CurrentState, unitEffects, unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
+                    }
+
 
                     if (gameState.CurrentState == GameStateEnum.planning || gameState.CurrentState == GameStateEnum.game_over)
                     {
-                        SetHealthBarFillAmounts(unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
-
-                        if (unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime > 0)
+                        if (unitHeadUIRef.UnitHeadUIInstance)
                         {
-                            unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.DeltaTime;
-                        }
-                        else if (unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.activeSelf)
-                        {
-                            unitHeadUIRef.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
-                            unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+                            if (unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime > 0)
+                            {
+                                unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.DeltaTime;
+                            }
+                            else if (unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.activeSelf)
+                            {
+                                unitHeadUIRef.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
+                                unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+                            }
                         }
                     }
                     
@@ -764,6 +779,13 @@ namespace LeyLineHybridECS
             #endregion
 
             #region PlayerLoops
+
+            authPlayerCam.settings.movement.edgeHoverMovement = UIRef.EscapeMenu.EdgeHoverToggle.isOn;
+            //if(UIRef.EscapeMenu.CamSpeedInputField.onValueChanged)
+            authPlayerCam.settings.movement.cameraMovementRate = UIRef.EscapeMenu.CamSpeedSlider.value;
+            authPlayerCam.settings.rotation.cameraRotationRate.y = UIRef.EscapeMenu.CamRotationSlider.value;
+            authPlayerCam.settings.zoom.zoomChangePerScroll = UIRef.EscapeMenu.CamZoomDistSlider.value;
+            authPlayerCam.settings.zoom.zoomLerpRate = UIRef.EscapeMenu.CamZoomSpeedSlider.value;
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
@@ -1059,8 +1081,9 @@ namespace LeyLineHybridECS
 
         void FireStepChangedEffects(string stateName, Color effectColor, string soundEffectPath)
         {
-            //SET TEXT COLOR / STRING
-            RuntimeManager.PlayOneShot(soundEffectPath);
+            if (UIRef.UIActive)
+                RuntimeManager.PlayOneShot(soundEffectPath);
+
             UIRef.TurnStateText.color = effectColor;
             UIRef.TurnStateText.text = char.ToUpper(stateName[0]) + stateName.Substring(1);
             //FIRE PARTICLES
@@ -1082,6 +1105,7 @@ namespace LeyLineHybridECS
         {
             if (Input.GetButtonDown("SwitchIngameUI"))
             {
+                
                 UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
             }
 
@@ -1092,7 +1116,8 @@ namespace LeyLineHybridECS
 
             if (Input.GetKeyDown(KeyCode.U))
             {
-                UIRef.Canvas.gameObject.SetActive(!UIRef.Canvas.gameObject.activeSelf);
+                UIRef.UIActive = !UIRef.UIActive;
+                UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
             }
 
             if(gameState == GameStateEnum.planning)
@@ -1110,70 +1135,73 @@ namespace LeyLineHybridECS
                     UIRef.SwapActionButton.Button.onClick.Invoke();
                 }
 
-                if (UIRef.ActionButtonGroup.activeSelf)
+                if(!UIRef.EscapeMenu.gameObject.activeSelf)
                 {
-                    if (Input.GetKeyDown(KeyCode.Alpha1))
+                    if (UIRef.ActionButtonGroup.activeSelf)
                     {
-                        UIRef.Actions[0].Button.Select();
-                        UIRef.Actions[0].Button.onClick.Invoke();
+                        if (Input.GetKeyDown(KeyCode.Alpha1))
+                        {
+                            UIRef.Actions[0].Button.Select();
+                            UIRef.Actions[0].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha2))
+                        {
+                            UIRef.Actions[1].Button.Select();
+                            UIRef.Actions[1].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha3))
+                        {
+                            UIRef.Actions[2].Button.Select();
+                            UIRef.Actions[2].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha4))
+                        {
+                            UIRef.Actions[3].Button.Select();
+                            UIRef.Actions[3].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha5))
+                        {
+                            UIRef.Actions[4].Button.Select();
+                            UIRef.Actions[4].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha6))
+                        {
+                            UIRef.Actions[5].Button.Select();
+                            UIRef.Actions[5].Button.onClick.Invoke();
+                        }
                     }
-                    else if (Input.GetKeyDown(KeyCode.Alpha2))
+                    else
                     {
-                        UIRef.Actions[1].Button.Select();
-                        UIRef.Actions[1].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha3))
-                    {
-                        UIRef.Actions[2].Button.Select();
-                        UIRef.Actions[2].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha4))
-                    {
-                        UIRef.Actions[3].Button.Select();
-                        UIRef.Actions[3].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha5))
-                    {
-                        UIRef.Actions[4].Button.Select();
-                        UIRef.Actions[4].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha6))
-                    {
-                        UIRef.Actions[5].Button.Select();
-                        UIRef.Actions[5].Button.onClick.Invoke();
-                    }
-                }
-                else
-                {
-                    if (Input.GetKeyDown(KeyCode.Alpha1))
-                    {
-                        UIRef.SpawnActions[0].Button.Select();
-                        UIRef.SpawnActions[0].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha2))
-                    {
-                        UIRef.SpawnActions[1].Button.Select();
-                        UIRef.SpawnActions[1].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha3))
-                    {
-                        UIRef.SpawnActions[2].Button.Select();
-                        UIRef.SpawnActions[2].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha4))
-                    {
-                        UIRef.SpawnActions[3].Button.Select();
-                        UIRef.SpawnActions[3].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha5))
-                    {
-                        UIRef.SpawnActions[4].Button.Select();
-                        UIRef.SpawnActions[4].Button.onClick.Invoke();
-                    }
-                    else if (Input.GetKeyDown(KeyCode.Alpha6))
-                    {
-                        UIRef.SpawnActions[5].Button.Select();
-                        UIRef.SpawnActions[5].Button.onClick.Invoke();
+                        if (Input.GetKeyDown(KeyCode.Alpha1))
+                        {
+                            UIRef.SpawnActions[0].Button.Select();
+                            UIRef.SpawnActions[0].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha2))
+                        {
+                            UIRef.SpawnActions[1].Button.Select();
+                            UIRef.SpawnActions[1].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha3))
+                        {
+                            UIRef.SpawnActions[2].Button.Select();
+                            UIRef.SpawnActions[2].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha4))
+                        {
+                            UIRef.SpawnActions[3].Button.Select();
+                            UIRef.SpawnActions[3].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha5))
+                        {
+                            UIRef.SpawnActions[4].Button.Select();
+                            UIRef.SpawnActions[4].Button.onClick.Invoke();
+                        }
+                        else if (Input.GetKeyDown(KeyCode.Alpha6))
+                        {
+                            UIRef.SpawnActions[5].Button.Select();
+                            UIRef.SpawnActions[5].Button.onClick.Invoke();
+                        }
                     }
                 }
             }
@@ -1442,19 +1470,19 @@ namespace LeyLineHybridECS
         public void ResetHealthBarFillAmounts(HealthBar healthBar, Health.Component health)
         {
             float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
-            healthBar.ArmorFill.fillAmount = 0;
+
             healthBar.BgFill.fillAmount = 0;
             healthBar.DamageFill.fillAmount = 0;
             healthBar.HealthFill.fillAmount = healthPercentage;
+            healthBar.ArmorFill.fillAmount = healthPercentage - .01f;
         }
 
-        public void SetHealthBarFillAmounts(UnitHeadUIReferences unitHeadUiRef, HealthBar healthBar, Health.Component health, uint unitFaction, uint playerFaction)
+        public void SetHealthBarFillAmounts(GameStateEnum gameState, UnitEffects unitEffects, UnitHeadUIReferences unitHeadUiRef, HealthBar healthBar, Health.Component health, uint unitFaction, uint playerFaction)
         {
-            float combinedHealth = health.CurrentHealth + health.Armor;
-            float healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
-            float armorPercentage = (float)health.Armor / combinedHealth;
-            healthBar.BgFill.fillAmount = 0;
-
+            float combinedHealth = 0;
+            float healthPercentage = 0;
+            float armorPercentage = 0;
+            
             if (health.MaxHealth + health.Armor >= 100)
             {
                 healthBar.Parts.material.SetTexture("_MainTex", healthBar.HealthSectionsBig);
@@ -1466,37 +1494,77 @@ namespace LeyLineHybridECS
                 healthBar.Parts.SetMaterialDirty();
             }
 
-            if (unitFaction == playerFaction)
+            if(gameState == GameStateEnum.planning)
             {
+                combinedHealth = health.CurrentHealth + health.Armor;
+                healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
+                armorPercentage = (float)health.Armor / combinedHealth;
+
+                healthBar.BgFill.fillAmount = 0;
                 if (combinedHealth < health.MaxHealth)
                 {
-                    //DONT SCALE
-                    healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
-                    
-                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
-                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.DeltaTime);
+                    healthBar.HealthFill.fillAmount = healthPercentage;
+                }
+
+                if (unitFaction == playerFaction)
+                {
+                    if (combinedHealth < health.MaxHealth)
+                    {
+                        healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                        healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.DeltaTime);
+                    }
+                    else
+                    {
+                        healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
+                        healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.DeltaTime);
+                        healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.DeltaTime);
+                    }
+
+                    healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.DeltaTime);
+                    healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.ArmorFill.fillAmount)) + 3f, 0);
                 }
                 else
                 {
-                    healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
+                    healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
+                    healthBar.ArmorFill.fillAmount = healthBar.HealthFill.fillAmount - 0.01f;
 
-                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.DeltaTime);
-                    healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.DeltaTime);
+                    healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / (float)health.CurrentHealth, Time.DeltaTime);
+                    healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.HealthFill.fillAmount)) + 3f, 0);
                 }
-
-                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / combinedHealth, Time.DeltaTime);
-                healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.ArmorFill.fillAmount)) + 3f, 0);
             }
             else
             {
-                healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                combinedHealth = unitEffects.CurrentHealth + unitEffects.CurrentArmor;
+                healthPercentage = (float)unitEffects.CurrentHealth / health.MaxHealth;
+                armorPercentage = (float)unitEffects.CurrentArmor / combinedHealth;
 
-                healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
-                healthBar.ArmorFill.fillAmount = 0;
+                //Debug.Log("CombinedHealth: " + combinedHealth + ", armorPercentage: " + armorPercentage);
 
-                healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / (float)health.CurrentHealth, Time.DeltaTime);
-                healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.HealthFill.fillAmount)) + 3f, 0);
+                if (unitEffects.CurrentArmor > 0)
+                {
+                    if (combinedHealth < health.MaxHealth)
+                    {
+                        healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                        healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)unitEffects.CurrentArmor / health.MaxHealth), Time.DeltaTime);
+                    }
+                    else
+                    {
+                        healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
+                        healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - healthBar.BgFill.fillAmount - armorPercentage, Time.DeltaTime);
+                        healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.DeltaTime);
+                    }
+                }
+                else if(unitFaction != playerFaction)
+                {
+                    healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                    healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
+                    healthBar.ArmorFill.fillAmount = healthBar.HealthFill.fillAmount - 0.01f;
+                }
+
+                healthBar.DamageFill.fillAmount = 0;
             }
+
         }
 
         public void SetArmorDisplay(Entity e, uint inArmorAmount, float displayTime, bool shatter = false)
@@ -1508,13 +1576,15 @@ namespace LeyLineHybridECS
                 Text armorText = healthbar.UnitHeadUIInstance.ArmorText;
                 Animator anim = healthbar.UnitHeadUIInstance.ArmorAnimator;
                 GameObject armorPanel = healthbar.UnitHeadUIInstance.ArmorPanel;
+                healthbar.UnitHeadUIInstance.PlanningBufferTime = 0;
                 armorText.text = inArmorAmount.ToString();
                 armorPanel.SetActive(true);
 
                 if (shatter)
+                {
                     anim.SetTrigger("Shatter");
-
-                healthbar.UnitHeadUIInstance.PlanningBufferTime = displayTime;
+                    healthbar.UnitHeadUIInstance.PlanningBufferTime = displayTime;
+                }
             }
         }
 
@@ -1568,21 +1638,22 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void InitializeUnitUI(UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
+        public void InitializeUnitUI(UnitHeadUIReferences headUIRef, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
         {
             //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
 
-            healthbar.UnitHeadUIInstance = Object.Instantiate(healthbar.UnitHeadUIPrefab, healthbar.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
-            healthbar.UnitHeadHealthBarInstance = Object.Instantiate(healthbar.UnitHeadHealthBarPrefab, healthbar.transform.position, Quaternion.identity, UIRef.HealthBarsPanel.transform);
+            headUIRef.UnitHeadUIInstance = Object.Instantiate(headUIRef.UnitHeadUIPrefab, headUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
+            headUIRef.UnitHeadHealthBarInstance = headUIRef.UnitHeadUIInstance.HealthBar;
+            headUIRef.UnitHeadHealthBarInstance.transform.parent = UIRef.HealthBarsPanel.transform;
 
-            if (healthbar.UnitHeadHealthBarInstance.PlayerColorImage && healthbar.UnitHeadHealthBarInstance.HoveredImage)
+            if (headUIRef.UnitHeadHealthBarInstance.PlayerColorImage && headUIRef.UnitHeadHealthBarInstance.HoveredImage)
             {
-                healthbar.UnitHeadHealthBarInstance.PlayerColorImage.color = settings.FactionColors[(int)unitFaction];
-                healthbar.UnitHeadHealthBarInstance.HoveredImage.color = settings.FactionColors[(int)unitFaction];
+                headUIRef.UnitHeadHealthBarInstance.PlayerColorImage.color = settings.FactionColors[(int)unitFaction];
+                headUIRef.UnitHeadHealthBarInstance.HoveredImage.color = settings.FactionColors[(int)unitFaction];
             }
 
 
-            healthbar.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+            headUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
             //initialize GroupUI and hero select button
             if (unitFaction == playerFaction)
             {
@@ -1666,11 +1737,11 @@ namespace LeyLineHybridECS
                     UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
                 }
             }
-            else if (healthbar.UnitHeadUIInstance.ActionDisplay)
-                Object.Destroy(healthbar.UnitHeadUIInstance.ActionDisplay.gameObject);
+            else if (headUIRef.UnitHeadUIInstance.ActionDisplay)
+                Object.Destroy(headUIRef.UnitHeadUIInstance.ActionDisplay.gameObject);
         }
 
-        void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences healthbar, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
+        void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences unitHeadUIRef, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
 
             if (isVisibleRef.MiniMapTileInstance)
@@ -1686,8 +1757,10 @@ namespace LeyLineHybridECS
 
             //Delete headUI / UnitGroupUI on unit death (when health = 0)
             //INSTEAD OF DELETING DIRECTLY SET FlagForDestruction AND DESTROY FROM UNITCLEANUPSYSTEM AFTER
-            healthbar.UnitHeadUIInstance.FlagForDestruction = true;
-            healthbar.UnitHeadHealthBarInstance.gameObject.SetActive(false);
+            unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction = true;
+
+            if(unitHeadUIRef.UnitHeadHealthBarInstance)
+                unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
 
             if (!stats.IsHero && unitFaction == playerFaction && UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
             {

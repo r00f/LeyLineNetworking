@@ -104,13 +104,10 @@ namespace LeyLineHybridECS
                                     */
                                     vision.RequireUpdate = true;
                                     currentPath.RemoveAt(0);
-                                    //Debug.Log("CoordPosPair cound after RemoveAt: " + actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count);
                                 }
                             }
                         }
                     }
-
-
                 }
             });
 

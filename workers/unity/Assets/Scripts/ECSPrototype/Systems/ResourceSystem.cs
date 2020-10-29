@@ -266,8 +266,8 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_UnitData).ForEach((ref Actions.Component actions, ref SpatialEntityId id) =>
         {
-            //clear dying unit actions if its lockedAction is in a different state then the killing action;
-            if (unitID == id.EntityId.Id && executeStep != actions.LockedAction.ActionExecuteStep)
+            //clear dying unit actions if its lockedAction is in an earlier step then the killing action;
+            if (unitID == id.EntityId.Id && executeStep < actions.LockedAction.ActionExecuteStep)
             {
                 actions = m_CleanupSystem.ClearLockedActions(actions);
             }

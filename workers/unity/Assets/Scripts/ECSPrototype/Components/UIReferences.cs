@@ -10,6 +10,7 @@ public class UIReferences : MonoBehaviour
     public Animator SlideOutUIAnimator;
 
     public bool OpponentReady;
+    public bool UIActive;
 
     [Header("MenuPanels")]
     public GameObject UIMainPanel;
