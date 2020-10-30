@@ -7,6 +7,7 @@ using Player;
 using Unit;
 using Unity.Collections;
 using Cell;
+using System.Collections.Generic;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
@@ -237,12 +238,14 @@ public class ResourceSystem : ComponentSystem
         });
     }
 
+    /*
     public void DealDamage(long unitID, uint damageAmount, ExecuteStepEnum executeStep)
     {
         Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
         {
             if (unitID == id.EntityId.Id)
             {
+                
                 var combinedHealth = health.CurrentHealth + health.Armor;
 
                 if ((int)combinedHealth - (int)damageAmount > 0)
@@ -261,6 +264,34 @@ public class ResourceSystem : ComponentSystem
             }
         });
     }
+    */
+
+    public void DealDamage(Dictionary<long, uint> damageDict, ExecuteStepEnum executeStep)
+    {
+        //Debug.Log("DealDamageCall");
+        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
+        {
+            if (damageDict.ContainsKey(id.EntityId.Id))
+            {
+                var combinedHealth = health.CurrentHealth + health.Armor;
+
+                if ((int)combinedHealth - (int)damageDict[id.EntityId.Id] > 0)
+                {
+                    combinedHealth -= damageDict[id.EntityId.Id];
+                    if (health.CurrentHealth > combinedHealth)
+                        health.CurrentHealth = combinedHealth;
+                    else
+                        health.Armor = combinedHealth - health.CurrentHealth;
+                }
+                else
+                {
+                    health.CurrentHealth = 0;
+                    Die(id.EntityId.Id, executeStep);
+                }
+            }
+        });
+    }
+
 
     public void Die(long unitID, ExecuteStepEnum executeStep)
     {

@@ -123,6 +123,7 @@ namespace LeyLineHybridECS
                         }
                         if (AllPlayersReady(gameStateWorldIndex.Value))
                         {
+
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.interrupt;
                         }
@@ -142,6 +143,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                gameState.AttackDamageDealt = false;
                                 gameState.CurrentState = GameStateEnum.attack;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -158,6 +160,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                gameState.AttackDamageDealt = false;
                                 gameState.CurrentState = GameStateEnum.move;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -173,6 +176,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                gameState.AttackDamageDealt = false;
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -188,6 +192,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                gameState.AttackDamageDealt = false;
                                 gameState.CurrentState = GameStateEnum.cleanup;
                                 gameState.HighestExecuteTime = 0;
                             }
