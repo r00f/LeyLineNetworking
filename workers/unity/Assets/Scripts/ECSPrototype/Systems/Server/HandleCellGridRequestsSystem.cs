@@ -355,7 +355,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         CellAttributes cellAtt = new CellAttributes
         {
             Neighbours = cellAttributes.Neighbours,
-            Cell = cell
+            Cell = cell,
+            CellMapColorIndex = cellAttributes.CellMapColorIndex
         };
 
         UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours, worldIndex);

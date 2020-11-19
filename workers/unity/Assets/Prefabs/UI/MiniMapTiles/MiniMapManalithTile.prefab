@@ -61,9 +61,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TileImage: {fileID: 305829909858896601}
   TileRect: {fileID: 2844755615055542781}
-  UILineRenderer: {fileID: 8593073235035178634}
   TileInvisibleColor: {r: 0.16037738, g: 0.13389999, b: 0.14258197, a: 1}
   TileColor: {r: 0, g: 0, b: 0, a: 0}
+  SmallTileScale: 0
+  BigTileScale: 0
+  UnitPlayerColorSprite: {fileID: 0}
+  DeathCrossPrefab: {fileID: 0}
+  UnitBecomeVisiblePingPS: {fileID: 0}
+  UILineRenderer: {fileID: 8593073235035178634}
 --- !u!1 &4197897220831176410
 GameObject:
   m_ObjectHideFlags: 0
@@ -128,8 +133,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: bae055c417b45e44cb293bcd2699dcb9, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 12c110faeea9d4f4b8866d54b6832979, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -152,9 +157,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TileImage: {fileID: 305829909858896601}
   TileRect: {fileID: 3539885339343089792}
-  UILineRenderer: {fileID: 0}
   TileInvisibleColor: {r: 0.16037738, g: 0.13389999, b: 0.14258197, a: 1}
   TileColor: {r: 0, g: 0, b: 0, a: 0}
+  SmallTileScale: 0
+  BigTileScale: 0
+  UnitPlayerColorSprite: {fileID: 0}
+  DeathCrossPrefab: {fileID: 0}
+  UnitBecomeVisiblePingPS: {fileID: 0}
+  UILineRenderer: {fileID: 0}
 --- !u!1 &4471742215002775649
 GameObject:
   m_ObjectHideFlags: 0
@@ -247,7 +257,7 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 21300000, guid: 498b360f6b58c9746972fe69cc2ca1fb, type: 3}
   m_improveResolution: 0
   m_Resolution: 0
   m_useNativeSize: 0
@@ -256,7 +266,7 @@ MonoBehaviour:
   - {x: 15, y: 15}
   - {x: 30.99, y: 15.2}
   - {x: 43.88, y: 60.5}
-  lineThickness: 2
+  lineThickness: 2.31
   relativeSize: 0
   lineList: 0
   lineCaps: 0

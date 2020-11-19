@@ -24,6 +24,7 @@ namespace LeyLineHybridECS
         EntityQuery m_AuthorativePlayerData;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         Camera ProjectorCamera;
+        public UIReferences UIRef { get; set; }
 
         protected override void OnCreate()
         {
@@ -64,6 +65,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            UIRef = Object.FindObjectOfType<UIReferences>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             ProjectorCamera = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
         }
@@ -198,7 +200,10 @@ namespace LeyLineHybridECS
 
             Entities.With(m_UnitData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible visible) =>
             {
-                UpdateUnitMapTilePosition(coord.CubeCoordinate, ref isVisibleGOs);
+                //UIReferences.
+                UpdateUnitMapTilePosition(UIRef.MinimapComponent, coord.CubeCoordinate, ref isVisibleGOs, true);
+                UpdateUnitMapTilePosition(UIRef.BigMapComponent, coord.CubeCoordinate, ref isVisibleGOs, false);
+
                 if (faction.Faction != playerFaction)
                 {
                     if (visionCoordsHash.Contains(coord.CubeCoordinate))
@@ -209,13 +214,21 @@ namespace LeyLineHybridECS
                             if (isVisibleGOs.MiniMapTileInstance.UnitBecomeVisiblePingPS)
                                 isVisibleGOs.MiniMapTileInstance.UnitBecomeVisiblePingPS.Play();
                         }
-                        visible.Value = 1;
+                        if (isVisibleGOs.BigMapTileInstance)
+                        {
+                            isVisibleGOs.BigMapTileInstance.gameObject.SetActive(true);
+                            if (isVisibleGOs.BigMapTileInstance.UnitBecomeVisiblePingPS)
+                                isVisibleGOs.BigMapTileInstance.UnitBecomeVisiblePingPS.Play();
+                        }
+                            visible.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                     }
                     else
                     {
                         if (isVisibleGOs.MiniMapTileInstance)
                             isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(false);
+                        if(isVisibleGOs.BigMapTileInstance)
+                            isVisibleGOs.BigMapTileInstance.gameObject.SetActive(false);
                         visible.Value = 0;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                     }
@@ -233,6 +246,10 @@ namespace LeyLineHybridECS
                         {
                             isVisibleGOs.MiniMapTileInstance.TileImage.color = isVisibleGOs.MiniMapTileInstance.TileColor;
                         }
+                        if(isVisibleGOs.BigMapTileInstance)
+                        {
+                            isVisibleGOs.BigMapTileInstance.TileImage.color = isVisibleGOs.BigMapTileInstance.TileColor;
+                        }
                         isVisibleComp.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                         //EntityManager.AddComponentData(e,  RequireVisibleUpdate);
@@ -246,6 +263,10 @@ namespace LeyLineHybridECS
                     {
                         if (isVisibleGOs.MiniMapTileInstance)
                             isVisibleGOs.MiniMapTileInstance.TileImage.color = isVisibleGOs.MiniMapTileInstance.TileInvisibleColor;
+
+                        if(isVisibleGOs.BigMapTileInstance)
+                            isVisibleGOs.BigMapTileInstance.TileImage.color = isVisibleGOs.BigMapTileInstance.TileInvisibleColor;
+
                         isVisibleComp.Value = 0;
                         //ADD REQUIRE UPDATE FLAG COMPONENT
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
@@ -258,14 +279,18 @@ namespace LeyLineHybridECS
             playerVisions.Dispose();
         }
 
-        void UpdateUnitMapTilePosition(Vector3f coord, ref IsVisibleReferences isVisibleRef)
+        void UpdateUnitMapTilePosition(MinimapScript map, Vector3f coord, ref IsVisibleReferences isVisibleRef, bool isMiniMap)
         {
-            float offsetMultiplier = 5.8f;
+            float offsetMultiplier = map.MapSize;
             //Instantiate MiniMapTile into Map
             Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
             Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
-            if(isVisibleRef.MiniMapTileInstance)
-                isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
+
+                if (isVisibleRef.MiniMapTileInstance && isMiniMap)
+                    isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
+
+                if (isVisibleRef.BigMapTileInstance && !isMiniMap)
+                    isVisibleRef.BigMapTileInstance.TileRect.anchoredPosition = invertedPos;
         }
 
             /*

@@ -139,7 +139,7 @@ public class AddComponentsSystem : ComponentSystem
 
             var cam = EntityManager.GetComponentObject<Moba_Camera>(entity);
 
-            cam.PlayerMapTileInstance = Object.Instantiate(cam.PlayerMapTilePrefab, Vector3.zero, Quaternion.identity, m_UIReferences.MiniMapPlayerTilePanel.transform);
+            cam.PlayerMapTileInstance = Object.Instantiate(cam.PlayerMapTilePrefab, Vector3.zero, Quaternion.identity, m_UIReferences.MinimapComponent.MiniMapPlayerTilePanel.transform);
             PostUpdateCommands.AddComponent(entity, highlightingData);
             m_UIReferences.MinimapComponent.h_Transform = htrans;
 
@@ -148,28 +148,13 @@ public class AddComponentsSystem : ComponentSystem
 
         Entities.With(m_CellAddedData).ForEach((Entity entity, ref WorldIndex.Component cellWorldIndex, ref CellAttributesComponent.Component cellAtt) =>
         {
-            //Debug.Log(authPlayerWorldIndex);
-
-            //if (cellWorldIndex.Value == authPlayerWorldIndex)
-            //{
-            //Debug.Log("AddCellComponents");
-            //UnityEngine.Rendering.Hybrid
-
-            /*
-            RenderMesh meshTest = new RenderMesh
-            {
-
-
-            };
-            */
-            //only add components if this cell is not water
-
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
             int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
            
             if (cellAtt.CellAttributes.CellMapColorIndex != 5)
             {
-                PopulateMap(m_UIReferences.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+                PopulateMap(m_UIReferences.MinimapComponent.MapSize, m_UIReferences.MinimapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+                PopulateMap(m_UIReferences.BigMapComponent.MapSize, m_UIReferences.BigMapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
 
                 IsVisible isVisible = new IsVisible
                 {
@@ -208,7 +193,8 @@ public class AddComponentsSystem : ComponentSystem
             }
             else
             {
-                PopulateMap(m_UIReferences.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex], true);
+                PopulateMap(m_UIReferences.MinimapComponent.MapSize, m_UIReferences.MinimapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex], true);
+                PopulateMap(m_UIReferences.BigMapComponent.MapSize, m_UIReferences.BigMapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex], true);
             }
 
 
@@ -238,12 +224,22 @@ public class AddComponentsSystem : ComponentSystem
             unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
-            PopulateMap(m_UIReferences.MiniMapUnitTilesPanel.transform, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+            PopulateMap(m_UIReferences.MinimapComponent.MapSize, m_UIReferences.MinimapComponent.MiniMapUnitTilesPanel.transform, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+            PopulateMap(m_UIReferences.BigMapComponent.MapSize, m_UIReferences.BigMapComponent.MiniMapUnitTilesPanel.transform, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
 
-            if(isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS)
+            if (isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS)
             {
                 ParticleSystem.MainModule main = isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS.main;
+                ParticleSystem.SizeOverLifetimeModule size = isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS.sizeOverLifetime;
                 main.startColor = settings.FactionMapColors[(int)faction.Faction];
+                size.sizeMultiplier = isVisibleRef.MiniMapTileInstance.SmallTileScale * 32;
+            }
+            if (isVisibleRef.BigMapTileInstance.UnitBecomeVisiblePingPS)
+            {
+                ParticleSystem.MainModule main = isVisibleRef.BigMapTileInstance.UnitBecomeVisiblePingPS.main;
+                ParticleSystem.SizeOverLifetimeModule size = isVisibleRef.BigMapTileInstance.UnitBecomeVisiblePingPS.sizeOverLifetime;
+                main.startColor = settings.FactionMapColors[(int)faction.Faction];
+                size.sizeMultiplier = isVisibleRef.BigMapTileInstance.BigTileScale * 32;
             }
             //if (unitWorldIndex.Value == authPlayerWorldIndex)
             //{
@@ -313,25 +309,59 @@ public class AddComponentsSystem : ComponentSystem
         playerFactions.Dispose();
     }
 
-    void PopulateMap(Transform parent, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool initColored = false)
+    void PopulateMap(float scale, Transform parent, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool initColored = false)
     {
-        float offsetMultiplier = 5.8f;
+        float offsetMultiplier = scale;
+        float tilescale = scale / 5.8f;
         //Instantiate MiniMapTile into Map
         Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
         Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
-        isVisibleRef.MiniMapTileInstance = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
-        isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
 
-        isVisibleRef.MiniMapTileInstance.TileColor = tileColor;
-        
+
+        if (!isVisibleRef.MiniMapTileInstance)
+        {
+            isVisibleRef.MiniMapTileInstance = InstantiateMapTile(isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored, true);
+        }
+        else if (!isVisibleRef.BigMapTileInstance)
+        {
+            isVisibleRef.BigMapTileInstance = InstantiateMapTile(isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored, false);
+        }
+    }
+
+    MiniMapTile InstantiateMapTile(IsVisibleReferences isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool initColored, bool isSmallTile)
+    {
+        MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
+        instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
+        //invertedPos = new Vector2((int)invertedPos.x, (int)invertedPos.y);
+        instanciatedTile.TileRect.anchoredPosition = invertedPos;
+        instanciatedTile.TileColor = tileColor;
+
+        if(instanciatedTile.UnitPlayerColorSprite)
+        {
+            instanciatedTile.UnitPlayerColorSprite.offsetMin = new Vector2((int)(instanciatedTile.UnitPlayerColorSprite.offsetMin.x * tileScale), (int)(instanciatedTile.UnitPlayerColorSprite.offsetMin.y * tileScale));
+            instanciatedTile.UnitPlayerColorSprite.offsetMax = new Vector2((int)(instanciatedTile.UnitPlayerColorSprite.offsetMax.x * tileScale),(int)(instanciatedTile.UnitPlayerColorSprite.offsetMax.y * tileScale));
+
+        }
+
+        if (isSmallTile)
+        {
+            instanciatedTile.SmallTileScale = tileScale;
+        }
+        else
+        {
+            instanciatedTile.BigTileScale = tileScale;
+        }
 
         //init gray if not water
         if (!initColored)
-            isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
+            instanciatedTile.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
         //init blue if water
         else
-            isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTileInstance.TileColor;
+            instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+
+        return instanciatedTile;
     }
+
 
 
 }

@@ -11,9 +11,12 @@ public class MiniMapTile : MonoBehaviour
     public Color TileInvisibleColor;
     [HideInInspector]
     public Color TileColor;
+    public float SmallTileScale;
+    public float BigTileScale;
 
     [Header("Optional Fields")]
-    public GameObject DeathCrossPrefab;
+    public RectTransform UnitPlayerColorSprite;
+    public RectTransform DeathCrossPrefab;
     public ParticleSystem UnitBecomeVisiblePingPS;
     public UILineRenderer UILineRenderer;
 }

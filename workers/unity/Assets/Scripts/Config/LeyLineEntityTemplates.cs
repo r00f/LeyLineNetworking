@@ -32,7 +32,8 @@ public static class LeyLineEntityTemplates {
             RopeTime = settings.RopeTime,
             CurrentRopeTime = 30f,
             MapCenter = mapCenter,
-            MinExecuteStepTime = settings.MinimumExecuteTime
+            MinExecuteStepTime = settings.MinimumExecuteTime,
+            DamageDict = new Dictionary<long, uint>()
         };
 
         var wIndex = new WorldIndex.Snapshot

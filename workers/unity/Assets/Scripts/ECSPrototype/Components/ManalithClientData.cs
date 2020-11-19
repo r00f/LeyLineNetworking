@@ -16,4 +16,6 @@ public class ManalithClientData : MonoBehaviour
     public MiniMapTile MiniMapTilePrefab;
     [HideInInspector]
     public MiniMapTile MiniMapTileInstance;
+    [HideInInspector]
+    public MiniMapTile BigMapTileInstance;
 }

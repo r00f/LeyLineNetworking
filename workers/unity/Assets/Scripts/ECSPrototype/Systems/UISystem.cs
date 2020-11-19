@@ -1085,7 +1085,9 @@ namespace LeyLineHybridECS
                 RuntimeManager.PlayOneShot(soundEffectPath);
 
             UIRef.TurnStateText.color = effectColor;
+            UIRef.BigMapTurnCounter.color = effectColor;
             UIRef.TurnStateText.text = char.ToUpper(stateName[0]) + stateName.Substring(1);
+            UIRef.BigMapTurnCounter.text = char.ToUpper(stateName[0]) + stateName.Substring(1);
             //FIRE PARTICLES
             foreach (ParticleSystem p in UIRef.CowExhaleParticleSystems)
             {
@@ -1108,7 +1110,10 @@ namespace LeyLineHybridECS
                 
                 UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
             }
-
+            if (Input.GetKeyDown(KeyCode.M))
+            {
+                InvertMenuPanelActive(UIRef.MapPanel.gameObject);
+            }
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 InvertMenuPanelActive(UIRef.EscapeMenu.gameObject);
@@ -1749,10 +1754,23 @@ namespace LeyLineHybridECS
                 if (isVisibleRef.MiniMapTileInstance.DeathCrossPrefab && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
                 {
                     var cross = Object.Instantiate(isVisibleRef.MiniMapTileInstance.DeathCrossPrefab, isVisibleRef.MiniMapTileInstance.TileRect.position, Quaternion.identity, isVisibleRef.MiniMapTileInstance.transform.parent);
-                    Object.Destroy(cross, 3f);
+                    Object.Destroy(cross.gameObject, 3f);
                 }
 
                 Object.Destroy(isVisibleRef.MiniMapTileInstance.gameObject, 0.5f);
+            }
+
+            if (isVisibleRef.BigMapTileInstance)
+            {
+                if (isVisibleRef.BigMapTileInstance.DeathCrossPrefab && isVisibleRef.BigMapTileInstance.isActiveAndEnabled)
+                {
+                    var cross = Object.Instantiate(isVisibleRef.BigMapTileInstance.DeathCrossPrefab, isVisibleRef.BigMapTileInstance.TileRect.position, Quaternion.identity, isVisibleRef.BigMapTileInstance.transform.parent);
+                    cross.sizeDelta = new Vector2(cross.sizeDelta.x * isVisibleRef.BigMapTileInstance.BigTileScale, cross.sizeDelta.y * isVisibleRef.BigMapTileInstance.BigTileScale);
+
+                    Object.Destroy(cross.gameObject, 3f);
+                }
+
+                Object.Destroy(isVisibleRef.BigMapTileInstance.gameObject, 0.5f);
             }
 
             //Delete headUI / UnitGroupUI on unit death (when health = 0)

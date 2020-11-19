@@ -10,10 +10,18 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 {
     public bool isHovered;
     public float scale;
+    public float MapSize;
     public RectTransform Map;
     public Vector3 MapCenter;
     //public Camera MapCam;
     public HeroTransform h_Transform;
+
+    [Header("Panels")]
+    public GameObject MiniMapCellTilesPanel;
+    public GameObject MiniMapUnitTilesPanel;
+    public GameObject MiniMapManalithTilesPanel;
+    public GameObject MiniMapPlayerTilePanel;
+
 
 
     public void OnPointerEnter(PointerEventData eventData)

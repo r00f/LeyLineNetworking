@@ -62,6 +62,9 @@ MonoBehaviour:
   TileRect: {fileID: 2844755615055542781}
   TileInvisibleColor: {r: 0.16037738, g: 0.13389999, b: 0.14258197, a: 1}
   TileColor: {r: 0, g: 0, b: 0, a: 0}
+  DeathCrossPrefab: {fileID: 0}
+  UnitBecomeVisiblePingPS: {fileID: 0}
+  UILineRenderer: {fileID: 0}
 --- !u!1 &4197897220831176410
 GameObject:
   m_ObjectHideFlags: 0
@@ -126,8 +129,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: c3d2b672a99e783458274e11869a75b5, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 12c110faeea9d4f4b8866d54b6832979, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -152,3 +155,6 @@ MonoBehaviour:
   TileRect: {fileID: 3539885339343089792}
   TileInvisibleColor: {r: 0.16037738, g: 0.13389999, b: 0.14258197, a: 1}
   TileColor: {r: 0, g: 0, b: 0, a: 0}
+  DeathCrossPrefab: {fileID: 0}
+  UnitBecomeVisiblePingPS: {fileID: 0}
+  UILineRenderer: {fileID: 0}

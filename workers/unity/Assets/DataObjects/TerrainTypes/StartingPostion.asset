@@ -12,18 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: StartingPostion
   m_EditorClassIdentifier: 
-  MapCellIconIndex: 3
-  MapCellColorIndex: 3
-  spawnTree: 0
-  treeIndex: 0
-  detailSpawnPercentage: 0
+  MapCellIconIndex: 6
+  MapCellColorIndex: 6
+  RandomTreeRotationIncrement: 0
   textureIndex: 4
-  detailIndex: 0
+  TreeHeightMinMax: {x: 0, y: 0}
+  DetailObjectIndexRanges: []
+  DetailObjectAmounts: []
+  DetailObjectSpawnProbabilities: 
+  DetailObjectRanges: []
+  TreeIndexMinMax: {x: 0, y: 0}
+  GrassAmountMinMax: {x: 0, y: 0}
+  NeighbourIndexMinMax: {x: 0, y: 0}
+  NeighbourAmountMinMax: {x: 0, y: 0}
   terrain_Name: StartingPosition
   additionalCost: 0
   yOffset: 0.2
+  cellTerrainYOffset: 0
+  DetailObjectSpawnYOffset: 0
+  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
   Walkable: 1
   spawnAllAssets: 0
+  probabilityToSpawnNeighbourAsset: 0
   probabilityToSpawnAsset: 100
   obstructVision: 0
   assets_to_Spawn:

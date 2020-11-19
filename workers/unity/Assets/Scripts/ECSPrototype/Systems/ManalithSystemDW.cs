@@ -152,8 +152,6 @@ namespace LeyLineHybridECS
 
                     Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                     {
-
-
                         if (clientData.ManalithEntityID == 0)
                         {
                             var circlePos = meshColor.transform.position.sqrMagnitude;
@@ -168,11 +166,14 @@ namespace LeyLineHybridECS
                                             clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                             clientData.ManalithEntityID = ID;
                                             clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
+                                            var coord1 = initData.leyLineCircleCoords[0];
+
                                             if (!clientData.MiniMapTileInstance)
-                                            {
-                                                var coord1 = initData.leyLineCircleCoords[0];
-                                                PopulateMap(initData, m_UISystem.UIRef.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0], true);
-                                            }
+                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0], true);
+                                            if (!clientData.BigMapTileInstance)
+                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0], true);
+
+
                                             break;
                                         case ManalithInitializer.CircleSize.Three:
                                             clientData.WorldPos = clientData.UIElementTransform.position;
@@ -182,9 +183,9 @@ namespace LeyLineHybridECS
 
                                             
                                             if (!clientData.MiniMapTileInstance)
-                                            {
-                                                PopulateMap(initData, m_UISystem.UIRef.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0], true);
-                                            }
+                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0], true);
+                                            if(!clientData.BigMapTileInstance)
+                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0], true);
 
                                             break;
                                     }
@@ -278,6 +279,8 @@ namespace LeyLineHybridECS
 
                             if (clientData.MiniMapTileInstance)
                                 clientData.MiniMapTileInstance.TileImage.color = meshColor.MapLerpColor;
+                            if(clientData.BigMapTileInstance)
+                                clientData.BigMapTileInstance.TileImage.color = meshColor.MapLerpColor;
                             //if fact.Faction != 0 display gain, else dont
                             //if color of the image isnt lerped to meshcolor, lerp there
                         }
@@ -335,7 +338,12 @@ namespace LeyLineHybridECS
                         clientData.MiniMapTileInstance.UILineRenderer.Gradient = meshGradientColor.MapGradient;
                         clientData.MiniMapTileInstance.UILineRenderer.SetVerticesDirty();
                     }
-                       
+
+                    if (clientData.BigMapTileInstance)
+                    {
+                        clientData.BigMapTileInstance.UILineRenderer.Gradient = meshGradientColor.MapGradient;
+                        clientData.BigMapTileInstance.UILineRenderer.SetVerticesDirty();
+                    }
 
                     for (int li = 0; li < meshGradientColor.colors.Length; li++)
                     {
@@ -485,31 +493,50 @@ namespace LeyLineHybridECS
             m_UISystem.UIRef.ManalithToolTipFab.gameObject.SetActive(false);
         }
 
-        void PopulateMap(ManalithInitializer initData, Transform parent, float3 coord, ref ManalithClientData isVisibleRef, Color tileColor, bool initColored = false)
+
+        void PopulateMap(float scale, ManalithInitializer initData, Transform parent, float3 coord, ref ManalithClientData isVisibleRef, Color tileColor, bool initColored = false)
         {
-            float offsetMultiplier = 5.8f;
+            float offsetMultiplier = scale;
+            float tilescale = scale / 5.8f;
             //Instantiate MiniMapTile into Map
             Vector3f c = new Vector3f(coord.x, coord.y, coord.x);
             Vector3 pos = CellGridMethods.CubeToPos(c, new Vector2f(0f, 0f));
 
             Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
-            isVisibleRef.MiniMapTileInstance = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
-            isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
 
-            isVisibleRef.MiniMapTileInstance.TileColor = tileColor;
+            if(!isVisibleRef.MiniMapTileInstance)
+            {
+                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored);
+            }
+            else if(!isVisibleRef.BigMapTileInstance)
+            {
+                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored);
+            }
+        }
+
+        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool initColored)
+        {
+            MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
+            instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
+            invertedPos = new Vector2((int)invertedPos.x, (int)invertedPos.y);
+            instanciatedTile.TileRect.anchoredPosition = invertedPos;
+            instanciatedTile.TileColor = tileColor;
 
 
             //init gray if not water
             if (!initColored)
-                isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
+                instanciatedTile.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
             //init blue if water
             else
-                isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTileInstance.TileColor;
+                instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+
+            return instanciatedTile;
         }
 
-        void PopulateMap(ManalithInitializer initData, Transform parent, List<float3> coords, ref ManalithClientData isVisibleRef, Color tileColor, bool initColored = false)
+        void PopulateMap(float scale, ManalithInitializer initData, Transform parent, List<float3> coords, ref ManalithClientData isVisibleRef, Color tileColor, bool initColored = false)
         {
-            float offsetMultiplier = 5.8f;
+            float offsetMultiplier = scale;
+            float tilescale = scale / 5.8f;
 
             List<Vector2> mapSpacePositions = new List<Vector2>();
             //Instantiate MiniMapTile into Map
@@ -532,39 +559,57 @@ namespace LeyLineHybridECS
 
             var theCenter = center / i;
 
+            if (!isVisibleRef.MiniMapTileInstance)
+            {
+                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, initColored, coords, initData, scale, true);
+            }
+            else if (!isVisibleRef.BigMapTileInstance)
+            {
+                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, initColored, coords, initData, scale, false);
+            }
+        }
 
-            isVisibleRef.MiniMapTileInstance = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
-            isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = theCenter;
-
-            isVisibleRef.MiniMapTileInstance.TileColor = tileColor;
+        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool initColored, List<float3> coords, ManalithInitializer initData, float scale, bool isMiniMapTile)
+        {
+            MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
+            instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
+            invertedPos = new Vector2((int)invertedPos.x, (int)invertedPos.y);
+            instanciatedTile.TileRect.anchoredPosition = invertedPos;
+            instanciatedTile.TileColor = tileColor;
 
 
             //init gray if not water
             if (!initColored)
-                isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
+                instanciatedTile.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
             //init blue if water
             else
-                isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTileInstance.TileColor;
+                instanciatedTile.TileImage.color = instanciatedTile.TileColor;
 
-            if(isVisibleRef.MiniMapTileInstance.UILineRenderer)
+            if (instanciatedTile.UILineRenderer)
             {
                 //Debug.Log("Populate UI Line Renderer Positions");
                 //isVisibleRef.MiniMapTileInstance.UILineRenderer.set
-                isVisibleRef.MiniMapTileInstance.UILineRenderer.Points = new Vector2[initData.leyLinePathCoords.Count];
-
+                instanciatedTile.UILineRenderer.Points = new Vector2[initData.leyLinePathCoords.Count];
+                if(isMiniMapTile)
+                    instanciatedTile.UILineRenderer.lineThickness = 2;
+                else
+                    instanciatedTile.UILineRenderer.lineThickness = 8;
                 //populate line positions
-                for (int v = 0; v < isVisibleRef.MiniMapTileInstance.UILineRenderer.Points.Length; v++)
+                for (int v = 0; v < instanciatedTile.UILineRenderer.Points.Length; v++)
                 {
                     var coord = new Vector3f(initData.leyLinePathCoords[v].x, initData.leyLinePathCoords[v].y, initData.leyLinePathCoords[v].z);
                     var p = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
-                    Vector2 invertedPos = new Vector2(p.x * offsetMultiplier, p.z * offsetMultiplier);
-                    isVisibleRef.MiniMapTileInstance.UILineRenderer.Points[v] = invertedPos - isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition;
+                    Vector2 invertedPos2 = new Vector2(p.x * scale, p.z * scale);
+                    instanciatedTile.UILineRenderer.Points[v] = invertedPos2 - instanciatedTile.TileRect.anchoredPosition;
                 }
 
-                isVisibleRef.MiniMapTileInstance.UILineRenderer.color = tileColor;
+                instanciatedTile.UILineRenderer.color = tileColor;
                 //isVisibleRef.MiniMapTileInstance.UILineRendererRect.anchoredPosition
             }
-        }
 
+            return instanciatedTile;
+        }
     }
+
+
 }
