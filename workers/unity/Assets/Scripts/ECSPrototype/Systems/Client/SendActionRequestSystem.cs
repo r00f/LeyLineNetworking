@@ -188,6 +188,20 @@ public class SendActionRequestSystem : ComponentSystem
         playerEnergys.Dispose();
     }
 
+    public void RevealPlayerVision()
+    {
+        Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId,  ref Vision.Component playerVision) =>
+        {
+            var request = new Vision.RevealVisionCommand.Request
+            (
+                playerId.EntityId,
+                new RevealVisionRequest()
+            );
+
+            m_CommandSystem.SendCommand(request);
+        });
+    }
+
     public void SelectActionCommand(int actionIndex, long entityId)
     {
         bool isSelfTarget = false;

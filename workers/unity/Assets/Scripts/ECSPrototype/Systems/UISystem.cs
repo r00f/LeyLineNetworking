@@ -85,7 +85,13 @@ namespace LeyLineHybridECS
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             UIRef = Object.FindObjectOfType<UIReferences>();
+            UIRef.MasterBus = RuntimeManager.GetBus(UIRef.MasterBusString);
+            UIRef.IngameSFXBus = RuntimeManager.GetBus(UIRef.InGameSFXBusString);
+            UIRef.EnvironmentBus = RuntimeManager.GetBus(UIRef.EnvironmentString);
+            UIRef.SFXBus = RuntimeManager.GetBus(UIRef.SFXBusString);
+            UIRef.MusicBus = RuntimeManager.GetBus(UIRef.MusicBusString);
             InitializeButtons();
+            AddSettingsListeners();
         }
 
         public void InitializeButtons()
@@ -94,6 +100,8 @@ namespace LeyLineHybridECS
             UIRef.HelpButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.HelpPanel); });
             UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { InvertMenuPanelActive(UIRef.SkillTreePanel); });
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
+
+            UIRef.RevealVisionButton.onClick.AddListener(delegate { m_SendActionRequestSystem.RevealPlayerVision(); });
 
 
             UIRef.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.CacelGraceTime); });
@@ -116,6 +124,20 @@ namespace LeyLineHybridECS
                 ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab); });
                 ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
+        }
+
+        public void AddSettingsListeners()
+        {
+            //VOLUME SLIDERS
+            UIRef.EscapeMenu.MasterVolumeSlider.onValueChanged.AddListener(delegate { OnVolumeSliderChanged(UIRef.MasterBus, UIRef.EscapeMenu.MasterVolumeSlider.value); });
+            UIRef.EscapeMenu.SFXVolumeSlider.onValueChanged.AddListener(delegate { OnVolumeSliderChanged(UIRef.SFXBus, UIRef.EscapeMenu.SFXVolumeSlider.value); });
+            UIRef.EscapeMenu.MusicVolumeSlider.onValueChanged.AddListener(delegate { OnVolumeSliderChanged(UIRef.MusicBus, UIRef.EscapeMenu.MusicVolumeSlider.value); });
+
+        }
+
+        void OnVolumeSliderChanged(FMOD.Studio.Bus bus, float volume)
+        {
+            bus.setVolume(volume);
         }
 
         ActionButton FillButtonFields(ActionButton inButton, Unit_BaseDataSet inBaseData, long inUnitId, int inIndex, bool isSpawnAction, bool hasBasicAction)
@@ -206,6 +228,8 @@ namespace LeyLineHybridECS
                 {
                     g.CleanupReset = true;
                 }
+
+                UIRef.GameOverPanel.SetActive(false);
 
                 UIRef.FriendlyReadySlider.BurstPlayed = false;
                 UIRef.EnemyReadySlider.BurstPlayed = false;
@@ -374,6 +398,26 @@ namespace LeyLineHybridECS
                         //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
+                    }
+                    break;
+                case GameStateEnum.game_over:
+                    if(UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.gameOverFired)
+                    {
+                        if(gameState.WinnerFaction == 0)
+                        {
+                            //TODO: ADD GAMEOVER SOUND EFFECTS
+                            FireStepChangedEffects("Draw", settings.FactionColors[0], UIRef.ExecuteStepChangePath);
+                        }
+                        else if(gameState.WinnerFaction == authPlayerFaction)
+                        {
+                            FireStepChangedEffects("Victory", Color.green, UIRef.ExecuteStepChangePath);
+                        }
+                        else
+                        {
+                            FireStepChangedEffects("Defeat", Color.red, UIRef.ExecuteStepChangePath);
+                        }
+
+                        UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.gameOverFired;
                     }
                     break;
             }
@@ -780,12 +824,7 @@ namespace LeyLineHybridECS
 
             #region PlayerLoops
 
-            authPlayerCam.settings.movement.edgeHoverMovement = UIRef.EscapeMenu.EdgeHoverToggle.isOn;
-            //if(UIRef.EscapeMenu.CamSpeedInputField.onValueChanged)
-            authPlayerCam.settings.movement.cameraMovementRate = UIRef.EscapeMenu.CamSpeedSlider.value;
-            authPlayerCam.settings.rotation.cameraRotationRate.y = UIRef.EscapeMenu.CamRotationSlider.value;
-            authPlayerCam.settings.zoom.zoomChangePerScroll = UIRef.EscapeMenu.CamZoomDistSlider.value;
-            authPlayerCam.settings.zoom.zoomLerpRate = UIRef.EscapeMenu.CamZoomSpeedSlider.value;
+            HandleMenuSettings(authPlayerCam);
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
@@ -1079,6 +1118,17 @@ namespace LeyLineHybridECS
             #endregion
         }
 
+        void HandleMenuSettings(Moba_Camera playerCam)
+        {
+            playerCam.settings.movement.edgeHoverMovement = UIRef.EscapeMenu.EdgeHoverToggle.isOn;
+            //if(UIRef.EscapeMenu.CamSpeedInputField.onValueChanged)
+            playerCam.settings.movement.cameraMovementRate = UIRef.EscapeMenu.CamSpeedSlider.value;
+            playerCam.settings.rotation.cameraRotationRate.y = UIRef.EscapeMenu.CamRotationSlider.value;
+            playerCam.settings.zoom.zoomChangePerScroll = UIRef.EscapeMenu.CamZoomDistSlider.value;
+            playerCam.settings.zoom.zoomLerpRate = UIRef.EscapeMenu.CamZoomSpeedSlider.value;
+
+        }
+
         void FireStepChangedEffects(string stateName, Color effectColor, string soundEffectPath)
         {
             if (UIRef.UIActive)
@@ -1107,11 +1157,14 @@ namespace LeyLineHybridECS
         {
             if (Input.GetButtonDown("SwitchIngameUI"))
             {
-                
                 UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
             }
             if (Input.GetKeyDown(KeyCode.M))
             {
+                UIRef.UIActive = !UIRef.UIActive;
+                UIRef.IngameSFXBus.setMute(!UIRef.UIActive);
+                UIRef.EnvironmentBus.setMute(!UIRef.UIActive);
+                UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
                 InvertMenuPanelActive(UIRef.MapPanel.gameObject);
             }
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -1748,28 +1801,38 @@ namespace LeyLineHybridECS
 
         void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences unitHeadUIRef, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
-
             if (isVisibleRef.MiniMapTileInstance)
             {
-                if (isVisibleRef.MiniMapTileInstance.DeathCrossPrefab && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
+                if (isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
                 {
-                    var cross = Object.Instantiate(isVisibleRef.MiniMapTileInstance.DeathCrossPrefab, isVisibleRef.MiniMapTileInstance.TileRect.position, Quaternion.identity, isVisibleRef.MiniMapTileInstance.transform.parent);
-                    Object.Destroy(cross.gameObject, 3f);
-                }
+                    isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.Rect.sizeDelta = isVisibleRef.MiniMapTileInstance.DeathCrossSize;
+                    isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.transform.parent = UIRef.MinimapComponent.MiniMapEffectsPanel.transform;
+                    isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.gameObject.SetActive(true);
 
+                    if (isVisibleRef.MiniMapTileInstance.EmitSoundEffect && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
+                        isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.FMODEmitter.Play();
+                }
+                Object.Destroy(isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.gameObject, 2f);
                 Object.Destroy(isVisibleRef.MiniMapTileInstance.gameObject, 0.5f);
             }
 
             if (isVisibleRef.BigMapTileInstance)
             {
-                if (isVisibleRef.BigMapTileInstance.DeathCrossPrefab && isVisibleRef.BigMapTileInstance.isActiveAndEnabled)
+                if (isVisibleRef.BigMapTileInstance.DeathBlowMapEffect && isVisibleRef.BigMapTileInstance.isActiveAndEnabled)
                 {
+                    isVisibleRef.BigMapTileInstance.DeathBlowMapEffect.Rect.sizeDelta = isVisibleRef.BigMapTileInstance.DeathCrossSize;
+                    isVisibleRef.BigMapTileInstance.DeathBlowMapEffect.transform.parent = UIRef.BigMapComponent.MiniMapEffectsPanel.transform;
+                    isVisibleRef.BigMapTileInstance.DeathBlowMapEffect.gameObject.SetActive(true);
+
+                    if (isVisibleRef.BigMapTileInstance.EmitSoundEffect && isVisibleRef.BigMapTileInstance.isActiveAndEnabled)
+                        isVisibleRef.BigMapTileInstance.DeathBlowMapEffect.FMODEmitter.Play();
+                    /*
                     var cross = Object.Instantiate(isVisibleRef.BigMapTileInstance.DeathCrossPrefab, isVisibleRef.BigMapTileInstance.TileRect.position, Quaternion.identity, isVisibleRef.BigMapTileInstance.transform.parent);
-                    cross.sizeDelta = new Vector2(cross.sizeDelta.x * isVisibleRef.BigMapTileInstance.BigTileScale, cross.sizeDelta.y * isVisibleRef.BigMapTileInstance.BigTileScale);
-
+                    cross.sizeDelta = isVisibleRef.BigMapTileInstance.DeathCrossSize;
                     Object.Destroy(cross.gameObject, 3f);
+                    */
                 }
-
+                Object.Destroy(isVisibleRef.BigMapTileInstance.DeathBlowMapEffect.gameObject, 2f);
                 Object.Destroy(isVisibleRef.BigMapTileInstance.gameObject, 0.5f);
             }
 

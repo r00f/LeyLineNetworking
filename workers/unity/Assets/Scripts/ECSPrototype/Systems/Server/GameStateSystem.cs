@@ -83,6 +83,7 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
+                        Debug.Log("WaitingForPlayers");
                         #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 2)
@@ -96,7 +97,7 @@ namespace LeyLineHybridECS
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
-                        #else
+#else
                         if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 4)
                         {
                             if (gameState.CurrentWaitTime <= 0)
@@ -203,7 +204,15 @@ namespace LeyLineHybridECS
                         //check if any hero is dead to go into gameOver
                         if (CheckAnyHeroDead(gameStateWorldIndex.Value))
                         {
+
+                            Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
+                            {
+                                playerVision.RevealVision = true;
+                                playerVision.RequireUpdate = true;
+                            });
+
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex.Value);
+
                             gameState.CurrentState = GameStateEnum.game_over;
                         }
                         else
@@ -238,23 +247,22 @@ namespace LeyLineHybridECS
                         gameState.CurrentState = GameStateEnum.planning;
                         break;
                     case GameStateEnum.game_over:
-#if UNITY_EDITOR
-                        //gameState.CurrentState = GameStateEnum.waiting_for_players;
-#endif
+
                         break;
                 }
+
 #if UNITY_EDITOR
                 if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
                     gameState.CurrentState = GameStateEnum.waiting_for_players;
                 }
 #else
-
-                if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
-                {
-                    gameState.CurrentState = GameStateEnum.waiting_for_players;
-                }
+                        if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
+                        {
+                            gameState.CurrentState = GameStateEnum.waiting_for_players;
+                        }
 #endif
+
             });
         }
 

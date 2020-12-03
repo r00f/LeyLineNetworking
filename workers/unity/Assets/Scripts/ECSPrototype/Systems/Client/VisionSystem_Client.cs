@@ -96,87 +96,87 @@ namespace LeyLineHybridECS
                 //REDUCED AMOUNT OF OBJECTS THAT ARE IN VISIBLEDATA 650 x if (isVisibleComp.RequireUpdate == 1) uses .5ms while doing nothing at all
                 Entities.With(m_RequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
                 {
-                    MeshRenderer meshRenderer = isVisibleGOs.MeshRenderer;
-                    List<GameObject> gameObjects = isVisibleGOs.GameObjects;
-                    Collider collider = isVisibleGOs.Collider;
-                    byte isVisible = isVisibleComp.Value;
-
-                    //use RequireVisibleUpdate flag comp instead of RequireUpdate check
-                    //if (isVisibleComp.RequireUpdate == 1)
-                    //{
-                    Color color = new Color();
-
-                    if (meshRenderer.material.HasProperty("_UnlitColor"))
-                        color = meshRenderer.material.GetColor("_UnlitColor");
-
                     if (isVisibleComp.LerpSpeed != 0)
                     {
-                        if (isVisible == 0)
+                        if (isVisibleComp.Value == 0)
                         {
-                            if (meshRenderer.material.GetColor("_UnlitColor").a > 0)
+                            if (isVisibleGOs.InGameTileColor.a > 0)
                             {
-                                color.a = meshRenderer.material.GetColor("_UnlitColor").a - isVisibleComp.LerpSpeed * Time.DeltaTime;
-                                meshRenderer.material.SetColor("_UnlitColor", color);
+                                isVisibleGOs.InGameTileColor.a -= isVisibleComp.LerpSpeed * Time.DeltaTime;
+                                isVisibleGOs.MeshRenderer.material.SetColor("_UnlitColor", isVisibleGOs.InGameTileColor);
                             }
                             else
                             {
-                                foreach (GameObject g in gameObjects)
+                                foreach (GameObject g in isVisibleGOs.GameObjects)
                                 {
                                     g.SetActive(false);
                                 }
-                                //REMOVE FLAG
                                 PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                                //isVisibleComp.RequireUpdate = 0;
                             }
                         }
                         else
                         {
-                            foreach (GameObject g in gameObjects)
+                            foreach (GameObject g in isVisibleGOs.GameObjects)
                             {
                                 g.SetActive(true);
                             }
 
-                            if (meshRenderer.material.GetColor("_UnlitColor").a < 1)
+                            if (isVisibleGOs.InGameTileColor.a < 1)
                             {
-                                color.a = meshRenderer.material.GetColor("_UnlitColor").a + isVisibleComp.LerpSpeed * Time.DeltaTime;
-                                meshRenderer.material.SetColor("_UnlitColor", color);
+                                isVisibleGOs.InGameTileColor.a += isVisibleComp.LerpSpeed * Time.DeltaTime;
+                                isVisibleGOs.MeshRenderer.material.SetColor("_UnlitColor", isVisibleGOs.InGameTileColor);
                             }
                             else
                             {
-                                //REMOVE FLAG
                                 PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                                //isVisibleComp.RequireUpdate = 0;
                             }
                         }
                     }
                     else
                     {
-                        if (isVisible == 0)
+                        if (isVisibleComp.Value == 0)
                         {
-                            foreach (GameObject g in gameObjects)
+                            foreach (GameObject g in isVisibleGOs.GameObjects)
                             {
                                 g.SetActive(false);
                             }
-                            collider.enabled = false;
-                            //REMOVE REQUIRE UPDATE FLAG COMPONENT
+                            isVisibleGOs.Collider.enabled = false;
                             PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-
-                            //isVisibleComp.RequireUpdate = 0;
                         }
                         else
                         {
-                            foreach (GameObject g in gameObjects)
+                            foreach (GameObject g in isVisibleGOs.GameObjects)
                             {
                                 g.SetActive(true);
                             }
-                            collider.enabled = true;
-                            //REMOVE REQUIRE UPDATE FLAG COMPONENT
+                            isVisibleGOs.Collider.enabled = true;
                             PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-
-                            //isVisibleComp.RequireUpdate = 0;
                         }
                     }
-                    //}
+
+                    if(isVisibleGOs.MiniMapTileInstance)
+                        isVisibleGOs.MapTileColor.a = isVisibleGOs.MiniMapTileInstance.DarknessAlphaDefault - isVisibleGOs.InGameTileColor.a;
+
+                    if (isVisibleGOs.MiniMapTileInstance && isVisibleGOs.MiniMapTileInstance.DarknessTileImage)
+                    {
+                        isVisibleGOs.MiniMapTileInstance.DarknessTileImage.color = isVisibleGOs.MapTileColor;
+
+                        if (isVisibleGOs.MapTileColor.a >= 0)
+                            isVisibleGOs.MiniMapTileInstance.DarknessTile.gameObject.SetActive(true);
+                        else
+                            isVisibleGOs.MiniMapTileInstance.DarknessTile.gameObject.SetActive(false);
+                    }
+
+                    if (isVisibleGOs.BigMapTileInstance && isVisibleGOs.BigMapTileInstance.DarknessTileImage)
+                    {
+                        isVisibleGOs.BigMapTileInstance.DarknessTileImage.color = isVisibleGOs.MapTileColor;
+
+                        if (isVisibleGOs.MapTileColor.a >= 0)
+                            isVisibleGOs.BigMapTileInstance.DarknessTile.gameObject.SetActive(true);
+                        else
+                            isVisibleGOs.BigMapTileInstance.DarknessTile.gameObject.SetActive(false);
+                    }
+                    
                 });
             }
             else
@@ -211,14 +211,34 @@ namespace LeyLineHybridECS
                         if (isVisibleGOs.MiniMapTileInstance)
                         {
                             isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(true);
-                            if (isVisibleGOs.MiniMapTileInstance.UnitBecomeVisiblePingPS)
-                                isVisibleGOs.MiniMapTileInstance.UnitBecomeVisiblePingPS.Play();
+
+                            if (isVisibleGOs.MiniMapTileInstance.BecomeVisibleMapEffect)
+                            {
+                                var ping = Object.Instantiate(isVisibleGOs.MiniMapTileInstance.BecomeVisibleMapEffect, isVisibleGOs.MiniMapTileInstance.TileRect.position, Quaternion.identity, UIRef.MinimapComponent.MiniMapEffectsPanel.transform);
+                                ParticleSystem.MainModule main = ping.ParticleSystem.main;
+                                ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
+                                main.startColor = isVisibleGOs.MiniMapTileInstance.TileColor;
+                                size.sizeMultiplier = UIRef.MinimapComponent.BecomeVisiblePingSize;
+                                ping.ParticleSystem.Play();
+                                Object.Destroy(ping.gameObject, 2f);
+                            }
                         }
                         if (isVisibleGOs.BigMapTileInstance)
                         {
                             isVisibleGOs.BigMapTileInstance.gameObject.SetActive(true);
-                            if (isVisibleGOs.BigMapTileInstance.UnitBecomeVisiblePingPS)
-                                isVisibleGOs.BigMapTileInstance.UnitBecomeVisiblePingPS.Play();
+
+                            if (isVisibleGOs.BigMapTileInstance.BecomeVisibleMapEffect)
+                            {
+                                var ping = Object.Instantiate(isVisibleGOs.BigMapTileInstance.BecomeVisibleMapEffect, isVisibleGOs.BigMapTileInstance.TileRect.position, Quaternion.identity, UIRef.BigMapComponent.MiniMapEffectsPanel.transform);
+                                ParticleSystem.MainModule main = ping.ParticleSystem.main;
+                                ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
+                                main.startColor = isVisibleGOs.MiniMapTileInstance.TileColor;
+                                size.sizeMultiplier = UIRef.BigMapComponent.BecomeVisiblePingSize;
+                                ping.ParticleSystem.Play();
+                                if(isVisibleGOs.BigMapTileInstance.EmitSoundEffect && isVisibleGOs.BigMapTileInstance.isActiveAndEnabled)
+                                    ping.FMODEmitter.Play();
+                                Object.Destroy(ping.gameObject, 2f);
+                            }
                         }
                             visible.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
@@ -242,35 +262,16 @@ namespace LeyLineHybridECS
                 {
                     if (isVisibleComp.Value == 0)
                     {
-                        if (isVisibleGOs.MiniMapTileInstance)
-                        {
-                            isVisibleGOs.MiniMapTileInstance.TileImage.color = isVisibleGOs.MiniMapTileInstance.TileColor;
-                        }
-                        if(isVisibleGOs.BigMapTileInstance)
-                        {
-                            isVisibleGOs.BigMapTileInstance.TileImage.color = isVisibleGOs.BigMapTileInstance.TileColor;
-                        }
                         isVisibleComp.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
-                        //EntityManager.AddComponentData(e,  RequireVisibleUpdate);
-                        //ADD REQUIRE UPDATE FLAG COMPONENT
-                        //isVisibleComp.RequireUpdate = 1;
                     }
                 }
                 else
                 {
                     if (isVisibleComp.Value == 1)
                     {
-                        if (isVisibleGOs.MiniMapTileInstance)
-                            isVisibleGOs.MiniMapTileInstance.TileImage.color = isVisibleGOs.MiniMapTileInstance.TileInvisibleColor;
-
-                        if(isVisibleGOs.BigMapTileInstance)
-                            isVisibleGOs.BigMapTileInstance.TileImage.color = isVisibleGOs.BigMapTileInstance.TileInvisibleColor;
-
                         isVisibleComp.Value = 0;
-                        //ADD REQUIRE UPDATE FLAG COMPONENT
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
-                        //isVisibleComp.RequireUpdate = 1;
                     }
                 }
             });
@@ -292,48 +293,6 @@ namespace LeyLineHybridECS
                 if (isVisibleRef.BigMapTileInstance && !isMiniMap)
                     isVisibleRef.BigMapTileInstance.TileRect.anchoredPosition = invertedPos;
         }
-
-            /*
-            public void UpdateVision()
-            {
-                var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-                var playerVision = playerVisions[0];
-
-                Entities.With(m_IsVisibleData).ForEach((IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
-                {
-                    var coord = Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate);
-                    byte isVisible = isVisibleComp.Value;
-
-                    if (isVisibleComp.RequireUpdate == 0)
-                    {
-                        //only compare when serverSide playerVision is updated
-                        if (isVisible == 0)
-                        {
-                            foreach (Vector3f c in playerVision.Positives)
-                            {
-                                if (Vector3fext.ToUnityVector(c) == coord)
-                                {
-                                    isVisibleComp.Value = 1;
-                                    isVisibleComp.RequireUpdate = 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            foreach (Vector3f c in playerVision.Negatives)
-                            {
-                                if (Vector3fext.ToUnityVector(c) == coord)
-                                {
-                                    isVisibleComp.Value = 0;
-                                    isVisibleComp.RequireUpdate = 1;
-                                }
-                            }
-                        }
-                    }
-                });
-
-                playerVisions.Dispose();
-            }
-            */
+        
         }
 }

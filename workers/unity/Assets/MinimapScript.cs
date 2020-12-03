@@ -8,6 +8,7 @@ using UnityEngine.EventSystems;
 [RequireComponent(typeof(RectTransform))]
 public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
+    public bool IsFullscreenMap;
     public bool isHovered;
     public float scale;
     public float MapSize;
@@ -16,9 +17,23 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     //public Camera MapCam;
     public HeroTransform h_Transform;
 
+    public int BecomeVisiblePingSize;
+    public int DeathPingSize;
+
+    //public int MapUnitOutlineOffset;
+    public Vector2 MapUnitPixelSize;
+    public Vector2 MapCellPixelSize;
+    public Vector2 MapCellDarknessPixelSize;
+
+    public Vector2 UnitColorOffsetMin;
+    public Vector2 UnitColorOffsetMax;
+
+
     [Header("Panels")]
     public GameObject MiniMapCellTilesPanel;
+    public GameObject MiniMapDarknessTilesPanel;
     public GameObject MiniMapUnitTilesPanel;
+    public GameObject MiniMapEffectsPanel;
     public GameObject MiniMapManalithTilesPanel;
     public GameObject MiniMapPlayerTilePanel;
 

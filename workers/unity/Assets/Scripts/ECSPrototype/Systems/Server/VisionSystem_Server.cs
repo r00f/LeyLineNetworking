@@ -16,11 +16,13 @@ public class VisionSystem_Server : ComponentSystem
 {
     //HandleCellGridRequestsSystem m_GridSystem;
     ILogDispatcher logger;
-
+    CommandSystem m_CommandSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_UnitData;
     EntityQuery m_PlayerData;
     EntityQuery m_CellData;
+    EntityQuery m_GameStateData;
+
 
     bool Init = false;
     int mapSize = 631;
@@ -53,12 +55,12 @@ public class VisionSystem_Server : ComponentSystem
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<CellAttributesComponent.Component>()
             );
-
     }
 
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
@@ -66,7 +68,23 @@ public class VisionSystem_Server : ComponentSystem
 
     protected override void OnUpdate()
     {
-        
+
+        var revealVisionRequests = m_CommandSystem.GetRequests<Vision.RevealVisionCommand.ReceivedRequest>();
+
+        for (int i = 0; i < revealVisionRequests.Count; i++)
+        {
+            var revealVisionRequest = revealVisionRequests[i];
+
+            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref SpatialEntityId p_id) =>
+            {
+                if(p_id.EntityId == revealVisionRequest.EntityId)
+                {
+                    p_Vision.RequireUpdate = true;
+                    p_Vision.RevealVision = !p_Vision.RevealVision;
+                }
+            });
+        }
+
         if (m_CellData.CalculateEntityCount() == mapSize)
         {
             //if any unit requires an update, update player aswell
@@ -132,44 +150,44 @@ public class VisionSystem_Server : ComponentSystem
                 {
                     if (p_Vision.RequireUpdate)
                     {
-                        /*
-                        logger.HandleLog(LogType.Warning,
-                        new LogEvent("playerVision.ReqUpdate = true")
-                        .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
-                        */
-                        
+                        if (!p_Vision.RevealVision)
+                        {
 
-                        p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
-                        
-                        p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                        p_Vision.Positives = p_Vision.Positives;
-                        p_Vision.Negatives = p_Vision.Negatives;
-                        p_Vision.Lastvisible = p_Vision.Lastvisible;
+                            /*
+                            logger.HandleLog(LogType.Warning,
+                            new LogEvent("playerVision.ReqUpdate = true")
+                            .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+                            */
 
-                        m_ComponentUpdateSystem.SendEvent(
-                        new Vision.UpdateClientVisionEvent.Event(),
-                        p_id.EntityId);
 
-                        p_Vision.RequireUpdate = false;
+                            p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
 
-                        //Debug.Log("UpdatePlayerVision");
+                            p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
+                            p_Vision.Positives = p_Vision.Positives;
+                            p_Vision.Negatives = p_Vision.Negatives;
+                            p_Vision.Lastvisible = p_Vision.Lastvisible;
 
-                        //Send clientSide updateVision command
-                        /*
+                            m_ComponentUpdateSystem.SendEvent(
+                            new Vision.UpdateClientVisionEvent.Event(),
+                            p_id.EntityId);
 
-                        var request = new Vision.UpdateClientVisionCommand.Request
-                        (
-                            p_id,
-                            new UpdateClientVisionRequest()
-                        );
+                            p_Vision.RequireUpdate = false;
+                        }
+                        else
+                        {
+                            p_Vision = RevealMap(p_Vision);
 
-                        updateClientVisionRequest.RequestsToSend.Add(request);
-                        m_PlayerData.UpdateClientVisionCommands[i] = updateClientVisionRequest;
+                            p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
+                            p_Vision.Positives = p_Vision.Positives;
+                            p_Vision.Negatives = p_Vision.Negatives;
+                            p_Vision.Lastvisible = p_Vision.Lastvisible;
 
-                        */
+                            m_ComponentUpdateSystem.SendEvent(
+                            new Vision.UpdateClientVisionEvent.Event(),
+                            p_id.EntityId);
 
-                        //Debug.Log("SendUpdateClientVisionRequest, count = " + updateClientVisionRequest.RequestsToSend.Count + ", " + m_PlayerData.UpdateClientVisionCommands[i].RequestsToSend.Count);
-
+                            p_Vision.RequireUpdate = false;
+                        }
                     }
                 });
             }
@@ -246,6 +264,19 @@ public class VisionSystem_Server : ComponentSystem
         return inVision;
     }
 
+    private Vision.Component RevealMap(Vision.Component inVision)
+    {
+        inVision.CellsInVisionrange.Clear();
+
+        //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
+        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coord) =>
+        {
+            inVision.CellsInVisionrange.Add(coord.CubeCoordinate);
+        });
+
+        return inVision;
+    }
+
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
     {
         //Debug.Log("UpdatePlayerVision: " + faction);
@@ -263,7 +294,7 @@ public class VisionSystem_Server : ComponentSystem
 
         var lastVision = new HashSet<Vector3f>();
 
-        foreach(Vector3f v in inVision.Lastvisible)
+        foreach (Vector3f v in inVision.Lastvisible)
         {
             lastVision.Add(v);
         }
@@ -286,15 +317,15 @@ public class VisionSystem_Server : ComponentSystem
 
         foreach (Vector3f v in lastVision)
         {
-            if(!currentVision.Contains(v))
+            if (!currentVision.Contains(v))
             {
                 inVision.Negatives.Add(v);
             }
         }
 
-        foreach(Vector3f v in currentVision)
+        foreach (Vector3f v in currentVision)
         {
-            if(!lastVision.Contains(v))
+            if (!lastVision.Contains(v))
             {
                 inVision.Positives.Add(v);
             }

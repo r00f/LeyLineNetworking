@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class IsVisibleReferences : MonoBehaviour
 {
+    public Color InGameTileColor;
+    public Color MapTileColor;
     public Collider Collider;
     public MeshRenderer MeshRenderer;
     public List<GameObject> GameObjects;

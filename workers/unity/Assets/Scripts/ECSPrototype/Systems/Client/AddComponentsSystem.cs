@@ -18,6 +18,13 @@ public class AddComponentsSystem : ComponentSystem
         public WorldIndex.Component WorldIndexState;
     }
 
+    public struct MapPopulatedIdentifyier : IComponentData
+    {
+
+    }
+
+    EntityQuery m_UnitMapPopulatedData;
+
     EntityQuery m_PlayerStateData;
     EntityQuery m_PlayerAddedData;
     EntityQuery m_ProjectileAddedData;
@@ -25,13 +32,13 @@ public class AddComponentsSystem : ComponentSystem
     EntityQuery m_CellAddedData;
     EntityManager em;
 
-    UIReferences m_UIReferences;
+    UIReferences UIRef;
 
     Settings settings;
 
     protected override void OnStartRunning()
     {
-        m_UIReferences = Object.FindObjectOfType<UIReferences>();
+        UIRef = Object.FindObjectOfType<UIReferences>();
         base.OnStartRunning();
     }
 
@@ -72,11 +79,27 @@ public class AddComponentsSystem : ComponentSystem
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<UnitEffects>(),
                 ComponentType.ReadOnly<AnimatorComponent>()
-
             }
         };
 
         m_UnitAddedData = GetEntityQuery(unitAddedDesc);
+
+        var unitMapPopulatedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+    {
+                typeof(MapPopulatedIdentifyier)
+    },
+            All = new ComponentType[]
+    {
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<CubeCoordinate.Component>(),
+                ComponentType.ReadOnly<AnimatorComponent>()
+    }
+        };
+
+        m_UnitMapPopulatedData = GetEntityQuery(unitMapPopulatedDesc);
+
 
         var cellAddedDesc = new EntityQueryDesc
         {
@@ -139,9 +162,9 @@ public class AddComponentsSystem : ComponentSystem
 
             var cam = EntityManager.GetComponentObject<Moba_Camera>(entity);
 
-            cam.PlayerMapTileInstance = Object.Instantiate(cam.PlayerMapTilePrefab, Vector3.zero, Quaternion.identity, m_UIReferences.MinimapComponent.MiniMapPlayerTilePanel.transform);
+            cam.PlayerMapTileInstance = Object.Instantiate(cam.PlayerMapTilePrefab, Vector3.zero, Quaternion.identity, UIRef.MinimapComponent.MiniMapPlayerTilePanel.transform);
             PostUpdateCommands.AddComponent(entity, highlightingData);
-            m_UIReferences.MinimapComponent.h_Transform = htrans;
+            UIRef.MinimapComponent.h_Transform = htrans;
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
         });
@@ -150,12 +173,12 @@ public class AddComponentsSystem : ComponentSystem
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
             int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-           
+
+            PopulateMap(UIRef.MinimapComponent, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+            PopulateMap(UIRef.BigMapComponent, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+
             if (cellAtt.CellAttributes.CellMapColorIndex != 5)
             {
-                PopulateMap(m_UIReferences.MinimapComponent.MapSize, m_UIReferences.MinimapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-                PopulateMap(m_UIReferences.BigMapComponent.MapSize, m_UIReferences.BigMapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
@@ -193,126 +216,98 @@ public class AddComponentsSystem : ComponentSystem
             }
             else
             {
-                PopulateMap(m_UIReferences.MinimapComponent.MapSize, m_UIReferences.MinimapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex], true);
-                PopulateMap(m_UIReferences.BigMapComponent.MapSize, m_UIReferences.BigMapComponent.MiniMapCellTilesPanel.transform, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex], true);
+
+                IsVisible isVisible = new IsVisible
+                {
+                    Value = 0,
+                    RequireUpdate = 1,
+                    LerpSpeed = 0.5f,
+                };
+
+                RequireMarkerUpdate requireMarkerUpdate = new RequireMarkerUpdate();
+
+                PostUpdateCommands.AddComponent(entity, isVisible);
+                PostUpdateCommands.AddComponent(entity, requireMarkerUpdate);
+
             }
-
-
-            /*
-            //PostUpdateCommands.AddComponent(entity, new NonUniformScale());
-            //PostUpdateCommands.AddComponent(entity, new Translation());
-            //PostUpdateCommands.AddComponent(entity, new LocalToWorld());
-            //PostUpdateCommands.AddComponent(entity, new WorldRenderBounds());
-            //PostUpdateCommands.AddComponent(entity, new ChunkWorldRenderBounds());
-
-            PostUpdateCommands.AddSharedComponent(entity, new RenderMesh
-            {
-                mesh = settings.TestMesh,
-                material = settings.TestMat
-
-            });
-            */
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
 
         });
 
-        Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord) =>
+        Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord) =>
         {
-
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
             unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
-            PopulateMap(m_UIReferences.MinimapComponent.MapSize, m_UIReferences.MinimapComponent.MiniMapUnitTilesPanel.transform, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
-            PopulateMap(m_UIReferences.BigMapComponent.MapSize, m_UIReferences.BigMapComponent.MiniMapUnitTilesPanel.transform, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+            if (anim.EnableVisualsDelay <= 0)
+            {
+                PopulateMap(UIRef.MinimapComponent, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+                PopulateMap(UIRef.BigMapComponent, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+                PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });
+            }
+        });
 
-            if (isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS)
-            {
-                ParticleSystem.MainModule main = isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS.main;
-                ParticleSystem.SizeOverLifetimeModule size = isVisibleRef.MiniMapTileInstance.UnitBecomeVisiblePingPS.sizeOverLifetime;
-                main.startColor = settings.FactionMapColors[(int)faction.Faction];
-                size.sizeMultiplier = isVisibleRef.MiniMapTileInstance.SmallTileScale * 32;
-            }
-            if (isVisibleRef.BigMapTileInstance.UnitBecomeVisiblePingPS)
-            {
-                ParticleSystem.MainModule main = isVisibleRef.BigMapTileInstance.UnitBecomeVisiblePingPS.main;
-                ParticleSystem.SizeOverLifetimeModule size = isVisibleRef.BigMapTileInstance.UnitBecomeVisiblePingPS.sizeOverLifetime;
-                main.startColor = settings.FactionMapColors[(int)faction.Faction];
-                size.sizeMultiplier = isVisibleRef.BigMapTileInstance.BigTileScale * 32;
-            }
-            //if (unitWorldIndex.Value == authPlayerWorldIndex)
-            //{
+        Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        {
+            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
+
             MouseState mouseState = new MouseState
-                {
-                    CurrentState = MouseState.State.Neutral,
-                    ClickEvent = 0
-                };
+            {
+                CurrentState = MouseState.State.Neutral,
+                ClickEvent = 0
+            };
 
-                MouseVariables mouseVars = new MouseVariables
-                {
-                    yOffset = 1f,
-                    Distance = 1.2f
-                };
+            MouseVariables mouseVars = new MouseVariables
+            {
+                yOffset = 1f,
+                Distance = 1.2f
+            };
 
-                IsVisible isVisible = new IsVisible();
+            IsVisible isVisible = new IsVisible();
 
-                if (faction.Faction == playerFaction.Faction)
-                {
-                    isVisible.Value = 1;
-                    isVisible.RequireUpdate = 1;
-                }
-                else
-                {
-                    isVisible.Value = 0;
-                    isVisible.RequireUpdate = 1;
-                }
+            if (faction.Faction == playerFaction.Faction)
+            {
+                isVisible.Value = 1;
+                isVisible.RequireUpdate = 1;
+            }
+            else
+            {
+                isVisible.Value = 0;
+                isVisible.RequireUpdate = 1;
+            }
 
-                if (isVisible.Value == 1)
-                {
-                    foreach (GameObject g in isVisibleRef.GameObjects)
-                        g.SetActive(true);
-                }
+            if (isVisible.Value == 1)
+            {
+                foreach (GameObject g in isVisibleRef.GameObjects)
+                    g.SetActive(true);
+            }
 
             MarkerState markerState = new MarkerState
-                {
-                    CurrentTargetType = MarkerState.TargetType.Neutral,
-                    IsSet = 0,
-                    TargetTypeSet = 0,
-                    CurrentState = MarkerState.State.Neutral,
-                    IsUnit = 1
-                };
+            {
+                CurrentTargetType = MarkerState.TargetType.Neutral,
+                IsSet = 0,
+                TargetTypeSet = 0,
+                CurrentState = MarkerState.State.Neutral,
+                IsUnit = 1
+            };
 
-                PostUpdateCommands.AddComponent(entity, mouseVars);
-                PostUpdateCommands.AddComponent(entity, markerState);
-                PostUpdateCommands.AddComponent(entity, mouseState);
-                PostUpdateCommands.AddComponent(entity, isVisible);
-            //}
+            PostUpdateCommands.AddComponent(entity, mouseVars);
+            PostUpdateCommands.AddComponent(entity, markerState);
+            PostUpdateCommands.AddComponent(entity, mouseState);
+            PostUpdateCommands.AddComponent(entity, isVisible);
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         });
-
-        /*
-        for(int i = 0; i < m_ProjectileAddedData.Length; i++)
-        {
-            var projectileWorldIndex = m_ProjectileAddedData.WorldIndexData[i];
-            var entity = m_ProjectileAddedData.Entities[i];
-
-            if (projectileWorldIndex.Value == authPlayerWorldIndex)
-            {
-
-            }
-        }
-        */
 
         authPlayerWorldIndexes.Dispose();
         playerFactions.Dispose();
     }
 
-    void PopulateMap(float scale, Transform parent, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool initColored = false)
+    void PopulateMap(MinimapScript miniMap, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)
     {
-        float offsetMultiplier = scale;
-        float tilescale = scale / 5.8f;
+        float offsetMultiplier = miniMap.MapSize;
         //Instantiate MiniMapTile into Map
         Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
         Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
@@ -320,48 +315,72 @@ public class AddComponentsSystem : ComponentSystem
 
         if (!isVisibleRef.MiniMapTileInstance)
         {
-            isVisibleRef.MiniMapTileInstance = InstantiateMapTile(isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored, true);
+            isVisibleRef.MiniMapTileInstance = InstantiateMapTile(miniMap, isVisibleRef, invertedPos, tileColor, isUnitTile);
+            //Object.Destroy(isVisibleRef.MiniMapTileInstance.BecomeVisibleMapEffect.FMODEmitter);
         }
         else if (!isVisibleRef.BigMapTileInstance)
         {
-            isVisibleRef.BigMapTileInstance = InstantiateMapTile(isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored, false);
+            isVisibleRef.BigMapTileInstance = InstantiateMapTile(miniMap, isVisibleRef, invertedPos, tileColor, isUnitTile);
         }
+
     }
 
-    MiniMapTile InstantiateMapTile(IsVisibleReferences isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool initColored, bool isSmallTile)
+    MiniMapTile InstantiateMapTile(MinimapScript miniMap, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
     {
-        MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
-        instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
-        //invertedPos = new Vector2((int)invertedPos.x, (int)invertedPos.y);
-        instanciatedTile.TileRect.anchoredPosition = invertedPos;
+        MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity);
         instanciatedTile.TileColor = tileColor;
+        instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+        instanciatedTile.EmitSoundEffect = miniMap.IsFullscreenMap;
 
-        if(instanciatedTile.UnitPlayerColorSprite)
+        if (!isUnitTile)
         {
-            instanciatedTile.UnitPlayerColorSprite.offsetMin = new Vector2((int)(instanciatedTile.UnitPlayerColorSprite.offsetMin.x * tileScale), (int)(instanciatedTile.UnitPlayerColorSprite.offsetMin.y * tileScale));
-            instanciatedTile.UnitPlayerColorSprite.offsetMax = new Vector2((int)(instanciatedTile.UnitPlayerColorSprite.offsetMax.x * tileScale),(int)(instanciatedTile.UnitPlayerColorSprite.offsetMax.y * tileScale));
-
-        }
-
-        if (isSmallTile)
-        {
-            instanciatedTile.SmallTileScale = tileScale;
+            instanciatedTile.transform.parent = miniMap.MiniMapCellTilesPanel.transform;
+            instanciatedTile.TileRect.anchoredPosition = invertedPos;
+            instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
+            instanciatedTile.DarknessTile.sizeDelta = miniMap.MapCellDarknessPixelSize;
+            instanciatedTile.DarknessTile.transform.parent = miniMap.MiniMapDarknessTilesPanel.transform;
+            instanciatedTile.DarknessTile.localScale = new Vector3(1, 1, 1);
         }
         else
         {
-            instanciatedTile.BigTileScale = tileScale;
+            instanciatedTile.transform.parent = miniMap.MiniMapUnitTilesPanel.transform;
+            instanciatedTile.TileRect.anchoredPosition = invertedPos;
+            instanciatedTile.TileRect.sizeDelta = miniMap.MapUnitPixelSize;
+
+            if(instanciatedTile.EvenOutlineOffset)
+            {
+                instanciatedTile.UnitPlayerColorSprite.offsetMin = new Vector2(miniMap.UnitColorOffsetMin.x, miniMap.UnitColorOffsetMin.x);
+                instanciatedTile.UnitPlayerColorSprite.offsetMax = new Vector2(-miniMap.UnitColorOffsetMin.x, -miniMap.UnitColorOffsetMin.x);
+            }
+            else
+            {
+                instanciatedTile.UnitPlayerColorSprite.offsetMin = miniMap.UnitColorOffsetMin;
+                instanciatedTile.UnitPlayerColorSprite.offsetMax = miniMap.UnitColorOffsetMax * -1;
+            }
+
+            instanciatedTile.DeathCrossSize = new Vector2(miniMap.DeathPingSize, miniMap.DeathPingSize);
+
+            if (instanciatedTile.BecomeVisibleMapEffect)
+            {
+                var ping = Object.Instantiate(instanciatedTile.BecomeVisibleMapEffect, instanciatedTile.TileRect.position, Quaternion.identity, miniMap.MiniMapEffectsPanel.transform);
+                ParticleSystem.MainModule main = ping.ParticleSystem.main;
+                ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
+                main.startColor = tileColor;
+                size.sizeMultiplier = miniMap.BecomeVisiblePingSize;
+                ping.ParticleSystem.Play();
+
+                if (instanciatedTile.EmitSoundEffect && instanciatedTile.isActiveAndEnabled)
+                {
+                    ping.FMODEmitter.Play();
+                }
+
+                Object.Destroy(ping.gameObject, 2f);
+            }
         }
 
-        //init gray if not water
-        if (!initColored)
-            instanciatedTile.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
-        //init blue if water
-        else
-            instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+        instanciatedTile.TileRect.localScale = new Vector3(1, 1, 1);
 
         return instanciatedTile;
     }
-
-
 
 }

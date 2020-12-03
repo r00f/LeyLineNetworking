@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
+using FMODUnity;
 
 public class MiniMapTile : MonoBehaviour
 {
@@ -11,12 +12,18 @@ public class MiniMapTile : MonoBehaviour
     public Color TileInvisibleColor;
     [HideInInspector]
     public Color TileColor;
-    public float SmallTileScale;
-    public float BigTileScale;
+    public bool EmitSoundEffect;
 
     [Header("Optional Fields")]
+    public MapEffectComponent DeathBlowMapEffect;
+    //public RectTransform DeathBlow;
+    public Vector2 DeathCrossSize;
+    public bool EvenOutlineOffset = true;
+    public RectTransform DarknessTile;
+    public float DarknessAlphaDefault;
+    public Image DarknessTileImage;
     public RectTransform UnitPlayerColorSprite;
-    public RectTransform DeathCrossPrefab;
-    public ParticleSystem UnitBecomeVisiblePingPS;
+    //public RectTransform DeathCrossPrefab;
+    public MapEffectComponent BecomeVisibleMapEffect;
     public UILineRenderer UILineRenderer;
 }

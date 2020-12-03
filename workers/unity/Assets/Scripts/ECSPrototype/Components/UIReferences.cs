@@ -18,6 +18,7 @@ public class UIReferences : MonoBehaviour
     public GameObject SkillTreePanel;
 
     [Header("MenuButtons")]
+    public Button RevealVisionButton;
     public MenuButton MainMenuButton;
     public MenuButton HelpButton;
     public MenuButton SkilltreeButton;
@@ -179,6 +180,21 @@ public class UIReferences : MonoBehaviour
     public List<Image> TurnStepFlares;
     public UIEffectsFired CurrentEffectsFiredState;
 
+    [Header("FMODBusPaths")]
+    public string MasterBusString;
+    public string InGameSFXBusString;
+    public string EnvironmentString;
+    public string SFXBusString;
+    public string UISFXBusString;
+    public string MusicBusString;
+
+    public FMOD.Studio.Bus MasterBus;
+    public FMOD.Studio.Bus IngameSFXBus;
+    public FMOD.Studio.Bus EnvironmentBus;
+    public FMOD.Studio.Bus SFXBus;
+    public FMOD.Studio.Bus UISFXBus;
+    public FMOD.Studio.Bus MusicBus;
+
     [Header("SoundEventPaths")]
     public string ReadySoundEventPath;
     public string OpponentReadySoundEventPath;
@@ -193,6 +209,7 @@ public class UIReferences : MonoBehaviour
         interruptFired,
         attackFired,
         moveFired,
-        skillshotFired
+        skillshotFired,
+        gameOverFired
     }
 }

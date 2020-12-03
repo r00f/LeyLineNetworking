@@ -15,6 +15,11 @@ public class EscapeMenu : MonoBehaviour
     public Slider CamZoomDistSlider;
     public Slider CamZoomSpeedSlider;
     public Toggle EdgeHoverToggle;
-
     public InputField TurnOverrideInputField;
+
+    [Header("Sound Settings")]
+    public Slider MasterVolumeSlider;
+    public Slider SFXVolumeSlider;
+    public Slider MusicVolumeSlider;
+
 }

@@ -159,6 +159,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InGameTileColor: {r: 1, g: 1, b: 1, a: 0}
+  MapTileColor: {r: 0, g: 0, b: 0, a: 0}
   Collider: {fileID: 0}
   MeshRenderer: {fileID: 23109104164007716}
   GameObjects:
@@ -166,6 +168,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: 7da2eec5ef82b894fb18f88e9625c408,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &8157832631591596192
 MonoBehaviour:
   m_ObjectHideFlags: 0
