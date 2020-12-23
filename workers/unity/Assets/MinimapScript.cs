@@ -17,6 +17,7 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     //public Camera MapCam;
     public HeroTransform h_Transform;
 
+    public int ManalithCapturePingSize;
     public int BecomeVisiblePingSize;
     public int DeathPingSize;
 

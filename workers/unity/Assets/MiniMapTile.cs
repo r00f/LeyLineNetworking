@@ -16,6 +16,8 @@ public class MiniMapTile : MonoBehaviour
 
     [Header("Optional Fields")]
     public MapEffectComponent DeathBlowMapEffect;
+    public MapEffectComponent GetCapturedMapEffect;
+    public int AddPingSize;
     //public RectTransform DeathBlow;
     public Vector2 DeathCrossSize;
     public bool EvenOutlineOffset = true;

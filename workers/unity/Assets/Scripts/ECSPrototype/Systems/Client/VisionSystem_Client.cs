@@ -208,11 +208,9 @@ namespace LeyLineHybridECS
                 {
                     if (visionCoordsHash.Contains(coord.CubeCoordinate))
                     {
-                        if (isVisibleGOs.MiniMapTileInstance)
+                        if (isVisibleGOs.MiniMapTileInstance && isVisibleGOs.MiniMapTileInstance.gameObject.activeSelf == false)
                         {
-                            isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(true);
-
-                            if (isVisibleGOs.MiniMapTileInstance.BecomeVisibleMapEffect)
+                            if (isVisibleGOs.MiniMapTileInstance.BecomeVisibleMapEffect && UIRef.MinimapComponent.isActiveAndEnabled)
                             {
                                 var ping = Object.Instantiate(isVisibleGOs.MiniMapTileInstance.BecomeVisibleMapEffect, isVisibleGOs.MiniMapTileInstance.TileRect.position, Quaternion.identity, UIRef.MinimapComponent.MiniMapEffectsPanel.transform);
                                 ParticleSystem.MainModule main = ping.ParticleSystem.main;
@@ -222,12 +220,13 @@ namespace LeyLineHybridECS
                                 ping.ParticleSystem.Play();
                                 Object.Destroy(ping.gameObject, 2f);
                             }
-                        }
-                        if (isVisibleGOs.BigMapTileInstance)
-                        {
-                            isVisibleGOs.BigMapTileInstance.gameObject.SetActive(true);
 
-                            if (isVisibleGOs.BigMapTileInstance.BecomeVisibleMapEffect)
+                            isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(true);
+                        }
+
+                        if (isVisibleGOs.BigMapTileInstance && isVisibleGOs.BigMapTileInstance.gameObject.activeSelf == false)
+                        {
+                            if (isVisibleGOs.BigMapTileInstance.BecomeVisibleMapEffect && UIRef.BigMapComponent.isActiveAndEnabled)
                             {
                                 var ping = Object.Instantiate(isVisibleGOs.BigMapTileInstance.BecomeVisibleMapEffect, isVisibleGOs.BigMapTileInstance.TileRect.position, Quaternion.identity, UIRef.BigMapComponent.MiniMapEffectsPanel.transform);
                                 ParticleSystem.MainModule main = ping.ParticleSystem.main;
@@ -235,12 +234,12 @@ namespace LeyLineHybridECS
                                 main.startColor = isVisibleGOs.MiniMapTileInstance.TileColor;
                                 size.sizeMultiplier = UIRef.BigMapComponent.BecomeVisiblePingSize;
                                 ping.ParticleSystem.Play();
-                                if(isVisibleGOs.BigMapTileInstance.EmitSoundEffect && isVisibleGOs.BigMapTileInstance.isActiveAndEnabled)
-                                    ping.FMODEmitter.Play();
+                                ping.FMODEmitter.Play();
                                 Object.Destroy(ping.gameObject, 2f);
                             }
+                            isVisibleGOs.BigMapTileInstance.gameObject.SetActive(true);
                         }
-                            visible.Value = 1;
+                        visible.Value = 1;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                     }
                     else

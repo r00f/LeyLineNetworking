@@ -95485,6 +95485,7 @@ MonoBehaviour:
   Map: {fileID: 4355616865422165551}
   MapCenter: {x: 28, y: 0, z: 28}
   h_Transform: {fileID: 0}
+  ManalithCapturePingSize: 120
   BecomeVisiblePingSize: 90
   DeathPingSize: 40
   MapUnitPixelSize: {x: 12, y: 12}
@@ -111608,10 +111609,11 @@ MonoBehaviour:
   - {fileID: 5586519373922579454}
   CurrentEffectsFiredState: 0
   MasterBusString: Bus:/
-  InGameSFXBusString: Bus:/SFX/ActionSFX
+  InGameSFXBusString: Bus:/SFX/InGame
   EnvironmentString: Bus:/SFX/Environment
   SFXBusString: Bus:/SFX
-  UISFXBusString: Bus:/SFX/UISFX
+  UISFXBusString: Bus:/SFX/UI
+  UINonMapSFXBusString: Bus:/SFX/UI/NonMap
   MusicBusString: Bus:/Music
   ReadySoundEventPath: event:/UISFX/ReadyIndicator
   OpponentReadySoundEventPath: event:/UISFX/EnemyReadyIndicator
@@ -119653,6 +119655,7 @@ MonoBehaviour:
   Map: {fileID: 2524470410762646861}
   MapCenter: {x: 28, y: 0, z: 28}
   h_Transform: {fileID: 0}
+  ManalithCapturePingSize: 300
   BecomeVisiblePingSize: 200
   DeathPingSize: 80
   MapUnitPixelSize: {x: 32, y: 32}

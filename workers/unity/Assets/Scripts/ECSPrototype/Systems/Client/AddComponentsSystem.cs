@@ -93,6 +93,7 @@ public class AddComponentsSystem : ComponentSystem
             All = new ComponentType[]
     {
                 ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<IsVisible>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<AnimatorComponent>()
     }
@@ -174,9 +175,10 @@ public class AddComponentsSystem : ComponentSystem
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
             int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
 
-            PopulateMap(UIRef.MinimapComponent, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-            PopulateMap(UIRef.BigMapComponent, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+            PopulateMap(UIRef.MinimapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+            PopulateMap(UIRef.BigMapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
 
+            //if this cell is not water, Add all components
             if (cellAtt.CellAttributes.CellMapColorIndex != 5)
             {
                 IsVisible isVisible = new IsVisible
@@ -214,6 +216,7 @@ public class AddComponentsSystem : ComponentSystem
                 PostUpdateCommands.AddComponent(entity, isVisible);
                 PostUpdateCommands.AddComponent(entity, requireMarkerUpdate);
             }
+            //if it is water, only add visibility component to exclude water from highlighting / mouse behaviour
             else
             {
 
@@ -233,20 +236,6 @@ public class AddComponentsSystem : ComponentSystem
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
 
-        });
-
-        Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord) =>
-        {
-            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
-            unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
-            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
-
-            if (anim.EnableVisualsDelay <= 0)
-            {
-                PopulateMap(UIRef.MinimapComponent, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
-                PopulateMap(UIRef.BigMapComponent, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
-                PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });
-            }
         });
 
         Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
@@ -301,11 +290,25 @@ public class AddComponentsSystem : ComponentSystem
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         });
 
+        Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible isVisible) =>
+        {
+            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
+            unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
+            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
+
+            if (anim.EnableVisualsDelay <= 0)
+            {
+                PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+                PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+                PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });
+            }
+        });
+
         authPlayerWorldIndexes.Dispose();
         playerFactions.Dispose();
     }
 
-    void PopulateMap(MinimapScript miniMap, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)
+    void PopulateMap(MinimapScript miniMap, byte isVisible, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)
     {
         float offsetMultiplier = miniMap.MapSize;
         //Instantiate MiniMapTile into Map
@@ -315,17 +318,17 @@ public class AddComponentsSystem : ComponentSystem
 
         if (!isVisibleRef.MiniMapTileInstance)
         {
-            isVisibleRef.MiniMapTileInstance = InstantiateMapTile(miniMap, isVisibleRef, invertedPos, tileColor, isUnitTile);
+            isVisibleRef.MiniMapTileInstance = InstantiateMapTile(miniMap, isVisible, isVisibleRef, invertedPos, tileColor, isUnitTile);
             //Object.Destroy(isVisibleRef.MiniMapTileInstance.BecomeVisibleMapEffect.FMODEmitter);
         }
         else if (!isVisibleRef.BigMapTileInstance)
         {
-            isVisibleRef.BigMapTileInstance = InstantiateMapTile(miniMap, isVisibleRef, invertedPos, tileColor, isUnitTile);
+            isVisibleRef.BigMapTileInstance = InstantiateMapTile(miniMap, isVisible, isVisibleRef, invertedPos, tileColor, isUnitTile);
         }
 
     }
 
-    MiniMapTile InstantiateMapTile(MinimapScript miniMap, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
+    MiniMapTile InstantiateMapTile(MinimapScript miniMap, byte isVisible, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
     {
         MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity);
         instanciatedTile.TileColor = tileColor;
@@ -343,6 +346,9 @@ public class AddComponentsSystem : ComponentSystem
         }
         else
         {
+            if (isVisible == 0)
+                instanciatedTile.gameObject.SetActive(false);
+
             instanciatedTile.transform.parent = miniMap.MiniMapUnitTilesPanel.transform;
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapUnitPixelSize;
@@ -360,7 +366,8 @@ public class AddComponentsSystem : ComponentSystem
 
             instanciatedTile.DeathCrossSize = new Vector2(miniMap.DeathPingSize, miniMap.DeathPingSize);
 
-            if (instanciatedTile.BecomeVisibleMapEffect)
+            //Check if is visible and if minimap that is being populated is active
+            if (instanciatedTile.BecomeVisibleMapEffect && isVisible == 1 && miniMap.isActiveAndEnabled)
             {
                 var ping = Object.Instantiate(instanciatedTile.BecomeVisibleMapEffect, instanciatedTile.TileRect.position, Quaternion.identity, miniMap.MiniMapEffectsPanel.transform);
                 ParticleSystem.MainModule main = ping.ParticleSystem.main;

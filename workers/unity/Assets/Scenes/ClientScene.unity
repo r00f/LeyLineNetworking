@@ -5632,6 +5632,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: 022beccab7c9fd144b19389c666a2311,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &181039410
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11652,6 +11653,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: 022beccab7c9fd144b19389c666a2311,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &305437946
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14137,6 +14139,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: 022beccab7c9fd144b19389c666a2311,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &500971280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -26431,6 +26434,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: 022beccab7c9fd144b19389c666a2311,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &1009539624
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37804,105 +37808,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 62479055548727233, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 62479055548727233, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 62479055548727233, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 459924726642820926, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 459924726642820926, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1049850189765156606, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: StartUpWaitTime
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1590815815580251800, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1590815815580251800, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1590815815580251800, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1723462861897514503, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1723462861897514503, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1723462861897514503, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3170284809538342054, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3170284809538342054, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3369142461665452747, guid: 1cb12f61b1de230419c494fb26b4c842,
         type: 3}
       propertyPath: m_Enabled
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3923863129218879866, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3923863129218879866, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3923863129218879866, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4193315770378987154, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4193315770378987154, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7926929094128790896, guid: 1cb12f61b1de230419c494fb26b4c842,
         type: 3}
@@ -38012,16 +37921,6 @@ PrefabInstance:
     - target: {fileID: 7926929094128790900, guid: 1cb12f61b1de230419c494fb26b4c842,
         type: 3}
       propertyPath: m_Pivot.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8109274307063758462, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8109274307063758462, guid: 1cb12f61b1de230419c494fb26b4c842,
-        type: 3}
-      propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -38805,7 +38704,7 @@ MonoBehaviour:
     distanceFadeStart: 10000
     distanceFadeEnd: 10000
     textureIndex: 0
-    textureOffset: {x: -0.9131215, y: -0, z: 0}
+    textureOffset: {x: -1.696271, y: -0, z: 0}
 --- !u!1 &1534519911
 GameObject:
   m_ObjectHideFlags: 0
@@ -52347,6 +52246,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: e81e668f57a3bee45bb1fa952a92048a,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &1998177403
 MonoBehaviour:
   m_ObjectHideFlags: 0

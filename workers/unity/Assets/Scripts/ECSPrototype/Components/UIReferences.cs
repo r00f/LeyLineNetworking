@@ -186,6 +186,7 @@ public class UIReferences : MonoBehaviour
     public string EnvironmentString;
     public string SFXBusString;
     public string UISFXBusString;
+    public string UINonMapSFXBusString;
     public string MusicBusString;
 
     public FMOD.Studio.Bus MasterBus;
@@ -193,6 +194,7 @@ public class UIReferences : MonoBehaviour
     public FMOD.Studio.Bus EnvironmentBus;
     public FMOD.Studio.Bus SFXBus;
     public FMOD.Studio.Bus UISFXBus;
+    public FMOD.Studio.Bus UINonMapSFXBus;
     public FMOD.Studio.Bus MusicBus;
 
     [Header("SoundEventPaths")]

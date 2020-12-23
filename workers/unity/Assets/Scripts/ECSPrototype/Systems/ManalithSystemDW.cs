@@ -135,12 +135,8 @@ namespace LeyLineHybridECS
 
                 var gameStates = m_GameControllerData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
-
                 var gameState = gameStates[0];
                 var playerFaction = playerFactions[0];
-
-
-
 
                 for (int i = 0; i < manaLithFactions.Length; i++)
                 {
@@ -169,9 +165,9 @@ namespace LeyLineHybridECS
                                             var coord1 = initData.leyLineCircleCoords[0];
 
                                             if (!clientData.MiniMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0], true);
+                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0]);
                                             if (!clientData.BigMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0], true);
+                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0]);
 
 
                                             break;
@@ -183,9 +179,9 @@ namespace LeyLineHybridECS
 
                                             
                                             if (!clientData.MiniMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0], true);
+                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0]);
                                             if(!clientData.BigMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0], true);
+                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0]);
 
                                             break;
                                     }
@@ -250,7 +246,34 @@ namespace LeyLineHybridECS
                                 var EventID = manalithFactionChangeEvents[q].EntityId.Id;
                                 if (ID == EventID)
                                 {
-                                    //Debug.Log("Got the event, now get the entity id of it??");
+                                    //Fire Get Capture effects
+                                    if(clientData.BigMapTileInstance && clientData.BigMapTileInstance.isActiveAndEnabled)
+                                    {
+                                        if (clientData.BigMapTileInstance.GetCapturedMapEffect)
+                                        {
+                                            var ping = Object.Instantiate(clientData.BigMapTileInstance.GetCapturedMapEffect, clientData.BigMapTileInstance.TileRect.position, Quaternion.identity, m_UISystem.UIRef.BigMapComponent.MiniMapEffectsPanel.transform);
+                                            ParticleSystem.MainModule main = ping.ParticleSystem.main;
+                                            ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
+                                            main.startColor = meshColor.Color;
+                                            size.sizeMultiplier = m_UISystem.UIRef.BigMapComponent.ManalithCapturePingSize + clientData.BigMapTileInstance.AddPingSize;
+                                            ping.ParticleSystem.Play();
+                                            ping.FMODEmitter.Play();
+                                            Object.Destroy(ping.gameObject, 4f);
+                                        }
+                                    }
+                                    if(clientData.MiniMapTileInstance && clientData.MiniMapTileInstance.isActiveAndEnabled)
+                                    {
+                                        if (clientData.MiniMapTileInstance.GetCapturedMapEffect)
+                                        {
+                                            var ping = Object.Instantiate(clientData.BigMapTileInstance.GetCapturedMapEffect, clientData.MiniMapTileInstance.TileRect.position, Quaternion.identity, m_UISystem.UIRef.MinimapComponent.MiniMapEffectsPanel.transform);
+                                            ParticleSystem.MainModule main = ping.ParticleSystem.main;
+                                            ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
+                                            main.startColor = meshColor.Color;
+                                            size.sizeMultiplier = m_UISystem.UIRef.MinimapComponent.ManalithCapturePingSize;
+                                            ping.ParticleSystem.Play();
+                                            Object.Destroy(ping.gameObject, 4f);
+                                        }
+                                    }
                                     meshColor.ManaLithObject.GainControlSoundEmitter.Play();
                                     foreach (ParticleSystem p in meshColor.ManaLithObject.OneShotParticleSystems)
                                     {
@@ -493,8 +516,7 @@ namespace LeyLineHybridECS
             m_UISystem.UIRef.ManalithToolTipFab.gameObject.SetActive(false);
         }
 
-
-        void PopulateMap(float scale, ManalithInitializer initData, Transform parent, float3 coord, ref ManalithClientData isVisibleRef, Color tileColor, bool initColored = false)
+        void PopulateMap(float scale, ManalithInitializer initData, Transform parent, float3 coord, ref ManalithClientData isVisibleRef, Color tileColor)
         {
             float offsetMultiplier = scale;
             float tilescale = scale / 5.8f;
@@ -506,15 +528,15 @@ namespace LeyLineHybridECS
 
             if(!isVisibleRef.MiniMapTileInstance)
             {
-                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored);
+                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, false);
             }
             else if(!isVisibleRef.BigMapTileInstance)
             {
-                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, initColored);
+                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, true);
             }
         }
 
-        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool initColored)
+        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool isBigMapTile)
         {
             MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
             instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
@@ -522,18 +544,14 @@ namespace LeyLineHybridECS
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileColor = tileColor;
 
+            if (isBigMapTile)
+                instanciatedTile.EmitSoundEffect = true;
 
-            //init gray if not water
-            if (!initColored)
-                instanciatedTile.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
-            //init blue if water
-            else
-                instanciatedTile.TileImage.color = instanciatedTile.TileColor;
 
             return instanciatedTile;
         }
 
-        void PopulateMap(float scale, ManalithInitializer initData, Transform parent, List<float3> coords, ref ManalithClientData isVisibleRef, Color tileColor, bool initColored = false)
+        void PopulateMap(float scale, ManalithInitializer initData, Transform parent, List<float3> coords, ref ManalithClientData isVisibleRef, Color tileColor)
         {
             float offsetMultiplier = scale;
             float tilescale = scale / 5.8f;
@@ -561,29 +579,21 @@ namespace LeyLineHybridECS
 
             if (!isVisibleRef.MiniMapTileInstance)
             {
-                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, initColored, coords, initData, scale, true);
+                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, coords, initData, scale, true);
             }
             else if (!isVisibleRef.BigMapTileInstance)
             {
-                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, initColored, coords, initData, scale, false);
+                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, coords, initData, scale, false);
             }
         }
 
-        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool initColored, List<float3> coords, ManalithInitializer initData, float scale, bool isMiniMapTile)
+        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, List<float3> coords, ManalithInitializer initData, float scale, bool isMiniMapTile)
         {
             MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
             instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
             invertedPos = new Vector2((int)invertedPos.x, (int)invertedPos.y);
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileColor = tileColor;
-
-
-            //init gray if not water
-            if (!initColored)
-                instanciatedTile.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
-            //init blue if water
-            else
-                instanciatedTile.TileImage.color = instanciatedTile.TileColor;
 
             if (instanciatedTile.UILineRenderer)
             {

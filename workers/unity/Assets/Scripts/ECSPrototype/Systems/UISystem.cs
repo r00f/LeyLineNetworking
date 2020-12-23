@@ -90,6 +90,7 @@ namespace LeyLineHybridECS
             UIRef.EnvironmentBus = RuntimeManager.GetBus(UIRef.EnvironmentString);
             UIRef.SFXBus = RuntimeManager.GetBus(UIRef.SFXBusString);
             UIRef.MusicBus = RuntimeManager.GetBus(UIRef.MusicBusString);
+            UIRef.UINonMapSFXBus = RuntimeManager.GetBus(UIRef.UINonMapSFXBusString);
             InitializeButtons();
             AddSettingsListeners();
         }
@@ -1131,9 +1132,7 @@ namespace LeyLineHybridECS
 
         void FireStepChangedEffects(string stateName, Color effectColor, string soundEffectPath)
         {
-            if (UIRef.UIActive)
-                RuntimeManager.PlayOneShot(soundEffectPath);
-
+            RuntimeManager.PlayOneShot(soundEffectPath);
             UIRef.TurnStateText.color = effectColor;
             UIRef.BigMapTurnCounter.color = effectColor;
             UIRef.TurnStateText.text = char.ToUpper(stateName[0]) + stateName.Substring(1);
@@ -1163,6 +1162,7 @@ namespace LeyLineHybridECS
             {
                 UIRef.UIActive = !UIRef.UIActive;
                 UIRef.IngameSFXBus.setMute(!UIRef.UIActive);
+                UIRef.UINonMapSFXBus.setMute(!UIRef.UIActive);
                 UIRef.EnvironmentBus.setMute(!UIRef.UIActive);
                 UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
                 InvertMenuPanelActive(UIRef.MapPanel.gameObject);
@@ -1175,6 +1175,7 @@ namespace LeyLineHybridECS
             if (Input.GetKeyDown(KeyCode.U))
             {
                 UIRef.UIActive = !UIRef.UIActive;
+                UIRef.UISFXBus.setMute(!UIRef.UIActive);
                 UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
             }
 
