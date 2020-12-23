@@ -13,13 +13,19 @@ namespace BlankProject
     {
         private const string AuthPlayer = "Prefabs/UnityClient/Authoritative/Player";
         private const string NonAuthPlayer = "Prefabs/UnityClient/NonAuthoritative/Player";
+        #pragma warning disable 649
+        [SerializeField] private bool UseExternalIp;
+        [SerializeField] private GameObject level;
+        #pragma warning restore 649
 
         public const string WorkerType = "UnityClient";
 
         private async void Start()
         {
-            var connParams = CreateConnectionParameters(WorkerType);
-            connParams.Network.ConnectionType = NetworkConnectionType.Kcp;
+            Application.targetFrameRate = 60;
+
+            var connParams = CreateConnectionParameters(WorkerUtils.UnityClient);
+            connParams.Network.UseExternalIp = UseExternalIp;
 
             var builder = new SpatialOSConnectionHandlerBuilder()
                 .SetConnectionParameters(connParams);
@@ -30,7 +36,7 @@ namespace BlankProject
                 switch (initializer.GetConnectionService())
                 {
                     case ConnectionService.Receptionist:
-                        builder.SetConnectionFlow(new ReceptionistFlow(CreateNewWorkerId(WorkerType), initializer));
+                        builder.SetConnectionFlow(new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.UnityClient), initializer));
                         break;
                     case ConnectionService.Locator:
                         builder.SetConnectionFlow(new LocatorFlow(initializer));
@@ -41,7 +47,7 @@ namespace BlankProject
             }
             else
             {
-                builder.SetConnectionFlow(new ReceptionistFlow(CreateNewWorkerId(WorkerType)));
+                builder.SetConnectionFlow(new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.UnityClient)));
             }
 
             await Connect(builder, new ForwardingDispatcher()).ConfigureAwait(false);
@@ -53,14 +59,8 @@ namespace BlankProject
             Worlds.DefaultWorld = World.AllWorlds[0].EntityManager;
             WorkerUtils.AddClientSystems(Worker.World);
 
-            //Debug.Log(Worlds.DefaultWorld.World.Name);
-            //FOR SOME REASON THIS HAS CEASED TO WORK NOW WE CHECK IF WORLDS IS INITIALIZED IN SYSTEMS INSTEAD
-            //World.Active.GetOrCreateSystem<LeyLineHybridECS.MeshColorLerpSystem>();
-            //World.Active.GetOrCreateSystem<ProjectileSystem>();
-            //World.Active.GetOrCreateSystem<ClientCleanupSystem>();
-
             var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
-            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer, fallback), gameObject);
+            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer), gameObject);
             PlayerLifecycleHelper.AddClientSystems(Worker.World);
         }
     }

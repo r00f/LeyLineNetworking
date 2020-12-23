@@ -4,9 +4,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Generic;
+using FMODUnity;
 
 public class AnimatorComponent : MonoBehaviour
 {
+
+    public Transform WeaponTransform;
 
     [Header("GenericAnimation")]
     public ECSAction CurrentLockedAction;
@@ -19,24 +22,21 @@ public class AnimatorComponent : MonoBehaviour
     public float EnableVisualsDelay;
     public List<GameObject> CharacterEffects;
 
+    [Header("SoundFX")]
+    public StudioEventEmitter VoiceEmitter;
+    public StudioEventEmitter FootStempEmitter;
+
     [Header("Movement")]
-    public Vector3f LastStationaryCoordinate;
     public int RotationSpeed;
     public Transform RotateTransform;
     public bool DestinationReachTriggerSet;
     public Vector3 RotationTarget;
-    public Vector3 DestinationPosition;
-    
-    [Header("GetHit")]
-    public uint LastHealth;
-    [SerializeField]
-    public bool ActionEffectTrigger = false;
-
+    public Vector2 DestinationPosition;
 
     [Header("Death")]
     public bool Dead;
     public bool DeathEventTrigger;
-    public List<GameObject> ObjectsToDisable;
+    public List<GameObject> DisableOnDeathObjects;
     public List<Rigidbody> RagdollRigidBodies;
     public List<Transform> Props;
     public ParticleSystem DeathParticleSystem;

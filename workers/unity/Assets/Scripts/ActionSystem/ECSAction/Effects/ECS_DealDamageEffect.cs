@@ -8,7 +8,10 @@ namespace LeyLineHybridECS
     [System.Serializable]
     public class ECS_DealDamageEffect : ECSActionEffect
     {
-        public uint damageAmount;
+        public uint DamageAmount;
+        public float ExplosionRadius;
+        public uint ExplosionForce;
+        public uint UpForce;
     }
         
 }

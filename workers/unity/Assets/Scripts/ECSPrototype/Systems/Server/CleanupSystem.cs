@@ -10,31 +10,15 @@ using Unity.Collections;
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class CleanupSystem : ComponentSystem
 {
-    /*
-    public struct UnitData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<SpatialEntityId> EntityIds;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<Health.Component> HealthData;
-        public ComponentDataArray<Actions.Component> ActionData;
-        public ComponentDataArray<WorldCommands.DeleteEntity.CommandSender> DeleteEntitySenders;
-    }
-
-    public struct GameStateData
-    {
-        public readonly int Length;
-        public readonly ComponentDataArray<WorldIndex.Component> WorldIndexData;
-        public readonly ComponentDataArray<GameState.Component> GameStates;
-    }
-    */
     CommandSystem m_CommandSystem;
     ResourceSystem m_ResourceSystem;
     ExecuteActionsSystem m_ExecuteSystem;
     TimerSystem m_TimerSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
 
     EntityQuery m_GameStateData;
     EntityQuery m_UnitData;
+    EntityQuery m_UnitRemovedData;
 
     protected override void OnCreate()
     {
@@ -52,11 +36,26 @@ public class CleanupSystem : ComponentSystem
         ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<GameState.Component>()
         );
+
+        var unitRemovedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+        {
+                ComponentType.ReadOnly<CubeCoordinate.Component>()
+        },
+            All = new ComponentType[]
+        {
+                typeof(UnitLifeCycleSystem.UnitStateData)
+        }
+        };
+
+        m_UnitRemovedData = GetEntityQuery(unitRemovedDesc);
     }
 
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
         m_ExecuteSystem = World.GetExistingSystem<ExecuteActionsSystem>();
@@ -70,7 +69,7 @@ public class CleanupSystem : ComponentSystem
             if (gameState.CurrentState == GameStateEnum.cleanup)
             {
                 m_TimerSystem.SubstractTurnDurations(WorldIndex.Value);
-                ClearAllLockedActions(WorldIndex.Value);
+
                 m_ResourceSystem.ResetArmor(WorldIndex.Value);
             }
         });
@@ -102,9 +101,37 @@ public class CleanupSystem : ComponentSystem
         {
             if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
             {
-                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
-                m_CommandSystem.SendCommand(deleteEntityRequest);
+                //RAISE CLIENT UI CLEANUP EVENT ON HEALTH COMPONENT AND DELETE ENTITY WHENEVER UI IS CLEANED ON ALL CLIENTS
+                /*
+                m_ComponentUpdateSystem.SendEvent(
+                new Health.CleanupUiEvent.Event(),
+                entityId.EntityId);
+                */
+
+                //if(m_ComponentUpdateSystem.GetEventsReceived<Health.CleanupUiEvent.Event>().Count == 0)
+                //{
+                    var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+                    m_CommandSystem.SendCommand(deleteEntityRequest);
+                //}
             }
         });
+    }
+
+    public bool CheckAllDeadUnitsDeleted(uint worldIndex)
+    {
+        bool allUnitsDeleted = true;
+
+        Entities.With(m_UnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref Health.Component health) =>
+        {
+            if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
+            {
+                allUnitsDeleted = false;
+            }
+        });
+
+        if (m_UnitRemovedData.CalculateEntityCount() > 0)
+            allUnitsDeleted = false;
+
+        return allUnitsDeleted;
     }
 }

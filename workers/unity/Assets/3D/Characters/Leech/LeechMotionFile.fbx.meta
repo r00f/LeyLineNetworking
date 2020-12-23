@@ -1,39 +1,32 @@
 fileFormatVersion: 2
-guid: b3bba2918cbc0c346ac3b49ffc254ec1
+guid: e1e15dbebf5a65c4a8661a4b349c57c2
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Body
-    100002: Body1
-    100004: Body2
-    100006: Body3
-    100008: Body4
-    100010: Body5
-    100012: Body6
-    100014: Body7
-    100016: Body8
-    100018: Body9
-    100020: //RootNode
-    400000: Body
-    400002: Body1
-    400004: Body2
-    400006: Body3
-    400008: Body4
-    400010: Body5
-    400012: Body6
-    400014: Body7
-    400016: Body8
-    400018: Body9
-    400020: //RootNode
-    7400000: Idle
-    7400002: Idle
-    7400004: Move
-    7400006: Succ
-    9500000: //RootNode
-    2186277476908879412: ImportLogs
+  serializedVersion: 19300
+  internalIDToNameTable:
+  - first:
+      74: 1827226128182048838
+    second: Take 001
+  - first:
+      74: -3100369314251171874
+    second: Idle
+  - first:
+      74: 1358262452650834379
+    second: Move
+  - first:
+      74: -4858689742576350415
+    second: LeechIdle
+  - first:
+      74: 6746977156738036014
+    second: LeechMove
+  - first:
+      74: -1940976898835638432
+    second: LeechSucc
+  - first:
+      74: -8390955320286223576
+    second: AttackPrototype
   externalObjects: {}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -51,7 +44,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 3
+    animationCompression: 0
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -60,10 +53,40 @@ ModelImporter:
     extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
-      name: Idle
-      takeName: Idle
+      name: LeechIdle
+      takeName: LeechIdle
+      internalID: 0
+      firstFrame: 15
+      lastFrame: 65
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask: []
+      maskType: 3
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 15
+    - serializedVersion: 16
+      name: LeechMove
+      takeName: LeechMove
+      internalID: 0
       firstFrame: 1
-      lastFrame: 60
+      lastFrame: 51
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -82,16 +105,24 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.95403093
+        functionName: PlayFootStepSFX
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+      additiveReferencePoseFrame: 15
     - serializedVersion: 16
-      name: Move
-      takeName: Move
-      firstFrame: 0
-      lastFrame: 30
+      name: LeechSucc
+      takeName: LeechSucc
+      internalID: 0
+      firstFrame: 1
+      lastFrame: 31
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
@@ -114,19 +145,20 @@ ModelImporter:
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
+      additiveReferencePoseFrame: 15
     - serializedVersion: 16
-      name: Succ
-      takeName: Succ
-      firstFrame: 0
-      lastFrame: 30
+      name: AttackPrototype
+      takeName: LeechSucc
+      internalID: 0
+      firstFrame: 1
+      lastFrame: 31
       wrapMode: 0
       orientationOffsetY: 0
       level: 0
       cycleOffset: 0
       loop: 0
       hasAdditiveReferencePose: 0
-      loopTime: 1
+      loopTime: 0
       loopBlend: 0
       loopBlendOrientation: 0
       loopBlendPositionY: 0
@@ -138,18 +170,26 @@ ModelImporter:
       mirror: 0
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
-      events: []
+      events:
+      - time: 0.052249637
+        functionName: TriggerEvent
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
       transformMask: []
       maskType: 3
       maskSource: {instanceID: 0}
-      additiveReferencePoseFrame: 0
-    isReadable: 1
+      additiveReferencePoseFrame: 15
+    isReadable: 0
   meshes:
     lODScreenPercentages: []
     globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -157,18 +197,19 @@ ModelImporter:
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 0.01
-    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -177,12 +218,187 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 1
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
-    skeleton: []
+    skeleton:
+    - name: Leech(Clone)
+      parentName: 
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mBodyMain
+      parentName: Leech(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Root
+      parentName: Leech(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Head
+      parentName: Root
+      position: {x: -0, y: 0.06, z: 0.3}
+      rotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+      scale: {x: 1.000001, y: 1, z: 1.000001}
+    - name: mSpike
+      parentName: Head
+      position: {x: -0.04585078, y: 0.0757678, z: 0.00000000834465}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Teeth
+      parentName: Head
+      position: {x: 0.022701688, y: -0.0016628529, z: 0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth1
+      parentName: Teeth
+      position: {x: 0.0050415862, y: -0.000000013953101, z: -0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth2
+      parentName: Teeth
+      position: {x: 0.0050415862, y: -0.000000013953101, z: -0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth3
+      parentName: Teeth
+      position: {x: 0.0050415862, y: -0.000000013953101, z: -0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth4
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth5
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth6
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth7
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth8
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth9
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth10
+      parentName: Teeth
+      position: {x: 0.0050415862, y: -0.000000013953101, z: -0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth11
+      parentName: Teeth
+      position: {x: 0.0050415862, y: -0.000000013953101, z: -0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth12
+      parentName: Teeth
+      position: {x: 0.0050415862, y: -0.000000013953101, z: -0.000027260776}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Head 1
+      parentName: Head
+      position: {x: -0.08737449, y: 0, z: 2.8034288e-18}
+      rotation: {x: 0.0000018529041, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: FeatherLeather
+      parentName: Head 1
+      position: {x: -0.2126255, y: -0.059800535, z: 0.00000022160933}
+      rotation: {x: 0.00941075, y: 0.04300749, z: -0.8601814, w: 0.5080845}
+      scale: {x: 1, y: 1, z: 1}
+    - name: pTorus1
+      parentName: FeatherLeather
+      position: {x: 0.21441326, y: 0.06274499, z: 4.7609307e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mFeathersPlayerColor
+      parentName: FeatherLeather
+      position: {x: 0.16586575, y: 0.12726094, z: 0.008177847}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mFeatherBones
+      parentName: FeatherLeather
+      position: {x: 0.1642618, y: 0.12800057, z: 0.008259216}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mSpike1
+      parentName: Head 1
+      position: {x: -0.2126255, y: -0.059800535, z: 0.00000022160933}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail1
+      parentName: Head 1
+      position: {x: -0.10951942, y: -0.00000040247846, z: -0.00000040585647}
+      rotation: {x: 0.0000019794234, y: -0.0000020020154, z: -0.5336146, w: 0.8457278}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: mSpike2
+      parentName: Tail1
+      position: {x: -0.103106104, y: -0.05980011, z: 0.0000006274659}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail2
+      parentName: Tail1
+      position: {x: -0.112040095, y: -2.04281e-16, z: -0.00000041519903}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: mSpike3
+      parentName: Tail2
+      position: {x: 0.008934, y: -0.05980011, z: 0.000001042665}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail3
+      parentName: Tail2
+      position: {x: -0.11480688, y: -7.904788e-16, z: -0.0000004254523}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: mSpike4
+      parentName: Tail3
+      position: {x: 0.1237409, y: -0.05980011, z: 0.0000014681174}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail4
+      parentName: Tail3
+      position: {x: -0.114837475, y: -4.2632563e-16, z: -0.00000042556567}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: Tail5
+      parentName: Tail4
+      position: {x: -0.11572174, y: -5.684342e-16, z: -0.00000042884255}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: Tail6
+      parentName: Tail5
+      position: {x: -0.08553696, y: -4.094502e-15, z: -0.00000031698357}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: Tail7
+      parentName: Tail6
+      position: {x: -0.07864411, y: -1.2878584e-15, z: -0.00000029143993}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: Tail8
+      parentName: Tail7
+      position: {x: -0.07937713, y: -0.0000000020112008, z: -0.00000029415642}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
     armTwist: 0.5
     foreArmTwist: 0.5
     upperLegTwist: 0.5
@@ -190,14 +406,17 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: f3b933ea83085dc458feb74c304d3153,
     type: 3}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 2
   additionalBone: 0
   userData: 
   assetBundleName: 

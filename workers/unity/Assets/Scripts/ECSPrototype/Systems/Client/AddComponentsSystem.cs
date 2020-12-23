@@ -6,7 +6,6 @@ using Player;
 using Unit;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine;
 
@@ -19,6 +18,13 @@ public class AddComponentsSystem : ComponentSystem
         public WorldIndex.Component WorldIndexState;
     }
 
+    public struct MapPopulatedIdentifyier : IComponentData
+    {
+
+    }
+
+    EntityQuery m_UnitMapPopulatedData;
+
     EntityQuery m_PlayerStateData;
     EntityQuery m_PlayerAddedData;
     EntityQuery m_ProjectileAddedData;
@@ -26,21 +32,21 @@ public class AddComponentsSystem : ComponentSystem
     EntityQuery m_CellAddedData;
     EntityManager em;
 
-    UIReferences m_UIReferences;
+    UIReferences UIRef;
 
     Settings settings;
 
     protected override void OnStartRunning()
     {
-        m_UIReferences = Object.FindObjectOfType<UIReferences>();
+        UIRef = Object.FindObjectOfType<UIReferences>();
         base.OnStartRunning();
     }
 
     protected override void OnCreate()
     {
-        base.OnCreateManager();
+        base.OnCreate();
 
-        em = World.Active.EntityManager;
+        em = World.EntityManager;
         settings = Resources.Load<Settings>("Settings");
 
         var projectileAddedDesc = new EntityQueryDesc
@@ -71,11 +77,30 @@ public class AddComponentsSystem : ComponentSystem
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<Transform>(),
-                ComponentType.ReadWrite<AnimatorComponent>()
+                ComponentType.ReadOnly<UnitEffects>(),
+                ComponentType.ReadOnly<AnimatorComponent>()
             }
         };
 
         m_UnitAddedData = GetEntityQuery(unitAddedDesc);
+
+        var unitMapPopulatedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+    {
+                typeof(MapPopulatedIdentifyier)
+    },
+            All = new ComponentType[]
+    {
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<IsVisible>(),
+                ComponentType.ReadOnly<CubeCoordinate.Component>(),
+                ComponentType.ReadOnly<AnimatorComponent>()
+    }
+        };
+
+        m_UnitMapPopulatedData = GetEntityQuery(unitMapPopulatedDesc);
+
 
         var cellAddedDesc = new EntityQueryDesc
         {
@@ -102,7 +127,8 @@ public class AddComponentsSystem : ComponentSystem
             {
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<PlayerState.Component>(),
-                ComponentType.ReadWrite<HeroTransform>()
+                ComponentType.ReadOnly<HeroTransform>(),
+                ComponentType.ReadWrite<Moba_Camera>()
             }
         };
 
@@ -111,10 +137,8 @@ public class AddComponentsSystem : ComponentSystem
         m_PlayerStateData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+            ComponentType.ReadOnly<PlayerState.HasAuthority>()
             );
-
-        m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
     }
 
@@ -131,116 +155,48 @@ public class AddComponentsSystem : ComponentSystem
 
         Entities.With(m_PlayerAddedData).ForEach((Entity entity, HeroTransform htrans, ref WorldIndex.Component pWorldIndex) =>
         {
-            //if (pWorldIndex.Value == authPlayerWorldIndex)
-            //{
-                HighlightingDataComponent highlightingData = new HighlightingDataComponent();
-                PostUpdateCommands.AddComponent(entity, highlightingData);
-                m_UIReferences.MinimapComponent.h_Transform = htrans;
-                
+            HighlightingDataComponent highlightingData = new HighlightingDataComponent
+            {
+                ShowIngameUI = true
 
-            //}
+            };
+
+            var cam = EntityManager.GetComponentObject<Moba_Camera>(entity);
+
+            cam.PlayerMapTileInstance = Object.Instantiate(cam.PlayerMapTilePrefab, Vector3.zero, Quaternion.identity, UIRef.MinimapComponent.MiniMapPlayerTilePanel.transform);
+            PostUpdateCommands.AddComponent(entity, highlightingData);
+            UIRef.MinimapComponent.h_Transform = htrans;
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
         });
 
-        Entities.With(m_CellAddedData).ForEach((Entity entity, ref WorldIndex.Component cellWorldIndex) =>
+        Entities.With(m_CellAddedData).ForEach((Entity entity, ref WorldIndex.Component cellWorldIndex, ref CellAttributesComponent.Component cellAtt) =>
         {
-            //Debug.Log(authPlayerWorldIndex);
+            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
+            int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
 
-            //if (cellWorldIndex.Value == authPlayerWorldIndex)
-            //{
-            //Debug.Log("AddCellComponents");
-            //UnityEngine.Rendering.Hybrid
+            PopulateMap(UIRef.MinimapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
+            PopulateMap(UIRef.BigMapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
 
-            /*
-            RenderMesh meshTest = new RenderMesh
+            //if this cell is not water, Add all components
+            if (cellAtt.CellAttributes.CellMapColorIndex != 5)
             {
+                IsVisible isVisible = new IsVisible
+                {
+                    Value = 0,
+                    RequireUpdate = 1,
+                    LerpSpeed = 0.5f,
+                };
 
-
-            };
-            */
-
-            IsVisible isVisible = new IsVisible
-            {
-                Value = 0,
-                RequireUpdate = 1,
-                LerpSpeed = 0.5f,
-            };
-
-            MouseState mouseState = new MouseState
-            {
-                CurrentState = MouseState.State.Neutral,
-            };
-
-            MouseVariables mouseVars = new MouseVariables
-            {
-                Distance = 0.865f
-            };
-
-            MarkerState markerState = new MarkerState
-            {
-                CurrentTargetType = MarkerState.TargetType.Neutral,
-                IsSet = 0,
-                TargetTypeSet = 0,
-                CurrentState = MarkerState.State.Neutral,
-                IsUnit = 0
-            };
-
-            PostUpdateCommands.AddComponent(entity, mouseVars);
-            PostUpdateCommands.AddComponent(entity, mouseState);
-            PostUpdateCommands.AddComponent(entity, markerState);
-            PostUpdateCommands.AddComponent(entity, isVisible);
-
-
-            /*
-            //PostUpdateCommands.AddComponent(entity, new NonUniformScale());
-            //PostUpdateCommands.AddComponent(entity, new Translation());
-            //PostUpdateCommands.AddComponent(entity, new LocalToWorld());
-            //PostUpdateCommands.AddComponent(entity, new WorldRenderBounds());
-            //PostUpdateCommands.AddComponent(entity, new ChunkWorldRenderBounds());
-
-            PostUpdateCommands.AddSharedComponent(entity, new RenderMesh
-            {
-                mesh = settings.TestMesh,
-                material = settings.TestMat
-
-            });
-            */
-
-            PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
-
-        });
-
-        Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord) =>
-        {
-            anim.LastStationaryCoordinate = coord.CubeCoordinate;
-
-            //if (unitWorldIndex.Value == authPlayerWorldIndex)
-            //{
                 MouseState mouseState = new MouseState
                 {
                     CurrentState = MouseState.State.Neutral,
-                    ClickEvent = 0
                 };
 
                 MouseVariables mouseVars = new MouseVariables
                 {
-                    yOffset = 1f,
-                    Distance = 1.2f
+                    Distance = 0.865f
                 };
-
-                IsVisible isVisible = new IsVisible();
-
-                if (faction.Faction == playerFaction.Faction)
-                {
-                    isVisible.Value = 1;
-                    isVisible.RequireUpdate = 1;
-                }
-                else
-                {
-                    isVisible.Value = 0;
-                    isVisible.RequireUpdate = 1;
-                }
 
                 MarkerState markerState = new MarkerState
                 {
@@ -248,32 +204,190 @@ public class AddComponentsSystem : ComponentSystem
                     IsSet = 0,
                     TargetTypeSet = 0,
                     CurrentState = MarkerState.State.Neutral,
-                    IsUnit = 1
+                    IsUnit = 0
                 };
 
+                RequireMarkerUpdate requireMarkerUpdate = new RequireMarkerUpdate();
+
+
                 PostUpdateCommands.AddComponent(entity, mouseVars);
-                PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, mouseState);
+                PostUpdateCommands.AddComponent(entity, markerState);
                 PostUpdateCommands.AddComponent(entity, isVisible);
-            //}
+                PostUpdateCommands.AddComponent(entity, requireMarkerUpdate);
+            }
+            //if it is water, only add visibility component to exclude water from highlighting / mouse behaviour
+            else
+            {
+
+                IsVisible isVisible = new IsVisible
+                {
+                    Value = 0,
+                    RequireUpdate = 1,
+                    LerpSpeed = 0.5f,
+                };
+
+                RequireMarkerUpdate requireMarkerUpdate = new RequireMarkerUpdate();
+
+                PostUpdateCommands.AddComponent(entity, isVisible);
+                PostUpdateCommands.AddComponent(entity, requireMarkerUpdate);
+
+            }
+
+            PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
+
+        });
+
+        Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        {
+            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
+
+            MouseState mouseState = new MouseState
+            {
+                CurrentState = MouseState.State.Neutral,
+                ClickEvent = 0
+            };
+
+            MouseVariables mouseVars = new MouseVariables
+            {
+                yOffset = 1f,
+                Distance = 1.2f
+            };
+
+            IsVisible isVisible = new IsVisible();
+
+            if (faction.Faction == playerFaction.Faction)
+            {
+                isVisible.Value = 1;
+                isVisible.RequireUpdate = 1;
+            }
+            else
+            {
+                isVisible.Value = 0;
+                isVisible.RequireUpdate = 1;
+            }
+
+            if (isVisible.Value == 1)
+            {
+                foreach (GameObject g in isVisibleRef.GameObjects)
+                    g.SetActive(true);
+            }
+
+            MarkerState markerState = new MarkerState
+            {
+                CurrentTargetType = MarkerState.TargetType.Neutral,
+                IsSet = 0,
+                TargetTypeSet = 0,
+                CurrentState = MarkerState.State.Neutral,
+                IsUnit = 1
+            };
+
+            PostUpdateCommands.AddComponent(entity, mouseVars);
+            PostUpdateCommands.AddComponent(entity, markerState);
+            PostUpdateCommands.AddComponent(entity, mouseState);
+            PostUpdateCommands.AddComponent(entity, isVisible);
 
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         });
 
-        /*
-        for(int i = 0; i < m_ProjectileAddedData.Length; i++)
+        Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible isVisible) =>
         {
-            var projectileWorldIndex = m_ProjectileAddedData.WorldIndexData[i];
-            var entity = m_ProjectileAddedData.Entities[i];
+            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
+            unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
+            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
-            if (projectileWorldIndex.Value == authPlayerWorldIndex)
+            if (anim.EnableVisualsDelay <= 0)
             {
-
+                PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+                PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
+                PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });
             }
-        }
-        */
+        });
 
         authPlayerWorldIndexes.Dispose();
         playerFactions.Dispose();
     }
+
+    void PopulateMap(MinimapScript miniMap, byte isVisible, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)
+    {
+        float offsetMultiplier = miniMap.MapSize;
+        //Instantiate MiniMapTile into Map
+        Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
+        Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
+
+
+        if (!isVisibleRef.MiniMapTileInstance)
+        {
+            isVisibleRef.MiniMapTileInstance = InstantiateMapTile(miniMap, isVisible, isVisibleRef, invertedPos, tileColor, isUnitTile);
+            //Object.Destroy(isVisibleRef.MiniMapTileInstance.BecomeVisibleMapEffect.FMODEmitter);
+        }
+        else if (!isVisibleRef.BigMapTileInstance)
+        {
+            isVisibleRef.BigMapTileInstance = InstantiateMapTile(miniMap, isVisible, isVisibleRef, invertedPos, tileColor, isUnitTile);
+        }
+
+    }
+
+    MiniMapTile InstantiateMapTile(MinimapScript miniMap, byte isVisible, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
+    {
+        MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity);
+        instanciatedTile.TileColor = tileColor;
+        instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+        instanciatedTile.EmitSoundEffect = miniMap.IsFullscreenMap;
+
+        if (!isUnitTile)
+        {
+            instanciatedTile.transform.parent = miniMap.MiniMapCellTilesPanel.transform;
+            instanciatedTile.TileRect.anchoredPosition = invertedPos;
+            instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
+            instanciatedTile.DarknessTile.sizeDelta = miniMap.MapCellDarknessPixelSize;
+            instanciatedTile.DarknessTile.transform.parent = miniMap.MiniMapDarknessTilesPanel.transform;
+            instanciatedTile.DarknessTile.localScale = new Vector3(1, 1, 1);
+        }
+        else
+        {
+            if (isVisible == 0)
+                instanciatedTile.gameObject.SetActive(false);
+
+            instanciatedTile.transform.parent = miniMap.MiniMapUnitTilesPanel.transform;
+            instanciatedTile.TileRect.anchoredPosition = invertedPos;
+            instanciatedTile.TileRect.sizeDelta = miniMap.MapUnitPixelSize;
+
+            if(instanciatedTile.EvenOutlineOffset)
+            {
+                instanciatedTile.UnitPlayerColorSprite.offsetMin = new Vector2(miniMap.UnitColorOffsetMin.x, miniMap.UnitColorOffsetMin.x);
+                instanciatedTile.UnitPlayerColorSprite.offsetMax = new Vector2(-miniMap.UnitColorOffsetMin.x, -miniMap.UnitColorOffsetMin.x);
+            }
+            else
+            {
+                instanciatedTile.UnitPlayerColorSprite.offsetMin = miniMap.UnitColorOffsetMin;
+                instanciatedTile.UnitPlayerColorSprite.offsetMax = miniMap.UnitColorOffsetMax * -1;
+            }
+
+            instanciatedTile.DeathCrossSize = new Vector2(miniMap.DeathPingSize, miniMap.DeathPingSize);
+
+            //Check if is visible and if minimap that is being populated is active
+            if (instanciatedTile.BecomeVisibleMapEffect && isVisible == 1 && miniMap.isActiveAndEnabled)
+            {
+                var ping = Object.Instantiate(instanciatedTile.BecomeVisibleMapEffect, instanciatedTile.TileRect.position, Quaternion.identity, miniMap.MiniMapEffectsPanel.transform);
+                ParticleSystem.MainModule main = ping.ParticleSystem.main;
+                ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
+                main.startColor = tileColor;
+                size.sizeMultiplier = miniMap.BecomeVisiblePingSize;
+                ping.ParticleSystem.Play();
+
+                if (instanciatedTile.EmitSoundEffect && instanciatedTile.isActiveAndEnabled)
+                {
+                    ping.FMODEmitter.Play();
+                }
+
+                Object.Destroy(ping.gameObject, 2f);
+            }
+        }
+
+        instanciatedTile.TileRect.localScale = new Vector3(1, 1, 1);
+
+        return instanciatedTile;
+    }
+
 }

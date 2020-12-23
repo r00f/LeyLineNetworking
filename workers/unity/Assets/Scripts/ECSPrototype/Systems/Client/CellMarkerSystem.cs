@@ -15,7 +15,7 @@ namespace LeyLineHybridECS
         EntityQuery m_PlayerStateData;
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
-        EntityQuery m_CellData;
+        EntityQuery m_RequireMarkerUpdateData;
         EntityQuery m_NewCellData;
         Settings settings;
 
@@ -26,11 +26,12 @@ namespace LeyLineHybridECS
             m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<MouseState>(),
-                ComponentType.ReadOnly<MarkerState>(),
-                ComponentType.ReadWrite<UnitMarkerGameObjects>()
+                ComponentType.ReadOnly<MarkerState>()
+                //ComponentType.ReadWrite<UnitMarkerGameObjects>()
                 );
 
-            m_CellData = GetEntityQuery(
+            m_RequireMarkerUpdateData = GetEntityQuery(
+                ComponentType.ReadWrite<RequireMarkerUpdate>(),
                 ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadWrite<MarkerState>(),
                 ComponentType.ReadWrite<MarkerGameObjects>()
@@ -39,7 +40,8 @@ namespace LeyLineHybridECS
             m_NewCellData = GetEntityQuery(
                 ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
                 ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-                ComponentType.ReadWrite<MarkerGameObjects>()
+                ComponentType.ReadWrite<MarkerGameObjects>(),
+                ComponentType.ReadWrite<IsVisibleReferences>()
                 );
 
             m_GameStateData = GetEntityQuery(
@@ -49,10 +51,8 @@ namespace LeyLineHybridECS
 
             m_PlayerStateData = GetEntityQuery(
                 ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadOnly<PlayerState.ComponentAuthority>()
+                ComponentType.ReadOnly<PlayerState.HasAuthority>()
             );
-
-            m_PlayerStateData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
         }
 
@@ -60,197 +60,124 @@ namespace LeyLineHybridECS
         {
             base.OnStartRunning();
             settings = Resources.Load<Settings>("Settings");
-
         }
 
         protected override void OnUpdate()
         {
+            /*
+            if(m_NewCellData.CalculateEntityCount() > 0)
+            {
+                Entities.With(m_NewCellData).ForEach((Entity e, MarkerGameObjects markerGameObjects, ref CellAttributesComponent.Component cellAtt) =>
+                {
+                    int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
+                    var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
 
-            if (m_PlayerStateData.CalculateEntityCount() == 0)
+                    float offsetMultiplier = UIRef.MinimapComponent.Map.sizeDelta.x / isVisibleRef.MiniMapTilePrefab.TileRect.sizeDelta.x / 2;
+                    //Instantiate MiniMapTile into Map
+                    Vector3 pos = CellGridMethods.CubeToPos(cellAtt.CellAttributes.Cell.CubeCoordinate, new Vector2f(0f, 0f));
+                    Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
+                    isVisibleRef.MiniMapTileInstance = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, UIRef.MiniMapTilesPanel.transform);
+                    isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
+
+                    isVisibleRef.MiniMapTileInstance.TileColor = settings.MapCellColors[colorIndex];
+                    //init gray if not water
+                    if (cellAtt.CellAttributes.CellMapColorIndex != 5)
+                        isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTilePrefab.TileInvisibleColor;
+                    //init blue if water
+                    else
+                        isVisibleRef.MiniMapTileInstance.TileImage.color = isVisibleRef.MiniMapTileInstance.TileColor;
+
+                    isVisibleRef.MiniMapTileInstance.TileColor = settings.MapCellColors[colorIndex];
+                });
+                
+            }
+            */
+            if (m_GameStateData.CalculateEntityCount() == 0)
                 return;
 
-            Entities.With(m_NewCellData).ForEach((MarkerGameObjects markerGameObjects, ref CellAttributesComponent.Component cellAtt) =>
+
+            //CHANGE TO REACTIVE COMPONENT FLAG ISSET > RequireMarkerStateUpdate Component
+            if (m_RequireMarkerUpdateData.CalculateEntityCount() > 0)
             {
-                int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-                markerGameObjects.MapMarkerRenderer.material.color = settings.MapCellColors[colorIndex];
-            });
+                var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+                var gameState = gameStateData[0];
 
-            var playerWorldIndexes = m_PlayerStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-            var playerWorldIndex = playerWorldIndexes[0];
+                //Debug.Log("ReqMarkerUpdateCount: " + m_RequireMarkerUpdateData.CalculateEntityCount());
 
-            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState)=>
-            {
-                var g = gameState;
-
-                if (gameStateWorldIndex.Value == playerWorldIndex.Value)
+                Entities.With(m_RequireMarkerUpdateData).ForEach((Entity e, MarkerGameObjects markerGameObjects, ref MarkerState markerState, ref CellAttributesComponent.Component cellAttributes) =>
                 {
-                    Entities.With(m_CellData).ForEach((MarkerGameObjects markerGameObjects, ref MarkerState markerState, ref CellAttributesComponent.Component cellAttributes) =>
+                    if (gameState.CurrentState != GameStateEnum.planning)
                     {
-                        if (g.CurrentState != GameStateEnum.planning)
-                        {
-                            markerGameObjects.ReachableMarker.SetActive(false);
-                            markerGameObjects.TargetMarker.SetActive(false);
-                            markerGameObjects.ClickedMarker.SetActive(false);
-                            markerGameObjects.HoveredMarker.SetActive(false);
-                        }
-                        else
-                        {
-                            switch (markerState.NumberOfTargets)
-                            {
-                                case 0:
-                                    if (markerGameObjects.TargetMarker.activeSelf)
-                                        markerGameObjects.TargetMarker.SetActive(false);
-                                    break;
-                                case 1:
-                                    if (!markerGameObjects.TargetMarker.activeSelf)
-                                        markerGameObjects.TargetMarker.SetActive(true);
-
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[0];
-                                    break;
-                                case 2:
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[1];
-                                    break;
-                                case 3:
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[2];
-                                    break;
-                                case 4:
-                                    markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[3];
-                                    break;
-                            }
-
-                            if (markerState.IsSet == 0)
-                            {
-                                //Debug.Log("markerstateSet = 0");
-                                switch (markerState.CurrentState)
-                                {
-                                    case MarkerState.State.Neutral:
-                                        markerGameObjects.ClickedMarker.SetActive(false);
-                                        markerGameObjects.HoveredMarker.SetActive(false);
-                                        markerGameObjects.ReachableMarker.SetActive(false);
-                                        break;
-                                    case MarkerState.State.Clicked:
-                                        if (markerState.NumberOfTargets == 0)
-                                            markerGameObjects.ClickedMarker.SetActive(true);
-                                        markerGameObjects.HoveredMarker.SetActive(false);
-                                        markerGameObjects.ReachableMarker.SetActive(false);
-                                        break;
-                                    case MarkerState.State.Hovered:
-                                        if(!cellAttributes.CellAttributes.Cell.IsTaken)
-                                        {
-                                            markerGameObjects.ClickedMarker.SetActive(false);
-                                            markerGameObjects.HoveredMarker.SetActive(true);
-                                            markerGameObjects.ReachableMarker.SetActive(false);
-                                        }
-                                        break;
-                                    case MarkerState.State.Reachable:
-                                        markerGameObjects.ClickedMarker.SetActive(false);
-                                        markerGameObjects.HoveredMarker.SetActive(false);
-                                        markerGameObjects.ReachableMarker.SetActive(true);
-                                        break;
-                                }
-                                markerState.IsSet = 1;
-                            }
-                        }
-                    });
-
-                    Entities.With(m_UnitData).ForEach((UnitMarkerGameObjects unitMarkerGameObjects, ref MarkerState markerState, ref FactionComponent.Component faction, ref MouseState mouseState) =>
+                        markerGameObjects.ReachableMarker.SetActive(false);
+                        markerGameObjects.TargetMarker.SetActive(false);
+                        markerGameObjects.ClickedMarker.SetActive(false);
+                        markerGameObjects.HoveredMarker.SetActive(false);
+                        PostUpdateCommands.RemoveComponent<RequireMarkerUpdate>(e);
+                    }
+                    else
                     {
-                        if (g.CurrentState != GameStateEnum.planning)
+                        switch (markerState.NumberOfTargets)
                         {
-                            unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
-                            unitMarkerGameObjects.DefenseMarker.SetActive(false);
-                            unitMarkerGameObjects.HealTargetMarker.SetActive(false);
+                            case 0:
+                                if (markerGameObjects.TargetMarker.activeSelf)
+                                    markerGameObjects.TargetMarker.SetActive(false);
+                                break;
+                            case 1:
+                                if (!markerGameObjects.TargetMarker.activeSelf)
+                                    markerGameObjects.TargetMarker.SetActive(true);
+
+                                markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex];
+                                break;
+                            case 2:
+                                markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex] + new Color(0, 0, 0, 0.2f);
+                                //markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[1];
+                                break;
+                            case 3:
+                                markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex] + new Color(0, 0, 0, 0.4f);
+
+                                //markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[2];
+                                break;
+                            case 4:
+                                markerGameObjects.TargetMarkerRenderer.material.color = settings.TurnStepLineColors[markerState.TurnStepIndex] + new Color(0, 0, 0, 0.6f);
+
+                                //markerGameObjects.TargetMarkerRenderer.material.color = markerGameObjects.TargetColors[3];
+                                break;
                         }
-                        else
+
+                        switch (markerState.CurrentState)
                         {
-                            int colorIndex = 0;
-
-                            if (faction.TeamColor == TeamColorEnum.blue)
-                            {
-                                colorIndex = 1;
-                            }
-                            else if (faction.TeamColor == TeamColorEnum.red)
-                            {
-                                colorIndex = 2;
-                            }
-
-                            if (markerState.NumberOfTargets > 0 && markerState.TargetTypeSet == 0)
-                            {
-                                switch (markerState.CurrentTargetType)
+                            case MarkerState.State.Neutral:
+                                markerGameObjects.ClickedMarker.SetActive(false);
+                                markerGameObjects.HoveredMarker.SetActive(false);
+                                markerGameObjects.ReachableMarker.SetActive(false);
+                                break;
+                            case MarkerState.State.Clicked:
+                                if (markerState.NumberOfTargets == 0)
+                                    markerGameObjects.ClickedMarker.SetActive(true);
+                                markerGameObjects.HoveredMarker.SetActive(false);
+                                markerGameObjects.ReachableMarker.SetActive(false);
+                                break;
+                            case MarkerState.State.Hovered:
+                                if (!cellAttributes.CellAttributes.Cell.IsTaken)
                                 {
-                                    case MarkerState.TargetType.Neutral:
-                                        //change when we implement other target types
-                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(true);
-                                        unitMarkerGameObjects.DefenseMarker.SetActive(false);
-                                        unitMarkerGameObjects.HealTargetMarker.SetActive(false);
-                                        break;
-                                    case MarkerState.TargetType.AttackTarget:
-                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(true);
-                                        unitMarkerGameObjects.DefenseMarker.SetActive(false);
-                                        unitMarkerGameObjects.HealTargetMarker.SetActive(false);
-                                        break;
-                                    case MarkerState.TargetType.DefenseTarget:
-                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
-                                        unitMarkerGameObjects.DefenseMarker.SetActive(true);
-                                        unitMarkerGameObjects.HealTargetMarker.SetActive(false);
-                                        break;
-                                    case MarkerState.TargetType.HealTarget:
-                                        unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
-                                        unitMarkerGameObjects.DefenseMarker.SetActive(false);
-                                        unitMarkerGameObjects.HealTargetMarker.SetActive(true);
-                                        break;
+                                    markerGameObjects.ClickedMarker.SetActive(false);
+                                    markerGameObjects.HoveredMarker.SetActive(true);
+                                    markerGameObjects.ReachableMarker.SetActive(false);
                                 }
-                                markerState.TargetTypeSet = 1;
-                            }
-                            else if (markerState.NumberOfTargets == 0)
-                            {
-                                if (markerState.TargetTypeSet == 1)
-                                {
-                                    markerState.TargetTypeSet = 0;
-                                }
-                                unitMarkerGameObjects.AttackTargetMarker.SetActive(false);
-                                unitMarkerGameObjects.DefenseMarker.SetActive(false);
-                                unitMarkerGameObjects.HealTargetMarker.SetActive(false);
-                            }
-
-                            if (markerState.IsSet == 0)
-                            {
-                                switch (markerState.CurrentState)
-                                {
-                                    case MarkerState.State.Neutral:
-                                        unitMarkerGameObjects.Outline.enabled = false;
-                                        markerState.IsSet = 1;
-                                        break;
-                                    case MarkerState.State.Clicked:
-                                        unitMarkerGameObjects.Outline.enabled = false;
-                                        //markerGameObject.Outline.enabled = true;
-                                        //markerGameObject.Outline.color = colorIndex;
-                                        markerState.IsSet = 1;
-                                        break;
-                                    case MarkerState.State.Hovered:
-                                        unitMarkerGameObjects.Outline.enabled = true;
-                                        unitMarkerGameObjects.Outline.color = colorIndex;
-                                        markerState.IsSet = 1;
-                                        break;
-                                    case MarkerState.State.Reachable:
-                                        unitMarkerGameObjects.Outline.enabled = true;
-                                        if (mouseState.CurrentState == MouseState.State.Hovered)
-                                        {
-                                            unitMarkerGameObjects.Outline.color = colorIndex;
-                                        }
-                                        else
-                                        {
-                                            unitMarkerGameObjects.Outline.color = 0;
-                                        }
-                                        break;
-                                }
-                            }
+                                break;
+                            case MarkerState.State.Reachable:
+                                markerGameObjects.ClickedMarker.SetActive(false);
+                                markerGameObjects.HoveredMarker.SetActive(false);
+                                markerGameObjects.ReachableMarker.SetActive(true);
+                                break;
                         }
-                    });
-                }
-            });
 
-            playerWorldIndexes.Dispose();
+                        PostUpdateCommands.RemoveComponent<RequireMarkerUpdate>(e);
+
+                    }
+                });
+                gameStateData.Dispose();
+            }
         }
     }
 }

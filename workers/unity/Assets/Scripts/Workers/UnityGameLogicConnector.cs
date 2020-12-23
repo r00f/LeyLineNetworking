@@ -13,21 +13,23 @@ namespace BlankProject
 
         private async void Start()
         {
+            Application.targetFrameRate = 60;
             PlayerLifecycleConfig.CreatePlayerEntityTemplate = LeyLineEntityTemplates.Player;
+
 
             IConnectionFlow flow;
             ConnectionParameters connectionParameters;
 
             if (Application.isEditor)
             {
-                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerType));
-                connectionParameters = CreateConnectionParameters(WorkerType);
+                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.UnityGameLogic));
+                connectionParameters = CreateConnectionParameters(WorkerUtils.UnityGameLogic);
             }
             else
             {
-                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerType),
+                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.UnityGameLogic),
                     new CommandLineConnectionFlowInitializer());
-                connectionParameters = CreateConnectionParameters(WorkerType,
+                connectionParameters = CreateConnectionParameters(WorkerUtils.UnityGameLogic,
                     new CommandLineConnectionParameterInitializer());
             }
 

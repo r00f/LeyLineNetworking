@@ -8,20 +8,19 @@ using LeyLineHybridECS;
 using System.Collections.Generic;
 using Unity.Collections;
 using Cell;
+using Player;
 
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : ComponentSystem
 {
     ActionEffectsSystem m_ActionEffectsSystem;
     UISystem m_UISystem;
+    EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     EntityQuery m_TransformData;
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
-
-    GameObject GarbageCollection;
-
-    EntityQuery m_GarbageCollection;
+    Settings settings;
 
     protected override void OnCreate()
     {
@@ -46,6 +45,7 @@ public class UnitAnimationSystem : ComponentSystem
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly <WorldIndex.Component>(),
+        ComponentType.ReadOnly<IsVisible>(),
         ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<Actions.Component>(),
@@ -53,9 +53,19 @@ public class UnitAnimationSystem : ComponentSystem
         ComponentType.ReadOnly<Position.Component>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<Unit_BaseDataSet>(),
+        ComponentType.ReadOnly<UnitEffects>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
         ComponentType.ReadWrite<Transform>()
         );
+
+        m_PlayerData = GetEntityQuery(
+        ComponentType.ReadOnly<HeroTransform>(),
+        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
+        ComponentType.ReadOnly<HighlightingDataComponent>(),
+        ComponentType.ReadOnly<FactionComponent.Component>()
+        );
+
+        settings = Resources.Load<Settings>("Settings");
     }
 
     protected override void OnStartRunning()
@@ -63,24 +73,44 @@ public class UnitAnimationSystem : ComponentSystem
         base.OnStartRunning();
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
-        GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
 
-        m_GarbageCollection = Worlds.DefaultWorld.CreateEntityQuery(
-        ComponentType.ReadWrite<GarbageCollectorComponent>()
-        );
     }
 
     protected override void OnUpdate()
     {
-        if (m_GameStateData.CalculateEntityCount() == 0)
+        if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
             return;
 
+        var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+        var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
         var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+
+        var playerHeroTransform = playerHeroTransforms[0];
+        var playerHigh = playerHighs[0];
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
         {
+            var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
             var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
             var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
+            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+            var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+            var unitComponentReferences = EntityManager.GetComponentObject<UnitComponentReferences>(e);
+            var visible = EntityManager.GetComponentData<IsVisible>(e);
+
+            //if this caracter has a filled voice emitter field and a voice event is triggered
+            if (animatorComponent.VoiceEmitter && animatorComponent.AnimationEvents.VoiceTrigger)
+            {
+                animatorComponent.VoiceEmitter.Play();
+                animatorComponent.AnimationEvents.VoiceTrigger = false;
+            }
+
+            //if this caracter has a filled footStep emitter field and a footstep event is triggered
+            if (animatorComponent.FootStempEmitter && animatorComponent.AnimationEvents.FootStepTrigger)
+            {
+                animatorComponent.FootStempEmitter.Play();
+                animatorComponent.AnimationEvents.FootStepTrigger = false;
+            }
 
             //outgoing effects (launch projectiles usw.)
             if (actions.LockedAction.Index != -3)
@@ -106,20 +136,23 @@ public class UnitAnimationSystem : ComponentSystem
                         {
                             case -3:
                                 break;
-                            case -2:
+                            /*case -2:
                                 animatorComponent.CurrentLockedAction = basedata.BasicMove;
                                 break;
                             case -1:
                                 animatorComponent.CurrentLockedAction = basedata.BasicAttack;
-                                break;
+                                break;*/
                         }
                     }
                 }
 
                 else if (gameStates[0].CurrentState != GameStateEnum.planning)
                 {
-                    var actionEffectType = actions.LockedAction.Effects[0].EffectType;
-                    HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { actions.LockedAction.Targets[0].TargetCoordinate };
+                    if(gameStates[0].CurrentState == GameStateEnum.interrupt)
+                    {
+                        animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                    }
+
 
                     if (animatorComponent.AnimationEvents)
                     {
@@ -129,47 +162,34 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
                         }
 
-                        //make sure units that die trigger their actionVisuals (Egg dying whitout animation / units getting killed before they get to animEvent 
-                        if (health.CurrentHealth == 0 && !animatorComponent.AnimationEvents.EventTrigger && !animatorComponent.DeathEventTrigger)
-                        {
-                            animatorComponent.AnimationEvents.EventTrigger = true;
-                            animatorComponent.DeathEventTrigger = true;
-                        }
 
                         //event triggered from animation
                         if (animatorComponent.AnimationEvents.EventTrigger)
                         {
-                            if (actions.LockedAction.Targets[0].Mods.Count != 0)
-                            {
-                                foreach (CoordinatePositionPair p in actions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs)
-                                {
-                                    coordsToTrigger.Add(p.CubeCoordinate);
-                                }
-                            }
-
                             if (animatorComponent.CurrentLockedAction.ProjectileFab)
                             {
-                                //THIS METHOD SUCKS
-                                Vector3 targetPos = CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter);
                                 float targetYoffset = 0;
                                 if (animatorComponent.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
                                 {
                                     targetYoffset = 1.3f;
                                 }
-                                m_ActionEffectsSystem.LaunchProjectile(animatorComponent.CurrentLockedAction.ProjectileFab, actionEffectType, coordsToTrigger, animatorComponent.ProjectileSpawnOrigin, targetPos, targetYoffset);
+                                m_ActionEffectsSystem.LaunchProjectile(animatorComponent.CurrentLockedAction.ProjectileFab, animatorComponent.ProjectileSpawnOrigin, targetPos, actions.LockedAction, id.EntityId.Id, coord.CubeCoordinate, targetYoffset);
                             }
                             else
                             {
-                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction.Effects[0].EffectType, coordsToTrigger);
+                                //Debug.Log("Trigger Action Effect: " + animatorComponent.Animator.GetInteger("ActionIndexInt"));
+                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform);
                             }
 
+                            animatorComponent.AnimationEvents.EventTriggered = true;
                             animatorComponent.AnimationEvents.EventTrigger = false;
                         }
                     }
 
                     if (!animatorComponent.ExecuteTriggerSet)
                     {
-                        ExecuteActionAnimation(actions, animatorComponent, gameStates[0].CurrentState, worldIndex.Value);
+                        ExecuteActionAnimation(actions, animatorComponent, gameStates[0], worldIndex.Value);
                     }
                     else
                     {
@@ -179,41 +199,35 @@ public class UnitAnimationSystem : ComponentSystem
                             if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
                                 animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
                         }
-                        //rotate animatorComponent.RotateTransform towards targetDirection
-                        Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
-                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                     }
-                }
-            }
 
-            //FeedBack to incoming Attacks / Heals
-            if (animatorComponent.ActionEffectTrigger)
-            {
-                if (animatorComponent.LastHealth != health.CurrentHealth)
-                {
-                    if (health.CurrentHealth == 0)
-                    {
-                        Death(animatorComponent);
-                    }
-                    else if (animatorComponent.LastHealth > health.CurrentHealth)
-                    {
-                        m_UISystem.SetHealthFloatText(e, animatorComponent.LastHealth - health.CurrentHealth);
-                        animatorComponent.Animator.SetTrigger("GetHit");
-                    }
-                    else
-                    {
-                        //healing feedback
-                    }
-                    animatorComponent.LastHealth = health.CurrentHealth;
+
+                    //rotate animatorComponent.RotateTransform towards targetDirection
+                    Vector3 targetDirection = RotateTowardsDirection(animatorComponent.RotateTransform, animatorComponent.RotationTarget, animatorComponent.RotationSpeed);
+                    animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+
                 }
-                animatorComponent.ActionEffectTrigger = false;
             }
 
             if (animatorComponent.Visuals.Count != 0)
             {
                 if (animatorComponent.EnableVisualsDelay >= 0)
                 {
-                    animatorComponent.EnableVisualsDelay -= Time.deltaTime;
+                    //initially rotate visuals AWAY from hero(so leech makes more sense)
+                    if(playerHeroTransform.Transform)
+                    {
+                        Vector3 dir = animatorComponent.RotateTransform.position - playerHeroTransform.Transform.position;
+                        dir.y = 0;
+                        animatorComponent.RotateTransform.rotation = Quaternion.LookRotation(dir);
+                    }
+
+                    //animatorComponent.RotateTransform.rotation
+                    foreach (GameObject g in animatorComponent.Visuals)
+                    {
+                        if(g.activeSelf)
+                            g.SetActive(false);
+                    }
+                    animatorComponent.EnableVisualsDelay -= Time.DeltaTime;
                 }
                 else if (!animatorComponent.Dead)
                 {
@@ -244,9 +258,71 @@ public class UnitAnimationSystem : ComponentSystem
                     animatorComponent.Animator.ResetTrigger("Execute");
                     animatorComponent.ExecuteTriggerSet = false;
                 }
+                if (animatorComponent.AnimationEvents.EventTriggered)
+                    animatorComponent.AnimationEvents.EventTriggered = false;
             }
 
             #region Set Animator Variables
+
+            if(gameStates[0].CurrentState == GameStateEnum.planning)
+            {
+
+                if(visible.Value == 1)
+                {
+                    unitComponentReferences.SelectionCircleGO.SetActive(true);
+
+                    if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                    {
+                        if (((int)faction.Faction & 1) == 1)
+                        {
+                            //odd
+                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 30000);
+                        }
+                        else
+                        {
+                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 30000);
+                        }
+                    }
+                    else
+                    {
+                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
+                    }
+                }
+
+                animatorComponent.Animator.SetBool("Executed", false);
+                animatorComponent.Animator.SetBool("Planning", true);
+                animatorComponent.Animator.ResetTrigger("Execute");
+            }
+            else
+            {
+                unitComponentReferences.SelectionCircleGO.SetActive(false);
+                animatorComponent.Animator.SetBool("Planning", false);
+            }
+
+            //if this unit has emissionColorMeshes set intensity to 0 / 100 when harvesting
+            if(teamColorMeshes.EmissionColorMeshes.Count != 0)
+            {
+                Color color = settings.FactionColors[(int)faction.TeamColor + 1];
+                foreach(Renderer r in teamColorMeshes.EmissionColorMeshes)
+                {
+                    if (energy.Harvesting)
+                    {
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, color * teamColorMeshes.EmissionIntensity, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
+                        //r.material.SetColor("_EmissiveColor", color * 100);
+                    }
+                    else
+                    {
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
+                    }
+
+                    r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
+                }
+            }
+
+            if (animatorComponent.CurrentLockedAction)
+                animatorComponent.Animator.SetBool("HasWindup", animatorComponent.CurrentLockedAction.HasWindup);
+            else
+                animatorComponent.Animator.SetBool("HasWindup", false);
 
             animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
 
@@ -264,20 +340,23 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 float step;
                 if (actions.LockedAction.Index != -3)
-                    step = (Time.deltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
+                    step = (Time.DeltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
                 else
-                    step = Time.deltaTime * 1.732f;
+                    step = Time.DeltaTime * 1.732f;
 
                 //move
                 animatorComponent.transform.position = Vector3.MoveTowards(animatorComponent.transform.position, serverPosition.Coords.ToUnityVector(), step);
             }
 
-            if (animatorComponent.transform.position == animatorComponent.DestinationPosition)
+            Vector2 posXZ = new Vector2(animatorComponent.transform.position.x, animatorComponent.transform.position.z);
+
+            if (posXZ == animatorComponent.DestinationPosition)
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
-                    animatorComponent.LastStationaryCoordinate = coord.CubeCoordinate;
+                    //Debug.Log("DestinationReached");
                     animatorComponent.Animator.SetTrigger("DestinationReached");
+                    unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
                     animatorComponent.DestinationPosition = Vector3.zero;
                     animatorComponent.DestinationReachTriggerSet = true;
                 }
@@ -286,78 +365,23 @@ public class UnitAnimationSystem : ComponentSystem
             #endregion
         });
 
+        playerHighs.Dispose();
         gameStates.Dispose();
     }
 
-    public Vector3 CoordinateToWorldPosition(uint inWorldIndex, Vector3f inCubeCoordinate)
+    public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameState.Component gameState, uint worldIndex)
     {
-        Vector3 worldPos = new Vector3();
-
-        Entities.With(m_CellData).ForEach((ref WorldIndex.Component worldIndex, ref Position.Component position, ref CubeCoordinate.Component cubeCoord) =>
-        {
-            if (worldIndex.Value == inWorldIndex && Vector3fext.ToUnityVector(inCubeCoordinate) == Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate))
-            {
-                worldPos = position.Coords.ToUnityVector();
-            }
-        });
-
-        return worldPos;
-    }
-
-    public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameStateEnum gameState, uint worldIndex)
-    {
-        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState - 2)
+        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState.CurrentState - 2)
         {
             if (!animatorComponent.InitialValuesSet)
             {
-                //Debug.Log("SetInitialValues");
-                if (gameState != GameStateEnum.move)
-                    animatorComponent.RotationTarget = CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
-                animatorComponent.DestinationPosition = CoordinateToWorldPosition(worldIndex, actions.LockedAction.Targets[0].TargetCoordinate);
+                var pos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
+                animatorComponent.DestinationPosition = new Vector2(pos.x, pos.z);
                 animatorComponent.InitialValuesSet = true;
             }
             animatorComponent.Animator.SetTrigger("Execute");
+            animatorComponent.Animator.SetBool("Executed", true);
             animatorComponent.ExecuteTriggerSet = true;
-        }
-    }
-
-    public void Death(AnimatorComponent animatorComponent)
-    {
-        var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
-        animatorComponent.Dead = true;
-
-        if (animatorComponent.DeathParticleSystem)
-        {
-            ParticleSystem ps = animatorComponent.DeathParticleSystem;
-            ps.Emit(animatorComponent.DeathParticlesCount);
-        }
-
-        foreach(GameObject go in animatorComponent.ObjectsToDisable)
-        {
-            go.SetActive(false);
-        }
-
-        foreach (Transform t in animatorComponent.Props)
-        {
-            t.parent = animatorComponent.Animator.transform;
-        }
-
-        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
-        animatorComponent.Animator.enabled = false;
-        garbageCollector.GarbageObjects.Add(animatorComponent.Animator.gameObject);
-
-        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-        {
-            garbageCollector.GarbageRigidbodies.Add(r);
-            r.isKinematic = false;
-        }
-
-        if(animatorComponent.DeathExplosionPos)
-        {
-            foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
-            {
-                r.AddExplosionForce(animatorComponent.DeathExplosionForce, animatorComponent.DeathExplosionPos.position, animatorComponent.DeathExplosionRadius);
-            }
         }
     }
 
@@ -365,7 +389,7 @@ public class UnitAnimationSystem : ComponentSystem
     {
         Vector3 targetDir = targetPosition - originTransform.position;
         targetDir.y = 0;
-        float rotSpeed = Time.deltaTime * rotationSpeed;
+        float rotSpeed = Time.DeltaTime * rotationSpeed;
         Vector3 direction = Vector3.RotateTowards(originTransform.forward, targetDir, rotSpeed, 0.0f);
         
         return direction;

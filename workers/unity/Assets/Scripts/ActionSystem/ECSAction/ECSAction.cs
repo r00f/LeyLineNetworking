@@ -34,9 +34,12 @@ namespace LeyLineHybridECS
         [Header("Action Information")]
         public Sprite ActionIcon;
         public Projectile ProjectileFab;
+        [TextArea]
         public string ActionName;
+        [TextArea]
         public string Description;
         public float TimeToExecute;
+        public bool HasWindup;
 
         [Header("Add Targets/Effects")]
         public ECSActionTarget TargetToAdd;

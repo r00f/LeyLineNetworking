@@ -50,6 +50,8 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Cinemachine;
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Helper Classes
@@ -59,7 +61,8 @@ public class Moba_Camera_Requirements
 	// Objects that are requirements for the script to work
 	public Transform pivot 	= null;
 	public Transform offset = null;
-	public Camera camera 	= null;
+	public CinemachineVirtualCamera virtualCam 	= null;
+    
 }
 
 [System.Serializable]
@@ -67,9 +70,11 @@ public class Moba_Camera_KeyCodes
 {
 	// Allows camera to be rotated while pressed
 	public KeyCode RotateCamera			= KeyCode.Mouse2;
-	
-	// Toggle lock camera to lockTargetTransform position
-	public KeyCode LockCamera			= KeyCode.L;
+    public KeyCode CameraRotateLeft     = KeyCode.Q;
+    public KeyCode CameraRotateRight    = KeyCode.E;
+
+    // Toggle lock camera to lockTargetTransform position
+    public KeyCode LockCamera			= KeyCode.L;
 	
 	// Lock camera to lockTargetTransform  position while being pressed
 	public KeyCode characterFocus		= KeyCode.Space;
@@ -164,9 +169,12 @@ public class Moba_Camera_Settings_Rotation {
 	// Lock the rotations axies
 	public bool lockRotationX 			= true;
 	public bool lockRotationY 			= true;
-	
-	// rotation that is used when the game starts
-	public Vector2 defualtRotation		= new Vector2(-45.0f, 0.0f);
+
+    public float zoomRotationMultiplier;
+    public float increasedZoomRotationMultiplier;
+    public float increaseZoomRotTreshhold;
+    // rotation that is used when the game starts
+    public Vector2 defualtRotation		= new Vector2(-45.0f, 0.0f);
 	
 	// How fast the camera rotates
 	public Vector2 cameraRotationRate	= new Vector2(100.0f, 100.0f);
@@ -185,15 +193,18 @@ public class Moba_Camera_Settings_Zoom {
 	public float maxZoom				= 20.0f;
 	
 	// How fast the camera zooms in and out
-	public float zoomRate				= 10.0f;
-	
-	// Zoom rate does not chance based on scroll speed
-	public bool constZoomRate			= false;
+	public float zoomChangePerScroll	= 10.0f;
+    public float zoomLerpRate           = 0.1f;
+
+    // Zoom rate does not chance based on scroll speed
+    public bool constZoomRate			= false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Moba_Camera Class
 public class Moba_Camera : MonoBehaviour {
+
+    public uint playerFaction = 0;
 	// Use fixed update
 	public bool useFixedUpdate			= false;
 	
@@ -201,9 +212,16 @@ public class Moba_Camera : MonoBehaviour {
 	public Moba_Camera_Requirements requirements	= new Moba_Camera_Requirements();
 	public Moba_Camera_Inputs inputs				= new Moba_Camera_Inputs();
 	public Moba_Camera_Settings settings			= new Moba_Camera_Settings();
-		
-	// The Current Zoom value for the camera; Not shown in Inspector
-	private float _currentZoomAmount			= 0.0f;
+
+    public MiniMapTile PlayerMapTilePrefab;
+    [HideInInspector]
+    public MiniMapTile PlayerMapTileInstance;
+
+    // The Current Zoom value for the camera; Not shown in Inspector
+    public float _lastZoomAmount = 0.0f;
+    public float _nextZoomAmount = 0.0f;
+    float t = 0f;
+    public float _currentZoomAmount			= 0.0f;
 	public float currentZoomAmount {
 		get {
 			return _currentZoomAmount;
@@ -242,9 +260,11 @@ public class Moba_Camera : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 
+        //Canvas canvas = FindObjectOfType<Canvas>();
+        //canvas.worldCamera = requirements.camera;
         heroTransform = GetComponent<HeroTransform>();
 		
-		if(!requirements.pivot || !requirements.offset || !requirements.camera) {
+		if(!requirements.pivot || !requirements.offset || !requirements.virtualCam) {
 			string missingRequirements = "";
 			if(requirements.pivot == null) {
 				missingRequirements += " / Pivot";
@@ -256,7 +276,7 @@ public class Moba_Camera : MonoBehaviour {
 				this.enabled = false;
 			}
 			
-			if(requirements.camera == null) {
+			if(requirements.virtualCam == null) {
 				missingRequirements += " / Camera";
 				this.enabled = false;
 			}
@@ -267,7 +287,8 @@ public class Moba_Camera : MonoBehaviour {
 			
 		// set values to the defualt values
 		_currentZoomAmount 		= settings.zoom.defaultZoom;
-		_currentCameraRotation 	= settings.rotation.defualtRotation;
+        _nextZoomAmount         = settings.zoom.defaultZoom;
+        _currentCameraRotation 	= settings.rotation.defualtRotation;
 		
 		// if using the defualt height
 		if(settings.movement.useDefualtHeight && this.enabled) {
@@ -327,32 +348,50 @@ public class Moba_Camera : MonoBehaviour {
     }
 	
 	void CalculateCameraZoom() {
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Camera Zoom In/Out
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Camera Zoom In/Out
+
+
 		float zoomChange = 0.0f;
 		int inverted = 1;
-		
-		float mouseScrollWheel = Input.GetAxis(inputs.axis.DeltaScrollWheel);
+        // change the zoom amount based on if zoom is inverted
+        if (!settings.zoom.invertZoom) inverted = -1;
+
+        float mouseScrollWheel = Input.GetAxis(inputs.axis.DeltaScrollWheel);
+
 		if(mouseScrollWheel != 0.0f) 
 		{
-			// Set the a camera value has changed
-			changeInCamera = true;
-			
-			if(settings.zoom.constZoomRate) {
-				if(mouseScrollWheel != 0.0) {
-					if(mouseScrollWheel > 0.0) zoomChange = 1;
-					else zoomChange = -1;
-				}
-			}
+            // Set the a camera value has changed
+
+            _lastZoomAmount = _currentZoomAmount;
+            t = 0;
+
+            if (settings.zoom.constZoomRate) {
+                if (mouseScrollWheel > 0.0) zoomChange = 1;
+                else zoomChange = -1;
+            }
 			else {
 				zoomChange = mouseScrollWheel;	
 			}
-		}
+
+            _nextZoomAmount = _lastZoomAmount + zoomChange * settings.zoom.zoomChangePerScroll * inverted;
+
+            if (_nextZoomAmount > settings.zoom.maxZoom)
+                _nextZoomAmount = settings.zoom.maxZoom;
+            else if(_nextZoomAmount < settings.zoom.minZoom)
+                _nextZoomAmount = settings.zoom.minZoom;
+        }
 		
-		// change the zoom amount based on if zoom is inverted
-		if(!settings.zoom.invertZoom) inverted = -1;
-		
-		_currentZoomAmount += zoomChange * settings.zoom.zoomRate * inverted * Time.deltaTime;
+        if(_currentZoomAmount != _nextZoomAmount)
+        {
+            changeInCamera = true;
+            t += settings.zoom.zoomLerpRate / Mathf.Abs(_nextZoomAmount - _lastZoomAmount) * Time.deltaTime;
+            _currentZoomAmount = Mathf.Lerp(_lastZoomAmount, _nextZoomAmount, t);
+        }
+        else
+        {
+            t = 0;
+        }
 	}
 
 	
@@ -365,12 +404,12 @@ public class Moba_Camera : MonoBehaviour {
         Cursor.visible = true;
         //Screen.lockCursor = false;
 
-        if ((inputs.useKeyCodeInputs)?
-			(Input.GetKey(inputs.keycodes.RotateCamera)&&inputs.useKeyCodeInputs):
-			(Input.GetButton(inputs.axis.button_rotate_camera))) {
-			// Lock the cursor to the center of the screen and hide the cursor
-			//Screen.lockCursor = true;
+        if (inputs.useKeyCodeInputs? Input.GetKey(inputs.keycodes.RotateCamera) || Input.GetKey(inputs.keycodes.CameraRotateLeft) || Input.GetKey(inputs.keycodes.CameraRotateRight):
+			Input.GetButton(inputs.axis.button_rotate_camera)) {
+            // Lock the cursor to the center of the screen and hide the cursor
+            //Screen.lockCursor = true;
             //Cursor.lockState = CursorLockMode.Locked;
+
             Cursor.visible = false;
             if (!settings.rotation.lockRotationX) {
 				float deltaMouseVertical = Input.GetAxis(inputs.axis.DeltaMouseVertical);
@@ -385,9 +424,20 @@ public class Moba_Camera : MonoBehaviour {
 					changeInCamera = true;
 				}
 			}
-			
+
 			if(!settings.rotation.lockRotationY) {
+
 				float deltaMouseHorizontal = Input.GetAxis(inputs.axis.DeltaMouseHorizontal);
+
+                if(Input.GetKey(inputs.keycodes.CameraRotateLeft))
+                {
+                    deltaMouseHorizontal = -1.0f;
+                }
+                else if (Input.GetKey(inputs.keycodes.CameraRotateRight))
+                {
+                    deltaMouseHorizontal = 1.0f;
+                }
+
 				if(deltaMouseHorizontal != 0.0f) {
 					if(settings.rotation.constRotationRate) {
 						if(deltaMouseHorizontal > deltaMouseDeadZone) changeInRotationY = 1.0f;
@@ -400,10 +450,29 @@ public class Moba_Camera : MonoBehaviour {
 				}
 			}
 		}
+
+        if (settings.rotation.lockRotationX)
+        {
+            //if lockRotationX is set to true(no user input set X rotation), calculate changeInRotation with camera height
+
+            if(currentZoomAmount >= settings.rotation.increaseZoomRotTreshhold)
+                _currentCameraRotation.x = settings.rotation.defualtRotation.x - currentZoomAmount * settings.rotation.zoomRotationMultiplier;
+            else
+            {
+                settings.rotation.increasedZoomRotationMultiplier = settings.rotation.zoomRotationMultiplier - (settings.rotation.increaseZoomRotTreshhold - currentZoomAmount);
+
+                _currentCameraRotation.x = settings.rotation.defualtRotation.x - currentZoomAmount * settings.rotation.increasedZoomRotationMultiplier;
+
+            }
+        }
+        else
+        {
+            _currentCameraRotation.x += changeInRotationX * settings.rotation.cameraRotationRate.x * Time.deltaTime;
+        }
+
+            // apply change in Y rotation
+        _currentCameraRotation.y += changeInRotationY * settings.rotation.cameraRotationRate.y * Time.deltaTime;
 		
-		// apply change in Y rotation
-		_currentCameraRotation.y += changeInRotationY * settings.rotation.cameraRotationRate.y * Time.deltaTime;
-		_currentCameraRotation.x += changeInRotationX * settings.rotation.cameraRotationRate.x * Time.deltaTime;
 	}
 	
 	void CalculateCameraMovement() {
@@ -442,7 +511,7 @@ public class Moba_Camera : MonoBehaviour {
 				}
 				
 				// Lerp between the target and current position
-				requirements.pivot.position = Vector3.Lerp(requirements.pivot.position, target, settings.movement.lockTransitionRate);
+				requirements.pivot.position = Vector3.Lerp(requirements.pivot.position, target, settings.movement.lockTransitionRate * Time.deltaTime);
 			}	
 		}
 		else
@@ -493,7 +562,7 @@ public class Moba_Camera : MonoBehaviour {
 				target.y = requirements.pivot.position.y;
 			
 			if((target - current).magnitude > 0.2f){
-				Vector3 shift = Vector3.Lerp(current, target, settings.movement.lockTransitionRate);
+				Vector3 shift = Vector3.Lerp(current, target, settings.movement.lockTransitionRate * Time.deltaTime);
 				requirements.pivot.position = new Vector3(requirements.pivot.position.x, shift.y, requirements.pivot.position.z);
 			}
 		}	
@@ -589,7 +658,7 @@ public class Moba_Camera : MonoBehaviour {
 	
 	//////////////////////////////////////////////////////////////////////////////////////////
 	// Get Variables from outside script
-	public Camera GetCamera() {
-		return requirements.camera;
+	public CinemachineVirtualCamera GetCamera() {
+		return requirements.virtualCam;
 	}
 }

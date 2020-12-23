@@ -11,23 +11,29 @@ using Unit;
 using LeyLineHybridECS;
 using static LeyLineHybridECS.ECSAction;
 using Improbable.Gdk.PlayerLifecycle;
+using UnityEngine;
 
 public static class LeyLineEntityTemplates {
 
     private static readonly List<string> AllWorkerAttributes =
         new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
 
-    public static EntityTemplate GameState(Vector3f position, uint worldIndex)
+    static Settings settings;
+
+    public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter)
     {
+        settings = Resources.Load<Settings>("Settings");
         var gameState = new GameState.Snapshot
         {
             CurrentState = GameStateEnum.waiting_for_players,
             PlayersOnMapCount = 0,
-            CalculateWaitTime = 5f,
-            CurrentWaitTime = 0f,
-            PlanningTime = 60f,
-            CurrentPlanningTime = 60f,
-            RopeDisplayTime = 30f
+            CalculateWaitTime = .5f,
+            CurrentWaitTime = .5f,
+            RopeTime = settings.RopeTime,
+            CurrentRopeTime = 30f,
+            MapCenter = mapCenter,
+            MinExecuteStepTime = settings.MinimumExecuteTime,
+            DamageDict = new Dictionary<long, uint>()
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -55,7 +61,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex)
+    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex , uint inbaseIncome)
     {
         var pos = new Position.Snapshot
         {
@@ -67,9 +73,19 @@ public static class LeyLineEntityTemplates {
             }
         };
 
-        var circle = new CircleCells.Snapshot
+        List<ManalithSlot> slots = new List<ManalithSlot>();
+        foreach(CellAttribute n in circleCells.CellAttributes)
         {
-            CircleAttributeList = circleCells
+            ManalithSlot go = new ManalithSlot();
+            go.CorrespondingCell = n;
+            slots.Add(go);
+        }
+
+        var circle = new Manalith.Snapshot
+        {
+            CircleAttributeList = circleCells,
+            BaseIncome = inbaseIncome,
+            Manalithslots = slots
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -93,6 +109,7 @@ public static class LeyLineEntityTemplates {
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
 
+        
         var pos = new Position.Snapshot
         {
             Coords = new Coordinates
@@ -102,6 +119,7 @@ public static class LeyLineEntityTemplates {
                 Z = position.Z
             }
         };
+        
 
         var coord = new CubeCoordinate.Snapshot
         {
@@ -156,20 +174,22 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Player(string workerId, byte[] serializedArguments)
+    public static EntityTemplate Player(EntityId entityId, string workerId, byte[] serializedArguments)
     {
-        var client = $"workerId:{workerId}";
+        var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
         var energy = new PlayerEnergy.Snapshot
         {
-            MaxEnergy = 40,
-            Energy = 20,
-            BaseIncome = 3
+            MaxEnergy = 80,
+            Energy = 40,
+            BaseIncome = 6,
+            Income = 6
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
         {
-            HeroName = "KingCroak"
+            HeroName = "KingCroak",
+            StartingUnitNames = new List<string> {"AxalotlEgg"}
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();
@@ -183,43 +203,58 @@ public static class LeyLineEntityTemplates {
             Negatives = new List<Vector3f>()
         };
 
-        var playerState = new PlayerState.Snapshot
+        var playerPathing = new PlayerPathing.Snapshot
         {
             CellsInRange = new List<CellAttribute>(),
             CachedPaths = new Dictionary<CellAttribute, CellAttributeList>(),
+            CoordinatesInRange = new List<Vector3f>()
+        };
+
+        var playerState = new PlayerState.Snapshot
+        {
             UnitTargets = new Dictionary<long, CubeCoordinateList>(),
-            EndStepReady = true
+            EndStepReady = true,
+            SelectedAction = new Action
+            {
+                Targets = new List<ActionTarget>(),
+                Effects = new List<ActionEffect>(),
+                Index = -3
+            }
 
         };
 
         var wIndex = new WorldIndex.Snapshot();
 
         var pos = new Position.Snapshot { Coords = new Coordinates() };
-        var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
-        var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
-        var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
+        //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
+        //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
+        //var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
 
 
         var template = new EntityTemplate();
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
+        /*
         template.AddComponent(clientHeartbeat, client);
         template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
+        */
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerState, client);
+        template.AddComponent(playerPathing, client);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
+        PlayerLifecycleHelper.AddPlayerLifecycleComponents(template, workerId, WorkerUtils.UnityGameLogic);
         return template;
     }
 
     public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
     {
-        var client = workerId;
+        var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
         var turnTimer = new TurnTimer.Snapshot
         {
@@ -320,36 +355,12 @@ public static class LeyLineEntityTemplates {
 
     static Actions.Snapshot SetActions (Unit_BaseDataSet inStats){
 
-        Action myBasicAttack = new Action();
-        myBasicAttack.Targets = new List<ActionTarget>();
-        myBasicAttack.Effects = new List<ActionEffect>();
-        Action myBasicMove = new Action();
-        myBasicMove.Targets = new List<ActionTarget>();
-        myBasicMove.Effects = new List<ActionEffect>();
         Action myNullableAction = new Action();
         myNullableAction.Index = -3;
         myNullableAction.Targets = new List<ActionTarget>();
         myNullableAction.Effects = new List<ActionEffect>();
         List<Action> myOtherActions = new List<Action>();
 
-
-        if (inStats.BasicMove != null)
-        {
-            myBasicMove = SetAction(inStats.BasicMove, -2);
-        }
-        else
-        {
-            myBasicMove = myNullableAction;
-        }
-
-        if (inStats.BasicAttack != null)
-        {
-            myBasicAttack = SetAction(inStats.BasicAttack, -1);
-        }
-        else
-        {
-            myBasicAttack = myNullableAction;
-        }
 
         for (int i = 0; i < inStats.Actions.Count; i++)
         {
@@ -363,9 +374,7 @@ public static class LeyLineEntityTemplates {
 
         var newActions = new Actions.Snapshot
         {
-            BasicMove = myBasicMove,
-            BasicAttack = myBasicAttack,
-            OtherActions = myOtherActions,
+            ActionsList = myOtherActions,
             NullAction = myNullableAction,
             CurrentSelected = myNullableAction,
             LastSelected = myNullableAction,
@@ -554,7 +563,10 @@ public static class LeyLineEntityTemplates {
             {
                 ECS_DealDamageEffect go = inAction.Effects[i] as ECS_DealDamageEffect;
                 AF.EffectType = EffectTypeEnum.deal_damage;
-                AF.DealDamageNested.DamageAmount = go.damageAmount;
+                AF.DealDamageNested.UpForce = go.UpForce;
+                AF.DealDamageNested.ExplosionForce = go.ExplosionForce;
+                AF.DealDamageNested.ExplosionRadius = go.ExplosionRadius;
+                AF.DealDamageNested.DamageAmount = go.DamageAmount;
             }
             if (inAction.Effects[i] is ECS_ArmorEffect)
             {

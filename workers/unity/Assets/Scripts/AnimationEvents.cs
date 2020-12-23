@@ -4,7 +4,10 @@ using UnityEngine;
 
 public class AnimationEvents : MonoBehaviour
 {
+    public bool VoiceTrigger;
+    public bool FootStepTrigger;
     public bool EventTrigger;
+    public bool EventTriggered;
     public int EffectGameObjectIndex;
 
     public void TriggerEvent()
@@ -15,6 +18,15 @@ public class AnimationEvents : MonoBehaviour
     public void SwitchEffect(int index = 0)
     {
         EffectGameObjectIndex = index;
-        //EffectGameObjectIndex = -1;
+    }
+
+    public void PlayVoiceSFX()
+    {
+        VoiceTrigger = true;
+    }
+
+    public void PlayFootStepSFX()
+    {
+        FootStepTrigger = true;
     }
 }

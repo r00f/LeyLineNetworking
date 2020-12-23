@@ -217,10 +217,69 @@ public class PathFindingSystem : ComponentSystem
             return new CellAttributeList(new List<CellAttribute>());
     }
 
-    public bool ValidateTarget(Entity e, UnitRequisitesEnum restrictions, long usingUnitId, uint inFaction)
+    public bool ValidateTarget(Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths)
     {
         bool valid = false;
 
+        if (inAction.Index == -3)
+            return valid;
+
+        switch (inAction.Targets[0].TargetType)
+        {
+            case TargetTypeEnum.cell:
+
+                Entities.With(m_CellData).ForEach((ref SpatialEntityId cellId, ref CellAttributesComponent.Component cellAtts, ref CubeCoordinate.Component cellCoord) =>
+                {
+                    var cell = cellAtts.CellAttributes.Cell;
+
+                    if (Vector3fext.ToUnityVector(cellCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    {
+                        if (inCachedPaths.Count != 0)
+                        {
+                            if (inCachedPaths.ContainsKey(cell))
+                            {
+                                valid = true;
+                            }
+                        }
+                        else
+                        {
+                            if(CellGridMethods.GetDistance(cellCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                            {
+                                if (inAction.Targets[0].CellTargetNested.RequireEmpty)
+                                {
+                                    if (!cell.IsTaken)
+                                        valid = true;
+                                }
+                                else
+                                {
+                                    valid = true;
+                                }
+                            }
+                        }
+                    }
+                });
+                break;
+            case TargetTypeEnum.unit:
+                Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId targetUnitId, ref CubeCoordinate.Component targetUnitCoord, ref FactionComponent.Component targetUnitFaction) =>
+                {
+                    if (Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    {
+                        if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                        {
+                            valid = ValidateUnitTarget(e, inAction.Targets[0].UnitTargetNested.UnitReq, usingUnitId, inFaction);
+                            //Debug.Log("UNIT VALID IN PATHFINDING SYS: " + valid);
+                        }
+                    }
+                });
+                break;
+        }
+        
+        return valid;
+    }
+
+    public bool ValidateUnitTarget(Entity e, UnitRequisitesEnum restrictions, long usingUnitId, uint inFaction)
+    {
+        bool valid = false;
         bool isUnit = false;
 
         if (EntityManager.HasComponent<Actions.Component>(e))
@@ -272,73 +331,7 @@ public class PathFindingSystem : ComponentSystem
                     break;
             }
         }
-        else
-        {
-            var cellAttributes = EntityManager.GetComponentData<CellAttributesComponent.Component>(e).CellAttributes.Cell;
-
-            if(cellAttributes.UnitOnCellId != 0)
-            {
-
-
-            }
-        }
 
         return valid;
     }
-
-    /*
-    public bool ValidateUnitTarget(long targetUnitId, long usingUnitId, uint inFaction, UnitRequisitesEnum restrictions)
-    {
-        bool valid = false;
-
-        Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component faction) =>
-        {
-            if (targetUnitId == unitId.EntityId.Id)
-            {
-                switch (restrictions)
-                {
-                    case UnitRequisitesEnum.any:
-                        valid = true;
-                        break;
-                    case UnitRequisitesEnum.enemy:
-                        if (faction.Faction != inFaction)
-                        {
-                            valid = true;
-                        }
-                        break;
-                    case UnitRequisitesEnum.friendly:
-                        if (faction.Faction == inFaction)
-                        {
-                            valid = true;
-                        }
-                        break;
-                    case UnitRequisitesEnum.friendly_other:
-                        if (faction.Faction == inFaction && usingUnitId != unitId.EntityId.Id)
-                        {
-                            valid = true;
-                        }
-                        break;
-                    case UnitRequisitesEnum.other:
-                        if (usingUnitId != unitId.EntityId.Id)
-                        {
-                            valid = true;
-                        }
-                        break;
-                    case UnitRequisitesEnum.self:
-                        //maybe selfstate becomes irrelevant once a self-target is implemented.
-                        if (usingUnitId == unitId.EntityId.Id)
-                        {
-                            valid = true;
-                        }
-                        break;
-
-                    default:
-                        break;
-                }
-            }
-        });
-
-        return valid;
-    }
-    */
 }

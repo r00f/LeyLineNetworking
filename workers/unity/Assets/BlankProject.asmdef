@@ -9,8 +9,11 @@
         "Unity.Entities.Hybrid",
         "Unity.Mathematics",
         "Improbable.Gdk.GameObjectCreation",
-        "Unity.Rendering.Hybrid",
-        "Unity.Transforms"
+        "Unity.Transforms",
+        "Unity.Timeline",
+        "Improbable.Gdk.BuildSystem",
+        "Cinemachine",
+        "Unity.RenderPipelines.HighDefinition.Runtime"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -19,5 +22,6 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": []
+    "versionDefines": [],
+    "noEngineReferences": false
 }

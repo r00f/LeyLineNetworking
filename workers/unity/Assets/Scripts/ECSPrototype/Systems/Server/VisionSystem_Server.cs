@@ -16,10 +16,13 @@ public class VisionSystem_Server : ComponentSystem
 {
     //HandleCellGridRequestsSystem m_GridSystem;
     ILogDispatcher logger;
-
+    CommandSystem m_CommandSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_UnitData;
     EntityQuery m_PlayerData;
     EntityQuery m_CellData;
+    EntityQuery m_GameStateData;
+
 
     bool Init = false;
     int mapSize = 631;
@@ -52,19 +55,36 @@ public class VisionSystem_Server : ComponentSystem
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<CellAttributesComponent.Component>()
             );
-
     }
 
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_CommandSystem = World.GetExistingSystem<CommandSystem>();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
     }
 
     protected override void OnUpdate()
     {
-        
+
+        var revealVisionRequests = m_CommandSystem.GetRequests<Vision.RevealVisionCommand.ReceivedRequest>();
+
+        for (int i = 0; i < revealVisionRequests.Count; i++)
+        {
+            var revealVisionRequest = revealVisionRequests[i];
+
+            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref SpatialEntityId p_id) =>
+            {
+                if(p_id.EntityId == revealVisionRequest.EntityId)
+                {
+                    p_Vision.RequireUpdate = true;
+                    p_Vision.RevealVision = !p_Vision.RevealVision;
+                }
+            });
+        }
+
         if (m_CellData.CalculateEntityCount() == mapSize)
         {
             //if any unit requires an update, update player aswell
@@ -88,7 +108,7 @@ public class VisionSystem_Server : ComponentSystem
 
                     if(u_Vision.InitialWaitTime > 0)
                     {
-                        u_Vision.InitialWaitTime -= Time.deltaTime;
+                        u_Vision.InitialWaitTime -= Time.DeltaTime;
                         if (u_Vision.InitialWaitTime <= 0)
                             u_Vision.RequireUpdate = true;
                     }
@@ -98,10 +118,11 @@ public class VisionSystem_Server : ComponentSystem
 
                     if (u_Vision.RequireUpdate == true)
                     {
+                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("u_Vision.ReqUpdate = true")
                         .WithField("unitId", id.EntityId.Id));
-
+                        */
                         var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
 
                         if (v.CellsInVisionrange.Count != 0)
@@ -110,10 +131,11 @@ public class VisionSystem_Server : ComponentSystem
                             {
                                 if (p_Faction.Faction == unitFaction)
                                 {
+                                    /*
                                     logger.HandleLog(LogType.Warning,
                                     new LogEvent("UnitLoopSetPlayerVisionReq")
                                     .WithField("UnitFaction", unitFaction));
-
+                                    */
                                     p_Vision.RequireUpdate = true;
                                 }
                             });
@@ -124,43 +146,48 @@ public class VisionSystem_Server : ComponentSystem
                     }
                 });
 
-                Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
+                Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction, ref SpatialEntityId p_id) =>
                 {
                     if (p_Vision.RequireUpdate)
                     {
-                        logger.HandleLog(LogType.Warning,
-                        new LogEvent("playerVision.ReqUpdate = true")
-                        .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+                        if (!p_Vision.RevealVision)
+                        {
 
-                        
+                            /*
+                            logger.HandleLog(LogType.Warning,
+                            new LogEvent("playerVision.ReqUpdate = true")
+                            .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+                            */
 
-                        p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
-                        
-                        p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                        p_Vision.Positives = p_Vision.Positives;
-                        p_Vision.Negatives = p_Vision.Negatives;
-                        p_Vision.Lastvisible = p_Vision.Lastvisible;
 
-                        p_Vision.RequireUpdate = false;
+                            p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
 
-                        //Debug.Log("UpdatePlayerVision");
+                            p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
+                            p_Vision.Positives = p_Vision.Positives;
+                            p_Vision.Negatives = p_Vision.Negatives;
+                            p_Vision.Lastvisible = p_Vision.Lastvisible;
 
-                        //Send clientSide updateVision command
-                        /*
+                            m_ComponentUpdateSystem.SendEvent(
+                            new Vision.UpdateClientVisionEvent.Event(),
+                            p_id.EntityId);
 
-                        var request = new Vision.UpdateClientVisionCommand.Request
-                        (
-                            p_id,
-                            new UpdateClientVisionRequest()
-                        );
+                            p_Vision.RequireUpdate = false;
+                        }
+                        else
+                        {
+                            p_Vision = RevealMap(p_Vision);
 
-                        updateClientVisionRequest.RequestsToSend.Add(request);
-                        m_PlayerData.UpdateClientVisionCommands[i] = updateClientVisionRequest;
+                            p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
+                            p_Vision.Positives = p_Vision.Positives;
+                            p_Vision.Negatives = p_Vision.Negatives;
+                            p_Vision.Lastvisible = p_Vision.Lastvisible;
 
-                        */
+                            m_ComponentUpdateSystem.SendEvent(
+                            new Vision.UpdateClientVisionEvent.Event(),
+                            p_id.EntityId);
 
-                        //Debug.Log("SendUpdateClientVisionRequest, count = " + updateClientVisionRequest.RequestsToSend.Count + ", " + m_PlayerData.UpdateClientVisionCommands[i].RequestsToSend.Count);
-
+                            p_Vision.RequireUpdate = false;
+                        }
                     }
                 });
             }
@@ -216,7 +243,8 @@ public class VisionSystem_Server : ComponentSystem
                             if (o.cluster.Contains(l[i]))
                             {
                                 visible = false;
-                                sightHash.Remove(l[i]);
+                                //first tree is visible if not removed from hash
+                                //sightHash.Remove(l[i]);
                                 //Debug.Log("contains removed Coord: " + l[i].X + "," + l[i].Y + "," + l[i].Z);
                             }
                         }
@@ -236,13 +264,27 @@ public class VisionSystem_Server : ComponentSystem
         return inVision;
     }
 
+    private Vision.Component RevealMap(Vision.Component inVision)
+    {
+        inVision.CellsInVisionrange.Clear();
+
+        //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
+        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coord) =>
+        {
+            inVision.CellsInVisionrange.Add(coord.CubeCoordinate);
+        });
+
+        return inVision;
+    }
+
     private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
     {
         //Debug.Log("UpdatePlayerVision: " + faction);
+        /*
         logger.HandleLog(LogType.Warning,
         new LogEvent("UpdatePlayerVision.")
         .WithField("Faction", faction));
-
+        */
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
 
@@ -252,7 +294,7 @@ public class VisionSystem_Server : ComponentSystem
 
         var lastVision = new HashSet<Vector3f>();
 
-        foreach(Vector3f v in inVision.Lastvisible)
+        foreach (Vector3f v in inVision.Lastvisible)
         {
             lastVision.Add(v);
         }
@@ -269,22 +311,21 @@ public class VisionSystem_Server : ComponentSystem
                     currentVision.Add(v);
                 }
             }
-
         });
 
         inVision.CellsInVisionrange = currentVision.ToList();
 
         foreach (Vector3f v in lastVision)
         {
-            if(!currentVision.Contains(v))
+            if (!currentVision.Contains(v))
             {
                 inVision.Negatives.Add(v);
             }
         }
 
-        foreach(Vector3f v in currentVision)
+        foreach (Vector3f v in currentVision)
         {
-            if(!lastVision.Contains(v))
+            if (!lastVision.Contains(v))
             {
                 inVision.Positives.Add(v);
             }
@@ -382,215 +423,7 @@ public class VisionSystem_Server : ComponentSystem
             }
         newObstructed = obstructed;
     }
-
-    private void Cluster_DetermineAngles(ObstructVisionCluster inCluster)
-    {/*
-        foreach (CellAttributesComponent.Component c in inCluster.cluster)
-        {
-
-            Angle angle = new Angle(c, GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.CellAttributes.Cell.Position));
-
-            if (!inCluster.RelevantAngles.Contains(angle))
-            {
-                inCluster.RelevantAngles.Add(angle);
-            }
-            
-        }
-        //print("Relevant angles Count: " + inCluster.RelevantAngles.Count());
-
-    }
-    */
-    }
-
-    /*private List<CellAttributes> Cluster_UseAngles(ObstructVisionCluster inCluster, List<CellAttributes> watching)
-    {
-        int count = inCluster.RelevantAngles.Count;
-        //Debug.Log(count);
-        Angle largest;
-        Angle smallest;
-        List<CellAttributes> Cone = new List<CellAttributes>();
-        //if count = 1 (solve the broblem of only one angle by making it into 2 angles based on distance to watcher
-        inCluster.RelevantAngles.Sort((x, y) => x.angle_float.CompareTo(y.angle_float));
-        largest = inCluster.RelevantAngles[count - 1];
-        smallest = inCluster.RelevantAngles[0];
-        //Debug.Log("Largest: " + largest.angle_float + " , " + "Smallest: " + smallest.angle_float);
-
-        bool specialcase = false;
-        
-        for (int i = 1; i < count; i++)
-        {
-            if (Mathf.Abs(inCluster.RelevantAngles[i].angle_float - inCluster.RelevantAngles[i - 1].angle_float) > 60)
-            {
-                specialcase = true;
-            }
-        }
-
-        //Debug.Log(specialcase);
-
-        #region normal case
-        if (!specialcase)
-        {
-            foreach (CellAttributes c in watching)
-            {
-                float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                if ((largest.angle_float >= Angle) && (Angle >= smallest.angle_float))
-                {
-                    Cone.Add(c);
-                }
-            }
-
-            for (int i = 1; i < count; i++)
-            {
-                Vector3f watcherCubeCoordinate = inCluster.watcher.CellAttributes.Cell.CubeCoordinate;
-                Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.CellAttributes.Cell.CubeCoordinate;
-                Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
-
-                foreach (CellAttributes c in Cone)
-                {
-                    float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                    Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
-
-                    if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i - 1].angle_float)
-                    {
-                        if (GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                        {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                        else
-                        {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                    }
-                }
-            }
-            return watching;
-        }
-        #endregion
-        
-        #region SpecialCase
-        else
-        {
-            List<Angle> Positives = new List<Angle>();
-            List<Angle> Negatives = new List<Angle>();
-            for (int i = count - 1; i >= 0; i--)
-            {
-                if (inCluster.RelevantAngles[i].angle_float >= 0)
-                {
-                    Positives.Add(inCluster.RelevantAngles[i]);
-                }
-                else
-                {
-                    Negatives.Add(inCluster.RelevantAngles[i]);
-                }
-            }
-            //Debug.Log(Positives[0].angle_float + " ; " + Positives[Positives.Count - 1].angle_float);
-            foreach (CellAttributes c in watching)
-            {
-                float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                if ((Positives[Positives.Count - 1].angle_float <= Angle && Angle >= 0) || (Angle <= Negatives[0].angle_float && Angle <= 0))
-                {
-                    Cone.Add(c);
-                }
-            }
-            //Debug.Log("clustercount" + Cone.Count);
-
-            Vector3f watcherCubeCoordinate = inCluster.watcher.CellAttributes.Cell.CubeCoordinate;
-            Vector3f largestCubeCoordinate = largest.cell.CellAttributes.Cell.CubeCoordinate;
-            Vector3f smallestCubeCoordinate = smallest.cell.CellAttributes.Cell.CubeCoordinate;
-
-            foreach (CellAttributes c in Cone)
-            {
-                float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
-
-                if (largest.angle_float <= Angle || Angle <= smallest.angle_float)
-                {
-                    if (GridSys.GetDistance(watcherCubeCoordinate, largestCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, smallestCubeCoordinate))
-                    {
-                        if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, largestCubeCoordinate))
-                        {
-                            if (watching.Contains(c)) watching.Remove(c);
-                        }
-                    }
-                    else
-                    {
-                        if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, smallestCubeCoordinate))
-                        {
-                            if (watching.Contains(c)) watching.Remove(c);
-                        }
-                    }
-                }
-            }
-            for (int i = 0; i < Positives.Count - 1; i++)
-            {
-                Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
-                Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i + 1].cell.CellAttributes.Cell.CubeCoordinate;
-
-                foreach (CellAttributes c in Cone)
-                {
-                    float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                    Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
-
-                    if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i + 1].angle_float)
-                    {
-                        if (GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) <= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                        {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                        else
-                        {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                    }
-                }
-            }
-            for (int i = Negatives.Count; i > 0; i--)
-            {
-                Vector3f currentCubeCoordinate = inCluster.RelevantAngles[i].cell.CellAttributes.Cell.CubeCoordinate;
-                Vector3f nextCubeCoordinate = inCluster.RelevantAngles[i - 1].cell.CellAttributes.Cell.CubeCoordinate;
-
-                foreach (CellAttributes c in Cone)
-                {
-                    float Angle = GridSys.GetAngle(inCluster.watcher.CellAttributes.Cell.Position, c.Cell.Position);
-                    Vector3f coneCellCubeCoordinate = c.Cell.CubeCoordinate;
-
-                    if (inCluster.RelevantAngles[i].angle_float >= Angle && Angle >= inCluster.RelevantAngles[i - 1].angle_float)
-                    {
-                        if (GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                        {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, currentCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                        else
-                        {
-                            if (GridSys.GetDistance(watcherCubeCoordinate, coneCellCubeCoordinate) >= GridSys.GetDistance(watcherCubeCoordinate, nextCubeCoordinate))
-                            {
-                                if (watching.Contains(c)) watching.Remove(c);
-                            }
-                        }
-                    }
-                }
-            }
-            return watching;
-        }
-        #endregion
-        
-    }*/
-
+    
 }
 
 

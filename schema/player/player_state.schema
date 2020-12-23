@@ -1,6 +1,7 @@
 package player;
 import "cell/cell_attributes.schema";
 import "generic/vector3.schema";
+import "unit/actions.schema";
 
 component PlayerState {
 	
@@ -8,17 +9,19 @@ component PlayerState {
 	PlayerStateEnum current_state = 1;
 	int64 selected_unit_id = 2;
 	generic.Vector3f selected_unit_coordinate = 3;
-	list<cell.CellAttribute> cells_in_range = 4;
-	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 5;
 	int32 selected_action_id = 6;
 	map<int64, CubeCoordinateList> unit_targets = 7;
 	bool end_step_ready = 8;
+	unit.Action selected_action = 9;
+	bool target_valid = 10;
+	bool target_dict_change = 11;
 }
 
 type CubeCoordinateList {
 
 	list<generic.Vector3f> cube_coordinates = 1;
-
+	int32 turn_step_index = 2;
+	int32 damage_amount = 3;
 }
 
 enum PlayerStateEnum {

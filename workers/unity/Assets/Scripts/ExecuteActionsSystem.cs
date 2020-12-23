@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using UnityEngine;
 using Unit;
 using Improbable.Gdk.Core;
 using Generic;
@@ -31,7 +32,7 @@ public class ExecuteActionsSystem : ComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<WorldIndex.Component>(),
-        ComponentType.ReadOnly<GameState.Component>()
+        ComponentType.ReadWrite<GameState.Component>()
         );
     }
 
@@ -51,6 +52,33 @@ public class ExecuteActionsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+        if (m_GameStateData.CalculateEntityCount() == 0)
+            return;
+
+        var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+        var gameStateWorldIndexData = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+        var gameState = gameStateData[0];
+        var gamestateWorldIndex = gameStateWorldIndexData[0];
+
+        GetUnitActions(gameState, gamestateWorldIndex);
+
+        if (!gameState.AttackDamageDealt && gameState.DamageDict.Count != 0)
+        { 
+            m_ResourceSystem.DealDamage(gameState.DamageDict, (ExecuteStepEnum)(int)gameState.CurrentState - 1);
+            gameState.DamageDict.Clear();
+            gameState.AttackDamageDealt = true;
+        }
+
+        #region Dispose
+        gameStateData[0] = gameState;
+        m_GameStateData.CopyFromComponentDataArray(gameStateData);
+        gameStateWorldIndexData.Dispose();
+        gameStateData.Dispose();
+        #endregion
+    }
+
+    public void GetUnitActions(GameState.Component gameState, WorldIndex.Component gamestateWorldIndex)
+    {
         Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions, ref SpatialEntityId unitId, ref FactionComponent.Component faction) =>
         {
             var uWi = unitWorldIndex.Value;
@@ -58,58 +86,65 @@ public class ExecuteActionsSystem : ComponentSystem
             var f = faction;
             var id = unitId.EntityId.Id;
 
-            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gamestateWorldIndex, ref GameState.Component gameState) =>
+            if (a.LockedAction.Effects.Count != 0 && gameState.CurrentState != GameStateEnum.planning)
             {
-                if (uWi == gamestateWorldIndex.Value)
+                switch (gameState.CurrentState)
                 {
-                    if (a.LockedAction.Effects.Count != 0 && gameState.CurrentState != GameStateEnum.planning)
-                    {
-                        switch (gameState.CurrentState)
+                    case GameStateEnum.interrupt:
+                        if ((int)a.LockedAction.ActionExecuteStep == 0 && !a.Executed)
                         {
-                            case GameStateEnum.interrupt:
-                                if ((int)a.LockedAction.ActionExecuteStep == 0 && !a.Executed)
-                                {
-                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
-                                    a.Executed = true;
-                                }
-                                break;
-                            case GameStateEnum.attack:
-                                if ((int)a.LockedAction.ActionExecuteStep == 1 && !a.Executed)
-                                {
-                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
-                                    a.Executed = true;
-                                }
-                                break;
-                            case GameStateEnum.move:
-                                if ((int)a.LockedAction.ActionExecuteStep == 2 && !a.Executed)
-                                {
-                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
-                                }
-                                break;
-                            case GameStateEnum.skillshot:
-                                if ((int)a.LockedAction.ActionExecuteStep == 3 && !a.Executed)
-                                {
-                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
-                                    a.Executed = true;
-                                }
-                                break;
-                            case GameStateEnum.cleanup:
-                                if ((int)a.LockedAction.ActionExecuteStep == 4 && !a.Executed)
-                                {
-                                    ExecuteAction(gamestateWorldIndex.Value, a.LockedAction, f, id);
-                                    a.Executed = true;
-                                }
-                                break;
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            a.Executed = true;
                         }
-                    }
+                        break;
+                    case GameStateEnum.attack:
+                        if ((int)a.LockedAction.ActionExecuteStep == 1 && !a.Executed)
+                        {
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            a.Executed = true;
+                        }
+                        break;
+                    case GameStateEnum.move:
+                        if ((int)a.LockedAction.ActionExecuteStep == 2 && !a.Executed)
+                        {
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            a.Executed = true;
+                        }
+                        break;
+                    case GameStateEnum.skillshot:
+                        if ((int)a.LockedAction.ActionExecuteStep == 3 && !a.Executed)
+                        {
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            a.Executed = true;
+                        }
+                        break;
+                    case GameStateEnum.cleanup:
+                        if ((int)a.LockedAction.ActionExecuteStep == 4 && !a.Executed)
+                        {
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            a.Executed = true;
+                        }
+                        break;
                 }
-            });
-
+            }
             actions = a;
         });
     }
 
-    public void ExecuteAction(uint worldIndex, Action action, FactionComponent.Component faction, long unitId)
+    public void AddDamageToDict(GameState.Component gameState, long unitId, uint damageAmount)
+    {
+        if (gameState.DamageDict.ContainsKey(unitId))
+        {
+            gameState.DamageDict[unitId] += damageAmount;
+        }
+        else
+        {
+            gameState.DamageDict.Add(unitId, damageAmount);
+        }
+
+    }
+
+    public void ExecuteAction(GameState.Component gameState, uint worldIndex, Action action, FactionComponent.Component faction, long unitId)
     {
         for (int j = 0; j < action.Effects.Count; j++)
         {
@@ -120,8 +155,7 @@ public class ExecuteActionsSystem : ComponentSystem
                     {
                         case ApplyToTargetsEnum.primary:
 
-                            //Attack(actions.LockedAction.Effects[0].DealDamageNested.DamageAmount, unitId, actions.LockedAction.Targets[0].TargetId);
-                            m_ResourceSystem.DealDamage(action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                            AddDamageToDict(gameState, action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount);
                             break;
                         case ApplyToTargetsEnum.secondary:
 
@@ -135,12 +169,12 @@ public class ExecuteActionsSystem : ComponentSystem
 
                                 foreach (long id in AreaToUnitIDConversion(coords, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
                                 {
-                                    m_ResourceSystem.DealDamage(id, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                                    AddDamageToDict(gameState, id, action.Effects[j].DealDamageNested.DamageAmount);
                                 }
                             }
                             break;
                         case ApplyToTargetsEnum.both:
-                            m_ResourceSystem.DealDamage(action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                            AddDamageToDict(gameState, action.Targets[0].TargetId, action.Effects[j].DealDamageNested.DamageAmount);
                             if (action.Targets[0].Mods.Count != 0)
                             {
                                 List<Vector3f> coords = new List<Vector3f>();
@@ -151,7 +185,7 @@ public class ExecuteActionsSystem : ComponentSystem
 
                                 foreach (long id in AreaToUnitIDConversion(coords, action.Effects[j].ApplyToRestrictions, unitId, faction.Faction))
                                 {
-                                    m_ResourceSystem.DealDamage(id, action.Effects[j].DealDamageNested.DamageAmount, action.ActionExecuteStep);
+                                    AddDamageToDict(gameState, id, action.Effects[j].DealDamageNested.DamageAmount);
                                 }
                             }
                             break;
@@ -169,25 +203,6 @@ public class ExecuteActionsSystem : ComponentSystem
             }
         }
     }
-    /*
-    public void SetUnitSpawn(string unitName, FactionComponent.Component unitFaction, Vector3f cubeCoord)
-    {
-        for (int i = 0; i < m_CellData.Length; i++)
-        {
-            var coord = m_CellData.CoordinateData[i].CubeCoordinate;
-            var unitToSpawn = m_CellData.UnitToSpawnData[i];
-
-            if (coord == cubeCoord)
-            {
-                //Debug.Log("SetUnitSpawn at coordinate: " + cubeCoord);
-                unitToSpawn.Faction = unitFaction.Faction;
-                unitToSpawn.TeamColor = unitFaction.TeamColor;
-                unitToSpawn.UnitName = unitName;
-                m_CellData.UnitToSpawnData[i] = unitToSpawn;
-            }
-        }
-    }
-    */
 
     public List<long> AreaToUnitIDConversion(List<Vector3f> inCoords, ApplyToRestrictionsEnum restricitons, long usingID, uint usingFaction)
     {
@@ -198,7 +213,7 @@ public class ExecuteActionsSystem : ComponentSystem
         {
             if (Coords.Contains(unitCoord.CubeCoordinate))
             {
-                if (m_PathFindingSystem.ValidateTarget(e, (UnitRequisitesEnum)(int)restricitons, usingID, usingFaction))
+                if (m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)restricitons, usingID, usingFaction))
                 {
                     unitIds.Add(unitId.EntityId.Id);
                 }

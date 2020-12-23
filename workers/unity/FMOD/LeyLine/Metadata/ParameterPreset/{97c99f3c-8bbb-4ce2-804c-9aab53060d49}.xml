@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.00.00">
+	<object class="ParameterPreset" id="{97c99f3c-8bbb-4ce2-804c-9aab53060d49}">
+		<property name="name">
+			<value>TimePitchDown</value>
+		</property>
+		<relationship name="folder">
+			<destination>{c47eda69-9bc6-4c7a-a371-e17c224f8d14}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{92c6874f-4bd8-487e-b95f-8f2a46b425f1}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{92c6874f-4bd8-487e-b95f-8f2a46b425f1}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

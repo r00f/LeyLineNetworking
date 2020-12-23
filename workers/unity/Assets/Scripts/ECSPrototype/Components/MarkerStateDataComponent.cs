@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System;
 using Unity.Entities;
 
+
+
 namespace LeyLineHybridECS
 {
     [Serializable]
@@ -22,6 +24,8 @@ namespace LeyLineHybridECS
         public int IsSet;
 
         public uint NumberOfTargets;
+
+        public int TurnStepIndex;
 
         public byte TargetTypeSet;
 

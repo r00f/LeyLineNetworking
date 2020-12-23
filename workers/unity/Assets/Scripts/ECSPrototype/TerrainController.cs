@@ -17,16 +17,34 @@ namespace LeyLineHybridECS
         HexagonalHexGridGenerator hexGridGenerator;
 
         [SerializeField]
+        float resolutionHeight;
+
+        [SerializeField]
         float hexXrangeMultiplier;
 
         [SerializeField]
         float height;
 
         [SerializeField]
-        int textureIndex;
+        int floodTextureIndex;
 
         [SerializeField]
-        Vector2 treeHeightMinMax;
+        int slopeTextureIndex;
+
+        [SerializeField]
+        int firVariantCount;
+
+        //[SerializeField]
+        //Vector2 treeHeightMinMax;
+
+        [SerializeField]
+        Vector2 grassHeightMinMax;
+
+        //[SerializeField]
+        //float grassCircleRange;
+
+        [SerializeField]
+        int randomGrasRotationMax;
 
         float[,] terrainHeights;
 
@@ -47,13 +65,33 @@ namespace LeyLineHybridECS
         float[,] strength;
 
 
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
+
+
+        public void UpdateAllMapTileTextures()
+        {
+            foreach (Cell c in hexGridGenerator.hexagons)
+            {
+                c.GetComponent<CellType>().UpdateTerrainTexture();
+            }
+
+        }
+
+
+        public void UpdateAllMapTiles()
+        {
+            foreach (Cell c in hexGridGenerator.hexagons)
+            {
+                c.GetComponent<CellType>().UpdateTerrain();
+            }
+
+        }
 
         public void GetTerrainHeight()
         {
             //print(terrain.terrainData.GetHeight((int)getTerrainHeightCoordinates.x, (int)getTerrainHeightCoordinates.y));
             print(terrain.terrainData.alphamapWidth);
-            print(terrain.terrainData.heightmapWidth);
+            print(terrain.terrainData.heightmapResolution);
         }
 
         public void UpdateLeyLineCracks()
@@ -72,16 +110,16 @@ namespace LeyLineHybridECS
             //paint height with crackbrush at terrain position
 
             //convert length of array to raise to world space units
-            int totalXrange = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * size);
-            int totalYrange = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * size);
+            int totalXrange = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * size);
+            int totalYrange = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * size);
 
             terrainHeights = new float[totalXrange, totalYrange];
             //print(terrainHeights.Length);
             strength = new float[totalXrange, totalYrange];
             //print(totalXrange);
 
-            int xOffset = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * position.x) - totalXrange / 2;
-            int yOffset = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * position.z) - totalYrange / 2;
+            int xOffset = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * position.x) - totalXrange / 2;
+            int yOffset = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * position.z) - totalYrange / 2;
 
 
 
@@ -96,10 +134,10 @@ namespace LeyLineHybridECS
                     strength[x, y] = 1 - textureToUse.GetPixelBilinear(x / (float)totalXrange, y / (float)totalYrange).a;
 
                     if(strength[x,y] == 0)
-                        terrainHeights[x, y] = strength[x, y] + (position.y / 600);
+                        terrainHeights[x, y] = strength[x, y] + (position.y / resolutionHeight);
                     else
                     {
-                        terrainHeights[x, y] = terrain.terrainData.GetHeight(xOffset + y, yOffset + x) / 600;
+                        terrainHeights[x, y] = terrain.terrainData.GetHeight(xOffset + y, yOffset + x) / resolutionHeight;
                     }
                 }
             }
@@ -110,7 +148,7 @@ namespace LeyLineHybridECS
         {
             foreach (Cell c in hexGridGenerator.hexagons)
             {
-                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Size, c.transform.position);
+                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Size, c.transform.localPosition);
             }
         }
 
@@ -120,20 +158,107 @@ namespace LeyLineHybridECS
 
             foreach (Cell c in hexGridGenerator.hexagons)
             {
-                if (c.GetComponent<CellType>().thisCellsTerrain.spawnTree)
+                TerrainType terrainType = c.GetComponent<CellType>().thisCellsTerrain;
+
+                int treeRot = 0;
+
+                if (terrainType.RandomTreeRotationIncrement != 0)
                 {
-                    TreeInstance treeInstance = new TreeInstance()
+                    treeRot = UnityEngine.Random.Range(0, 360 / terrainType.RandomTreeRotationIncrement) * terrainType.RandomTreeRotationIncrement;
+                }
+                
+
+
+                if (terrainType.NeighbourAmountMinMax.y != 0)
+                {
+                    int grassAmount = UnityEngine.Random.Range((int)terrainType.NeighbourAmountMinMax.x, (int)terrainType.NeighbourAmountMinMax.y + 1);
+
+                    foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
                     {
-                        prototypeIndex = 0,
-                        color = Color.black,
-                        heightScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
-                        widthScale = UnityEngine.Random.Range(treeHeightMinMax.x, treeHeightMinMax.y),
-                    };
-                    SpawnHexagonTree(c.transform.position, treeInstance);
+                        if (n.GetComponent<CellType>().thisCellsTerrain.Walkable && UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnNeighbourAsset)
+                            SpawnDetailPatch(grassAmount, n, terrainType.NeighbourIndexMinMax, 0.6f, UnityEngine.Random.Range(0,360));
+                    }
+                }
+
+                if(terrainType.DetailObjectIndexRanges.Count != 0 && terrainType.DetailObjectAmounts.Count != 0 && terrainType.DetailObjectSpawnProbabilities.Count != 0)
+                {
+                    for(int i = 0; i < terrainType.DetailObjectIndexRanges.Count; i++)
+                    {
+                        int grassAmount = (int)UnityEngine.Random.Range(terrainType.DetailObjectAmounts[i].x, terrainType.DetailObjectAmounts[i].y);
+
+                        if (UnityEngine.Random.Range(0, 100) <= terrainType.DetailObjectSpawnProbabilities[i])
+                        {
+                            float randomRange = 0f;
+                            if (terrainType.DetailObjectRanges.Count != 0)
+                                randomRange = UnityEngine.Random.Range(terrainType.DetailObjectRanges[i].x, terrainType.DetailObjectRanges[i].y);
+
+                            SpawnDetailPatch(grassAmount, c, terrainType.DetailObjectIndexRanges[i], randomRange, treeRot, terrainType.DetailObjectSpawnYOffset + UnityEngine.Random.Range(terrainType.DetailObjectSpawnYOffsetMinMax.x, terrainType.DetailObjectSpawnYOffsetMinMax.y));
+                        }
+                    }
+                }
+
+                if (terrainType.TreeIndexMinMax.y != 0)
+                {
+                    if (terrainType.GrassAmountMinMax.y == 0)
+                    {
+                        TreeInstance treeInstance = new TreeInstance()
+                        {
+                            prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
+                            //color = Color.white,
+                            //lightmapColor = Color.white,
+                            heightScale = UnityEngine.Random.Range(terrainType.TreeHeightMinMax.x, terrainType.TreeHeightMinMax.y),
+                            widthScale = 1,
+                            rotation = treeRot
+                        };
+                        SpawnHexagonTree(c.transform.position - transform.parent.position, treeInstance);
+                    }
+                    else
+                    {
+                        int grassAmount = UnityEngine.Random.Range((int)terrainType.GrassAmountMinMax.x, (int)terrainType.GrassAmountMinMax.y + 1);
+
+                        if (terrainType.probabilityToSpawnAsset != 0)
+                        {
+                            if (UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnAsset)
+                            {
+                                SpawnDetailPatch(grassAmount, c, terrainType.TreeIndexMinMax, 0);
+                            }
+                        }
+                        else
+                        {
+                            SpawnDetailPatch(grassAmount, c, terrainType.TreeIndexMinMax, 0);
+                        }
+                    }
                 }
             }
-            terrain.terrainData.treeInstances = treeList.ToArray();
+
+            //add grass to treeList before setting terrain.treeInstances
+            terrain.terrainData.SetTreeInstances(treeList.ToArray(), false);
+            //terrain.terrainData.treeInstances = treeList.ToArray();
             terrain.Flush();
+        }
+
+        public void SpawnDetailPatch(int grassAmount, Cell c, Vector2 treeIndexMinMax, float spawnCircleRange, float randomRotation = 0f, float yOffset = 0f)
+        {
+            for (int i = 0; i < grassAmount; i++)
+            {
+                TreeInstance treeInstance = new TreeInstance()
+                {
+                    prototypeIndex = UnityEngine.Random.Range((int)treeIndexMinMax.x, (int)treeIndexMinMax.y + 1) - 1,
+                    color = Color.white,
+                    lightmapColor = Color.white,
+                    heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                    widthScale = 1,
+                    rotation = randomRotation * Mathf.Deg2Rad
+                };
+
+                //can spawn at same place
+                Vector2 randomOffset = UnityEngine.Random.insideUnitCircle.normalized * spawnCircleRange;
+
+                Vector3 pos = c.transform.position - transform.parent.position + new Vector3(randomOffset.x, 0, randomOffset.y) + new Vector3(0, yOffset, 0);
+
+                SpawnHexagonTree(pos, treeInstance);
+            }
+
         }
 
         public void SpawnHexagonTree(Vector3 hexPos, TreeInstance treeInstance)
@@ -141,7 +266,7 @@ namespace LeyLineHybridECS
 
             float xCenter = 1 / terrain.terrainData.size.x * hexPos.x;
             float zCenter = 1 / terrain.terrainData.size.z * hexPos.z;
-            float yCenter = hexPos.y / 600;
+            float yCenter = hexPos.y / resolutionHeight;
 
             treeInstance.position = new Vector3(xCenter, yCenter, zCenter);
 
@@ -191,15 +316,14 @@ namespace LeyLineHybridECS
             float h = size * Mathf.Sqrt(3);
 
             //convert length of array to raise to world space unit
-            rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
-            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h);
-
+            rectSize.x = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * h);
 
             int width = (int)rectSize.x;
             int height = (int)rectSize.y;
 
-            terrainPos.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * hexPos.x) - width / 2;
-            terrainPos.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * hexPos.z) - height / 2;
+            terrainPos.x = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * hexPos.x) - width / 2;
+            terrainPos.y = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * hexPos.z) - height / 2;
 
             return terrainPos;
         }
@@ -254,8 +378,8 @@ namespace LeyLineHybridECS
             float w = size * 2;
             float h = size * Mathf.Sqrt(3);
             //convert length of array to raise to world space units
-            rectSize.x = (int)(terrain.terrainData.heightmapWidth / terrain.terrainData.size.x * w);
-            rectSize.y = (int)(terrain.terrainData.heightmapHeight / terrain.terrainData.size.z * h + 1);
+            rectSize.x = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * w);
+            rectSize.y = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * h + 1);
 
             float [,] pixelArray = new float[(int)rectSize.y, (int)rectSize.x];
 
@@ -285,7 +409,7 @@ namespace LeyLineHybridECS
                 {
                     if (y >= (height / 2) - xRange / 2 && y <= (height / 2) + xRange / 2)
                     //if the point to raise is not a part of the hex, set it to be the position it had before
-                    pixelArray[y, x] = hexPos.y / 600;
+                    pixelArray[y, x] = hexPos.y / resolutionHeight;
                     
                     else
                     {
@@ -316,7 +440,7 @@ namespace LeyLineHybridECS
                                 offsetPos = new Vector3(w / 2, 0, h / 2);
                             }
                         }
-                        pixelArray[y, x] = terrain.SampleHeight(hexPos + offsetPos) / 600;
+                        pixelArray[y, x] = terrain.SampleHeight(hexPos + offsetPos) / resolutionHeight;
                     }
                     
                 }
@@ -506,7 +630,7 @@ namespace LeyLineHybridECS
                     // by 90 to get an alpha blending value in the range 0..1.
                     var frac = angle / 90.0;
                     //slope texture
-                    map[y, x, 3] = (float)frac;
+                    map[y, x, slopeTextureIndex] = (float)frac;
                     //non slope texture
                     map[y, x, GetMainTextureAtTerrainPos(new Vector2(x, y))] = (float)(1 - frac);
                 }
@@ -611,7 +735,7 @@ namespace LeyLineHybridECS
         public void SmoothTerrainHeights()
         {
 
-            float[,] smoothHeights = smooth(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight), new Vector2(terrain.terrainData.heightmapWidth, terrain.terrainData.heightmapHeight), 1);
+            float[,] smoothHeights = smooth(terrain.terrainData.GetHeights(0, 0, terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution), new Vector2(terrain.terrainData.heightmapResolution, terrain.terrainData.heightmapResolution), 1);
             terrain.terrainData.SetHeights(0, 0, smoothHeights);
 
         }
@@ -702,8 +826,8 @@ namespace LeyLineHybridECS
 
         public void SetWholeTerrainHeight()
         {
-            int xRes = terrain.terrainData.heightmapWidth;
-            int yRes = terrain.terrainData.heightmapHeight;
+            int xRes = terrain.terrainData.heightmapResolution;
+            int yRes = terrain.terrainData.heightmapResolution;
 
             terrainHeights = new float[xRes, yRes];
 
@@ -714,7 +838,7 @@ namespace LeyLineHybridECS
                 for (int y = 0; y < yRes; y++)
                 {
                     //since I could not find MeshResolution > Terrain Height access from code I hardcoded it
-                    terrainHeights[x, y] = height / 600;
+                    terrainHeights[x, y] = (height - transform.position.y) / resolutionHeight;
                 }
             }
 
@@ -734,7 +858,7 @@ namespace LeyLineHybridECS
             {
                 for (int y = 0; y < yRes; y++)
                 {
-                    alphaMap[x, y, textureIndex] = 1;
+                    alphaMap[x, y, floodTextureIndex] = 1;
                 }
             }
 

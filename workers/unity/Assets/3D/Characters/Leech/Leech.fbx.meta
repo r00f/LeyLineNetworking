@@ -1,143 +1,413 @@
 fileFormatVersion: 2
 guid: f3b933ea83085dc458feb74c304d3153
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Body
-    100002: Body1
-    100004: Body2
-    100006: Body3
-    100008: Body4
-    100010: Body5
-    100012: Body6
-    100014: Body7
-    100016: Body8
-    100018: Body9
-    100020: FeatherLeather
-    100022: //RootNode
-    100024: mBodyMain
-    100026: mFeatherBones
-    100028: mFeathersPlayerColor
-    100030: mSpike
-    100032: mSpike1
-    100034: mSpike2
-    100036: mSpike3
-    100038: mSpike4
-    100040: mTooth1
-    100042: mTooth10
-    100044: mTooth11
-    100046: mTooth12
-    100048: mTooth2
-    100050: mTooth3
-    100052: mTooth4
-    100054: mTooth5
-    100056: mTooth6
-    100058: mTooth7
-    100060: mTooth8
-    100062: mTooth9
-    100064: pTorus1
-    100066: Teeth
-    400000: Body
-    400002: Body1
-    400004: Body2
-    400006: Body3
-    400008: Body4
-    400010: Body5
-    400012: Body6
-    400014: Body7
-    400016: Body8
-    400018: Body9
-    400020: FeatherLeather
-    400022: //RootNode
-    400024: mBodyMain
-    400026: mFeatherBones
-    400028: mFeathersPlayerColor
-    400030: mSpike
-    400032: mSpike1
-    400034: mSpike2
-    400036: mSpike3
-    400038: mSpike4
-    400040: mTooth1
-    400042: mTooth10
-    400044: mTooth11
-    400046: mTooth12
-    400048: mTooth2
-    400050: mTooth3
-    400052: mTooth4
-    400054: mTooth5
-    400056: mTooth6
-    400058: mTooth7
-    400060: mTooth8
-    400062: mTooth9
-    400064: pTorus1
-    400066: Teeth
-    2100000: Leech
-    2100002: Bone
-    2100004: Leather
-    2100006: Feather
-    2300000: mFeatherBones
-    2300002: mFeathersPlayerColor
-    2300004: mSpike
-    2300006: mSpike1
-    2300008: mSpike2
-    2300010: mSpike3
-    2300012: mSpike4
-    2300014: mTooth1
-    2300016: mTooth10
-    2300018: mTooth11
-    2300020: mTooth12
-    2300022: mTooth2
-    2300024: mTooth3
-    2300026: mTooth4
-    2300028: mTooth5
-    2300030: mTooth6
-    2300032: mTooth7
-    2300034: mTooth8
-    2300036: mTooth9
-    2300038: pTorus1
-    3300000: mFeatherBones
-    3300002: mFeathersPlayerColor
-    3300004: mSpike
-    3300006: mSpike1
-    3300008: mSpike2
-    3300010: mSpike3
-    3300012: mSpike4
-    3300014: mTooth1
-    3300016: mTooth10
-    3300018: mTooth11
-    3300020: mTooth12
-    3300022: mTooth2
-    3300024: mTooth3
-    3300026: mTooth4
-    3300028: mTooth5
-    3300030: mTooth6
-    3300032: mTooth7
-    3300034: mTooth8
-    3300036: mTooth9
-    3300038: pTorus1
-    4300000: mBodyMain
-    4300002: mSpike4
-    4300004: mSpike3
-    4300006: mSpike2
-    4300008: pTorus1
-    4300010: mFeathersPlayerColor
-    4300012: mFeatherBones
-    4300014: mSpike1
-    4300016: mSpike
-    4300018: mTooth1
-    4300020: mTooth2
-    4300022: mTooth3
-    4300024: mTooth4
-    4300026: mTooth5
-    4300028: mTooth6
-    4300030: mTooth7
-    4300032: mTooth8
-    4300034: mTooth9
-    4300036: mTooth10
-    4300038: mTooth11
-    4300040: mTooth12
-    9500000: //RootNode
-    13700000: mBodyMain
+  serializedVersion: 19300
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Body
+  - first:
+      1: 100002
+    second: Body1
+  - first:
+      1: 100004
+    second: Body2
+  - first:
+      1: 100006
+    second: Body3
+  - first:
+      1: 100008
+    second: Body4
+  - first:
+      1: 100010
+    second: Body5
+  - first:
+      1: 100012
+    second: Body6
+  - first:
+      1: 100014
+    second: Body7
+  - first:
+      1: 100016
+    second: Body8
+  - first:
+      1: 100018
+    second: Body9
+  - first:
+      1: 100020
+    second: FeatherLeather
+  - first:
+      1: 100022
+    second: //RootNode
+  - first:
+      1: 100024
+    second: mBodyMain
+  - first:
+      1: 100026
+    second: mFeatherBones
+  - first:
+      1: 100028
+    second: mFeathersPlayerColor
+  - first:
+      1: 100030
+    second: mSpike
+  - first:
+      1: 100032
+    second: mSpike1
+  - first:
+      1: 100034
+    second: mSpike2
+  - first:
+      1: 100036
+    second: mSpike3
+  - first:
+      1: 100038
+    second: mSpike4
+  - first:
+      1: 100040
+    second: mTooth1
+  - first:
+      1: 100042
+    second: mTooth10
+  - first:
+      1: 100044
+    second: mTooth11
+  - first:
+      1: 100046
+    second: mTooth12
+  - first:
+      1: 100048
+    second: mTooth2
+  - first:
+      1: 100050
+    second: mTooth3
+  - first:
+      1: 100052
+    second: mTooth4
+  - first:
+      1: 100054
+    second: mTooth5
+  - first:
+      1: 100056
+    second: mTooth6
+  - first:
+      1: 100058
+    second: mTooth7
+  - first:
+      1: 100060
+    second: mTooth8
+  - first:
+      1: 100062
+    second: mTooth9
+  - first:
+      1: 100064
+    second: pTorus1
+  - first:
+      1: 100066
+    second: Teeth
+  - first:
+      4: 400000
+    second: Body
+  - first:
+      4: 400002
+    second: Body1
+  - first:
+      4: 400004
+    second: Body2
+  - first:
+      4: 400006
+    second: Body3
+  - first:
+      4: 400008
+    second: Body4
+  - first:
+      4: 400010
+    second: Body5
+  - first:
+      4: 400012
+    second: Body6
+  - first:
+      4: 400014
+    second: Body7
+  - first:
+      4: 400016
+    second: Body8
+  - first:
+      4: 400018
+    second: Body9
+  - first:
+      4: 400020
+    second: FeatherLeather
+  - first:
+      4: 400022
+    second: //RootNode
+  - first:
+      4: 400024
+    second: mBodyMain
+  - first:
+      4: 400026
+    second: mFeatherBones
+  - first:
+      4: 400028
+    second: mFeathersPlayerColor
+  - first:
+      4: 400030
+    second: mSpike
+  - first:
+      4: 400032
+    second: mSpike1
+  - first:
+      4: 400034
+    second: mSpike2
+  - first:
+      4: 400036
+    second: mSpike3
+  - first:
+      4: 400038
+    second: mSpike4
+  - first:
+      4: 400040
+    second: mTooth1
+  - first:
+      4: 400042
+    second: mTooth10
+  - first:
+      4: 400044
+    second: mTooth11
+  - first:
+      4: 400046
+    second: mTooth12
+  - first:
+      4: 400048
+    second: mTooth2
+  - first:
+      4: 400050
+    second: mTooth3
+  - first:
+      4: 400052
+    second: mTooth4
+  - first:
+      4: 400054
+    second: mTooth5
+  - first:
+      4: 400056
+    second: mTooth6
+  - first:
+      4: 400058
+    second: mTooth7
+  - first:
+      4: 400060
+    second: mTooth8
+  - first:
+      4: 400062
+    second: mTooth9
+  - first:
+      4: 400064
+    second: pTorus1
+  - first:
+      4: 400066
+    second: Teeth
+  - first:
+      21: 2100000
+    second: Leech
+  - first:
+      21: 2100002
+    second: Bone
+  - first:
+      21: 2100004
+    second: Leather
+  - first:
+      21: 2100006
+    second: Feather
+  - first:
+      23: 2300000
+    second: mFeatherBones
+  - first:
+      23: 2300002
+    second: mFeathersPlayerColor
+  - first:
+      23: 2300004
+    second: mSpike
+  - first:
+      23: 2300006
+    second: mSpike1
+  - first:
+      23: 2300008
+    second: mSpike2
+  - first:
+      23: 2300010
+    second: mSpike3
+  - first:
+      23: 2300012
+    second: mSpike4
+  - first:
+      23: 2300014
+    second: mTooth1
+  - first:
+      23: 2300016
+    second: mTooth10
+  - first:
+      23: 2300018
+    second: mTooth11
+  - first:
+      23: 2300020
+    second: mTooth12
+  - first:
+      23: 2300022
+    second: mTooth2
+  - first:
+      23: 2300024
+    second: mTooth3
+  - first:
+      23: 2300026
+    second: mTooth4
+  - first:
+      23: 2300028
+    second: mTooth5
+  - first:
+      23: 2300030
+    second: mTooth6
+  - first:
+      23: 2300032
+    second: mTooth7
+  - first:
+      23: 2300034
+    second: mTooth8
+  - first:
+      23: 2300036
+    second: mTooth9
+  - first:
+      23: 2300038
+    second: pTorus1
+  - first:
+      33: 3300000
+    second: mFeatherBones
+  - first:
+      33: 3300002
+    second: mFeathersPlayerColor
+  - first:
+      33: 3300004
+    second: mSpike
+  - first:
+      33: 3300006
+    second: mSpike1
+  - first:
+      33: 3300008
+    second: mSpike2
+  - first:
+      33: 3300010
+    second: mSpike3
+  - first:
+      33: 3300012
+    second: mSpike4
+  - first:
+      33: 3300014
+    second: mTooth1
+  - first:
+      33: 3300016
+    second: mTooth10
+  - first:
+      33: 3300018
+    second: mTooth11
+  - first:
+      33: 3300020
+    second: mTooth12
+  - first:
+      33: 3300022
+    second: mTooth2
+  - first:
+      33: 3300024
+    second: mTooth3
+  - first:
+      33: 3300026
+    second: mTooth4
+  - first:
+      33: 3300028
+    second: mTooth5
+  - first:
+      33: 3300030
+    second: mTooth6
+  - first:
+      33: 3300032
+    second: mTooth7
+  - first:
+      33: 3300034
+    second: mTooth8
+  - first:
+      33: 3300036
+    second: mTooth9
+  - first:
+      33: 3300038
+    second: pTorus1
+  - first:
+      43: 4300000
+    second: mBodyMain
+  - first:
+      43: 4300002
+    second: mSpike4
+  - first:
+      43: 4300004
+    second: mSpike3
+  - first:
+      43: 4300006
+    second: mSpike2
+  - first:
+      43: 4300008
+    second: pTorus1
+  - first:
+      43: 4300010
+    second: mFeathersPlayerColor
+  - first:
+      43: 4300012
+    second: mFeatherBones
+  - first:
+      43: 4300014
+    second: mSpike1
+  - first:
+      43: 4300016
+    second: mSpike
+  - first:
+      43: 4300018
+    second: mTooth1
+  - first:
+      43: 4300020
+    second: mTooth2
+  - first:
+      43: 4300022
+    second: mTooth3
+  - first:
+      43: 4300024
+    second: mTooth4
+  - first:
+      43: 4300026
+    second: mTooth5
+  - first:
+      43: 4300028
+    second: mTooth6
+  - first:
+      43: 4300030
+    second: mTooth7
+  - first:
+      43: 4300032
+    second: mTooth8
+  - first:
+      43: 4300034
+    second: mTooth9
+  - first:
+      43: 4300036
+    second: mTooth10
+  - first:
+      43: 4300038
+    second: mTooth11
+  - first:
+      43: 4300040
+    second: mTooth12
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: mBodyMain
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -158,9 +428,14 @@ ModelImporter:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Leech
-    second: {fileID: 2100000, guid: f7500cf446741f74dbd712069661fa71, type: 2}
+    second: {fileID: 2100000, guid: 6e262bbb8309825458566ee64cccef65, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: LeechInner
+    second: {fileID: 2100000, guid: 233f0a859e45df74aaa9b4f61e5354fd, type: 2}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
     materialLocation: 1
@@ -178,7 +453,7 @@ ModelImporter:
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
     importConstraints: 0
-    animationCompression: 1
+    animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -190,10 +465,11 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 1.5
+    globalScale: 1
     meshCompression: 0
     addColliders: 0
     useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -201,18 +477,19 @@ ModelImporter:
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
-    weldVertices: 1
-    preserveHierarchy: 0
+    weldVertices: 0
+    preserveHierarchy: 1
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 0.015
-    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -221,12 +498,187 @@ ModelImporter:
     legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
     blendShapeNormalImportMode: 1
     normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 0
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human: []
-    skeleton: []
+    skeleton:
+    - name: Leech(Clone)
+      parentName: 
+      position: {x: 0, y: 0, z: 0}
+      rotation: {x: 0, y: 0, z: 0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mBodyMain
+      parentName: Leech(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Root
+      parentName: Leech(Clone)
+      position: {x: -0, y: 0, z: 0}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Head
+      parentName: Root
+      position: {x: -0, y: 0.06, z: 0.3}
+      rotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
+      scale: {x: 1.000001, y: 1, z: 1.000001}
+    - name: mSpike
+      parentName: Head
+      position: {x: -0.045850776, y: 0.07576779, z: 0.00000000834465}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Teeth
+      parentName: Head
+      position: {x: 0.022701688, y: -0.0016628529, z: 0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth1
+      parentName: Teeth
+      position: {x: 0.005041586, y: -0.0000000139531, z: -0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth2
+      parentName: Teeth
+      position: {x: 0.005041586, y: -0.0000000139531, z: -0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth3
+      parentName: Teeth
+      position: {x: 0.005041586, y: -0.0000000139531, z: -0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth4
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth5
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth6
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth7
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth8
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth9
+      parentName: Teeth
+      position: {x: -0.0050416016, y: -0.0000805437, z: -0.0000068265185}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth10
+      parentName: Teeth
+      position: {x: 0.005041586, y: -0.0000000139531, z: -0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth11
+      parentName: Teeth
+      position: {x: 0.005041586, y: -0.0000000139531, z: -0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mTooth12
+      parentName: Teeth
+      position: {x: 0.005041586, y: -0.0000000139531, z: -0.00002726077}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Head 1
+      parentName: Head
+      position: {x: -0.08737449, y: 0, z: 2.8034284e-18}
+      rotation: {x: 0.0000018529041, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: FeatherLeather
+      parentName: Head 1
+      position: {x: -0.2126255, y: -0.059800535, z: 0.00000022160931}
+      rotation: {x: 0.00941075, y: 0.04300749, z: -0.8601814, w: 0.5080845}
+      scale: {x: 1, y: 1, z: 1}
+    - name: pTorus1
+      parentName: FeatherLeather
+      position: {x: 0.21441326, y: 0.06274499, z: 4.7609307e-17}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mFeathersPlayerColor
+      parentName: FeatherLeather
+      position: {x: 0.16586575, y: 0.12726092, z: 0.008177846}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mFeatherBones
+      parentName: FeatherLeather
+      position: {x: 0.1642618, y: 0.12800057, z: 0.008259216}
+      rotation: {x: 0, y: -0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: mSpike1
+      parentName: Head 1
+      position: {x: -0.2126255, y: -0.059800535, z: 0.00000022160931}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail1
+      parentName: Head 1
+      position: {x: -0.109519415, y: -0.00000040247846, z: -0.00000040585647}
+      rotation: {x: 0.0000019794234, y: -0.0000020020154, z: -0.5336146, w: 0.8457278}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: mSpike2
+      parentName: Tail1
+      position: {x: -0.103106104, y: -0.05980011, z: 0.0000006274659}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail2
+      parentName: Tail1
+      position: {x: -0.11204007, y: -2.04281e-16, z: -0.00000041519903}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: mSpike3
+      parentName: Tail2
+      position: {x: 0.008934, y: -0.05980011, z: 0.000001042665}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail3
+      parentName: Tail2
+      position: {x: -0.11480686, y: -7.904788e-16, z: -0.00000042545224}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: mSpike4
+      parentName: Tail3
+      position: {x: 0.1237409, y: -0.05980011, z: 0.0000014681174}
+      rotation: {x: -0.0000018529042, y: 0, z: -0, w: 1}
+      scale: {x: 1, y: 1, z: 1}
+    - name: Tail4
+      parentName: Tail3
+      position: {x: -0.11483746, y: -4.2632563e-16, z: -0.00000042556567}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: Tail5
+      parentName: Tail4
+      position: {x: -0.11572171, y: -5.684342e-16, z: -0.00000042884255}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: Tail6
+      parentName: Tail5
+      position: {x: -0.085536934, y: -4.094502e-15, z: -0.00000031698357}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
+    - name: Tail7
+      parentName: Tail6
+      position: {x: -0.07864411, y: -1.2878584e-15, z: -0.00000029143993}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000006, y: 1, z: 1.0000006}
+    - name: Tail8
+      parentName: Tail7
+      position: {x: -0.07937713, y: -0.0000000020112008, z: -0.0000002941564}
+      rotation: {x: -0, y: -0, z: -0, w: 1}
+      scale: {x: 1.0000005, y: 1, z: 1.0000005}
     armTwist: 0.5
     foreArmTwist: 0.5
     upperLegTwist: 0.5
@@ -234,13 +686,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 1
   additionalBone: 0
   userData: 
   assetBundleName: 

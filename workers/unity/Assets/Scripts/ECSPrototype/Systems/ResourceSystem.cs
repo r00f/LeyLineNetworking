@@ -6,6 +6,8 @@ using Generic;
 using Player;
 using Unit;
 using Unity.Collections;
+using Cell;
+using System.Collections.Generic;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
@@ -14,6 +16,7 @@ public class ResourceSystem : ComponentSystem
     EntityQuery m_PlayerData;
     EntityQuery m_UnitData;
     EntityQuery m_GameStateData;
+    EntityQuery m_ManalithData;
     private EntityQuery projectorGroup;
 
     Settings settings;
@@ -29,6 +32,12 @@ public class ResourceSystem : ComponentSystem
 
                ComponentType.ReadWrite<Transform>(),
                ComponentType.ReadWrite<Projector>()
+        );
+
+        m_ManalithData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadWrite<Manalith.Component>(),
+            ComponentType.ReadWrite<FactionComponent.Component>()
         );
 
         m_PlayerData = Worlds.GameLogicWorld.CreateEntityQuery(
@@ -62,89 +71,67 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) => 
         {
-            if(gameState.CurrentState == GameStateEnum.calculate_energy)
-            {
-                ResetIncomeAdded(gameStateWorldIndex.Value);
-            }
-            else if(gameState.CurrentState == GameStateEnum.planning)
+            if (gameState.CurrentState == GameStateEnum.interrupt)
             {
                 AddIncome(gameStateWorldIndex.Value);
             }
         });
     }
 
-    public void ResetIncomeAdded(uint worldIndex)
+    public void CalculateIncome(uint worldIndex)
     {
-        //var workerSystem = World.GetExistingSystem<WorkerSystem>();
-        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref PlayerEnergy.Component playerEnergy) =>
+        var workerSystem = World.GetExistingSystem<WorkerSystem>();
+
+        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
         {
-            if (playerWorldIndex.Value == worldIndex && playerEnergy.IncomeAdded == true)
+            var pFaction = playerFaction;
+            var pEnergy = playerEnergy;
+
+            if (playerWorldIndex.Value == worldIndex)
             {
-                playerEnergy.IncomeAdded = false;
-                /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("ResetIncomeAdded.")
-                .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));*/
+                if (pEnergy.IncomeAdded == true)
+                {
+                    pEnergy.Income = pEnergy.BaseIncome;
+
+                    Entities.With(m_ManalithData).ForEach((ref WorldIndex.Component manalithWorldIndex, ref FactionComponent.Component manalithFaction, ref Manalith.Component manalith) =>
+                    {
+                        if (manalithFaction.Faction == pFaction.Faction)
+                        {
+                            pEnergy.Income += manalith.CombinedEnergyGain;
+                        }
+                    });
+
+                    //Debug.Log("CalculateIncome: " + pEnergy.Income);
+                    pEnergy.IncomeAdded = false;
+                    playerEnergy = pEnergy;
+                }
             }
         });
     }
 
-    public void AddIncome(uint worldIndex)
+    void AddIncome(uint worldIndex)
     {
-        var workerSystem = World.GetExistingSystem<WorkerSystem>();
-
-        #region unitDataVars
-        //var unitsWorldIndex = m_UnitData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-        //var unitsAction = m_UnitData.ToComponentDataArray<Actions.Component>(Allocator.TempJob);
-        //var unitsId = m_UnitData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
-        var unitsFaction = m_UnitData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-        var unitsEnergy = m_UnitData.ToComponentDataArray<Energy.Component>(Allocator.TempJob);
-        #endregion
-
-
-        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
+        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
         {
-
             if (playerWorldIndex.Value == worldIndex)
             {
-                if (playerEnergy.IncomeAdded == false)
+                if (energyComp.IncomeAdded == false)
                 {
-                    playerEnergy.IncomeAdded = true;
-                    playerEnergy.Income = playerEnergy.BaseIncome;
+                    //Debug.Log("Add Income: " + energyComp.Income);
 
-                    //Income Calculation do this once at the beginning of each turn
-                    for (int ui = 0; ui < unitsEnergy.Length; ui++)
+                    if (energyComp.Energy + energyComp.Income < energyComp.MaxEnergy)
                     {
-                        var unitFaction = unitsFaction[ui].Faction;
-                        var unitEnergy = unitsEnergy[ui];
-
-                        //if the player and the unit share the same Faction
-                        if (unitFaction == playerFaction.Faction)
-                        {
-                            if (unitEnergy.Harvesting)
-                                playerEnergy.Income += unitEnergy.EnergyIncome;
-
-                            playerEnergy.Income -= unitEnergy.EnergyUpkeep;
-                        }
-                    }
-
-                    if (playerEnergy.Energy + playerEnergy.Income <= playerEnergy.MaxEnergy)
-                    {
-                        playerEnergy.Energy += playerEnergy.Income;
+                        energyComp.Energy += energyComp.Income;
                     }
                     else
                     {
-                        playerEnergy.Energy = playerEnergy.MaxEnergy;
+                        energyComp.Energy = energyComp.MaxEnergy;
                     }
 
-                    //playersEnergy[pi] = playerEnergy;
-
-                    /*workerSystem.LogDispatcher.HandleLog(LogType.Warning, new LogEvent("AddIncome.")
-                    .WithField("InComeAdded", m_PlayerData.PlayerEnergyData[pi].IncomeAdded));*/
-
+                    energyComp.IncomeAdded = true;
                 }
             }
         });
-        unitsFaction.Dispose();
-        unitsEnergy.Dispose();
     }
 
     public void AddEnergy(uint playerFaction, uint energyAmount)
@@ -251,12 +238,14 @@ public class ResourceSystem : ComponentSystem
         });
     }
 
+    /*
     public void DealDamage(long unitID, uint damageAmount, ExecuteStepEnum executeStep)
     {
         Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
         {
             if (unitID == id.EntityId.Id)
             {
+                
                 var combinedHealth = health.CurrentHealth + health.Armor;
 
                 if ((int)combinedHealth - (int)damageAmount > 0)
@@ -275,13 +264,41 @@ public class ResourceSystem : ComponentSystem
             }
         });
     }
+    */
+
+    public void DealDamage(Dictionary<long, uint> damageDict, ExecuteStepEnum executeStep)
+    {
+        //Debug.Log("DealDamageCall");
+        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
+        {
+            if (damageDict.ContainsKey(id.EntityId.Id))
+            {
+                var combinedHealth = health.CurrentHealth + health.Armor;
+
+                if ((int)combinedHealth - (int)damageDict[id.EntityId.Id] > 0)
+                {
+                    combinedHealth -= damageDict[id.EntityId.Id];
+                    if (health.CurrentHealth > combinedHealth)
+                        health.CurrentHealth = combinedHealth;
+                    else
+                        health.Armor = combinedHealth - health.CurrentHealth;
+                }
+                else
+                {
+                    health.CurrentHealth = 0;
+                    Die(id.EntityId.Id, executeStep);
+                }
+            }
+        });
+    }
+
 
     public void Die(long unitID, ExecuteStepEnum executeStep)
     {
         Entities.With(m_UnitData).ForEach((ref Actions.Component actions, ref SpatialEntityId id) =>
         {
-            //clear dying unit actions if its lockedAction is in a different state then the killing action;
-            if (unitID == id.EntityId.Id && executeStep != actions.LockedAction.ActionExecuteStep)
+            //clear dying unit actions if its lockedAction is in an earlier step then the killing action;
+            if (unitID == id.EntityId.Id && executeStep < actions.LockedAction.ActionExecuteStep)
             {
                 actions = m_CleanupSystem.ClearLockedActions(actions);
             }

@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
+  m_Name: AxaDefend
+  m_EditorClassIdentifier: 
+  ActionExecuteStep: 0
+  ActionIcon: {fileID: 21300000, guid: 74fd7a4b67279c9448ef8decb14b3151, type: 3}
+  ProjectileFab: {fileID: 93931158904744250, guid: efed8d62e7b8bce438c2d6591e01b410,
+    type: 3}
+  ActionName: Water Shield
+  Description: Gives an ally a water shield. That ally gains <color=yellow>40</color>
+    armor.
+  TimeToExecute: 5
+  HasWindup: 0
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114578424212294910}
+  Effects:
+  - {fileID: 114035594301065256}
+--- !u!114 &114035594301065256
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f14e9ecbc1673f449b4d23411c2ff9f, type: 3}
+  m_Name: E_Armor(Clone)
+  m_EditorClassIdentifier: 
+  ApplyToTargets: 0
+  specificTargetIdentifier: 0
+  TurnDuration: 1
+  ApplyToRestrictions: 0
+  ArmorAmount: 40
+--- !u!114 &114578424212294910
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72c707e3d66097a4195aca654657c5db, type: 3}
+  m_Name: T_Unit(Clone)
+  m_EditorClassIdentifier: 
+  HighlighterToUse: 1
+  targettingRange: 5
+  energyCost: 8
+  ModToAdd: {fileID: 0}
+  SecondaryTargets: []
+  Restrictions: 0
+  Coordinate:
+    X: 0
+    Y: 0
+    Z: 0

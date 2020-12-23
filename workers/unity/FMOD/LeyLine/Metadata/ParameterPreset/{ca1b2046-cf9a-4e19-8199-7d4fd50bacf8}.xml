@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.00.00">
+	<object class="ParameterPreset" id="{ca1b2046-cf9a-4e19-8199-7d4fd50bacf8}">
+		<property name="name">
+			<value>FadeInFastTikTok</value>
+		</property>
+		<relationship name="folder">
+			<destination>{c47eda69-9bc6-4c7a-a371-e17c224f8d14}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{3ad28e8e-6bf4-4420-a805-a13b61b6720b}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{3ad28e8e-6bf4-4420-a805-a13b61b6720b}">
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+	</object>
+</objects>

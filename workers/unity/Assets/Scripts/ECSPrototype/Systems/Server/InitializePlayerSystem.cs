@@ -33,7 +33,7 @@ namespace LeyLineHybridECS
                 All = new ComponentType[] 
                 {
                     ComponentType.ReadOnly<PlayerAttributes.Component>(),
-                    ComponentType.ReadOnly<PlayerAttributes.ComponentAuthority>(),
+                    ComponentType.ReadOnly<PlayerAttributes.HasAuthority>(),
                     ComponentType.ReadWrite<Position.Component>(),
                     ComponentType.ReadWrite<WorldIndex.Component>(),
                     ComponentType.ReadWrite<FactionComponent.Component>()
@@ -41,8 +41,6 @@ namespace LeyLineHybridECS
             };
 
             m_PlayerAddedData = GetEntityQuery(playerAddedDesc);
-
-            m_PlayerAddedData.SetFilter(PlayerAttributes.ComponentAuthority.Authoritative);
 
             var playerRemovedDesc = new EntityQueryDesc
             {
@@ -63,7 +61,8 @@ namespace LeyLineHybridECS
 
 
             m_SpawnCellData = GetEntityQuery(
-                ComponentType.ReadOnly<CellAttributesComponent.ComponentAuthority>(),
+                //ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
+                //ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<IsSpawn.Component>(),
@@ -89,6 +88,7 @@ namespace LeyLineHybridECS
             base.OnStartRunning();
             m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
         }
+
         protected override void OnUpdate()
         {
             Entities.With(m_PlayerAddedData).ForEach((Entity entity, ref WorldIndex.Component worldIndex, ref FactionComponent.Component factionComp, ref Position.Component pos, ref FactionComponent.Component playerAddedFaction, ref PlayerAttributes.Component playerAddedPlayerAttributes) =>
@@ -133,6 +133,7 @@ namespace LeyLineHybridECS
                     //add playerAttributes.HeroSpawned bool 
                     else if(!playerAttribute.HeroSpawned)
                     {
+                        var playerAtt = playerAttribute;
                         var playerWIndex = worldIndex.WorldIndexState.Value;
                         var f = factionComp.Faction;
                         var heroName = playerAttribute.HeroName;
@@ -144,6 +145,11 @@ namespace LeyLineHybridECS
                                 if (unitToSpawn.Faction == f && unitToSpawn.IsSpawn)
                                 {
                                     m_SpawnSystem.SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate);
+
+                                    for(int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
+                                    {
+                                        m_SpawnSystem.SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(coord.CubeCoordinate, new Vector3f(0,0,0))[i+1]);
+                                    }
                                 }
                             }
                         });

@@ -23,10 +23,6 @@ namespace LeyLineHybridECS
         protected override void OnCreate()
         {
             base.OnCreate();
-            m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadWrite<CellAttributesComponent.Component>()
-            );
 
             m_GameStateData = GetEntityQuery(
             ComponentType.ReadOnly<WorldIndex.Component>(),
@@ -55,96 +51,77 @@ namespace LeyLineHybridECS
 
         protected override void OnUpdate()
         {
-            //var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-            //var gameStateWorldIndexes = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-           
-            /*#region unit data
 
-            var unitCellsToMarks = m_UnitData.ToComponentDataArray<CellsToMark.Component>(Allocator.TempJob);
-            var movementVarData = m_UnitData.ToComponentDataArray<MovementVariables.Component>(Allocator.TempJob);
-            int i = 0;
-            #endregion
-            */
+            if (m_GameStateData.CalculateEntityCount() == 0)
+                return;
+
+            var gameStateWindexData = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
+            var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+            var gameStateWIndex = gameStateWindexData[0];
+            var gameState = gameStateData[0];
+
 
             Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref WorldIndex.Component unitWorldIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
             {
-                var movementVariables = m;
-                var unitWindex = unitWorldIndex.Value;
-                var actions = actionsData;
                 var unitID = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
-                var pos = position;
-                var vis = vision;
-                var cor = coord;
-                
-                if (actionsData.LockedAction.Index == -2)
+
+                if (actionsData.LockedAction.Index != -3 && actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
                 {
-                    var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
-                    Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
+                    if(actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
                     {
-                        if (unitWindex == gameStateWorldIndex.Value)
+                        var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
+
+                        if (gameState.CurrentState == GameStateEnum.interrupt)
                         {
-                            if (gameState.CurrentState == GameStateEnum.interrupt)
+                            actionsData = CompareCullableActions(actionsData, gameStateWIndex.Value, unitID);
+                        }
+                        else if (gameState.CurrentState == GameStateEnum.move)
+                        {
+                            if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
                             {
-                                //PATH CULLING
-                                actions = CompareCullableActions(actions, gameStateWorldIndex.Value, unitID);
-                                //actionsDatas[i] = actionsData;
-                            }
-                            else if (gameState.CurrentState == GameStateEnum.move)
-                            {
-                                if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
+                                //instead of lerping towards next pos in path, set pos and wait for client to catch up
+                                if (m.TimeLeft >= 0)
                                 {
-                                    //instead of lerping towards next pos in path, set pos and wait for client to catch up
-                                    if (movementVariables.TimeLeft >= 0)
+                                    m.TimeLeft -= Time.DeltaTime;
+                                }
+                                else
+                                {
+                                    position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
+
+                                    if (currentPath.Count == 1)
                                     {
-                                        movementVariables.TimeLeft -= Time.deltaTime;
+                                        m.TimeLeft = 0;
                                     }
                                     else
                                     {
-                                        pos.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
-
-                                        if (currentPath.Count == 1)
-                                        {
-                                            movementVariables.TimeLeft = 0;
-                                        }
-                                        else
-                                        {
-                                            movementVariables.TimeLeft = actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
-                                        }
-                                        cor.CubeCoordinate = currentPath[0].CubeCoordinate;
-                                        /*
-                                        logger.HandleLog(LogType.Warning,
-                                        new LogEvent("Set Unit ReqUpdate from MovementSystem")
-                                        .WithField("AYAYA", "AYAYA"));
-                                        */
-                                        vis.RequireUpdate = true;
-                                        currentPath.RemoveAt(0);
+                                        m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                                     }
+                                    coord.CubeCoordinate = currentPath[0].CubeCoordinate;
+                                    /*
+                                    logger.HandleLog(LogType.Warning,
+                                    new LogEvent("Set Unit ReqUpdate from MovementSystem")
+                                    .WithField("AYAYA", "AYAYA"));
+                                    */
+                                    vision.RequireUpdate = true;
+                                    currentPath.RemoveAt(0);
                                 }
                             }
-                            /*else if (gameStates[gi].CurrentState == GameStateEnum.calculate_energy)
-                            {
-                                cellsToMark.CachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-                                cellsToMark.CellsInRange = new List<CellAttributes>();
-                                unitCellsToMarks[i] = cellsToMark;
-                            }*/
                         }
-                    });
-                    position = pos;
-                    m = movementVariables;
-                    vision = vis;
-                    coord = cor;
-                    actionsData = actions;
+                    }
                 }
             });
+
+            gameStateWindexData.Dispose();
+            gameStateData.Dispose();
         }
 
         private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)
         {
             Entities.With(m_UnitData).ForEach((ref SpatialEntityId otherUnitId, ref Actions.Component otherUnitActions, ref WorldIndex.Component otherUnitWorldIndex) =>
             {
-                if (worldIndex == otherUnitWorldIndex.Value && unitId != otherUnitId.EntityId.Id)
+                if (worldIndex == otherUnitWorldIndex.Value && unitId != otherUnitId.EntityId.Id && otherUnitActions.LockedAction.Index != -3 && unitActions.LockedAction.Index != -3)
                 {
-                    if (otherUnitActions.LockedAction.Index != -3 && Vector3fext.ToUnityVector(otherUnitActions.LockedAction.Targets[0].TargetCoordinate) == Vector3fext.ToUnityVector(unitActions.LockedAction.Targets[0].TargetCoordinate))
+                    if (Vector3fext.ToUnityVector(otherUnitActions.LockedAction.Targets[0].TargetCoordinate) == Vector3fext.ToUnityVector(unitActions.LockedAction.Targets[0].TargetCoordinate))
                     {
                         if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                         {
@@ -157,17 +134,14 @@ namespace LeyLineHybridECS
                                 {
                                     unitActions = CullPath(unitActions);
                                 }
-                                //Debug.Log("MoveTimesTheSame");
                             }
                             else if (unitMoveTime > otherUnitMoveTime)
                             {
                                 unitActions = CullPath(unitActions);
-                                //Debug.Log("UnitSlower, Cull path");
                             }
                         }
                         else if (otherUnitActions.LockedAction.Effects[0].EffectType == EffectTypeEnum.spawn_unit)
                         {
-                            //Debug.Log("SpawnCullPath");
                             unitActions = CullPath(unitActions);
                         }
                     }
@@ -178,17 +152,31 @@ namespace LeyLineHybridECS
 
         private Actions.Component CullPath(Actions.Component unitActions)
         {
-            var coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
-            unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(coordCount - 1);
-            coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
-
-            if(coordCount != 0)
+            var coordCount = 0;
+            if(unitActions.LockedAction.Targets.Count != 0)
             {
-                Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[coordCount - 1].CubeCoordinate;
-                var t = unitActions.LockedAction.Targets[0];
-                t.TargetCoordinate = newTarget;
-                unitActions.LockedAction.Targets[0] = t;
-                unitActions.LockedAction = unitActions.LockedAction;
+                if (unitActions.LockedAction.Targets[0].Mods.Count != 0)
+                    coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+            }
+
+            if (coordCount != 0)
+            {
+                unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(coordCount - 1);
+                coordCount = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count;
+
+                if(coordCount != 0)
+                {
+                    Vector3f newTarget = unitActions.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[coordCount - 1].CubeCoordinate;
+                    var t = unitActions.LockedAction.Targets[0];
+                    t.TargetCoordinate = newTarget;
+                    unitActions.LockedAction.Targets[0] = t;
+                    unitActions.LockedAction = unitActions.LockedAction;
+                }
+                else
+                {
+                    unitActions.LockedAction = unitActions.NullAction;
+                }
+
             }
             else
             {

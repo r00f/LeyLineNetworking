@@ -6,59 +6,88 @@ using Unit;
 using Improbable;
 using UnityEngine.Animations;
 using Generic;
+using FMODUnity;
 
 public class Projectile : MonoBehaviour
 {
+    //currently only used for axa shield
+    public GameObject DestinationObjectPrefab;
+    public GameObject DestinationExplosionPrefab;
+    public Transform ExplosionSpawnTransform;
+    public CollisionDetectionComponent CollisionDetection;
 
-    public bool DestroyAtDestination;
-    public bool DestinationReached;
-    public bool FlagForDestruction;
-    public bool QueuedForDestruction;
+    public float TargetYOffset;
     public bool ArriveInstantly;
+    public float MovementDelay;
+    public float DestroyAfterSeconds;
+    public bool DestroyAtDestination;
 
+
+    [Header ("Transform Projectile")]
     public Transform TransformToMove;
     public Transform TransformToRotate;
     public Transform PhysicsExplosionOrigin;
     public float TravellingSpeed;
     public float MaxHeight;
-    public float MovementDelay;
     public float Acceleration;
-    public float TargetYOffset;
+
+    public int DegreesPerSecond;
+    public int AxaShieldOrbitCount;
+    public List<GameObject> DisableAtDestinationObjects;
+    public List<GameObject> DisableBeforeDestructionObjects;
+
+    [Header("Physics Projectile")]
+    public ForceMode LaunchForceMode;
+    public List<Rigidbody> RigidbodiesToLaunch;
+    //public Rigidbody ToungeEnd;
+    //public Rigidbody ToungeBase;
+    public int LaunchForce;
 
     [Header("Tounge")]
-    public Rigidbody ToungeEnd;
-    public Rigidbody ToungeBase;
-    public int LaunchForce;
     public int ContractSpeed;
     public int ContractUpForce;
-    public bool Launched;
-    public Joint BaseJoint;
+    //public Joint BaseJoint;
     public List<SpringJoint> SpringJoints;
 
+    [HideInInspector]
+    public bool Launched;
+
+    public float ParticleSystemsStopWaitTime;
+    public List<ParticleSystem> ParticleSystemsToStop;
+    public ParticleSystem ExplosionParticleSystem;
+    public StudioEventEmitter ExplosionEventEmitter;
+
+    /*
     [Header("Impact Physics Explosion")]
     public float ExplosionWaitTime;
     public float ExplosionRadius;
     public int ExplosionForce;
+    */
 
-
-    public ParticleSystem BodyParticleSystem;
-    public ParticleSystem TrailParticleSystem;
-    public ParticleSystem ExplosionParticleSystem;
-
-
-
+    //Internal vars
+    [HideInInspector]
+    public Action Action;
+    [HideInInspector]
+    public bool DestinationReached;
+    [HideInInspector]
+    public bool EffectTriggered;
+    [HideInInspector]
+    public bool FlagForDestruction;
+    [HideInInspector]
+    public long UnitId;
+    [HideInInspector]
+    public bool QueuedForDestruction;
+    [HideInInspector]
     public Transform SpawnTransform;
     [HideInInspector]
     public List<Vector3> TravellingCurve;
     [HideInInspector]
     public int CurrentTargetId = 0;
     [HideInInspector]
-    public EffectTypeEnum EffectOnDetonation;
-    [HideInInspector]
-    public HashSet<Vector3f> CoordinatesToTrigger;
-    [HideInInspector]
     public bool IsTravelling;
     [HideInInspector]
     public float MovementPercentage;
+
+
 
 }

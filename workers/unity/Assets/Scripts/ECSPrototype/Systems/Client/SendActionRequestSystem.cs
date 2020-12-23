@@ -8,6 +8,8 @@ using Player;
 using UnityEngine;
 using Improbable;
 using Unity.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 //Update after playerState selected unit has been set
 [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
@@ -21,6 +23,8 @@ public class SendActionRequestSystem : ComponentSystem
     EntityQuery m_ClickedUnitData;
     //EntityQuery m_SelectActionRequestData;
     CommandSystem m_CommandSystem;
+    UISystem m_UISystem;
+    ILogDispatcher logger;
 
     protected override void OnCreate()
     {
@@ -28,12 +32,12 @@ public class SendActionRequestSystem : ComponentSystem
 
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<PlayerEnergy.Component>(),
-        ComponentType.ReadOnly<PlayerState.ComponentAuthority>(),
+        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
         ComponentType.ReadWrite<PlayerState.Component>(),
+        ComponentType.ReadWrite<PlayerPathing.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<HighlightingDataComponent>()
         );
-        m_PlayerData.SetFilter(PlayerState.ComponentAuthority.Authoritative);
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
@@ -46,6 +50,7 @@ public class SendActionRequestSystem : ComponentSystem
         );
 
         m_ClickedUnitData = GetEntityQuery(
+        ComponentType.ReadOnly<Actions.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<ClickEvent>()
@@ -68,165 +73,160 @@ public class SendActionRequestSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+        m_UISystem = World.GetExistingSystem<UISystem>();
     }
 
     protected override void OnUpdate()
     {
-        if (m_PlayerData.CalculateEntityCount() == 0)
+        if (m_PlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
             return;
+
+
+        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
         var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerEnergys = m_PlayerData.ToComponentDataArray<PlayerEnergy.Component>(Allocator.TempJob);
+        var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
+        var playerHigh = playerHighs[0];
+        var gameState = gameStates[0];
         var playerFaction = playerFactions[0];
         var playerState = playerStates[0];
         var playerEnergy = playerEnergys[0];
 
-        Entities.With(m_UnitData).ForEach((Entity e, ref MouseState mouseState, ref SpatialEntityId id, ref WorldIndex.Component wIndex, ref ClientPath.Component path, ref Actions.Component actions, ref CubeCoordinate.Component uCoord) =>
+        //if the current selected unit wants an unitTarget
+        if (gameState.CurrentState == GameStateEnum.planning)
         {
-            var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
-            var unitMouseState = mouseState;
-            var unitEntityId = id.EntityId;
-            var unitWorldIndex = wIndex.Value;
-            var clientPath = path;
-            var actionsData = actions;
-            var unitCoord = Vector3fext.ToUnityVector(uCoord.CubeCoordinate);
-
-            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
+            Entities.With(m_UnitData).ForEach((Entity e, ref MouseState mouseState, ref SpatialEntityId id, ref WorldIndex.Component wIndex, ref ClientPath.Component path, ref Actions.Component actions, ref CubeCoordinate.Component uCoord) =>
             {
-                if (unitWorldIndex == gameStateWorldIndex.Value)
+                var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
+                var anim = EntityManager.GetComponentObject<AnimatorComponent>(e);
+                var unitMouseState = mouseState;
+                var unitEntityId = id.EntityId;
+                var unitWorldIndex = wIndex.Value;
+                var clientPath = path;
+                var actionsData = actions;
+                var unitCoord = Vector3fext.ToUnityVector(uCoord.CubeCoordinate);
+
+                //set unit action to basic move if is clicked and player has energy
+                if (unitMouseState.ClickEvent == 1)
                 {
-                    if (gameState.CurrentState != GameStateEnum.planning)
-                        return;
-                }
-            });
-
-            //if the current selected unit wants an unitTarget
-
-            //set unit action to basic move if is clicked and player has energy
-            if (unitMouseState.ClickEvent == 1 && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
-            {
-                playerState.SelectedUnitId = unitEntityId.Id;
-
-                if (actionsData.BasicMove.Index != -3 && faction.Faction == playerFaction.Faction)
-                {
-                    SelectActionCommand(-2, unitEntityId.Id);
-                }
-                else
-                {
-                    //SelectActionCommand(0, unitEntityId.Id);
-                }
-            }
-
-            #region Set Target Command
-            //check if unit is the selected unit in playerState and if current selected action is not empty
-            if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Index != -3)
-            {
-                if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
-                {
-                    Vector3 TargetCoord = new Vector3(999, 999, 999);
-
-                    //IF WE WANT CELL AND CLICK UNIT USE UNIT COORD
-                    if (!actionsData.CurrentSelected.Targets[0].CellTargetNested.RequireEmpty)
+                    if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                     {
-                        Entities.With(m_ClickedUnitData).ForEach((ref CubeCoordinate.Component clickedUnitCoord) =>
+                        if (faction.Faction == playerFaction.Faction)
                         {
-                            var coord = Vector3fext.ToUnityVector(clickedUnitCoord.CubeCoordinate);
-                            TargetCoord = coord;
-                        });
-                    }
-
-                    //Now only loops over the clicked cell (ClickEvent component)
-                    Entities.With(m_CellData).ForEach((ref SpatialEntityId cellEntityId, ref CubeCoordinate.Component cCoord, ref MarkerState cellMarkerState) =>
-                    {
-
-                        var cellCoord = Vector3fext.ToUnityVector(cCoord.CubeCoordinate);
-
-                        if (cellCoord != unitCoord || TargetCoord == cellCoord)
-                        {
-                            var request = new Actions.SetTargetCommand.Request
-                            (
-                                unitEntityId,
-                                new SetTargetRequest(cellEntityId.EntityId.Id)
-                            );
-
-                            m_CommandSystem.SendCommand(request);
-                            //setTargetRequest.RequestsToSend.Add(request);
-                            //m_SelectActionRequestData.SetTargetSenders[i] = setTargetRequest;
+                            //if (actionsData.BasicMove.Index != -3)
+                            //{
+                                //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+                                anim.AnimationEvents.VoiceTrigger = true;
+                                SelectActionCommand(-3, unitEntityId.Id);
+                                //m_UISystem.InitializeSelectedActionTooltip(0);
+                            //}
                         }
-
-                        m_HighlightingSystem.ResetHighlights();
-                    });
+                    }
                 }
-                else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
+
+                #region Set Target Command
+                //check if unit is the selected unit in playerState and if current selected action is not empty
+                if (unitEntityId.Id == playerState.SelectedUnitId && actionsData.CurrentSelected.Index != -3)
                 {
-                    bool sent = false;
-                    Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId) =>
-                    {
-
-                        var request = new Actions.SetTargetCommand.Request
-                        (
-                            unitEntityId,
-                            new SetTargetRequest(targetUnitEntityId.EntityId.Id)
-                        );
-
-                        m_CommandSystem.SendCommand(request);
-                        sent = true;
-                        m_HighlightingSystem.ResetHighlights();
-                    });
-                    if (!sent)
+                    if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.cell)
                     {
                         Entities.With(m_CellData).ForEach((ref SpatialEntityId cellEntityId, ref CubeCoordinate.Component cCoord, ref MarkerState cellMarkerState) =>
                         {
-
-                            var cellCoord = Vector3fext.ToUnityVector(cCoord.CubeCoordinate);
-
-
-                            if (cellCoord != unitCoord)
+                            if (Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate) == Vector3fext.ToUnityVector(cCoord.CubeCoordinate))
                             {
                                 var request = new Actions.SetTargetCommand.Request
                                 (
                                     unitEntityId,
                                     new SetTargetRequest(cellEntityId.EntityId.Id)
                                 );
+                                anim.AnimationEvents.VoiceTrigger = true;
                                 m_CommandSystem.SendCommand(request);
                             }
-                            m_HighlightingSystem.ResetHighlights();
+
+                            m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+                        });
+                    }
+                    else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
+                    {
+                        Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId) =>
+                        {
+                            var request = new Actions.SetTargetCommand.Request
+                            (
+                                unitEntityId,
+                                new SetTargetRequest(targetUnitEntityId.EntityId.Id)
+                            );
+
+                            anim.AnimationEvents.VoiceTrigger = true;
+                            m_CommandSystem.SendCommand(request);
+                            m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
                         });
                     }
                 }
-            }
 
-            mouseState = unitMouseState;
-            id.EntityId = unitEntityId;
-            wIndex.Value = unitWorldIndex;
-            path = clientPath;
-            actions =  actionsData;
-            uCoord.CubeCoordinate = Vector3fext.FromUnityVector(unitCoord);
-            #endregion
-        });
+                mouseState = unitMouseState;
+                id.EntityId = unitEntityId;
+                wIndex.Value = unitWorldIndex;
+                path = clientPath;
+                actions = actionsData;
+                uCoord.CubeCoordinate = Vector3fext.FromUnityVector(unitCoord);
+                #endregion
+            });
+        }
 
         playerStates[0] = playerState;
         m_PlayerData.CopyFromComponentDataArray(playerStates);
+        gameStates.Dispose();
+        playerHighs.Dispose();
         playerFactions.Dispose();
         playerStates.Dispose();
         playerEnergys.Dispose();
+    }
+
+    public void RevealPlayerVision()
+    {
+        Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId,  ref Vision.Component playerVision) =>
+        {
+            var request = new Vision.RevealVisionCommand.Request
+            (
+                playerId.EntityId,
+                new RevealVisionRequest()
+            );
+
+            m_CommandSystem.SendCommand(request);
+        });
     }
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
         bool isSelfTarget = false;
 
+        var playerPathings = m_PlayerData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
         var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHighlightingDatas = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+        var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
 
+        var playerPathing = playerPathings[0];
+        var playerFaction = playerFactions[0];
         var playerState = playerStates[0];
         var playerHigh = playerHighlightingDatas[0];
 
         playerState.SelectedActionId = actionIndex;
+
+        var lastSelectedActionTargets = new List<Vector3f>();
+
+        if (playerState.UnitTargets.Keys.Contains(entityId))
+        {
+            lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates);
+        }
+
+        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+        m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
         Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
@@ -240,9 +240,11 @@ public class SendActionRequestSystem : ComponentSystem
 
                 m_CommandSystem.SendCommand(request);
 
+                Action act = actions.NullAction;
+
                 if (actionIndex >= 0)
                 {
-                    Action act = actions.OtherActions[actionIndex];
+                    act = actions.ActionsList[actionIndex];
                     if (act.Targets[0].TargetType == TargetTypeEnum.unit)
                     {
                         if (act.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
@@ -251,38 +253,55 @@ public class SendActionRequestSystem : ComponentSystem
                         }
                     }
                 }
+                /*else
+                {
+                    if (actionIndex == -2)
+                        act = actions.BasicMove;
+                    else if (actionIndex == -1)
+                        act = actions.BasicAttack;
+                }*/
 
-                m_HighlightingSystem.ResetHighlights();
-                //playerHigh.LastHoveredCoordinate = new Vector3f(999f, 999f, 999f);
-
+                playerState.SelectedAction = act;
 
                 if (actionIndex != -3)
                 {
                     if (!isSelfTarget)
                     {
-                        m_HighlightingSystem.ClearPlayerState();
+                        playerPathing.CoordinatesInRange.Clear();
+                        playerPathing.CellsInRange.Clear();
+                        playerPathing.CachedPaths.Clear();
+                        playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
+                        playerPathing.CellsInRange = playerPathing.CellsInRange;
+                        playerPathing.CachedPaths = playerPathing.CachedPaths;
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
-                        playerState = m_HighlightingSystem.FillUnitTargetsList(playerHigh, playerState);
-                        playerStates[0] = playerState;
-                        playerHighlightingDatas[0] = playerHigh;
-                        m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
-                        m_PlayerData.CopyFromComponentDataArray(playerStates);
-                        m_HighlightingSystem.UpdateSelectedUnit();
+                        playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerPathing, playerFaction.Faction);
+                        playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh);
+                        m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing);
                     }
                     else
                     {
                         playerHigh.TargetRestrictionIndex = 2;
-                        m_HighlightingSystem.SetSelfTarget(entityId);
+                        m_HighlightingSystem.SetSelfTarget(entityId, (int)act.ActionExecuteStep);
                     }
                 }
             }
         });
 
+        //
+        playerHigh.SelectActionBuffer = 3;
+
+        playerState.UnitTargets = playerState.UnitTargets;
         playerStates[0] = playerState;
         playerHighlightingDatas[0] = playerHigh;
+        playerPathings[0] = playerPathing;
+
+        m_PlayerData.CopyFromComponentDataArray(playerPathings);
         m_PlayerData.CopyFromComponentDataArray(playerStates);
         m_PlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
+
         playerHighlightingDatas.Dispose();
         playerStates.Dispose();
+        playerPathings.Dispose();
+        playerFactions.Dispose();
     }
 }

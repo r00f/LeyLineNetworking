@@ -7,6 +7,7 @@ TagManager:
   - Projector
   - HealthBarParent
   - GarbageCollection
+  - River
   layers:
   - Default
   - TransparentFX
@@ -24,11 +25,11 @@ TagManager:
   - MapIcon
   - UIMarker
   - Bloom
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Tounge
+  - VisibilityDecal
+  - ExposureVolume
+  - DecalVolume
+  - SoundTrigger
   - 
   - 
   - 
@@ -41,6 +42,9 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: MapLine
+    uniqueID: 2575047679
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0

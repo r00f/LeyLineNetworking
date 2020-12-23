@@ -1,4 +1,5 @@
 package generic;
+import "generic/vector3.schema";
 
 component GameState {
 	
@@ -8,11 +9,26 @@ component GameState {
 	float highest_execute_time = 3;
 	float calculate_wait_time = 4;
 	float current_wait_time = 5;
-	float planning_time = 6;
-	float current_planning_time = 7;
-	float rope_display_time = 8;
-	uint32 winner_faction = 9;
-	
+	float rope_time = 6;
+	float current_rope_time = 7;
+	uint32 winner_faction = 8;
+	generic.Vector2f map_center = 9;
+	uint32 turn_counter = 10;
+	float min_execute_step_time = 11;
+	map<int64, uint32> damage_dict = 12;
+	bool attack_damage_dealt = 13;
+	event Cleanup cleanup_state_event;
+	event RopeEnd rope_end_event;
+}
+
+type RopeEnd
+{
+
+}
+
+type Cleanup
+{
+
 }
 
 enum GameStateEnum {

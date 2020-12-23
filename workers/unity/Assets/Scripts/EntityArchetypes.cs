@@ -12,7 +12,7 @@ public sealed class EntityArchetypes
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     public static void Initialize()
     {
-        var entityManager = World.Active.EntityManager;
+        var entityManager = World.AllWorlds[0].EntityManager;
 
         UnitArchetype = entityManager.CreateArchetype(
         ComponentType.ReadOnly<SpatialEntityId>(),

@@ -38,9 +38,12 @@ namespace LeyLineHybridECS
 
 
 
-            if (GUILayout.Button("Raise Terrain"))
+            if (GUILayout.Button("Apply Height Offset"))
             {
-                //cellType.RaiseTerrain();
+                for (int i = myCellTypes.Length - 1; i >= 0; i--)
+                {
+                    myCellTypes[i].ApplyCellOffset();
+                }
             }
 
             serializedObject.ApplyModifiedProperties();

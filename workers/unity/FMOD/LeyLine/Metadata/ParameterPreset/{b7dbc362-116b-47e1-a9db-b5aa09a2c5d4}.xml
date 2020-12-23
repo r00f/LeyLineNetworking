@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<objects serializationModel="Studio.02.00.00">
+	<object class="ParameterPreset" id="{b7dbc362-116b-47e1-a9db-b5aa09a2c5d4}">
+		<property name="name">
+			<value>Direction</value>
+		</property>
+		<relationship name="folder">
+			<destination>{c47eda69-9bc6-4c7a-a371-e17c224f8d14}</destination>
+		</relationship>
+		<relationship name="parameter">
+			<destination>{103d56a4-24de-4247-88b7-c24b66331b6d}</destination>
+		</relationship>
+	</object>
+	<object class="GameParameter" id="{103d56a4-24de-4247-88b7-c24b66331b6d}">
+		<property name="parameterType">
+			<value>4</value>
+		</property>
+		<property name="minimum">
+			<value>-180</value>
+		</property>
+		<property name="maximum">
+			<value>180</value>
+		</property>
+		<property name="initialValue">
+			<value>0</value>
+		</property>
+		<property name="isExposedRecursively">
+			<value>false</value>
+		</property>
+	</object>
+</objects>

@@ -7,7 +7,9 @@ namespace LeyLineHybridECS
 #if UNITY_EDITOR
         public Transform CellsParent;
         public abstract List<Cell> GenerateGrid();
+        public abstract void RefreshHexagonList();
 #endif
+
     }
 }
 

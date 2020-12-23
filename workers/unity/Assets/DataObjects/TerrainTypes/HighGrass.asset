@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
+  m_Name: HighGrass
+  m_EditorClassIdentifier: 
+  MapCellIconIndex: 2
+  MapCellColorIndex: 2
+  RandomTreeRotationIncrement: 30
+  textureIndex: 1
+  TreeHeightMinMax: {x: 0, y: 0}
+  DetailObjectIndexRanges:
+  - {x: 11, y: 11}
+  DetailObjectAmounts:
+  - {x: 4, y: 5}
+  DetailObjectSpawnProbabilities: 64000000
+  DetailObjectRanges:
+  - {x: 0.4, y: 0.7}
+  TreeIndexMinMax: {x: 0, y: 0}
+  GrassAmountMinMax: {x: 0, y: 0}
+  NeighbourIndexMinMax: {x: 0, y: 0}
+  NeighbourAmountMinMax: {x: 0, y: 0}
+  terrain_Name: 
+  additionalCost: 0
+  yOffset: 0.1
+  cellTerrainYOffset: 0
+  DetailObjectSpawnYOffset: 0
+  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
+  Walkable: 1
+  spawnAllAssets: 0
+  probabilityToSpawnNeighbourAsset: 0
+  probabilityToSpawnAsset: 0
+  obstructVision: 0
+  assets_to_Spawn: []

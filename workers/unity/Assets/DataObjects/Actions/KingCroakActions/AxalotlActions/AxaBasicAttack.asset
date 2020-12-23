@@ -1,0 +1,70 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
+  m_Name: AxaBasicAttack
+  m_EditorClassIdentifier: 
+  ActionExecuteStep: 1
+  ActionIcon: {fileID: 21300000, guid: 3ebe049902ca8404b9b0764fd12ba8ea, type: 3}
+  ProjectileFab: {fileID: 93931158904744250, guid: c88def649c416ac499e64a4280acef24,
+    type: 3}
+  ActionName: Splash
+  Description: Attacks an enemy from afar. Deals <color=red>35</color> damage.
+  TimeToExecute: 4
+  HasWindup: 0
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: 114273308848104638}
+  Effects:
+  - {fileID: 114062705790130200}
+--- !u!114 &114062705790130200
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1354728ae938cf429a050b3d199523e, type: 3}
+  m_Name: E_Damage(Clone)
+  m_EditorClassIdentifier: 
+  ApplyToTargets: 0
+  specificTargetIdentifier: 0
+  TurnDuration: 0
+  ApplyToRestrictions: 4
+  DamageAmount: 35
+  ExplosionRadius: 1
+  ExplosionForce: 300
+  UpForce: 10
+--- !u!114 &114273308848104638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72c707e3d66097a4195aca654657c5db, type: 3}
+  m_Name: T_Unit(Clone)
+  m_EditorClassIdentifier: 
+  HighlighterToUse: 0
+  targettingRange: 4
+  energyCost: 10
+  ModToAdd: {fileID: 0}
+  SecondaryTargets: []
+  Restrictions: 5
+  Coordinate:
+    X: 0
+    Y: 0
+    Z: 0
