@@ -1703,7 +1703,7 @@ namespace LeyLineHybridECS
 
             headUIRef.UnitHeadUIInstance = Object.Instantiate(headUIRef.UnitHeadUIPrefab, headUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
             headUIRef.UnitHeadHealthBarInstance = headUIRef.UnitHeadUIInstance.HealthBar;
-            headUIRef.UnitHeadHealthBarInstance.transform.parent = UIRef.HealthBarsPanel.transform;
+            headUIRef.UnitHeadHealthBarInstance.transform.SetParent(UIRef.HealthBarsPanel.transform, false);
 
             if (headUIRef.UnitHeadHealthBarInstance.PlayerColorImage && headUIRef.UnitHeadHealthBarInstance.HoveredImage)
             {

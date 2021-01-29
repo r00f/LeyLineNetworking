@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 //Update after playerState selected unit has been set
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendActionRequestSystem : ComponentSystem
 {
     HighlightingSystem m_HighlightingSystem;

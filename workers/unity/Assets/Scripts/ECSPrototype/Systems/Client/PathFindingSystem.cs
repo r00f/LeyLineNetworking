@@ -10,7 +10,7 @@ using Cell;
 using Unit;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class PathFindingSystem : ComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();

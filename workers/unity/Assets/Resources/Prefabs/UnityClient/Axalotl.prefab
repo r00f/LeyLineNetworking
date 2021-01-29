@@ -297,6 +297,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InGameTileColor: {r: 0, g: 0, b: 0, a: 0}
+  MapTileColor: {r: 0, g: 0, b: 0, a: 0}
   Collider: {fileID: 771660692032844721}
   MeshRenderer: {fileID: 9010769315543680074}
   GameObjects:
@@ -307,6 +309,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &3289465276142304449
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2125,6 +2128,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SecondWindPS
+      objectReference: {fileID: 0}
+    - target: {fileID: 5081119125536372538, guid: 7f1d8d86532f4dc44ba85df5774f3893,
+        type: 3}
+      propertyPath: m_RenderMode
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 8025587447407972750, guid: 7f1d8d86532f4dc44ba85df5774f3893,
         type: 3}

@@ -3,7 +3,6 @@
     "references": [
         "Improbable.Gdk.Core",
         "Improbable.Gdk.Generated",
-        "Improbable.Gdk.Mobile",
         "Improbable.Gdk.PlayerLifecycle",
         "Unity.Entities",
         "Unity.Entities.Hybrid",
@@ -17,7 +16,7 @@
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": false,
     "precompiledReferences": [],
     "autoReferenced": true,

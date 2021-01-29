@@ -1,11 +1,11 @@
 {
     "name": "Improbable.Gdk.Generated",
     "references": [
-        "Improbable.Gdk.Core",
         "Unity.Collections",
         "Unity.Entities",
+        "Unity.Mathematics",
         "Unity.Entities.Hybrid",
-        "Unity.Mathematics"
+        "Improbable.Gdk.Core"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -14,6 +14,5 @@
     "precompiledReferences": [],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
-    "noEngineReferences": false
+    "versionDefines": []
 }

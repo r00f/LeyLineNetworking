@@ -629,8 +629,8 @@ MonoBehaviour:
   Actions:
   - {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
   SpawnActions:
+  - {fileID: 11400000, guid: f6ef931d2e726d64a841328c62918a6a, type: 2}
   - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
-  - {fileID: 11400000, guid: 08777fa115aee2d4cb5eb8d1c355252e, type: 2}
   - {fileID: 11400000, guid: 0cbeddf0d1006c64891a8c9756757b3e, type: 2}
   - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
   - {fileID: 11400000, guid: bf22d741f918cc54098242b30df15793, type: 2}
@@ -788,6 +788,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InGameTileColor: {r: 0, g: 0, b: 0, a: 0}
+  MapTileColor: {r: 0, g: 0, b: 0, a: 0}
   Collider: {fileID: 771660692032844721}
   MeshRenderer: {fileID: 7863409164157800000}
   GameObjects:
@@ -798,6 +800,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &1130299993275380547
 MonoBehaviour:
   m_ObjectHideFlags: 0

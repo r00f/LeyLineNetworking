@@ -224,21 +224,10 @@ public static class LeyLineEntityTemplates {
         };
 
         var wIndex = new WorldIndex.Snapshot();
-
         var pos = new Position.Snapshot { Coords = new Coordinates() };
-        //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
-        //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
-        //var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
-
-
         var template = new EntityTemplate();
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
-        /*
-        template.AddComponent(clientHeartbeat, client);
-        template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
-        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        */
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerState, client);
@@ -614,5 +603,4 @@ public static class LeyLineEntityTemplates {
         }
       return newAction;
     }
-
 }

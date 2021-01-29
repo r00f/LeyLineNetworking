@@ -7,7 +7,7 @@ using LeyLineHybridECS;
 using Unity.Collections;
 using UnityEngine;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : ComponentSystem
 {
     private ComponentUpdateSystem componentUpdateSystem;

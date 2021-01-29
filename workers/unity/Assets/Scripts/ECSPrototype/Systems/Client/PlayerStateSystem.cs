@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Improbable.Gdk.Core;
 using Generic;
 using Player;
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(MouseStateSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(MouseStateSystem))]
     public class PlayerStateSystem : ComponentSystem
     {
         EntityQuery m_UnitData;
@@ -26,18 +26,18 @@ namespace LeyLineHybridECS
             base.OnCreate();
 
             m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<GameState.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>()
+                ComponentType.ReadOnly<GameState.Component>(),
+                ComponentType.ReadOnly<WorldIndex.Component>()
             );
 
             m_PlayerData = GetEntityQuery(
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadOnly<Vision.Component>(),
-            ComponentType.ReadWrite<HighlightingDataComponent>(),
-            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
-            ComponentType.ReadWrite<PlayerState.Component>(),
-            ComponentType.ReadWrite<Moba_Camera>()
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<Vision.Component>(),
+                ComponentType.ReadWrite<HighlightingDataComponent>(),
+                ComponentType.ReadOnly<PlayerState.HasAuthority>(),
+                ComponentType.ReadWrite<PlayerState.Component>(),
+                ComponentType.ReadWrite<Moba_Camera>()
             );
 
 
@@ -74,157 +74,172 @@ namespace LeyLineHybridECS
 
             var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
+            /*
             #region PlayerData
             var playersWorldID = m_PlayerData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
             var playersCamera = m_PlayerData.ToComponentArray<Moba_Camera>();
-            var playersState = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
+            var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
             var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
             var playerVisions = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
             var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
             #endregion
+            
 
-            var gameState = gameStateData[0];
             var playerFact = playerFactions[0];
             var playerHigh = playerHighs[0];
             var playerVision = playerVisions[0];
-            var playerState = playersState[0];
+            var playerState = playerStates[0];
             var playerWorldIndex = playersWorldID[0].Value;
             var playerCam = playersCamera[0];
+            */
 
-            if (playerCam.PlayerMapTileInstance)
+            var gameState = gameStateData[0];
+
+            Entities.With(m_PlayerData).ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction) =>
             {
-                playerCam.PlayerMapTileInstance.TileRect.anchoredPosition = (new Vector2(gameState.MapCenter.X, gameState.MapCenter.Y) - new Vector2(playerCam.transform.position.x, playerCam.transform.position.z)) * -5.8f;
-                //Equalize rot with player rot
-                Vector3 compassRotation = playerCam.PlayerMapTileInstance.TileRect.eulerAngles;
-                compassRotation.z = -playerCam.transform.eulerAngles.y;
-                playerCam.PlayerMapTileInstance.TileRect.eulerAngles = compassRotation;
-            }
+                var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+                var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
 
-            if (playerCam.playerFaction != playerFact.Faction)
-                playerCam.playerFaction = playerFact.Faction;
-
-            var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
-            var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
-
-            if (cleanUpStateEvents.Count > 0)
-            {
-                playerHigh.CancelState = false;
-            }
-
-            if (gameState.CurrentState == GameStateEnum.planning)
-            {
-                if (ropeEndEvents.Count == 0)
+                if (playerCam.PlayerMapTileInstance)
                 {
-                    if (playerState.CurrentState != PlayerStateEnum.ready)
+                    playerCam.PlayerMapTileInstance.TileRect.anchoredPosition = (new Vector2(gameState.MapCenter.X, gameState.MapCenter.Y) - new Vector2(playerCam.transform.position.x, playerCam.transform.position.z)) * -5.8f;
+                    //Equalize rot with player rot
+                    Vector3 compassRotation = playerCam.PlayerMapTileInstance.TileRect.eulerAngles;
+                    compassRotation.z = -playerCam.transform.eulerAngles.y;
+                    playerCam.PlayerMapTileInstance.TileRect.eulerAngles = compassRotation;
+                }
+
+                if (playerCam.playerFaction != playerFaction.Faction)
+                    playerCam.playerFaction = playerFaction.Faction;
+
+                if (cleanUpStateEvents.Count > 0)
+                {
+                    playerHigh.CancelState = false;
+                }
+
+                if (gameState.CurrentState == GameStateEnum.planning)
+                {
+                    if (ropeEndEvents.Count == 0)
                     {
-                        if (playerHigh.CancelState)
+                        if (playerState.CurrentState != PlayerStateEnum.ready)
                         {
-                            if (playerHigh.CancelTime >= 0)
-                                playerHigh.CancelTime -= Time.DeltaTime;
+                            if (playerHigh.CancelState)
+                            {
+                                if (playerHigh.CancelTime >= 0)
+                                    playerHigh.CancelTime -= Time.DeltaTime;
+                                else
+                                {
+                                    Debug.Log("SetPlayerReady");
+                                    playerState.CurrentState = PlayerStateEnum.ready;
+                                    Debug.Log((int) playerState.CurrentState);
+                                }
+                                UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - playerHigh.CancelTime / 3);
+                            }
                             else
                             {
-                                playerState.CurrentState = PlayerStateEnum.ready;
-                            }
-                            UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - playerHigh.CancelTime / 3);
-                        }
-                        else
-                        {
-                            HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
+                                HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
-                            Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
-                            {
-                                var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
-
-                                if (unitId.EntityId.Id == playerState.SelectedUnitId)
+                                var pS = playerState;
+                                var pH = playerHigh;
+                                
+                                Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, ref CellsToMark.Component unitCellsToMark) =>
                                 {
-                                    foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
+                                    var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+
+                                    if (unitId.EntityId.Id == pS.SelectedUnitId)
                                     {
-                                        if (!p.isPlaying)
-                                            p.Play();
-                                    }
-
-                                    if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
-                                        playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
-
-                                    playerCam.SetTargetTransform(unitComponentReferences.transform);
-
-                                    if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
-                                    {
-                                        if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                                        foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
                                         {
-                                            playerState.CurrentState = PlayerStateEnum.waiting_for_target;
+                                            if (!p.isPlaying)
+                                                p.Play();
                                         }
-                                        //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
-                                        if (Input.GetButtonDown("Fire2"))
+
+                                        if (Vector3fext.ToUnityVector(pS.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
+                                            pS.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+                                            
+                                            playerCam.SetTargetTransform(unitComponentReferences.transform);
+
+                                        if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
                                         {
-                                            //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
-                                            m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
-                                            //Call methods so line/target gets disabled instantly
-                                            m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
-                                            playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                                            if (pS.CurrentState != PlayerStateEnum.waiting_for_target)
+                                            {
+                                                pS.CurrentState = PlayerStateEnum.waiting_for_target;
+                                            }
+                                            //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
+                                            if (Input.GetButtonDown("Fire2"))
+                                            {
+                                                //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
+                                                m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
+                                                //Call methods so line/target gets disabled instantly
+                                                m_HighlightingSystem.ResetUnitHighLights(e, pS, unitId.EntityId.Id);
+                                                pS.UnitTargets.Remove(unitId.EntityId.Id);
+                                                m_UISystem.ClearSelectedActionToolTip();
+                                            }
+                                        }
+                                        else if (pS.CurrentState != PlayerStateEnum.unit_selected && !pH.CancelState)
+                                        {
+                                            pS.CurrentState = PlayerStateEnum.unit_selected;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
+                                        {
+                                            if (p.isPlaying)
+                                                p.Stop();
+                                        }
+                                        if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && pS.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
+                                        {
+                                            pS.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+                                            pS.SelectedUnitId = unitId.EntityId.Id;
+                                            //Clear ActionTooltip on UnitSelect
                                             m_UISystem.ClearSelectedActionToolTip();
                                         }
                                     }
-                                    else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
-                                    {
-                                        playerState.CurrentState = PlayerStateEnum.unit_selected;
-                                    }
-                                }
-                                else
-                                {
-                                    foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
-                                    {
-                                        if (p.isPlaying)
-                                            p.Stop();
-                                    }
-                                    if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
-                                    {
-                                        playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
-                                        playerState.SelectedUnitId = unitId.EntityId.Id;
-                                        //Clear ActionTooltip on UnitSelect
-                                        m_UISystem.ClearSelectedActionToolTip();
-                                    }
-                                }
-                            });
+                                });
+
+                                playerState = pS;
+                            }
+                        }
+                        else
+                        {
+                            if (playerState.SelectedUnitId != 0)
+                                playerState.SelectedUnitId = 0;
                         }
                     }
                     else
                     {
-                        if (playerState.SelectedUnitId != 0)
-                            playerState.SelectedUnitId = 0;
+                        m_HighlightingSystem.ResetHighlights();
+                        playerState.CurrentState = PlayerStateEnum.ready;
                     }
+
                 }
                 else
                 {
-                    m_HighlightingSystem.ResetHighlights();
-                    playerState.CurrentState = PlayerStateEnum.ready;
-                }
-
-            }
-            else
-            {
-                if (playerState.CurrentState != PlayerStateEnum.waiting && gameState.CurrentState != GameStateEnum.interrupt)
-                {
-                    if (playerState.UnitTargets.Count != 0)
+                    if (playerState.CurrentState != PlayerStateEnum.waiting && gameState.CurrentState != GameStateEnum.interrupt)
                     {
-                        playerState.UnitTargets.Clear();
-                        playerState.UnitTargets = playerState.UnitTargets;
+                        if (playerState.UnitTargets.Count != 0)
+                        {
+                            playerState.UnitTargets.Clear();
+                            playerState.UnitTargets = playerState.UnitTargets;
+                        }
+                        playerState.CurrentState = PlayerStateEnum.waiting;
                     }
-                    playerState.CurrentState = PlayerStateEnum.waiting;
                 }
-            }
+            });
 
             #region Dispose
-            playerHighs[0] = playerHigh;
-            m_PlayerData.CopyFromComponentDataArray(playerHighs);
-            playersState[0] = playerState;
-            m_PlayerData.CopyFromComponentDataArray(playersState);
+            //playerHighs[0] = playerHigh;
+            //m_PlayerData.CopyFromComponentDataArray(playerHighs);
+            //playerStates[0] = playerState;
+            //m_PlayerData.CopyFromComponentDataArray(playerStates);
+            //Debug.Log(playerStates[0].CurrentState);
             gameStateData.Dispose();
-            playerVisions.Dispose();
-            playersWorldID.Dispose();
-            playersState.Dispose();
-            playerHighs.Dispose();
-            playerFactions.Dispose();
+            //playerVisions.Dispose();
+            //playersWorldID.Dispose();
+            //playerStates.Dispose();
+            //playerHighs.Dispose();
+            //playerFactions.Dispose();
             #endregion
         }
 

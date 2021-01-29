@@ -1,0 +1,136 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0598980a22146e5bb63df7b024cf2b0, type: 3}
+  m_Name: ClientPrefabMapping
+  m_EditorClassIdentifier: 
+  EntityRepresentationResolvers:
+  - id: 0
+  - id: 1
+  - id: 2
+  - id: 3
+  - id: 4
+  - id: 5
+  - id: 6
+  - id: 7
+  - id: 8
+  - id: 9
+  - id: 10
+  - id: 11
+  - id: 12
+  references:
+    version: 1
+    00000000:
+      type: {class: OwningWorkerEntityResolver, ns: Improbable.Gdk.PlayerLifecycle.Representation.Types,
+        asm: Improbable.Gdk.PlayerLifecycle}
+      data:
+        entityType: Player
+        ownedPrefab: {fileID: 1431507095965031200, guid: 5cda793064af42540b39f7b30549bc85,
+          type: 3}
+        unownedPrefab: {fileID: 1431507095965031200, guid: 7aa5679b16b0a5e48be04b2761a3b7b3,
+          type: 3}
+        requiredComponents: 
+    00000001:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Cell
+        prefab: {fileID: 1667097178242444, guid: a67130c57cb9172498adc741605886ca,
+          type: 3}
+        requiredComponents: 
+    00000002:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Axalotl
+        prefab: {fileID: 4245292855223164028, guid: 5b49d94af5e44374aa888f2d97b6f7b3,
+          type: 3}
+        requiredComponents: 
+    00000003:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: AxalotlEgg
+        prefab: {fileID: 1648259841331300964, guid: 8e6248aea1d28d64f924fe1d9bbb602d,
+          type: 3}
+        requiredComponents: 
+    00000004:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: KingCroak
+        prefab: {fileID: 4245292855223164028, guid: 313e17de9a5fc7342a40e170b0e9c2da,
+          type: 3}
+        requiredComponents: 
+    00000005:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Leech
+        prefab: {fileID: 4245292855223164028, guid: 8d0192a34e1f74741841eefdd24130d2,
+          type: 3}
+        requiredComponents: 
+    00000006:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Spike
+        prefab: {fileID: 4245292855223164028, guid: fa56f21d7e5edf940900eab0aacdd951,
+          type: 3}
+        requiredComponents: 
+    00000007:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: SpikeEgg
+        prefab: {fileID: 1648259841331300964, guid: 115afa03636dd1647b251296834bda3d,
+          type: 3}
+        requiredComponents: 
+    00000008:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Branchling
+        prefab: {fileID: 1695995152696693040, guid: dacad4f0d3bfb244e9ce6a586b20dd6e,
+          type: 3}
+        requiredComponents: 
+    00000009:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Crystalite
+        prefab: {fileID: 5277365872124837927, guid: 0548370afc6913f4883f746e08f5b7d5,
+          type: 3}
+        requiredComponents: 
+    0000000A:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Effigy
+        prefab: {fileID: 7410517916415333887, guid: 7f30544eee4467249befd6d1ffc4740c,
+          type: 3}
+        requiredComponents: 
+    0000000B:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: Rootling
+        prefab: {fileID: 861298645236661526, guid: 8e3d0e4a8ce3c794f9803338ebb53782,
+          type: 3}
+        requiredComponents: 
+    0000000C:
+      type: {class: SimpleEntityResolver, ns: Improbable.Gdk.Core.Representation.Types,
+        asm: Improbable.Gdk.Core}
+      data:
+        entityType: StoneBeetle
+        prefab: {fileID: 4713497714055453816, guid: adcd2563910a019408a70007366ff397,
+          type: 3}
+        requiredComponents: 

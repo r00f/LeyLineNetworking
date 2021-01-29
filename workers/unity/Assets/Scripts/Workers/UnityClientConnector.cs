@@ -5,17 +5,15 @@ using Improbable.Gdk.PlayerLifecycle;
 using Improbable.Worker.CInterop;
 using UnityEngine;
 using Unity.Entities;
-
+using Improbable.Gdk.Core.Representation;
 
 namespace BlankProject
 {
     public class UnityClientConnector : WorkerConnector
     {
-        private const string AuthPlayer = "Prefabs/UnityClient/Authoritative/Player";
-        private const string NonAuthPlayer = "Prefabs/UnityClient/NonAuthoritative/Player";
+        [SerializeField] private EntityRepresentationMapping entityRepresentationMapping;
         #pragma warning disable 649
         [SerializeField] private bool UseExternalIp;
-        [SerializeField] private GameObject level;
         #pragma warning restore 649
 
         public const string WorkerType = "UnityClient";
@@ -56,12 +54,12 @@ namespace BlankProject
         protected override void HandleWorkerConnectionEstablished()
         {
             Worlds.ClientWorld = Worker.World.EntityManager;
-            Worlds.DefaultWorld = World.AllWorlds[0].EntityManager;
+            Worlds.DefaultWorld = World.All[0].EntityManager;
             WorkerUtils.AddClientSystems(Worker.World);
-
-            var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin, Worker.LogDispatcher);
-            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker, AuthPlayer, NonAuthPlayer), gameObject);
+            //var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin);
+            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World,  new AdvancedEntityPipeline(Worker), entityRepresentationMapping, gameObject);
             PlayerLifecycleHelper.AddClientSystems(Worker.World);
         }
+
     }
 }

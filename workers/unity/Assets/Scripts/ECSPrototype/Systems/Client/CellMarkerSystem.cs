@@ -9,7 +9,7 @@ using Unity.Collections;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HighlightingSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HighlightingSystem))]
     public class CellMarkerSystem : ComponentSystem
     {
         EntityQuery m_PlayerStateData;

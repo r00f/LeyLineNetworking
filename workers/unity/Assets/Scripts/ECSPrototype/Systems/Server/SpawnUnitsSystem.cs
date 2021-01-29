@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using UnityEngine;
 using Improbable.Gdk.Core.Commands;
 using Improbable.Gdk.Core;
@@ -11,7 +11,7 @@ using Unity.Collections;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(ExecuteActionsSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(ExecuteActionsSystem))]
     public class SpawnUnitsSystem : ComponentSystem
     {
         GameStateSystem m_GameStateSystem;

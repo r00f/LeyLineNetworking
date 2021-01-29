@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LeyLineHybridECS;
@@ -11,8 +11,10 @@ public class Unit_BaseDataSet : MonoBehaviour
     public uint VisionRange;
     public uint BaseHealth;
     public uint EnergyIncome;
+    [HideInInspector]
     public SelectUnitButton SelectUnitButtonInstance;
     public bool IsHero;
+    [HideInInspector]
     public bool UIInitialized;
     public uint UnitTypeId;
     public Sprite UnitGroupSprite;

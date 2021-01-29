@@ -12,7 +12,7 @@ using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HighlightingSystem : ComponentSystem
 {
 

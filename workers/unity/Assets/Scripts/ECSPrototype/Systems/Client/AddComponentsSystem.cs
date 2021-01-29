@@ -33,7 +33,6 @@ public class AddComponentsSystem : ComponentSystem
     EntityManager em;
 
     UIReferences UIRef;
-
     Settings settings;
 
     protected override void OnStartRunning()
@@ -87,20 +86,19 @@ public class AddComponentsSystem : ComponentSystem
         var unitMapPopulatedDesc = new EntityQueryDesc
         {
             None = new ComponentType[]
-    {
-                typeof(MapPopulatedIdentifyier)
-    },
+        {
+        typeof(MapPopulatedIdentifyier)
+        },
             All = new ComponentType[]
-    {
+        {
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<IsVisible>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<AnimatorComponent>()
-    }
+        }
         };
 
         m_UnitMapPopulatedData = GetEntityQuery(unitMapPopulatedDesc);
-
 
         var cellAddedDesc = new EntityQueryDesc
         {

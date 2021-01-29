@@ -7,7 +7,7 @@ using Generic;
 using LeyLineHybridECS;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class CleanupSystem : ComponentSystem
 {
     CommandSystem m_CommandSystem;

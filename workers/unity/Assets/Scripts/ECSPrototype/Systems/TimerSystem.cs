@@ -3,7 +3,7 @@ using Improbable.Gdk.Core;
 using Unit;
 using Generic;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class TimerSystem : ComponentSystem
 {
     EntityQuery m_TimerData;

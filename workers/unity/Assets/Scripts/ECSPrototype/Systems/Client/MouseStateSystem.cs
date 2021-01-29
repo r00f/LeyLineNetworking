@@ -13,7 +13,7 @@ using Unit;
 using Generic;
 using System.Collections.Generic;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(HighlightingSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(HighlightingSystem))]
 public class MouseStateSystem : JobComponentSystem
 {
     private BeginSimulationEntityCommandBufferSystem entityCommandBufferSystem;
@@ -111,7 +111,7 @@ public class MouseStateSystem : JobComponentSystem
                 Hit = hit,
                 PlayerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob),
                 PlayerFactions = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob),
-                ECBuffer = entityCommandBufferSystem.CreateCommandBuffer().ToConcurrent()
+                ECBuffer = entityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter()
             };
             return mouseStateJob.Schedule(this, inputDeps);
         }
@@ -130,7 +130,7 @@ public class MouseStateSystem : JobComponentSystem
         public NativeArray<Entity> PlayerEntities;
         public RaycastHit Hit;
         public bool MouseLeftButtonDown;
-        public EntityCommandBuffer.Concurrent ECBuffer;
+        public EntityCommandBuffer.ParallelWriter ECBuffer;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<FactionComponent.Component> PlayerFactions;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]

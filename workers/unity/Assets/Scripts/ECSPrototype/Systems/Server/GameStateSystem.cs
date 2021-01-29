@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class GameStateSystem : ComponentSystem
     {
         ResourceSystem m_ResourceSystem;
@@ -124,7 +124,7 @@ namespace LeyLineHybridECS
                         }
                         if (AllPlayersReady(gameStateWorldIndex.Value))
                         {
-
+                            Debug.Log("AllPlayersReady");
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.interrupt;
                         }

@@ -10,7 +10,7 @@ using Unity.Collections;
 using Cell;
 using Player;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : ComponentSystem
 {
     ActionEffectsSystem m_ActionEffectsSystem;

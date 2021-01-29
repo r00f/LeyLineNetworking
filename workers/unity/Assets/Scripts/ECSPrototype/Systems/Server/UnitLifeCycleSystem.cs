@@ -8,7 +8,7 @@ using Player;
 using UnityEngine;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData

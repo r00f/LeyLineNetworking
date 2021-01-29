@@ -36,8 +36,11 @@ sysinfo.txt
 # Generated code
 # We need to include some of the generated code below, which means we can't use a `directory/` ignore.
 # Once a directory is ignored by git, nothing underneath it can ever be un-ignored.
+
 workers/unity/Assets/Generated/Source.meta
 workers/unity/Assets/Generated/Source/**/*.*
+workers/unity/Assets/Generated/Editor.meta
+workers/unity/Assets/Generated/Editor/**/*.*
 
 workers/unity/Assets/Plugins/Editor/
 workers/unity/Assets/Plugins/Editor.meta

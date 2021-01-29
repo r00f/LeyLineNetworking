@@ -8,7 +8,7 @@ using LeyLineHybridECS;
 using System.Collections.Generic;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
 {
     PathFindingSystem m_PathFindingSystem;

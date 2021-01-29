@@ -7,7 +7,13 @@
       },
       {
         "name": "build",
-        "steps": [{"name": "** Open Unity to build the gamelogic worker. **", "command": "echo", "arguments": ["No-op."]}]
+        "steps": [
+          {
+            "name": "** Run ci/build-gamelogic.sh instead **",
+            "command": "echo",
+            "arguments": [ "No-op." ]
+          }
+        ]
       },
       {
         "name": "clean",
@@ -28,7 +34,7 @@
     },
     "component_delivery": {
       "default": "RELIABLE_ORDERED",
-      "checkoutAllInitially": true
+      "checkoutAllInitially": false
     }
   },
   "external": {

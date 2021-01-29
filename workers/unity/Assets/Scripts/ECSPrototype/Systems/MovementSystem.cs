@@ -11,7 +11,7 @@ using Unity.Collections;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class MovementSystem : ComponentSystem
     {
         ILogDispatcher logger;

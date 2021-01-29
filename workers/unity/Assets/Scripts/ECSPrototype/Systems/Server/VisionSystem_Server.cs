@@ -11,7 +11,7 @@ using Unit;
 using System.Linq;
 using Unity.Collections;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class VisionSystem_Server : ComponentSystem
 {
     //HandleCellGridRequestsSystem m_GridSystem;

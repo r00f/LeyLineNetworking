@@ -11,7 +11,7 @@ using System.Collections;
 using Player;
 using System.Linq;
 
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
 public class ActionEffectsSystem : ComponentSystem
 {
     Settings settings;

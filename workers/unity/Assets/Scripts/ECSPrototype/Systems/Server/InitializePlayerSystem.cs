@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class InitializePlayerSystem : ComponentSystem
     {
         public struct PlayerStateData : ISystemStateComponentData

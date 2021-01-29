@@ -1,5 +1,5 @@
 {
-  "template": "w2_r0500_e5",
+  "template": "n1standard2_std40_r0500",
   "world": {
     "chunkEdgeLengthMeters": 50,
     "snapshots": {
@@ -8,7 +8,17 @@
     "dimensions": {
       "xMeters": 500,
       "zMeters": 500
-    }
+    },
+    "legacy_flags": [
+      {
+        "name": "bridge_qos_max_timeout",
+        "value": "0"
+      },
+      {
+        "name": "interest_queries_components_are_filtered_by_component_delivery",
+        "value": "false"
+      }
+    ]
   },
   "load_balancing": {
     "layer_configurations": [
@@ -36,21 +46,24 @@
         {
           "all": {}
         }
+      ],
+      "flags": [
+        {
+          "name": "my_flag",
+          "value": "has_a_value"
+        }
       ]
     },
     {
       "worker_type": "UnityClient",
       "permissions": [
         {
-          "all": {}
-        }
-      ]
-    },
-    {
-      "worker_type": "MobileClient",
-      "permissions": [
-        {
-          "all": {}
+          "entity_query": {
+            "allow": true,
+            "components": [
+              "*"
+            ]
+          }
         }
       ]
     }
