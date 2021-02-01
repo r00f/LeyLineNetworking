@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -68,7 +68,6 @@ public class VisionSystem_Server : ComponentSystem
 
     protected override void OnUpdate()
     {
-
         var revealVisionRequests = m_CommandSystem.GetRequests<Vision.RevealVisionCommand.ReceivedRequest>();
 
         for (int i = 0; i < revealVisionRequests.Count; i++)

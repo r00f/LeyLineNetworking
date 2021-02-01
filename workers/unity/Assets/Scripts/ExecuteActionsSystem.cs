@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using UnityEngine;
 using Unit;
 using Improbable.Gdk.Core;
@@ -7,6 +7,7 @@ using Cell;
 using LeyLineHybridECS;
 using System.Collections.Generic;
 using Unity.Collections;
+using Improbable.Gdk.PlayerLifecycle;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : ComponentSystem
@@ -79,7 +80,7 @@ public class ExecuteActionsSystem : ComponentSystem
 
     public void GetUnitActions(GameState.Component gameState, WorldIndex.Component gamestateWorldIndex)
     {
-        Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions, ref SpatialEntityId unitId, ref FactionComponent.Component faction) =>
+        Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref OwningWorker.Component owningWOrker) =>
         {
             var uWi = unitWorldIndex.Value;
             var a = actions;
@@ -93,35 +94,28 @@ public class ExecuteActionsSystem : ComponentSystem
                     case GameStateEnum.interrupt:
                         if ((int)a.LockedAction.ActionExecuteStep == 0 && !a.Executed)
                         {
-                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id, owningWOrker);
                             a.Executed = true;
                         }
                         break;
                     case GameStateEnum.attack:
                         if ((int)a.LockedAction.ActionExecuteStep == 1 && !a.Executed)
                         {
-                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id, owningWOrker);
                             a.Executed = true;
                         }
                         break;
                     case GameStateEnum.move:
                         if ((int)a.LockedAction.ActionExecuteStep == 2 && !a.Executed)
                         {
-                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id, owningWOrker);
                             a.Executed = true;
                         }
                         break;
                     case GameStateEnum.skillshot:
                         if ((int)a.LockedAction.ActionExecuteStep == 3 && !a.Executed)
                         {
-                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
-                            a.Executed = true;
-                        }
-                        break;
-                    case GameStateEnum.cleanup:
-                        if ((int)a.LockedAction.ActionExecuteStep == 4 && !a.Executed)
-                        {
-                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id);
+                            ExecuteAction(gameState, gamestateWorldIndex.Value, a.LockedAction, f, id, owningWOrker);
                             a.Executed = true;
                         }
                         break;
@@ -144,7 +138,7 @@ public class ExecuteActionsSystem : ComponentSystem
 
     }
 
-    public void ExecuteAction(GameState.Component gameState, uint worldIndex, Action action, FactionComponent.Component faction, long unitId)
+    public void ExecuteAction(GameState.Component gameState, uint worldIndex, Action action, FactionComponent.Component faction, long unitId, OwningWorker.Component owningWorker)
     {
         for (int j = 0; j < action.Effects.Count; j++)
         {
@@ -196,7 +190,7 @@ public class ExecuteActionsSystem : ComponentSystem
                     break;
                 case EffectTypeEnum.spawn_unit:
                     //SetUnitSpawn(action.Effects[j].SpawnUnitNested.UnitName, faction, action.Targets[0].TargetCoordinate);
-                    m_SpawnSystem.SpawnUnit(worldIndex, action.Effects[j].SpawnUnitNested.UnitName, faction.Faction, action.Targets[0].TargetCoordinate);
+                    m_SpawnSystem.SpawnUnit(worldIndex, action.Effects[j].SpawnUnitNested.UnitName, faction.Faction, action.Targets[0].TargetCoordinate, owningWorker.WorkerId);
                     break;
                 case EffectTypeEnum.move_along_path:
                     break;

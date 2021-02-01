@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Cell;
 using Unit;
 using Generic;
@@ -8,7 +8,7 @@ using Player;
 using UnityEngine;
 using Unity.Collections;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(SpawnUnitsSystem))]
 public class UnitLifeCycleSystem : ComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData
@@ -19,6 +19,7 @@ public class UnitLifeCycleSystem : ComponentSystem
         public long EntityId;
     }
 
+    
     HandleCellGridRequestsSystem m_CellGridSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_CellData;

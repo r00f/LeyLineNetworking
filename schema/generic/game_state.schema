@@ -17,8 +17,14 @@ component GameState {
 	float min_execute_step_time = 11;
 	map<int64, uint32> damage_dict = 12;
 	bool attack_damage_dealt = 13;
+    event InitializeMap initialize_map_event;
 	event Cleanup cleanup_state_event;
 	event RopeEnd rope_end_event;
+}
+
+type InitializeMap
+{
+
 }
 
 type RopeEnd
@@ -30,6 +36,8 @@ type Cleanup
 {
 
 }
+
+
 
 enum GameStateEnum {
 	

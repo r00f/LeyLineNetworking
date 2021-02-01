@@ -1,4 +1,4 @@
-﻿
+
 using System.Collections.Generic;
 using Improbable;
 //using Improbable.PlayerLifecycle;
@@ -145,12 +145,27 @@ public static class LeyLineEntityTemplates {
 
         };
 
-        var unitToSpawn = new UnitToSpawn.Snapshot
+
+        var unitToSpawn = new UnitToSpawn.Snapshot();
+
+        if (faction == 0)
         {
-            UnitName = unitName,
-            IsSpawn = isSpawn,
-            Faction = (worldIndex - 1) * 2 + faction
-        };
+            unitToSpawn = new UnitToSpawn.Snapshot
+            {
+                UnitName = unitName,
+                IsSpawn = isSpawn,
+                Faction = 0
+            };
+        }
+        else
+        {
+            unitToSpawn = new UnitToSpawn.Snapshot
+            {
+                UnitName = unitName,
+                IsSpawn = isSpawn,
+                Faction = (worldIndex - 1) * 2 + faction
+            };
+        }
 
         var wIndex = new WorldIndex.Snapshot
         {
@@ -189,7 +204,7 @@ public static class LeyLineEntityTemplates {
         var playerAttributes = new PlayerAttributes.Snapshot
         {
             HeroName = "KingCroak",
-            StartingUnitNames = new List<string> {"AxalotlEgg"}
+            StartingUnitNames = new List<string> {"AxalotlEgg", "Leech", "Leech"}
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();
@@ -241,7 +256,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, FactionComponent.Component faction, uint worldIndex, Unit_BaseDataSet Stats)
+    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
@@ -260,10 +275,27 @@ public static class LeyLineEntityTemplates {
             CubeCoordinate = cubeCoordinate
         };
 
+
+        TeamColorEnum factionColor = new TeamColorEnum();
+
+        if(faction == 0)
+        {
+            //add yellow
+            factionColor = TeamColorEnum.blue;
+        }
+        if (faction % 2 == 1)
+        {
+            factionColor = TeamColorEnum.blue;
+        }
+        else if (faction % 2 == 0)
+        {
+            factionColor = TeamColorEnum.red;
+        }
+
         var factionSnapshot = new FactionComponent.Snapshot
         {
-            Faction = faction.Faction,
-            TeamColor = faction.TeamColor
+            Faction = faction,
+            TeamColor = factionColor
         };
 
         var cellsToMarkSnapshot = new CellsToMark.Snapshot
@@ -317,11 +349,13 @@ public static class LeyLineEntityTemplates {
 
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
-        var owningComponent = new OwningWorker.Snapshot { WorkerId = client };
+        var owningComponent = new OwningWorker.Snapshot {WorkerId = workerId};
 
         var template = new EntityTemplate();
+
         if(Stats.IsHero)
             template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
+
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
@@ -335,6 +369,126 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(clientPathSnapshot, client);
+        template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
+        template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
+        template.AddComponent(actions, WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        return template;
+    }
+
+    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats)
+    {
+        //var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
+
+        var turnTimer = new TurnTimer.Snapshot
+        {
+            Timers = new List<Timer>()
+        };
+
+        var pos = new Position.Snapshot
+        {
+            Coords = position.Coords
+        };
+
+        var coord = new CubeCoordinate.Snapshot
+        {
+            CubeCoordinate = cubeCoordinate
+        };
+
+
+        TeamColorEnum factionColor = new TeamColorEnum();
+
+        if (faction == 0)
+        {
+            //add yellow
+            factionColor = TeamColorEnum.blue;
+        }
+        if (faction % 2 == 1)
+        {
+            factionColor = TeamColorEnum.blue;
+        }
+        else if (faction % 2 == 0)
+        {
+            factionColor = TeamColorEnum.red;
+        }
+
+        var factionSnapshot = new FactionComponent.Snapshot
+        {
+            Faction = faction,
+            TeamColor = factionColor
+        };
+
+        var cellsToMarkSnapshot = new CellsToMark.Snapshot
+        {
+            CellsInRange = new List<CellAttributes>(),
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
+        };
+
+        var clientPathSnapshot = new ClientPath.Snapshot
+        {
+            Path = new CellAttributeList(new List<CellAttribute>()),
+        };
+
+        var wIndex = new WorldIndex.Snapshot
+        {
+            Value = worldIndex
+        };
+
+        var unitVision = new Vision.Snapshot
+        {
+            CellsInVisionrange = new List<Vector3f>(),
+            Lastvisible = new List<Vector3f>(),
+            Positives = new List<Vector3f>(),
+            Negatives = new List<Vector3f>(),
+            RequireUpdate = true,
+            InitialWaitTime = .1f,
+            VisionRange = Stats.VisionRange
+        };
+
+        var health = new Health.Snapshot
+        {
+            MaxHealth = Stats.BaseHealth,
+            CurrentHealth = Stats.BaseHealth
+        };
+
+        var energy = new Energy.Snapshot
+        {
+            //SpawnCost = Stats.SpawnCost,
+            //EnergyUpkeep = Stats.EnergyUpkeep,
+            EnergyIncome = Stats.EnergyIncome
+        };
+
+        var movementVariables = new MovementVariables.Snapshot
+        {
+            //MovementRange = Stats.MovementRange,
+            TravelTime = 1.7f
+        };
+
+
+        var actions = SetActions(Stats);
+
+        //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
+        //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
+        var owningComponent = new OwningWorker.Snapshot { WorkerId = workerId };
+
+        var template = new EntityTemplate();
+
+        if (Stats.IsHero)
+            template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
+
+        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(clientHeartbeat, client);
+        //template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
+        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
+        template.AddComponent(health, WorkerUtils.UnityGameLogic);
+        template.AddComponent(energy, WorkerUtils.UnityGameLogic);
+        template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(coord, WorkerUtils.UnityGameLogic);
+        template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
+        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(clientPathSnapshot, client);
         template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);

@@ -1,4 +1,4 @@
-﻿using Cell;
+using Cell;
 using Generic;
 using Improbable.Gdk.Core;
 using Player;
@@ -86,24 +86,35 @@ namespace LeyLineHybridECS
                         Debug.Log("WaitingForPlayers");
                         #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
-                        if (gameState.PlayersOnMapCount == 1 && m_UnitData.CalculateEntityCount() >= 2)
+                        if (gameState.PlayersOnMapCount == 1)
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+
+                                m_CleanUpSystem.DeleteNeutralUnits(gameStateWorldIndex.Value);
+                                //raise InitMapEvent
+                                m_ComponentUpdateSystem.SendEvent(
+                                new GameState.InitializeMapEvent.Event(),
+                                gameStateId.EntityId);
+
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
 #else
-                        if (gameState.PlayersOnMapCount == 2 && m_UnitData.CalculateEntityCount() >= 4)
+                        if (gameState.PlayersOnMapCount == 2)
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+
+                                m_ComponentUpdateSystem.SendEvent(
+                                new GameState.InitializeMapEvent.Event(),
+                                gameStateId.EntityId);
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
                             else
@@ -219,8 +230,15 @@ namespace LeyLineHybridECS
                         {
                             gameState.CurrentRopeTime = gameState.RopeTime;
 
-                            Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId) =>
+                            Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref Vision.Component playerVision) =>
                             {
+                                /*
+                                if(playerVision.RevealVision)
+                                {
+                                    playerVision.RequireUpdate = true;
+                                    playerVision.RevealVision = false;
+                                }
+                                */
                                 m_ComponentUpdateSystem.SendEvent(
                                     new Vision.UpdateClientVisionEvent.Event(),
                                     playerId.EntityId);

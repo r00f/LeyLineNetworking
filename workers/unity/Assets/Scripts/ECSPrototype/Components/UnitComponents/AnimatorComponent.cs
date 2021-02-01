@@ -48,6 +48,9 @@ public class AnimatorComponent : MonoBehaviour
     public List<Rigidbody> RagdollRigidBodies;
     public List<Transform> Props;
 
+    public float DismemberPercentage;
+    public List<Joint> DismemberJoints;
+
     [HideInInspector]
     public ParticleSystem DeathParticleSystem;
     [HideInInspector]

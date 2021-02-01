@@ -1,4 +1,4 @@
-﻿using FMODUnity;
+using FMODUnity;
 using Generic;
 using Improbable.Gdk.Core;
 using Player;
@@ -16,8 +16,7 @@ using UnityEngine.UI.Extensions;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation]
-    [UpdateInGroup(typeof(PresentationSystemGroup))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class UISystem : ComponentSystem
     {
         //EventSystem m_EventSystem;
@@ -196,7 +195,14 @@ namespace LeyLineHybridECS
 
             #endregion
 
+            var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
+
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+
+            if(initMapEvents.Count > 0)
+            {
+                ClearUnitUIElements();
+            }
 
             if (cleanUpStateEvents.Count > 0)
             {
@@ -1118,6 +1124,26 @@ namespace LeyLineHybridECS
             playerHighlightingDatas.Dispose();
             #endregion
         }
+
+        void ClearUnitUIElements()
+        {
+
+            for (var i = 0; i < UIRef.MinimapComponent.MiniMapUnitTilesPanel.transform.childCount; i++)
+            {
+                Object.Destroy(UIRef.MinimapComponent.MiniMapUnitTilesPanel.transform.GetChild(i).gameObject);
+            }
+
+            for (var i = 0; i < UIRef.BigMapComponent.MiniMapUnitTilesPanel.transform.childCount; i++)
+            {
+                Object.Destroy(UIRef.BigMapComponent.MiniMapUnitTilesPanel.transform.GetChild(i).gameObject);
+            }
+
+            for (var i = 0; i < UIRef.HealthBarsPanel.transform.childCount; i++)
+            {
+                Object.Destroy(UIRef.HealthBarsPanel.transform.GetChild(i).gameObject);
+            }
+        }
+
 
         void HandleMenuSettings(Moba_Camera playerCam)
         {

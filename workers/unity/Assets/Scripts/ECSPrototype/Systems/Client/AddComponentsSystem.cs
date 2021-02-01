@@ -1,4 +1,4 @@
-﻿using Cell;
+using Cell;
 using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
@@ -9,8 +9,8 @@ using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 
-[DisableAutoCreation]
-[UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class AddComponentsSystem : ComponentSystem
 {
     public struct WorldIndexStateData : ISystemStateComponentData
@@ -29,6 +29,7 @@ public class AddComponentsSystem : ComponentSystem
     EntityQuery m_PlayerAddedData;
     EntityQuery m_ProjectileAddedData;
     EntityQuery m_UnitAddedData;
+    EntityQuery m_UnitRemovedData;
     EntityQuery m_CellAddedData;
     EntityManager em;
 
@@ -91,6 +92,7 @@ public class AddComponentsSystem : ComponentSystem
         },
             All = new ComponentType[]
         {
+                typeof(WorldIndexStateData),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<IsVisible>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -137,7 +139,6 @@ public class AddComponentsSystem : ComponentSystem
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<PlayerState.HasAuthority>()
             );
-
     }
 
     protected override void OnUpdate()
@@ -182,7 +183,6 @@ public class AddComponentsSystem : ComponentSystem
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
-                    RequireUpdate = 1,
                     LerpSpeed = 0.5f,
                 };
 
@@ -221,7 +221,6 @@ public class AddComponentsSystem : ComponentSystem
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
-                    RequireUpdate = 1,
                     LerpSpeed = 0.5f,
                 };
 
@@ -254,16 +253,7 @@ public class AddComponentsSystem : ComponentSystem
 
             IsVisible isVisible = new IsVisible();
 
-            if (faction.Faction == playerFaction.Faction)
-            {
-                isVisible.Value = 1;
-                isVisible.RequireUpdate = 1;
-            }
-            else
-            {
-                isVisible.Value = 0;
-                isVisible.RequireUpdate = 1;
-            }
+            isVisible.Value = 1;
 
             if (isVisible.Value == 1)
             {
@@ -280,13 +270,57 @@ public class AddComponentsSystem : ComponentSystem
                 IsUnit = 1
             };
 
+
             PostUpdateCommands.AddComponent(entity, mouseVars);
             PostUpdateCommands.AddComponent(entity, markerState);
             PostUpdateCommands.AddComponent(entity, mouseState);
             PostUpdateCommands.AddComponent(entity, isVisible);
-
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         });
+
+        Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        {
+            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
+
+            MouseState mouseState = new MouseState
+            {
+                CurrentState = MouseState.State.Neutral,
+                ClickEvent = 0
+            };
+
+            MouseVariables mouseVars = new MouseVariables
+            {
+                yOffset = 1f,
+                Distance = 1.2f
+            };
+
+            IsVisible isVisible = new IsVisible();
+
+            isVisible.Value = 1;
+
+            if (isVisible.Value == 1)
+            {
+                foreach (GameObject g in isVisibleRef.GameObjects)
+                    g.SetActive(true);
+            }
+
+            MarkerState markerState = new MarkerState
+            {
+                CurrentTargetType = MarkerState.TargetType.Neutral,
+                IsSet = 0,
+                TargetTypeSet = 0,
+                CurrentState = MarkerState.State.Neutral,
+                IsUnit = 1
+            };
+
+
+            PostUpdateCommands.AddComponent(entity, mouseVars);
+            PostUpdateCommands.AddComponent(entity, markerState);
+            PostUpdateCommands.AddComponent(entity, mouseState);
+            PostUpdateCommands.AddComponent(entity, isVisible);
+            PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
+        });
+
 
         Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible isVisible) =>
         {
@@ -296,6 +330,7 @@ public class AddComponentsSystem : ComponentSystem
 
             if (anim.EnableVisualsDelay <= 0)
             {
+                Debug.Log(isVisible.Value);
                 PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
                 PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
                 PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });
@@ -344,9 +379,6 @@ public class AddComponentsSystem : ComponentSystem
         }
         else
         {
-            if (isVisible == 0)
-                instanciatedTile.gameObject.SetActive(false);
-
             instanciatedTile.transform.parent = miniMap.MiniMapUnitTilesPanel.transform;
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapUnitPixelSize;

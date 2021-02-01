@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Core.Commands;
@@ -93,6 +93,18 @@ public class CleanupSystem : ComponentSystem
         actions.LockedAction = actions.NullAction;
         actions.Executed = false;
         return actions;
+    }
+
+    public void DeleteNeutralUnits(uint worldIndex)
+    {
+        Entities.With(m_UnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref Health.Component health, ref FactionComponent.Component faction) =>
+        {
+            if (unitWorldIndex.Value == worldIndex && faction.Faction == 0)
+            {
+                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+                m_CommandSystem.SendCommand(deleteEntityRequest);
+            }
+        });
     }
 
     public void DeleteDeadUnits(uint worldIndex)

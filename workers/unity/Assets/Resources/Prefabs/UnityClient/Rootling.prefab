@@ -181,6 +181,8 @@ MonoBehaviour:
   DisableOnDeathObjects: []
   RagdollRigidBodies: []
   Props: []
+  DismemberPercentage: 0
+  DismemberJoints: []
   DeathParticleSystem: {fileID: 0}
   DeathParticlesCount: 0
   DeathExplosionPos: {fileID: 0}
@@ -227,6 +229,7 @@ MonoBehaviour:
   MeshRenderer: {fileID: 0}
   GameObjects:
   - {fileID: 2789597271107038730}
+  - {fileID: 7016738768852060974}
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
@@ -902,6 +905,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2fe05691705dc3240b073f7573434e3a, type: 3}
+--- !u!4 &7811072305063254479 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -2054377591469318805, guid: 2fe05691705dc3240b073f7573434e3a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1088712875186128036}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &277687462481902069 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 2fe05691705dc3240b073f7573434e3a,
@@ -914,6 +923,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1088712875186128036}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7016738768852060974 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -1262252351213891702, guid: 2fe05691705dc3240b073f7573434e3a,
+    type: 3}
+  m_PrefabInstance: {fileID: 1088712875186128036}
+  m_PrefabAsset: {fileID: 0}
 --- !u!137 &8374859592592982903 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: -350549621210478637, guid: 2fe05691705dc3240b073f7573434e3a,
@@ -923,12 +938,6 @@ SkinnedMeshRenderer:
 --- !u!4 &1137322484972387544 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 59521311626164348, guid: 2fe05691705dc3240b073f7573434e3a,
-    type: 3}
-  m_PrefabInstance: {fileID: 1088712875186128036}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &7811072305063254479 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: -2054377591469318805, guid: 2fe05691705dc3240b073f7573434e3a,
     type: 3}
   m_PrefabInstance: {fileID: 1088712875186128036}
   m_PrefabAsset: {fileID: 0}

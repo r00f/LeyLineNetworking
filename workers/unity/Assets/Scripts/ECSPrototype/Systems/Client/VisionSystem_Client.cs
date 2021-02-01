@@ -1,4 +1,4 @@
-﻿using Cell;
+using Cell;
 using Generic;
 using Improbable.Gdk.Core;
 using Player;
@@ -12,8 +12,7 @@ using Improbable.Gdk.TransformSynchronization;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation]
-    [UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class VisionSystem_Client : ComponentSystem
     {
         ILogDispatcher logger;
@@ -251,7 +250,6 @@ namespace LeyLineHybridECS
                         visible.Value = 0;
                         PostUpdateCommands.AddComponent(e, new RequireVisibleUpdate());
                     }
-
                 }
             });
 

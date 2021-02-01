@@ -1,4 +1,4 @@
-﻿using Cell;
+using Cell;
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -17,11 +17,10 @@ namespace LeyLineHybridECS
             public WorldIndex.Component WorldIndexState;
         }
 
-        SpawnUnitsSystem m_SpawnSystem;
         EntityQuery m_PlayerAddedData;
         EntityQuery m_PlayerRemovedData;
         EntityQuery m_GameStateData;
-        EntityQuery m_SpawnCellData;
+
         EntityQuery m_PlayerData;
 
         protected override void OnCreate()
@@ -59,16 +58,6 @@ namespace LeyLineHybridECS
 
             m_PlayerRemovedData = GetEntityQuery(playerRemovedDesc);
 
-
-            m_SpawnCellData = GetEntityQuery(
-                //ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
-                //ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadOnly<IsSpawn.Component>(),
-                ComponentType.ReadWrite<UnitToSpawn.Component>()
-            );
-
             m_GameStateData = GetEntityQuery(
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<Position.Component>(),
@@ -83,14 +72,9 @@ namespace LeyLineHybridECS
             );
         }
 
-        protected override void OnStartRunning()
-        {
-            base.OnStartRunning();
-            m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
-        }
-
         protected override void OnUpdate()
         {
+            
             Entities.With(m_PlayerAddedData).ForEach((Entity entity, ref WorldIndex.Component worldIndex, ref FactionComponent.Component factionComp, ref Position.Component pos, ref FactionComponent.Component playerAddedFaction, ref PlayerAttributes.Component playerAddedPlayerAttributes) =>
             {
                 if (worldIndex.Value == 0)
@@ -105,6 +89,7 @@ namespace LeyLineHybridECS
                             c.Coords = gameStatePos.Coords;
                     });
 
+                    factionComp = SetPlayerFaction(wIndex);
                     pos.Coords = c.Coords;
                 }
 
@@ -122,40 +107,6 @@ namespace LeyLineHybridECS
                     }
                 });
                 PostUpdateCommands.RemoveComponent<PlayerStateData>(entity);
-            });
-
-            Entities.With(m_PlayerData).ForEach((Entity entity, ref PlayerStateData worldIndex, ref FactionComponent.Component factionComp, ref PlayerAttributes.Component playerAttribute) =>
-            {
-                if (worldIndex.WorldIndexState.Value != 0)
-                {
-                    if (factionComp.Faction == 0) 
-                        factionComp = SetPlayerFaction(worldIndex.WorldIndexState.Value);
-                    //add playerAttributes.HeroSpawned bool 
-                    else if(!playerAttribute.HeroSpawned)
-                    {
-                        var playerAtt = playerAttribute;
-                        var playerWIndex = worldIndex.WorldIndexState.Value;
-                        var f = factionComp.Faction;
-                        var heroName = playerAttribute.HeroName;
-
-                        Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
-                        {
-                            if (cellWorldIndex.Value == playerWIndex)
-                            {
-                                if (unitToSpawn.Faction == f && unitToSpawn.IsSpawn)
-                                {
-                                    m_SpawnSystem.SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate);
-
-                                    for(int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
-                                    {
-                                        m_SpawnSystem.SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(coord.CubeCoordinate, new Vector3f(0,0,0))[i+1]);
-                                    }
-                                }
-                            }
-                        });
-                        playerAttribute.HeroSpawned = true;
-                    }
-                }
             });
         }
 

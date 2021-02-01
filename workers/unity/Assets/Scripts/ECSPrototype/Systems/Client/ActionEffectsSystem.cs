@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Improbable;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
@@ -461,6 +461,18 @@ public class ActionEffectsSystem : ComponentSystem
         {
             t.parent = animatorComponent.Animator.transform;
         }
+
+        //dismemberment
+        foreach (CharacterJoint j in animatorComponent.DismemberJoints)
+        {
+            float rand = Random.Range(0f, 1f);
+            if(rand <= animatorComponent.DismemberPercentage)
+            {
+                j.transform.parent = animatorComponent.Animator.transform;
+                Object.Destroy(j);
+            }
+        }
+
 
         //Enable ragdoll behaviour
         animatorComponent.Animator.transform.parent = GarbageCollection.transform;

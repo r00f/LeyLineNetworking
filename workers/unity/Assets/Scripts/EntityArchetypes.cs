@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using Generic;
 using Unit;
+using Improbable.Gdk.PlayerLifecycle;
 
 public sealed class EntityArchetypes
 {
@@ -20,7 +21,10 @@ public sealed class EntityArchetypes
         ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadWrite<Actions.Component>(),
-        ComponentType.ReadOnly<FactionComponent.Component>());
+        ComponentType.ReadOnly<FactionComponent.Component>(),
+        ComponentType.ReadOnly<OwningWorker.Component>()
+        );
+
     }
 
 }
