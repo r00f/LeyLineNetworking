@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
@@ -15,12 +15,12 @@ public class DollyCameraComponent : MonoBehaviour
     CinemachineBrain cameraBrain;
     [SerializeField]
     float UIDisplayDelatTime;
-    [SerializeField]
-    float decalProjectorLerpInSpeed;
+    //[SerializeField]
+    //float decalProjectorLerpInSpeed;
     [SerializeField]
     float mapTitleLerpSpeed;
-    [SerializeField]
-    DecalProjector decalProjector;
+    //[SerializeField]
+    //DecalProjector decalProjector;
     [SerializeField]
     UIReferences UIRef;
     [SerializeField]
@@ -42,8 +42,7 @@ public class DollyCameraComponent : MonoBehaviour
     bool directionSet;
     [SerializeField]
     bool endPath;
-
-
+    public bool RevealVisionTrigger;
 
     // Start is called before the first frame update
     void Start()
@@ -92,8 +91,9 @@ public class DollyCameraComponent : MonoBehaviour
         {
             if (smoothPath.m_Waypoints.Length != 0)
             {
-                if (trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset || Input.anyKeyDown)
+                if ((trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset || Input.anyKeyDown) && !endPath)
                 {
+                    RevealVisionTrigger = true;
                     endPath = true;
                 }
             }
@@ -136,7 +136,7 @@ public class DollyCameraComponent : MonoBehaviour
         }
         //reach end of path start transition to mobaCam
         dollyCam.Priority = 9;
-        decalProjector.fadeFactor += decalProjectorLerpInSpeed * Time.deltaTime;
+        //decalProjector.fadeFactor += decalProjectorLerpInSpeed * Time.deltaTime;
 
         if (UIDisplayDelatTime > 0)
             UIDisplayDelatTime -= Time.deltaTime;

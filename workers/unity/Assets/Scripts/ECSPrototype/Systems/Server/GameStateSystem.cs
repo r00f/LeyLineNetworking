@@ -112,6 +112,7 @@ namespace LeyLineHybridECS
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
 
+                                m_CleanUpSystem.DeleteNeutralUnits(gameStateWorldIndex.Value);
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(),
                                 gameStateId.EntityId);

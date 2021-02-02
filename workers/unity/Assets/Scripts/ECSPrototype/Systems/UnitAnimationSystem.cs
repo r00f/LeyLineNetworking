@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Unit;
 using Generic;
@@ -299,24 +299,18 @@ public class UnitAnimationSystem : ComponentSystem
                 animatorComponent.Animator.SetBool("Planning", false);
             }
 
-            //if this unit has emissionColorMeshes set intensity to 0 / 100 when harvesting
-            if(teamColorMeshes.EmissionColorMeshes.Count != 0)
+            foreach (Renderer r in teamColorMeshes.HarvestingEmissionColorMeshes)
             {
-                Color color = settings.FactionColors[(int)faction.TeamColor + 1];
-                foreach(Renderer r in teamColorMeshes.EmissionColorMeshes)
+                if (energy.Harvesting)
                 {
-                    if (energy.Harvesting)
-                    {
-                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, color * teamColorMeshes.EmissionIntensity, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
-                        //r.material.SetColor("_EmissiveColor", color * 100);
-                    }
-                    else
-                    {
-                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
-                    }
-
-                    r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
+                    teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, teamColorMeshes.color * teamColorMeshes.EmissionIntensity, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
                 }
+                else
+                {
+                    teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
+                }
+
+                r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
             }
 
             if (animatorComponent.CurrentLockedAction)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
@@ -63,21 +63,22 @@ public class InitializeUnitsSystem : ComponentSystem
 
             unitEffects.CurrentHealth = health.CurrentHealth;
 
-            Color factionColor = new Color();
-
             switch (unitFactionComp.TeamColor)
             {
                 case TeamColorEnum.blue:
                     //markerObjects.Outline.color = 1;
-                    factionColor = settings.FactionColors[1];
+                    teamColorMeshes.color = settings.FactionColors[1];
                     break;
                 case TeamColorEnum.red:
                     //markerObjects.Outline.color = 2;
-                    factionColor = settings.FactionColors[2];
+                    teamColorMeshes.color = settings.FactionColors[2];
                     break;
             }
 
-            for(int m = 0; m < teamColorMeshes.detailColorMeshes.Count; m++)
+            if(unitFactionComp.Faction == 0)
+                teamColorMeshes.color = settings.FactionColors[0];
+
+            for (int m = 0; m < teamColorMeshes.detailColorMeshes.Count; m++)
             {
                 Renderer r = teamColorMeshes.detailColorMeshes[m];
 
@@ -88,26 +89,52 @@ public class InitializeUnitsSystem : ComponentSystem
                     Debug.LogError("Not Enough PartialColorMasks set, set them on the unit TeamColorMeshes component!");
 
                 //set layer1 color to factionColor
-                r.material.SetColor("_BaseColor1", factionColor);
-
+                r.material.SetColor("_BaseColor1", teamColorMeshes.color);
             }
 
-            foreach(ParticleSystem p in teamColorMeshes.ParticleSystems)
+            foreach (Renderer r in teamColorMeshes.EmissionColorMeshes)
+            {
+               if(r.materials[r.materials.Length - 1].HasProperty("_EmissiveColor"))
+                    r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.color * r.materials[r.materials.Length - 1].GetFloat("_EmissiveIntensity"));
+
+                if (r.materials[r.materials.Length - 1].HasProperty("_EmissionColor"))
+                    r.materials[r.materials.Length - 1].SetColor("_EmissionColor", teamColorMeshes.color * r.materials[r.materials.Length - 1].GetFloat("_EmissiveIntensity"));
+            }
+
+            foreach (Light l in teamColorMeshes.Lights)
+            {
+                l.color = teamColorMeshes.color;
+            }
+
+            foreach (ParticleSystemRenderer p in teamColorMeshes.EmissiveTrailParticleSystems)
+            {
+                p.trailMaterial.SetColor("_EmissiveColor", teamColorMeshes.color * p.trailMaterial.GetFloat("_EmissiveIntensity"));
+            }
+
+            foreach (LineRenderer l in teamColorMeshes.LineRenderers)
+            {
+                l.material.SetColor("_EmissiveColor", teamColorMeshes.color * l.material.GetFloat("_EmissiveIntensity"));
+                //l.startColor = teamColorMeshes.color;
+                //l.endColor = teamColorMeshes.color;
+            }
+
+
+            foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
             {
                 ParticleSystem.MainModule main = p.main;
-                main.startColor = new Color(factionColor.r, factionColor.g, factionColor.b, main.startColor.color.a);
+                main.startColor = new Color(teamColorMeshes.color.r, teamColorMeshes.color.g, teamColorMeshes.color.b, main.startColor.color.a);
             }
 
             foreach (Renderer r in teamColorMeshes.FullColorMeshes)
             {
                 if (r.material.HasProperty("_UnlitColor"))
-                    r.material.SetColor("_UnlitColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_UnlitColor").a));
+                    r.material.SetColor("_UnlitColor", new Color(teamColorMeshes.color.r, teamColorMeshes.color.g, teamColorMeshes.color.b, r.material.GetColor("_UnlitColor").a));
                 else if (r.material.HasProperty("_BaseColor"))
-                    r.material.SetColor("_BaseColor", new Color(factionColor.r, factionColor.g, factionColor.b, r.material.GetColor("_BaseColor").a));
+                    r.material.SetColor("_BaseColor", new Color(teamColorMeshes.color.r, teamColorMeshes.color.g, teamColorMeshes.color.b, r.material.GetColor("_BaseColor").a));
 
                 if (r is SpriteRenderer)
                 {
-                    r.material.color = factionColor;
+                    r.material.color = teamColorMeshes.color;
                 }
 
                 if (r is TrailRenderer)
@@ -116,13 +143,13 @@ public class InitializeUnitsSystem : ComponentSystem
                     float alpha = 1.0f;
                     Gradient gradient = new Gradient();
                     gradient.SetKeys(
-                        new GradientColorKey[] { new GradientColorKey(factionColor, 0.0f), new GradientColorKey(factionColor, 1.0f) },
+                        new GradientColorKey[] { new GradientColorKey(teamColorMeshes.color, 0.0f), new GradientColorKey(teamColorMeshes.color, 1.0f) },
                         new GradientAlphaKey[] { new GradientAlphaKey(alpha, 0.0f), new GradientAlphaKey(alpha, 1.0f) }
                     );
                     tr.colorGradient = gradient;
-
                 }
             }
+
             Entities.With(m_PlayerData).ForEach((HeroTransform heroTransform, ref FactionComponent.Component playerFactionComp) =>
             {
                 if (stats.IsHero && playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)

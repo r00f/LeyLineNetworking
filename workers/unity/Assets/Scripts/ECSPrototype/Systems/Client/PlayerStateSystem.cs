@@ -148,11 +148,8 @@ namespace LeyLineHybridECS
 
                                     if (unitId.EntityId.Id == pS.SelectedUnitId)
                                     {
-                                        foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
-                                        {
-                                            if (!p.isPlaying)
-                                                p.Play();
-                                        }
+                                        if (!teamColorMeshes.ParticleSystems[0].isPlaying)
+                                            teamColorMeshes.ParticleSystems[0].Play();
 
                                         if (Vector3fext.ToUnityVector(pS.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                                             pS.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
@@ -183,11 +180,9 @@ namespace LeyLineHybridECS
                                     }
                                     else
                                     {
-                                        foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
-                                        {
-                                            if (p.isPlaying)
-                                                p.Stop();
-                                        }
+                                        if (teamColorMeshes.ParticleSystems[0].isPlaying)
+                                            teamColorMeshes.ParticleSystems[0].Stop();
+
                                         if (visionCoordsHash.Contains(unitCoord.CubeCoordinate) && pS.CurrentState != PlayerStateEnum.waiting_for_target && mouseState.ClickEvent == 1)
                                         {
                                             pS.SelectedUnitCoordinate = unitCoord.CubeCoordinate;

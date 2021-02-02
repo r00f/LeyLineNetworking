@@ -204,7 +204,7 @@ public static class LeyLineEntityTemplates {
         var playerAttributes = new PlayerAttributes.Snapshot
         {
             HeroName = "KingCroak",
-            StartingUnitNames = new List<string> {"AxalotlEgg", "Leech", "Leech"}
+            StartingUnitNames = new List<string> {"Leech", "Leech", "Effigy", "StoneBeetle", "Branchling", "Rootling", "Crystalite"}
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();

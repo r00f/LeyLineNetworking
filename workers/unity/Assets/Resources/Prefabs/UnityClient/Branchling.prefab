@@ -171,11 +171,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad5b1ad0473a8b548a0a55139f42c85d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Lights: []
   ParticleSystems:
   - {fileID: 8045807266157344232}
   FullColorMeshes:
   - {fileID: 4236818415891193068}
-  EmissionColorMeshes: []
+  HarvestingEmissionColorMeshes: []
+  EmissionColorMeshes:
+  - {fileID: 7422891748961989369}
   EmissionIntensity: 0
   EmissionLerpTime: 0
   EmissionLerpColor: {r: 0, g: 0, b: 0, a: 0}

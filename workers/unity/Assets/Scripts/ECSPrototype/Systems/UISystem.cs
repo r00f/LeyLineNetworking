@@ -28,6 +28,7 @@ namespace LeyLineHybridECS
         EntityQuery m_AuthoritativePlayerData;
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
+        DollyCameraComponent dollyCam;
 
         public UIReferences UIRef{get; set;}
 
@@ -81,6 +82,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            dollyCam = Object.FindObjectOfType<DollyCameraComponent>();
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             UIRef = Object.FindObjectOfType<UIReferences>();
@@ -90,6 +92,7 @@ namespace LeyLineHybridECS
             UIRef.SFXBus = RuntimeManager.GetBus(UIRef.SFXBusString);
             UIRef.MusicBus = RuntimeManager.GetBus(UIRef.MusicBusString);
             UIRef.UINonMapSFXBus = RuntimeManager.GetBus(UIRef.UINonMapSFXBusString);
+
             InitializeButtons();
             AddSettingsListeners();
         }
@@ -199,9 +202,16 @@ namespace LeyLineHybridECS
 
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
-            if(initMapEvents.Count > 0)
+            if (initMapEvents.Count > 0)
             {
+                m_SendActionRequestSystem.RevealPlayerVision();
                 ClearUnitUIElements();
+            }
+
+            if (dollyCam.RevealVisionTrigger)
+            {
+                m_SendActionRequestSystem.RevealPlayerVision();
+                dollyCam.RevealVisionTrigger = false;
             }
 
             if (cleanUpStateEvents.Count > 0)
