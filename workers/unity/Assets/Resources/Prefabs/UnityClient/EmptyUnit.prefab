@@ -167,6 +167,7 @@ MonoBehaviour:
   ParticleSystems:
   - {fileID: 4813044893763074212}
   EmissiveTrailParticleSystems: []
+  TrailRenderers: []
   LineRenderers: []
   FullColorMeshes:
   - {fileID: 1706615932947190176}
@@ -195,7 +196,6 @@ MonoBehaviour:
   Collider: {fileID: 771660692032844721}
   MeshRenderer: {fileID: 0}
   GameObjects:
-  - {fileID: 1706615932949122912}
   - {fileID: 5183188501354973995}
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}

@@ -10480,6 +10480,7 @@ MonoBehaviour:
   - {fileID: 6556093311027956491}
   - {fileID: 8151335260859936451}
   - {fileID: 8789158768592884506}
+  TrailRenderers: []
   LineRenderers: []
   FullColorMeshes:
   - {fileID: 5445454162187311139}
@@ -10510,10 +10511,9 @@ MonoBehaviour:
   Collider: {fileID: 6235304998422575666}
   MeshRenderer: {fileID: 0}
   GameObjects:
-  - {fileID: 5445454162189502179}
+  - {fileID: 2005051714543616680}
   - {fileID: 954599591423097682}
   - {fileID: 2726179108538859150}
-  - {fileID: 2005051714543616680}
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}

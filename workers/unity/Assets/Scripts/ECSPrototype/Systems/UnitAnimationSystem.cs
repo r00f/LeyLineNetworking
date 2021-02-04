@@ -44,7 +44,7 @@ public class UnitAnimationSystem : ComponentSystem
         );
 
         m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly <WorldIndex.Component>(),
+        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<IsVisible>(),
         ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
@@ -60,6 +60,7 @@ public class UnitAnimationSystem : ComponentSystem
         );
 
         m_PlayerData = GetEntityQuery(
+        ComponentType.ReadOnly<Vision.Component>(),
         ComponentType.ReadOnly<HeroTransform>(),
         ComponentType.ReadOnly<PlayerState.HasAuthority>(),
         ComponentType.ReadOnly<HighlightingDataComponent>(),
@@ -83,9 +84,11 @@ public class UnitAnimationSystem : ComponentSystem
             return;
 
         var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
+        var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
         var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
         var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
+        var playerVision = playerVisionData[0];
         var playerHeroTransform = playerHeroTransforms[0];
         var playerHigh = playerHighs[0];
 
@@ -268,27 +271,21 @@ public class UnitAnimationSystem : ComponentSystem
 
             if(gameStates[0].CurrentState == GameStateEnum.planning)
             {
-                if(visible.Value == 1)
+                if(visible.Value == 1 && !playerVision.RevealVision)
                 {
                     unitComponentReferences.SelectionCircleGO.SetActive(true);
 
                     if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
                     {
-                        if (((int)faction.Faction & 1) == 1)
-                        {
-                            //odd
-                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[1] * 30000);
-                        }
-                        else
-                        {
-                            unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", settings.FactionColors[2] * 30000);
-                        }
+                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", teamColorMeshes.color * 30000);
                     }
                     else
                     {
                         unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
                     }
                 }
+                else
+                    unitComponentReferences.SelectionCircleGO.SetActive(false);
 
                 animatorComponent.Animator.SetBool("Executed", false);
                 animatorComponent.Animator.SetBool("Planning", true);
@@ -360,6 +357,7 @@ public class UnitAnimationSystem : ComponentSystem
             #endregion
         });
 
+        playerVisionData.Dispose();
         playerHighs.Dispose();
         gameStates.Dispose();
     }

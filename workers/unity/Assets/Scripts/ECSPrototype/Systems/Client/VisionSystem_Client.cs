@@ -29,13 +29,6 @@ namespace LeyLineHybridECS
         {
             base.OnCreate();
 
-            /*
-            m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<GameState.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>()
-            );
-            */
-
             m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),

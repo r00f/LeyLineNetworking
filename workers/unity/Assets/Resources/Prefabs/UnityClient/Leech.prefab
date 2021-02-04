@@ -770,6 +770,7 @@ MonoBehaviour:
   ParticleSystems:
   - {fileID: 4001082344444506438}
   EmissiveTrailParticleSystems: []
+  TrailRenderers: []
   LineRenderers: []
   FullColorMeshes:
   - {fileID: 7863409164157800004}
@@ -804,7 +805,6 @@ MonoBehaviour:
   - {fileID: 1392809713254018858}
   - {fileID: 7863409164155867294}
   - {fileID: 7141000779545827086}
-  - {fileID: 7125525580338333314}
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
