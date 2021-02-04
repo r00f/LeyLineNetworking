@@ -144,6 +144,8 @@ MonoBehaviour:
   DisableOnDeathObjects: []
   RagdollRigidBodies: []
   Props: []
+  DismemberPercentage: 0
+  DismemberJoints: []
   DeathParticleSystem: {fileID: 0}
   DeathParticlesCount: 0
   DeathExplosionPos: {fileID: 0}
@@ -161,10 +163,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad5b1ad0473a8b548a0a55139f42c85d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Lights: []
   ParticleSystems:
   - {fileID: 4813044893763074212}
+  EmissiveTrailParticleSystems: []
+  LineRenderers: []
   FullColorMeshes:
   - {fileID: 1706615932947190176}
+  HarvestingEmissionColorMeshes: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -282,10 +288,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b0f8c96b65f0b47a375a65b1bcd83e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerColor: {r: 0, g: 0, b: 0, a: 0}
   DisplayDeathSkull: 1
-  BloodParticleSystem: {fileID: 1393841048670574437, guid: 4233759ae060dcf45b46bda562f15480,
+  BloodParticleSystem: {fileID: 1833421389896087581, guid: 4233759ae060dcf45b46bda562f15480,
     type: 3}
-  BodyPartBloodParticleSystem: {fileID: 1393841048670574437, guid: cc7f6a310b7b9744da4d1c75965bff81,
+  BodyPartBloodParticleSystem: {fileID: -3433307285042944686, guid: cc7f6a310b7b9744da4d1c75965bff81,
     type: 3}
   DefenseParticleSystem: {fileID: 6722497138764780913, guid: 4eea7b2b71540f440b332773cc0d16ef,
     type: 3}

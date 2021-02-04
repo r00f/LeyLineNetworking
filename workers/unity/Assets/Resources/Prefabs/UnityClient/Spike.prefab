@@ -102,6 +102,7 @@ TrailRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -306,6 +307,7 @@ TrailRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -623,6 +625,8 @@ MonoBehaviour:
   - {fileID: 3388902424279289390}
   Props:
   - {fileID: 6277809151406041484}
+  DismemberPercentage: 0
+  DismemberJoints: []
   DeathParticleSystem: {fileID: 0}
   DeathParticlesCount: 0
   DeathExplosionPos: {fileID: 0}
@@ -640,12 +644,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad5b1ad0473a8b548a0a55139f42c85d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Lights: []
   ParticleSystems:
   - {fileID: 8598731126526585502}
+  EmissiveTrailParticleSystems: []
+  LineRenderers: []
   FullColorMeshes:
   - {fileID: 6277809151408466440}
   - {fileID: 6277809151408466436}
   - {fileID: 2463632361227649946}
+  HarvestingEmissionColorMeshes: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -686,6 +694,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InGameTileColor: {r: 0, g: 0, b: 0, a: 0}
+  MapTileColor: {r: 0, g: 0, b: 0, a: 0}
   Collider: {fileID: 771660692032844721}
   MeshRenderer: {fileID: 6277809151408466522}
   GameObjects:
@@ -696,6 +706,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &930118610718755571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -735,10 +746,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b0f8c96b65f0b47a375a65b1bcd83e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerColor: {r: 0, g: 0, b: 0, a: 0}
   DisplayDeathSkull: 1
-  BloodParticleSystem: {fileID: 1393841048670574437, guid: 4233759ae060dcf45b46bda562f15480,
+  BloodParticleSystem: {fileID: 1833421389896087581, guid: 4233759ae060dcf45b46bda562f15480,
     type: 3}
-  BodyPartBloodParticleSystem: {fileID: 1393841048670574437, guid: cc7f6a310b7b9744da4d1c75965bff81,
+  BodyPartBloodParticleSystem: {fileID: -3433307285042944686, guid: cc7f6a310b7b9744da4d1c75965bff81,
     type: 3}
   DefenseParticleSystem: {fileID: 6722497138764780913, guid: 4eea7b2b71540f440b332773cc0d16ef,
     type: 3}
@@ -2189,6 +2201,7 @@ TrailRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:

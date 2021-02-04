@@ -6,9 +6,10 @@ using UnityEngine;
 
 public class UnitEffects : MonoBehaviour
 {
+    public Color PlayerColor;
     public bool DisplayDeathSkull;
-    public GameObject BloodParticleSystem;
-    public GameObject BodyPartBloodParticleSystem;
+    public PlayerColor_ParticleSystem BloodParticleSystem;
+    public PlayerColor_ParticleSystem BodyPartBloodParticleSystem;
     public GameObject DefenseParticleSystem;
     public GameObject ShieldBrakeParticleSystem;
     public ParticleSystem SecondWindParticleSystemInstance;

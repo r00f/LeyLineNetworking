@@ -2125,6 +2125,62 @@ ParticleSystem:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
+  LifetimeByEmitterSpeedModule:
+    enabled: 0
+    m_Curve:
+      serializedVersion: 2
+      minMaxState: 1
+      scalar: 1
+      minScalar: 1
+      maxCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: -0.8
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 1
+          value: 0.2
+          inSlope: -0.8
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+      minCurve:
+        serializedVersion: 2
+        m_Curve:
+        - serializedVersion: 3
+          time: 0
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 1
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.33333334
+        m_PreInfinity: 2
+        m_PostInfinity: 2
+        m_RotationOrder: 4
+    m_Range: {x: 0, y: 1}
   ForceModule:
     enabled: 0
     x:
@@ -4706,6 +4762,7 @@ ParticleSystemRenderer:
   m_LightProbeUsage: 0
   m_ReflectionProbeUsage: 0
   m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -4748,6 +4805,8 @@ ParticleSystemRenderer:
   m_EnableGPUInstancing: 1
   m_ApplyActiveColorSpace: 1
   m_AllowRoll: 1
+  m_FreeformStretching: 0
+  m_RotateWithStretchDirection: 1
   m_VertexStreams: 00010304
   m_Mesh: {fileID: 0}
   m_Mesh1: {fileID: 0}
@@ -4812,8 +4871,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad5b1ad0473a8b548a0a55139f42c85d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Lights: []
   ParticleSystems:
   - {fileID: 2323853192212211158}
+  EmissiveTrailParticleSystems: []
+  LineRenderers: []
   FullColorMeshes:
   - {fileID: 8456560364713200850}
   - {fileID: 7550265048825398549}
@@ -4834,6 +4896,7 @@ MonoBehaviour:
   - {fileID: 7550265048825398775}
   - {fileID: 7550265048825398773}
   - {fileID: 7550265048825398771}
+  HarvestingEmissionColorMeshes: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -4972,6 +5035,8 @@ MonoBehaviour:
   - {fileID: 551011809639352705}
   - {fileID: 8416682395092072242}
   Props: []
+  DismemberPercentage: 0
+  DismemberJoints: []
   DeathParticleSystem: {fileID: 3604355855864021443}
   DeathParticlesCount: 10
   DeathExplosionPos: {fileID: 8846974289181975837}
@@ -4989,6 +5054,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1c667c2ae07eda84d82ae78b8b3175eb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InGameTileColor: {r: 0, g: 0, b: 0, a: 0}
+  MapTileColor: {r: 0, g: 0, b: 0, a: 0}
   Collider: {fileID: 6943022816249909003}
   MeshRenderer: {fileID: 7550265048825398549}
   GameObjects:
@@ -4998,6 +5065,7 @@ MonoBehaviour:
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
   MiniMapTileInstance: {fileID: 0}
+  BigMapTileInstance: {fileID: 0}
 --- !u!114 &4367961099226942553
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5089,10 +5157,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0b0f8c96b65f0b47a375a65b1bcd83e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  PlayerColor: {r: 0, g: 0, b: 0, a: 0}
   DisplayDeathSkull: 0
-  BloodParticleSystem: {fileID: 1393841048670574437, guid: 4233759ae060dcf45b46bda562f15480,
+  BloodParticleSystem: {fileID: 1833421389896087581, guid: 4233759ae060dcf45b46bda562f15480,
     type: 3}
-  BodyPartBloodParticleSystem: {fileID: 0}
+  BodyPartBloodParticleSystem: {fileID: -3433307285042944686, guid: cc7f6a310b7b9744da4d1c75965bff81,
+    type: 3}
   DefenseParticleSystem: {fileID: 6722497138764780913, guid: 4eea7b2b71540f440b332773cc0d16ef,
     type: 3}
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,

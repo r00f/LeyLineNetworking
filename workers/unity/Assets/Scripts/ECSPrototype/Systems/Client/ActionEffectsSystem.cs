@@ -198,8 +198,11 @@ public class ActionEffectsSystem : ComponentSystem
                                 }
                                 else
                                 {
-                                    Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
-
+                                    PlayerColor_ParticleSystem go = Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
+                                    for(int ii =0; ii<go.SetParticleSystem_BaseColor.Count; ii++)
+                                    {
+                                        go.SetParticleSystem_BaseColor[ii].startColor = unitEffects.PlayerColor;
+                                    }
 
                                     //if the unit survives
                                     if ((int)unitEffects.CurrentHealth - (int)damageAmount > 0)
@@ -268,11 +271,11 @@ public class ActionEffectsSystem : ComponentSystem
 
                         if (unitEffects.BodyPartBloodParticleSystem)
                         {
-                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.BodyPartBloodParticleSystem);
+                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor, unitEffects.BodyPartBloodParticleSystem);
                         }
                         else
                         {
-                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value);
+                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
                         }
 
                         //unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
@@ -305,11 +308,11 @@ public class ActionEffectsSystem : ComponentSystem
 
                             if (unitEffects.BodyPartBloodParticleSystem)
                             {
-                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.BodyPartBloodParticleSystem);
+                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value,unitEffects.PlayerColor, unitEffects.BodyPartBloodParticleSystem);
                             }
                             else
                             {
-                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value);
+                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
                             }
 
                             //unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
@@ -434,7 +437,7 @@ public class ActionEffectsSystem : ComponentSystem
         playerVisionData.Dispose();
     }
 
-    public void Death(AnimatorComponent animatorComponent, Action action, Vector3 position, GameObject bodyPartParticle = null, float delay = 0)
+    public void Death(AnimatorComponent animatorComponent, Action action, Vector3 position,Color playerColor, PlayerColor_ParticleSystem bodyPartParticle = null, float delay = 0)
     {
         var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
 
@@ -447,7 +450,11 @@ public class ActionEffectsSystem : ComponentSystem
             {
                 if (i == random || i == random2)
                 {
-                    Object.Instantiate(bodyPartParticle, animatorComponent.RagdollRigidBodies[i].position, Quaternion.identity, animatorComponent.RagdollRigidBodies[i].transform);
+                    PlayerColor_ParticleSystem go = Object.Instantiate(bodyPartParticle, animatorComponent.RagdollRigidBodies[i].position, Quaternion.identity, animatorComponent.RagdollRigidBodies[i].transform);
+                    for (int ii = 0; ii < go.SetParticleSystem_BaseColor.Count; ii++)
+                    {
+                        go.SetParticleSystem_BaseColor[ii].startColor = playerColor;
+                    }
                 }
             }
         }
