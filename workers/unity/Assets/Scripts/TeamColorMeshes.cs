@@ -14,6 +14,9 @@ public class TeamColorMeshes : MonoBehaviour
     public List<ParticleSystemRenderer> EmissiveTrailParticleSystems = new List<ParticleSystemRenderer>();
 
     [SerializeField]
+    public List<TrailRenderer> TrailRenderers = new List<TrailRenderer>();
+
+    [SerializeField]
     public List<LineRenderer> LineRenderers = new List<LineRenderer>();
 
     [SerializeField]

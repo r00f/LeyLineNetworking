@@ -73,6 +73,8 @@ public class InitializeUnitsSystem : ComponentSystem
             }
 
 
+
+
             for (int m = 0; m < teamColorMeshes.detailColorMeshes.Count; m++)
             {
                 Renderer r = teamColorMeshes.detailColorMeshes[m];
@@ -85,6 +87,12 @@ public class InitializeUnitsSystem : ComponentSystem
 
                 //set layer1 color to factionColor
                 r.material.SetColor("_BaseColor1", teamColorMeshes.color);
+            }
+
+            foreach (TrailRenderer tr in teamColorMeshes.TrailRenderers)
+            {
+                tr.startColor = teamColorMeshes.color;
+                tr.endColor = teamColorMeshes.color;
             }
 
             foreach (Renderer r in teamColorMeshes.EmissionColorMeshes)
