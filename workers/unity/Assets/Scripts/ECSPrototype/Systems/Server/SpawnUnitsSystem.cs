@@ -77,7 +77,7 @@ namespace LeyLineHybridECS
                     {
                         //Debug.Log("SpawnNeutralUnit");
                         
-                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId);
+                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation);
                     }
                 });
 
@@ -95,13 +95,13 @@ namespace LeyLineHybridECS
                         {
                             if (cellWorldIndex.Value == playerWIndex)
                             {
-                                if (unitToSpawn.Faction == f && unitToSpawn.IsSpawn)
+                                if (unitToSpawn.Faction == f)
                                 {
-                                    SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId);
+                                    SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
 
                                     for (int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
                                     {
-                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(coord.CubeCoordinate, new Vector3f(0, 0, 0))[i + 1], owningW.WorkerId);
+                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(coord.CubeCoordinate, new Vector3f(0, 0, 0))[i + 1], owningW.WorkerId, unitToSpawn.StartRotation);
                                     }
                                 }
                             }
@@ -111,9 +111,8 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void SpawnUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId)
+        public void SpawnUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0)
         {
-
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
             {
                 var coord = cCord.CubeCoordinate;
@@ -122,63 +121,27 @@ namespace LeyLineHybridECS
                 {
                     //Debug.Log("CreateEntityRequest");
                     var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<Unit_BaseDataSet>();
-                    var entity = LeyLineEntityTemplates.Unit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats);
+                    var entity = LeyLineEntityTemplates.Unit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }
             });
-
-            
-            /*
-            Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component refPlayerFaction, ref OwningWorker.Component refOwningWorker) =>
-            {
-                var owningWorker = refOwningWorker;
-                var playerFaction = refPlayerFaction;
-
-                //Debug.Log(playerFaction.Faction);
-                owningWorker.WorkerId
-                if (playerFaction.Faction == unitFaction)
-                {
-
-                }
-            });
-            */
-            
         }
 
-        public void SpawnNeutralUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId)
+        public void SpawnNeutralUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0)
         {
-
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
             {
                 var coord = cCord.CubeCoordinate;
 
                 if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                 {
-                    //Debug.Log("CreateEntityRequest");
                     var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<Unit_BaseDataSet>();
-                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats);
+                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }
             });
-
-            /*
-            Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component refPlayerFaction, ref OwningWorker.Component refOwningWorker) =>
-            {
-                var owningWorker = refOwningWorker;
-                var playerFaction = refPlayerFaction;
-
-                //Debug.Log(playerFaction.Faction);
-                owningWorker.WorkerId
-                if (playerFaction.Faction == unitFaction)
-                {
-
-                }
-            });
-            */
-
         }
-
     }
 }

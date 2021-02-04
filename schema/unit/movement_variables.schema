@@ -6,6 +6,7 @@ component MovementVariables {
 	uint32 movement_range = 1;
 	float travel_time = 2;
 	float time_left = 3;
+    uint32 start_rotation = 4;
 
 
 }

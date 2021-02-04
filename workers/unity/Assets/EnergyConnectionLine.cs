@@ -22,7 +22,7 @@ public class EnergyConnectionLine : MonoBehaviour
         if (!DefaultPointParent || BodyPartLineConnections.Count == 0)
             return;
 
-        Debug.Log("AYAYA");
+        //Debug.Log("AYAYA");
         DefaultPointList.Clear();
 
         DefaultPointList.Add(BodyPartLineConnections[0]);

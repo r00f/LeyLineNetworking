@@ -105,7 +105,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startRotation = 0)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
 
@@ -145,7 +145,6 @@ public static class LeyLineEntityTemplates {
 
         };
 
-
         var unitToSpawn = new UnitToSpawn.Snapshot();
 
         if (faction == 0)
@@ -153,8 +152,8 @@ public static class LeyLineEntityTemplates {
             unitToSpawn = new UnitToSpawn.Snapshot
             {
                 UnitName = unitName,
-                IsSpawn = isSpawn,
-                Faction = 0
+                Faction = 0,
+                StartRotation = startRotation
             };
         }
         else
@@ -162,8 +161,8 @@ public static class LeyLineEntityTemplates {
             unitToSpawn = new UnitToSpawn.Snapshot
             {
                 UnitName = unitName,
-                IsSpawn = isSpawn,
-                Faction = (worldIndex - 1) * 2 + faction
+                Faction = (worldIndex - 1) * 2 + faction,
+                StartRotation = startRotation
             };
         }
 
@@ -256,7 +255,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats)
+    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats, uint startRotation)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
@@ -340,13 +339,11 @@ public static class LeyLineEntityTemplates {
 
         var movementVariables = new MovementVariables.Snapshot
         {
-            //MovementRange = Stats.MovementRange,
-            TravelTime = 1.7f
+            TravelTime = 1.7f,
+            StartRotation = startRotation
         };
 
-
         var actions = SetActions(Stats);
-
         var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
         var owningComponent = new OwningWorker.Snapshot {WorkerId = workerId};
@@ -376,7 +373,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats)
+    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats, uint startRotation)
     {
         //var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
@@ -460,8 +457,8 @@ public static class LeyLineEntityTemplates {
 
         var movementVariables = new MovementVariables.Snapshot
         {
-            //MovementRange = Stats.MovementRange,
-            TravelTime = 1.7f
+            TravelTime = 1.7f,
+            StartRotation = startRotation
         };
 
 
@@ -475,6 +472,7 @@ public static class LeyLineEntityTemplates {
 
         if (Stats.IsHero)
             template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
+
 
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);

@@ -330,7 +330,7 @@ public class AddComponentsSystem : ComponentSystem
 
             if (anim.EnableVisualsDelay <= 0)
             {
-                Debug.Log(isVisible.Value);
+                //Debug.Log(isVisible.Value);
                 PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
                 PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
                 PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });

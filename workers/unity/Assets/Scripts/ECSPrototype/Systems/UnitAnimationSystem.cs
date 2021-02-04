@@ -55,7 +55,8 @@ public class UnitAnimationSystem : ComponentSystem
         ComponentType.ReadOnly<Unit_BaseDataSet>(),
         ComponentType.ReadOnly<UnitEffects>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
-        ComponentType.ReadWrite<Transform>()
+        ComponentType.ReadWrite<Transform>(),
+        ComponentType.ReadOnly<MovementVariables.Component>()
         );
 
         m_PlayerData = GetEntityQuery(
@@ -92,6 +93,7 @@ public class UnitAnimationSystem : ComponentSystem
         {
             var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
             var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
+            var moveVars = EntityManager.GetComponentData<MovementVariables.Component>(e);
             var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
@@ -214,7 +216,7 @@ public class UnitAnimationSystem : ComponentSystem
                 if (animatorComponent.EnableVisualsDelay >= 0)
                 {
                     //initially rotate visuals AWAY from hero(so leech makes more sense)
-                    if(playerHeroTransform.Transform)
+                    if(playerHeroTransform.Transform && moveVars.StartRotation == 0)
                     {
                         Vector3 dir = animatorComponent.RotateTransform.position - playerHeroTransform.Transform.position;
                         dir.y = 0;
@@ -266,7 +268,6 @@ public class UnitAnimationSystem : ComponentSystem
 
             if(gameStates[0].CurrentState == GameStateEnum.planning)
             {
-
                 if(visible.Value == 1)
                 {
                     unitComponentReferences.SelectionCircleGO.SetActive(true);

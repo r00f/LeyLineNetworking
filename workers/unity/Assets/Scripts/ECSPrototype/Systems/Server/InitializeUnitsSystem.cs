@@ -27,7 +27,9 @@ public class InitializeUnitsSystem : ComponentSystem
             ComponentType.ReadWrite<LineRendererComponent>(),
             ComponentType.ReadWrite<TeamColorMeshes>(),
             ComponentType.ReadWrite<UnitEffects>(),
-            ComponentType.ReadOnly<Health.Component>()
+            ComponentType.ReadOnly<Health.Component>(),
+            ComponentType.ReadWrite<AnimatorComponent>(),
+            ComponentType.ReadOnly<MovementVariables.Component>()
             );
 
         m_PlayerData = GetEntityQuery(
@@ -35,32 +37,19 @@ public class InitializeUnitsSystem : ComponentSystem
             ComponentType.ReadOnly<FactionComponent.Component>()
             );
 
-        //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
         settings = Resources.Load<Settings>("Settings");
     }
 
     protected override void OnUpdate()
     {
-        var healthData = m_UnitData.ToComponentDataArray<Health.Component>(Allocator.TempJob);
-        var unitFactionData = m_UnitData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-        var unitStatData = m_UnitData.ToComponentArray<Unit_BaseDataSet>();
-        var unitEffectsData = m_UnitData.ToComponentArray<UnitEffects>();
-        var teamColorMesheData = m_UnitData.ToComponentArray<TeamColorMeshes>();
-        var componentReferenceData = m_UnitData.ToComponentArray<UnitComponentReferences>();
-        var lineRendererData = m_UnitData.ToComponentArray<LineRendererComponent>();
-        var unitTransformData = m_UnitData.ToComponentArray<Transform>();
-
-        for (int i = 0; i < unitFactionData.Length; i++)
+        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent anim, ref FactionComponent.Component unitFactionComp, ref Health.Component health, ref MovementVariables.Component move) =>
         {
-            var stats = unitStatData[i];
-            var health = healthData[i];
-            var unitEffects = unitEffectsData[i];
-            var unitFactionComp = unitFactionData[i];
-            var teamColorMeshes = teamColorMesheData[i];
-            var componentReferences = componentReferenceData[i];
-            var lineRenderer = lineRendererData[i];
-            var unitTransform = unitTransformData[i];
+            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+            var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
+            var unitTransform = EntityManager.GetComponentObject<Transform>(e);
+            var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
 
+            anim.RotateTransform.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
             unitEffects.CurrentHealth = health.CurrentHealth;
 
             switch (unitFactionComp.TeamColor)
@@ -68,15 +57,21 @@ public class InitializeUnitsSystem : ComponentSystem
                 case TeamColorEnum.blue:
                     //markerObjects.Outline.color = 1;
                     teamColorMeshes.color = settings.FactionColors[1];
+                    unitEffects.PlayerColor = settings.FactionColors[1];
                     break;
                 case TeamColorEnum.red:
                     //markerObjects.Outline.color = 2;
                     teamColorMeshes.color = settings.FactionColors[2];
+                    unitEffects.PlayerColor = settings.FactionColors[2];
                     break;
             }
 
-            if(unitFactionComp.Faction == 0)
+            if (unitFactionComp.Faction == 0)
+            {
                 teamColorMeshes.color = settings.FactionColors[0];
+                unitEffects.PlayerColor = settings.FactionColors[0];
+            }
+
 
             for (int m = 0; m < teamColorMeshes.detailColorMeshes.Count; m++)
             {
@@ -94,7 +89,7 @@ public class InitializeUnitsSystem : ComponentSystem
 
             foreach (Renderer r in teamColorMeshes.EmissionColorMeshes)
             {
-               if(r.materials[r.materials.Length - 1].HasProperty("_EmissiveColor"))
+                if (r.materials[r.materials.Length - 1].HasProperty("_EmissiveColor"))
                     r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.color * r.materials[r.materials.Length - 1].GetFloat("_EmissiveIntensity"));
 
                 if (r.materials[r.materials.Length - 1].HasProperty("_EmissionColor"))
@@ -114,10 +109,7 @@ public class InitializeUnitsSystem : ComponentSystem
             foreach (LineRenderer l in teamColorMeshes.LineRenderers)
             {
                 l.material.SetColor("_EmissiveColor", teamColorMeshes.color * l.material.GetFloat("_EmissiveIntensity"));
-                //l.startColor = teamColorMeshes.color;
-                //l.endColor = teamColorMeshes.color;
             }
-
 
             foreach (ParticleSystem p in teamColorMeshes.ParticleSystems)
             {
@@ -150,18 +142,19 @@ public class InitializeUnitsSystem : ComponentSystem
                 }
             }
 
-            Entities.With(m_PlayerData).ForEach((HeroTransform heroTransform, ref FactionComponent.Component playerFactionComp) =>
+            var unitFComp = unitFactionComp;
+            var unitTrans = unitTransform;
+
+            if (stats.IsHero)
             {
-                if (stats.IsHero && playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
+                Entities.With(m_PlayerData).ForEach((HeroTransform heroTransform, ref FactionComponent.Component playerFactionComp) =>
                 {
-                    heroTransform.Transform = unitTransform;
-                }
-            });
-        }
-
-        m_UnitData.CopyFromComponentDataArray(unitFactionData);
-        unitFactionData.Dispose();
-        healthData.Dispose();
-
+                    if (playerFactionComp.Faction == unitFComp.Faction && heroTransform.Transform == null)
+                    {
+                        heroTransform.Transform = unitTransform;
+                    }
+                });
+            }
+        });
     }
 }

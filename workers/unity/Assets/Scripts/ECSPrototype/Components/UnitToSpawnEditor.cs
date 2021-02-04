@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace LeyLineHybridECS
@@ -8,6 +8,7 @@ namespace LeyLineHybridECS
         public string UnitName;
         public bool IsHeroSpawn;
         public uint Faction;
+        public uint StartRotation;
     }
 }
 

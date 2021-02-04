@@ -201,7 +201,8 @@ public class ActionEffectsSystem : ComponentSystem
                                     PlayerColor_ParticleSystem go = Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
                                     for(int ii =0; ii<go.SetParticleSystem_BaseColor.Count; ii++)
                                     {
-                                        go.SetParticleSystem_BaseColor[ii].startColor = unitEffects.PlayerColor;
+                                        ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
+                                        main.startColor = unitEffects.PlayerColor;
                                     }
 
                                     //if the unit survives
@@ -396,30 +397,10 @@ public class ActionEffectsSystem : ComponentSystem
 
             List<Vector3> travellingPoints = new List<Vector3>();
 
-            //if(projectileFab.MaxHeight > 0)
-            //{
-
             //THIS USES SINUS CALC FOR STRAIGHT LINES -- CHANGE METHOD TO HANDLE STRAIGHT LINES WHITOUT CALCULATING SINUS STUFF
             travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
-            //Debug.Log(travellingPoints.Count);
-            //}
-            //else
-            //{
-            //travellingPoints.Add(spawnTransform.position);
-            //travellingPoints.Add(offSetTarget);
-            //}
 
-            //Quaternion lookRotation = new Quaternion();
             Vector3 distance = offSetTarget - spawnTransform.position;
-            //lookRotation.SetLookRotation(distance);
-
-            /*
-
-            if (projectileFab.BaseJoint)
-            {
-                projectileFab.BaseJoint.connectedBody = spawnTransform.GetComponent<Rigidbody>();
-            }
-            */
 
             foreach (SpringJoint s in projectileFab.SpringJoints)
             {
@@ -453,7 +434,8 @@ public class ActionEffectsSystem : ComponentSystem
                     PlayerColor_ParticleSystem go = Object.Instantiate(bodyPartParticle, animatorComponent.RagdollRigidBodies[i].position, Quaternion.identity, animatorComponent.RagdollRigidBodies[i].transform);
                     for (int ii = 0; ii < go.SetParticleSystem_BaseColor.Count; ii++)
                     {
-                        go.SetParticleSystem_BaseColor[ii].startColor = playerColor;
+                        ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
+                        main.startColor = playerColor;
                     }
                 }
             }
