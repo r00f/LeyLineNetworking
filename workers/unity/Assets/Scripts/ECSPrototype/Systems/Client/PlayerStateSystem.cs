@@ -69,34 +69,17 @@ namespace LeyLineHybridECS
         protected override void OnUpdate()
         {
 
-            if (m_PlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
+            if (m_GameStateData.CalculateEntityCount() == 0)
                 return;
 
             var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-
-            /*
-            #region PlayerData
-            var playersWorldID = m_PlayerData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-            var playersCamera = m_PlayerData.ToComponentArray<Moba_Camera>();
-            var playerStates = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
-            var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
-            var playerVisions = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-            var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-            #endregion
-            
-
-            var playerFact = playerFactions[0];
-            var playerHigh = playerHighs[0];
-            var playerVision = playerVisions[0];
-            var playerState = playerStates[0];
-            var playerWorldIndex = playersWorldID[0].Value;
-            var playerCam = playersCamera[0];
-            */
-
             var gameState = gameStateData[0];
 
             Entities.With(m_PlayerData).ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction) =>
             {
+                if (playerVision.RevealVision)
+                    return;
+
                 var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
                 var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
 

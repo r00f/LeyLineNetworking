@@ -79,7 +79,7 @@ public class ActionEffectsSystem : ComponentSystem
         var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
 
 
-        if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
+        if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0 || playerVisionData[0].RevealVision)
         {
             //Debug.Log("OOF");
             playerVisionData.Dispose();

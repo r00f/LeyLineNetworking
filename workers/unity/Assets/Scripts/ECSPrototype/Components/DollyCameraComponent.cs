@@ -53,6 +53,7 @@ public class DollyCameraComponent : MonoBehaviour
         trackedDolly.m_PathPosition = 0;
         dollyCam.Priority = 11;
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
+        UIRef.UIActive = false;
         UIRef.UIMainPanel.SetActive(false);
     }
 
@@ -140,9 +141,13 @@ public class DollyCameraComponent : MonoBehaviour
 
         if (UIDisplayDelatTime > 0)
             UIDisplayDelatTime -= Time.deltaTime;
-        else if (!cameraBrain.IsBlending && UIRef.UIActive)
+
+
+        else if (!cameraBrain.IsBlending && !UIRef.UIActive)
         {
             UIRef.UIMainPanel.SetActive(true);
+            UIRef.UIActive = true;
+            Destroy(gameObject);
         }
     }
 

@@ -187,7 +187,6 @@ namespace LeyLineHybridECS
             var authPlayerCameras = m_AuthoritativePlayerData.ToComponentArray<Moba_Camera>();
             var authPlayerCam = authPlayerCameras[0];
 
-
             var gameState = gameStates[0];
             var authPlayerFaction = authPlayersFaction[0].Faction;
             var authPlayerState = authPlayersState[0];
@@ -206,6 +205,77 @@ namespace LeyLineHybridECS
             {
                 m_SendActionRequestSystem.RevealPlayerVision();
                 ClearUnitUIElements();
+
+                switch (authPlayersFaction[0].TeamColor)
+                {
+                    case TeamColorEnum.blue:
+                        UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[0];
+                        UIRef.FriendlyColor = settings.FactionColors[1];
+                        UIRef.EnemyColor = settings.FactionColors[2];
+                        break;
+                    case TeamColorEnum.red:
+                        UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[1];
+                        UIRef.FriendlyColor = settings.FactionColors[2];
+                        UIRef.EnemyColor = settings.FactionColors[1];
+                        break;
+                }
+
+                UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
+                UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
+
+                UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
+
+                UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
+                UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
+
+                UIRef.FriendlyReadySlider.PlayerColorImage.color = UIRef.FriendlyColor;
+                UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
+                UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
+                UIRef.FriendlyRope.color = UIRef.FriendlyColor;
+                UIRef.EnergyConnectorPlayerColorFill.color = UIRef.FriendlyColor;
+
+                UIRef.EnemyReadySlider.PlayerColorImage.color = UIRef.EnemyColor;
+                UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
+                UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
+                UIRef.EnemyRope.color = UIRef.EnemyColor;
+
+                UIRef.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
+                UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
+                UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
+
+                var fBurst = UIRef.FriendlyReadyBurstPS.main;
+                fBurst.startColor = UIRef.FriendlyColor;
+                var eBurst = UIRef.EnemyReadyBurstPS.main;
+                eBurst.startColor = UIRef.EnemyColor;
+
+                var main = UIRef.FriendlyReadySwooshParticle.LoopPS.main;
+                main.startColor = UIRef.FriendlyColor;
+
+                var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
+                main1.startColor = UIRef.FriendlyColor;
+
+                var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
+                main2.startColor = UIRef.EnemyColor;
+
+                var main3 = UIRef.EnemyReadySwooshParticle.LoopPS.main;
+                main3.startColor = UIRef.EnemyColor;
+
+                if (!UIRef.MatchReadyPanel.activeSelf)
+                {
+                    UIRef.MatchReadyPanel.SetActive(true);
+                }
+            }
+
+            if (gameState.CurrentState != GameStateEnum.waiting_for_players)
+            {
+                if (UIRef.StartUpWaitTime > 0)
+                {
+                    UIRef.StartUpWaitTime -= Time.DeltaTime;
+                }
+                else
+                {
+                    UIRef.StartupPanel.SetActive(false);
+                }
             }
 
             if (dollyCam.RevealVisionTrigger)
@@ -271,83 +341,17 @@ namespace LeyLineHybridECS
                 UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
             }
 
-            #region Initialize
-            if (gameState.CurrentState != GameStateEnum.waiting_for_players)
-            {
-                //RETARDED IF REQUIRES STARTUPPANEL TO BE ACTIVE TO WORK
-                if (UIRef.StartupPanel.activeSelf)
-                {
-                    if (!UIRef.MatchReadyPanel.activeSelf)
-                    {
-                        UIRef.MatchReadyPanel.SetActive(true);
-                    }
-                    if (UIRef.StartUpWaitTime > 0)
-                    {
-                        UIRef.StartUpWaitTime -= Time.DeltaTime;
-                    }
-                    else
-                    {
-                        switch (authPlayersFaction[0].TeamColor)
-                        {
-                            case TeamColorEnum.blue:
-                                UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[0];
-                                UIRef.FriendlyColor = settings.FactionColors[1];
-                                UIRef.EnemyColor = settings.FactionColors[2];
-                                break;
-                            case TeamColorEnum.red:
-                                UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[1];
-                                UIRef.FriendlyColor = settings.FactionColors[2];
-                                UIRef.EnemyColor = settings.FactionColors[1];
-                                break;
-                        }
-
-                        UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
-                        UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
-
-                        UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
-
-                        UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
-                        UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
-
-                        UIRef.FriendlyReadySlider.PlayerColorImage.color = UIRef.FriendlyColor;
-                        UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
-                        UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
-                        UIRef.FriendlyRope.color = UIRef.FriendlyColor;
-                        UIRef.EnergyConnectorPlayerColorFill.color = UIRef.FriendlyColor;
-
-                        UIRef.EnemyReadySlider.PlayerColorImage.color = UIRef.EnemyColor;
-                        UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
-                        UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
-                        UIRef.EnemyRope.color = UIRef.EnemyColor;
-
-                        UIRef.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
-                        UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
-                        UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
-
-                        var fBurst = UIRef.FriendlyReadyBurstPS.main;
-                        fBurst.startColor = UIRef.FriendlyColor;
-                        var eBurst = UIRef.EnemyReadyBurstPS.main;
-                        eBurst.startColor = UIRef.EnemyColor;
-
-                        var main = UIRef.FriendlyReadySwooshParticle.LoopPS.main;
-                        main.startColor = UIRef.FriendlyColor;
-
-                        var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
-                        main1.startColor = UIRef.FriendlyColor;
-                        
-                        var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
-                        main2.startColor = UIRef.EnemyColor;
-
-                        var main3 = UIRef.EnemyReadySwooshParticle.LoopPS.main;
-                        main3.startColor = UIRef.EnemyColor;
-
-                        UIRef.StartupPanel.SetActive(false);
-                    }
-                }
-            }
-            #endregion
-
             HandleKeyCodeInput(gameState.CurrentState);
+
+            if(!UIRef.UIActive)
+            {
+                gameStates.Dispose();
+                authPlayersEnergy.Dispose();
+                authPlayersFaction.Dispose();
+                authPlayersState.Dispose();
+                playerHighlightingDatas.Dispose();
+                return;
+            }
 
             #region TurnStepEffects
 
