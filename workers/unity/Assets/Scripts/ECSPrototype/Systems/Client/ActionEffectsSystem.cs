@@ -392,8 +392,16 @@ public class ActionEffectsSystem : ComponentSystem
         //if any coord in an AoE is visible or Launching unit is visible or target unit is visible, spawn a projectile
         if (AoEcontainsTarget || playerVisionHash.Contains(inAction.Targets[0].TargetCoordinate) || playerVisionHash.Contains(originCoord))
         {
+
+
+            Projectile projectile = Object.Instantiate(projectileFab, spawnTransform.position, spawnTransform.rotation, spawnTransform.root);
+            projectile.UnitId = unitId;
+            projectile.Action = inAction;
+            projectile.SpawnTransform = spawnTransform;
+
+
             //save targetPosition / targetYOffset on units?
-            Vector3 offSetTarget = new Vector3(targetPos.x, targetPos.y + yOffset, targetPos.z);
+            Vector3 offSetTarget = new Vector3(targetPos.x, targetPos.y + yOffset + projectile.TargetYOffset, targetPos.z);
 
             List<Vector3> travellingPoints = new List<Vector3>();
 
@@ -407,10 +415,7 @@ public class ActionEffectsSystem : ComponentSystem
                 s.maxDistance = distance.magnitude / projectileFab.SpringJoints.Count;
             }
 
-            Projectile projectile = Object.Instantiate(projectileFab, spawnTransform.position, spawnTransform.rotation, spawnTransform.root);
-            projectile.UnitId = unitId;
-            projectile.Action = inAction;
-            projectile.SpawnTransform = spawnTransform;
+
             projectile.TravellingCurve = travellingPoints;
             projectile.IsTravelling = true;
         }

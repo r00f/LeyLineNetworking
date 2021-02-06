@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
 using Unit;
@@ -115,7 +115,7 @@ public class ProjectileSystem : ComponentSystem
 
                         projectile.DestinationReached = true;
                     }
-                    else if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 2)
+                    else if (projectile.CurrentTargetId < projectile.TravellingCurve.Count - 1 - projectile.TravellingCurveCutOff)
                     {
                         float dist = Vector3.Distance(projectile.TravellingCurve[projectile.CurrentTargetId], projectile.TravellingCurve[projectile.CurrentTargetId + 1]);
                         if (projectile.MovementPercentage >= 1f)
