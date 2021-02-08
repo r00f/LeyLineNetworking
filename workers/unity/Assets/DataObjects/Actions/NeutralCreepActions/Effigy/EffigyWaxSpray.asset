@@ -17,7 +17,7 @@ MonoBehaviour:
   ProjectileFab: {fileID: 93931158904744250, guid: 4912da989b47fc7469544c903c51ecc3,
     type: 3}
   ActionName: Wax Spray
-  Description: Spray the area with wax. Deals <color=red>60</color> damge to all
+  Description: Spray the area with wax. Deals <color=red>30</color> damge to all
     enemies in the area.
   TimeToExecute: 4
   HasWindup: 0
@@ -81,7 +81,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 0
   ApplyToRestrictions: 4
-  DamageAmount: 60
+  DamageAmount: 30
   ExplosionRadius: 4
   ExplosionForce: 600
   UpForce: 5

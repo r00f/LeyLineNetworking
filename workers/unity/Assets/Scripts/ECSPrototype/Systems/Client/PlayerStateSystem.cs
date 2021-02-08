@@ -78,7 +78,10 @@ namespace LeyLineHybridECS
             Entities.With(m_PlayerData).ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction) =>
             {
                 if (playerVision.RevealVision)
+                {
+                    gameStateData.Dispose();
                     return;
+                }
 
                 var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
                 var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
