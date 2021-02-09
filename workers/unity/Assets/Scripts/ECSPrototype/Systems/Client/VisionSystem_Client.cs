@@ -188,7 +188,7 @@ namespace LeyLineHybridECS
             var playerVision = playerVisions[0];
             var playerFaction = playerFactions[0].Faction;
 
-            HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
+            //HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
             Entities.With(m_UnitData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible visible) =>
             {
@@ -198,7 +198,7 @@ namespace LeyLineHybridECS
 
                 if (faction.Faction != playerFaction)
                 {
-                    if (visionCoordsHash.Contains(coord.CubeCoordinate))
+                    if (playerVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
                     {
                         if (isVisibleGOs.MiniMapTileInstance && isVisibleGOs.MiniMapTileInstance.gameObject.activeSelf == false)
                         {
@@ -248,7 +248,7 @@ namespace LeyLineHybridECS
 
             Entities.With(m_IsVisibleData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
             {
-                if(visionCoordsHash.Contains(cubeCoord.CubeCoordinate))
+                if(playerVision.CellsInVisionrange.ContainsKey(cubeCoord.CubeCoordinate))
                 {
                     if (isVisibleComp.Value == 0)
                     {

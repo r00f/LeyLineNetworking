@@ -211,7 +211,7 @@ public static class LeyLineEntityTemplates {
         var playerVision = new Vision.Snapshot
         {
             RequireUpdate = false,
-            CellsInVisionrange = new List<Vector3f>(),
+            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
             Lastvisible = new List<Vector3f>(),
             Positives = new List<Vector3f>(),
             Negatives = new List<Vector3f>()
@@ -315,7 +315,7 @@ public static class LeyLineEntityTemplates {
 
         var unitVision = new Vision.Snapshot
         {
-            CellsInVisionrange = new List<Vector3f>(),
+            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
             Lastvisible = new List<Vector3f>(),
             Positives = new List<Vector3f>(),
             Negatives = new List<Vector3f>(),
@@ -433,7 +433,7 @@ public static class LeyLineEntityTemplates {
 
         var unitVision = new Vision.Snapshot
         {
-            CellsInVisionrange = new List<Vector3f>(),
+            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
             Lastvisible = new List<Vector3f>(),
             Positives = new List<Vector3f>(),
             Negatives = new List<Vector3f>(),

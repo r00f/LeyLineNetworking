@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using Improbable;
@@ -138,65 +138,75 @@ namespace LeyLineHybridECS
                 var gameState = gameStates[0];
                 var playerFaction = playerFactions[0];
 
+
+                var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
+
+                if(initMapEvents.Count > 0)
+                {
+                    for (int i = 0; i < manaLithFactions.Length; i++)
+                    {
+                        var manalithFaction = manaLithFactions[i];
+                        var manaLith = manalithComps[i];
+                        var ID = entityID[i].EntityId.Id;
+                        var pos = manaLithPositions[i];
+
+
+                        Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
+                        {
+                                var circlePos = meshColor.transform.position.sqrMagnitude;
+                                if (pos.Coords.ToUnityVector().sqrMagnitude == circlePos)
+                                {
+                                    if (m_UISystem.UIRef != null)
+                                    {
+                                        switch (initData.circleSize)
+                                        {
+                                            case ManalithInitializer.CircleSize.Seven:
+                                                clientData.WorldPos = clientData.UIElementTransform.position;
+                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
+                                                clientData.ManalithEntityID = ID;
+                                                clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
+                                                var coord1 = initData.leyLineCircleCoords[0];
+
+                                                if (!clientData.MiniMapTileInstance)
+                                                    PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0]);
+                                                if (!clientData.BigMapTileInstance)
+                                                    PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0]);
+
+
+                                                break;
+                                            case ManalithInitializer.CircleSize.Three:
+                                                clientData.WorldPos = clientData.UIElementTransform.position;
+                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
+                                                clientData.ManalithEntityID = ID;
+                                                clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
+
+
+                                                if (!clientData.MiniMapTileInstance)
+                                                    PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0]);
+                                                if (!clientData.BigMapTileInstance)
+                                                    PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0]);
+
+                                                break;
+                                        }
+
+
+                                    }
+                            }
+                        });
+                    }
+                }
+
                 for (int i = 0; i < manaLithFactions.Length; i++)
                 {
                     var manalithFaction = manaLithFactions[i];
                     var manaLith = manalithComps[i];
                     var ID = entityID[i].EntityId.Id;
                     var pos = manaLithPositions[i];
-                    
 
                     Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                     {
-                        if (clientData.ManalithEntityID == 0)
-                        {
-                            var circlePos = meshColor.transform.position.sqrMagnitude;
-                            if (pos.Coords.ToUnityVector().sqrMagnitude == circlePos)
-                            {
-                                if (m_UISystem.UIRef != null)
-                                {
-                                    switch (initData.circleSize)
-                                    {
-                                        case ManalithInitializer.CircleSize.Seven:
-                                            clientData.WorldPos = clientData.UIElementTransform.position;
-                                            clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
-                                            clientData.ManalithEntityID = ID;
-                                            clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
-                                            var coord1 = initData.leyLineCircleCoords[0];
-
-                                            if (!clientData.MiniMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0]);
-                                            if (!clientData.BigMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, coord1, ref clientData, settings.FactionMapColors[0]);
-
-
-                                            break;
-                                        case ManalithInitializer.CircleSize.Three:
-                                            clientData.WorldPos = clientData.UIElementTransform.position;
-                                            clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
-                                            clientData.ManalithEntityID = ID;
-                                            clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
-
-                                            
-                                            if (!clientData.MiniMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, initData, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0]);
-                                            if(!clientData.BigMapTileInstance)
-                                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, initData, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, initData.leyLineCircleCoords, ref clientData, settings.FactionMapColors[0]);
-
-                                            break;
-                                    }
-
-
-                                }
-                            }
-                        }
-
-
-
                         if (clientData.ManalithEntityID == ID)
                         {
-
-
                             #region EnableDisableManalithHovered
                             bool manalithIsHovered = false;
                             foreach (CellAttribute c in manaLith.CircleAttributeList.CellAttributes)
@@ -236,10 +246,12 @@ namespace LeyLineHybridECS
                                     }
                                 }
                             }
-                            meshColor.MapColor = settings.FactionMapColors[(int)manalithFaction.Faction];
-                            meshColor.Color = settings.FactionColors[(int)manalithFaction.Faction];
+
+                            meshColor.MapColor = settings.FactionMapColors[(int) manalithFaction.Faction];
+                            meshColor.Color = settings.FactionColors[(int) manalithFaction.Faction];
 
                             var manalithFactionChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Manalith.ManalithFactionChangeEvent.Event>();
+
                             for (int q = 0; q < manalithFactionChangeEvents.Count; q++)
                             {
 
@@ -247,7 +259,7 @@ namespace LeyLineHybridECS
                                 if (ID == EventID)
                                 {
                                     //Fire Get Capture effects
-                                    if(clientData.BigMapTileInstance && clientData.BigMapTileInstance.isActiveAndEnabled)
+                                    if (clientData.BigMapTileInstance && clientData.BigMapTileInstance.isActiveAndEnabled)
                                     {
                                         if (clientData.BigMapTileInstance.GetCapturedMapEffect)
                                         {
@@ -261,7 +273,7 @@ namespace LeyLineHybridECS
                                             Object.Destroy(ping.gameObject, 4f);
                                         }
                                     }
-                                    if(clientData.MiniMapTileInstance && clientData.MiniMapTileInstance.isActiveAndEnabled)
+                                    if (clientData.MiniMapTileInstance && clientData.MiniMapTileInstance.isActiveAndEnabled)
                                     {
                                         if (clientData.MiniMapTileInstance.GetCapturedMapEffect)
                                         {
@@ -302,7 +314,7 @@ namespace LeyLineHybridECS
 
                             if (clientData.MiniMapTileInstance)
                                 clientData.MiniMapTileInstance.TileImage.color = meshColor.MapLerpColor;
-                            if(clientData.BigMapTileInstance)
+                            if (clientData.BigMapTileInstance)
                                 clientData.BigMapTileInstance.TileImage.color = meshColor.MapLerpColor;
                             //if fact.Faction != 0 display gain, else dont
                             //if color of the image isnt lerped to meshcolor, lerp there
@@ -310,12 +322,12 @@ namespace LeyLineHybridECS
                     });
                 }
 
+
                 Entities.With(m_CircleData).ForEach((MeshColor meshColor) =>
                 {
 
                     if (meshColor.LerpColor != meshColor.Color)
                         meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
-
 
                     if(meshColor.MapLerpColor != meshColor.MapColor)
                         meshColor.MapLerpColor = Color.Lerp(meshColor.MapLerpColor, meshColor.MapColor, 0.05f);

@@ -255,10 +255,11 @@ public class VisionSystem_Server : ComponentSystem
                     }
                 }
             }
-            sight = new List<Vector3f>(sightHash);
+            //sight = new List<Vector3f>(sightHash);
         }
 
-        inVision.CellsInVisionrange = sight;
+        //inVision.CellsInVisionrange.Clear();
+        inVision.CellsInVisionrange = sightHash.ToDictionary(x => x, x => (uint)x.X);
 
         return inVision;
     }
@@ -270,7 +271,7 @@ public class VisionSystem_Server : ComponentSystem
         //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
         Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coord) =>
         {
-            inVision.CellsInVisionrange.Add(coord.CubeCoordinate);
+            inVision.CellsInVisionrange.Add(coord.CubeCoordinate, 0);
         });
 
         return inVision;
@@ -285,7 +286,7 @@ public class VisionSystem_Server : ComponentSystem
         .WithField("Faction", faction));
         */
         inVision.Lastvisible.Clear();
-        inVision.Lastvisible.AddRange(inVision.CellsInVisionrange);
+        inVision.Lastvisible.AddRange(inVision.CellsInVisionrange.Keys);
 
         inVision.Positives.Clear();
         inVision.Negatives.Clear();
@@ -305,14 +306,14 @@ public class VisionSystem_Server : ComponentSystem
             if (faction == unitFaction.Faction)
             {
                 //use a hashSet to increase performance of contains calls (O(1) vs. O(n))
-                foreach (Vector3f v in unitVision.CellsInVisionrange)
+                foreach (Vector3f v in unitVision.CellsInVisionrange.Keys)
                 {
                     currentVision.Add(v);
                 }
             }
         });
 
-        inVision.CellsInVisionrange = currentVision.ToList();
+        inVision.CellsInVisionrange = currentVision.ToDictionary(item => item, item => (uint)0);
 
         foreach (Vector3f v in lastVision)
         {

@@ -1,4 +1,4 @@
-﻿using Cell;
+using Cell;
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -700,7 +700,7 @@ public class HighlightingSystem : ComponentSystem
 
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-        HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
+        //HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
         Entities.With(m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
         {
@@ -711,7 +711,7 @@ public class HighlightingSystem : ComponentSystem
             //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
             if (actions.LockedAction.Index == -3)
             {
-                if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
+                if (playerState.UnitTargets.ContainsKey(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
                     ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
                     playerState.UnitTargets.Remove(unitId.EntityId.Id);

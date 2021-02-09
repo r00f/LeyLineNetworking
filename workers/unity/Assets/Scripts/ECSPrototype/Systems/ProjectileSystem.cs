@@ -15,6 +15,7 @@ public class ProjectileSystem : ComponentSystem
     private EntityQuery m_MoveAnimData;
     private EntityQuery m_ProjectileData;
     private EntityQuery m_UnitData;
+    EntityQuery m_PlayerData;
     bool initialized;
     ActionEffectsSystem m_ActionEffectSystem;
 
@@ -30,6 +31,8 @@ public class ProjectileSystem : ComponentSystem
         ComponentType.ReadWrite<MovementAnimComponent>(),
         ComponentType.ReadWrite<Transform>()
         );
+
+
 
     }
 
@@ -54,6 +57,11 @@ public class ProjectileSystem : ComponentSystem
                     ComponentType.ReadOnly<GameState.HasAuthority>()
                 );
 
+                m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
+                ComponentType.ReadOnly<Vision.Component>(),
+                ComponentType.ReadOnly<PlayerState.HasAuthority>()
+                );
+
                 initialized = true;
             }
         }
@@ -65,6 +73,15 @@ public class ProjectileSystem : ComponentSystem
     {
         if(WorldsInitialized())
         {
+
+            if (m_PlayerData.CalculateEntityCount() == 0)
+                return;
+
+            var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
+
+            var playerVision = playerVisionData[0];
+
+
             Entities.With(m_ProjectileData).ForEach((Entity entity, Projectile projectile, Transform transform) =>
             {
                 if(projectile.CollisionDetection)
@@ -169,7 +186,7 @@ public class ProjectileSystem : ComponentSystem
 
                         if (!projectile.EffectTriggered)
                         {
-                            m_ActionEffectSystem.TriggerActionEffect(projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, projectile.AxaShieldOrbitCount);
+                            m_ActionEffectSystem.TriggerActionEffect(playerVision, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, projectile.AxaShieldOrbitCount);
 
                             if(projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
                             {
@@ -240,6 +257,7 @@ public class ProjectileSystem : ComponentSystem
                     }
                 }
             });
+            playerVisionData.Dispose();
         }
     }
 }

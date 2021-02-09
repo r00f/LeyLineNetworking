@@ -179,12 +179,12 @@ public class UnitAnimationSystem : ComponentSystem
                                 {
                                     targetYoffset = 1.3f;
                                 }
-                                m_ActionEffectsSystem.LaunchProjectile(animatorComponent.CurrentLockedAction.ProjectileFab, animatorComponent.ProjectileSpawnOrigin, targetPos, actions.LockedAction, id.EntityId.Id, coord.CubeCoordinate, targetYoffset);
+                                m_ActionEffectsSystem.LaunchProjectile(playerVision, animatorComponent.CurrentLockedAction.ProjectileFab, animatorComponent.ProjectileSpawnOrigin, targetPos, actions.LockedAction, id.EntityId.Id, coord.CubeCoordinate, targetYoffset);
                             }
                             else
                             {
                                 //Debug.Log("Trigger Action Effect: " + animatorComponent.Animator.GetInteger("ActionIndexInt"));
-                                m_ActionEffectsSystem.TriggerActionEffect(actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform);
+                                m_ActionEffectsSystem.TriggerActionEffect(playerVision, actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform);
                             }
 
                             animatorComponent.AnimationEvents.EventTriggered = true;

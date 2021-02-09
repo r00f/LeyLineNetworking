@@ -19,6 +19,7 @@ public class ActionEffectsSystem : ComponentSystem
     PathFindingSystem m_PathFindingSystem;
     UnitAnimationSystem m_UnitAnimationSystem;
     HighlightingSystem m_HighlightingSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
     EntityQuery m_GameStateData;
@@ -41,9 +42,7 @@ public class ActionEffectsSystem : ComponentSystem
         ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<CapsuleCollider>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
-        ComponentType.ReadWrite<AnimatorComponent>(),
-        ComponentType.ReadWrite<UnitHeadUIReferences>(),
-        ComponentType.ReadWrite<UnitEffects>()
+        ComponentType.ReadWrite<UnitComponentReferences>()
         );
 
         m_CellData = GetEntityQuery(
@@ -61,6 +60,7 @@ public class ActionEffectsSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         m_UnitAnimationSystem = World.GetExistingSystem<UnitAnimationSystem>();
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
@@ -75,266 +75,259 @@ public class ActionEffectsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-        var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
 
+        var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
-        if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0 || playerVisionData[0].RevealVision)
+        if (cleanUpStateEvents.Count > 0)
         {
-            //Debug.Log("OOF");
-            playerVisionData.Dispose();
-            gameStates.Dispose();
-            return;
+            Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences componentReferences, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
+            {
+                if (componentReferences.UnitEffectsComp.AxaShield && componentReferences.UnitEffectsComp.AxaShield.Orbits.Count != 0)
+                {
+                    for (int i = componentReferences.UnitEffectsComp.AxaShield.Orbits.Count - 1; i >= 0; i--)
+                    {
+                        AxaShieldOrbit o = componentReferences.UnitEffectsComp.AxaShield.Orbits[i];
+
+                        foreach (ParticleSystem loopPS in o.LoopingSystems)
+                        {
+                            loopPS.Stop();
+                        }
+                        foreach (ParticleSystem explosionPS in o.ExplosionSystems)
+                        {
+                            explosionPS.Play();
+                        }
+                        Object.Destroy(o.gameObject, .2f);
+                        componentReferences.UnitEffectsComp.AxaShield.Orbits.Remove(o);
+                    }
+                }
+                componentReferences.UnitEffectsComp.CombinedArmor = 0;
+                componentReferences.UnitEffectsComp.CurrentArmor = 0;
+                componentReferences.UnitEffectsComp.CurrentHealth = health.CurrentHealth;
+            });
         }
 
-        var playerVisionHash = new HashSet<Vector3f>(playerVisionData[0].CellsInVisionrange);
-
-        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
+        Entities.With(m_GameStateData).ForEach((ref GameState.Component gameState) =>
         {
-            var unitHeadUIRef = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
-            var unitCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
-            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
-
-            if(playerVisionHash.Contains(coord.CubeCoordinate))
+            if (gameState.CurrentState != GameStateEnum.planning)
             {
-                if (gameStates[0].CurrentState == GameStateEnum.planning)
+                Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
                 {
-                    //handle axa shield orbits
-                    if (unitEffects.AxaShield && unitEffects.AxaShield.Orbits.Count != 0)
+                    if (playerVision.RevealVision)
                     {
-                        for (int i = unitEffects.AxaShield.Orbits.Count - 1; i >= 0; i--)
-                        {
-                            AxaShieldOrbit o = unitEffects.AxaShield.Orbits[i];
-
-                            foreach (ParticleSystem loopPS in o.LoopingSystems)
-                            {
-                                loopPS.Stop();
-                            }
-                            foreach (ParticleSystem explosionPS in o.ExplosionSystems)
-                            {
-                                explosionPS.Play();
-                            }
-                            Object.Destroy(o.gameObject, .2f);
-                            unitEffects.AxaShield.Orbits.Remove(o);
-                        }
+                        return;
                     }
+                    var pVision = playerVision;
 
-                    unitEffects.CombinedArmor = 0;
-                    unitEffects.CurrentArmor = 0;
-                    unitEffects.CurrentHealth = health.CurrentHealth;
-                }
-
-                //DOES THE SAME FOR EACH GETHITEFFECT IN LIST (TWO DAMAGE NUMBERS AT THE SAME TIME) - ADD BEHAVIOUR TO ADD DAMAGE NUBERS AND ONLY DISPLAY 1 EFFECT 
-                for (int i = 0; i < unitEffects.GetHitEffects.Count; i++)
-                {
-                    unitEffects.HitPosition = unitCollider.ClosestPoint(unitEffects.GetHitEffects.ElementAt(i).Value);
-                    Vector3 dir = unitEffects.GetHitEffects.ElementAt(i).Value - unitEffects.HitPosition;
-
-                    foreach (ActionEffect effect in unitEffects.GetHitEffects.ElementAt(i).Key.Effects)
+                    Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences componentReferences, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
                     {
-                        switch (effect.EffectType)
+                        if (pVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
                         {
-                            case EffectTypeEnum.deal_damage:
+                            //DOES THE SAME FOR EACH GETHITEFFECT IN LIST (TWO DAMAGE NUMBERS AT THE SAME TIME) - ADD BEHAVIOUR TO ADD DAMAGE NUBERS AND ONLY DISPLAY 1 EFFECT 
+                            for (int i = 0; i < componentReferences.UnitEffectsComp.GetHitEffects.Count; i++)
+                            {
+                                componentReferences.UnitEffectsComp.HitPosition = componentReferences.CapsuleCollider.ClosestPoint(componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Value);
+                                Vector3 dir = componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Value - componentReferences.UnitEffectsComp.HitPosition;
 
-                                uint damageAmount = effect.DealDamageNested.DamageAmount;
-
-                                if (unitEffects.CurrentArmor > 0)
+                                foreach (ActionEffect effect in componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Key.Effects)
                                 {
-                                    //handle axa shield orbits
-                                    if (unitEffects.AxaShield && unitEffects.AxaShield.Orbits.Count != 0)
+                                    switch (effect.EffectType)
                                     {
-                                        int remainingDamage = (int)damageAmount;
+                                        case EffectTypeEnum.deal_damage:
 
-                                        for (int j = unitEffects.AxaShield.Orbits.Count - 1; j >= 0; j--)
-                                        {
-                                            AxaShieldOrbit o = unitEffects.AxaShield.Orbits[j];
+                                            uint damageAmount = effect.DealDamageNested.DamageAmount;
 
-                                            if (remainingDamage - 10 >= 0)
+                                            if (componentReferences.UnitEffectsComp.CurrentArmor > 0)
                                             {
-                                                foreach (ParticleSystem loopPS in o.LoopingSystems)
+                                                //handle axa shield orbits
+                                                if (componentReferences.UnitEffectsComp.AxaShield && componentReferences.UnitEffectsComp.AxaShield.Orbits.Count != 0)
                                                 {
-                                                    loopPS.Stop();
-                                                }
-                                                foreach (ParticleSystem explosionPS in o.ExplosionSystems)
-                                                {
-                                                    explosionPS.Play();
-                                                }
-                                                Object.Destroy(o.gameObject, .2f);
-                                                remainingDamage -= 10;
-                                                unitEffects.AxaShield.Orbits.Remove(o);
-                                            }
-                                        }
-                                    }
+                                                    int remainingDamage = (int) damageAmount;
 
-                                    if (damageAmount < unitEffects.CurrentArmor)
+                                                    for (int j = componentReferences.UnitEffectsComp.AxaShield.Orbits.Count - 1; j >= 0; j--)
+                                                    {
+                                                        AxaShieldOrbit o = componentReferences.UnitEffectsComp.AxaShield.Orbits[j];
+
+                                                        if (remainingDamage - 10 >= 0)
+                                                        {
+                                                            foreach (ParticleSystem loopPS in o.LoopingSystems)
+                                                            {
+                                                                loopPS.Stop();
+                                                            }
+                                                            foreach (ParticleSystem explosionPS in o.ExplosionSystems)
+                                                            {
+                                                                explosionPS.Play();
+                                                            }
+                                                            Object.Destroy(o.gameObject, .2f);
+                                                            remainingDamage -= 10;
+                                                            componentReferences.UnitEffectsComp.AxaShield.Orbits.Remove(o);
+                                                        }
+                                                    }
+                                                }
+
+                                                if (damageAmount < componentReferences.UnitEffectsComp.CurrentArmor)
+                                                {
+                                                    //do armor damage Stuff
+                                                    Object.Instantiate(componentReferences.UnitEffectsComp.DefenseParticleSystem, componentReferences.UnitEffectsComp.HitPosition, Quaternion.identity);
+                                                    componentReferences.UnitEffectsComp.CurrentArmor -= damageAmount;
+                                                    m_UISystem.SetArmorDisplay(e, componentReferences.UnitEffectsComp.CurrentArmor, 5f);
+                                                    m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.yellow);
+                                                }
+                                                else
+                                                {
+                                                    //shatter shield
+                                                    uint remainingDamage = damageAmount - componentReferences.UnitEffectsComp.CurrentArmor;
+                                                    Object.Instantiate(componentReferences.UnitEffectsComp.ShieldBrakeParticleSystem, componentReferences.UnitEffectsComp.HitPosition, Quaternion.identity);
+
+                                                    m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red, 0.4f);
+
+                                                    m_UISystem.SetArmorDisplay(e, componentReferences.UnitEffectsComp.CurrentArmor, .5f, true);
+
+                                                    componentReferences.UnitEffectsComp.CurrentArmor = 0;
+
+                                                    if ((int) componentReferences.UnitEffectsComp.CurrentHealth - (int) remainingDamage > 0)
+                                                    {
+                                                        componentReferences.UnitEffectsComp.CurrentHealth -= remainingDamage;
+                                                    }
+                                                    else
+                                                    {
+                                                        componentReferences.UnitEffectsComp.CurrentHealth = 0;
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                PlayerColor_ParticleSystem go = Object.Instantiate(componentReferences.UnitEffectsComp.BloodParticleSystem, componentReferences.UnitEffectsComp.HitPosition, Quaternion.LookRotation(dir));
+                                                for (int ii = 0; ii < go.SetParticleSystem_BaseColor.Count; ii++)
+                                                {
+                                                    ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
+                                                    main.startColor = componentReferences.UnitEffectsComp.PlayerColor;
+                                                }
+
+                                                //if the unit survives
+                                                if ((int) componentReferences.UnitEffectsComp.CurrentHealth - (int) damageAmount > 0)
+                                                {
+                                                    m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
+                                                    componentReferences.UnitEffectsComp.CurrentHealth -= damageAmount;
+                                                }
+                                                else
+                                                {
+                                                    componentReferences.UnitEffectsComp.CurrentHealth = 0;
+                                                }
+                                            }
+
+
+                                            if (componentReferences.HeadUIReferencesComp.UnitHeadHealthBarInstance)
+                                            {
+                                                if (componentReferences.HeadUIReferencesComp.IncomingDamage - damageAmount >= 0)
+                                                {
+                                                    componentReferences.HeadUIReferencesComp.IncomingDamage -= damageAmount;
+                                                }
+                                                else
+                                                {
+                                                    componentReferences.HeadUIReferencesComp.IncomingDamage = 0;
+                                                }
+
+                                                if (componentReferences.UnitEffectsComp.CurrentHealth + componentReferences.UnitEffectsComp.CurrentArmor >= health.MaxHealth)
+                                                {
+                                                    componentReferences.HeadUIReferencesComp.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (componentReferences.UnitEffectsComp.CurrentHealth + componentReferences.UnitEffectsComp.CurrentArmor) / (health.MaxHealth + componentReferences.UnitEffectsComp.CombinedArmor));
+                                                }
+                                                else
+                                                {
+                                                    componentReferences.HeadUIReferencesComp.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (componentReferences.UnitEffectsComp.CurrentHealth + componentReferences.UnitEffectsComp.CurrentArmor) / health.MaxHealth);
+                                                }
+                                            }
+
+                                            componentReferences.AnimatorComp.Animator.SetTrigger("GetHit");
+
+                                            break;
+
+                                        case EffectTypeEnum.gain_armor:
+
+                                            //enter defensive stance in animator
+
+                                            uint armorAmount = componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Key.Effects[0].GainArmorNested.ArmorAmount;
+                                            //do gainArmorStuff
+                                            componentReferences.UnitEffectsComp.CombinedArmor += armorAmount;
+                                            componentReferences.UnitEffectsComp.CurrentArmor += armorAmount;
+                                            m_UISystem.SetArmorDisplay(e, componentReferences.UnitEffectsComp.CurrentArmor, .5f);
+                                            m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);
+                                            break;
+                                    }
+                                }
+
+                                componentReferences.UnitEffectsComp.CurrentGetHitEffect = componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i);
+                                componentReferences.UnitEffectsComp.GetHitEffects.Remove(componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Key);
+                            }
+
+                            if (componentReferences.UnitEffectsComp.CurrentHealth == 0 && health.CurrentHealth == 0 && !componentReferences.AnimatorComp.Dead)
+                            {
+                                if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != componentReferences.UnitEffectsComp.CurrentGetHitEffect.Key.ActionExecuteStep)
+                                {
+                                    //NORMAL DEATH - INSTANTLY DIE
+                                    if (componentReferences.UnitEffectsComp.DisplayDeathSkull)
+                                        m_UISystem.TriggerUnitDeathUI(e);
+
+                                    if (componentReferences.UnitEffectsComp.BodyPartBloodParticleSystem)
                                     {
-                                        //do armor damage Stuff
-                                        Object.Instantiate(unitEffects.DefenseParticleSystem, unitEffects.HitPosition, Quaternion.identity);
-                                        unitEffects.CurrentArmor -= damageAmount;
-                                        m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, 5f);
-                                        m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.yellow);
+                                        Death(componentReferences, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Key, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Value, componentReferences.UnitEffectsComp.PlayerColor, componentReferences.UnitEffectsComp.BodyPartBloodParticleSystem);
                                     }
                                     else
                                     {
-                                        //shatter shield
-                                        uint remainingDamage = damageAmount - unitEffects.CurrentArmor;
-                                        Object.Instantiate(unitEffects.ShieldBrakeParticleSystem, unitEffects.HitPosition, Quaternion.identity);
-
-                                        m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red, 0.4f);
-
-                                        m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f, true);
-
-                                        unitEffects.CurrentArmor = 0;
-
-                                        if ((int)unitEffects.CurrentHealth - (int)remainingDamage > 0)
-                                        {
-                                            unitEffects.CurrentHealth -= remainingDamage;
-                                        }
-                                        else
-                                        {
-                                            unitEffects.CurrentHealth = 0;
-                                        }
+                                        Death(componentReferences, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Key, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Value, componentReferences.UnitEffectsComp.PlayerColor);
                                     }
+
+                                    //componentReferences.UnitEffectsComp.GetHitEffects.Remove(componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Key);
                                 }
                                 else
                                 {
-                                    PlayerColor_ParticleSystem go = Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
-                                    for(int ii =0; ii<go.SetParticleSystem_BaseColor.Count; ii++)
+                                    //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
+
+                                    //if(componentReferences.AnimatorComp.) if character is not red turn it red
+                                    if (componentReferences.UnitEffectsComp.SecondWindParticleSystemInstance)
                                     {
-                                        ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
-                                        main.startColor = unitEffects.PlayerColor;
+                                        ParticleSystem ps = componentReferences.UnitEffectsComp.SecondWindParticleSystemInstance;
+
+                                        if (!ps.isPlaying)
+                                            ps.Play();
                                     }
 
-                                    //if the unit survives
-                                    if ((int)unitEffects.CurrentHealth - (int)damageAmount > 0)
+                                    if (componentReferences.AnimatorComp.AnimationEvents.EventTriggered)
                                     {
-                                        m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
-                                        unitEffects.CurrentHealth -= damageAmount;
-                                    }
-                                    else
-                                    {
-                                        unitEffects.CurrentHealth = 0;
-                                    }
-                                }
+                                        if (componentReferences.UnitEffectsComp.SecondWindParticleSystemInstance)
+                                        {
+                                            ParticleSystem ps = componentReferences.UnitEffectsComp.SecondWindParticleSystemInstance;
 
+                                            if (ps.isPlaying)
+                                                ps.Stop();
+                                        }
 
-                                if (unitHeadUIRef.UnitHeadHealthBarInstance)
-                                {
-                                    if(unitHeadUIRef.IncomingDamage - damageAmount >= 0)
-                                    {
-                                        unitHeadUIRef.IncomingDamage -= damageAmount;
-                                    }
-                                    else
-                                    {
-                                        unitHeadUIRef.IncomingDamage = 0;
-                                    }
+                                        if (componentReferences.UnitEffectsComp.DisplayDeathSkull)
+                                            m_UISystem.TriggerUnitDeathUI(e);
 
-                                    if (unitEffects.CurrentHealth + unitEffects.CurrentArmor >= health.MaxHealth)
-                                    {
-                                        unitHeadUIRef.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float)(unitEffects.CurrentHealth + unitEffects.CurrentArmor) / (health.MaxHealth + unitEffects.CombinedArmor));
-                                    }
-                                    else
-                                    {
-                                        unitHeadUIRef.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float)(unitEffects.CurrentHealth + unitEffects.CurrentArmor) / health.MaxHealth);
+                                        if (componentReferences.UnitEffectsComp.BodyPartBloodParticleSystem)
+                                        {
+                                            Death(componentReferences, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Key, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Value, componentReferences.UnitEffectsComp.PlayerColor, componentReferences.UnitEffectsComp.BodyPartBloodParticleSystem);
+                                        }
+                                        else
+                                        {
+                                            Death(componentReferences, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Key, componentReferences.UnitEffectsComp.CurrentGetHitEffect.Value, componentReferences.UnitEffectsComp.PlayerColor);
+                                        }
+
                                     }
                                 }
-
-                                animatorComponent.Animator.SetTrigger("GetHit");
-
-
-                                break;
-
-                            case EffectTypeEnum.gain_armor:
-
-                                //enter defensive stance in animator
-
-                                uint armorAmount = unitEffects.GetHitEffects.ElementAt(i).Key.Effects[0].GainArmorNested.ArmorAmount;
-                                //do gainArmorStuff
-                                unitEffects.CombinedArmor += armorAmount;
-                                unitEffects.CurrentArmor += armorAmount;
-                                m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f);
-                                m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);
-                                break;
-                        }
-                    }
-
-                    unitEffects.CurrentGetHitEffect = unitEffects.GetHitEffects.ElementAt(i);
-                    unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
-                }
-
-                if (unitEffects.CurrentHealth == 0 && health.CurrentHealth == 0 && !animatorComponent.Dead)
-                {
-                    if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.CurrentGetHitEffect.Key.ActionExecuteStep)
-                    {
-                        //NORMAL DEATH - INSTANTLY DIE
-                        if (unitEffects.DisplayDeathSkull)
-                            m_UISystem.TriggerUnitDeathUI(e);
-
-                        if (unitEffects.BodyPartBloodParticleSystem)
-                        {
-                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor, unitEffects.BodyPartBloodParticleSystem);
-                        }
-                        else
-                        {
-                            Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
-                        }
-
-                        //unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
-                    }
-                    else
-                    {
-                        //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
-
-                        //if(animatorComponent.) if character is not red turn it red
-                        if (unitEffects.SecondWindParticleSystemInstance)
-                        {
-                            ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                            if (!ps.isPlaying)
-                                ps.Play();
-                        }
-
-                        if (animatorComponent.AnimationEvents.EventTriggered)
-                        {
-                            if (unitEffects.SecondWindParticleSystemInstance)
-                            {
-                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                                if (ps.isPlaying)
-                                    ps.Stop();
                             }
-
-                            if (unitEffects.DisplayDeathSkull)
-                                m_UISystem.TriggerUnitDeathUI(e);
-
-                            if (unitEffects.BodyPartBloodParticleSystem)
-                            {
-                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value,unitEffects.PlayerColor, unitEffects.BodyPartBloodParticleSystem);
-                            }
-                            else
-                            {
-                                Death(animatorComponent, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
-                            }
-
-                            //unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
-
                         }
-                    }
-                }
+
+                        componentReferences.AnimatorComp.Animator.SetInteger("Armor", (int)componentReferences.UnitEffectsComp.CurrentArmor);
+                    });
+                });
             }
-
-            animatorComponent.Animator.SetInteger("Armor", (int)unitEffects.CurrentArmor);
         });
 
-        playerVisionData.Dispose();
-        gameStates.Dispose();
     }
 
-    public void TriggerActionEffect(Action inAction, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
+    public void TriggerActionEffect(Vision.Component playerVision, Action inAction, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
     {
-        var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-        var playerVisionHash = new HashSet<Vector3f>(playerVisionData[0].CellsInVisionrange);
-
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
         HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { inAction.Targets[0].TargetCoordinate };
 
@@ -347,53 +340,45 @@ public class ActionEffectsSystem : ComponentSystem
         }
 
 
-        Entities.With(m_UnitData).ForEach((Entity e, UnitEffects unitEffects, ref FactionComponent.Component faction, ref CubeCoordinate.Component cubeCoord) =>
+        Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences componentReferences, ref FactionComponent.Component faction, ref CubeCoordinate.Component cubeCoord) =>
         {
-        if (playerVisionHash.Contains(cubeCoord.CubeCoordinate))
+        if (playerVision.CellsInVisionrange.ContainsKey(cubeCoord.CubeCoordinate))
         {
             //only apply effect if target unit is valid or pass correct coordinates
-            if (coordsToTrigger.Contains(unitEffects.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)inAction.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
+            if (coordsToTrigger.Contains(componentReferences.UnitEffectsComp.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)inAction.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
-                if (unitEffects.AxaShield && spawnShieldOrbits != 0)
+                if (componentReferences.UnitEffectsComp.AxaShield && spawnShieldOrbits != 0)
                 {
                     //if we need to spawn shieldorbits spaWN SHIELDorbits
                     for (int i = 0; i < spawnShieldOrbits; i++)
                     {
-                        AxaShieldOrbit go = Object.Instantiate(unitEffects.AxaShield.OrbitPrefab, unitEffects.AxaShield.transform.position, Quaternion.LookRotation(hitTransform.position - unitEffects.AxaShield.transform.position), unitEffects.AxaShield.transform);
+                        AxaShieldOrbit go = Object.Instantiate(componentReferences.UnitEffectsComp.AxaShield.OrbitPrefab, componentReferences.UnitEffectsComp.AxaShield.transform.position, Quaternion.LookRotation(hitTransform.position - componentReferences.UnitEffectsComp.AxaShield.transform.position), componentReferences.UnitEffectsComp.AxaShield.transform);
                         go.GetComponent<MovementAnimComponent>().RotationAxis = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), 0f);
-                        unitEffects.AxaShield.Orbits.Add(go);
+                        componentReferences.UnitEffectsComp.AxaShield.Orbits.Add(go);
                     }
                 }
-                    unitEffects.GetHitEffects.Add(inAction, hitTransform.position);
+                    componentReferences.UnitEffectsComp.GetHitEffects.Add(inAction, hitTransform.position);
                 }
             }
         });
-
-        playerVisionData.Dispose();
-
     }
 
-    public void LaunchProjectile(Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
+    public void LaunchProjectile(Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
     {
-        var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-        var playerVisionHash = new HashSet<Vector3f>(playerVisionData[0].CellsInVisionrange);
-
         bool AoEcontainsTarget = false;
 
         if (inAction.Targets[0].Mods.Count != 0 && !AoEcontainsTarget)
         {
             foreach (CoordinatePositionPair p in inAction.Targets[0].Mods[0].CoordinatePositionPairs)
             {
-                if (playerVisionHash.Contains(p.CubeCoordinate))
+                if (playerVision.CellsInVisionrange.ContainsKey(p.CubeCoordinate))
                     AoEcontainsTarget = true;
             }
         }
 
         //if any coord in an AoE is visible or Launching unit is visible or target unit is visible, spawn a projectile
-        if (AoEcontainsTarget || playerVisionHash.Contains(inAction.Targets[0].TargetCoordinate) || playerVisionHash.Contains(originCoord))
+        if (AoEcontainsTarget || playerVision.CellsInVisionrange.ContainsKey(inAction.Targets[0].TargetCoordinate) || playerVision.CellsInVisionrange.ContainsKey(originCoord))
         {
-
-
             Projectile projectile = Object.Instantiate(projectileFab, spawnTransform.position, spawnTransform.rotation, spawnTransform.root);
             projectile.UnitId = unitId;
             projectile.Action = inAction;
@@ -419,24 +404,22 @@ public class ActionEffectsSystem : ComponentSystem
             projectile.TravellingCurve = travellingPoints;
             projectile.IsTravelling = true;
         }
-
-        playerVisionData.Dispose();
     }
 
-    public void Death(AnimatorComponent animatorComponent, Action action, Vector3 position,Color playerColor, PlayerColor_ParticleSystem bodyPartParticle = null, float delay = 0)
+    public void Death(UnitComponentReferences componentReferences, Action action, Vector3 position,Color playerColor, PlayerColor_ParticleSystem bodyPartParticle = null, float delay = 0)
     {
         var garbageCollector = m_GarbageCollection.ToComponentArray<GarbageCollectorComponent>()[0];
 
         if (bodyPartParticle)
         {
-            int random = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
-            int random2 = Random.Range(0, animatorComponent.RagdollRigidBodies.Count);
+            int random = Random.Range(0, componentReferences.AnimatorComp.RagdollRigidBodies.Count);
+            int random2 = Random.Range(0, componentReferences.AnimatorComp.RagdollRigidBodies.Count);
 
-            for (int i = 0; i < animatorComponent.RagdollRigidBodies.Count; i++)
+            for (int i = 0; i < componentReferences.AnimatorComp.RagdollRigidBodies.Count; i++)
             {
                 if (i == random || i == random2)
                 {
-                    PlayerColor_ParticleSystem go = Object.Instantiate(bodyPartParticle, animatorComponent.RagdollRigidBodies[i].position, Quaternion.identity, animatorComponent.RagdollRigidBodies[i].transform);
+                    PlayerColor_ParticleSystem go = Object.Instantiate(bodyPartParticle, componentReferences.AnimatorComp.RagdollRigidBodies[i].position, Quaternion.identity, componentReferences.AnimatorComp.RagdollRigidBodies[i].transform);
                     for (int ii = 0; ii < go.SetParticleSystem_BaseColor.Count; ii++)
                     {
                         ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
@@ -446,37 +429,37 @@ public class ActionEffectsSystem : ComponentSystem
             }
         }
 
-        foreach (GameObject go in animatorComponent.DisableOnDeathObjects)
+        foreach (GameObject go in componentReferences.AnimatorComp.DisableOnDeathObjects)
         {
             go.SetActive(false);
         }
 
-        foreach (Transform t in animatorComponent.Props)
+        foreach (Transform t in componentReferences.AnimatorComp.Props)
         {
-            t.parent = animatorComponent.Animator.transform;
+            t.parent = componentReferences.AnimatorComp.Animator.transform;
         }
 
         //dismemberment
-        foreach (CharacterJoint j in animatorComponent.DismemberJoints)
+        foreach (CharacterJoint j in componentReferences.AnimatorComp.DismemberJoints)
         {
             float rand = Random.Range(0f, 1f);
-            if(rand <= animatorComponent.DismemberPercentage)
+            if(rand <= componentReferences.AnimatorComp.DismemberPercentage)
             {
-                j.transform.parent = animatorComponent.Animator.transform;
+                j.transform.parent = componentReferences.AnimatorComp.Animator.transform;
                 Object.Destroy(j);
             }
         }
 
 
         //Enable ragdoll behaviour
-        animatorComponent.Animator.transform.parent = GarbageCollection.transform;
-        animatorComponent.Animator.enabled = false;
-        garbageCollector.GarbageObjects.Add(animatorComponent.Animator.gameObject);
+        componentReferences.AnimatorComp.Animator.transform.parent = GarbageCollection.transform;
+        componentReferences.AnimatorComp.Animator.enabled = false;
+        garbageCollector.GarbageObjects.Add(componentReferences.AnimatorComp.Animator.gameObject);
 
 
         HashSet<Rigidbody> ragdollHash = new HashSet<Rigidbody>();
 
-        foreach (Rigidbody r in animatorComponent.RagdollRigidBodies)
+        foreach (Rigidbody r in componentReferences.AnimatorComp.RagdollRigidBodies)
         {
             ragdollHash.Add(r);
             garbageCollector.GarbageRigidbodies.Add(r);
@@ -494,7 +477,7 @@ public class ActionEffectsSystem : ComponentSystem
             }
         }
 
-        animatorComponent.Dead = true;
+        componentReferences.AnimatorComp.Dead = true;
     }
 
     public void Explode(Vector3 explosionOrigin, float explosionRadius, float explosionForce, uint upForce, HashSet<Rigidbody> ragdollRigidbodies)
