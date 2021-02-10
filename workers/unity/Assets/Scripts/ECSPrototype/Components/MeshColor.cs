@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -14,6 +14,7 @@ namespace LeyLineHybridECS
         public Color MapColor;
         public Color MapLerpColor;
         public MeshRenderer MeshRenderer;
+        public bool IsLerping;
         //public List<MeshRenderer> EmissionColorRenderers;
         //public List<Light> Lights;
         public ParticleSystem CirclePs;

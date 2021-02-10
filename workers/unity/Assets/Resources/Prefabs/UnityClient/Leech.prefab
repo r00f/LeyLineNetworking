@@ -855,6 +855,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d542142e32d1de44a9c563f6a3cc2e61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  CapsuleCollider: {fileID: 771660692032844721}
+  LinerendererComp: {fileID: 8898852741660551068}
+  AnimatorComp: {fileID: 8950170168944560130}
+  TeamColorMeshesComp: {fileID: 4440954350749950428}
+  IsVisibleRefComp: {fileID: 9121732361173887378}
+  BaseDataSetComp: {fileID: 3289465276142304449}
+  HeadUIReferencesComp: {fileID: 1130299993275380547}
+  AnimPortraitComp: {fileID: 930118610718755571}
+  UnitEffectsComp: {fileID: 5848321040896014150}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}

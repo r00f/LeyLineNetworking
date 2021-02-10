@@ -23,8 +23,9 @@ public class UnitCompReferencesHelper : Editor
         if (GUILayout.Button("Initialize CompReferences"))
         {
             myTarget.InitializeComponentReferences();
+            serializedObject.ApplyModifiedProperties();
+            PrefabUtility.SavePrefabAsset(myTarget.gameObject);
         }
 
-        serializedObject.ApplyModifiedProperties();
     }
 }

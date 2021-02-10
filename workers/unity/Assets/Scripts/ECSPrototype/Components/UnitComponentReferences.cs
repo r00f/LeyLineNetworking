@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using cakeslice;
 
-[RequireComponent(typeof(AnimatorComponent), typeof(UnitHeadUIReferences), typeof(TeamColorMeshes))]
+[RequireComponent(typeof(CapsuleCollider), typeof(LineRendererComponent), typeof(AnimatorComponent)),
+RequireComponent(typeof(TeamColorMeshes), typeof(IsVisibleReferences), typeof(Unit_BaseDataSet)),
+RequireComponent(typeof(UnitHeadUIReferences), typeof(AnimatedPortraitReference), typeof(UnitEffects))]
 public class UnitComponentReferences : MonoBehaviour
 {
     public CapsuleCollider CapsuleCollider;

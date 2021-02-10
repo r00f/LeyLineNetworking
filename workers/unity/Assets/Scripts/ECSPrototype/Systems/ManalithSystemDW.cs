@@ -332,6 +332,14 @@ namespace LeyLineHybridECS
                     if(meshColor.MapLerpColor != meshColor.MapColor)
                         meshColor.MapLerpColor = Color.Lerp(meshColor.MapLerpColor, meshColor.MapColor, 0.05f);
 
+                    if (meshColor.MapLerpColor == meshColor.MapColor && meshColor.LerpColor == meshColor.Color)
+                    {
+                        meshColor.IsLerping = false;
+                    }
+                    else
+                        meshColor.IsLerping = true;
+
+
                     //Color emissionColor = meshColor.LerpColor * meshColor.EmissionMultiplier;
                     meshColor.MeshRenderer.material.SetColor("_UnlitColor", meshColor.LerpColor);
                     //meshColor.MeshRenderer.material.EnableKeyword("_EMISSION");
@@ -363,28 +371,33 @@ namespace LeyLineHybridECS
 
                 });
 
+
+                //only udate LineGradients while Color is Lerping
                 Entities.With(m_LineData).ForEach((MeshGradientColor meshGradientColor, ManalithClientData clientData) =>
                 {
-                    meshGradientColor.Gradient = ConstructGradient(meshGradientColor.ManalithColor.LerpColor, meshGradientColor.ConnectedManalithColor.LerpColor);
-                    meshGradientColor.MapGradient = ConstructGradient(meshGradientColor.ManalithColor.MapLerpColor, meshGradientColor.ConnectedManalithColor.MapLerpColor);
-
-                    if (clientData.MiniMapTileInstance)
+                    if(meshGradientColor.ManalithColor.IsLerping || meshGradientColor.ConnectedManalithColor.IsLerping)
                     {
-                        clientData.MiniMapTileInstance.UILineRenderer.Gradient = meshGradientColor.MapGradient;
-                        clientData.MiniMapTileInstance.UILineRenderer.SetVerticesDirty();
-                    }
+                        meshGradientColor.Gradient = ConstructGradient(meshGradientColor.ManalithColor.LerpColor, meshGradientColor.ConnectedManalithColor.LerpColor);
+                        meshGradientColor.MapGradient = ConstructGradient(meshGradientColor.ManalithColor.MapLerpColor, meshGradientColor.ConnectedManalithColor.MapLerpColor);
 
-                    if (clientData.BigMapTileInstance)
-                    {
-                        clientData.BigMapTileInstance.UILineRenderer.Gradient = meshGradientColor.MapGradient;
-                        clientData.BigMapTileInstance.UILineRenderer.SetVerticesDirty();
-                    }
+                        if (clientData.MiniMapTileInstance)
+                        {
+                            clientData.MiniMapTileInstance.UILineRenderer.Gradient = meshGradientColor.MapGradient;
+                            clientData.MiniMapTileInstance.UILineRenderer.SetVerticesDirty();
+                        }
 
-                    for (int li = 0; li < meshGradientColor.colors.Length; li++)
-                    {
-                        meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float)li / meshGradientColor.colors.Length) /** meshGradientColor.EmissionMultiplier*/;
+                        if (clientData.BigMapTileInstance)
+                        {
+                            clientData.BigMapTileInstance.UILineRenderer.Gradient = meshGradientColor.MapGradient;
+                            clientData.BigMapTileInstance.UILineRenderer.SetVerticesDirty();
+                        }
 
-                        meshGradientColor.mesh.colors = meshGradientColor.colors;
+                        for (int li = 0; li < meshGradientColor.colors.Length; li++)
+                        {
+                            meshGradientColor.colors[li] = meshGradientColor.Gradient.Evaluate((float) li / meshGradientColor.colors.Length);
+
+                            meshGradientColor.mesh.colors = meshGradientColor.colors;
+                        }
                     }
                 });
 
