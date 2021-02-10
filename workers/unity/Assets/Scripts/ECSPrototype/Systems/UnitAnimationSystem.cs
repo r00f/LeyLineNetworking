@@ -161,11 +161,36 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (animatorComponent.AnimationEvents)
                     {
+                        /*
                         if (animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
                         {
                             animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
                             animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
                         }
+                        */
+
+                        foreach (AnimStateEffectHandler a in animatorComponent.AnimStateEffectHandlers)
+                        {
+                            if(a.IsActiveState)
+                            {
+                                for (int i = 0; i < a.CurrentEffectOnTimestamps.Count; i++)
+                                {
+                                    if (a.CurrentEffectOnTimestamps[i].x <= 0)
+                                    {
+                                        animatorComponent.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                                    }
+                                }
+
+                                for (int i = 0; i < a.CurrentEffectOffTimestamps.Count; i++)
+                                {
+                                    if (a.CurrentEffectOffTimestamps[i].x <= 0)
+                                    {
+                                        animatorComponent.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                                    }
+                                }
+                            }
+                        }
+
 
 
                         //event triggered from animation

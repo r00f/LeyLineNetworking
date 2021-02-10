@@ -9,6 +9,7 @@ using FMODUnity;
 public class AnimatorComponent : MonoBehaviour
 {
 
+    public List<AnimStateEffectHandler> AnimStateEffectHandlers;
     public Transform WeaponTransform;
 
     [Header("GenericAnimation")]
