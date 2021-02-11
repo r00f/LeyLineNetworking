@@ -200,6 +200,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 9010769315541911250}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 9010769315532335424}
@@ -207,8 +208,7 @@ MonoBehaviour:
   ExecuteTriggerSet: 0
   InitialValuesSet: 0
   ProjectileSpawnOrigin: {fileID: 1968831714424908805}
-  Visuals:
-  - {fileID: 8108814016297623155}
+  Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
   - {fileID: 3120752561693149971}

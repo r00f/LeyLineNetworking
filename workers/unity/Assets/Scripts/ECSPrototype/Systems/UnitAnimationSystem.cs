@@ -175,9 +175,10 @@ public class UnitAnimationSystem : ComponentSystem
                             {
                                 for (int i = 0; i < a.CurrentEffectOnTimestamps.Count; i++)
                                 {
-                                    if (a.CurrentEffectOnTimestamps[i].x <= 0)
+                                    if (a.CurrentEffectOnTimestamps[i].x <= 0 )
                                     {
-                                        animatorComponent.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                                        animatorComponent.CharacterEffects[(int)a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                                        a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
                                     }
                                 }
 
@@ -186,6 +187,7 @@ public class UnitAnimationSystem : ComponentSystem
                                     if (a.CurrentEffectOffTimestamps[i].x <= 0)
                                     {
                                         animatorComponent.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                                        a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
                                     }
                                 }
                             }

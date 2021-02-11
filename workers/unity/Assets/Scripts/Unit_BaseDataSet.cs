@@ -10,6 +10,7 @@ public class Unit_BaseDataSet : MonoBehaviour
     [Range(0, 20)]
     public uint VisionRange;
     public uint BaseHealth;
+    public uint EnergyBaseIncome;
     public uint EnergyIncome;
     [HideInInspector]
     public SelectUnitButton SelectUnitButtonInstance;

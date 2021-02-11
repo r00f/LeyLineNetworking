@@ -580,6 +580,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 6277809151406041408}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 6277809151415814066}
@@ -587,13 +588,12 @@ MonoBehaviour:
   ExecuteTriggerSet: 0
   InitialValuesSet: 0
   ProjectileSpawnOrigin: {fileID: 7150794941038468868}
-  Visuals:
-  - {fileID: 8108814016297623155}
+  Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
   - {fileID: 1094178332401473320}
-  - {fileID: 6712945080671107961}
   - {fileID: 7156183395109989668}
+  - {fileID: 6712945080671107961}
   VoiceEmitter: {fileID: 1169538025521282994}
   FootStempEmitter: {fileID: 4035786856844519652}
   RotationSpeed: 4

@@ -619,6 +619,7 @@ MonoBehaviour:
   UnitName: Leech
   VisionRange: 2
   BaseHealth: 40
+  EnergyBaseIncome: 0
   EnergyIncome: 5
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -629,6 +630,8 @@ MonoBehaviour:
   Actions:
   - {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
   - {fileID: 11400000, guid: 0cbeddf0d1006c64891a8c9756757b3e, type: 2}
+  - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
+  - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
   SpawnActions:
   - {fileID: 11400000, guid: f6ef931d2e726d64a841328c62918a6a, type: 2}
   - {fileID: 11400000, guid: 5ca69791f4450294aa9fa83f16db281d, type: 2}
@@ -714,6 +717,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 7863409164155374768}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 7863409164165227334}

@@ -965,6 +965,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c318f34339668004eb9e5f1fe39df3c6, type: 2}
   - {fileID: 11400000, guid: f6ef931d2e726d64a841328c62918a6a, type: 2}
   - {fileID: 11400000, guid: 363c36aca056e514385a49d10d419fbb, type: 2}
+  - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
 --- !u!114 &8898852741660551068
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1043,6 +1044,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 512922516778929933}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 512922516772004001}
@@ -1050,8 +1052,7 @@ MonoBehaviour:
   ExecuteTriggerSet: 0
   InitialValuesSet: 0
   ProjectileSpawnOrigin: {fileID: 8189970073007501741}
-  Visuals:
-  - {fileID: 8108814016297623155}
+  Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
   - {fileID: 3647463394038079088}

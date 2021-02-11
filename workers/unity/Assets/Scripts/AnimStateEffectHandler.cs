@@ -4,9 +4,11 @@ using UnityEngine;
 public class AnimStateEffectHandler : StateMachineBehaviour
 {
     public List<Vector2> EffectOnTimestamps;
-    public List<Vector2> CurrentEffectOnTimestamps;
-
     public List<Vector2> EffectOffTimestamps;
+
+    [HideInInspector]
+    public List<Vector2> CurrentEffectOnTimestamps;
+    [HideInInspector]
     public List<Vector2> CurrentEffectOffTimestamps;
 
     public bool IsActiveState;
@@ -14,12 +16,8 @@ public class AnimStateEffectHandler : StateMachineBehaviour
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         IsActiveState = true;
-
-        for (int i = 0; i < EffectOnTimestamps.Count; i++)
-            CurrentEffectOnTimestamps[i] = EffectOnTimestamps[i];
-
-        for (int i = 0; i < EffectOffTimestamps.Count; i++)
-            CurrentEffectOffTimestamps[i] = EffectOffTimestamps[i];
+        CurrentEffectOnTimestamps.AddRange(EffectOnTimestamps);
+        CurrentEffectOffTimestamps.AddRange(EffectOffTimestamps);
     }
 
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)

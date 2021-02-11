@@ -196,14 +196,14 @@ public static class LeyLineEntityTemplates {
         {
             MaxEnergy = 80,
             Energy = 40,
-            BaseIncome = 6,
+            BaseIncome = 100,
             Income = 6
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
         {
             HeroName = "KingCroak",
-            StartingUnitNames = new List<string> {"Leech", "Leech", "Effigy", "StoneBeetle", "Branchling", "Rootling", "Crystalite"}
+            StartingUnitNames = new List<string> {"Leech", "Spike", "Effigy", "StoneBeetle", "Branchling", "Rootling", "Crystalite", "Axalotl"}
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();
