@@ -795,9 +795,11 @@ MonoBehaviour:
   EffectOnTimestamps:
   - {x: 0.5, y: 0}
   - {x: 0.5, y: 1}
+  - {x: 0.65, y: 2}
   EffectOffTimestamps:
   - {x: 1, y: 0}
   - {x: 1, y: 1}
+  - {x: 1.6, y: 2}
   CurrentEffectOnTimestamps: []
   CurrentEffectOffTimestamps: []
   IsActiveState: 0
