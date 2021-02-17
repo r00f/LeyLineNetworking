@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using Generic;
@@ -120,9 +120,8 @@ public static class CellGridMethods
         return CubeRound(new Vector3f(LineLerp(a.X, b.X, t), LineLerp(a.Y, b.Y, t), LineLerp(a.Z, b.Z, t)));
     }
 
-    public static List<Vector3f> LineDraw(Vector3f origin, Vector3f destination)
+    public static List<Vector3f> LineDraw(List<Vector3f> line, Vector3f origin, Vector3f destination)
     {
-        List<Vector3f> line = new List<Vector3f>();
         var n = GetDistance(origin, destination);
 
         //nudge destination

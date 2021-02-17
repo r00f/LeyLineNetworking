@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -179,7 +179,6 @@ public class PathFindingSystem : ComponentSystem
                     {
                         ret[cell.Cell][neighbour] = neighbour.MovementCost;
                     }
-
                 }
 
             }

@@ -249,7 +249,7 @@ public class HighlightingSystem : ComponentSystem
         else if (inHinghlightningData.LineAoE == 1)
         {
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount);
-            cubeCoordList.CubeCoordinates = CellGridMethods.LineDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate);
+            cubeCoordList.CubeCoordinates = CellGridMethods.LineDraw(new List<Vector3f>(), playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate);
 
             if (cubeCoordList.CubeCoordinates.Count != 1)
             {

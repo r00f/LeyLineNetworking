@@ -8,7 +8,7 @@ using Improbable;
 using Player;
 using Improbable.Gdk.PlayerLifecycle;
 using Unity.Collections;
-
+using System.Collections.Generic;
 
 namespace LeyLineHybridECS
 {
@@ -101,7 +101,7 @@ namespace LeyLineHybridECS
 
                                     for (int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
                                     {
-                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(coord.CubeCoordinate, new Vector3f(0, 0, 0))[i + 1], owningW.WorkerId, unitToSpawn.StartRotation);
+                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(new List<Vector3f>(), coord.CubeCoordinate, new Vector3f(0, 0, 0))[i + 1], owningW.WorkerId, unitToSpawn.StartRotation);
                                     }
                                 }
                             }

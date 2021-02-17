@@ -63,7 +63,6 @@ public class VisionSystem_Server : ComponentSystem
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
-
     }
 
     protected override void OnUpdate()
@@ -196,8 +195,8 @@ public class VisionSystem_Server : ComponentSystem
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
     {
         List<Vector3f> sight = CellGridMethods.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
-        
         var sightHash = new HashSet<Vector3f>();
+
         foreach (Vector3f v in sight)
         {
             sightHash.Add(v);
@@ -228,7 +227,7 @@ public class VisionSystem_Server : ComponentSystem
 
             foreach (Vector3f c in Ring)
             {
-                Lines.Add(CellGridMethods.LineDraw(coor.CubeCoordinate, c));
+                Lines.Add(CellGridMethods.LineDraw(new List<Vector3f>(), coor.CubeCoordinate, c));
             }
             foreach (List<Vector3f> l in Lines)
             {
@@ -285,6 +284,7 @@ public class VisionSystem_Server : ComponentSystem
         new LogEvent("UpdatePlayerVision.")
         .WithField("Faction", faction));
         */
+
         inVision.Lastvisible.Clear();
         inVision.Lastvisible.AddRange(inVision.CellsInVisionrange.Keys);
 

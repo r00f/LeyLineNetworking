@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -229,7 +229,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                                         locked.CombinedCost = CalculateCombinedCost(t);
                                                         break;
                                                     case ModTypeEnum.line:
-                                                        foreach (Vector3f v in CellGridMethods.LineDraw(requestingUnitCoord.CubeCoordinate, t.TargetCoordinate))
+                                                        foreach (Vector3f v in CellGridMethods.LineDraw(new List<Vector3f>(), requestingUnitCoord.CubeCoordinate, t.TargetCoordinate))
                                                         {
                                                             mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
                                                         }
@@ -326,7 +326,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                     break;
                 case ModTypeEnum.line:
-                    foreach (Vector3f v in CellGridMethods.LineDraw(originCoord, t.TargetCoordinate))
+                    foreach (Vector3f v in CellGridMethods.LineDraw(new List<Vector3f>(), originCoord, t.TargetCoordinate))
                     {
                         mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
                     }

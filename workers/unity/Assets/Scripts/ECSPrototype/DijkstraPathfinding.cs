@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Cell;
 /// <summary>
 /// Implementation of Dijkstra pathfinding algorithm.
@@ -22,7 +22,7 @@ namespace LeyLineHybridECS
             while (frontier.Count != 0)
             {
                 var current = frontier.Dequeue();
-                var neighbours = GetNeigbours(edges, current);
+                var neighbours = GetNeigbours(new List<CellAttribute>(), edges, current);
                 foreach (var neighbour in neighbours)
                 {
                     var newCost = costSoFar[current] + edges[current][neighbour];
@@ -63,7 +63,7 @@ namespace LeyLineHybridECS
             while (frontier.Count != 0)
             {
                 var current = frontier.Dequeue();
-                var neighbours = GetNeigbours(edges, current);
+                var neighbours = GetNeigbours(new List<T>(), edges, current);
                 foreach (var neighbour in neighbours)
                 {
                     var newCost = costSoFar[current] + edges[current][neighbour];

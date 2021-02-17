@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LeyLineHybridECS
@@ -17,11 +17,11 @@ namespace LeyLineHybridECS
         /// </returns>
         public abstract List<T> FindPath<T>(Dictionary<T, Dictionary<T, int>> edges, T originNode, T destinationNode);
 
-        protected List<T> GetNeigbours<T>(Dictionary<T, Dictionary<T, int>> edges, T node)
+        protected List<T> GetNeigbours<T>(List<T> list, Dictionary<T, Dictionary<T, int>> edges, T node)
         {
             if (!edges.ContainsKey(node))
             {
-                return new List<T>();
+                return list;
             }
             return edges[node].Keys.ToList();
         }

@@ -138,7 +138,7 @@ public static class LeyLineEntityTemplates {
                     CubeCoordinate = cubeCoordinate,
                     IsTaken = isTaken,
                     MovementCost = 1,
-                    ObstructVision = inObstruction,
+                    ObstructVision = inObstruction
                 },
                 Neighbours = neighbours
             }
@@ -172,6 +172,7 @@ public static class LeyLineEntityTemplates {
         };
 
         var template = new EntityTemplate();
+
         template.AddComponent(pos, gameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, gameLogic);
         template.AddComponent(new Persistence.Snapshot(), gameLogic);
