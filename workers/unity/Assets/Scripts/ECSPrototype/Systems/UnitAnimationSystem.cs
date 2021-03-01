@@ -117,6 +117,30 @@ public class UnitAnimationSystem : ComponentSystem
                 animatorComponent.AnimationEvents.FootStepTrigger = false;
             }
 
+            foreach (AnimStateEffectHandler a in animatorComponent.AnimStateEffectHandlers)
+            {
+                if (a.IsActiveState)
+                {
+                    for (int i = 0; i < a.CurrentEffectOnTimestamps.Count; i++)
+                    {
+                        if (a.CurrentEffectOnTimestamps[i].x <= 0)
+                        {
+                            animatorComponent.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                            a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
+                        }
+                    }
+
+                    for (int i = 0; i < a.CurrentEffectOffTimestamps.Count; i++)
+                    {
+                        if (a.CurrentEffectOffTimestamps[i].x <= 0)
+                        {
+                            animatorComponent.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                            a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
+                        }
+                    }
+                }
+            }
+
             //outgoing effects (launch projectiles usw.)
             if (actions.LockedAction.Index != -3)
             {
@@ -168,32 +192,6 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
                         }
                         */
-
-                        foreach (AnimStateEffectHandler a in animatorComponent.AnimStateEffectHandlers)
-                        {
-                            if(a.IsActiveState)
-                            {
-                                for (int i = 0; i < a.CurrentEffectOnTimestamps.Count; i++)
-                                {
-                                    if (a.CurrentEffectOnTimestamps[i].x <= 0 )
-                                    {
-                                        animatorComponent.CharacterEffects[(int)a.CurrentEffectOnTimestamps[i].y].SetActive(true);
-                                        a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
-                                    }
-                                }
-
-                                for (int i = 0; i < a.CurrentEffectOffTimestamps.Count; i++)
-                                {
-                                    if (a.CurrentEffectOffTimestamps[i].x <= 0)
-                                    {
-                                        animatorComponent.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
-                                        a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
-                                    }
-                                }
-                            }
-                        }
-
-
 
                         //event triggered from animation
                         if (animatorComponent.AnimationEvents.EventTrigger)

@@ -31,9 +31,6 @@ public class VisionSystem_Server : ComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-        //m_ClientVisionSystem = World.GetExistingSystem<VisionSystem_Client>();
-        //m_GridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
-
 
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),

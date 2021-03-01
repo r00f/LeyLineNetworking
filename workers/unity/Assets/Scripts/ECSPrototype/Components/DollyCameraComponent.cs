@@ -150,5 +150,4 @@ public class DollyCameraComponent : MonoBehaviour
             Destroy(gameObject);
         }
     }
-
 }

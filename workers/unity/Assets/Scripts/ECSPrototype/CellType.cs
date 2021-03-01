@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -68,8 +68,8 @@ namespace LeyLineHybridECS
         {
             if (thisCellsTerrain != null)
             {
-
-                terrainHeightOffset = thisCellsTerrain.cellTerrainYOffset;
+                if(thisCellsTerrain.cellTerrainYOffset != 0)
+                    terrainHeightOffset = thisCellsTerrain.cellTerrainYOffset;
 
                 pos3D.Value = new Position3D
                 {

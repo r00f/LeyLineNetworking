@@ -792,8 +792,8 @@ namespace LeyLineHybridECS
 
                     if(unitHeadUIRef.UnitHeadUIInstance && unitHeadUIRef.UnitHeadHealthBarInstance)
                     {
-                        unitHeadUIRef.UnitHeadUIInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
-                        unitHeadUIRef.UnitHeadHealthBarInstance.transform.position = WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0));
+                        unitHeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
+                        unitHeadUIRef.UnitHeadHealthBarInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
                         SetHealthBarFillAmounts(gameState.CurrentState, unitEffects, unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
                     }
 
@@ -847,6 +847,8 @@ namespace LeyLineHybridECS
 
             HandleMenuSettings(authPlayerCam);
 
+            UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
+
             if (gameState.CurrentState != GameStateEnum.planning)
             {
                 if (UIRef.GOButtonScript.Button.interactable)
@@ -865,16 +867,11 @@ namespace LeyLineHybridECS
                     UIRef.GOButtonScript.Button.interactable = true;
                 }
 
-                UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
-
-                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy - .003f)
+                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float)playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount - .003f)
                 {
-                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, (float)(playerEnergy.Energy + playerEnergy.Income) / playerEnergy.MaxEnergy, Time.DeltaTime);
+                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float)playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
                 }
             }
-
-            //IMPLEMENT CORRECT LERP CONTROL (Pass start / end values)
-            UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float)playerEnergy.Energy / playerEnergy.MaxEnergy, Time.DeltaTime);
 
             UIRef.CurrentMaxEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
             UIRef.TotalEnergyIncomeText.text = "+" + playerEnergy.Income.ToString();
@@ -1139,6 +1136,11 @@ namespace LeyLineHybridECS
             #endregion
         }
 
+        public Vector3 RoundVector3(Vector3 inVector)
+        {
+            return new Vector3((int)inVector.x, (int)inVector.y, (int)inVector.z);
+        }
+
         void ClearUnitUIElements()
         {
 
@@ -1157,7 +1159,6 @@ namespace LeyLineHybridECS
                 Object.Destroy(UIRef.HealthBarsPanel.transform.GetChild(i).gameObject);
             }
         }
-
 
         void HandleMenuSettings(Moba_Camera playerCam)
         {
@@ -1216,7 +1217,7 @@ namespace LeyLineHybridECS
             {
                 UIRef.UIActive = !UIRef.UIActive;
                 UIRef.UISFXBus.setMute(!UIRef.UIActive);
-                UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
+                UIRef.Canvas.enabled = !UIRef.Canvas.enabled;
             }
 
             if(gameState == GameStateEnum.planning)
@@ -1322,8 +1323,8 @@ namespace LeyLineHybridECS
             Vector3 screenPos = Camera.main.WorldToScreenPoint(worldPos);
             //Convert the screenpoint to ui rectangle local point
             RectTransformUtility.ScreenPointToLocalPointInRectangle(parentCanvas.transform as RectTransform, screenPos, parentCanvas.worldCamera, out Vector2 movePos);
-            //Convert the local point to world point
-            return parentCanvas.transform.TransformPoint(movePos);
+
+            return movePos;
         }
 
         void UpdateSelectUnitButton(Actions.Component actions, SelectUnitButton unitButton, Energy.Component inEnergy, FactionComponent.Component inFaction)
@@ -1558,12 +1559,8 @@ namespace LeyLineHybridECS
                 toHealthBar.DamageRect.offsetMax = new Vector2((-toHealthBar.HealthBarRect.rect.width * (1 - toHealthBar.HealthFill.fillAmount)) + 3f, 0);
             }
 
-            if (toHealthBar.Parts)
-            {
-                toHealthBar.Parts.material.mainTextureScale = fromHealthBar.Parts.material.mainTextureScale;
-                toHealthBar.Parts.material.mainTexture = fromHealthBar.Parts.material.mainTexture;
-                toHealthBar.Parts.SetMaterialDirty();
-            }
+            toHealthBar.NumberOfParts = fromHealthBar.NumberOfParts;
+            EnableHealthBarParts(toHealthBar.Parts, fromHealthBar.NumberOfParts);
         }
 
         public void ResetHealthBarFillAmounts(HealthBar healthBar, Health.Component health)
@@ -1581,25 +1578,14 @@ namespace LeyLineHybridECS
             float combinedHealth = 0;
             float healthPercentage = 0;
             float armorPercentage = 0;
-            
-            if (health.MaxHealth + health.Armor >= 100)
-            {
-                healthBar.Parts.material.SetTexture("_MainTex", healthBar.HealthSectionsBig);
-                healthBar.Parts.SetMaterialDirty();
-            }
-            else
-            {
-                healthBar.Parts.material.SetTexture("_MainTex", healthBar.HealthSectionsSmall);
-                healthBar.Parts.SetMaterialDirty();
-            }
 
             if(gameState == GameStateEnum.planning)
             {
                 combinedHealth = health.CurrentHealth + health.Armor;
                 healthPercentage = (float)health.CurrentHealth / health.MaxHealth;
                 armorPercentage = (float)health.Armor / combinedHealth;
-
                 healthBar.BgFill.fillAmount = 0;
+
                 if (combinedHealth < health.MaxHealth)
                 {
                     healthBar.HealthFill.fillAmount = healthPercentage;
@@ -1609,12 +1595,18 @@ namespace LeyLineHybridECS
                 {
                     if (combinedHealth < health.MaxHealth)
                     {
-                        healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                        healthBar.NumberOfParts = health.MaxHealth / 20;
+                        //EnableHealthBarParts(healthBar.Parts,);
+                        //healthBar.Parts.pixelsPerUnitMultiplier = (float) health.MaxHealth / 40f;
+                        //healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
                         healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)health.Armor / health.MaxHealth), Time.DeltaTime);
                     }
                     else
                     {
-                        healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
+                        healthBar.NumberOfParts = (uint) combinedHealth / 20;
+                        //EnableHealthBarParts(healthBar.Parts, );
+                        //healthBar.Parts.pixelsPerUnitMultiplier = combinedHealth / 40f;
+                        //healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
                         healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - armorPercentage, Time.DeltaTime);
                         healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.DeltaTime);
                     }
@@ -1624,13 +1616,17 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                    healthBar.NumberOfParts = health.MaxHealth / 20;
+                    //EnableHealthBarParts(healthBar.Parts, );
+                    //healthBar.Parts.pixelsPerUnitMultiplier = (float)health.MaxHealth / 40f;
+                    //healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
                     healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
                     healthBar.ArmorFill.fillAmount = healthBar.HealthFill.fillAmount - 0.01f;
 
                     healthBar.DamageFill.fillAmount = Mathf.Lerp(healthBar.DamageFill.fillAmount, (float)unitHeadUiRef.IncomingDamage / (float)health.CurrentHealth, Time.DeltaTime);
                     healthBar.DamageRect.offsetMax = new Vector2((-healthBar.HealthBarRect.rect.width * (1 - healthBar.HealthFill.fillAmount)) + 3f, 0);
                 }
+                EnableHealthBarParts(healthBar.Parts, healthBar.NumberOfParts);
             }
             else
             {
@@ -1644,26 +1640,50 @@ namespace LeyLineHybridECS
                 {
                     if (combinedHealth < health.MaxHealth)
                     {
-                        healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                        healthBar.NumberOfParts = health.MaxHealth / 20;
+                        //EnableHealthBarParts(healthBar.Parts, health.MaxHealth / 20);
+                        //healthBar.Parts.pixelsPerUnitMultiplier = (float) health.MaxHealth / 40f;
+                        //healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
                         healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float)unitEffects.CurrentArmor / health.MaxHealth), Time.DeltaTime);
                     }
                     else
                     {
-                        healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
+                        healthBar.NumberOfParts = (uint)combinedHealth / 20;
+                        //EnableHealthBarParts(healthBar.Parts,);
+                        // healthBar.Parts.pixelsPerUnitMultiplier = combinedHealth / 40f;
+                        //healthBar.Parts.material.mainTextureScale = new Vector2(combinedHealth / 20f, 1f);
                         healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, 1 - healthBar.BgFill.fillAmount - armorPercentage, Time.DeltaTime);
                         healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, 1, Time.DeltaTime);
                     }
                 }
                 else if(unitFaction != playerFaction)
                 {
-                    healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
+                    healthBar.NumberOfParts = health.MaxHealth / 20;
+                    //EnableHealthBarParts(healthBar.Parts, health.MaxHealth / 20);
+                    //healthBar.Parts.pixelsPerUnitMultiplier = combinedHealth / 40f;
+                    //healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
                     healthBar.HealthFill.fillAmount = Mathf.Lerp(healthBar.HealthFill.fillAmount, healthPercentage, Time.DeltaTime);
                     healthBar.ArmorFill.fillAmount = healthBar.HealthFill.fillAmount - 0.01f;
                 }
 
+                EnableHealthBarParts(healthBar.Parts, healthBar.NumberOfParts);
                 healthBar.DamageFill.fillAmount = 0;
             }
+        }
 
+        public void EnableHealthBarParts(List<GameObject> HealthBarParts, uint numberToEnable)
+        {
+            for(int i = 0; i < HealthBarParts.Count; i++)
+            {
+                if(i < numberToEnable)
+                {
+                    HealthBarParts[i].SetActive(true);
+                }
+                else
+                {
+                    HealthBarParts[i].SetActive(false);
+                }
+            }
         }
 
         public void SetArmorDisplay(Entity e, uint inArmorAmount, float displayTime, bool shatter = false)

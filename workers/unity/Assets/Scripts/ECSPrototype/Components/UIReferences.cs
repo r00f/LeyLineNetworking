@@ -1,4 +1,4 @@
-﻿using FMODUnity;
+using FMODUnity;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -39,6 +39,7 @@ public class UIReferences : MonoBehaviour
     public Image HeroPortraitPlayerColor;
 
     [Header("EnergyBarPanel")]
+    public float MaxFillAmount;
     public Image HeroEnergyIncomeFill;
     public Image HeroCurrentEnergyFill;
     public Text CurrentMaxEnergyText;

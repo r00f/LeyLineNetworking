@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,14 +14,24 @@ public class HealthBar : MonoBehaviour
     public Image ArmorFill;
     public Image DamageFill;
     public Image BgFill;
-    public Image Parts;
+    //public Image Parts;
     public RectTransform HealthBarRect;
     public RectTransform DamageRect;
-    public Texture HealthSectionsSmall;
-    public Texture HealthSectionsBig;
+    public RectTransform PartsRect;
+    public List<GameObject> Parts;
+    public List<uint> RectSizes;
+    public uint NumberOfParts;
+    //public Texture HealthSectionsSmall;
+    //public Texture HealthSectionsBig;
 
     public void Start()
     {
-        Parts.material = Instantiate(Parts.material);
+        //Parts.material = Instantiate(Parts.material);
+    }
+
+    public void Update()
+    {
+        if (NumberOfParts >= 2 && RectSizes.Count >= NumberOfParts)
+            PartsRect.sizeDelta = new Vector2(RectSizes[(int)NumberOfParts - 2], PartsRect.sizeDelta.y);
     }
 }

@@ -793,13 +793,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EffectOnTimestamps:
-  - {x: 0.5, y: 0}
-  - {x: 0.5, y: 1}
-  - {x: 0.65, y: 2}
+  - {x: 0.8, y: 0}
   EffectOffTimestamps:
-  - {x: 1, y: 0}
-  - {x: 1, y: 1}
-  - {x: 1.6, y: 2}
+  - {x: 1.6, y: 0}
   CurrentEffectOnTimestamps: []
   CurrentEffectOffTimestamps: []
   IsActiveState: 0
@@ -941,9 +937,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.124860406
+  m_TransitionDuration: 0.44584036
   m_TransitionOffset: 0
-  m_ExitTime: 0.9165043
+  m_ExitTime: 0.8193345
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0

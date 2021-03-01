@@ -162,7 +162,7 @@ namespace LeyLineHybridECS
                                         {
                                             case ManalithInitializer.CircleSize.Seven:
                                                 clientData.WorldPos = clientData.UIElementTransform.position;
-                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
+                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, Vector3.zero, Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                                 clientData.ManalithEntityID = ID;
                                                 clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
                                                 var coord1 = initData.leyLineCircleCoords[0];
@@ -176,7 +176,7 @@ namespace LeyLineHybridECS
                                                 break;
                                             case ManalithInitializer.CircleSize.Three:
                                                 clientData.WorldPos = clientData.UIElementTransform.position;
-                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos), Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
+                                                clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, Vector3.zero, Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                                 clientData.ManalithEntityID = ID;
                                                 clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
 
@@ -229,7 +229,7 @@ namespace LeyLineHybridECS
 
                             if (clientData.IngameIconRef && m_UISystem.UIRef)
                             {
-                                clientData.IngameIconRef.transform.position = m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos);
+                                clientData.IngameIconRef.transform.localPosition = m_UISystem.RoundVector3(m_UISystem.WorldToUISpace(m_UISystem.UIRef.Canvas, clientData.WorldPos));
                                 if (ID == m_UISystem.UIRef.ManalithToolTipFab.ActiveManalithID)
                                 {
                                     Vector2 Screenpos = new Vector2(0f, 0f);

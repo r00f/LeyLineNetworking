@@ -42,9 +42,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.11464167
+  m_TransitionDuration: 0.3385663
   m_TransitionOffset: 0
-  m_ExitTime: 0.9165044
+  m_ExitTime: 0.8205366
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -63,11 +63,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EffectOnTimestamps:
-  - {x: 0.3, y: 0}
-  - {x: 0.65, y: 1}
+  - {x: 0.65, y: 0}
   EffectOffTimestamps:
-  - {x: 1, y: 0}
-  - {x: 1, y: 1}
+  - {x: 1.6, y: 0}
   CurrentEffectOnTimestamps: []
   CurrentEffectOffTimestamps: []
   IsActiveState: 0

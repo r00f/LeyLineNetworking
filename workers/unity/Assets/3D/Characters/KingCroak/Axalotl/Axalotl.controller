@@ -392,7 +392,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EffectOnTimestamps:
-  - {x: 0.3, y: 1}
+  - {x: 0.2, y: 1}
   EffectOffTimestamps:
   - {x: 0.8, y: 0}
   CurrentEffectOnTimestamps: []
@@ -851,7 +851,7 @@ AnimatorStateMachine:
     m_Position: {x: 390, y: 190, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -5093077065708323557}
-    m_Position: {x: 610, y: 300, z: 0}
+    m_Position: {x: 610, y: 310, z: 0}
   - serializedVersion: 1
     m_State: {fileID: -6972518448136218493}
     m_Position: {x: 840, y: 210, z: 0}
@@ -1229,9 +1229,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.10470772
   m_TransitionOffset: 0
-  m_ExitTime: 0.90625
+  m_ExitTime: 0.9478896
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0

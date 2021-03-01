@@ -4921,7 +4921,7 @@ MonoBehaviour:
   HealthBarYOffset: 1.5
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
-  UnitHeadHealthBarPrefab: {fileID: 8079530597859831226, guid: b70e178b7eff5a546bb4da6f716f8711,
+  UnitHeadHealthBarPrefab: {fileID: 7290637364848590618, guid: b70e178b7eff5a546bb4da6f716f8711,
     type: 3}
   UnitHeadUIInstance: {fileID: 0}
   UnitHeadHealthBarInstance: {fileID: 0}
@@ -4941,6 +4941,7 @@ MonoBehaviour:
   UnitName: Spike Egg
   VisionRange: 2
   BaseHealth: 40
+  EnergyBaseIncome: 0
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -5003,6 +5004,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9479af25dff652641840cc28d8def014, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 8846974289181975837}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 8045395822357648005}
