@@ -873,7 +873,9 @@ namespace LeyLineHybridECS
                 }
             }
 
-            UIRef.CurrentMaxEnergyText.text = playerEnergy.Energy + " / " + playerEnergy.MaxEnergy;
+            UIRef.CurrentEnergyText.text = playerEnergy.Energy.ToString();
+            UIRef.MaxEnergyText.text = playerEnergy.MaxEnergy.ToString();
+
             UIRef.TotalEnergyIncomeText.text = "+" + playerEnergy.Income.ToString();
 
             if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)

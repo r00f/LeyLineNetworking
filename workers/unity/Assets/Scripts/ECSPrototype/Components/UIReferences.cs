@@ -42,7 +42,8 @@ public class UIReferences : MonoBehaviour
     public float MaxFillAmount;
     public Image HeroEnergyIncomeFill;
     public Image HeroCurrentEnergyFill;
-    public Text CurrentMaxEnergyText;
+    public Text CurrentEnergyText;
+    public Text MaxEnergyText;
     public Text TotalEnergyIncomeText;
 
     [Header("InGameUI")]
