@@ -462,6 +462,11 @@ public static class LeyLineEntityTemplates {
             StartRotation = startRotation
         };
 
+        var aiUnit = new AiUnit.Snapshot
+        {
+            IsAggroed = false
+        };
+
 
         var actions = SetActions(Stats);
 
@@ -487,6 +492,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
+        template.AddComponent(aiUnit, WorkerUtils.UnityGameLogic);
         //template.AddComponent(clientPathSnapshot, client);
         template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);

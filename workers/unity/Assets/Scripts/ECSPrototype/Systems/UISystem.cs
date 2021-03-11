@@ -44,6 +44,7 @@ namespace LeyLineHybridECS
             settings = Resources.Load<Settings>("Settings");
 
             m_UnitData = GetEntityQuery(
+                ComponentType.ReadOnly<Energy.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<Unit_BaseDataSet>(),
@@ -286,9 +287,9 @@ namespace LeyLineHybridECS
 
             if (cleanUpStateEvents.Count > 0)
             {
-                Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction) =>
+                Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
                 {
-                    var energy = EntityManager.GetComponentData<Energy.Component>(e);
+                    //var energy = EntityManager.GetComponentData<Energy.Component>(e);
                     var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
 
                     if (stats.SelectUnitButtonInstance)

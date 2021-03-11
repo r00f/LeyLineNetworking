@@ -40,5 +40,6 @@ public static class WorkerUtils
         world.GetOrCreateSystem<TimerSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
         world.GetOrCreateSystem<VisionSystem_Server>();
+        world.GetOrCreateSystem<AISystem>();
     }
 }

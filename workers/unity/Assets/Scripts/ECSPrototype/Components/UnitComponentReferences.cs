@@ -18,7 +18,6 @@ public class UnitComponentReferences : MonoBehaviour
     public AnimatedPortraitReference AnimPortraitComp;
     public UnitEffects UnitEffectsComp;
     
-
     [Header("HealthBar")]
     public GameObject HealthbarPrefab;
     public GameObject HealthBarInstance;
@@ -26,7 +25,6 @@ public class UnitComponentReferences : MonoBehaviour
     [Header("UnitVIsuals")]
     public GameObject SelectionCircleGO;
     public MeshRenderer SelectionMeshRenderer;
-
 
     public void InitializeComponentReferences()
     {

@@ -18,6 +18,7 @@ namespace LeyLineHybridECS
         CleanupSystem m_CleanUpSystem;
         SpawnUnitsSystem m_SpawnSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
+        
 
         EntityQuery m_CellData;
         EntityQuery m_HeroData;
@@ -74,6 +75,7 @@ namespace LeyLineHybridECS
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
             m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
+            
         }
 
         protected override void OnUpdate()
@@ -189,6 +191,7 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
+                                UpdateMovedUnitCells(gameStateWorldIndex.Value);
                                 gameState.AttackDamageDealt = false;
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
@@ -216,7 +219,6 @@ namespace LeyLineHybridECS
                         //check if any hero is dead to go into gameOver
                         if (CheckAnyHeroDead(gameStateWorldIndex.Value))
                         {
-
                             Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
                             {
                                 playerVision.RevealVision = true;
@@ -245,7 +247,7 @@ namespace LeyLineHybridECS
                                     playerId.EntityId);
                             });
 
-                            UpdateMovedUnitCells(gameStateWorldIndex.Value);
+
                                 
                             if (m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
                             {
@@ -361,7 +363,6 @@ namespace LeyLineHybridECS
                 {
                     if (actions.LockedAction.Index != -3 && actions.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                     {
-                        //Debug.Log("UnitHasAPath");
                         if (!unitDict.ContainsKey(cubeCoord.CubeCoordinate))
                         {
                             unitDict.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate, entityId.EntityId.Id);

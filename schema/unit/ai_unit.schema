@@ -1,0 +1,10 @@
+package unit;
+import "generic/vector3.schema";
+
+
+component AiUnit {
+    id = 128;
+    bool is_aggroed = 1;
+    int64 aggroed_unit_id = 2;
+    generic.Vector3f aggroed_unit_coordinate = 3;
+}

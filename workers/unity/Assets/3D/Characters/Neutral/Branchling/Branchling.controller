@@ -11,9 +11,6 @@ AnimatorStateTransition:
   - m_ConditionMode: 1
     m_ConditionEvent: DestinationReached
     m_EventTreshold: 0
-  - m_ConditionMode: 2
-    m_ConditionEvent: Harvesting
-    m_EventTreshold: 0
   m_DstStateMachine: {fileID: 0}
   m_DstState: {fileID: 7760751892227578855}
   m_Solo: 0

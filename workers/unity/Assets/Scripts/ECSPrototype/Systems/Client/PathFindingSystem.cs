@@ -82,6 +82,28 @@ public class PathFindingSystem : ComponentSystem
         return cellsInRadius;
     }
 
+    public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadiusIgnoringTaken(uint radius, List<CellAttributes> cellsInRange, CellAttribute origin)
+    {
+        var paths = CachePaths(cellsInRange, origin);
+        var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
+
+        foreach (var key in paths.Keys)
+        {
+            var path = paths[key];
+
+            if (path.CellAttributes.Count != 0 && key.IsTaken)
+                path.CellAttributes.RemoveAt(0);
+
+            if (path.CellAttributes.Count == 0)
+                continue;
+
+            path.CellAttributes.Reverse();
+            cachedPaths.Add(key, path);
+        }
+
+        return cachedPaths;
+    }
+
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, CellAttribute origin)
     {
         var paths = CachePaths(cellsInRange, origin);
@@ -106,7 +128,6 @@ public class PathFindingSystem : ComponentSystem
         }
 
         return cachedPaths;
-
     }
 
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)

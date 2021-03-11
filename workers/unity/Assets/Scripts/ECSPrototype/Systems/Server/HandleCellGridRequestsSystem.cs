@@ -119,7 +119,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                             {
                                 //Set target instantly
                                 self = true;
-                                unitActions.LockedAction = SetLockedAction(unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitEntityId.EntityId.Id, unitFaction.Faction);
+                                unitActions.LockedAction = SetLockedAction(unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitEntityId.EntityId.Id, unitFaction.Faction, unitCellsToMark);
                                 unitActions.CurrentSelected = unitActions.NullAction;
                             }
                         }
@@ -195,6 +195,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     {
                                         bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, cell.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
                                         //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(cell.CubeCoordinate));
+                                        Debug.Log(valid);
 
                                         if (valid)
                                         {
@@ -263,7 +264,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                                         if (valid)
                                         {
-                                            requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, targetUnitId.EntityId.Id, requestingUnitFaction.Faction);
+                                            requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, targetUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark);
                                         }
                                         else
                                         {
@@ -302,7 +303,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return combinedCost;
     }
 
-    public Action SetLockedAction(Action selectedAction, Vector3f originCoord, Vector3f unitCoord, long unitId, uint faction)
+    public Action SetLockedAction(Action selectedAction, Vector3f originCoord, Vector3f unitCoord, long unitId, uint faction, CellsToMark.Component cellsToMark)
     {
         Action locked = selectedAction;
         var t = locked.Targets[0];
@@ -323,6 +324,13 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     }
                     break;
                 case ModTypeEnum.path:
+                    foreach (CellAttribute c in m_PathFindingSystem.FindPath(unitCoord, cellsToMark.CachedPaths).CellAttributes)
+                    {
+                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
+                    }
+                    mod.PathNested.OriginCoordinate = originCoord;
+                    locked.Targets[0].Mods[0] = mod;
+                    locked.CombinedCost = CalculateCombinedCost(t);
 
                     break;
                 case ModTypeEnum.line:

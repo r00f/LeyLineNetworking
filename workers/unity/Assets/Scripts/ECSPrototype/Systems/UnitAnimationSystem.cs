@@ -15,6 +15,7 @@ public class UnitAnimationSystem : ComponentSystem
 {
     ActionEffectsSystem m_ActionEffectsSystem;
     UISystem m_UISystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     EntityQuery m_TransformData;
@@ -75,6 +76,7 @@ public class UnitAnimationSystem : ComponentSystem
         base.OnStartRunning();
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
 
     }
 
@@ -91,6 +93,30 @@ public class UnitAnimationSystem : ComponentSystem
         var playerVision = playerVisionData[0];
         var playerHeroTransform = playerHeroTransforms[0];
         var playerHigh = playerHighs[0];
+
+        var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+
+        if (cleanUpStateEvents.Count > 0)
+        {
+            Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
+            {
+                if (actions.LockedAction.Index == -3)
+                    animatorComponent.CurrentLockedAction = null;
+
+                animatorComponent.DestinationPosition = Vector2.zero;
+
+                animatorComponent.DestinationReachTriggerSet = false;
+                animatorComponent.InitialValuesSet = false;
+                animatorComponent.ExecuteTriggerSet = false;
+                animatorComponent.AnimationEvents.EventTriggered = false;
+                animatorComponent.Animator.SetInteger("Armor", 0);
+                animatorComponent.Animator.ResetTrigger("Execute");
+                animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
+                animatorComponent.Animator.SetBool("Executed", false);
+                animatorComponent.Animator.ResetTrigger("DestinationReached");
+            });
+        }
+
 
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
         {
@@ -159,20 +185,6 @@ public class UnitAnimationSystem : ComponentSystem
                             animatorComponent.CurrentLockedAction = basedata.SpawnActions[actions.LockedAction.Index - basedata.Actions.Count];
                         }
                     }
-                    else
-                    {
-                        switch (actions.LockedAction.Index)
-                        {
-                            case -3:
-                                break;
-                            /*case -2:
-                                animatorComponent.CurrentLockedAction = basedata.BasicMove;
-                                break;
-                            case -1:
-                                animatorComponent.CurrentLockedAction = basedata.BasicAttack;
-                                break;*/
-                        }
-                    }
                 }
 
                 else if (gameStates[0].CurrentState != GameStateEnum.planning)
@@ -185,13 +197,6 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (animatorComponent.AnimationEvents)
                     {
-                        /*
-                        if (animatorComponent.AnimationEvents.EffectGameObjectIndex > -1)
-                        {
-                            animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].SetActive(!animatorComponent.CharacterEffects[animatorComponent.AnimationEvents.EffectGameObjectIndex].activeSelf);
-                            animatorComponent.AnimationEvents.EffectGameObjectIndex = -1;
-                        }
-                        */
 
                         //event triggered from animation
                         if (animatorComponent.AnimationEvents.EventTrigger)
@@ -268,33 +273,9 @@ public class UnitAnimationSystem : ComponentSystem
                 }
             }
 
-            //reset in planning SHOULD BE ONLY ONE TIME
-            if (actions.LockedAction.Index == -3 && gameStates[0].CurrentState == GameStateEnum.planning)
-            {
-                animatorComponent.CurrentLockedAction = null;
-
-                if (animatorComponent.InitialValuesSet)
-                {
-                    animatorComponent.InitialValuesSet = false;
-                }
-
-                if (animatorComponent.DestinationReachTriggerSet)
-                {
-                    animatorComponent.Animator.ResetTrigger("DestinationReached");
-                    animatorComponent.DestinationReachTriggerSet = false;
-                }
-                if (animatorComponent.ExecuteTriggerSet)
-                {
-                    animatorComponent.Animator.ResetTrigger("Execute");
-                    animatorComponent.ExecuteTriggerSet = false;
-                }
-                if (animatorComponent.AnimationEvents.EventTriggered)
-                    animatorComponent.AnimationEvents.EventTriggered = false;
-            }
 
             #region Set Animator Variables
-
-            if(gameStates[0].CurrentState == GameStateEnum.planning)
+            if (gameStates[0].CurrentState == GameStateEnum.planning)
             {
                 if(visible.Value == 1 && !playerVision.RevealVision)
                 {
@@ -312,9 +293,7 @@ public class UnitAnimationSystem : ComponentSystem
                 else
                     unitComponentReferences.SelectionCircleGO.SetActive(false);
 
-                animatorComponent.Animator.SetBool("Executed", false);
                 animatorComponent.Animator.SetBool("Planning", true);
-                animatorComponent.Animator.ResetTrigger("Execute");
             }
             else
             {
@@ -341,13 +320,12 @@ public class UnitAnimationSystem : ComponentSystem
             else
                 animatorComponent.Animator.SetBool("HasWindup", false);
 
-            animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
 
             if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
-            if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
-                animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
+            //if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
+                //animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
 
             #endregion
 
@@ -367,14 +345,13 @@ public class UnitAnimationSystem : ComponentSystem
 
             Vector2 posXZ = new Vector2(animatorComponent.transform.position.x, animatorComponent.transform.position.z);
 
-            if (posXZ == animatorComponent.DestinationPosition)
+            if (Vector2.Distance(posXZ, animatorComponent.DestinationPosition) <= 0.2f)
             {
                 if (!animatorComponent.DestinationReachTriggerSet)
                 {
                     //Debug.Log("DestinationReached");
                     animatorComponent.Animator.SetTrigger("DestinationReached");
                     unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
-                    animatorComponent.DestinationPosition = Vector3.zero;
                     animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
