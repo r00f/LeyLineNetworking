@@ -325,7 +325,8 @@ public class AddComponentsSystem : ComponentSystem
         Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible isVisible) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
-            unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
+            unitEffects.OriginCoordinate = coord.CubeCoordinate;
+            unitEffects.DestinationCoordinate = coord.CubeCoordinate;
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
             if (anim.EnableVisualsDelay <= 0)

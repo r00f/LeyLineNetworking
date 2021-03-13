@@ -121,7 +121,7 @@ type SelectActionResponse {
 }
 
 type SetTargetRequest {
-	int64 target_id = 1;
+    generic.Vector3f target_coordinate = 1;
 }
 
 type SetTargetResponse {

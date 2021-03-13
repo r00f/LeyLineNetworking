@@ -179,7 +179,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
 
                 if (unitEntityId.EntityId.Id == setTargetRequest.EntityId.Id)
                 {
-                    long id = setTargetRequest.Payload.TargetId;
+                    var coord = setTargetRequest.Payload.TargetCoordinate;
 
                     if (unitActions.CurrentSelected.Index != -3 && unitActions.LockedAction.Index == -3)
                     {
@@ -187,13 +187,13 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         {
                             case TargetTypeEnum.cell:
 
-                                Entities.With(m_CellData).ForEach((ref SpatialEntityId cellId, ref CellAttributesComponent.Component cellAtts) =>
+                                Entities.With(m_CellData).ForEach((ref SpatialEntityId cellId, ref CellAttributesComponent.Component cellAtts, ref CubeCoordinate.Component cCoord) =>
                                 {
                                     var cell = cellAtts.CellAttributes.Cell;
 
-                                    if (cellId.EntityId.Id == id)
+                                    if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cCoord.CubeCoordinate))
                                     {
-                                        bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, cell.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
+                                        bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, cell.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths, cellAtts.CellAttributes.Cell);
                                         //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(cell.CubeCoordinate));
                                         Debug.Log(valid);
 
@@ -203,7 +203,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                             var locked = requestingUnitActions.LockedAction;
                                             var t = requestingUnitActions.LockedAction.Targets[0];
                                             t.TargetCoordinate = cell.CubeCoordinate;
-                                            t.TargetId = id;
+                                            //t.TargetId = id;
                                             requestingUnitActions.LockedAction.Targets[0] = t;
 
                                             for (int mi = 0; mi < requestingUnitActions.LockedAction.Targets[0].Mods.Count; mi++)
@@ -257,7 +257,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                             case TargetTypeEnum.unit:
                                 Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId targetUnitId, ref CubeCoordinate.Component targetUnitCoord) =>
                                 {
-                                    if (targetUnitId.EntityId.Id == id)
+                                    if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
                                     {
                                         bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
                                         //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate));

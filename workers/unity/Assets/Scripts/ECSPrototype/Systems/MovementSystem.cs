@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using System.Collections.Generic;
 using Improbable.Gdk.Core;
@@ -96,6 +96,7 @@ namespace LeyLineHybridECS
                                     {
                                         m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                                     }
+
                                     coord.CubeCoordinate = currentPath[0].CubeCoordinate;
                                     /*
                                     logger.HandleLog(LogType.Warning,

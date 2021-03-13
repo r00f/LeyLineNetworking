@@ -49,6 +49,7 @@ MonoBehaviour:
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
   CollisionDetection: {fileID: 0}
+  TravellingCurveCutOff: 0
   TargetYOffset: 0
   ArriveInstantly: 1
   MovementDelay: 0.026
@@ -5245,7 +5246,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0146092
+  m_MaxDistance: 1.7613754
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5331,7 +5332,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0146092
+  m_MaxDistance: 1.7613754
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5437,7 +5438,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0146092
+  m_MaxDistance: 1.7613754
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5559,7 +5560,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.0146092
+  m_MaxDistance: 1.7613754
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

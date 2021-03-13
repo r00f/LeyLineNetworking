@@ -1,4 +1,4 @@
-﻿using Generic;
+using Generic;
 using System.Collections;
 using System.Collections.Generic;
 using Unit;
@@ -25,6 +25,7 @@ public class UnitEffects : MonoBehaviour
     public uint CombinedArmor;
     public uint CurrentArmor;
     public uint CurrentHealth;
-    public Vector3f LastStationaryCoordinate;
+    public Vector3f OriginCoordinate;
+    public Vector3f DestinationCoordinate;
 
 }

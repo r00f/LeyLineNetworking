@@ -102,7 +102,6 @@ public class ActionEffectsSystem : ComponentSystem
                 }
                 componentReferences.UnitEffectsComp.CombinedArmor = 0;
                 componentReferences.UnitEffectsComp.CurrentArmor = 0;
-                componentReferences.UnitEffectsComp.CurrentHealth = health.CurrentHealth;
             });
         }
 
@@ -215,7 +214,6 @@ public class ActionEffectsSystem : ComponentSystem
                                                 }
                                             }
 
-
                                             if (componentReferences.HeadUIReferencesComp.UnitHeadHealthBarInstance)
                                             {
                                                 if (componentReferences.HeadUIReferencesComp.IncomingDamage - damageAmount >= 0)
@@ -259,7 +257,7 @@ public class ActionEffectsSystem : ComponentSystem
                                 componentReferences.UnitEffectsComp.GetHitEffects.Remove(componentReferences.UnitEffectsComp.GetHitEffects.ElementAt(i).Key);
                             }
 
-                            if (componentReferences.UnitEffectsComp.CurrentHealth == 0 && health.CurrentHealth == 0 && !componentReferences.AnimatorComp.Dead)
+                            if (componentReferences.UnitEffectsComp.CurrentHealth == 0 && !componentReferences.AnimatorComp.Dead)
                             {
                                 if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != componentReferences.UnitEffectsComp.CurrentGetHitEffect.Key.ActionExecuteStep)
                                 {
@@ -317,7 +315,6 @@ public class ActionEffectsSystem : ComponentSystem
                                 }
                             }
                         }
-
                         componentReferences.AnimatorComp.Animator.SetInteger("Armor", (int)componentReferences.UnitEffectsComp.CurrentArmor);
                     });
                 });
@@ -328,6 +325,8 @@ public class ActionEffectsSystem : ComponentSystem
 
     public void TriggerActionEffect(Vision.Component playerVision, Action inAction, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
     {
+
+        Debug.Log("TriggerActionEffect");
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
         HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { inAction.Targets[0].TargetCoordinate };
 
@@ -339,13 +338,21 @@ public class ActionEffectsSystem : ComponentSystem
             }
         }
 
-
         Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences componentReferences, ref FactionComponent.Component faction, ref CubeCoordinate.Component cubeCoord) =>
         {
+            if ((int)inAction.ActionExecuteStep < 2)
+                AddGetHitEffect(e, inAction, componentReferences.UnitEffectsComp.OriginCoordinate, playerVision, cubeCoord, coordsToTrigger, componentReferences, spawnShieldOrbits, unitID, hitTransform, faction);
+            else
+                AddGetHitEffect(e, inAction, componentReferences.UnitEffectsComp.DestinationCoordinate, playerVision, cubeCoord, coordsToTrigger, componentReferences, spawnShieldOrbits, unitID, hitTransform, faction);
+        });
+    }
+
+    public void AddGetHitEffect(Entity e, Action inAction, Vector3f coordToCompare, Vision.Component playerVision, CubeCoordinate.Component cubeCoord, HashSet<Vector3f> coordsToTrigger, UnitComponentReferences componentReferences, int spawnShieldOrbits, long unitID, Transform hitTransform, FactionComponent.Component faction)
+    {
         if (playerVision.CellsInVisionrange.ContainsKey(cubeCoord.CubeCoordinate))
         {
             //only apply effect if target unit is valid or pass correct coordinates
-            if (coordsToTrigger.Contains(componentReferences.UnitEffectsComp.LastStationaryCoordinate) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)(int)inAction.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
+            if (coordsToTrigger.Contains(coordToCompare) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum) (int) inAction.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
             {
                 if (componentReferences.UnitEffectsComp.AxaShield && spawnShieldOrbits != 0)
                 {
@@ -357,10 +364,9 @@ public class ActionEffectsSystem : ComponentSystem
                         componentReferences.UnitEffectsComp.AxaShield.Orbits.Add(go);
                     }
                 }
-                    componentReferences.UnitEffectsComp.GetHitEffects.Add(inAction, hitTransform.position);
-                }
+                componentReferences.UnitEffectsComp.GetHitEffects.Add(inAction, hitTransform.position);
             }
-        });
+        }
     }
 
     public void LaunchProjectile(Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)

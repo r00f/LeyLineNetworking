@@ -214,7 +214,6 @@ namespace LeyLineHybridECS
                             }
                         }
                         break;
-
                     case GameStateEnum.cleanup:
                         //check if any hero is dead to go into gameOver
                         if (CheckAnyHeroDead(gameStateWorldIndex.Value))
@@ -247,8 +246,8 @@ namespace LeyLineHybridECS
                                     playerId.EntityId);
                             });
 
+                            m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
 
-                                
                             if (m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
                             {
                                 gameState.TurnCounter++;
@@ -399,8 +398,6 @@ namespace LeyLineHybridECS
                     }
                 }
             });
-
-            m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex);
         }
 
         private uint FindWinnerFaction(uint gameStateWorldIndex)

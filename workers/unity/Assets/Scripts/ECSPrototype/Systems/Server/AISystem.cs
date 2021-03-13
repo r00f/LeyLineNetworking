@@ -10,7 +10,7 @@ using Player;
 using Improbable.Gdk.PlayerLifecycle;
 using Unity.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class AISystem : ComponentSystem
@@ -80,6 +80,8 @@ public class AISystem : ComponentSystem
 
             var unitWorldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
 
+            unitCellsToMark.CellsInRange.Clear();
+            unitCellsToMark.CachedPaths.Clear();
             aiUnit.AggroedUnitCoordinate = new Vector3f(0, 0, 0);
             aiUnit.AggroedUnitId = 0;
             aiU.IsAggroed = false;
@@ -94,29 +96,75 @@ public class AISystem : ComponentSystem
                 }
             });
 
-            //if playerunit is in range of attack
-            if(CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiU.AggroedUnitCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange)
+            if(aiU.IsAggroed)
             {
-                actions.CurrentSelected = actions.ActionsList[1];
-            }
-            //else walk towards playerunit
-            else
-            {
-                actions.CurrentSelected = actions.ActionsList[0];
-                unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint) actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex.Value);
-                unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadiusIgnoringTaken((uint) actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-            }
+                var extrarange = 0;
 
-            var request = new Actions.SetTargetCommand.Request
-            (
-                aiId.EntityId,
-                new SetTargetRequest(aiU.AggroedUnitId)
-            );
+                if(actions.ActionsList[1].Targets[0].Mods.Count != 0)
+                {
+                    if (actions.ActionsList[1].Targets[0].Mods[0].ModType == ModTypeEnum.aoe)
+                        extrarange = actions.ActionsList[1].Targets[0].Mods[0].AoeNested.Radius;
+                }
 
-            m_CommandSystem.SendCommand(request);
+                //if playerunit is in range of attack
+                if (CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiU.AggroedUnitCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
+                {
+                    actions.CurrentSelected = actions.ActionsList[1];
+                }
+                //else walk towards playerunit
+                else
+                {
+                    actions.CurrentSelected = actions.ActionsList[0];
+                    unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint)actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex.Value);
+                    unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius((uint)actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
+                }
+
+                if(extrarange != 0)
+                {
+                    for(uint i = 0; i < 6; i++)
+                    {
+                        if(CellGridMethods.GetDistance(CellGridMethods.CubeNeighbour(aiU.AggroedUnitCoordinate, i), unitCoord.CubeCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange)
+                         {
+                            var request = new Actions.SetTargetCommand.Request
+                            (
+                                aiId.EntityId,
+                                new SetTargetRequest(CellGridMethods.CubeNeighbour(aiU.AggroedUnitCoordinate, i))
+                            );
+                            m_CommandSystem.SendCommand(request);
+                        }
+                    }
+                }
+                else
+                {
+
+                    if(actions.CurrentSelected.ActionExecuteStep == ExecuteStepEnum.move)
+                    {
+                        var request = new Actions.SetTargetCommand.Request
+                        (
+                            aiId.EntityId,
+                            new SetTargetRequest(ClosestPathTarget(aiU.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
+                        );
+                        m_CommandSystem.SendCommand(request);
+                    }
+                    else
+                    {
+                        var request = new Actions.SetTargetCommand.Request
+                        (
+                            aiId.EntityId,
+                            new SetTargetRequest(aiU.AggroedUnitCoordinate)
+                        );
+                        m_CommandSystem.SendCommand(request);
+                    }
+
+                }
+            }
 
             aiUnit = aiU;
-
         });
+    }
+
+    public Vector3f ClosestPathTarget(Vector3f targetCoord, Dictionary<CellAttribute, CellAttributeList> inDict)
+    {
+        return inDict.Keys.OrderBy(i => CellGridMethods.GetDistance(targetCoord, i.CubeCoordinate)).ToList()[0].CubeCoordinate;
     }
 }

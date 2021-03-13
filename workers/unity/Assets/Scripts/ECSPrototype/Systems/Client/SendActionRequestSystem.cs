@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Generic;
@@ -143,7 +143,7 @@ public class SendActionRequestSystem : ComponentSystem
                                 var request = new Actions.SetTargetCommand.Request
                                 (
                                     unitEntityId,
-                                    new SetTargetRequest(cellEntityId.EntityId.Id)
+                                    new SetTargetRequest(cCoord.CubeCoordinate)
                                 );
                                 anim.AnimationEvents.VoiceTrigger = true;
                                 m_CommandSystem.SendCommand(request);
@@ -154,12 +154,12 @@ public class SendActionRequestSystem : ComponentSystem
                     }
                     else if (actionsData.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
                     {
-                        Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId) =>
+                        Entities.With(m_ClickedUnitData).ForEach((ref SpatialEntityId targetUnitEntityId, ref CubeCoordinate.Component targetUnitCoord) =>
                         {
                             var request = new Actions.SetTargetCommand.Request
                             (
                                 unitEntityId,
-                                new SetTargetRequest(targetUnitEntityId.EntityId.Id)
+                                new SetTargetRequest(targetUnitCoord.CubeCoordinate)
                             );
 
                             anim.AnimationEvents.VoiceTrigger = true;

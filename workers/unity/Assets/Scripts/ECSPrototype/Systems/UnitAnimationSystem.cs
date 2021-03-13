@@ -103,8 +103,12 @@ public class UnitAnimationSystem : ComponentSystem
                 if (actions.LockedAction.Index == -3)
                     animatorComponent.CurrentLockedAction = null;
 
-                animatorComponent.DestinationPosition = Vector2.zero;
+                var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
+                var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
+
+                animatorComponent.DestinationPosition = Vector2.zero;
+                unitEffects.OriginCoordinate = coord.CubeCoordinate;
                 animatorComponent.DestinationReachTriggerSet = false;
                 animatorComponent.InitialValuesSet = false;
                 animatorComponent.ExecuteTriggerSet = false;
@@ -197,7 +201,6 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (animatorComponent.AnimationEvents)
                     {
-
                         //event triggered from animation
                         if (animatorComponent.AnimationEvents.EventTrigger)
                         {
@@ -224,7 +227,7 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (!animatorComponent.ExecuteTriggerSet)
                     {
-                        ExecuteActionAnimation(actions, animatorComponent, gameStates[0], worldIndex.Value);
+                        ExecuteActionAnimation(unitEffects, actions, animatorComponent, gameStates[0], worldIndex.Value);
                     }
                     else
                     {
@@ -273,7 +276,6 @@ public class UnitAnimationSystem : ComponentSystem
                 }
             }
 
-
             #region Set Animator Variables
             if (gameStates[0].CurrentState == GameStateEnum.planning)
             {
@@ -320,7 +322,6 @@ public class UnitAnimationSystem : ComponentSystem
             else
                 animatorComponent.Animator.SetBool("HasWindup", false);
 
-
             if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
                 animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
@@ -351,7 +352,6 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     //Debug.Log("DestinationReached");
                     animatorComponent.Animator.SetTrigger("DestinationReached");
-                    unitEffects.LastStationaryCoordinate = coord.CubeCoordinate;
                     animatorComponent.DestinationReachTriggerSet = true;
                 }
             }
@@ -364,14 +364,18 @@ public class UnitAnimationSystem : ComponentSystem
         gameStates.Dispose();
     }
 
-    public void ExecuteActionAnimation(Actions.Component actions, AnimatorComponent animatorComponent, GameState.Component gameState, uint worldIndex)
+    public void ExecuteActionAnimation(UnitEffects unitEffects, Actions.Component actions, AnimatorComponent animatorComponent, GameState.Component gameState, uint worldIndex)
     {
         if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState.CurrentState - 2)
         {
             if (!animatorComponent.InitialValuesSet)
             {
-                var pos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
-                animatorComponent.DestinationPosition = new Vector2(pos.x, pos.z);
+                if(actions.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
+                {
+                    unitEffects.DestinationCoordinate = actions.LockedAction.Targets[0].TargetCoordinate;
+                    var pos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
+                    animatorComponent.DestinationPosition = new Vector2(pos.x, pos.z);
+                }
                 animatorComponent.InitialValuesSet = true;
             }
             animatorComponent.Animator.SetTrigger("Execute");

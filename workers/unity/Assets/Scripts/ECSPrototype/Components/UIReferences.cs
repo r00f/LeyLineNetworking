@@ -172,7 +172,7 @@ public class UIReferences : MonoBehaviour
     public ParticleSystem EnemyReadyBurstPS;
 
     [Header("TurnWheel")]
-    public Animator TurnWheelAnimator;
+    //public Animator TurnWheelAnimator;
     public float ReadyOutSpeed;
     public float ReadyInSpeed;
     public ReadySlider EnemyReadySlider;

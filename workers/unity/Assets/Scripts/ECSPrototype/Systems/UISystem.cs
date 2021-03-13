@@ -241,8 +241,8 @@ namespace LeyLineHybridECS
                 UIRef.EnemyRope.color = UIRef.EnemyColor;
 
                 UIRef.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
-                UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
-                UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
+                //UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
+                //UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
 
                 var fBurst = UIRef.FriendlyReadyBurstPS.main;
                 fBurst.startColor = UIRef.FriendlyColor;
@@ -376,7 +376,7 @@ namespace LeyLineHybridECS
                 UIRef.BigWheelColoredParts[i].color = settings.TurnStepBgColors[i];
             }
 
-            UIRef.TurnWheelAnimator.SetInteger("TurnStep", (int)gameState.CurrentState - 1);
+            //UIRef.TurnWheelAnimator.SetInteger("TurnStep", (int)gameState.CurrentState - 1);
 
             switch (gameState.CurrentState)
             {

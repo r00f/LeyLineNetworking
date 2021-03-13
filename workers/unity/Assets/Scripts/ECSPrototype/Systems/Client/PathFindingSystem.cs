@@ -40,11 +40,6 @@ public class PathFindingSystem : ComponentSystem
         );
     }
 
-    protected override void OnUpdate()
-    {
-        
-    }
-
     public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
         //returns a list of offsetCoordinates
@@ -80,28 +75,6 @@ public class PathFindingSystem : ComponentSystem
         });
 
         return cellsInRadius;
-    }
-
-    public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadiusIgnoringTaken(uint radius, List<CellAttributes> cellsInRange, CellAttribute origin)
-    {
-        var paths = CachePaths(cellsInRange, origin);
-        var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
-
-        foreach (var key in paths.Keys)
-        {
-            var path = paths[key];
-
-            if (path.CellAttributes.Count != 0 && key.IsTaken)
-                path.CellAttributes.RemoveAt(0);
-
-            if (path.CellAttributes.Count == 0)
-                continue;
-
-            path.CellAttributes.Reverse();
-            cachedPaths.Add(key, path);
-        }
-
-        return cachedPaths;
     }
 
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, CellAttribute origin)
@@ -294,6 +267,63 @@ public class PathFindingSystem : ComponentSystem
                 break;
         }
         
+        return valid;
+    }
+
+    public bool ValidateTarget(Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths, CellAttribute cellAtt)
+    {
+        bool valid = false;
+
+        if (inAction.Index == -3)
+            return valid;
+
+        switch (inAction.Targets[0].TargetType)
+        {
+            case TargetTypeEnum.cell:
+
+                var cell = cellAtt;
+
+                if (Vector3fext.ToUnityVector(cellAtt.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                {
+                    if (inCachedPaths.Count != 0)
+                    {
+                        if (inCachedPaths.ContainsKey(cell))
+                        {
+                            valid = true;
+                        }
+                    }
+                    else
+                    {
+                        if (CellGridMethods.GetDistance(cellAtt.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                        {
+                            if (inAction.Targets[0].CellTargetNested.RequireEmpty)
+                            {
+                                if (!cellAtt.IsTaken)
+                                    valid = true;
+                            }
+                            else
+                            {
+                                valid = true;
+                            }
+                        }
+                    }
+                }
+                break;
+            case TargetTypeEnum.unit:
+                Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId targetUnitId, ref CubeCoordinate.Component targetUnitCoord, ref FactionComponent.Component targetUnitFaction) =>
+                {
+                    if (Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    {
+                        if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                        {
+                            valid = ValidateUnitTarget(e, inAction.Targets[0].UnitTargetNested.UnitReq, usingUnitId, inFaction);
+                            //Debug.Log("UNIT VALID IN PATHFINDING SYS: " + valid);
+                        }
+                    }
+                });
+                break;
+        }
+
         return valid;
     }
 
