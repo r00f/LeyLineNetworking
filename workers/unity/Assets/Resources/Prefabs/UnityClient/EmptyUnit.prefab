@@ -165,8 +165,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Lights: []
-  ParticleSystems:
-  - {fileID: 4813044893763074212}
+  ParticleSystems: []
   EmissiveTrailParticleSystems: []
   TrailRenderers: []
   LineRenderers: []
@@ -287,6 +286,7 @@ MonoBehaviour:
   HealthBarInstance: {fileID: 0}
   SelectionCircleGO: {fileID: 1706615932949122912}
   SelectionMeshRenderer: {fileID: 1706615932947190176}
+  SelectionGameObjects: []
 --- !u!114 &-6603811149368157288
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -315,7 +315,11 @@ MonoBehaviour:
   CombinedArmor: 0
   CurrentArmor: 0
   CurrentHealth: 0
-  LastStationaryCoordinate:
+  OriginCoordinate:
+    X: 0
+    Y: 0
+    Z: 0
+  DestinationCoordinate:
     X: 0
     Y: 0
     Z: 0
@@ -622,12 +626,6 @@ Transform:
 --- !u!23 &1706615932947190176 stripped
 MeshRenderer:
   m_CorrespondingSourceObject: {fileID: 6682207234197832629, guid: b52e26c420099ab47ae96a2e7685cd69,
-    type: 3}
-  m_PrefabInstance: {fileID: 5410202169812881941}
-  m_PrefabAsset: {fileID: 0}
---- !u!198 &4813044893763074212 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 711490546723449521, guid: b52e26c420099ab47ae96a2e7685cd69,
     type: 3}
   m_PrefabInstance: {fileID: 5410202169812881941}
   m_PrefabAsset: {fileID: 0}

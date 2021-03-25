@@ -281,15 +281,23 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if(visible.Value == 1 && !playerVision.RevealVision)
                 {
-                    unitComponentReferences.SelectionCircleGO.SetActive(true);
-
                     if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
                     {
-                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", teamColorMeshes.color * 30000);
+
+                        m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
+
+                        foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                            g.layer = 21;
+
+                        //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", teamColorMeshes.color * 30000);
                     }
                     else
                     {
-                        unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
+                        foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                            g.layer = 11;
+
+                        //unitComponentReferences.SelectionCircleGO.SetActive(false);
+                        //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
                     }
                 }
                 else
@@ -299,6 +307,9 @@ public class UnitAnimationSystem : ComponentSystem
             }
             else
             {
+                foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                    g.layer = 11;
+
                 unitComponentReferences.SelectionCircleGO.SetActive(false);
                 animatorComponent.Animator.SetBool("Planning", false);
             }

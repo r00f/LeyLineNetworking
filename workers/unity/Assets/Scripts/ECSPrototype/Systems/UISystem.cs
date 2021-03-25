@@ -241,8 +241,8 @@ namespace LeyLineHybridECS
                 UIRef.EnemyRope.color = UIRef.EnemyColor;
 
                 UIRef.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
-                //UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
-                //UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
+                UIRef.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
+                UIRef.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
 
                 var fBurst = UIRef.FriendlyReadyBurstPS.main;
                 fBurst.startColor = UIRef.FriendlyColor;
@@ -376,7 +376,7 @@ namespace LeyLineHybridECS
                 UIRef.BigWheelColoredParts[i].color = settings.TurnStepBgColors[i];
             }
 
-            //UIRef.TurnWheelAnimator.SetInteger("TurnStep", (int)gameState.CurrentState - 1);
+            UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int)gameState.CurrentState - 1);
 
             switch (gameState.CurrentState)
             {
@@ -677,8 +677,29 @@ namespace LeyLineHybridECS
                             }
                         }
                         #endregion
-                        
 
+                        /*
+                        if(playerHigh.CancelState || authPlayerState.CurrentState == PlayerStateEnum.ready)
+                        {
+                            UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", 0);
+                        }
+                        else
+                        {
+                            if (actions.CurrentSelected.Index != -3)
+                            {
+                                UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) actions.CurrentSelected.ActionExecuteStep + 1);
+                            }
+                            else if (actions.LockedAction.Index != -3)
+                            {
+                                UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) actions.LockedAction.ActionExecuteStep + 1);
+                            }
+                            else
+                            {
+                                UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", 0);
+                            }
+                        }
+
+                        */
                         for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
                         {
                             if(actions.CurrentSelected.Index != -3)

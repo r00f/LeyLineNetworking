@@ -12,6 +12,9 @@ public class UIReferences : MonoBehaviour
     public bool OpponentReady;
     public bool UIActive;
 
+
+    public Material SelectionOutlineMaterial;
+
     [Header("MenuPanels")]
     public GameObject UIMainPanel;
     public GameObject HelpPanel;
@@ -141,6 +144,7 @@ public class UIReferences : MonoBehaviour
     public Text TurnStateText;
     public Animator GOButtonAnimator;
     public float CacelGraceTime;
+    public float SlidersOpenMultiplier;
     public GOButton GOButtonScript;
     public StudioEventEmitter RopeLoopEmitter;
 
@@ -172,7 +176,7 @@ public class UIReferences : MonoBehaviour
     public ParticleSystem EnemyReadyBurstPS;
 
     [Header("TurnWheel")]
-    //public Animator TurnWheelAnimator;
+    public Animator ExecuteStepPanelAnimator;
     public float ReadyOutSpeed;
     public float ReadyInSpeed;
     public ReadySlider EnemyReadySlider;

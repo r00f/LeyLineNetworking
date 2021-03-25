@@ -40,6 +40,10 @@ public class PathFindingSystem : ComponentSystem
         );
     }
 
+    protected override void OnUpdate()
+    {
+    }
+
     public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
     {
         //returns a list of offsetCoordinates

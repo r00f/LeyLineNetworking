@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -107,15 +107,19 @@ namespace LeyLineHybridECS
 
         void OnEnable()
         {
-            //ConnectManaLith();
+
         }
 
         public void GenerateMeshes()
         {
             //manaLithParent = GameObject.Find("Manaliths").transform;
             //transform.parent = manaLithParent;
+            terrainController = FindObjectOfType<TerrainController>();
+            projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
+            leyLinePathMesh = new Mesh();
+            UpdatePathRenderer();
 
-            if(leyLinePathMeshFilter.sharedMesh != null)
+            if (leyLinePathMeshFilter.sharedMesh != null)
             {
                 //create unique name for the asset
                 string assetName = "leylinepath" + Resources.FindObjectsOfTypeAll(typeof(Mesh)).Count();
@@ -156,7 +160,7 @@ namespace LeyLineHybridECS
 
         public void ConnectManaLith()
         {
-            terrainController = FindObjectOfType<TerrainController>();
+
             terrainController.leyLineCrackPositions.Clear();
 
             //otherManaliths.Clear();

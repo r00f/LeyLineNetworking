@@ -46,43 +46,42 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public bool RotatingBack;
 
 
-    //int cancelCloseToOpenHash;
-    //int cancelOpenHash;
-    //int rotateBackHash;
-    //int rotateToGoHash;
+    int cancelCloseToOpenHash;
+    int cancelOpenHash;
+    int rotateBackHash;
+    int rotateToGoHash;
 
     public void OnPointerEnter(PointerEventData eventData)
     {
         hovered = true;
-        //animator.SetBool("Hovered", true);
+        animator.SetBool("Hovered", true);
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         hovered = false;
-        //animator.SetBool("Hovered", false);
+        animator.SetBool("Hovered", false);
     }
 
     public void Start()
     {
         var button = GetComponent<Button>();
-        /*
+
         rotateToGoHash = Animator.StringToHash("Base Layer.RotateBack -> Base Layer.GO");
         cancelCloseToOpenHash = Animator.StringToHash("Base Layer.Cancel -> Base Layer.CancelOpen");
         cancelOpenHash = Animator.StringToHash("Base Layer.CancelOpen");
         rotateBackHash = Animator.StringToHash("Base Layer.RotateBack");
-        */
         button.onClick.AddListener(delegate { OnClick(); });
-        //LightInner.color = new Color(LightInner.color.r, LightInner.color.g, LightInner.color.b, 0);
+        LightInner.color = new Color(LightInner.color.r, LightInner.color.g, LightInner.color.b, 0);
     }
 
     private void Update()
     {
-        //animator.SetBool("Ready", PlayerReady);
-        //if(!PlayerReady)
-            //animator.SetBool("Cancel", PlayerInCancelState);
+        animator.SetBool("Ready", PlayerReady);
+        if(!PlayerReady)
+            animator.SetBool("Cancel", PlayerInCancelState);
 
-        /*
+
         if ((animator.GetCurrentAnimatorStateInfo(0).fullPathHash == rotateBackHash || animator.GetCurrentAnimatorStateInfo(0).fullPathHash == cancelOpenHash || animator.GetAnimatorTransitionInfo(0).fullPathHash == cancelCloseToOpenHash) && animator.GetAnimatorTransitionInfo(0).fullPathHash != rotateToGoHash)
         {
             RotatingBack = true;
@@ -101,7 +100,7 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 CancelStateEmitter.Stop();
         }
 
-        */
+
 
         if (hovered && Button.interactable)
         {
@@ -110,42 +109,42 @@ public class GOButton : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             else
                 LightCircle.color -= new Color(0, 0, 0, LightCircleLerpSpeed * Time.deltaTime);
 
-            /*
+
             if (LightFlare.color.a < LightFlareHoverMax)
                 LightFlare.color += new Color(0, 0, 0, LightFlareLerpSpeed * Time.deltaTime);
             else
                 LightFlare.color -= new Color(0, 0, 0, LightFlareLerpSpeed * Time.deltaTime);
-                */
+
         }
         else
         {
-            /*
+
             if(LightInner.color.a > 0)
             {
                 LightInner.color -= new Color(0, 0, 0, LightFlareLerpSpeed * Time.deltaTime);
             }
-            */
+
             if (LightCircle.color.a > LightCircleDefaultAlpha)
                 LightCircle.color -= new Color(0, 0, 0, LightCircleLerpSpeed * Time.deltaTime);
-            /*
+
             if (LightFlare.color.a > 0)
                 LightFlare.color -= new Color(0, 0, 0, LightFlareLerpSpeed * Time.deltaTime);
-                */
+
         }
     }
 
     public void OnClick()
     {
         //COMPLETELY FLARE UP LIGHTS
-        //LightFlare.color = new Color(LightFlare.color.r, LightFlare.color.g, LightFlare.color.b, 1);
+        LightFlare.color = new Color(LightFlare.color.r, LightFlare.color.g, LightFlare.color.b, 1);
         LightCircle.color = new Color(LightCircle.color.r, LightCircle.color.g, LightCircle.color.b, 1);
     }
 
     public void SetLightsToPlayerColor(Color color)
     {
-        //LightFlare.color = color;
+        LightFlare.color = color;
         LightCircle.color = color;
-        //LightInner.color = color;
+        LightInner.color = color;
     }
 
 }

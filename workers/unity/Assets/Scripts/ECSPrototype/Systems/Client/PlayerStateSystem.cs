@@ -55,7 +55,6 @@ namespace LeyLineHybridECS
 
         }
 
-
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
@@ -116,12 +115,16 @@ namespace LeyLineHybridECS
                                         playerState.CurrentState = PlayerStateEnum.ready;
                                         Debug.Log((int) playerState.CurrentState);
                                     }
-                                    UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - playerHigh.CancelTime / 3);
                                 }
                                 else
                                 {
                                     playerState = UpdateSelectedUnit(playerCam, playerState, playerHigh, playerVision);
+
+                                    if (playerHigh.CancelTime < UIRef.CacelGraceTime)
+                                        playerHigh.CancelTime += Time.DeltaTime * UIRef.SlidersOpenMultiplier;
                                 }
+
+                                UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - (playerHigh.CancelTime / UIRef.CacelGraceTime));
                             }
                             else
                             {
@@ -159,13 +162,15 @@ namespace LeyLineHybridECS
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId)
                 {
-                    if (!unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].isPlaying)
-                        unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].Play();
+                    //if (!unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].isPlaying)
+                        //unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].Play();
 
                     if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                         playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
 
                     playerCam.SetTargetTransform(unitComponentReferences.transform);
+
+                    unitComponentReferences.SelectionCircleGO.SetActive(true);
 
                     if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
                     {
@@ -193,10 +198,12 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    if (unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].isPlaying)
-                        unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].Stop();
+                    //if (unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].isPlaying)
+                        //unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].Stop();
 
-                    if(mouseState.ClickEvent == 1)
+                    unitComponentReferences.SelectionCircleGO.SetActive(false);
+
+                    if (mouseState.ClickEvent == 1)
                     {
                         if (playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
@@ -235,7 +242,8 @@ namespace LeyLineHybridECS
             {
                 if (playerState.CurrentState != PlayerStateEnum.ready)
                 {
-                    playerHigh.CancelTime = timeToCancel;
+                    if(!playerHigh.CancelState)
+                        playerHigh.CancelTime = timeToCancel;
                     playerHigh.CancelState = !playerHigh.CancelState;
                 }
             });

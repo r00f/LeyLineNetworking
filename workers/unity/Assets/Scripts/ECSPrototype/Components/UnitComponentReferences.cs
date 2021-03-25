@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using cakeslice;
 
 [RequireComponent(typeof(CapsuleCollider), typeof(LineRendererComponent), typeof(AnimatorComponent)),
 RequireComponent(typeof(TeamColorMeshes), typeof(IsVisibleReferences), typeof(Unit_BaseDataSet)),
@@ -26,6 +25,8 @@ public class UnitComponentReferences : MonoBehaviour
     public GameObject SelectionCircleGO;
     public MeshRenderer SelectionMeshRenderer;
 
+    public List<GameObject> SelectionGameObjects;
+
     public void InitializeComponentReferences()
     {
         CapsuleCollider = GetComponent<CapsuleCollider>();
@@ -37,5 +38,19 @@ public class UnitComponentReferences : MonoBehaviour
         HeadUIReferencesComp = GetComponent<UnitHeadUIReferences>();
         AnimPortraitComp = GetComponent<AnimatedPortraitReference>();
         UnitEffectsComp = GetComponent<UnitEffects>();
+
+        SelectionGameObjects.Clear();
+
+        foreach(SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
+            SelectionGameObjects.Add(s.gameObject);
+
+        foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
+            SelectionGameObjects.Add(m.gameObject);
+
+        if(SelectionCircleGO && SelectionGameObjects.Contains(SelectionCircleGO))
+        {
+            SelectionGameObjects.Remove(SelectionCircleGO);
+        }
+
     }
 }

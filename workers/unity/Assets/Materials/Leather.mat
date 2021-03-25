@@ -275,9 +275,9 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.3396226, g: 0.26196498, b: 0.21947306, a: 1}
+    - _BaseColor: {r: 0.5943396, g: 0.4333651, b: 0.3448291, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
-    - _Color: {r: 0.33962256, g: 0.26196495, b: 0.21947303, a: 1}
+    - _Color: {r: 0.5943396, g: 0.43336508, b: 0.34482908, a: 1}
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
@@ -291,6 +291,7 @@ Material:
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
 --- !u!114 &5404912014580860539
 MonoBehaviour:
   m_ObjectHideFlags: 11

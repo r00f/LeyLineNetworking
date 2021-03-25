@@ -1,4 +1,4 @@
-﻿Shader "DepthMask"
+Shader "DepthMask"
 {
 	SubShader {
 		// Render the mask after regular geometry, but before masked geometry and

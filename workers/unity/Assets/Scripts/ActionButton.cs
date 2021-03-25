@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -36,10 +36,12 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
     {
         if(!SelectHandler.Selected && !Hovered)
         {
+            TurnStepBauble.enabled = false;
             SelectedGlow.enabled = false;
         }
         else
         {
+            TurnStepBauble.enabled = true;
             SelectedGlow.enabled = true;
         }
     }

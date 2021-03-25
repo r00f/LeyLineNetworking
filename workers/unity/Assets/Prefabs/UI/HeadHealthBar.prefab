@@ -1258,6 +1258,7 @@ MonoBehaviour:
   BgFill: {fileID: 6055418230114753709}
   HealthBarRect: {fileID: 4185233041639642291}
   DamageRect: {fileID: 6072170886814570471}
+  PartsRect: {fileID: 0}
   Parts:
   - {fileID: 9101080235318248907}
   - {fileID: 43418378353422714}
@@ -1269,6 +1270,7 @@ MonoBehaviour:
   - {fileID: 2300341037386356320}
   - {fileID: 5681255029926144433}
   - {fileID: 5908857590801615687}
+  RectSizes: 
   NumberOfParts: 0
 --- !u!1 &5908857590801615687
 GameObject:
@@ -1360,7 +1362,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5763064371356456309
 RectTransform:
   m_ObjectHideFlags: 0
