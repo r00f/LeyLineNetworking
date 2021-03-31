@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace LeyLineHybridECS
@@ -12,11 +12,14 @@ namespace LeyLineHybridECS
         {
             pathPs = GetComponentInChildren<ParticleSystem>();
             mesh = GetComponent<MeshFilter>().mesh;
+            if(pathPs)
+            {
+                ParticleSystem pPs = pathPs;
+                var pathShapeModule = pPs.shape;
+                pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
+                pathShapeModule.mesh = mesh;
+            }
 
-            ParticleSystem pPs = pathPs;
-            var pathShapeModule = pPs.shape;
-            pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
-            pathShapeModule.mesh = mesh;
         }
     }
 }

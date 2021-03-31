@@ -160,7 +160,7 @@ namespace LeyLineHybridECS
 
         public void ConnectManaLith()
         {
-
+            terrainController = FindObjectOfType<TerrainController>();
             terrainController.leyLineCrackPositions.Clear();
 
             //otherManaliths.Clear();
@@ -252,6 +252,7 @@ namespace LeyLineHybridECS
         public void UpdateLeyLinePath()
         {
             leyLinePath.Clear();
+            gridGenerator = FindObjectOfType<HexagonalHexGridGenerator>();
 
             if (connectedManaLith != null && connectedManaLith != this)
             {

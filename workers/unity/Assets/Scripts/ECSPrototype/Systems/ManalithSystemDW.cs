@@ -217,12 +217,30 @@ namespace LeyLineHybridECS
 
                             if (manalithIsHovered && gameState.CurrentState == GameStateEnum.planning)
                             {
-                                clientData.ManalithHoveredMesh.enabled = true;
+                                clientData.IngameIconRef.gameObject.SetActive(true);
+                                m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", meshColor.Color);
+
+                                foreach (GameObject g in meshColor.ManaLithObject.SelectionOutlineRenderers)
+                                {
+                                    g.layer = 21;
+                                }
+
+                                //clientData.ManalithHoveredMesh.enabled = true;
                                 clientData.ManalithHoveredMesh.material.SetColor("_UnlitColor", meshColor.LerpColor);
+
+                                //enable tooltip when user clicks
+                                //if (Input.GetButtonDown("Fire1"))
+                                    //SwitchTooltip(clientData);
                             }
                             else
                             {
-                                clientData.ManalithHoveredMesh.enabled = false;
+
+                                clientData.IngameIconRef.gameObject.SetActive(false);
+                                foreach (GameObject g in meshColor.ManaLithObject.SelectionOutlineRenderers)
+                                {
+                                    g.layer = 0;
+                                }
+                                //clientData.ManalithHoveredMesh.enabled = false;
                             }
 
                             #endregion

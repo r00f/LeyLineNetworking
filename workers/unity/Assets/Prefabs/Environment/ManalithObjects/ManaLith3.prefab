@@ -80,7 +80,7 @@ LineRenderer:
   - {x: 0, y: 0, z: 1}
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 1
+    widthMultiplier: 0.3
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -211,7 +211,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4478502063552338373
 Transform:
   m_ObjectHideFlags: 0
@@ -5088,7 +5088,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8076838793856098722}
-  m_Mesh: {fileID: -5535525147861541028, guid: 6f13fda89ec485b449f0e9e1eab95d9f, type: 3}
+  m_Mesh: {fileID: 2956572769988134888, guid: 59487f5409f1ba847890ace55a90147c, type: 3}
 --- !u!1 &8361903899685021776
 GameObject:
   m_ObjectHideFlags: 0
@@ -5291,9 +5291,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8f67a9305442d2b45a6eaecdad3c917d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ManalithHoveredMesh: {fileID: 0}
+  ManalithHoveredMesh: {fileID: 7957662461164416584}
   ManalithEntityID: 0
-  UIElementTransform: {fileID: 0}
+  UIElementTransform: {fileID: 5954548460053882675}
   WorldPos: {x: 0, y: 0, z: 0}
   TooltipBackgroundImage: {fileID: 0}
   NodeName: 
@@ -5333,7 +5333,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8960737574649285750
 Transform:
   m_ObjectHideFlags: 0
@@ -10235,6 +10235,12 @@ PrefabInstance:
 --- !u!4 &5954548460053882675 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1921862937231571239, guid: 069d4378a316b81488db5492056434be,
+    type: 3}
+  m_PrefabInstance: {fileID: 5190709106074279444}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &7957662461164416584 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 2766988867484201052, guid: 069d4378a316b81488db5492056434be,
     type: 3}
   m_PrefabInstance: {fileID: 5190709106074279444}
   m_PrefabAsset: {fileID: 0}

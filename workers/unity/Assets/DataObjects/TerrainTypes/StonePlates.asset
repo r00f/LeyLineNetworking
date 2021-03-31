@@ -18,7 +18,7 @@ MonoBehaviour:
   textureIndex: 2
   TreeHeightMinMax: {x: 0, y: 0}
   DetailObjectIndexRanges:
-  - {x: 22, y: 23}
+  - {x: 16, y: 16}
   DetailObjectAmounts:
   - {x: 1, y: 1}
   DetailObjectSpawnProbabilities: 64000000
@@ -33,6 +33,7 @@ MonoBehaviour:
   yOffset: 0
   cellTerrainYOffset: 0.1
   DetailObjectSpawnYOffset: -0.1
+  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
   Walkable: 1
   spawnAllAssets: 0
   probabilityToSpawnNeighbourAsset: 0

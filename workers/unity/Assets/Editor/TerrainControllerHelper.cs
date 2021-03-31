@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEditor;
 
@@ -21,6 +21,12 @@ public class TerrainControllerHelper : Editor
     {
             base.OnInspectorGUI();
             serializedObject.Update();
+
+
+            if (GUILayout.Button("Save Terrain Asset"))
+            {
+                myTarget.SaveTerrainAsset();
+            }
 
 
             if (GUILayout.Button("Update Trees"))

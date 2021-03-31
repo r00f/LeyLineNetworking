@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEditor;
 using System.Collections.Generic;
@@ -66,6 +66,12 @@ namespace LeyLineHybridECS
 
 
 #if UNITY_EDITOR
+
+
+        public void SaveTerrainAsset()
+        {
+            AssetDatabase.SaveAssets();
+        }
 
 
         public void UpdateAllMapTileTextures()
