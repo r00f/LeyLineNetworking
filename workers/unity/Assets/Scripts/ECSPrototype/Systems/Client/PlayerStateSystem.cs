@@ -47,7 +47,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<MouseState>(),
-                ComponentType.ReadOnly<Health.Component>(),
+                //ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadWrite<UnitComponentReferences>()

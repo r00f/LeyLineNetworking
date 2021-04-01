@@ -75,9 +75,7 @@ namespace LeyLineHybridECS
                 {
                     if (unitToSpawn.Faction == 0)
                     {
-                        //Debug.Log("SpawnNeutralUnit");
-                        
-                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation);
+                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
                     }
                 });
 
@@ -128,7 +126,7 @@ namespace LeyLineHybridECS
             });
         }
 
-        public void SpawnNeutralUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0)
+        public void SpawnNeutralUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0, bool isManalithUnit = false)
         {
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
             {
@@ -137,7 +135,7 @@ namespace LeyLineHybridECS
                 if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                 {
                     var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<Unit_BaseDataSet>();
-                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation);
+                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation, isManalithUnit);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }

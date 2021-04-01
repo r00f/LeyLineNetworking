@@ -122,7 +122,8 @@ public class SendActionRequestSystem : ComponentSystem
                             //if (actionsData.BasicMove.Index != -3)
                             //{
                                 //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
-                                anim.AnimationEvents.VoiceTrigger = true;
+                                if(anim.AnimationEvents)
+                                    anim.AnimationEvents.VoiceTrigger = true;
                                 SelectActionCommand(-3, unitEntityId.Id);
                                 //m_UISystem.InitializeSelectedActionTooltip(0);
                             //}
@@ -145,7 +146,8 @@ public class SendActionRequestSystem : ComponentSystem
                                     unitEntityId,
                                     new SetTargetRequest(cCoord.CubeCoordinate)
                                 );
-                                anim.AnimationEvents.VoiceTrigger = true;
+                                if(anim.AnimationEvents)
+                                    anim.AnimationEvents.VoiceTrigger = true;
                                 m_CommandSystem.SendCommand(request);
                             }
 
@@ -204,6 +206,7 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
+        Debug.Log("SelectActionCommand with index: " + actionIndex + " from entity with id: " + entityId);
         bool isSelfTarget = false;
 
         var playerPathings = m_PlayerData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
@@ -232,6 +235,7 @@ public class SendActionRequestSystem : ComponentSystem
         {
             if (idComponent.EntityId.Id == entityId)
             {
+                Debug.Log("SendSelectActionRequest");
                 var request = new Actions.SelectActionCommand.Request
                 (
                     idComponent.EntityId,

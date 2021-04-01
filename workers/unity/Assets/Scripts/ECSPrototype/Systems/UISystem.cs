@@ -49,7 +49,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<Unit_BaseDataSet>(),
                 ComponentType.ReadOnly<MouseState>(),
-                ComponentType.ReadOnly<Health.Component>(),
+                //ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<IsVisible>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<Actions.Component>(),
@@ -287,7 +287,7 @@ namespace LeyLineHybridECS
 
             if (cleanUpStateEvents.Count > 0)
             {
-                Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
+                Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref FactionComponent.Component faction, ref Energy.Component energy) =>
                 {
                     //var energy = EntityManager.GetComponentData<Energy.Component>(e);
                     var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
@@ -297,8 +297,14 @@ namespace LeyLineHybridECS
                         UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
                     }
 
-                    if(unitHeadUIRef.UnitHeadHealthBarInstance)
-                        ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
+                    if(EntityManager.HasComponent<Health.Component>(e))
+                    {
+                        var health = EntityManager.GetComponentData<Health.Component>(e);
+
+                        if (unitHeadUIRef.UnitHeadHealthBarInstance)
+                            ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
+                    }
+
                 });
 
 
@@ -504,7 +510,7 @@ namespace LeyLineHybridECS
             
             #region Unitloop
 
-            Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
+            Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, /*ref Health.Component health,*/ ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
             {
                 uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -518,6 +524,68 @@ namespace LeyLineHybridECS
                 int actionCount = stats.Actions.Count;
                 int spawnActionCount = stats.SpawnActions.Count;
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+
+                if(EntityManager.HasComponent<Health.Component>(e))
+                {
+                    var health = EntityManager.GetComponentData<Health.Component>(e);
+                    string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
+
+                    if (health.Armor > 0 && faction.Faction == authPlayerFaction)
+                    {
+
+                        UIRef.PortraitArmorText.enabled = true;
+                        UIRef.PortraitHealthText.text = currentMaxHealth;
+                        UIRef.PortraitArmorText.text = health.Armor.ToString();
+
+                    }
+                    else
+                    {
+                        UIRef.PortraitArmorText.enabled = false;
+                        UIRef.PortraitHealthText.text = currentMaxHealth;
+                    }
+
+
+                    if (unitEffects.CurrentHealth == 0)
+                    {
+                        if (unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
+                        {
+                            CleanupUnitUI(isVisibleRef, unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
+                        }
+                    }
+                    else if (unitHeadUIRef.UnitHeadUIInstance)
+                    {
+                        GameObject healthBarGO = unitHeadUIRef.UnitHeadHealthBarInstance.gameObject;
+
+                        if (isVisible.Value == 1)
+                        {
+                            if (!healthBarGO.activeSelf)
+                                healthBarGO.SetActive(true);
+
+                            if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                            {
+                                unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled = true;
+                            }
+                            else if (unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled)
+                                unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled = false;
+
+                            if (unitEffects.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && faction.Faction == authPlayerFaction))
+                            {
+                                if (!unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
+                                    unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(true);
+                            }
+                            else if (unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
+                            {
+                                unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(false);
+                            }
+                            SetHealthBarFillAmounts(gameState.CurrentState, unitEffects, unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
+                        }
+                        else
+                        {
+                            if (healthBarGO.activeSelf)
+                                healthBarGO.SetActive(false);
+                        }
+                    }
+                }
 
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
@@ -566,23 +634,6 @@ namespace LeyLineHybridECS
                         UIRef.PortraitNameText.enabled = true;
                         UIRef.AnimatedPortrait.GenericImage.enabled = true;
                         UIRef.AnimatedPortrait.PlayerColorImage.enabled = true;
-                    }
-
-
-                    string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
-
-                    if (health.Armor > 0 && faction.Faction == authPlayerFaction)
-                    {
-
-                        UIRef.PortraitArmorText.enabled = true;
-                        UIRef.PortraitHealthText.text = currentMaxHealth;
-                        UIRef.PortraitArmorText.text = health.Armor.ToString();
-
-                    }
-                    else
-                    {
-                        UIRef.PortraitArmorText.enabled = false;
-                        UIRef.PortraitHealthText.text = currentMaxHealth;
                     }
 
                     if(unitHeadUIRef.UnitHeadHealthBarInstance)
@@ -678,28 +729,7 @@ namespace LeyLineHybridECS
                         }
                         #endregion
 
-                        /*
-                        if(playerHigh.CancelState || authPlayerState.CurrentState == PlayerStateEnum.ready)
-                        {
-                            UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", 0);
-                        }
-                        else
-                        {
-                            if (actions.CurrentSelected.Index != -3)
-                            {
-                                UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) actions.CurrentSelected.ActionExecuteStep + 1);
-                            }
-                            else if (actions.LockedAction.Index != -3)
-                            {
-                                UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) actions.LockedAction.ActionExecuteStep + 1);
-                            }
-                            else
-                            {
-                                UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", 0);
-                            }
-                        }
 
-                        */
                         for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
                         {
                             if(actions.CurrentSelected.Index != -3)
@@ -753,10 +783,18 @@ namespace LeyLineHybridECS
                 if (!stats.UIInitialized)
                 {
                     InitializeUnitUI(unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
+
+                    if (!EntityManager.HasComponent<Health.Component>(e))
+                    {
+                        Object.Destroy(unitHeadUIRef.UnitHeadHealthBarInstance.gameObject);
+                    }
                     stats.UIInitialized = true;
                 }
                 else
                 {
+
+
+
                     if (unitHeadUIRef.UnitHeadUIInstance)
                     {
                         unitHeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.SetFloat("WaitTime", unitHeadUIRef.HealthTextDelay);
@@ -771,52 +809,10 @@ namespace LeyLineHybridECS
                         }
                     }
 
-                    if (unitEffects.CurrentHealth == 0)
-                    {
-                        if(unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
-                        {
-                            CleanupUnitUI(isVisibleRef, unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
-                        }
-                    }
-                    else if(unitHeadUIRef.UnitHeadUIInstance)
-                    {
-                        GameObject healthBarGO = unitHeadUIRef.UnitHeadHealthBarInstance.gameObject;
-
-                        if (isVisible.Value == 1)
-                        {
-                            if(!healthBarGO.activeSelf)
-                                healthBarGO.SetActive(true);
-
-                            if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
-                            {
-                                unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled = true;
-                            }
-                            else if (unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled)
-                                unitHeadUIRef.UnitHeadHealthBarInstance.HoveredImage.enabled = false;
-
-                            if (unitEffects.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && faction.Faction == authPlayerFaction))
-                            {
-                                if(!unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
-                                    unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(true);
-                            }
-                            else if(unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.activeSelf)
-                            {
-                                unitHeadUIRef.UnitHeadHealthBarInstance.HealthBarGo.SetActive(false);
-                            }
-
-                        }
-                        else
-                        {
-                            if (healthBarGO.activeSelf)
-                                healthBarGO.SetActive(false);
-                        }
-                    }
-
                     if(unitHeadUIRef.UnitHeadUIInstance && unitHeadUIRef.UnitHeadHealthBarInstance)
                     {
                         unitHeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
                         unitHeadUIRef.UnitHeadHealthBarInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
-                        SetHealthBarFillAmounts(gameState.CurrentState, unitEffects, unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
                     }
 
 

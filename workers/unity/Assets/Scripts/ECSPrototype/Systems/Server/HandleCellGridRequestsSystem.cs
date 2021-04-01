@@ -37,7 +37,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<Health.Component>(),
+            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<Actions.Component>(),
             ComponentType.ReadWrite<CellsToMark.Component>()

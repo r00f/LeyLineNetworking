@@ -42,7 +42,8 @@ public class UnitLifeCycleSystem : ComponentSystem
             All = new ComponentType[]
             {
                 ComponentType.ReadOnly<SpatialEntityId>(),
-                ComponentType.ReadOnly<Health.Component>(),
+                ComponentType.ReadOnly<Actions.Component>(),
+                //ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>()
             }

@@ -38,6 +38,7 @@ public class AISystem : ComponentSystem
         {
             None = new ComponentType[]
             {
+                typeof(ManalithUnit.Component),
                 typeof(AiUnit.Component)
             },
             All = new ComponentType[]

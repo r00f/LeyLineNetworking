@@ -51,7 +51,8 @@ public class InitializeUnitsSystem : ComponentSystem
             anim.RotateTransform.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
             unitEffects.CurrentHealth = health.CurrentHealth;
 
-            anim.AnimStateEffectHandlers.AddRange(anim.Animator.GetBehaviours<AnimStateEffectHandler>());
+            if(anim.Animator)
+                anim.AnimStateEffectHandlers.AddRange(anim.Animator.GetBehaviours<AnimStateEffectHandler>());
 
 
             switch (unitFactionComp.TeamColor)

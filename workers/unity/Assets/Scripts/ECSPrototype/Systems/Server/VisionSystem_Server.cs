@@ -37,7 +37,7 @@ public class VisionSystem_Server : ComponentSystem
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<Health.Component>(),
+            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<Vision.Component>()
             );
 

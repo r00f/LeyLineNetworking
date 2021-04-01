@@ -69,7 +69,7 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MouseState>(),
-            ComponentType.ReadOnly<Health.Component>(),
+            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<LineRendererComponent>(),
             ComponentType.ReadOnly<Transform>()

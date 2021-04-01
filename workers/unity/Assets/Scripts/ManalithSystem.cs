@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Cell;
 using Generic;
 using Unit;
@@ -11,9 +11,11 @@ using UnityEngine;
 public class ManalithSystem : ComponentSystem
 {
     private ComponentUpdateSystem componentUpdateSystem;
+    private EntityQuery m_NonManalithUnitData;
     private EntityQuery m_ManalithData;
     private EntityQuery m_CellData;
     private EntityQuery m_UnitData;
+    private EntityQuery m_ManalithUnitData;
     private EntityQuery m_GameStateData;
 
     protected override void OnCreate()
@@ -36,12 +38,44 @@ public class ManalithSystem : ComponentSystem
             ComponentType.ReadOnly<IsCircleCell.Component>()
         );
 
-        m_UnitData = GetEntityQuery(
+        
+        var NormalUnitDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+            {
+                typeof(ManalithUnit.Component)
+            },
+            All = new ComponentType[]
+            {
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<Actions.Component>(),
             ComponentType.ReadOnly<Health.Component>(),
+            ComponentType.ReadWrite<Energy.Component>()
+            }
+        };
+        m_NonManalithUnitData = GetEntityQuery(NormalUnitDesc);
+        
+
+
+        m_UnitData = GetEntityQuery(
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadOnly<FactionComponent.Component>(),
+            ComponentType.ReadOnly<Actions.Component>(),
+            //ComponentType.ReadOnly<Health.Component>(),
+            ComponentType.ReadWrite<Energy.Component>()
+        );
+        
+
+        m_ManalithUnitData = GetEntityQuery(
+            ComponentType.ReadOnly<ManalithUnit.Component>(),
+            ComponentType.ReadOnly<WorldIndex.Component>(),
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadWrite<FactionComponent.Component>(),
+            ComponentType.ReadOnly<Actions.Component>(),
+            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<Energy.Component>()
         );
         m_GameStateData = GetEntityQuery(
@@ -161,8 +195,12 @@ public class ManalithSystem : ComponentSystem
                         componentUpdateSystem.SendEvent(
                          new Manalith.ManalithFactionChangeEvent.Event(),
                          entityId.EntityId);
-
                     }
+
+                    //Apply manalith Faction to manalithUnitFaction
+
+                    
+
                 }
             }
         });
@@ -199,7 +237,7 @@ public class ManalithSystem : ComponentSystem
             //slot.EnergyGained = 0;
             slot.OccupyingFaction = 0;
 
-            Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Health.Component unitHealth) =>
+            Entities.With(m_NonManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Health.Component unitHealth) =>
             {
                 if (unitId.EntityId.Id == slot.CorrespondingCell.UnitOnCellId)
                 {
@@ -237,10 +275,9 @@ public class ManalithSystem : ComponentSystem
     public void UpdateUnit(long inUnitId, uint faction, ref Manalith.Component node)
     {
         var m_node = node;
+
         Entities.With(m_UnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
         {
-            
-
             if (unitId.EntityId.Id == inUnitId)
             {
                 if (unitFaction.Faction == faction)
@@ -274,9 +311,16 @@ public class ManalithSystem : ComponentSystem
                 }
             }
         });
+
+        //Update ManalithUnits
+        Entities.With(m_ManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
+        {
+            if (unitId.EntityId.Id == inUnitId)
+            {
+                unitFaction.Faction = faction;
+            }
+        });
+
         node = m_node;
     }
-
-
-
 }

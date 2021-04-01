@@ -108,7 +108,7 @@ namespace BlankProject.Editor
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
                 uint worldIndex = c.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
                 int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsHeroSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartRotation);
+                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().IsManalithUnit, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartRotation);
                 snapshot.AddEntity(cell);
             }
         }

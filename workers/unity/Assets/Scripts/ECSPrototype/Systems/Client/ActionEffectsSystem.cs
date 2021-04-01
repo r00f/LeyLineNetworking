@@ -75,7 +75,6 @@ public class ActionEffectsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
-
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
         if (cleanUpStateEvents.Count > 0)
@@ -234,8 +233,8 @@ public class ActionEffectsSystem : ComponentSystem
                                                     componentReferences.HeadUIReferencesComp.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (componentReferences.UnitEffectsComp.CurrentHealth + componentReferences.UnitEffectsComp.CurrentArmor) / health.MaxHealth);
                                                 }
                                             }
-
-                                            componentReferences.AnimatorComp.Animator.SetTrigger("GetHit");
+                                            if (componentReferences.AnimatorComp.Animator)
+                                                componentReferences.AnimatorComp.Animator.SetTrigger("GetHit");
 
                                             break;
 
@@ -315,7 +314,8 @@ public class ActionEffectsSystem : ComponentSystem
                                 }
                             }
                         }
-                        componentReferences.AnimatorComp.Animator.SetInteger("Armor", (int)componentReferences.UnitEffectsComp.CurrentArmor);
+                        if(componentReferences.AnimatorComp.Animator)
+                            componentReferences.AnimatorComp.Animator.SetInteger("Armor", (int)componentReferences.UnitEffectsComp.CurrentArmor);
                     });
                 });
             }

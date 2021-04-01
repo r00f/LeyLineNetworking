@@ -46,7 +46,7 @@ namespace LeyLineHybridECS
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadOnly<Health.Component>(),
+            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadOnly<Actions.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>()
             );
@@ -75,7 +75,6 @@ namespace LeyLineHybridECS
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
             m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
-            
         }
 
         protected override void OnUpdate()
@@ -95,7 +94,7 @@ namespace LeyLineHybridECS
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
 
-                                m_CleanUpSystem.DeleteNeutralUnits(gameStateWorldIndex.Value);
+                                m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex.Value);
                                 //raise InitMapEvent
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(),

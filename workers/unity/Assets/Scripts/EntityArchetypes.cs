@@ -19,7 +19,7 @@ public sealed class EntityArchetypes
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<WorldIndex.Component>(),
-        ComponentType.ReadOnly<Health.Component>(),
+        //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadWrite<Actions.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadOnly<OwningWorker.Component>()

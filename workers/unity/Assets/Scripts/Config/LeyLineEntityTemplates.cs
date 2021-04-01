@@ -105,7 +105,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startRotation = 0)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, bool isManalithUnitSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startRotation = 0)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
 
@@ -153,7 +153,8 @@ public static class LeyLineEntityTemplates {
             {
                 UnitName = unitName,
                 Faction = 0,
-                StartRotation = startRotation
+                StartRotation = startRotation,
+                ManalithUnit = isManalithUnitSpawn
             };
         }
         else
@@ -162,7 +163,8 @@ public static class LeyLineEntityTemplates {
             {
                 UnitName = unitName,
                 Faction = (worldIndex - 1) * 2 + faction,
-                StartRotation = startRotation
+                StartRotation = startRotation,
+                ManalithUnit = isManalithUnitSpawn
             };
         }
 
@@ -345,8 +347,8 @@ public static class LeyLineEntityTemplates {
         };
 
         var actions = SetActions(Stats);
-        var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
-        var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
+        //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
+        //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
         var owningComponent = new OwningWorker.Snapshot {WorkerId = workerId};
 
         var template = new EntityTemplate();
@@ -357,8 +359,8 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
-        template.AddComponent(clientHeartbeat, client);
-        template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(clientHeartbeat, client);
+       // template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
@@ -374,9 +376,9 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats, uint startRotation)
+    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats, uint startRotation, bool isManalithUnit = false)
     {
-        //var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
+        var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
         var turnTimer = new TurnTimer.Snapshot
         {
@@ -443,11 +445,7 @@ public static class LeyLineEntityTemplates {
             VisionRange = Stats.VisionRange
         };
 
-        var health = new Health.Snapshot
-        {
-            MaxHealth = Stats.BaseHealth,
-            CurrentHealth = Stats.BaseHealth
-        };
+
 
         var energy = new Energy.Snapshot
         {
@@ -462,12 +460,6 @@ public static class LeyLineEntityTemplates {
             StartRotation = startRotation
         };
 
-        var aiUnit = new AiUnit.Snapshot
-        {
-            IsAggroed = false
-        };
-
-
         var actions = SetActions(Stats);
 
         //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
@@ -479,6 +471,27 @@ public static class LeyLineEntityTemplates {
         if (Stats.IsHero)
             template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
 
+        if (isManalithUnit)
+        {
+            var manalithUnit = new ManalithUnit.Snapshot();
+            template.AddComponent(manalithUnit, WorkerUtils.UnityGameLogic);
+        }
+        else
+        {
+            var aiUnit = new AiUnit.Snapshot
+            {
+                IsAggroed = false
+            };
+
+            var health = new Health.Snapshot
+            {
+                MaxHealth = Stats.BaseHealth,
+                CurrentHealth = Stats.BaseHealth
+            };
+
+            template.AddComponent(aiUnit, WorkerUtils.UnityGameLogic);
+            template.AddComponent(health, WorkerUtils.UnityGameLogic);
+        }
 
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
@@ -486,14 +499,14 @@ public static class LeyLineEntityTemplates {
         //template.AddComponent(clientHeartbeat, client);
         //template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        template.AddComponent(health, WorkerUtils.UnityGameLogic);
+
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(aiUnit, WorkerUtils.UnityGameLogic);
-        //template.AddComponent(clientPathSnapshot, client);
+
+        template.AddComponent(clientPathSnapshot, client);
         template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);

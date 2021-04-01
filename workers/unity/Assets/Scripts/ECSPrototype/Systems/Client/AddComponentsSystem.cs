@@ -75,7 +75,6 @@ public class AddComponentsSystem : ComponentSystem
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<UnitEffects>(),
                 ComponentType.ReadOnly<AnimatorComponent>()

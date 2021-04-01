@@ -47,7 +47,7 @@ public class UnitAnimationSystem : ComponentSystem
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<IsVisible>(),
-        ComponentType.ReadOnly<Health.Component>(),
+        //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<Actions.Component>(),
         ComponentType.ReadOnly<Energy.Component>(),
@@ -98,13 +98,17 @@ public class UnitAnimationSystem : ComponentSystem
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
+            Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref FactionComponent.Component faction) =>
             {
                 if (actions.LockedAction.Index == -3)
                     animatorComponent.CurrentLockedAction = null;
 
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+                var unitComponentReferences = EntityManager.GetComponentObject<UnitComponentReferences>(e);
+
+                if (unitComponentReferences.SelectionMeshRenderer.material.HasProperty("_UnlitColor"))
+                    unitComponentReferences.SelectionMeshRenderer.material.SetColor("_UnlitColor", settings.FactionColors[(int)faction.Faction]);
 
 
                 animatorComponent.DestinationPosition = Vector2.zero;
@@ -112,17 +116,24 @@ public class UnitAnimationSystem : ComponentSystem
                 animatorComponent.DestinationReachTriggerSet = false;
                 animatorComponent.InitialValuesSet = false;
                 animatorComponent.ExecuteTriggerSet = false;
-                animatorComponent.AnimationEvents.EventTriggered = false;
-                animatorComponent.Animator.SetInteger("Armor", 0);
-                animatorComponent.Animator.ResetTrigger("Execute");
-                animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
-                animatorComponent.Animator.SetBool("Executed", false);
-                animatorComponent.Animator.ResetTrigger("DestinationReached");
+
+                if(animatorComponent.AnimationEvents)
+                    animatorComponent.AnimationEvents.EventTriggered = false;
+
+                if (animatorComponent.Animator)
+                {
+                    animatorComponent.Animator.SetInteger("Armor", 0);
+                    animatorComponent.Animator.ResetTrigger("Execute");
+                    animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
+                    animatorComponent.Animator.SetBool("Executed", false);
+                    animatorComponent.Animator.ResetTrigger("DestinationReached");
+                }
+
             });
         }
 
 
-        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref Health.Component health) =>
+        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy) =>
         {
             var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
             var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
@@ -276,65 +287,71 @@ public class UnitAnimationSystem : ComponentSystem
                 }
             }
 
-            #region Set Animator Variables
-            if (gameStates[0].CurrentState == GameStateEnum.planning)
+
+            if (animatorComponent.Animator)
             {
-                if(visible.Value == 1 && !playerVision.RevealVision)
+                #region Set Animator Variables
+                if (gameStates[0].CurrentState == GameStateEnum.planning)
                 {
-                    if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                    if (visible.Value == 1 && !playerVision.RevealVision)
                     {
+                        if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                        {
+                            m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
 
-                        m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
+                            foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                                g.layer = 21;
 
-                        foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
-                            g.layer = 21;
+                            //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", teamColorMeshes.color * 30000);
+                        }
+                        else
+                        {
+                            foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                                g.layer = 11;
 
-                        //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", teamColorMeshes.color * 30000);
+                            //unitComponentReferences.SelectionCircleGO.SetActive(false);
+                            //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
+                        }
+                    }
+                    else
+                        unitComponentReferences.SelectionCircleGO.SetActive(false);
+
+                    animatorComponent.Animator.SetBool("Planning", true);
+                }
+                else
+                {
+                    foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                        g.layer = 11;
+
+                    unitComponentReferences.SelectionCircleGO.SetActive(false);
+                    animatorComponent.Animator.SetBool("Planning", false);
+                }
+
+                foreach (Renderer r in teamColorMeshes.HarvestingEmissionColorMeshes)
+                {
+                    if (energy.Harvesting)
+                    {
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, teamColorMeshes.color * teamColorMeshes.EmissionIntensity, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
                     }
                     else
                     {
-                        foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
-                            g.layer = 11;
-
-                        //unitComponentReferences.SelectionCircleGO.SetActive(false);
-                        //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
+                        teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
                     }
+
+                    r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
                 }
+
+                if (animatorComponent.CurrentLockedAction)
+                    animatorComponent.Animator.SetBool("HasWindup", animatorComponent.CurrentLockedAction.HasWindup);
                 else
-                    unitComponentReferences.SelectionCircleGO.SetActive(false);
+                    animatorComponent.Animator.SetBool("HasWindup", false);
 
-                animatorComponent.Animator.SetBool("Planning", true);
-            }
-            else
-            {
-                foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
-                    g.layer = 11;
+                if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
+                    animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
-                unitComponentReferences.SelectionCircleGO.SetActive(false);
-                animatorComponent.Animator.SetBool("Planning", false);
+
             }
 
-            foreach (Renderer r in teamColorMeshes.HarvestingEmissionColorMeshes)
-            {
-                if (energy.Harvesting)
-                {
-                    teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, teamColorMeshes.color * teamColorMeshes.EmissionIntensity, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
-                }
-                else
-                {
-                    teamColorMeshes.EmissionLerpColor = Color.Lerp(teamColorMeshes.EmissionLerpColor, Color.black, Time.DeltaTime * teamColorMeshes.EmissionLerpTime);
-                }
-
-                r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", teamColorMeshes.EmissionLerpColor);
-            }
-
-            if (animatorComponent.CurrentLockedAction)
-                animatorComponent.Animator.SetBool("HasWindup", animatorComponent.CurrentLockedAction.HasWindup);
-            else
-                animatorComponent.Animator.SetBool("HasWindup", false);
-
-            if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
-                animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
             //if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
                 //animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
@@ -389,8 +406,13 @@ public class UnitAnimationSystem : ComponentSystem
                 }
                 animatorComponent.InitialValuesSet = true;
             }
-            animatorComponent.Animator.SetTrigger("Execute");
-            animatorComponent.Animator.SetBool("Executed", true);
+
+            if(animatorComponent.Animator)
+            {
+                animatorComponent.Animator.SetTrigger("Execute");
+                animatorComponent.Animator.SetBool("Executed", true);
+            }
+
             animatorComponent.ExecuteTriggerSet = true;
         }
     }
