@@ -105,7 +105,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, bool isManalithUnitSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startRotation = 0)
+    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, bool isManalithUnitSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
 
@@ -164,7 +164,9 @@ public static class LeyLineEntityTemplates {
                 UnitName = unitName,
                 Faction = (worldIndex - 1) * 2 + faction,
                 StartRotation = startRotation,
-                ManalithUnit = isManalithUnitSpawn
+                ManalithUnit = isManalithUnitSpawn,
+                StartingUnitIndex = startingUnitIndex
+               
             };
         }
 

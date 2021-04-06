@@ -10,6 +10,7 @@ namespace LeyLineHybridECS
         public bool IsManalithUnit;
         public uint Faction;
         public uint StartRotation;
+        public uint StartUnitIndex;
     }
 }
 

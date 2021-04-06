@@ -10,5 +10,6 @@ component UnitToSpawn {
 	generic.TeamColorEnum team_color = 3;
     uint32 start_rotation = 4;
     bool manalith_unit = 5;
+    uint32 starting_unit_index = 6;
 	
 }

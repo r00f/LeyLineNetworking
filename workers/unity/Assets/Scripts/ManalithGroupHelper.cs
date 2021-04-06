@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
@@ -20,6 +20,11 @@ namespace LeyLineHybridECS
         {
             base.OnInspectorGUI();
             serializedObject.Update();
+
+            if (GUILayout.Button("Connect Manalith init scripts"))
+            {
+                myTarget.ConnectManalithInitializerScripts();
+            }
 
             if (GUILayout.Button("Connect Manaliths"))
             {

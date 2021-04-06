@@ -138,7 +138,6 @@ namespace LeyLineHybridECS
                 var gameState = gameStates[0];
                 var playerFaction = playerFactions[0];
 
-
                 var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
 
                 if(initMapEvents.Count > 0)
@@ -149,7 +148,6 @@ namespace LeyLineHybridECS
                         var manaLith = manalithComps[i];
                         var ID = entityID[i].EntityId.Id;
                         var pos = manaLithPositions[i];
-
 
                         Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                         {
@@ -272,7 +270,6 @@ namespace LeyLineHybridECS
 
                             for (int q = 0; q < manalithFactionChangeEvents.Count; q++)
                             {
-
                                 var EventID = manalithFactionChangeEvents[q].EntityId.Id;
                                 if (ID == EventID)
                                 {
@@ -571,14 +568,15 @@ namespace LeyLineHybridECS
 
             if(!isVisibleRef.MiniMapTileInstance)
             {
-                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, false);
+                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, initData, scale, true);
             }
             else if(!isVisibleRef.BigMapTileInstance)
             {
-                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, true);
+                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, invertedPos, tileColor, initData, scale, false);
             }
         }
 
+        /*
         MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, bool isBigMapTile)
         {
             MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
@@ -593,6 +591,7 @@ namespace LeyLineHybridECS
 
             return instanciatedTile;
         }
+        */
 
         void PopulateMap(float scale, ManalithInitializer initData, Transform parent, List<float3> coords, ref ManalithClientData isVisibleRef, Color tileColor)
         {
@@ -622,15 +621,15 @@ namespace LeyLineHybridECS
 
             if (!isVisibleRef.MiniMapTileInstance)
             {
-                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, coords, initData, scale, true);
+                isVisibleRef.MiniMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, initData, scale, true);
             }
             else if (!isVisibleRef.BigMapTileInstance)
             {
-                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, coords, initData, scale, false);
+                isVisibleRef.BigMapTileInstance = InstantiateMapTile(ref isVisibleRef, parent, tilescale, theCenter, tileColor, initData, scale, false);
             }
         }
 
-        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, List<float3> coords, ManalithInitializer initData, float scale, bool isMiniMapTile)
+        MiniMapTile InstantiateMapTile(ref ManalithClientData isVisibleRef, Transform parent, float tileScale, Vector2 invertedPos, Color tileColor, ManalithInitializer initData, float scale, bool isMiniMapTile)
         {
             MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity, parent);
             instanciatedTile.TileRect.sizeDelta = new Vector2((int)(instanciatedTile.TileRect.sizeDelta.x * tileScale), (int)(instanciatedTile.TileRect.sizeDelta.y * tileScale));
@@ -643,10 +642,16 @@ namespace LeyLineHybridECS
                 //Debug.Log("Populate UI Line Renderer Positions");
                 //isVisibleRef.MiniMapTileInstance.UILineRenderer.set
                 instanciatedTile.UILineRenderer.Points = new Vector2[initData.leyLinePathCoords.Count];
+
+
                 if(isMiniMapTile)
                     instanciatedTile.UILineRenderer.lineThickness = 2;
                 else
                     instanciatedTile.UILineRenderer.lineThickness = 8;
+
+                if (initData.leyLinePathCoords.Count == 0)
+                    Object.Destroy(instanciatedTile.UILineRenderer.gameObject);
+
                 //populate line positions
                 for (int v = 0; v < instanciatedTile.UILineRenderer.Points.Length; v++)
                 {

@@ -89,11 +89,10 @@ public class ManalithSystem : ComponentSystem
     {
         base.OnStartRunning();
 
-        Entities.With(m_ManalithData).ForEach((ref FactionComponent.Component factionref) =>
-        {
-            factionref.Faction = 0;
-        });
-
+        //Entities.With(m_ManalithData).ForEach((ref FactionComponent.Component factionref) =>
+        //{
+            //factionref.Faction = 0;
+        //});
     }
 
     public void UpdateManaliths(uint worldIndex)
@@ -199,13 +198,10 @@ public class ManalithSystem : ComponentSystem
 
                     //Apply manalith Faction to manalithUnitFaction
 
-                    
-
                 }
             }
         });
     }
-
 
     protected override void OnUpdate()
     {

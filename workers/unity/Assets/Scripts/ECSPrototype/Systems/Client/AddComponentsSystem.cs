@@ -363,6 +363,10 @@ public class AddComponentsSystem : ComponentSystem
 
     MiniMapTile InstantiateMapTile(MinimapScript miniMap, byte isVisible, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
     {
+
+        if (!isVisibleRef.MiniMapTilePrefab)
+            return null;
+
         MiniMapTile instanciatedTile = Object.Instantiate(isVisibleRef.MiniMapTilePrefab, Vector3.zero, Quaternion.identity);
         instanciatedTile.TileColor = tileColor;
         instanciatedTile.TileImage.color = instanciatedTile.TileColor;

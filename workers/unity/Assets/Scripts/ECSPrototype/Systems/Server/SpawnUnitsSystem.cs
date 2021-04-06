@@ -23,6 +23,7 @@ namespace LeyLineHybridECS
         EntityQuery m_SpawnCellData;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         WorkerSystem m_WorkerSystem;
+        ManalithSystem m_ManalithSystem;
 
         protected override void OnCreate()
         {
@@ -63,6 +64,7 @@ namespace LeyLineHybridECS
             m_CommandSystem = World.GetExistingSystem<CommandSystem>();
             m_GameStateSystem = World.GetExistingSystem<GameStateSystem>();
             m_WorkerSystem = World.GetExistingSystem<WorkerSystem>();
+            m_ManalithSystem = World.GetExistingSystem<ManalithSystem>();
         }
 
         protected override void OnUpdate()
@@ -95,15 +97,28 @@ namespace LeyLineHybridECS
                             {
                                 if (unitToSpawn.Faction == f)
                                 {
+                                    /*
                                     SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
 
                                     for (int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
                                     {
                                         SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(new List<Vector3f>(), coord.CubeCoordinate, new Vector3f(0, 0, 0))[i + 1], owningW.WorkerId, unitToSpawn.StartRotation);
                                     }
+                                    */
+
+                                    if(unitToSpawn.StartingUnitIndex == 0)
+                                    {
+                                        SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
+                                    }
+                                    else if(unitToSpawn.StartingUnitIndex <= playerAtt.StartingUnitNames.Count)
+                                    {
+                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[(int)unitToSpawn.StartingUnitIndex - 1], unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
+                                    }
                                 }
                             }
                         });
+
+                        //m_ManalithSystem.UpdateManaliths(worldIndex.Value);
                     }
                 });
             }

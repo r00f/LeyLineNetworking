@@ -1,11 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LeyLineHybridECS;
 
 public class ManalithGroup : MonoBehaviour
 {
-    [HideInInspector]
     public List<ManalithInitializer> ManalithInitializers = new List<ManalithInitializer>();
 
     [SerializeField]

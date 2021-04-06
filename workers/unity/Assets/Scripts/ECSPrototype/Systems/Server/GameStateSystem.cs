@@ -100,6 +100,8 @@ namespace LeyLineHybridECS
                                 new GameState.InitializeMapEvent.Event(),
                                 gameStateId.EntityId);
 
+                                gameState.InitMapWaitTime = 2f;
+
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
                             else
@@ -113,10 +115,11 @@ namespace LeyLineHybridECS
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
 
-                                m_CleanUpSystem.DeleteNeutralUnits(gameStateWorldIndex.Value);
+                                m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex.Value);
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(),
                                 gameStateId.EntityId);
+                                gameState.InitMapWaitTime = 2f;
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
                             else
@@ -229,37 +232,46 @@ namespace LeyLineHybridECS
                         }
                         else
                         {
-                            gameState.CurrentRopeTime = gameState.RopeTime;
-
-                            Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref Vision.Component playerVision) =>
+                            if (gameState.InitMapWaitTime > 0)
+                                gameState.InitMapWaitTime -= Time.DeltaTime;
+                            else
                             {
-                                /*
-                                if(playerVision.RevealVision)
+                                gameState.CurrentRopeTime = gameState.RopeTime;
+
+                                Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref Vision.Component playerVision) =>
                                 {
-                                    playerVision.RequireUpdate = true;
-                                    playerVision.RevealVision = false;
+                                    /*
+                                    if(playerVision.RevealVision)
+                                    {
+                                        playerVision.RequireUpdate = true;
+                                        playerVision.RevealVision = false;
+                                    }
+                                    */
+                                    m_ComponentUpdateSystem.SendEvent(
+                                        new Vision.UpdateClientVisionEvent.Event(),
+                                        playerId.EntityId);
+                                });
+
+                                m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
+
+                                if (m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
+                                {
+                                    gameState.TurnCounter++;
+                                    m_CleanUpSystem.ClearAllLockedActions(gameStateWorldIndex.Value);
+                                    m_ManalithSystem.UpdateManaliths(gameStateWorldIndex.Value);
+                                    m_ResourceSystem.CalculateIncome(gameStateWorldIndex.Value);
+
+                                    m_ComponentUpdateSystem.SendEvent(
+                                    new GameState.CleanupStateEvent.Event(),
+                                    gameStateId.EntityId);
+
+                                    gameState.CurrentState = GameStateEnum.calculate_energy;
                                 }
-                                */
-                                m_ComponentUpdateSystem.SendEvent(
-                                    new Vision.UpdateClientVisionEvent.Event(),
-                                    playerId.EntityId);
-                            });
 
-                            m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
-
-                            if (m_CleanUpSystem.CheckAllDeadUnitsDeleted(gameStateWorldIndex.Value))
-                            {
-                                gameState.TurnCounter++;
-                                m_CleanUpSystem.ClearAllLockedActions(gameStateWorldIndex.Value);
-                                m_ManalithSystem.UpdateManaliths(gameStateWorldIndex.Value);
-                                m_ResourceSystem.CalculateIncome(gameStateWorldIndex.Value);
-
-                                m_ComponentUpdateSystem.SendEvent(
-                                new GameState.CleanupStateEvent.Event(),
-                                gameStateId.EntityId);
-
-                                gameState.CurrentState = GameStateEnum.calculate_energy;
                             }
+
+
+
                         }
                         break;
                     case GameStateEnum.calculate_energy:
