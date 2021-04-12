@@ -1161,7 +1161,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: b679d83761469f14fabae96db96c52dc, type: 2}
+  PortraitClips:
+  - {fileID: 0}
+  - {fileID: 7400000, guid: 8ff4a4fcb25644842ac393722983f05c, type: 2}
+  - {fileID: 7400000, guid: e32834773ae095d4ab27e44ba63f1301, type: 2}
 --- !u!114 &5764804077693253567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1446,7 +1449,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100000, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 4294967295
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100002, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_Layer
@@ -1462,7 +1465,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100006, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 4294967295
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100008, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_Layer
@@ -1606,7 +1609,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100074, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 4294967295
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100076, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_Layer
@@ -1630,7 +1633,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100084, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 4294967295
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100086, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_Layer
@@ -1638,7 +1641,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100086, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_StaticEditorFlags
-      value: 4294967295
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 100088, guid: 7995083baf52fa242b9e1ad0df0b6340, type: 3}
       propertyPath: m_Layer
@@ -2552,6 +2555,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PathLineRenderer
       objectReference: {fileID: 0}
+    - target: {fileID: 4925922130738473536, guid: 5161a36862e3d4b4ea064b61df44030f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4979119098227092446, guid: 5161a36862e3d4b4ea064b61df44030f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2725,6 +2733,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SelectionCircle
+      objectReference: {fileID: 0}
+    - target: {fileID: 6682207234195905909, guid: b52e26c420099ab47ae96a2e7685cd69,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6682207234196062549, guid: b52e26c420099ab47ae96a2e7685cd69,
         type: 3}

@@ -833,7 +833,7 @@ namespace LeyLineHybridECS
                 var energy = EntityManager.GetComponentData<Energy.Component>(e);
                 var lineRenderer = EntityManager.GetComponentObject<LineRendererComponent>(e);
                 var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
-                var animatedPortrait = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClip;
+                var animatedPortraits = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClips;
                 var factionColor = faction.TeamColor;
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
                 int actionCount = stats.Actions.Count;
@@ -876,19 +876,16 @@ namespace LeyLineHybridECS
                 {
                     UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
 
-                    if (UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortrait.GetHashCode())
+                    if (animatedPortraits.Count != 0 && UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction.Faction].GetHashCode())
                     {
-                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortrait;
-                    }
-                    else
-                    {
-                        UIRef.PortraitNameText.text = stats.UnitName;
-                        UIRef.PortraitPlayerColorGlow.enabled = true;
-                        UIRef.PortraitNameText.enabled = true;
-                        UIRef.AnimatedPortrait.GenericImage.enabled = true;
-                        UIRef.AnimatedPortrait.PlayerColorImage.enabled = true;
+                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int)faction.Faction];
                     }
 
+                    UIRef.PortraitNameText.text = stats.UnitName;
+                    UIRef.PortraitPlayerColorGlow.enabled = true;
+                    UIRef.PortraitNameText.enabled = true;
+                    UIRef.AnimatedPortrait.GenericImage.enabled = true;
+                    UIRef.PortraitPlayerColorGlow.color = unitEffects.PlayerColor;
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
 
@@ -911,12 +908,6 @@ namespace LeyLineHybridECS
 
                     if (faction.Faction == authPlayerFaction)
                     {
-                        //if (UIRef.AnimatedPortrait.OverrideAnimSet)
-                        //{
-                        UIRef.PortraitPlayerColor.color = UIRef.FriendlyColor;
-                        UIRef.PortraitPlayerColorGlow.color = UIRef.FriendlyColor;
-                        //}
-
                         if (actions.CurrentSelected.Index == -3 && actions.LockedAction.Index == -3)
                         {
                             UIRef.SAInfoPanel.SetActive(false);
@@ -1021,9 +1012,6 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        UIRef.PortraitPlayerColor.color = UIRef.EnemyColor;
-                        UIRef.PortraitPlayerColorGlow.color = UIRef.EnemyColor;
-
                         UIRef.SAInfoPanel.SetActive(false);
 
                         for (int bi = 0; bi < UIRef.Actions.Count; bi++)
@@ -1046,7 +1034,6 @@ namespace LeyLineHybridECS
                     UIRef.PortraitPlayerColorGlow.enabled = false;
                     UIRef.PortraitNameText.enabled = false;
                     UIRef.AnimatedPortrait.GenericImage.enabled = false;
-                    UIRef.AnimatedPortrait.PlayerColorImage.enabled = false;
                 }
 
                 if (!stats.UIInitialized)
@@ -1171,35 +1158,31 @@ namespace LeyLineHybridECS
                 var energy = EntityManager.GetComponentData<Energy.Component>(e);
                 var lineRenderer = EntityManager.GetComponentObject<LineRendererComponent>(e);
                 var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
-                var animatedPortrait = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClip;
+                var animatedPortraits = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClips;
                 var factionColor = faction.TeamColor;
                 var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
                 int actionCount = stats.Actions.Count;
                 int spawnActionCount = stats.SpawnActions.Count;
-                var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+                //var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+                var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
 
                 if (authPlayerState.SelectedUnitId == unitId)
                 {
                     UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
 
-                    if (UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortrait.GetHashCode())
+                    if (animatedPortraits.Count != 0 && UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int)faction.Faction].GetHashCode())
                     {
-                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortrait;
+                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int)faction.Faction];
                     }
-                    else
-                    {
-                        UIRef.PortraitNameText.text = stats.UnitName;
-                        UIRef.PortraitPlayerColorGlow.enabled = true;
-                        UIRef.PortraitNameText.enabled = true;
-                        UIRef.AnimatedPortrait.GenericImage.enabled = true;
-                        UIRef.AnimatedPortrait.PlayerColorImage.enabled = true;
-                    }
+
+                    UIRef.PortraitNameText.text = stats.UnitName;
+                    UIRef.PortraitPlayerColorGlow.enabled = true;
+                    UIRef.PortraitNameText.enabled = true;
+                    UIRef.AnimatedPortrait.GenericImage.enabled = true;
+                    UIRef.PortraitPlayerColorGlow.color = teamColorMeshes.color;
 
                     if (faction.Faction == authPlayerFaction)
                     {
-                        UIRef.PortraitPlayerColor.color = UIRef.FriendlyColor;
-                        UIRef.PortraitPlayerColorGlow.color = UIRef.FriendlyColor;
-
                         if (actions.CurrentSelected.Index == -3 && actions.LockedAction.Index == -3)
                         {
                             UIRef.SAInfoPanel.SetActive(false);
@@ -1304,9 +1287,6 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        UIRef.PortraitPlayerColor.color = UIRef.EnemyColor;
-                        UIRef.PortraitPlayerColorGlow.color = UIRef.EnemyColor;
-
                         UIRef.SAInfoPanel.SetActive(false);
 
                         for (int bi = 0; bi < UIRef.Actions.Count; bi++)
@@ -1329,7 +1309,7 @@ namespace LeyLineHybridECS
                     UIRef.PortraitPlayerColorGlow.enabled = false;
                     UIRef.PortraitNameText.enabled = false;
                     UIRef.AnimatedPortrait.GenericImage.enabled = false;
-                    UIRef.AnimatedPortrait.PlayerColorImage.enabled = false;
+                    //UIRef.AnimatedPortrait.PlayerColorImage.enabled = false;
                 }
 
                 if (!stats.UIInitialized)

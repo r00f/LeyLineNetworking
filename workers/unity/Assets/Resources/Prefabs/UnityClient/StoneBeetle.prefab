@@ -15413,7 +15413,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: b679d83761469f14fabae96db96c52dc, type: 2}
+  PortraitClips:
+  - {fileID: 7400000, guid: 9bca6961f37c2634196eae8c5a679bc0, type: 2}
+  - {fileID: 7400000, guid: bec2549ce7dc3ac4c9a5c0f7351770d6, type: 2}
+  - {fileID: 7400000, guid: 55935b030cb74e047be267b89c6b0430, type: 2}
 --- !u!114 &3135429663083575227
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15531,7 +15534,7 @@ MonoBehaviour:
   m_PointlightHDType: 0
   m_SpotLightShape: 0
   m_AreaLightShape: 0
-  m_Intensity: 1000
+  m_Intensity: 100000
   m_EnableSpotReflector: 0
   m_LuxAtDistance: 1
   m_InnerSpotPercent: 0
@@ -16441,7 +16444,7 @@ PrefabInstance:
     - target: {fileID: 2435213032710680815, guid: 07d07e35cdab8154f8244d070801d397,
         type: 3}
       propertyPath: m_Intensity
-      value: 79.57747
+      value: 7957.747
       objectReference: {fileID: 0}
     - target: {fileID: 2435213032710680815, guid: 07d07e35cdab8154f8244d070801d397,
         type: 3}
@@ -16911,6 +16914,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PathLineRenderer
       objectReference: {fileID: 0}
+    - target: {fileID: 4925922130738473536, guid: 5161a36862e3d4b4ea064b61df44030f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4979119098227092446, guid: 5161a36862e3d4b4ea064b61df44030f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -16991,6 +16999,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SelectionCircle
+      objectReference: {fileID: 0}
+    - target: {fileID: 6682207234195905909, guid: b52e26c420099ab47ae96a2e7685cd69,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6682207234196062549, guid: b52e26c420099ab47ae96a2e7685cd69,
         type: 3}

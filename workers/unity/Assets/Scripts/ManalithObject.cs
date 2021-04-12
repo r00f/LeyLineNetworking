@@ -8,10 +8,12 @@ public class ManalithObject : MonoBehaviour
     public string Name;
     public List<MeshRenderer> EmissionColorRenderers;
     public List<GameObject> SelectionOutlineRenderers;
+    public List<MeshRenderer> DetailColorRenderers;
     public List<Light> Lights;
     public List<ParticleSystem> ParticleSystems;
     public List<ParticleSystem> OneShotParticleSystems;
     public StudioEventEmitter GainControlSoundEmitter;
+    public float PortraitAnimLength;
 
     public void FillSelectionOutlineObjects()
     {

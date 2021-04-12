@@ -14,15 +14,14 @@ public class EnergyConnectionLine : MonoBehaviour
     public Vector2 AnimationIntervalMinMax;
     public Vector2 CurveThiccnessMinMax;
     float CurrentAnimIntervalTime;
-    AnimationCurve animCurve;
+    public AnimationCurve animCurve = new AnimationCurve();
     //public 
 
-    private void OnEnable()
+    void OnEnable()
     {
         if (!DefaultPointParent || BodyPartLineConnections.Count == 0)
             return;
 
-        //Debug.Log("AYAYA");
         DefaultPointList.Clear();
 
         DefaultPointList.Add(BodyPartLineConnections[0]);
@@ -34,7 +33,6 @@ public class EnergyConnectionLine : MonoBehaviour
 
         DefaultPointList.Add(BodyPartLineConnections[1]);
 
-        animCurve = new AnimationCurve();
         LineRenderer.positionCount = DefaultPointList.Count;
         CurrentAnimIntervalTime = AnimationIntervalMinMax.x;
 
@@ -44,10 +42,15 @@ public class EnergyConnectionLine : MonoBehaviour
             animCurve.AddKey(new Keyframe(i / ((float) LineRenderer.positionCount - 1), 0.05f));
         }
 
+
+    }
+
+    private void Start()
+    {
         LineRenderer.widthCurve = animCurve;
     }
 
-    void Update()
+    void LateUpdate()
     {
         if (DefaultPointList.Count == 0 || LineRenderer.positionCount == 0)
             return;
@@ -59,7 +62,7 @@ public class EnergyConnectionLine : MonoBehaviour
         {
             CurrentAnimIntervalTime -= Time.deltaTime;
         }
-        else
+        else if(DefaultPointList.Count - 2 < animCurve.keys.Length)
         {
             for (int i = 1; i < DefaultPointList.Count - 1; i++)
             {

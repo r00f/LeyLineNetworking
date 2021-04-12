@@ -4801,7 +4801,7 @@ MonoBehaviour:
   m_PointlightHDType: 0
   m_SpotLightShape: 0
   m_AreaLightShape: 0
-  m_Intensity: 600
+  m_Intensity: 50000
   m_EnableSpotReflector: 0
   m_LuxAtDistance: 1
   m_InnerSpotPercent: 0
@@ -9747,7 +9747,7 @@ MonoBehaviour:
   m_PointlightHDType: 0
   m_SpotLightShape: 0
   m_AreaLightShape: 0
-  m_Intensity: 600
+  m_Intensity: 50000
   m_EnableSpotReflector: 0
   m_LuxAtDistance: 1
   m_InnerSpotPercent: 0
@@ -10632,7 +10632,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: b679d83761469f14fabae96db96c52dc, type: 2}
+  PortraitClips:
+  - {fileID: 7400000, guid: 740a8c8064c0b8445b68be58081a49ac, type: 2}
+  - {fileID: 7400000, guid: 965b9bbf29138fd4c8638111808d8ff8, type: 2}
+  - {fileID: 7400000, guid: 90f6a75529d2ca84abad2a1ee1c761e3, type: 2}
 --- !u!114 &882018676871478844
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15513,7 +15516,7 @@ MonoBehaviour:
   m_PointlightHDType: 0
   m_SpotLightShape: 0
   m_AreaLightShape: 0
-  m_Intensity: 600
+  m_Intensity: 50000
   m_EnableSpotReflector: 0
   m_LuxAtDistance: 1
   m_InnerSpotPercent: 0
@@ -15645,6 +15648,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: PathLineRenderer
       objectReference: {fileID: 0}
+    - target: {fileID: 4925922130738473536, guid: 5161a36862e3d4b4ea064b61df44030f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4979119098227092446, guid: 5161a36862e3d4b4ea064b61df44030f,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -15725,6 +15733,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SelectionCircle
+      objectReference: {fileID: 0}
+    - target: {fileID: 6682207234195905909, guid: b52e26c420099ab47ae96a2e7685cd69,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6682207234196062549, guid: b52e26c420099ab47ae96a2e7685cd69,
         type: 3}
@@ -16055,7 +16068,7 @@ PrefabInstance:
     - target: {fileID: -993317156913398579, guid: 455b8c4f5fec16d41a62088f6f3ceceb,
         type: 3}
       propertyPath: m_Intensity
-      value: 47.746483
+      value: 3978.8735
       objectReference: {fileID: 0}
     - target: {fileID: -993317156913398579, guid: 455b8c4f5fec16d41a62088f6f3ceceb,
         type: 3}
@@ -16100,7 +16113,7 @@ PrefabInstance:
     - target: {fileID: 6076924292626507626, guid: 455b8c4f5fec16d41a62088f6f3ceceb,
         type: 3}
       propertyPath: m_Intensity
-      value: 47.746483
+      value: 3978.8735
       objectReference: {fileID: 0}
     - target: {fileID: 6076924292626507626, guid: 455b8c4f5fec16d41a62088f6f3ceceb,
         type: 3}
@@ -16135,7 +16148,7 @@ PrefabInstance:
     - target: {fileID: 9211902239177680539, guid: 455b8c4f5fec16d41a62088f6f3ceceb,
         type: 3}
       propertyPath: m_Intensity
-      value: 47.746483
+      value: 3978.8735
       objectReference: {fileID: 0}
     - target: {fileID: 9211902239177680539, guid: 455b8c4f5fec16d41a62088f6f3ceceb,
         type: 3}

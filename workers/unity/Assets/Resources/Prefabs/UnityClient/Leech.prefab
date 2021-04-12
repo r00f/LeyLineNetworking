@@ -40,7 +40,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.15883334, y: -0.000000007314488, z: -0.00000027089072}
+  m_ConnectedAnchor: {x: -0.15883334, y: 1.3609242e-10, z: -0.00000027089072}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -173,7 +173,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.22408035, y: -0.0000000073065394, z: -0.000000428607}
+  m_ConnectedAnchor: {x: -0.22408035, y: 1.4404122e-10, z: -0.00000042860705}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -247,7 +247,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.231564, y: -0.000000007311396, z: -0.0000004736918}
+  m_ConnectedAnchor: {x: -0.23156388, y: 1.3918441e-10, z: -0.0000004736918}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -321,7 +321,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.1576385, y: -0.00000000731358, z: -0.0000003239121}
+  m_ConnectedAnchor: {x: -0.1576385, y: 1.3700062e-10, z: -0.0000003239121}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -449,7 +449,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.22961403, y: -0.000000007308072, z: -0.00000043064043}
+  m_ConnectedAnchor: {x: -0.22961403, y: 1.4250855e-10, z: -0.00000043064043}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -523,7 +523,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.21259308, y: -0.00000040978347, z: -0.000000417231}
+  m_ConnectedAnchor: {x: -0.21259308, y: -0.0000004023329, z: -0.00000041723104}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -629,6 +629,7 @@ MonoBehaviour:
   UnitSprite: {fileID: 0}
   Actions:
   - {fileID: 11400000, guid: 5534d6ca102a9e54a85df8108885aec1, type: 2}
+  - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
   SpawnActions: []
 --- !u!114 &8898852741660551068
 MonoBehaviour:
@@ -836,7 +837,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: 6e1397f7998428646844679058e5fd6f, type: 2}
+  PortraitClips:
+  - {fileID: 0}
+  - {fileID: 7400000, guid: ee7014b6a2bc1db428883cc120eaeda4, type: 2}
+  - {fileID: 7400000, guid: f8f6fd57acd721f49a7bf75bc9c66edd, type: 2}
 --- !u!114 &5764804077693253567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1004,7 +1008,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.22967516, y: -0.0000000073096342, z: -0.00000042242064}
+  m_ConnectedAnchor: {x: -0.22967516, y: 1.4094613e-10, z: -0.00000042242064}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -1256,7 +1260,7 @@ CharacterJoint:
   m_Anchor: {x: 0, y: 0, z: 0}
   m_Axis: {x: 1, y: 0, z: 0}
   m_AutoConfigureConnectedAnchor: 1
-  m_ConnectedAnchor: {x: -0.17060426, y: -0.0000000073122766, z: -0.0000002832678}
+  m_ConnectedAnchor: {x: -0.17060414, y: 1.3830391e-10, z: -0.0000002832678}
   serializedVersion: 2
   m_SwingAxis: {x: 0, y: 1, z: 0}
   m_TwistLimitSpring:
@@ -1543,6 +1547,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: SelectionCircle
       objectReference: {fileID: 0}
+    - target: {fileID: 6682207234195905909, guid: b52e26c420099ab47ae96a2e7685cd69,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6682207234196062549, guid: b52e26c420099ab47ae96a2e7685cd69,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1730,6 +1739,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: PathLineRenderer
+      objectReference: {fileID: 0}
+    - target: {fileID: 4925922130738473536, guid: 5161a36862e3d4b4ea064b61df44030f,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4979119098227092446, guid: 5161a36862e3d4b4ea064b61df44030f,
         type: 3}

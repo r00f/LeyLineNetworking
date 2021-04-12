@@ -377,7 +377,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 83a94d0c559049a409bba60a3b05205c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  PortraitClip: {fileID: 7400000, guid: 6298c96947f6ada438f5266be216caf4, type: 2}
+  PortraitClips:
+  - {fileID: 0}
+  - {fileID: 7400000, guid: 6664a40bf951c4b4b887ffe298b30265, type: 2}
+  - {fileID: 7400000, guid: 693b8c298f4d0a0489d47cb5a9f098cc, type: 2}
 --- !u!114 &5764804077693253567
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1985,7 +1988,7 @@ PrefabInstance:
     - target: {fileID: 4925922130738473536, guid: 5161a36862e3d4b4ea064b61df44030f,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4979119098227092446, guid: 5161a36862e3d4b4ea064b61df44030f,
         type: 3}
@@ -2067,6 +2070,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: SelectionCircle
+      objectReference: {fileID: 0}
+    - target: {fileID: 6682207234195905909, guid: b52e26c420099ab47ae96a2e7685cd69,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6682207234196062549, guid: b52e26c420099ab47ae96a2e7685cd69,
         type: 3}

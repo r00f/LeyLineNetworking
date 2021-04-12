@@ -384,6 +384,13 @@ namespace LeyLineHybridECS
                     if (circlePsMain.startColor.color != meshColor.LerpColor)
                         circlePsMain.startColor = meshColor.LerpColor;
 
+                    for (int i = 0; i < meshColor.ManaLithObject.DetailColorRenderers.Count; i++)
+                    {
+                        Renderer r = meshColor.ManaLithObject.DetailColorRenderers[i];
+
+                        r.sharedMaterial.SetColor("_BaseColor1", meshColor.LerpColor);
+                    }
+
                 });
 
 
