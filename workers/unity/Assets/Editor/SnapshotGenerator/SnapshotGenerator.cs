@@ -66,7 +66,7 @@ namespace BlankProject.Editor
 
                 foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
-                    if (n.GetComponent<IsTaken>().Value != true){
+                   //if (n.GetComponent<IsTaken>().Value != true){
                         circle.CellAttributes.Add(new CellAttribute
                         {
                             Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
@@ -74,7 +74,7 @@ namespace BlankProject.Editor
                             IsTaken = n.GetComponent<IsTaken>().Value,
                             MovementCost = n.GetComponent<MovementCost>().Value
                         });
-                    }
+                   //}
                 }
 
                 Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);

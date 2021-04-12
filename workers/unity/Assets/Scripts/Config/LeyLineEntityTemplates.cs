@@ -74,11 +74,14 @@ public static class LeyLineEntityTemplates {
         };
 
         List<ManalithSlot> slots = new List<ManalithSlot>();
-        foreach(CellAttribute n in circleCells.CellAttributes)
+        foreach (CellAttribute n in circleCells.CellAttributes)
         {
-            ManalithSlot go = new ManalithSlot();
-            go.CorrespondingCell = n;
-            slots.Add(go);
+            if (n.IsTaken != true)
+            {
+                ManalithSlot go = new ManalithSlot();
+                go.CorrespondingCell = n;
+                slots.Add(go);
+            }
         }
 
         var circle = new Manalith.Snapshot
@@ -175,6 +178,7 @@ public static class LeyLineEntityTemplates {
             Value = worldIndex
         };
 
+
         var template = new EntityTemplate();
 
         template.AddComponent(pos, gameLogic);
@@ -188,6 +192,8 @@ public static class LeyLineEntityTemplates {
             template.AddComponent(new IsCircleCell.Snapshot(), gameLogic);
         if (isSpawn)
             template.AddComponent(new IsSpawn.Snapshot(), gameLogic);
+        if (isTaken)
+            template.AddComponent(new StaticTaken.Snapshot(), gameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
 
         return template;
