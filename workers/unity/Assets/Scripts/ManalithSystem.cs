@@ -184,6 +184,8 @@ public class ManalithSystem : ComponentSystem
                         UpdateUnit(slot.CorrespondingCell.UnitOnCellId, faction.Faction, ref manalithComp);
                     }
 
+                    UpdateManalithUnit(manalithComp.ManalithUnitId, faction.Faction, ref manalithComp);
+
                     manalithComp.StateChange = false;
 
                     factionref = faction;
@@ -318,5 +320,18 @@ public class ManalithSystem : ComponentSystem
         });
 
         node = m_node;
+    }
+
+
+    public void UpdateManalithUnit(long inUnitId, uint faction, ref Manalith.Component node)
+    {
+        //Update ManalithUnits
+        Entities.With(m_ManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
+        {
+            if (unitId.EntityId.Id == inUnitId)
+            {
+                unitFaction.Faction = faction;
+            }
+        });
     }
 }

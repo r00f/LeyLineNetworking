@@ -207,10 +207,10 @@ namespace LeyLineHybridECS
                         {
                             #region EnableDisableManalithHovered
                             bool manalithIsHovered = false;
-                            foreach (CellAttribute c in manaLith.CircleAttributeList.CellAttributes)
+
+                            if(manaLith.CircleCoordinatesList.Contains(playerHighlightingDatas[0].HoveredCoordinate))
                             {
-                                if (Vector3fext.ToUnityVector(playerHighlightingDatas[0].HoveredCoordinate) == Vector3fext.ToUnityVector(c.CubeCoordinate))
-                                    manalithIsHovered = true;
+                                manalithIsHovered = true;
                             }
 
                             if (manalithIsHovered && gameState.CurrentState == GameStateEnum.planning)

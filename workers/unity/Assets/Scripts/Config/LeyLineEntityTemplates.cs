@@ -84,9 +84,16 @@ public static class LeyLineEntityTemplates {
             }
         }
 
+        var circleCellCoords = new List<Vector3f>();
+
+        foreach(CellAttribute c in circleCells.CellAttributes)
+        {
+            circleCellCoords.Add(c.CubeCoordinate);
+        }
+
         var circle = new Manalith.Snapshot
         {
-            CircleAttributeList = circleCells,
+            CircleCoordinatesList = circleCellCoords,
             BaseIncome = inbaseIncome,
             Manalithslots = slots
         };

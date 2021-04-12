@@ -25,8 +25,9 @@ public class UnitLifeCycleSystem : ComponentSystem
     EntityQuery m_CellData;
     EntityQuery m_UnitAddedData;
     EntityQuery m_UnitRemovedData;
+    private EntityQuery m_ManalithData;
     EntityQuery m_UnitChangedData;
-
+    private EntityQuery m_ManalithUnitAddedData;
 
     protected override void OnCreate()
     {
@@ -43,13 +44,32 @@ public class UnitLifeCycleSystem : ComponentSystem
             {
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Actions.Component>(),
-                //ComponentType.ReadOnly<Health.Component>(),
+                ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>()
             }
         };
 
         m_UnitAddedData = GetEntityQuery(unitAddedDesc);
+
+
+        var manalithUnitAddedDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+            {
+                typeof(UnitStateData)
+            },
+            All = new ComponentType[]
+            {
+                ComponentType.ReadOnly<ManalithUnit.Component>(),
+                ComponentType.ReadOnly<SpatialEntityId>(),
+                ComponentType.ReadOnly<Actions.Component>(),
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadOnly<CubeCoordinate.Component>()
+            }
+        };
+
+        m_ManalithUnitAddedData = GetEntityQuery(manalithUnitAddedDesc);
 
         var unitRemovedDesc = new EntityQueryDesc
         {
@@ -64,6 +84,13 @@ public class UnitLifeCycleSystem : ComponentSystem
         };
 
         m_UnitRemovedData = GetEntityQuery(unitRemovedDesc);
+
+        m_ManalithData = GetEntityQuery(
+        ComponentType.ReadOnly<WorldIndex.Component>(),
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadWrite<Manalith.Component>(),
+        ComponentType.ReadWrite<FactionComponent.Component>()
+        );
 
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
@@ -100,6 +127,24 @@ public class UnitLifeCycleSystem : ComponentSystem
                 if (coord == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && worldIndex.Value == cellWorldIndex.Value)
                 {
                     cellAttribute.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAttribute.CellAttributes, true, id, cellWorldIndex.Value);
+                }
+            });
+
+            PostUpdateCommands.AddComponent(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction });
+        });
+
+        Entities.With(m_ManalithUnitAddedData).ForEach((Entity e, ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCubeCoordinate, ref SpatialEntityId unitEntityId, ref FactionComponent.Component unitFaction) =>
+        {
+            var coordComp = unitCubeCoordinate;
+            var coord = Vector3fext.ToUnityVector(unitCubeCoordinate.CubeCoordinate);
+            var worldIndex = unitWorldIndex;
+            var id = unitEntityId.EntityId.Id;
+
+            Entities.With(m_ManalithData).ForEach((ref Manalith.Component manalithComponent, ref WorldIndex.Component manalithWorldIndex) =>
+            {
+                if(worldIndex.Value == manalithWorldIndex.Value && manalithComponent.CircleCoordinatesList.Contains(coordComp.CubeCoordinate))
+                {
+                    manalithComponent.ManalithUnitId = id;
                 }
             });
 

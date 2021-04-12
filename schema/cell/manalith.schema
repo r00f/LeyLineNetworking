@@ -1,15 +1,17 @@
 package cell;
 
 import "cell/cell_attributes.schema";
+import "generic/vector3.schema";
 
 component Manalith
 {
     id = 113;
-	cell.CellAttributeList circle_attribute_list = 1;
+	list<generic.Vector3f> circle_coordinates_list = 1;
 	uint32 combined_energy_gain = 2;
 	uint32 base_income = 3;
 	list<ManalithSlot> manalithslots = 4;
 	bool state_change = 5;
+    int64 manalith_unit_id = 6;
 	event ManalithFactionChange manalith_faction_change_event;
 }
 

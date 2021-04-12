@@ -29,7 +29,6 @@ public class PortraitRenderer : MonoBehaviour
     [SerializeField]
     RecorderController m_RecorderController;
 
-
     public void FillUnitList()
     {
 
