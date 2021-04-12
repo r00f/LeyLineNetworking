@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using FMODUnity;
 using UnityEngine.UI;
 using Unity.Mathematics;
+using Unit;
 
 namespace LeyLineHybridECS
 {
@@ -22,6 +23,7 @@ namespace LeyLineHybridECS
         EntityQuery m_CircleData;
         EntityQuery m_ManaLithData;
         EntityQuery m_ProjectorData;
+        private EntityQuery m_ManalithUnitData;
         EntityQuery m_PlayerData;
         EntityQuery m_GameControllerData;
         ComponentUpdateSystem m_ComponentUpdateSystem;
@@ -55,17 +57,18 @@ namespace LeyLineHybridECS
 
                     //var Manager = World.Active.GetExistingManager<EntityManager>();
                     m_ManaLithData = Worlds.ClientWorld.CreateEntityQuery(
-
                         ComponentType.ReadOnly<FactionComponent.Component>(),
                         ComponentType.ReadOnly<Manalith.Component>(),
                         ComponentType.ReadOnly<Position.Component>(),
                         ComponentType.ReadOnly<SpatialEntityId>()
-
                     );
 
-                    //Debug.Log("init: " + m_ManaLithData.CalculateEntityCount());
-                    //Debug.Log(m_CircleData.CalculateEntityCount());
-                    
+                    m_ManalithUnitData = Worlds.ClientWorld.CreateEntityQuery(
+                        ComponentType.ReadOnly<SpatialEntityId>(),
+                        ComponentType.ReadOnly<ManalithUnit.Component>(),
+                        ComponentType.ReadOnly<TeamColorMeshes>()
+                    );
+
                     initialized = true;
                 }
             }
@@ -74,7 +77,6 @@ namespace LeyLineHybridECS
 
         protected override void OnCreate()
         {
-            
             base.OnCreate();
             //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
             settings = Resources.Load<Settings>("Settings");
@@ -88,19 +90,18 @@ namespace LeyLineHybridECS
                     ComponentType.ReadWrite<StudioEventEmitter>()
             );
 
-
             m_LineData = GetEntityQuery(
 
                  ComponentType.ReadWrite<MeshGradientColor>(),
                  ComponentType.ReadWrite<ManalithClientData>()
             );
 
-
             m_ProjectorData = GetEntityQuery(
 
                    ComponentType.ReadWrite<Transform>(),
                    ComponentType.ReadWrite<Projector>()
             );
+
 
 
         }
@@ -130,6 +131,12 @@ namespace LeyLineHybridECS
                 var manalithComps = m_ManaLithData.ToComponentDataArray<Manalith.Component>(Allocator.TempJob);
                 var entityID = m_ManaLithData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
 
+
+                var manalithUnitEntittyIds = m_ManalithUnitData.ToComponentDataArray<SpatialEntityId>(Allocator.TempJob);
+                var manalithUnitTeamColorMeshes = m_ManalithUnitData.ToComponentArray<TeamColorMeshes>();
+
+
+
                 var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
                 var playerHighlightingDatas = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
 
@@ -151,10 +158,11 @@ namespace LeyLineHybridECS
 
                         Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
                         {
-                                var circlePos = meshColor.transform.position.sqrMagnitude;
-                                if (pos.Coords.ToUnityVector().sqrMagnitude == circlePos)
-                                {
-                                    if (m_UISystem.UIRef != null)
+                            var circlePos = meshColor.transform.position.sqrMagnitude;
+
+                            if (pos.Coords.ToUnityVector().sqrMagnitude == circlePos)
+                            {
+                                if (m_UISystem.UIRef != null)
                                     {
                                         switch (initData.circleSize)
                                         {
@@ -205,6 +213,24 @@ namespace LeyLineHybridECS
                     {
                         if (clientData.ManalithEntityID == ID)
                         {
+                            if(!clientData.ManalithUnitTeamColorMeshes)
+                            {
+                                for (int y = 0; y < manalithUnitEntittyIds.Length; y++)
+                                {
+                                    var manalithUnitID = manalithUnitEntittyIds[y].EntityId.Id;
+                                    var manalithUnitTeamColorMesh = manalithUnitTeamColorMeshes[y];
+
+                                    if (manalithUnitID == manaLith.ManalithUnitId)
+                                    {
+                                        clientData.ManalithUnitTeamColorMeshes = manalithUnitTeamColorMesh;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                clientData.ManalithUnitTeamColorMeshes.color = meshColor.Color;
+                            }
+
                             #region EnableDisableManalithHovered
                             bool manalithIsHovered = false;
 
@@ -271,6 +297,7 @@ namespace LeyLineHybridECS
                             for (int q = 0; q < manalithFactionChangeEvents.Count; q++)
                             {
                                 var EventID = manalithFactionChangeEvents[q].EntityId.Id;
+
                                 if (ID == EventID)
                                 {
                                     //Fire Get Capture effects
