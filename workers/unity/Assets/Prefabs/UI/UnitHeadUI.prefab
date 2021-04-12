@@ -835,6 +835,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: DeathBlow
       objectReference: {fileID: 0}
+    - target: {fileID: 2381430604803317522, guid: dda4934a6864ead4ebf95ff5d43454dc,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6622552794021159053, guid: dda4934a6864ead4ebf95ff5d43454dc,
         type: 3}
       propertyPath: m_LocalPosition.x
