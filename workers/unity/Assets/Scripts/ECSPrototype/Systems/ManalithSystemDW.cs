@@ -170,7 +170,8 @@ namespace LeyLineHybridECS
                                                 clientData.WorldPos = clientData.UIElementTransform.position;
                                                 clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, Vector3.zero, Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                                 clientData.ManalithEntityID = ID;
-                                                clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
+                                               //clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
+
                                                 var coord1 = initData.leyLineCircleCoords[0];
 
                                                 if (!clientData.MiniMapTileInstance)
@@ -184,7 +185,7 @@ namespace LeyLineHybridECS
                                                 clientData.WorldPos = clientData.UIElementTransform.position;
                                                 clientData.IngameIconRef = Object.Instantiate(m_UISystem.UIRef.ManalithIconPrefab, Vector3.zero, Quaternion.identity, m_UISystem.UIRef.ManalithInfoPanel.transform);
                                                 clientData.ManalithEntityID = ID;
-                                                clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
+                                                //clientData.IngameIconRef.InfoButton.onClick.AddListener(delegate { SwitchTooltip(clientData); });
 
 
                                                 if (!clientData.MiniMapTileInstance)
@@ -450,6 +451,7 @@ namespace LeyLineHybridECS
                     }
                 });
 
+                manalithUnitEntittyIds.Dispose();
                 manaLithPositions.Dispose();
                 manaLithFactions.Dispose();
                 entityID.Dispose();
@@ -488,7 +490,7 @@ namespace LeyLineHybridECS
             return g;
         }
 
-        protected void SwitchTooltip(ManalithClientData clientData)
+        /* protected void SwitchTooltip(ManalithClientData clientData)
         {
             ManalithTooltip Tooltip = m_UISystem.UIRef.ManalithToolTipFab;
             if (clientData.ManalithEntityID == Tooltip.ActiveManalithID)
@@ -574,7 +576,7 @@ namespace LeyLineHybridECS
             UpdateLeyLineTooltipPosition(clientData.IngameIconRef.RectTrans.anchoredPosition);
 
 
-        }
+        } */
 
         protected void UpdateLeyLineTooltipPosition(Vector2 inButtonAnchoredPosition)
         {
@@ -626,7 +628,6 @@ namespace LeyLineHybridECS
             return instanciatedTile;
         }
         */
-
         void PopulateMap(float scale, ManalithInitializer initData, Transform parent, List<float3> coords, ref ManalithClientData isVisibleRef, Color tileColor)
         {
             float offsetMultiplier = scale;

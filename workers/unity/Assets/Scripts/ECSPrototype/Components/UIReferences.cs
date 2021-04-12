@@ -56,12 +56,14 @@ public class UIReferences : MonoBehaviour
     public GameObject ActionEffectUIPanel;
 
     [Header("UnitPortrait")]
+    public BottomLeftPortraitComponent BottomLeftPortrait;
+    /*
     public GameObject InfoEnabledPanel;
     public Image PortraitPlayerColor;
     public Image PortraitPlayerColorGlow;
     public SetPortraitClip AnimatedPortrait;
     public Text PortraitNameText;
-
+    
     [Header("UnitStats")]
     public Text UnitStats;
 
@@ -70,7 +72,7 @@ public class UIReferences : MonoBehaviour
     public Text PortraitArmorText;
     public Text PortraitRegenText;
     public HealthBar PortraitHealthBar;
-
+    */
     [Header("Actions")]
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;

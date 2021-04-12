@@ -13,6 +13,8 @@ using UnityEngine.EventSystems;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
+using Cell;
+using Improbable;
 
 namespace LeyLineHybridECS
 {
@@ -29,6 +31,7 @@ namespace LeyLineHybridECS
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
         EntityQuery m_ManalithUnitData;
+        EntityQuery m_ManalithData;
         DollyCameraComponent dollyCam;
 
         public UIReferences UIRef { get; set; }
@@ -96,6 +99,15 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<PlayerState.Component>()
                 );
+            m_ManalithData = GetEntityQuery(
+                ComponentType.ReadOnly<FactionComponent.Component>(),
+                ComponentType.ReadOnly<Manalith.Component>(),
+                ComponentType.ReadOnly<Position.Component>(),
+                ComponentType.ReadOnly<SpatialEntityId>()
+                );
+
+
+        
         }
 
         protected override void OnStartRunning()
@@ -212,7 +224,7 @@ namespace LeyLineHybridECS
             var playerEnergy = authPlayersEnergy[0];
             var playerHigh = playerHighlightingDatas[0];
 
-            GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
+            //GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
 
             #endregion
 
@@ -567,12 +579,10 @@ namespace LeyLineHybridECS
             {
                 if (authPlayerState.SelectedUnitId == 0)
                 {
-                    if (UIRef.PortraitHealthBar.gameObject.activeSelf)
+                    if (UIRef.BottomLeftPortrait.UnitInfoPanel.activeSelf || UIRef.BottomLeftPortrait.ManalithInfoPanel.activeSelf)
                     {
-                        UIRef.PortraitHealthText.enabled = false;
-                        UIRef.PortraitArmorText.enabled = false;
-                        UIRef.PortraitRegenText.enabled = false;
-                        UIRef.PortraitHealthBar.gameObject.SetActive(false);
+                        UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(false);
+                        UIRef.BottomLeftPortrait.ManalithInfoPanel.SetActive(false);
                     }
                 }
 
@@ -589,14 +599,15 @@ namespace LeyLineHybridECS
                     UIRef.SpawnActions[si].Visuals.SetActive(false);
                 }
             }
-            else
+            /*else
             {
                 if (!UIRef.PortraitHealthBar.gameObject.activeSelf)
                 {
                     UIRef.PortraitHealthText.enabled = true;
                     UIRef.PortraitHealthBar.gameObject.SetActive(true);
                 }
-            }
+          
+            }  */
 
             //all players
             Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
@@ -874,37 +885,42 @@ namespace LeyLineHybridECS
 
                 if (authPlayerState.SelectedUnitId == unitId)
                 {
+                    if (!UIRef.BottomLeftPortrait.UnitInfoPanel.activeSelf)
+                    {
+                        UIRef.BottomLeftPortrait.ManalithInfoPanel.SetActive(false);
+                        UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(true);
+                    }
                     UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
 
-                    if (animatedPortraits.Count != 0 && UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction.Faction].GetHashCode())
+                    if (animatedPortraits.Count != 0 && UIRef.BottomLeftPortrait.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction.Faction].GetHashCode())
                     {
-                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int)faction.Faction];
+                        UIRef.BottomLeftPortrait.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int)faction.Faction];
                     }
 
-                    UIRef.PortraitNameText.text = stats.UnitName;
-                    UIRef.PortraitPlayerColorGlow.enabled = true;
-                    UIRef.PortraitNameText.enabled = true;
-                    UIRef.AnimatedPortrait.GenericImage.enabled = true;
-                    UIRef.PortraitPlayerColorGlow.color = unitEffects.PlayerColor;
+                    UIRef.BottomLeftPortrait.PortraitNameText.text = stats.UnitName;
+                    UIRef.BottomLeftPortrait.PortraitPlayerColorGlow.enabled = true;
+                    UIRef.BottomLeftPortrait.PortraitNameText.enabled = true;
+                    UIRef.BottomLeftPortrait.AnimatedPortrait.GenericImage.enabled = true;
+                    UIRef.BottomLeftPortrait.PortraitPlayerColorGlow.color = unitEffects.PlayerColor;
 
                     string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
 
                     if (health.Armor > 0 && faction.Faction == authPlayerFaction)
                     {
 
-                        UIRef.PortraitArmorText.enabled = true;
-                        UIRef.PortraitHealthText.text = currentMaxHealth;
-                        UIRef.PortraitArmorText.text = health.Armor.ToString();
+                        UIRef.BottomLeftPortrait.PortraitArmorText.enabled = true;
+                        UIRef.BottomLeftPortrait.PortraitHealthText.text = currentMaxHealth;
+                        UIRef.BottomLeftPortrait.PortraitArmorText.text = health.Armor.ToString();
 
                     }
                     else
                     {
-                        UIRef.PortraitArmorText.enabled = false;
-                        UIRef.PortraitHealthText.text = currentMaxHealth;
+                        UIRef.BottomLeftPortrait.PortraitArmorText.enabled = false;
+                        UIRef.BottomLeftPortrait.PortraitHealthText.text = currentMaxHealth;
                     }
 
                     if (unitHeadUIRef.UnitHeadHealthBarInstance)
-                        EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.PortraitHealthBar, faction.Faction, authPlayerFaction);
+                        EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.BottomLeftPortrait.PortraitHealthBar, faction.Faction, authPlayerFaction);
 
                     if (faction.Faction == authPlayerFaction)
                     {
@@ -1031,9 +1047,9 @@ namespace LeyLineHybridECS
                     if (UIRef.SwapActionButton.gameObject.activeSelf)
                         UIRef.SwapActionButton.gameObject.SetActive(false);
 
-                    UIRef.PortraitPlayerColorGlow.enabled = false;
-                    UIRef.PortraitNameText.enabled = false;
-                    UIRef.AnimatedPortrait.GenericImage.enabled = false;
+                    UIRef.BottomLeftPortrait.PortraitPlayerColorGlow.enabled = false;
+                    UIRef.BottomLeftPortrait.PortraitNameText.enabled = false;
+                    UIRef.BottomLeftPortrait.AnimatedPortrait.GenericImage.enabled = false;
                 }
 
                 if (!stats.UIInitialized)
@@ -1170,16 +1186,24 @@ namespace LeyLineHybridECS
                 {
                     UpdateSAEnergyText(lineRenderer, actions, UIRef.SAEnergyText);
 
-                    if (animatedPortraits.Count != 0 && UIRef.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int)faction.Faction].GetHashCode())
+                    if (!UIRef.BottomLeftPortrait.ManalithInfoPanel.activeSelf)
                     {
-                        UIRef.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int)faction.Faction];
+                        UIRef.BottomLeftPortrait.ManalithInfoPanel.SetActive(true);
+                        UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(false);
                     }
 
-                    UIRef.PortraitNameText.text = stats.UnitName;
-                    UIRef.PortraitPlayerColorGlow.enabled = true;
-                    UIRef.PortraitNameText.enabled = true;
-                    UIRef.AnimatedPortrait.GenericImage.enabled = true;
-                    UIRef.PortraitPlayerColorGlow.color = teamColorMeshes.color;
+                    PopulateManlithInfoHexes(unitId);
+
+                    if (animatedPortraits.Count != 0 && UIRef.BottomLeftPortrait.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int)faction.Faction].GetHashCode())
+                    {
+                        UIRef.BottomLeftPortrait.AnimatedPortrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int)faction.Faction];
+                    }
+
+                    UIRef.BottomLeftPortrait.PortraitNameText.text = stats.UnitName;
+                    UIRef.BottomLeftPortrait.PortraitPlayerColorGlow.enabled = true;
+                    UIRef.BottomLeftPortrait.PortraitNameText.enabled = true;
+                    UIRef.BottomLeftPortrait.AnimatedPortrait.GenericImage.enabled = true;
+                    UIRef.BottomLeftPortrait.PortraitPlayerColorGlow.color = teamColorMeshes.color;
 
                     if (faction.Faction == authPlayerFaction)
                     {
@@ -1306,9 +1330,9 @@ namespace LeyLineHybridECS
                     if (UIRef.SwapActionButton.gameObject.activeSelf)
                         UIRef.SwapActionButton.gameObject.SetActive(false);
 
-                    UIRef.PortraitPlayerColorGlow.enabled = false;
-                    UIRef.PortraitNameText.enabled = false;
-                    UIRef.AnimatedPortrait.GenericImage.enabled = false;
+                    UIRef.BottomLeftPortrait.PortraitPlayerColorGlow.enabled = false;
+                    UIRef.BottomLeftPortrait.PortraitNameText.enabled = false;
+                    UIRef.BottomLeftPortrait.AnimatedPortrait.GenericImage.enabled = false;
                     //UIRef.AnimatedPortrait.PlayerColorImage.enabled = false;
                 }
 
@@ -1345,6 +1369,57 @@ namespace LeyLineHybridECS
                     }
                 }
             });
+        }
+
+        protected void PopulateManlithInfoHexes(uint selectedUnitId)
+        {
+            Entities.With(m_ManalithData).ForEach((ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
+            {
+
+                //Debug.Log(ID.EntityId.Id);
+                if (selectedUnitId == manalith.ManalithUnitId)
+                {
+                    //Debug.Log("Arrived at right Manalith");
+                    UIRef.BottomLeftPortrait.ManalithEnergyGainText.text = manalith.CombinedEnergyGain.ToString();
+                    if (faction.Faction != 0)
+                    {
+                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.color = settings.FactionColors[(int)faction.Faction];
+                    }
+                    else
+                    {
+                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.color = settings.UINeutralColor;
+                    }
+
+                    for (int i = 0; i < UIRef.BottomLeftPortrait.InfoPanelHexes.Count; i++)
+                    {
+                        if (i < manalith.Manalithslots.Count)
+                        {
+                            UIRef.BottomLeftPortrait.InfoPanelHexes[i].Hex.enabled = true;
+                            if (manalith.Manalithslots[i].OccupyingFaction != 0)
+                            {
+                                UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.gameObject.SetActive(true);
+                                UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.color = settings.FactionColors[(int)manalith.Manalithslots[i].OccupyingFaction];
+                            }
+                            else {
+                                UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.gameObject.SetActive(false);
+                            }
+                        }
+                        else
+                        {
+                            UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.gameObject.SetActive(false);
+                            UIRef.BottomLeftPortrait.InfoPanelHexes[i].Hex.enabled = false;
+                        }
+                    }
+                }
+
+            
+            });
+         
+
+            //set position of overhead manalith objects??
+           //UpdateLeyLineTooltipPosition(clientData.IngameIconRef.RectTrans.anchoredPosition);
+
+
         }
 
         public Vector3 RoundVector3(Vector3 inVector)
