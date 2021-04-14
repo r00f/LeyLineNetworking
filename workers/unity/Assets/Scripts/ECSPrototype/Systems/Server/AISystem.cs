@@ -70,49 +70,40 @@ public class AISystem : ComponentSystem
         }
     }
 
+
+
     public void UpdateAIUnits()
     {
         Entities.With(m_AiUnitData).ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord) =>
         {
-            var aiVision = vision;
-            var aiU = aiUnit;
-            var act = actions;
-            var aiId = AIid;
-
             var unitWorldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
+
+            var extrarange = 0;
+
+            if (actions.ActionsList[1].Targets[0].Mods.Count != 0)
+            {
+                if (actions.ActionsList[1].Targets[0].Mods[0].ModType == ModTypeEnum.aoe)
+                    extrarange = actions.ActionsList[1].Targets[0].Mods[0].AoeNested.Radius;
+            }
 
             unitCellsToMark.CellsInRange.Clear();
             unitCellsToMark.CachedPaths.Clear();
-            aiUnit.AggroedUnitCoordinate = new Vector3f(0, 0, 0);
-            aiUnit.AggroedUnitId = 0;
-            aiU.IsAggroed = false;
 
-            Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
+            if (!aiUnit.IsAggroed || CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate) > actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
             {
-                if (aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
-                {
-                    aiU.AggroedUnitCoordinate = coord.CubeCoordinate;
-                    aiU.AggroedUnitId = id.EntityId.Id;
-                    aiU.IsAggroed = true;
-                }
-            });
-
-            if(aiU.IsAggroed)
+                aiUnit = RandomizeUnitAggression(vision, aiUnit, actions, AIid);
+            }
+            else
             {
-                var extrarange = 0;
+                aiUnit = RefreshUnitAggression(vision, aiUnit, actions, AIid);
+            }
 
-                if(actions.ActionsList[1].Targets[0].Mods.Count != 0)
-                {
-                    if (actions.ActionsList[1].Targets[0].Mods[0].ModType == ModTypeEnum.aoe)
-                        extrarange = actions.ActionsList[1].Targets[0].Mods[0].AoeNested.Radius;
-                }
-
-                //if playerunit is in range of attack
-                if (CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiU.AggroedUnitCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
+            if (aiUnit.IsAggroed)
+            {
+                if (CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
                 {
                     actions.CurrentSelected = actions.ActionsList[1];
                 }
-                //else walk towards playerunit
                 else
                 {
                     actions.CurrentSelected = actions.ActionsList[0];
@@ -124,12 +115,12 @@ public class AISystem : ComponentSystem
                 {
                     for(uint i = 0; i < 6; i++)
                     {
-                        if(CellGridMethods.GetDistance(CellGridMethods.CubeNeighbour(aiU.AggroedUnitCoordinate, i), unitCoord.CubeCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange)
+                        if(CellGridMethods.GetDistance(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, i), unitCoord.CubeCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange)
                          {
                             var request = new Actions.SetTargetCommand.Request
                             (
-                                aiId.EntityId,
-                                new SetTargetRequest(CellGridMethods.CubeNeighbour(aiU.AggroedUnitCoordinate, i))
+                                AIid.EntityId,
+                                new SetTargetRequest(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, i))
                             );
                             m_CommandSystem.SendCommand(request);
                         }
@@ -142,8 +133,8 @@ public class AISystem : ComponentSystem
                     {
                         var request = new Actions.SetTargetCommand.Request
                         (
-                            aiId.EntityId,
-                            new SetTargetRequest(ClosestPathTarget(aiU.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
+                            AIid.EntityId,
+                            new SetTargetRequest(ClosestPathTarget(aiUnit.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
                         );
                         m_CommandSystem.SendCommand(request);
                     }
@@ -151,17 +142,54 @@ public class AISystem : ComponentSystem
                     {
                         var request = new Actions.SetTargetCommand.Request
                         (
-                            aiId.EntityId,
-                            new SetTargetRequest(aiU.AggroedUnitCoordinate)
+                            AIid.EntityId,
+                            new SetTargetRequest(aiUnit.AggroedUnitCoordinate)
                         );
                         m_CommandSystem.SendCommand(request);
                     }
 
                 }
             }
-
-            aiUnit = aiU;
         });
+    }
+
+    public AiUnit.Component RandomizeUnitAggression(Vision.Component aiVision, AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId)
+    {
+        aiUnit.AggroedUnitCoordinate = new Vector3f(999, 999, 999);
+        aiUnit.AggroedUnitId = 0;
+        aiUnit.IsAggroed = false;
+
+        Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
+        {
+            if (aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
+            {
+                aiUnit.AggroedUnitCoordinate = coord.CubeCoordinate;
+                aiUnit.AggroedUnitId = id.EntityId.Id;
+                aiUnit.IsAggroed = true;
+            }
+        });
+
+        return aiUnit;
+    }
+
+
+    public AiUnit.Component RefreshUnitAggression(Vision.Component aiVision, AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId)
+    {
+        bool aggroedUnitExists = false;
+
+        Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
+        {
+            if (aiUnit.AggroedUnitId == id.EntityId.Id)
+            {
+                aggroedUnitExists = true;
+                aiUnit.AggroedUnitCoordinate = coord.CubeCoordinate;
+            }
+        });
+
+        if(aggroedUnitExists)
+            return aiUnit;
+        else
+            return RandomizeUnitAggression(aiVision, aiUnit, act, aiId);
     }
 
     public Vector3f ClosestPathTarget(Vector3f targetCoord, Dictionary<CellAttribute, CellAttributeList> inDict)

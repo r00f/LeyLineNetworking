@@ -226,12 +226,13 @@ public class ProjectileSystem : ComponentSystem
 
                 if (projectile.FlagForDestruction && !projectile.QueuedForDestruction)
                 {
-
                     foreach (GameObject go in projectile.DisableBeforeDestructionObjects)
                     {
                         go.SetActive(false);
                     }
-                    GameObject.Destroy(projectile.gameObject, 0.5f);
+                    if(projectile.gameObject)
+                        GameObject.Destroy(projectile.gameObject, 0.5f);
+
                     projectile.QueuedForDestruction = true;
                 }
             });

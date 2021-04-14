@@ -162,9 +162,6 @@ namespace LeyLineHybridECS
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId)
                 {
-                    //if (!unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].isPlaying)
-                        //unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].Play();
-
                     if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                         playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
 
@@ -198,18 +195,14 @@ namespace LeyLineHybridECS
                 }
                 else
                 {
-                    //if (unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].isPlaying)
-                        //unitComponentReferences.TeamColorMeshesComp.ParticleSystems[0].Stop();
-
                     unitComponentReferences.SelectionCircleGO.SetActive(false);
 
                     if (mouseState.ClickEvent == 1)
                     {
-                        if (playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                        if ((EntityManager.HasComponent<ManalithUnit.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
                             playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                             playerState.SelectedUnitId = unitId.EntityId.Id;
-                            //Clear ActionTooltip on UnitSelect
                             m_UISystem.ClearSelectedActionToolTip();
                         }
                     }

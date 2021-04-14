@@ -214,14 +214,14 @@ public static class LeyLineEntityTemplates {
         {
             MaxEnergy = 80,
             Energy = 40,
-            BaseIncome = 20,
-            Income = 6
+            BaseIncome = 0,
+            Income = 0
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
         {
             HeroName = "KingCroak",
-            StartingUnitNames = new List<string> {"Leech", "Leech"}
+            StartingUnitNames = new List<string> {"Leech", "Leech", "Axalotl"}
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();

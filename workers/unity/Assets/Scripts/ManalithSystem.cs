@@ -75,6 +75,7 @@ public class ManalithSystem : ComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadWrite<FactionComponent.Component>(),
             ComponentType.ReadOnly<Actions.Component>(),
+            ComponentType.ReadWrite<Vision.Component>(),
             //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<Energy.Component>()
         );
@@ -196,6 +197,9 @@ public class ManalithSystem : ComponentSystem
                         componentUpdateSystem.SendEvent(
                          new Manalith.ManalithFactionChangeEvent.Event(),
                          entityId.EntityId);
+
+
+                        //Vision.req
                     }
 
                     //Apply manalith Faction to manalithUnitFaction
@@ -214,11 +218,20 @@ public class ManalithSystem : ComponentSystem
     {
         var slot = manalith.Manalithslots[slotIndex];
 
+        bool isTaken;
+
+        if (unitId == 0)
+            isTaken = false;
+        else
+            isTaken = true;
+
         slot.CorrespondingCell = new CellAttribute
         {
+            IsTaken = isTaken,
             UnitOnCellId = unitId,
             CubeCoordinate = manalith.Manalithslots[slotIndex].CorrespondingCell.CubeCoordinate
         };
+
         manalith.Manalithslots[slotIndex] = slot;
         manalith.Manalithslots = manalith.Manalithslots;
         manalith.StateChange = true;
@@ -226,8 +239,12 @@ public class ManalithSystem : ComponentSystem
 
     public uint UpdateFaction(Manalith.Component circleCells, uint worldIndex)
     {
+        int player0Units = 0;
         int player1Units = 0;
         int player2Units = 0;
+
+        uint player1Faction = (worldIndex - 1) * 2 + 1;
+        uint player2Faction = (worldIndex - 1) * 2 + 2;
 
         for (int cci = 0; cci < circleCells.Manalithslots.Count; cci++)
         {
@@ -239,16 +256,19 @@ public class ManalithSystem : ComponentSystem
             {
                 if (unitId.EntityId.Id == slot.CorrespondingCell.UnitOnCellId)
                 {
-                    if (unitFaction.Faction == (worldIndex - 1) * 2 + 1)
+                    if (unitFaction.Faction == 0)
+                    {
+                        player0Units++;
+                    }
+                    else if (unitFaction.Faction == player1Faction)
                     {
                         player1Units++;
-                        slot.OccupyingFaction = unitFaction.Faction;
                     }
-                    else if (unitFaction.Faction == (worldIndex - 1) * 2 + 2)
+                    else if (unitFaction.Faction == player2Faction)
                     {
                         player2Units++;
-                        slot.OccupyingFaction = unitFaction.Faction;
                     }
+                    slot.OccupyingFaction = unitFaction.Faction;
                 }
             });
 
@@ -256,18 +276,16 @@ public class ManalithSystem : ComponentSystem
             circleCells.Manalithslots = circleCells.Manalithslots;
         }
 
-        if (player1Units > player2Units)
-        {
-            return (worldIndex - 1) * 2 + 1;
-        }
-        else if (player1Units < player2Units)
-        {
-            return (worldIndex - 1) * 2 + 2;
-        }
-        else
-        {
+        int biggestUnitCount = Mathf.Max(player0Units, player1Units, player2Units);
+
+        if (biggestUnitCount == 0 || player1Units == player2Units || biggestUnitCount == player0Units)
             return 0;
-        }
+        else if (biggestUnitCount == player1Units)
+            return player1Faction;
+        else if (biggestUnitCount == player2Units)
+            return player2Faction;
+        else
+            return 0;
     }
 
     public void UpdateUnit(long inUnitId, uint faction, ref Manalith.Component node)
@@ -322,15 +340,14 @@ public class ManalithSystem : ComponentSystem
         node = m_node;
     }
 
-
     public void UpdateManalithUnit(long inUnitId, uint faction, ref Manalith.Component node)
     {
-        //Update ManalithUnits
-        Entities.With(m_ManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
+        Entities.With(m_ManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy, ref Vision.Component vision) =>
         {
             if (unitId.EntityId.Id == inUnitId)
             {
                 unitFaction.Faction = faction;
+                vision.RequireUpdate = true;
             }
         });
     }

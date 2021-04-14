@@ -1192,7 +1192,7 @@ namespace LeyLineHybridECS
                         UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(false);
                     }
 
-                    PopulateManlithInfoHexes(unitId);
+                    PopulateManlithInfoHexes(unitId, authPlayerFaction);
 
                     if (animatedPortraits.Count != 0 && UIRef.BottomLeftPortrait.AnimatedPortrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int)faction.Faction].GetHashCode())
                     {
@@ -1371,36 +1371,46 @@ namespace LeyLineHybridECS
             });
         }
 
-        protected void PopulateManlithInfoHexes(uint selectedUnitId)
+        protected void PopulateManlithInfoHexes(uint selectedUnitId, uint playerFaction)
         {
             Entities.With(m_ManalithData).ForEach((ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
             {
-
-                //Debug.Log(ID.EntityId.Id);
                 if (selectedUnitId == manalith.ManalithUnitId)
                 {
-                    //Debug.Log("Arrived at right Manalith");
-                    UIRef.BottomLeftPortrait.ManalithEnergyGainText.text = manalith.CombinedEnergyGain.ToString();
+                    if(faction.Faction == playerFaction)
+                    {
+                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.text = manalith.CombinedEnergyGain.ToString();
+                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.enabled = true;
+                    }
+                    else
+                    {
+                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.enabled = false;
+                    }
+
+                    /*
                     if (faction.Faction != 0)
                     {
-                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.color = settings.FactionColors[(int)faction.Faction];
+                        //UIRef.BottomLeftPortrait.ManalithEnergyGainText.color = settings.FactionColors[(int)faction.Faction];
                     }
                     else
                     {
                         UIRef.BottomLeftPortrait.ManalithEnergyGainText.color = settings.UINeutralColor;
                     }
+                    */
 
                     for (int i = 0; i < UIRef.BottomLeftPortrait.InfoPanelHexes.Count; i++)
                     {
                         if (i < manalith.Manalithslots.Count)
                         {
                             UIRef.BottomLeftPortrait.InfoPanelHexes[i].Hex.enabled = true;
-                            if (manalith.Manalithslots[i].OccupyingFaction != 0)
+
+                            if (manalith.Manalithslots[i].CorrespondingCell.IsTaken)
                             {
                                 UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.gameObject.SetActive(true);
                                 UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.color = settings.FactionColors[(int)manalith.Manalithslots[i].OccupyingFaction];
                             }
-                            else {
+                            else
+                            {
                                 UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.gameObject.SetActive(false);
                             }
                         }
