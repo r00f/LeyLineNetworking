@@ -12,17 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: ManaLith3
   m_EditorClassIdentifier: 
+  TerrainName: 
+  additionalCost: 0
+  obstructVision: 0
+  Walkable: 1
   MapCellIconIndex: 0
   MapCellColorIndex: 0
   textureIndex: 2
+  TreeHeightMinMax: {x: 0, y: 0}
   TreeIndexMinMax: {x: 0, y: 0}
-  GrassAmountMinMax: {x: 0, y: 0}
-  terrain_Name: Manalith
-  additionalCost: 0
+  NeighbourIndexMinMax: {x: 0, y: 0}
+  NeighbourAmountMinMax: {x: 0, y: 0}
+  probabilityToSpawnNeighbourAsset: 0
+  RandomDetailRotationIncrement: 0
+  DetailObjectIndexRanges: []
+  DetailObjectAmounts: []
+  DetailObjectSpawnProbabilities: 
+  DetailObjectRanges: []
   yOffset: 0
-  Walkable: 1
-  spawnAllAssets: 0
-  probabilityToSpawnAsset: 100
-  obstructVision: 0
-  assets_to_Spawn:
+  cellTerrainYOffset: 0
+  DetailObjectSpawnYOffset: 0
+  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
+  AssetsToSpawn:
   - {fileID: 8361903899685021776, guid: f89578f5dd08aa04dbe6b21e48ebdfb0, type: 3}

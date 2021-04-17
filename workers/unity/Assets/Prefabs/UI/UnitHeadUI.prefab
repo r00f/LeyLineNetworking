@@ -534,11 +534,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5c9f92546a95dd3449d9d844319286e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  DestroyWaitTime: 10
   FlagForDestruction: 0
+  DestroyWaitTime: 1
   FloatHealthText: {fileID: 4770188776630539249}
   FloatHealthAnimator: {fileID: 2157681571798002970}
   ArmorAnimator: {fileID: 1810524493194071404}
+  DeathCrossAnimator: {fileID: 7975270916794214332}
   PlanningBufferTime: 0
   DeathBlowImage: {fileID: 4387750474089934699}
   ArmorPanel: {fileID: 2703932069359298339}
@@ -956,6 +957,12 @@ GameObject:
 --- !u!224 &5044288757550010612 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6622552794021159053, guid: dda4934a6864ead4ebf95ff5d43454dc,
+    type: 3}
+  m_PrefabInstance: {fileID: 2155220136546873465}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7975270916794214332 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 8306110986589362117, guid: dda4934a6864ead4ebf95ff5d43454dc,
     type: 3}
   m_PrefabInstance: {fileID: 2155220136546873465}
   m_PrefabAsset: {fileID: 0}

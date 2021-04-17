@@ -64,6 +64,7 @@ public class UnitAnimationSystem : ComponentSystem
         ComponentType.ReadOnly<Vision.Component>(),
         ComponentType.ReadOnly<HeroTransform>(),
         ComponentType.ReadOnly<PlayerState.HasAuthority>(),
+        ComponentType.ReadOnly<PlayerState.Component>(),
         ComponentType.ReadOnly<HighlightingDataComponent>(),
         ComponentType.ReadOnly<FactionComponent.Component>()
         );
@@ -87,9 +88,11 @@ public class UnitAnimationSystem : ComponentSystem
 
         var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
         var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
+        var playerStateData = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
         var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
 
+        var playerState = playerStateData[0];
         var playerVision = playerVisionData[0];
         var playerHeroTransform = playerHeroTransforms[0];
         var playerHigh = playerHighs[0];
@@ -100,9 +103,6 @@ public class UnitAnimationSystem : ComponentSystem
         {
             Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref FactionComponent.Component faction) =>
             {
-                if (actions.LockedAction.Index == -3)
-                    animatorComponent.CurrentLockedAction = null;
-
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
                 var unitComponentReferences = EntityManager.GetComponentObject<UnitComponentReferences>(e);
@@ -257,6 +257,10 @@ public class UnitAnimationSystem : ComponentSystem
 
                 }
             }
+            else if(animatorComponent.CurrentLockedAction)
+            {
+                animatorComponent.CurrentLockedAction = null;
+            }
 
             if (animatorComponent.Visuals.Count != 0)
             {
@@ -295,22 +299,17 @@ public class UnitAnimationSystem : ComponentSystem
                 {
                     if (visible.Value == 1 && !playerVision.RevealVision)
                     {
-                        if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate))
+                        if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
                             m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
 
                             foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
                                 g.layer = 21;
-
-                            //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", teamColorMeshes.color * 30000);
                         }
                         else
                         {
                             foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
                                 g.layer = 11;
-
-                            //unitComponentReferences.SelectionCircleGO.SetActive(false);
-                            //unitComponentReferences.SelectionMeshRenderer.material.SetColor("_EmissiveColor", Color.black);
                         }
                     }
                     else
@@ -387,6 +386,7 @@ public class UnitAnimationSystem : ComponentSystem
             #endregion
         });
 
+        playerStateData.Dispose();
         playerVisionData.Dispose();
         playerHighs.Dispose();
         gameStates.Dispose();

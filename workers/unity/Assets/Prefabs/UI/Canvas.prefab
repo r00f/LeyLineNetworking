@@ -126105,6 +126105,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1776667677117320513}
     m_Modifications:
+    - target: {fileID: 1031987653609869391, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3599228124011036488, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
         type: 3}
       propertyPath: m_Name
@@ -126220,6 +126225,11 @@ PrefabInstance:
       propertyPath: UIRef
       value: 
       objectReference: {fileID: 1049850189765156606}
+    - target: {fileID: 6935406589729819477, guid: d9f54e3b279a32e4d83a683f3a4eeec7,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d9f54e3b279a32e4d83a683f3a4eeec7, type: 3}
 --- !u!224 &3761278860204851281 stripped

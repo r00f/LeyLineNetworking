@@ -12,28 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: Rock
   m_EditorClassIdentifier: 
+  TerrainName: 
+  additionalCost: 0
+  obstructVision: 0
+  Walkable: 1
   MapCellIconIndex: 3
   MapCellColorIndex: 3
-  RandomTreeRotationIncrement: 30
   textureIndex: 3
-  TreeHeightMinMax: {x: 1, y: 1.5}
-  DetailObjectIndexRanges: []
-  DetailObjectAmounts: []
-  DetailObjectSpawnProbabilities: 
-  DetailObjectRanges: []
-  TreeIndexMinMax: {x: 14, y: 15}
-  GrassAmountMinMax: {x: 2, y: 3}
+  TreeHeightMinMax: {x: 0, y: 0}
+  TreeIndexMinMax: {x: 0, y: 0}
   NeighbourIndexMinMax: {x: 0, y: 0}
   NeighbourAmountMinMax: {x: 0, y: 0}
-  terrain_Name: 
-  additionalCost: 0
+  probabilityToSpawnNeighbourAsset: 0
+  RandomDetailRotationIncrement: 0
+  DetailObjectIndexRanges:
+  - {x: 12, y: 15}
+  DetailObjectAmounts:
+  - {x: 1, y: 1}
+  DetailObjectSpawnProbabilities: 19000000
+  DetailObjectRanges:
+  - {x: 0, y: 1}
   yOffset: 0.2
   cellTerrainYOffset: 0
   DetailObjectSpawnYOffset: 0
   DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
-  Walkable: 1
-  spawnAllAssets: 0
-  probabilityToSpawnNeighbourAsset: 0
-  probabilityToSpawnAsset: 10
-  obstructVision: 0
-  assets_to_Spawn: []
+  AssetsToSpawn: []

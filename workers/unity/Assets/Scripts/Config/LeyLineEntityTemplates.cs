@@ -493,10 +493,7 @@ public static class LeyLineEntityTemplates {
         }
         else
         {
-            var aiUnit = new AiUnit.Snapshot
-            {
-                IsAggroed = false
-            };
+            var aiUnit = new AiUnit.Snapshot();
 
             var health = new Health.Snapshot
             {

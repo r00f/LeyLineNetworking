@@ -168,9 +168,9 @@ namespace LeyLineHybridECS
 
                 int treeRot = 0;
 
-                if (terrainType.RandomTreeRotationIncrement != 0)
+                if (terrainType.RandomDetailRotationIncrement != 0)
                 {
-                    treeRot = UnityEngine.Random.Range(0, 360 / terrainType.RandomTreeRotationIncrement) * terrainType.RandomTreeRotationIncrement;
+                    treeRot = UnityEngine.Random.Range(0, 360 / terrainType.RandomDetailRotationIncrement) * terrainType.RandomDetailRotationIncrement;
                 }
                 
 
@@ -205,35 +205,16 @@ namespace LeyLineHybridECS
 
                 if (terrainType.TreeIndexMinMax.y != 0)
                 {
-                    if (terrainType.GrassAmountMinMax.y == 0)
+                    TreeInstance treeInstance = new TreeInstance()
                     {
-                        TreeInstance treeInstance = new TreeInstance()
-                        {
-                            prototypeIndex = UnityEngine.Random.Range((int)terrainType.TreeIndexMinMax.x, (int)terrainType.TreeIndexMinMax.y + 1) - 1,
-                            //color = Color.white,
-                            //lightmapColor = Color.white,
-                            heightScale = UnityEngine.Random.Range(terrainType.TreeHeightMinMax.x, terrainType.TreeHeightMinMax.y),
-                            widthScale = 1,
-                            rotation = treeRot
-                        };
-                        SpawnHexagonTree(c.transform.position - transform.parent.position, treeInstance);
-                    }
-                    else
-                    {
-                        int grassAmount = UnityEngine.Random.Range((int)terrainType.GrassAmountMinMax.x, (int)terrainType.GrassAmountMinMax.y + 1);
-
-                        if (terrainType.probabilityToSpawnAsset != 0)
-                        {
-                            if (UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnAsset)
-                            {
-                                SpawnDetailPatch(grassAmount, c, terrainType.TreeIndexMinMax, 0);
-                            }
-                        }
-                        else
-                        {
-                            SpawnDetailPatch(grassAmount, c, terrainType.TreeIndexMinMax, 0);
-                        }
-                    }
+                        prototypeIndex = UnityEngine.Random.Range((int) terrainType.TreeIndexMinMax.x, (int) terrainType.TreeIndexMinMax.y + 1) - 1,
+                        //color = Color.white,
+                        //lightmapColor = Color.white,
+                        heightScale = UnityEngine.Random.Range(terrainType.TreeHeightMinMax.x, terrainType.TreeHeightMinMax.y),
+                        widthScale = 1,
+                        rotation = treeRot
+                    };
+                    SpawnHexagonTree(c.transform.position - transform.parent.position, treeInstance);
                 }
             }
 

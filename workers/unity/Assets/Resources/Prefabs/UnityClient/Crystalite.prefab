@@ -2333,9 +2333,9 @@ MonoBehaviour:
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
   UIInitialized: 0
-  UnitTypeId: 0
-  UnitGroupSprite: {fileID: 0}
-  UnitSprite: {fileID: 0}
+  UnitTypeId: 3
+  UnitGroupSprite: {fileID: 21300000, guid: 11ca2ebd391a52d42a8bf1df40d2b90a, type: 3}
+  UnitSprite: {fileID: 21300000, guid: 11ca2ebd391a52d42a8bf1df40d2b90a, type: 3}
   Actions:
   - {fileID: 11400000, guid: e4bd8d366db801e49afcb3dca435b108, type: 2}
   - {fileID: 11400000, guid: ceb214bd71f768541923c2ac6d1a0081, type: 2}
@@ -2354,7 +2354,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   IncomingDamage: 0
   HealthBarYOffset: 2
-  UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
+  UnitHeadUIPrefab: {fileID: 2609948338221265714, guid: a33dd47d3d0d0dd419c394e10f1024e1,
     type: 3}
   UnitHeadHealthBarPrefab: {fileID: 7290637364848590618, guid: b70e178b7eff5a546bb4da6f716f8711,
     type: 3}

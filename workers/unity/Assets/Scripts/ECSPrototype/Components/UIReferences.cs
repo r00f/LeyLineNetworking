@@ -126,9 +126,11 @@ public class UIReferences : MonoBehaviour
     public MinimapScript BigMapComponent;
     public Text BigMapTurnCounter;
 
+    /*
     [Header("ManaLithUI")]
     public ManalithInfoComponent ManalithIconPrefab;
     public ManalithTooltip ManalithToolTipFab;
+    */
 
     [Header("ReadyPanel")]
     public float RopeFillsEndDist;

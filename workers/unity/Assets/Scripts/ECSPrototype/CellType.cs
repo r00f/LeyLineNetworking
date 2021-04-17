@@ -102,61 +102,19 @@ namespace LeyLineHybridECS
                     objectsOnTile.Clear();
                 }
 
-                if (thisCellsTerrain.assets_to_Spawn.Count > 0)
+                if (thisCellsTerrain.AssetsToSpawn.Count > 0)
                 {
-                    if (thisCellsTerrain.spawnAllAssets)
+                    if (thisCellsTerrain.TerrainName == "Manalith")
                     {
-                        for (int i = thisCellsTerrain.assets_to_Spawn.Count; i >= 0; i--)
-                        {
-                            /*
-                            if (Random.Range(0, 100) <= thisCellsTerrain.probabilityToSpawnAsset)
-                            {
-                                
-                                GameObject go = PrefabUtility.InstantiatePrefab(thisCellsTerrain.assets_to_Spawn[i]) as GameObject;
-                                go.transform.parent = transform;
-                                go.transform.position = transform.position;
-                                
-                                GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[i], transform.position, Quaternion.identity, transform);
-                                objectsOnTile.Add(go);
-
-                            }
-                            */
-                        }
-                    }
-                    else
-                    {
-                        if (thisCellsTerrain.terrain_Name == "Manalith")
-                        {
-                            var manaLithParent = GameObject.Find("Manaliths").transform;
-                            var manaLithGroup = manaLithParent.GetComponent<ManalithGroup>();
-                            GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[0], transform.position, Quaternion.identity, manaLithParent);
-                            var initializer = go.GetComponent<ManalithInitializer>();
-                            initializer.occupiedCell = GetComponent<Cell>();
-                            go.transform.SetSiblingIndex(ManalithChainIndex);
-                            manaLithGroup.ManalithInitializers[ManalithChainIndex] = initializer;
-                            manaLithGroup.ConnectManalithInitializerScripts();
-                            objectsOnTile.Add(go);
-                        }
-                        /*
-                        else
-                        {
-                            GameObject go = Instantiate(thisCellsTerrain.assets_to_Spawn[0], transform.position, Quaternion.identity, transform);
-                            objectsOnTile.Add(go);
-                        }
-
-                        
-                       int c = Random.Range(0, thisCellsTerrain.assets_to_Spawn.Count);
-                       if (Random.Range(0, 100) <= thisCellsTerrain.probabilityToSpawnAsset)
-                       {
-
-                           GameObject go = PrefabUtility.InstantiatePrefab(thisCellsTerrain.assets_to_Spawn[c]) as GameObject;
-                           go.transform.parent = transform;
-                           go.transform.position = transform.position;
-
-
-
-                       }
-                       */
+                        var manaLithParent = GameObject.Find("Manaliths").transform;
+                        var manaLithGroup = manaLithParent.GetComponent<ManalithGroup>();
+                        GameObject go = Instantiate(thisCellsTerrain.AssetsToSpawn[0], transform.position, Quaternion.identity, manaLithParent);
+                        var initializer = go.GetComponent<ManalithInitializer>();
+                        initializer.occupiedCell = GetComponent<Cell>();
+                        go.transform.SetSiblingIndex(ManalithChainIndex);
+                        manaLithGroup.ManalithInitializers[ManalithChainIndex] = initializer;
+                        manaLithGroup.ConnectManalithInitializerScripts();
+                        objectsOnTile.Add(go);
                     }
                 }
             }

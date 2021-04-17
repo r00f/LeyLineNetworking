@@ -681,7 +681,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6848006868655134611}
-  - component: {fileID: 7404542180986272626}
+  - component: {fileID: 2045417404361184514}
   m_Layer: 0
   m_Name: LowGrass3
   m_TagString: Untagged
@@ -712,7 +712,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!205 &7404542180986272626
+--- !u!205 &2045417404361184514
 LODGroup:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -720,8 +720,8 @@ LODGroup:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6728990140167347436}
   serializedVersion: 2
-  m_LocalReferencePoint: {x: -0.037759334, y: 0.045000076, z: -0.20315468}
-  m_Size: 1.5852783
+  m_LocalReferencePoint: {x: -0.024444312, y: 0.0450001, z: -0.052913398}
+  m_Size: 1.6052918
   m_FadeMode: 0
   m_AnimateCrossFading: 0
   m_LastLODIsBillboard: 0
@@ -729,15 +729,24 @@ LODGroup:
   - screenRelativeHeight: 0
     fadeTransitionWidth: 0
     renderers:
-    - renderer: {fileID: 6862495828234442268}
-    - renderer: {fileID: 3971270084484759683}
-    - renderer: {fileID: 4380115800890306564}
-    - renderer: {fileID: 7344578835975671289}
-    - renderer: {fileID: 2045644610746223839}
-    - renderer: {fileID: 1495389217988994954}
-    - renderer: {fileID: 9052668293022146107}
-    - renderer: {fileID: 8267541439051568495}
-    - renderer: {fileID: 4454086509413207350}
+    - renderer: {fileID: 8815951957736610607, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 6862495828234442268, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 3971270084484759683, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 7344578835975671289, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 6021383293411015701, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 9147182879245936944, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 9052668293022146107, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 8267541439051568495, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
+    - renderer: {fileID: 7953430354643149944, guid: 43c229b913f11f444922f6812efc9a6f,
+        type: 3}
   m_Enabled: 1
 --- !u!1 &8515071862940112771
 GameObject:

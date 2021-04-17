@@ -12,28 +12,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: Forest
   m_EditorClassIdentifier: 
+  TerrainName: 
+  additionalCost: 0
+  obstructVision: 1
+  Walkable: 0
   MapCellIconIndex: 1
   MapCellColorIndex: 1
-  RandomTreeRotationIncrement: 10
   textureIndex: 6
   TreeHeightMinMax: {x: 1, y: 1.3}
+  TreeIndexMinMax: {x: 1, y: 1}
+  NeighbourIndexMinMax: {x: 8, y: 8}
+  NeighbourAmountMinMax: {x: 1, y: 1}
+  probabilityToSpawnNeighbourAsset: 20
+  RandomDetailRotationIncrement: 60
   DetailObjectIndexRanges: []
   DetailObjectAmounts: []
   DetailObjectSpawnProbabilities: 
   DetailObjectRanges: []
-  TreeIndexMinMax: {x: 1, y: 1}
-  GrassAmountMinMax: {x: 0, y: 0}
-  NeighbourIndexMinMax: {x: 8, y: 8}
-  NeighbourAmountMinMax: {x: 1, y: 1}
-  terrain_Name: Forest
-  additionalCost: 0
   yOffset: 0.1
   cellTerrainYOffset: 0
   DetailObjectSpawnYOffset: 0
   DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
-  Walkable: 0
-  spawnAllAssets: 0
-  probabilityToSpawnNeighbourAsset: 20
-  probabilityToSpawnAsset: 100
-  obstructVision: 1
-  assets_to_Spawn: []
+  AssetsToSpawn: []

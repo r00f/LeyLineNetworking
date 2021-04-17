@@ -12,28 +12,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: BasaltForestLow
   m_EditorClassIdentifier: 
+  TerrainName: 
+  additionalCost: 0
+  obstructVision: 0
+  Walkable: 0
   MapCellIconIndex: 9
   MapCellColorIndex: 9
-  RandomTreeRotationIncrement: 60
   textureIndex: 3
   TreeHeightMinMax: {x: 0.8, y: 1}
-  DetailObjectIndexRanges: []
-  DetailObjectAmounts: []
-  DetailObjectSpawnProbabilities: 
-  DetailObjectRanges: []
-  TreeIndexMinMax: {x: 10, y: 10}
-  GrassAmountMinMax: {x: 0, y: 0}
+  TreeIndexMinMax: {x: 0, y: 0}
   NeighbourIndexMinMax: {x: 0, y: 0}
   NeighbourAmountMinMax: {x: 0, y: 0}
-  terrain_Name: BasaltLow
-  additionalCost: 0
-  yOffset: -2
-  cellTerrainYOffset: 0
-  DetailObjectSpawnYOffset: 0
-  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
-  Walkable: 0
-  spawnAllAssets: 0
   probabilityToSpawnNeighbourAsset: 0
-  probabilityToSpawnAsset: 100
-  obstructVision: 0
-  assets_to_Spawn: []
+  RandomDetailRotationIncrement: 60
+  DetailObjectIndexRanges:
+  - {x: 10, y: 10}
+  DetailObjectAmounts:
+  - {x: 1, y: 1}
+  DetailObjectSpawnProbabilities: 64000000
+  DetailObjectRanges: []
+  yOffset: -2
+  cellTerrainYOffset: 2
+  DetailObjectSpawnYOffset: -1.8
+  DetailObjectSpawnYOffsetMinMax: {x: -0.5, y: -1}
+  AssetsToSpawn: []

@@ -475,21 +475,6 @@ namespace LeyLineHybridECS
             }
             #endregion
 
-            #region SwitchIngameUI
-
-            if (gameState.CurrentState != GameStateEnum.planning)
-            {
-                if (UIRef.ManalithToolTipFab.isActiveAndEnabled)
-                {
-                    UIRef.ManalithToolTipFab.ActiveManalithID = 0;
-                    UIRef.ManalithToolTipFab.gameObject.SetActive(false);
-                }
-                //if(UIRef.IngameUIPanel.activeSelf)
-                //UIRef.IngameUIPanel.SetActive(false);
-            }
-
-            #endregion
-
             #region GameOver
             if (gameState.CurrentState == GameStateEnum.game_over)
             {
@@ -851,6 +836,23 @@ namespace LeyLineHybridECS
                 int spawnActionCount = stats.SpawnActions.Count;
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
+                if(EntityManager.HasComponent<AiUnit.Component>(e) && unitHeadUIRef.UnitHeadUIInstance)
+                {
+                    var AIUnitHeadUIRef = unitHeadUIRef.UnitHeadUIInstance as AIUnitHeadUI;
+                    var AIUnit = EntityManager.GetComponentData<AiUnit.Component>(e);
+
+
+                    if (gameState.CurrentState == GameStateEnum.planning)
+                    {
+                        if (AIUnit.CurrentState == AiUnitStateEnum.aggroed)
+                            AIUnitHeadUIRef.ExclamationMark.SetActive(true);
+                        else
+                            AIUnitHeadUIRef.ExclamationMark.SetActive(false);
+                    }
+                    else
+                        AIUnitHeadUIRef.ExclamationMark.SetActive(false);
+                }
+
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
                     var damagePreviewAmount = 0;
@@ -1057,7 +1059,7 @@ namespace LeyLineHybridECS
                     InitializeUnitUI(unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
                     stats.UIInitialized = true;
                 }
-                else
+                else if(unitHeadUIRef.UnitHeadUIInstance)
                 {
                     unitHeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.SetFloat("WaitTime", unitHeadUIRef.HealthTextDelay);
 
@@ -2163,6 +2165,8 @@ namespace LeyLineHybridECS
 
         void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences unitHeadUIRef, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
+            unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction = true;
+
             if (isVisibleRef.MiniMapTileInstance)
             {
                 if (isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
@@ -2198,12 +2202,11 @@ namespace LeyLineHybridECS
                 Object.Destroy(isVisibleRef.BigMapTileInstance.gameObject, 0.5f);
             }
 
-            //Delete headUI / UnitGroupUI on unit death (when health = 0)
-            //INSTEAD OF DELETING DIRECTLY SET FlagForDestruction AND DESTROY FROM UNITCLEANUPSYSTEM AFTER
-            unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction = true;
+            if(unitHeadUIRef.UnitHeadUIInstance)
+                Object.Destroy(unitHeadUIRef.UnitHeadUIInstance.gameObject, unitHeadUIRef.UnitHeadUIInstance.DestroyWaitTime);
 
             if (unitHeadUIRef.UnitHeadHealthBarInstance)
-                unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
+                Object.Destroy(unitHeadUIRef.UnitHeadHealthBarInstance.gameObject);
 
             if (!stats.IsHero && unitFaction == playerFaction && UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
             {

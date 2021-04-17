@@ -230,7 +230,7 @@ public class ProjectileSystem : ComponentSystem
                     {
                         go.SetActive(false);
                     }
-                    if(projectile.gameObject)
+                    if(projectile)
                         GameObject.Destroy(projectile.gameObject, 0.5f);
 
                     projectile.QueuedForDestruction = true;

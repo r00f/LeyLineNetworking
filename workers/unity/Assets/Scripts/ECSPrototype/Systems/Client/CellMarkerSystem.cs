@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Improbable.Gdk.Core;
 using UnityEngine;
 using Generic;

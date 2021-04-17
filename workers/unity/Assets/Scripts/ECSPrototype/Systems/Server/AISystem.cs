@@ -70,8 +70,6 @@ public class AISystem : ComponentSystem
         }
     }
 
-
-
     public void UpdateAIUnits()
     {
         Entities.With(m_AiUnitData).ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord) =>
@@ -89,7 +87,7 @@ public class AISystem : ComponentSystem
             unitCellsToMark.CellsInRange.Clear();
             unitCellsToMark.CachedPaths.Clear();
 
-            if (!aiUnit.IsAggroed || CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate) > actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
+            if (aiUnit.CurrentState == AiUnitStateEnum.idle || CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate) > actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
             {
                 aiUnit = RandomizeUnitAggression(vision, aiUnit, actions, AIid);
             }
@@ -98,45 +96,27 @@ public class AISystem : ComponentSystem
                 aiUnit = RefreshUnitAggression(vision, aiUnit, actions, AIid);
             }
 
-            if (aiUnit.IsAggroed)
+            if (aiUnit.CurrentState == AiUnitStateEnum.aggroed || aiUnit.CurrentState == AiUnitStateEnum.chasing)
             {
+                //ATTACK ACTION
                 if (CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange + extrarange)
                 {
                     actions.CurrentSelected = actions.ActionsList[1];
-                }
-                else
-                {
-                    actions.CurrentSelected = actions.ActionsList[0];
-                    unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint)actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex.Value);
-                    unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius((uint)actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-                }
 
-                if(extrarange != 0)
-                {
-                    for(uint i = 0; i < 6; i++)
+                    if (extrarange != 0)
                     {
-                        if(CellGridMethods.GetDistance(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, i), unitCoord.CubeCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange)
-                         {
-                            var request = new Actions.SetTargetCommand.Request
-                            (
-                                AIid.EntityId,
-                                new SetTargetRequest(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, i))
-                            );
-                            m_CommandSystem.SendCommand(request);
+                        for (uint i = 0; i < 6; i++)
+                        {
+                            if (CellGridMethods.GetDistance(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, i), unitCoord.CubeCoordinate) <= actions.ActionsList[1].Targets[0].Targettingrange)
+                            {
+                                var request = new Actions.SetTargetCommand.Request
+                                (
+                                    AIid.EntityId,
+                                    new SetTargetRequest(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, i))
+                                );
+                                m_CommandSystem.SendCommand(request);
+                            }
                         }
-                    }
-                }
-                else
-                {
-
-                    if(actions.CurrentSelected.ActionExecuteStep == ExecuteStepEnum.move)
-                    {
-                        var request = new Actions.SetTargetCommand.Request
-                        (
-                            AIid.EntityId,
-                            new SetTargetRequest(ClosestPathTarget(aiUnit.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
-                        );
-                        m_CommandSystem.SendCommand(request);
                     }
                     else
                     {
@@ -147,7 +127,19 @@ public class AISystem : ComponentSystem
                         );
                         m_CommandSystem.SendCommand(request);
                     }
+                }
+                else
+                {
+                    actions.CurrentSelected = actions.ActionsList[0];
+                    unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint)actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex.Value);
+                    unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius((uint)actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
 
+                    var request = new Actions.SetTargetCommand.Request
+                    (
+                        AIid.EntityId,
+                        new SetTargetRequest(ClosestPathTarget(aiUnit.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
+                    );
+                    m_CommandSystem.SendCommand(request);
                 }
             }
         });
@@ -157,7 +149,7 @@ public class AISystem : ComponentSystem
     {
         aiUnit.AggroedUnitCoordinate = new Vector3f(999, 999, 999);
         aiUnit.AggroedUnitId = 0;
-        aiUnit.IsAggroed = false;
+        bool anyUnitinVisionRange = false;
 
         Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
         {
@@ -165,13 +157,36 @@ public class AISystem : ComponentSystem
             {
                 aiUnit.AggroedUnitCoordinate = coord.CubeCoordinate;
                 aiUnit.AggroedUnitId = id.EntityId.Id;
-                aiUnit.IsAggroed = true;
+                anyUnitinVisionRange = true;
             }
         });
 
+
+        switch (aiUnit.CurrentState)
+        {
+            case AiUnitStateEnum.idle:
+                if(anyUnitinVisionRange)
+                    aiUnit.CurrentState = AiUnitStateEnum.aggroed;
+                break;
+            case AiUnitStateEnum.aggroed:
+                if (anyUnitinVisionRange)
+                    aiUnit.CurrentState = AiUnitStateEnum.chasing;
+                else
+                    aiUnit.CurrentState = AiUnitStateEnum.idle;
+                break;
+            case AiUnitStateEnum.chasing:
+                if (!anyUnitinVisionRange)
+                    aiUnit.CurrentState = AiUnitStateEnum.idle;
+                break;
+            case AiUnitStateEnum.attacking:
+                break;
+            case AiUnitStateEnum.returning:
+                break;
+        }
+
+
         return aiUnit;
     }
-
 
     public AiUnit.Component RefreshUnitAggression(Vision.Component aiVision, AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId)
     {
@@ -179,14 +194,30 @@ public class AISystem : ComponentSystem
 
         Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
         {
-            if (aiUnit.AggroedUnitId == id.EntityId.Id)
+            if (aiUnit.AggroedUnitId == id.EntityId.Id && aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
             {
                 aggroedUnitExists = true;
                 aiUnit.AggroedUnitCoordinate = coord.CubeCoordinate;
             }
         });
 
-        if(aggroedUnitExists)
+        
+        switch (aiUnit.CurrentState)
+        {
+            case AiUnitStateEnum.idle:
+                break;
+            case AiUnitStateEnum.aggroed:
+                    aiUnit.CurrentState = AiUnitStateEnum.chasing;
+                break;
+            case AiUnitStateEnum.chasing:
+                break;
+            case AiUnitStateEnum.attacking:
+                break;
+            case AiUnitStateEnum.returning:
+                break;
+        }
+
+        if (aggroedUnitExists)
             return aiUnit;
         else
             return RandomizeUnitAggression(aiVision, aiUnit, act, aiId);
