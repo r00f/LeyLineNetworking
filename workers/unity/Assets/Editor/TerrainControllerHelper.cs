@@ -51,7 +51,7 @@ public class TerrainControllerHelper : Editor
 
             if (GUILayout.Button("Set Whole Terrain Height"))
             {
-                myTarget.SetWholeTerrainHeight();
+                myTarget.UpdateTerrainHeight();
             }
 
             if (GUILayout.Button("Set Whole Terrain Texture"))

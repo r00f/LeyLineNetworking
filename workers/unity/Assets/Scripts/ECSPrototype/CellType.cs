@@ -52,6 +52,11 @@ namespace LeyLineHybridECS
             terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
         }
 
+        public void UpdateTerrainHeight()
+        {
+            terrainController.SetHexagonTerrainHeight(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0));
+        }
+
         public void ApplyCellOffset()
         {
             pos3D.Value = new Position3D

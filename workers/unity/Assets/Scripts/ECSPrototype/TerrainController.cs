@@ -154,7 +154,7 @@ namespace LeyLineHybridECS
         {
             foreach (Cell c in hexGridGenerator.hexagons)
             {
-                SetHexagonTerrainHeight(c.GetComponent<CellDimensions>().Size, c.transform.localPosition);
+                c.GetComponent<CellType>().UpdateTerrainHeight();
             }
         }
 

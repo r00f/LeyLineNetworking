@@ -145,6 +145,7 @@ public class DollyCameraComponent : MonoBehaviour
 
         else if (!cameraBrain.IsBlending && !UIRef.UIActive)
         {
+            mapTitleTextMesh.color = new Color(0, 0, 0, 0);
             UIRef.UIMainPanel.SetActive(true);
             UIRef.UIActive = true;
             Destroy(gameObject);
