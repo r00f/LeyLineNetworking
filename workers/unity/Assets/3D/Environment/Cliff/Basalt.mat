@@ -116,7 +116,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - Vector1_2B39A70A: 1.8
-    - Vector1_71D74060: 1
+    - Vector1_71D74060: 0.5
     - Vector1_84F9607E: 0
     - Vector1_C1DD3A71: 0
     - Vector1_FB8FF122: 0
@@ -260,6 +260,7 @@ Material:
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
 --- !u!114 &8517871301996488066
 MonoBehaviour:
   m_ObjectHideFlags: 11

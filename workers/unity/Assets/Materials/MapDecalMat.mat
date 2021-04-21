@@ -10,11 +10,11 @@ Material:
   m_Name: MapDecalMat
   m_Shader: {fileID: -6465566751694194690, guid: a4116d3655fb9734c9eadaa5e35dff83,
     type: 3}
-  m_ShaderKeywords: _ALBEDOCONTRIBUTION _COLORMAP _MASKMAP
+  m_ShaderKeywords: _ALBEDOCONTRIBUTION
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 1
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses:
   - DBufferMesh_M
@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseColorMap:
-        m_Texture: {fileID: 2800000, guid: b0ff21bcc81b63d4880a3af1ee00b7b8, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BentNormalMap:
@@ -76,7 +76,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MaskMap:
-        m_Texture: {fileID: 2800000, guid: b0ff21bcc81b63d4880a3af1ee00b7b8, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
@@ -138,8 +138,8 @@ Material:
     - _DecalBlend: 0.96
     - _DecalMaskMapBlueScale: 1
     - _DecalMeshDepthBias: 0
-    - _DecalStencilRef: 8
-    - _DecalStencilWriteMask: 8
+    - _DecalStencilRef: 16
+    - _DecalStencilWriteMask: 16
     - _DepthOffsetEnable: 0
     - _DetailAlbedoScale: 1
     - _DetailNormalScale: 1
@@ -252,9 +252,9 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 1
     m_Colors:
-    - Color_CE97B1C4: {r: 0.010137607, g: 0.0061409706, b: 0.01886791, a: 1}
+    - Color_CE97B1C4: {r: 0, g: 0, b: 0, a: 1}
     - Color_D398FD66: {r: 1, g: 0.19916233, b: 0, a: 1}
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0, g: 0, b: 0, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _DiffusionProfileAsset: {r: 0, g: 0, b: 0, a: 0}
@@ -271,6 +271,7 @@ Material:
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMask: {r: 1, g: 0, b: 0, a: 0}
     - _UVMappingMaskEmissive: {r: 1, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
 --- !u!114 &3332777140145477555
 MonoBehaviour:
   m_ObjectHideFlags: 11

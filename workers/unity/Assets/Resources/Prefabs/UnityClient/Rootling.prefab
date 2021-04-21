@@ -239,7 +239,7 @@ MonoBehaviour:
   AnimationEvents: {fileID: 3472730449269197841}
   ExecuteTriggerSet: 0
   InitialValuesSet: 0
-  ProjectileSpawnOrigin: {fileID: 0}
+  ProjectileSpawnOrigin: {fileID: 1137322484972387544}
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
@@ -353,6 +353,7 @@ MonoBehaviour:
   UnitSprite: {fileID: 21300000, guid: 9874af7279cc754489a6a9b6fc50e405, type: 3}
   Actions:
   - {fileID: 11400000, guid: 3b0ff82066ea45b4e8250e45d618c127, type: 2}
+  - {fileID: 11400000, guid: 83e95952b37629941b97da6a45480130, type: 2}
   - {fileID: 11400000, guid: fe544b6f4c5065748b6812957a2bef84, type: 2}
   SpawnActions: []
 --- !u!114 &4518830118222795305

@@ -2,12 +2,13 @@ version: 2
 importPivots: 1
 tpsheetFileNames:
 - Assets/codeandweb.com/Example/SpriteSheet/sprites.tpsheet
+- Assets/UI/Textures/AIExclamationmark/ExclamationMark.tpsheet
 - Assets/UI/Textures/DeathUI/DeathSkull.tpsheet
 - Assets/UI/Textures/DeathUI/DeathX.tpsheet
+- Assets/UI/Textures/ExclamationMark.tpsheet
 - Assets/UI/Textures/GOButton/GoButtonTurnAround.tpsheet
 - Assets/UI/Textures/HeadUIShield/ShieldCrack.tpsheet
 - Assets/UI/Textures/MapPanel/MapWheelRotate.tpsheet
-- Assets/UI/Textures/Portrait.tpsheet
 - Assets/UI/Textures/Portrait/Manaliths/ManalithPortraits.tpsheet
 - Assets/UI/Textures/Portrait/Units/KingCroak/KingCroakPortraits.tpsheet
 - Assets/UI/Textures/Portrait/Units/KingCroak/SpikePortrait.tpsheet
@@ -16,12 +17,13 @@ tpsheetFileNames:
 - Assets/UI/Textures/Portrait/Units/Neutral/Rootling.tpsheet
 textureFileNames:
 - Assets/codeandweb.com/Example/SpriteSheet/sprites.png
+- Assets/UI/Textures/AIExclamationmark/ExclamationMark.png
 - Assets/UI/Textures/DeathUI/DeathSkull.png
 - Assets/UI/Textures/DeathUI/DeathX.png
+- Assets/UI/Textures/ExclamationMark.png
 - Assets/UI/Textures/GOButton/GoButtonTurnAround.png
 - Assets/UI/Textures/HeadUIShield/ShieldCrack.png
 - Assets/UI/Textures/MapPanel/MapWheelRotate.png
-- Assets/UI/Textures/Portrait.png
 - Assets/UI/Textures/Portrait/Manaliths/ManalithPortraits.png
 - Assets/UI/Textures/Portrait/Units/KingCroak/KingCroakPortraits.png
 - Assets/UI/Textures/Portrait/Units/KingCroak/SpikePortrait.png
@@ -30,6 +32,7 @@ textureFileNames:
 - Assets/UI/Textures/Portrait/Units/Neutral/Rootling.png
 normalmapFileNames:
 - Assets/codeandweb.com/Example/SpriteSheet/sprites_n.png
+- 
 - 
 - 
 - 

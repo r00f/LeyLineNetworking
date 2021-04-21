@@ -13,13 +13,23 @@ public class AnimStateEffectHandler : StateMachineBehaviour
 
     public bool IsActiveState;
 
+
+    /*
+    public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
+    {
+        IsActiveState = true;
+        CurrentEffectOnTimestamps.AddRange(EffectOnTimestamps);
+        CurrentEffectOffTimestamps.AddRange(EffectOffTimestamps);
+    }
+    */
+    
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         IsActiveState = true;
         CurrentEffectOnTimestamps.AddRange(EffectOnTimestamps);
         CurrentEffectOffTimestamps.AddRange(EffectOffTimestamps);
     }
-
+    
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
         for (int i = 0; i < CurrentEffectOnTimestamps.Count; i++)
