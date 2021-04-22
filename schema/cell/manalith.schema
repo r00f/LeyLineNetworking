@@ -12,6 +12,7 @@ component Manalith
 	list<ManalithSlot> manalithslots = 4;
 	bool state_change = 5;
     int64 manalith_unit_id = 6;
+    generic.Vector3f manalith_unit_coordinate = 7;
 	event ManalithFactionChange manalith_faction_change_event;
 }
 

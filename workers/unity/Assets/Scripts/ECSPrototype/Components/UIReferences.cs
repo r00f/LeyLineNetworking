@@ -181,6 +181,7 @@ public class UIReferences : MonoBehaviour
 
     [Header("TurnWheel")]
     public Animator ExecuteStepPanelAnimator;
+    /*
     public float ReadyOutSpeed;
     public float ReadyInSpeed;
     public ReadySlider EnemyReadySlider;
@@ -188,6 +189,7 @@ public class UIReferences : MonoBehaviour
     public List<Image> SmallWheelColoredParts;
     public List<Image> BigWheelColoredParts;
     public List<Image> TurnStepFlares;
+    */
     public UIEffectsFired CurrentEffectsFiredState;
 
     [Header("FMODBusPaths")]

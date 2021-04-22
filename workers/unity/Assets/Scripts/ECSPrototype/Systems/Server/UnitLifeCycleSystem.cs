@@ -145,6 +145,7 @@ public class UnitLifeCycleSystem : ComponentSystem
                 if(worldIndex.Value == manalithWorldIndex.Value && manalithComponent.CircleCoordinatesList.Contains(coordComp.CubeCoordinate))
                 {
                     manalithComponent.ManalithUnitId = id;
+                    manalithComponent.ManalithUnitCoordinate = coordComp.CubeCoordinate;
                 }
             });
 

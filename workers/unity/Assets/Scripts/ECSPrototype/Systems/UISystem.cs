@@ -259,13 +259,11 @@ namespace LeyLineHybridECS
                 UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
                 UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
 
-                UIRef.FriendlyReadySlider.PlayerColorImage.color = UIRef.FriendlyColor;
                 UIRef.FriendlyReadyDot.color = UIRef.FriendlyColor;
                 UIRef.FriendlyReadySwoosh.color = UIRef.FriendlyColor;
                 UIRef.FriendlyRope.color = UIRef.FriendlyColor;
                 UIRef.EnergyConnectorPlayerColorFill.color = UIRef.FriendlyColor;
 
-                UIRef.EnemyReadySlider.PlayerColorImage.color = UIRef.EnemyColor;
                 UIRef.EnemyReadyDot.color = UIRef.EnemyColor;
                 UIRef.EnemyReadySwoosh.color = UIRef.EnemyColor;
                 UIRef.EnemyRope.color = UIRef.EnemyColor;
@@ -349,9 +347,6 @@ namespace LeyLineHybridECS
 
                 UIRef.GameOverPanel.SetActive(false);
 
-                UIRef.FriendlyReadySlider.BurstPlayed = false;
-                UIRef.EnemyReadySlider.BurstPlayed = false;
-
                 UIRef.FriendlyReadyDot.enabled = false;
                 UIRef.EnemyReadyDot.enabled = false;
                 UIRef.FriendlyReadySwoosh.fillAmount = 0;
@@ -385,26 +380,6 @@ namespace LeyLineHybridECS
             }
 
             #region TurnStepEffects
-
-            if (gameState.CurrentState != GameStateEnum.planning)
-            {
-                for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
-                {
-                    UIRef.TurnStepFlares[i].enabled = false;
-                }
-            }
-
-            //RESETTING ALL THE COLORS ALL THE TIME RETARDATION
-
-            for (int i = 0; i < UIRef.SmallWheelColoredParts.Count; i++)
-            {
-                UIRef.SmallWheelColoredParts[i].color = settings.TurnStepColors[i + 1];
-            }
-
-            for (int i = 0; i < UIRef.BigWheelColoredParts.Count; i++)
-            {
-                UIRef.BigWheelColoredParts[i].color = settings.TurnStepBgColors[i];
-            }
 
             UIRef.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) gameState.CurrentState - 1);
 
@@ -604,55 +579,36 @@ namespace LeyLineHybridECS
                         UIRef.GOButtonScript.SetLightsToPlayerColor(UIRef.FriendlyColor);
                         UIRef.GOButtonScript.PlayerReady = true;
                         //Slide out first if friendly
-                        if (UIRef.FriendlyReadySlider.LerpTime < 1)
+
+                        if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning || UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.enemyReadyFired)
                         {
-                            UIRef.FriendlyReadySlider.LerpTime += UIRef.ReadyOutSpeed * Time.DeltaTime;
-                            if (!UIRef.FriendlyReadySlider.BurstPlayed)
-                            {
-                                UIRef.FriendlyReadySlider.BurstPS.time = 0;
-                                UIRef.FriendlyReadySlider.BurstPS.Play();
-                                UIRef.FriendlyReadySlider.BurstPlayed = true;
-                            }
-                            UIRef.FriendlyReadySlider.Rect.anchoredPosition = new Vector3(UIRef.FriendlyReadySlider.StartPosition.x, Mathf.Lerp(UIRef.FriendlyReadySlider.StartPosition.y, UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y, UIRef.FriendlyReadySlider.LerpTime), 0);
+                            FireStepChangedEffects("Waiting", UIRef.FriendlyColor, UIRef.ReadySoundEventPath);
+                            UIRef.FriendlyReadyDot.enabled = true;
+                            UIRef.FriendlyReadyBurstPS.time = 0;
+                            UIRef.FriendlyReadyBurstPS.Play();
+                            UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
+                        }
+                        UIRef.FriendlyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
+
+                        if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
+                        {
+                            UIRef.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                            UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
+                            UIRef.FriendlyReadySwooshParticle.LoopPS.time = 0;
+                            UIRef.FriendlyReadySwooshParticle.LoopPS.Stop();
                         }
                         else
                         {
-                            if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.planning || UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.enemyReadyFired)
-                            {
-                                FireStepChangedEffects("Waiting", UIRef.FriendlyColor, UIRef.ReadySoundEventPath);
-                                UIRef.FriendlyReadyDot.enabled = true;
-                                UIRef.FriendlyReadyBurstPS.time = 0;
-                                UIRef.FriendlyReadyBurstPS.Play();
-                                UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
-                            }
-                            UIRef.FriendlyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
-
-                            if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
-                            {
-                                UIRef.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                                UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                                UIRef.FriendlyReadySwooshParticle.LoopPS.time = 0;
-                                UIRef.FriendlyReadySwooshParticle.LoopPS.Stop();
-                            }
-                            else
-                            {
-                                UIRef.FriendlyReadySwooshParticle.LoopPS.Play();
-                            }
-
-                            UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyReadySwooshParticle.ParentRect.sizeDelta.x, UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition.y);
-                            UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
+                            UIRef.FriendlyReadySwooshParticle.LoopPS.Play();
                         }
+
+                        UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyReadySwooshParticle.ParentRect.sizeDelta.x, UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition.y);
+                        UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                     }
                     else if (gameState.CurrentState == GameStateEnum.planning)
                     {
                         UIRef.GOButtonScript.PlayerReady = false;
                         UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
-
-                        if (UIRef.FriendlyReadySlider.LerpTime > 0)
-                        {
-                            UIRef.FriendlyReadySlider.LerpTime -= UIRef.ReadyInSpeed * Time.DeltaTime;
-                            UIRef.FriendlyReadySlider.Rect.anchoredPosition = new Vector3(UIRef.FriendlyReadySlider.StartPosition.x, Mathf.Lerp(UIRef.FriendlyReadySlider.StartPosition.y, UIRef.FriendlyReadySlider.StartPosition.y + UIRef.FriendlyReadySlider.SlideOffset.y, UIRef.FriendlyReadySlider.LerpTime), 0);
-                        }
                     }
                 }
                 else
@@ -683,30 +639,13 @@ namespace LeyLineHybridECS
 
                         if (UIRef.EnemyReadySwoosh.fillAmount >= 1)
                         {
-                            if (!UIRef.EnemyReadySlider.BurstPlayed)
-                            {
-                                UIRef.EnemyReadySlider.BurstPS.time = 0;
-                                UIRef.EnemyReadySlider.BurstPS.Play();
-                                UIRef.EnemyReadySlider.BurstPlayed = true;
-                            }
                             UIRef.EnemyReadyDot.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
                             UIRef.EnemyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-
-                            if (UIRef.EnemyReadySlider.LerpTime < 1)
-                            {
-                                UIRef.EnemyReadySlider.LerpTime += UIRef.ReadyOutSpeed * Time.DeltaTime;
-                                UIRef.EnemyReadySlider.Rect.anchoredPosition = new Vector3(Mathf.Lerp(UIRef.EnemyReadySlider.StartPosition.x, UIRef.EnemyReadySlider.StartPosition.x + UIRef.EnemyReadySlider.SlideOffset.x, UIRef.EnemyReadySlider.LerpTime), UIRef.EnemyReadySlider.StartPosition.y, 0);
-                            }
                         }
                     }
                     else if (gameState.CurrentState == GameStateEnum.planning)
                     {
                         UIRef.OpponentReady = false;
-                        if (UIRef.EnemyReadySlider.LerpTime > 0)
-                        {
-                            UIRef.EnemyReadySlider.LerpTime -= UIRef.ReadyInSpeed * Time.DeltaTime;
-                            UIRef.EnemyReadySlider.Rect.anchoredPosition = new Vector3(Mathf.Lerp(UIRef.EnemyReadySlider.StartPosition.x, UIRef.EnemyReadySlider.StartPosition.x + UIRef.EnemyReadySlider.SlideOffset.x, UIRef.EnemyReadySlider.LerpTime), UIRef.EnemyReadySlider.StartPosition.y, 0);
-                        }
                     }
                 }
             });
@@ -1007,26 +946,7 @@ namespace LeyLineHybridECS
                             }
                         }
                         #endregion
-
-                        for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
-                        {
-                            if (actions.CurrentSelected.Index != -3)
-                            {
-                                if (i == (int) actions.CurrentSelected.ActionExecuteStep)
-                                    UIRef.TurnStepFlares[i].enabled = true;
-                                else
-                                    UIRef.TurnStepFlares[i].enabled = false;
-                            }
-                            else if (actions.LockedAction.Index != -3)
-                            {
-                                if (i == (int) actions.LockedAction.ActionExecuteStep)
-                                    UIRef.TurnStepFlares[i].enabled = true;
-                                else
-                                    UIRef.TurnStepFlares[i].enabled = false;
-                            }
-                            else
-                                UIRef.TurnStepFlares[i].enabled = false;
-                        }
+                        
                     }
                     else
                     {
@@ -1290,26 +1210,6 @@ namespace LeyLineHybridECS
                             }
                         }
                         #endregion
-
-                        for (int i = 0; i < UIRef.TurnStepFlares.Count; i++)
-                        {
-                            if (actions.CurrentSelected.Index != -3)
-                            {
-                                if (i == (int) actions.CurrentSelected.ActionExecuteStep)
-                                    UIRef.TurnStepFlares[i].enabled = true;
-                                else
-                                    UIRef.TurnStepFlares[i].enabled = false;
-                            }
-                            else if (actions.LockedAction.Index != -3)
-                            {
-                                if (i == (int) actions.LockedAction.ActionExecuteStep)
-                                    UIRef.TurnStepFlares[i].enabled = true;
-                                else
-                                    UIRef.TurnStepFlares[i].enabled = false;
-                            }
-                            else
-                                UIRef.TurnStepFlares[i].enabled = false;
-                        }
                     }
                     else
                     {

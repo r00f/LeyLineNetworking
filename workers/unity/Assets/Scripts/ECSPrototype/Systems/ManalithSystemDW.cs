@@ -231,17 +231,9 @@ namespace LeyLineHybridECS
 
                             if(playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                             {
-                                if (manaLith.CircleCoordinatesList.Contains(playerHighlightingDatas[0].HoveredCoordinate))
+                                if (Vector3fext.ToUnityVector(manaLith.ManalithUnitCoordinate) == Vector3fext.ToUnityVector(playerHighlightingDatas[0].HoveredCoordinate))
                                 {
                                     manalithIsHovered = true;
-
-                                    for (int j = 0; j < manaLith.Manalithslots.Count; j++)
-                                    {
-                                        if (Vector3fext.ToUnityVector(manaLith.Manalithslots[j].CorrespondingCell.CubeCoordinate) == Vector3fext.ToUnityVector(playerHighlightingDatas[0].HoveredCoordinate))
-                                        {
-                                            manalithIsHovered = !manaLith.Manalithslots[j].CorrespondingCell.IsTaken;
-                                        }
-                                    }
                                 }
                             }
 

@@ -381,7 +381,7 @@ AnimatorController:
   - serializedVersion: 5
     m_Name: GetHit
     m_StateMachine: {fileID: 1107478861552367376}
-    m_Mask: {fileID: 31900000, guid: 113abab8da3511c4aaaa2f781838a4b0, type: 2}
+    m_Mask: {fileID: 0}
     m_Motions: []
     m_Behaviours: []
     m_BlendingMode: 0
@@ -545,7 +545,8 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400012, guid: a8351c766422afd43a38907548e76afa, type: 3}
+  m_Motion: {fileID: 7276463211774250988, guid: 979d03f6d2a10a14280b73f9698919ab,
+    type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 

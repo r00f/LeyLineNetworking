@@ -6,6 +6,7 @@ using System.Linq;
 using Generic;
 using Unity.Entities;
 using UnityEngine.Rendering.HighDefinition;
+using UnityEngine.Rendering;
 
 public class DollyCameraComponent : MonoBehaviour
 {
@@ -43,10 +44,22 @@ public class DollyCameraComponent : MonoBehaviour
     [SerializeField]
     bool endPath;
     public bool RevealVisionTrigger;
+    [SerializeField]
+    VolumeProfile volumeProfile;
+    [SerializeField]
+    Fog fog;
+    [SerializeField]
+    float fogDistanceLerpSpeed;
 
     // Start is called before the first frame update
     void Start()
     {
+        
+        if(volumeProfile.TryGet(out Fog f))
+        {
+            fog = f;
+        }
+
         trackedDolly = dollyCam.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachineTrackedDolly;
         smoothPath = trackedDolly.m_Path as CinemachineSmoothPath;
         pathWaypoints = smoothPath.m_Waypoints.ToList();
@@ -55,11 +68,15 @@ public class DollyCameraComponent : MonoBehaviour
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
         UIRef.UIActive = false;
         UIRef.UIMainPanel.SetActive(false);
+        fog.depthExtent.value = 64;
     }
 
     // Update is called once per frame
     void Update()
     {
+
+
+        //volumeProfile.components[0]
         if (GameObject.FindGameObjectWithTag("Player"))
         {
             playerCam = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Moba_Camera>();
@@ -138,6 +155,9 @@ public class DollyCameraComponent : MonoBehaviour
         //reach end of path start transition to mobaCam
         dollyCam.Priority = 9;
         //decalProjector.fadeFactor += decalProjectorLerpInSpeed * Time.deltaTime;
+
+        if (fog.depthExtent.value > 32)
+            fog.depthExtent.value -= Time.deltaTime * fogDistanceLerpSpeed;
 
         if (UIDisplayDelatTime > 0)
             UIDisplayDelatTime -= Time.deltaTime;
