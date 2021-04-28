@@ -5,8 +5,23 @@ import "generic/vector3.schema";
 component AiUnit {
     id = 128;
     AiUnitStateEnum current_state = 1;
-    int64 aggroed_unit_id = 2;
-    generic.Vector3f aggroed_unit_coordinate = 3;
+    ActionTypeEnum chosen_action_type = 2;
+    list<generic.Vector3f> action_type_weights_list = 3;
+    list<Vector2int> move_actions_prio_list = 4;
+    list<Vector2int> attack_actions_prio_list = 5;
+    list<Vector2int> utility_actions_prio_list = 6;
+    list<Vector2int> culled_move_actions_prio_list = 7;
+    list<Vector2int> culled_attack_actions_prio_list = 8;
+    list<Vector2int> culled_utility_actions_prio_list = 9;
+    int64 aggroed_unit_id = 10;
+    generic.Vector3f aggroed_unit_coordinate = 11;
+    bool any_unit_in_vision_range = 12;
+}
+
+type Vector2int
+{
+    int32 x = 1;
+    int32 y = 2;
 }
 
 enum AiUnitStateEnum {
@@ -14,7 +29,16 @@ enum AiUnitStateEnum {
 	idle = 0;
     aggroed = 1;
     chasing = 2;
-    attacking = 3;
-    returning = 4;
+    inAttackRange = 3;
+    inDanger = 4;
+    returning = 5;
 
 }
+
+enum ActionTypeEnum {
+    none = 0;
+	move = 1;
+    attack = 2;
+    utility = 3;
+}
+

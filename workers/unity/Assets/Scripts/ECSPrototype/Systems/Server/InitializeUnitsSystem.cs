@@ -19,7 +19,7 @@ public class InitializeUnitsSystem : ComponentSystem
 
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<Unit_BaseDataSet>(),
+            ComponentType.ReadOnly<UnitDataSet>(),
             ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<UnitComponentReferences>(),
@@ -46,7 +46,7 @@ public class InitializeUnitsSystem : ComponentSystem
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
             var unitTransform = EntityManager.GetComponentObject<Transform>(e);
-            var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+            var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
 
             anim.RotateTransform.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
             unitEffects.CurrentHealth = health.CurrentHealth;

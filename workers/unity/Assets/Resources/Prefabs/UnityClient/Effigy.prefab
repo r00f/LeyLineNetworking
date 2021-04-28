@@ -10369,6 +10369,7 @@ GameObject:
   - component: {fileID: 882018676871478844}
   - component: {fileID: 8676098010572886555}
   - component: {fileID: 6235304998422575666}
+  - component: {fileID: 3691618360314474816}
   m_Layer: 10
   m_Name: Effigy
   m_TagString: Untagged
@@ -10600,6 +10601,7 @@ MonoBehaviour:
   Actions:
   - {fileID: 11400000, guid: 77c851d52ec50ae4d95ddaa0ce529866, type: 2}
   - {fileID: 11400000, guid: 868f1d67ba2d1754b9172918a3e1e585, type: 2}
+  - {fileID: 11400000, guid: f272e1de475b3414d84db91544d69681, type: 2}
   SpawnActions: []
 --- !u!114 &6022047490272934592
 MonoBehaviour:
@@ -10717,6 +10719,32 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &3691618360314474816
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7410517916415333887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 161306eb2cf0b0d4ab71d005af3baf2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MoveActionPrioList:
+  - {x: 0, y: 100}
+  AttackActionPrioList:
+  - {x: 1, y: 100}
+  UtitlityActionPrioList:
+  - {x: 2, y: 100}
+  AIUnitStateEnum: 4
+  ActionTypeWeightsList:
+  - {x: 0, y: 0, z: 0}
+  - {x: 20, y: 70, z: 10}
+  - {x: 20, y: 70, z: 10}
+  - {x: 10, y: 70, z: 20}
+  - {x: 20, y: 10, z: 70}
+  - {x: 100, y: 0, z: 0}
 --- !u!198 &2118463536034080043
 ParticleSystem:
   m_ObjectHideFlags: 0

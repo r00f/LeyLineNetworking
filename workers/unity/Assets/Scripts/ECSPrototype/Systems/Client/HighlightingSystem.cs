@@ -57,7 +57,7 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<Actions.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadOnly<Unit_BaseDataSet>(),
+            ComponentType.ReadOnly<UnitDataSet>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MouseState>(),
             ComponentType.ReadWrite<CellsToMark.Component>(),
@@ -276,7 +276,7 @@ public class HighlightingSystem : ComponentSystem
         ECSActionEffect effect = null;
 
         //var id = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
-        var actions = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+        var actions = EntityManager.GetComponentObject<UnitDataSet>(e);
 
         if (target == null)
         {

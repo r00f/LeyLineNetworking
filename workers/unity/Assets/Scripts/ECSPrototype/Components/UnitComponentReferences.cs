@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CapsuleCollider), typeof(LineRendererComponent), typeof(AnimatorComponent)),
-RequireComponent(typeof(TeamColorMeshes), typeof(IsVisibleReferences), typeof(Unit_BaseDataSet)),
+RequireComponent(typeof(TeamColorMeshes), typeof(IsVisibleReferences), typeof(UnitDataSet)),
 RequireComponent(typeof(UnitHeadUIReferences), typeof(AnimatedPortraitReference), typeof(UnitEffects))]
 public class UnitComponentReferences : MonoBehaviour
 {
@@ -12,7 +12,7 @@ public class UnitComponentReferences : MonoBehaviour
     public AnimatorComponent AnimatorComp;
     public TeamColorMeshes TeamColorMeshesComp;
     public IsVisibleReferences IsVisibleRefComp;
-    public Unit_BaseDataSet BaseDataSetComp;
+    public UnitDataSet BaseDataSetComp;
     public UnitHeadUIReferences HeadUIReferencesComp;
     public AnimatedPortraitReference AnimPortraitComp;
     public UnitEffects UnitEffectsComp;
@@ -34,7 +34,7 @@ public class UnitComponentReferences : MonoBehaviour
         AnimatorComp = GetComponent<AnimatorComponent>();
         TeamColorMeshesComp = GetComponent<TeamColorMeshes>();
         IsVisibleRefComp = GetComponent<IsVisibleReferences>();
-        BaseDataSetComp = GetComponent<Unit_BaseDataSet>();
+        BaseDataSetComp = GetComponent<UnitDataSet>();
         HeadUIReferencesComp = GetComponent<UnitHeadUIReferences>();
         AnimPortraitComp = GetComponent<AnimatedPortraitReference>();
         UnitEffectsComp = GetComponent<UnitEffects>();

@@ -51,7 +51,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Energy.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
-                ComponentType.ReadOnly<Unit_BaseDataSet>(),
+                ComponentType.ReadOnly<UnitDataSet>(),
                 ComponentType.ReadOnly<MouseState>(),
                 ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<IsVisible>(),
@@ -68,7 +68,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Energy.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
-                ComponentType.ReadOnly<Unit_BaseDataSet>(),
+                ComponentType.ReadOnly<UnitDataSet>(),
                 ComponentType.ReadOnly<MouseState>(),
                 ComponentType.ReadOnly<IsVisible>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
@@ -174,7 +174,7 @@ namespace LeyLineHybridECS
             bus.setVolume(volume);
         }
 
-        ActionButton FillButtonFields(ActionButton inButton, Unit_BaseDataSet inBaseData, long inUnitId, int inIndex, bool isSpawnAction, bool hasBasicAction)
+        ActionButton FillButtonFields(ActionButton inButton, UnitDataSet inBaseData, long inUnitId, int inIndex, bool isSpawnAction, bool hasBasicAction)
         {
             if (isSpawnAction)
             {
@@ -318,7 +318,7 @@ namespace LeyLineHybridECS
                 Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
                 {
                     //var energy = EntityManager.GetComponentData<Energy.Component>(e);
-                    var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+                    var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
 
                     if (stats.SelectUnitButtonInstance)
                     {
@@ -770,7 +770,7 @@ namespace LeyLineHybridECS
                 var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
                 var animatedPortraits = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClips;
                 var factionColor = faction.TeamColor;
-                var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+                var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
                 int actionCount = stats.Actions.Count;
                 int spawnActionCount = stats.SpawnActions.Count;
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
@@ -1098,7 +1098,7 @@ namespace LeyLineHybridECS
                 var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
                 var animatedPortraits = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClips;
                 var factionColor = faction.TeamColor;
-                var stats = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+                var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
                 int actionCount = stats.Actions.Count;
                 int spawnActionCount = stats.SpawnActions.Count;
                 //var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
@@ -1955,7 +1955,7 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void InitializeUnitUI(UnitHeadUIReferences headUIRef, Unit_BaseDataSet stats, long unitId, uint unitFaction, uint playerFaction)
+        public void InitializeUnitUI(UnitHeadUIReferences headUIRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction)
         {
             //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
 
@@ -2063,7 +2063,7 @@ namespace LeyLineHybridECS
             headUIRef.UnitHeadUIInstance = Object.Instantiate(headUIRef.UnitHeadUIPrefab, headUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
         }
 
-        void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences unitHeadUIRef, Unit_BaseDataSet stats, long unitID, uint unitFaction, uint playerFaction)
+        void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences unitHeadUIRef, UnitDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
             unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction = true;
 

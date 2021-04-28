@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 9035240112684858099}
   - component: {fileID: 664739988800558804}
   - component: {fileID: 2870570389383036669}
+  - component: {fileID: 7132598970197836852}
   m_Layer: 10
   m_Name: Branchling
   m_TagString: Untagged
@@ -244,6 +245,7 @@ MonoBehaviour:
   Actions:
   - {fileID: 11400000, guid: ac1a9e6ff048d0948b518d68773e5b5a, type: 2}
   - {fileID: 11400000, guid: 8a49655ef92d2a7478784a99278c62c2, type: 2}
+  - {fileID: 11400000, guid: f272e1de475b3414d84db91544d69681, type: 2}
   SpawnActions: []
 --- !u!114 &2507533135946710543
 MonoBehaviour:
@@ -360,6 +362,32 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0, y: 1, z: 0}
+--- !u!114 &7132598970197836852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1695995152696693040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 161306eb2cf0b0d4ab71d005af3baf2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MoveActionPrioList:
+  - {x: 0, y: 100}
+  AttackActionPrioList:
+  - {x: 1, y: 100}
+  UtitlityActionPrioList:
+  - {x: 2, y: 100}
+  AIUnitStateEnum: 2
+  ActionTypeWeightsList:
+  - {x: 0, y: 0, z: 0}
+  - {x: 20, y: 70, z: 10}
+  - {x: 20, y: 70, z: 10}
+  - {x: 10, y: 70, z: 20}
+  - {x: 20, y: 10, z: 70}
+  - {x: 100, y: 0, z: 0}
 --- !u!54 &8343892590056388524
 Rigidbody:
   m_ObjectHideFlags: 0

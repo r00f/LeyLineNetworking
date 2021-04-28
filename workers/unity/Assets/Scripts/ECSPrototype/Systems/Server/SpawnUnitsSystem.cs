@@ -133,7 +133,7 @@ namespace LeyLineHybridECS
                 if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                 {
                     //Debug.Log("CreateEntityRequest");
-                    var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<Unit_BaseDataSet>();
+                    var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<UnitDataSet>();
                     var entity = LeyLineEntityTemplates.Unit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
@@ -149,8 +149,10 @@ namespace LeyLineHybridECS
 
                 if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                 {
-                    var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<Unit_BaseDataSet>();
-                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation, isManalithUnit);
+                    var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName);
+                    var Stats = unitGO.GetComponent<UnitDataSet>();
+                    var AIStats = unitGO.GetComponent<AIUnitDataSet>();
+                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, AIStats, startRotation, isManalithUnit);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }

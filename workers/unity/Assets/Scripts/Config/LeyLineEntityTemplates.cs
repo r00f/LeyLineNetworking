@@ -273,7 +273,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats, uint startRotation)
+    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
@@ -391,7 +391,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, Unit_BaseDataSet Stats, uint startRotation, bool isManalithUnit = false)
+    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, bool isManalithUnit = false)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
@@ -493,7 +493,38 @@ public static class LeyLineEntityTemplates {
         }
         else
         {
-            var aiUnit = new AiUnit.Snapshot();
+
+            var aiUnit = new AiUnit.Snapshot
+            {
+                ActionTypeWeightsList = new List<Vector3f>(),
+                MoveActionsPrioList = new List<Vector2int>(),
+                AttackActionsPrioList = new List<Vector2int>(),
+                UtilityActionsPrioList = new List<Vector2int>(),
+                CulledMoveActionsPrioList = new List<Vector2int>(),
+                CulledAttackActionsPrioList = new List<Vector2int>(),
+                CulledUtilityActionsPrioList = new List<Vector2int>()
+
+            };
+
+            foreach(Vector3 v3 in aiUnitData.ActionTypeWeightsList)
+            {
+                aiUnit.ActionTypeWeightsList.Add(new Vector3f(v3.x, v3.y, v3.z));
+            }
+
+            foreach(Vector2 v2 in aiUnitData.MoveActionPrioList)
+            {
+                aiUnit.MoveActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
+            }
+            foreach (Vector2 v2 in aiUnitData.AttackActionPrioList)
+            {
+                aiUnit.AttackActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
+            }
+            foreach (Vector2 v2 in aiUnitData.UtitlityActionPrioList)
+            {
+                aiUnit.UtilityActionsPrioList.Add(new Vector2int((int)v2.x, (int) v2.y));
+            }
+
+
 
             var health = new Health.Snapshot
             {
@@ -526,7 +557,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    static Actions.Snapshot SetActions (Unit_BaseDataSet inStats){
+    static Actions.Snapshot SetActions (UnitDataSet inStats){
 
         Action myNullableAction = new Action();
         myNullableAction.Index = -3;

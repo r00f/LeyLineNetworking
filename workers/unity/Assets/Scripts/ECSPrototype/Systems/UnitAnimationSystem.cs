@@ -53,7 +53,7 @@ public class UnitAnimationSystem : ComponentSystem
         ComponentType.ReadOnly<Energy.Component>(),
         ComponentType.ReadOnly<Position.Component>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<Unit_BaseDataSet>(),
+        ComponentType.ReadOnly<UnitDataSet>(),
         ComponentType.ReadOnly<UnitEffects>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
         ComponentType.ReadWrite<Transform>(),
@@ -187,7 +187,7 @@ public class UnitAnimationSystem : ComponentSystem
             {
                 if (!animatorComponent.CurrentLockedAction)
                 {
-                    Unit_BaseDataSet basedata = EntityManager.GetComponentObject<Unit_BaseDataSet>(e);
+                    UnitDataSet basedata = EntityManager.GetComponentObject<UnitDataSet>(e);
 
                     if (actions.LockedAction.Index >= 0)
                     {
