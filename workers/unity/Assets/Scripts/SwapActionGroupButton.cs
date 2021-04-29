@@ -21,6 +21,10 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
     GameObject NormalActions;
     [SerializeField]
     public Button Button;
+    [SerializeField]
+    Image ButtonBgImage;
+    [SerializeField]
+    Image ButtonHoveredGlow;
 
     [Header("Sprites")]
     public Sprite ActionsIconSprite;
@@ -36,13 +40,19 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
 
     private void Update()
     {
+
         if (!Hovered)
         {
-            GlowImage.enabled = false;
+            ButtonHoveredGlow.enabled = false;
+
+            //GlowImage.enabled = false;
         }
         else
         {
-            GlowImage.enabled = true;
+            ButtonHoveredGlow.enabled = true;
+
+            //GlowImage.enabled = true;
+
         }
     }
 
@@ -61,6 +71,7 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
             SpawnActions.SetActive(true);
             IconImage.sprite = ActionsIconSprite;
             GlowImage.sprite = ActionsGlowSprite;
+            GlowImage.enabled = true;
             ButtonInverted = true;
         }
         else
@@ -69,6 +80,7 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
             SpawnActions.SetActive(false);
             IconImage.sprite = SpawnIconSprite;
             GlowImage.sprite = SpawnGlowSprite;
+            GlowImage.enabled = false;
             ButtonInverted = false;
         }
     }
@@ -76,12 +88,13 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
     public void OnPointerEnter(PointerEventData eventData)
     {
         Hovered = true;
+
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         Hovered = false;
-    }
 
+    }
 
 }
