@@ -84,7 +84,7 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
-                        Debug.Log("WaitingForPlayers");
+                        //Debug.Log("WaitingForPlayers");
                         #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1)
@@ -140,7 +140,7 @@ namespace LeyLineHybridECS
                         }
                         if (AllPlayersReady(gameStateWorldIndex.Value))
                         {
-                            Debug.Log("AllPlayersReady");
+                            //Debug.Log("AllPlayersReady");
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             gameState.CurrentState = GameStateEnum.interrupt;
                         }

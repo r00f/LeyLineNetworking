@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Unity.Mathematics;
 using Improbable;
@@ -8,6 +8,8 @@ public struct HighlightingDataComponent : IComponentData
 {
     public uint Range;
     public uint RingRadius;
+    public uint ConeRadius;
+    public uint ConeExtent;
     public uint AoERadius;
     public byte LineAoE;
     public byte PathingRange;

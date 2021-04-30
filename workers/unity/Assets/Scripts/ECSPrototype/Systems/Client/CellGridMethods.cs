@@ -79,22 +79,64 @@ public static class CellGridMethods
     {
         var ring = new List<Vector3f>();
         var cubeScale = CubeScale(DirectionsArray[4], radius);
-        //Debug.Log("OriginCoord = " + origin.X + ", " + origin.Y + ", " + origin.Z);
-        //Debug.Log("CubeScale = " + cubeScale.X + ", " + cubeScale.Y + ", " + cubeScale.Z);
-        var coord = new Vector3f(origin.X + cubeScale.X, origin.Y + cubeScale.Y, origin.Z + cubeScale.Z);
+        var coord = CubeAdd(origin, cubeScale);
 
         for (int i = 0; i < 6; i++)
         {
             for (int j = 0; j < radius; j++)
             {
-                //Debug.Log("RingCoord = " + coord.X + coord.Y + coord.Z);
                 ring.Add(coord);
                 coord = CubeNeighbour(coord, (uint)i);
             }
         }
 
-        //Debug.Log("RingCount = " + ring.Count);
         return ring;
+    }
+
+    public static Vector3f RotateRight(Vector3f origin)
+    {
+        return new Vector3f(-origin.Z, -origin.X, -origin.Y);
+    }
+
+    public static Vector3f RotateLeft(Vector3f origin)
+    {
+        return new Vector3f(-origin.Y, -origin.Z, -origin.X);
+    }
+
+    public static List<Vector3f> ConeDraw(Vector3f center, Vector3f target, uint radius, uint extent)
+    {
+
+        var cone = new List<Vector3f>();
+        var coord = target;
+        var halfExtent = (extent - 1) / 2;
+
+        for (int i = 0; i <= halfExtent; i++)
+        {
+            cone.Add(coord);
+            var direction = CoordinateDirection(center, coord);
+            var rotatedDirection = RotateRight(direction);
+            var rotatedCoord = CubeAdd(rotatedDirection, center);
+            coord = rotatedCoord;
+        }
+
+        coord = target;
+
+        for (int i = 0; i <= halfExtent; i++)
+        {
+            if(i != 0)
+                cone.Add(coord);
+            var direction = CoordinateDirection(center, coord);
+            var rotatedDirectionL = RotateLeft(direction);
+            var rotatedCoordL = CubeAdd(rotatedDirectionL, center);
+            coord = rotatedCoordL;
+        }
+
+        return cone;
+    }
+
+    public static Vector3f CubeAdd(Vector3f a, Vector3f b)
+    {
+        return new Vector3f(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
     }
 
     public static int GetDistance(Vector3f originCubeCoordinate, Vector3f otherCubeCoordinate)

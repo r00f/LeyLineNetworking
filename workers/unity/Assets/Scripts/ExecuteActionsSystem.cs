@@ -65,7 +65,7 @@ public class ExecuteActionsSystem : ComponentSystem
 
         if (!gameState.AttackDamageDealt && gameState.DamageDict.Count != 0)
         { 
-            m_ResourceSystem.DealDamage(gameState.DamageDict, (ExecuteStepEnum)(int)gameState.CurrentState - 1);
+            m_ResourceSystem.DealDamage(gameState.DamageDict, (ExecuteStepEnum)(int)gameState.CurrentState - 2);
             gameState.DamageDict.Clear();
             gameState.AttackDamageDealt = true;
         }
@@ -189,7 +189,6 @@ public class ExecuteActionsSystem : ComponentSystem
                     m_TimerSystem.AddTimedEffect(action.Targets[0].TargetId, action.Effects[0]);
                     break;
                 case EffectTypeEnum.spawn_unit:
-                    //SetUnitSpawn(action.Effects[j].SpawnUnitNested.UnitName, faction, action.Targets[0].TargetCoordinate);
                     m_SpawnSystem.SpawnUnit(worldIndex, action.Effects[j].SpawnUnitNested.UnitName, faction.Faction, action.Targets[0].TargetCoordinate, owningWorker.WorkerId);
                     break;
                 case EffectTypeEnum.move_along_path:

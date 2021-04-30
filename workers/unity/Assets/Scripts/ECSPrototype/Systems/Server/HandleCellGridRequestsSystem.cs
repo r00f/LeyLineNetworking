@@ -119,7 +119,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                             {
                                 //Set target instantly
                                 self = true;
-                                unitActions.LockedAction = SetLockedAction(unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitEntityId.EntityId.Id, unitFaction.Faction, unitCellsToMark);
+                                unitActions.LockedAction = SetLockedAction(unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate,  unitFaction.Faction, unitCellsToMark, unitEntityId.EntityId.Id);
                                 unitActions.CurrentSelected = unitActions.NullAction;
                             }
                         }
@@ -141,10 +141,8 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                         }
                                     }
                                     unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-                                    //playerState.CachedPaths = unitCellsToMark.CachedPaths;
                                     break;
                                 case UseHighlighterEnum.no_pathing:
-                                    //playerState.CachedPaths.Clear();
                                     break;
                             }
                         }
@@ -194,61 +192,13 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cCoord.CubeCoordinate))
                                     {
                                         bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, cell.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths, cellAtts.CellAttributes.Cell);
-                                        //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(cell.CubeCoordinate));
-                                        Debug.Log(valid);
 
                                         if (valid)
                                         {
-                                            requestingUnitActions.LockedAction = requestingUnitActions.CurrentSelected;
-                                            var locked = requestingUnitActions.LockedAction;
-                                            var t = requestingUnitActions.LockedAction.Targets[0];
-                                            t.TargetCoordinate = cell.CubeCoordinate;
-                                            //t.TargetId = id;
-                                            requestingUnitActions.LockedAction.Targets[0] = t;
-
-                                            for (int mi = 0; mi < requestingUnitActions.LockedAction.Targets[0].Mods.Count; mi++)
-                                            {
-                                                var modType = requestingUnitActions.LockedAction.Targets[0].Mods[mi].ModType;
-                                                var mod = requestingUnitActions.LockedAction.Targets[0].Mods[0];
-                                                switch (modType)
-                                                {
-                                                    case ModTypeEnum.aoe:
-                                                        foreach (Vector3f v in CellGridMethods.CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius))
-                                                        {
-                                                            //if(m_PathFindingSystem.ValidateUnitTarget(v)
-                                                            //this adds all coords whitout validating targets and needs some kind of validation method
-                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
-                                                        }
-                                                        break;
-                                                    case ModTypeEnum.path:
-                                                        foreach (CellAttribute c in m_PathFindingSystem.FindPath(cell, requestingUnitCellsToMark.CachedPaths).CellAttributes)
-                                                        {
-                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
-                                                        }
-                                                        mod.PathNested.OriginCoordinate = requestingUnitCoord.CubeCoordinate;
-                                                        requestingUnitActions.LockedAction.Targets[0].Mods[0] = mod;
-                                                        locked.CombinedCost = CalculateCombinedCost(t);
-                                                        break;
-                                                    case ModTypeEnum.line:
-                                                        foreach (Vector3f v in CellGridMethods.LineDraw(new List<Vector3f>(), requestingUnitCoord.CubeCoordinate, t.TargetCoordinate))
-                                                        {
-                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
-                                                        }
-                                                        break;
-                                                    case ModTypeEnum.ring:
-                                                        foreach (Vector3f v in CellGridMethods.RingDraw(t.TargetCoordinate, mod.RingNested.Radius))
-                                                        {
-                                                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
-                                                        }
-                                                        break;
-                                                }
-                                            }
-                                            requestingUnitActions.LockedAction = locked;
-                                            m_ResourceSystem.SubstactEnergy(requestingUnitFaction.Faction, locked.CombinedCost);
+                                            requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, cell.CubeCoordinate, requestingUnitFaction.Faction, requestingUnitCellsToMark);
                                         }
                                         else
                                         {
-                                            //if target is invalid raise event on reqUnitActions
                                             requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
                                         }
                                     }
@@ -260,11 +210,10 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                     if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
                                     {
                                         bool valid = m_PathFindingSystem.ValidateTarget(requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
-                                        //Debug.Log("SERVERSIDE VALID: " + valid + "; " + requestingUnitCellsToMark.CachedPaths.Count + "; " + Vector3fext.ToUnityVector(requestingUnitCoord.CubeCoordinate) + "; " + Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate));
 
                                         if (valid)
                                         {
-                                            requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, targetUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark);
+                                            requestingUnitActions.LockedAction = SetLockedAction(requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetUnitCoord.CubeCoordinate, requestingUnitFaction.Faction, requestingUnitCellsToMark, targetUnitId.EntityId.Id);
                                         }
                                         else
                                         {
@@ -275,7 +224,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                                 break;
                         }
 
-                        //Debug.Log("ClearCurrentSelectedAction from HandleCellGridReqSys");
                         requestingUnitActions.CurrentSelected = requestingUnitActions.NullAction;
                         unitActions = requestingUnitActions;
                     }
@@ -303,11 +251,11 @@ public class HandleCellGridRequestsSystem : ComponentSystem
         return combinedCost;
     }
 
-    public Action SetLockedAction(Action selectedAction, Vector3f originCoord, Vector3f unitCoord, long unitId, uint faction, CellsToMark.Component cellsToMark)
+    public Action SetLockedAction(Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction, CellsToMark.Component cellsToMark, long unitId = 0)
     {
         Action locked = selectedAction;
         var t = locked.Targets[0];
-        t.TargetCoordinate = unitCoord;
+        t.TargetCoordinate = targetCoord;
         t.TargetId = unitId;
         locked.Targets[0] = t;
 
@@ -324,7 +272,7 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     }
                     break;
                 case ModTypeEnum.path:
-                    foreach (CellAttribute c in m_PathFindingSystem.FindPath(unitCoord, cellsToMark.CachedPaths).CellAttributes)
+                    foreach (CellAttribute c in m_PathFindingSystem.FindPath(targetCoord, cellsToMark.CachedPaths).CellAttributes)
                     {
                         mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
                     }
@@ -341,6 +289,12 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                     break;
                 case ModTypeEnum.ring:
                     foreach (Vector3f v in CellGridMethods.RingDraw(t.TargetCoordinate, mod.RingNested.Radius))
+                    {
+                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
+                    }
+                    break;
+                case ModTypeEnum.cone:
+                    foreach (Vector3f v in CellGridMethods.ConeDraw(originCoord, t.TargetCoordinate, mod.ConeNested.Radius, mod.ConeNested.Extent))
                     {
                         mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
                     }

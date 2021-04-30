@@ -235,6 +235,10 @@ public class HighlightingSystem : ComponentSystem
         {
             playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(CellGridMethods.LineDraw(new List<Vector3f>(), playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate), (int) inAction.ActionExecuteStep, (int) inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
         }
+        else if(inHinghlightningData.ConeExtent != 0)
+        {
+            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(CellGridMethods.ConeDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inHinghlightningData.ConeRadius, inHinghlightningData.ConeExtent), (int) inAction.ActionExecuteStep, (int) inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
+        }
         else
         {
             CubeCoordinateList cubeCoordList = new CubeCoordinateList(new List<Vector3f>(), (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
@@ -480,9 +484,6 @@ public class HighlightingSystem : ComponentSystem
                             //use Arc Line
                             if (playerHighlightingData.HoveredPosition != Vector3.zero)
                             {
-                                //playerHighlightingData.tur
-                                //Debug.Log("UpdateArcLineRenderer");
-                                
                                 UpdateArcLineRenderer(playerHighlightingData.LineYOffset, playerHighlightingData.HoveredPosition, lineRendererComp, (int)actions.CurrentSelected.ActionExecuteStep);
                             }
                             else
@@ -515,6 +516,8 @@ public class HighlightingSystem : ComponentSystem
         highLightingData.PathLine = 0;
         highLightingData.AoERadius = 0;
         highLightingData.RingRadius = 0;
+        highLightingData.ConeExtent = 0;
+        highLightingData.ConeRadius = 0;
 
         foreach (ECSActionSecondaryTargets t in inMods)
         {
@@ -535,6 +538,12 @@ public class HighlightingSystem : ComponentSystem
             {
                 SecondaryRing secRing = t as SecondaryRing;
                 highLightingData.RingRadius = secRing.radius;
+            }
+            else if (t is SecondaryCone)
+            {
+                SecondaryCone secCone = t as SecondaryCone;
+                highLightingData.ConeRadius = secCone.radius;
+                highLightingData.ConeExtent = secCone.extent;
             }
         }
     }

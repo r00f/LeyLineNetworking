@@ -206,7 +206,7 @@ public class SendActionRequestSystem : ComponentSystem
 
     public void SelectActionCommand(int actionIndex, long entityId)
     {
-        Debug.Log("SelectActionCommand with index: " + actionIndex + " from entity with id: " + entityId);
+        //Debug.Log("SelectActionCommand with index: " + actionIndex + " from entity with id: " + entityId);
         bool isSelfTarget = false;
 
         var playerPathings = m_PlayerData.ToComponentDataArray<PlayerPathing.Component>(Allocator.TempJob);
@@ -235,7 +235,7 @@ public class SendActionRequestSystem : ComponentSystem
         {
             if (idComponent.EntityId.Id == entityId)
             {
-                Debug.Log("SendSelectActionRequest");
+                //Debug.Log("SendSelectActionRequest");
                 var request = new Actions.SelectActionCommand.Request
                 (
                     idComponent.EntityId,

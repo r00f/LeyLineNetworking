@@ -664,6 +664,16 @@ public static class LeyLineEntityTemplates {
                         mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);
                     }
+                    if (t is SecondaryCone)
+                    {
+                        SecondaryCone go1 = t as SecondaryCone;
+                        TargetMod mod = new TargetMod();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
+                        mod.ModType = ModTypeEnum.cone;
+                        mod.ConeNested.Radius = go1.radius;
+                        mod.ConeNested.Extent = go1.extent;
+                        newAT.Mods.Add(mod);
+                    }
                 }
             }
             if (inAction.Targets[i] is ECSATarget_Unit)
@@ -741,6 +751,16 @@ public static class LeyLineEntityTemplates {
                         mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
                         mod.ModType = ModTypeEnum.ring;
                         mod.RingNested.Radius = go1.radius;
+                        newAT.Mods.Add(mod);
+                    }
+                    if (t is SecondaryCone)
+                    {
+                        SecondaryCone go1 = t as SecondaryCone;
+                        TargetMod mod = new TargetMod();
+                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
+                        mod.ModType = ModTypeEnum.cone;
+                        mod.ConeNested.Radius = go1.radius;
+                        mod.ConeNested.Extent = go1.extent;
                         newAT.Mods.Add(mod);
                     }
                 }

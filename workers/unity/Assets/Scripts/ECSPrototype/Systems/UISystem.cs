@@ -1596,7 +1596,7 @@ namespace LeyLineHybridECS
                 //Instantly reset all the Values from cleanup
                 if (combinedAmount > 0)
                 {
-                    Debug.Log("CombinedAmount greater than 0 in cleanupEvent");
+                    //Debug.Log("CombinedAmount greater than 0 in cleanupEvent");
                     unitGroupUI.EnergyChangeText.text = "+" + combinedAmount;
                     unitGroupUI.EnergyFill.fillAmount = 0;
                     unitGroupUI.EnergyGainFill.fillAmount = 1;

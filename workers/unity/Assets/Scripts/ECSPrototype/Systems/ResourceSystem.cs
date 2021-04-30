@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
@@ -268,7 +268,6 @@ public class ResourceSystem : ComponentSystem
 
     public void DealDamage(Dictionary<long, uint> damageDict, ExecuteStepEnum executeStep)
     {
-        //Debug.Log("DealDamageCall");
         Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
         {
             if (damageDict.ContainsKey(id.EntityId.Id))
@@ -293,12 +292,12 @@ public class ResourceSystem : ComponentSystem
     }
 
 
-    public void Die(long unitID, ExecuteStepEnum executeStep)
+    public void Die(long unitID, ExecuteStepEnum killingExecuteStep)
     {
         Entities.With(m_UnitData).ForEach((ref Actions.Component actions, ref SpatialEntityId id) =>
         {
-            //clear dying unit actions if its lockedAction is in an earlier step then the killing action;
-            if (unitID == id.EntityId.Id && executeStep < actions.LockedAction.ActionExecuteStep)
+            //clear dying unit actions if its lockedAction is in an later step then the killing action;
+            if (unitID == id.EntityId.Id && actions.LockedAction.ActionExecuteStep > killingExecuteStep)
             {
                 actions = m_CleanupSystem.ClearLockedActions(actions);
             }

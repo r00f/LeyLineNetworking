@@ -271,7 +271,7 @@ public class AISystem : ComponentSystem
 
             if(considerTypes[0] && considerTypes[1])
             {
-                Debug.Log("ConsiderMoveAttack");
+                //Debug.Log("ConsiderMoveAttack");
                 //if the roll is 0-x / x-y 
                 if (r >= 0 && r <= ActionTypeProbabilities.x)
                 {
@@ -284,7 +284,7 @@ public class AISystem : ComponentSystem
             }
             else if(considerTypes[0] && considerTypes[2])
             {
-                Debug.Log("ConsiderMoveUtility");
+                //Debug.Log("ConsiderMoveUtility");
                 //if the roll is 0-x / x-y 
                 if (r >= 0 && r <= ActionTypeProbabilities.x)
                 {
@@ -297,7 +297,7 @@ public class AISystem : ComponentSystem
             }
             else if(considerTypes[1] && considerTypes[2])
             {
-                Debug.Log("ConsiderAttackUtility");
+                //Debug.Log("ConsiderAttackUtility");
                 //if the roll is 0-x / x-y 
                 if (r >= 0 && r <= ActionTypeProbabilities.y)
                 {
@@ -337,7 +337,7 @@ public class AISystem : ComponentSystem
         switch(aiUnit.ChosenActionType)
         {
             case ActionTypeEnum.move:
-                Debug.Log("SetMoveAction");
+                //Debug.Log("SetMoveAction");
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledMoveActionsPrioList, actions);
                 unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint) actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex);
                 unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius((uint) actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
@@ -350,7 +350,7 @@ public class AISystem : ComponentSystem
                 break;
 
             case ActionTypeEnum.attack:
-                Debug.Log("SetAttackAction");
+                //Debug.Log("SetAttackAction");
 
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledAttackActionsPrioList, actions);
 
@@ -390,7 +390,7 @@ public class AISystem : ComponentSystem
 
             case ActionTypeEnum.utility:
 
-                Debug.Log("SetUtilityAction");
+                //Debug.Log("SetUtilityAction");
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledUtilityActionsPrioList, actions);
                 var utilityRequest = new Actions.SetTargetCommand.Request
                 (

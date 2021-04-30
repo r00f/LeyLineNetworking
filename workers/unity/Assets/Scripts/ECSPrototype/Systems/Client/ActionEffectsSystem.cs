@@ -326,7 +326,7 @@ public class ActionEffectsSystem : ComponentSystem
     public void TriggerActionEffect(Vision.Component playerVision, Action inAction, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
     {
 
-        Debug.Log("TriggerActionEffect");
+        //Debug.Log("TriggerActionEffect");
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
         HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { inAction.Targets[0].TargetCoordinate };
 

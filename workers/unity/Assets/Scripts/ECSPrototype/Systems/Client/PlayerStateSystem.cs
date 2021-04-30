@@ -111,9 +111,9 @@ namespace LeyLineHybridECS
                                         playerHigh.CancelTime -= Time.DeltaTime;
                                     else
                                     {
-                                        Debug.Log("SetPlayerReady");
+                                        //Debug.Log("SetPlayerReady");
                                         playerState.CurrentState = PlayerStateEnum.ready;
-                                        Debug.Log((int) playerState.CurrentState);
+                                        //Debug.Log((int) playerState.CurrentState);
                                     }
                                 }
                                 else

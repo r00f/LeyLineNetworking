@@ -60,11 +60,17 @@ type TargetMod {
 	
 		uint32 radius = 1;
 	}
+    type Cone {
+	
+		uint32 radius = 1;
+        uint32 extent = 2;
+	}
 	list<CoordinatePositionPair> coordinate_position_pairs = 1;
 	AoE aoe_nested = 2;
 	Path path_nested = 3;
 	Ring ring_nested = 4;
-	ModTypeEnum mod_type = 5;
+    Cone cone_nested = 5;
+	ModTypeEnum mod_type = 6;
 }
 
 type CoordinatePositionPair {
@@ -102,6 +108,7 @@ aoe = 0;
 path = 1;
 line = 2;
 ring = 3;
+cone = 4;
 }
 
 enum UseHighlighterEnum {
