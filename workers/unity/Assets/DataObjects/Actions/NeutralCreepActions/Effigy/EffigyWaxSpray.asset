@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
   m_Name: EffigyWaxSpray
   m_EditorClassIdentifier: 
-  ActionExecuteStep: 3
+  ActionExecuteStep: 1
   ActionIcon: {fileID: -1843667923929619090, guid: 1709c699aeed51545927cddf655f0b28,
     type: 3}
   ProjectileFab: {fileID: 93931158904744250, guid: 4912da989b47fc7469544c903c51ecc3,
@@ -57,7 +57,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
   targettingRange: 2
-  energyCost: 0
+  energyCost: 15
   ModToAdd: {fileID: 0}
   SecondaryTargets:
   - {fileID: 114105971380555592}
@@ -81,7 +81,7 @@ MonoBehaviour:
   ApplyToTargets: 2
   specificTargetIdentifier: 0
   TurnDuration: 0
-  ApplyToRestrictions: 4
+  ApplyToRestrictions: 3
   DamageAmount: 30
   ExplosionRadius: 4
   ExplosionForce: 600

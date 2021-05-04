@@ -42,8 +42,8 @@ MonoBehaviour:
   ApplyToTargets: 2
   specificTargetIdentifier: 0
   TurnDuration: 0
-  ApplyToRestrictions: 4
-  DamageAmount: 55
+  ApplyToRestrictions: 3
+  DamageAmount: 60
   ExplosionRadius: 3
   ExplosionForce: 500
   UpForce: 5
@@ -76,7 +76,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
   targettingRange: 4
-  energyCost: 0
+  energyCost: 15
   ModToAdd: {fileID: 0}
   SecondaryTargets:
   - {fileID: 114489467121559340}
