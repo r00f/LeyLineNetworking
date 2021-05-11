@@ -14,6 +14,9 @@ using System.Linq;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
 public class ActionEffectsSystem : ComponentSystem
 {
+
+    ILogDispatcher logger;
+
     Settings settings;
     UISystem m_UISystem;
     PathFindingSystem m_PathFindingSystem;
@@ -65,6 +68,7 @@ public class ActionEffectsSystem : ComponentSystem
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
         GarbageCollection = Object.FindObjectOfType<GarbageCollectorComponent>().gameObject;
 
@@ -323,53 +327,69 @@ public class ActionEffectsSystem : ComponentSystem
 
     }
 
-    public void TriggerActionEffect(Vision.Component playerVision, Action inAction, long unitID, Transform hitTransform, int spawnShieldOrbits = 0)
+    public void TriggerActionEffect(uint usingUnitFaction, Vision.Component playerVision, Action usingUnitAction, long usingUnitID, Transform hitTransform, GameState.Component gameState, int spawnShieldOrbits = 0)
     {
-
         //Debug.Log("TriggerActionEffect");
         //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
-        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { inAction.Targets[0].TargetCoordinate };
+        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { usingUnitAction.Targets[0].TargetCoordinate };
 
-        if (inAction.Targets[0].Mods.Count != 0)
+        if (usingUnitAction.Targets[0].Mods.Count != 0)
         {
-            foreach (CoordinatePositionPair p in inAction.Targets[0].Mods[0].CoordinatePositionPairs)
+            foreach (CoordinatePositionPair p in usingUnitAction.Targets[0].Mods[0].CoordinatePositionPairs)
             {
                 coordsToTrigger.Add(p.CubeCoordinate);
             }
         }
 
-        Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences componentReferences, ref FactionComponent.Component faction, ref CubeCoordinate.Component cubeCoord) =>
+        //ALL POSSIBLE TARGET UNITS
+        Entities.With(m_UnitData).ForEach((Entity targetEntity, UnitEffects targetUnitEffects, ref CubeCoordinate.Component targetCubeCoord) =>
         {
-            if ((int)inAction.ActionExecuteStep < 2)
-                AddGetHitEffect(e, inAction, componentReferences.UnitEffectsComp.OriginCoordinate, playerVision, cubeCoord, coordsToTrigger, componentReferences, spawnShieldOrbits, unitID, hitTransform, faction);
+            if ((int)usingUnitAction.ActionExecuteStep < 2)
+                AddGetHitEffect(targetEntity, targetUnitEffects.OriginCoordinate, coordsToTrigger, targetUnitEffects, playerVision, spawnShieldOrbits, usingUnitID, hitTransform, usingUnitFaction, usingUnitAction, gameState);
             else
-                AddGetHitEffect(e, inAction, componentReferences.UnitEffectsComp.DestinationCoordinate, playerVision, cubeCoord, coordsToTrigger, componentReferences, spawnShieldOrbits, unitID, hitTransform, faction);
+                AddGetHitEffect(targetEntity, targetUnitEffects.DestinationCoordinate, coordsToTrigger, targetUnitEffects, playerVision, spawnShieldOrbits, usingUnitID, hitTransform, usingUnitFaction, usingUnitAction, gameState);
         });
     }
 
-    public void AddGetHitEffect(Entity e, Action inAction, Vector3f coordToCompare, Vision.Component playerVision, CubeCoordinate.Component cubeCoord, HashSet<Vector3f> coordsToTrigger, UnitComponentReferences componentReferences, int spawnShieldOrbits, long unitID, Transform hitTransform, FactionComponent.Component faction)
+    public void AddGetHitEffect(Entity targetEntity,  Vector3f targetUnitCoordinate, HashSet<Vector3f> targetCoordinates, UnitEffects targetUnitEffects, Vision.Component playerVision, int spawnShieldOrbits, long usingUnitID, Transform usingUnitHitTransform, uint usingUnitfaction, Action usingUnitAction, GameState.Component gameState)
     {
-        if (playerVision.CellsInVisionrange.ContainsKey(cubeCoord.CubeCoordinate))
+        /*
+        logger.HandleLog(LogType.Warning,
+        new LogEvent("AddGetHitEffect")
+        .WithField("InAction", usingUnitAction));
+        logger.HandleLog(LogType.Warning,
+        new LogEvent("AddGetHitEffect")
+        .WithField("hitTransform", usingUnitHitTransform));
+        */
+
+        if (playerVision.CellsInVisionrange.ContainsKey(targetUnitCoordinate))
         {
             //only apply effect if target unit is valid or pass correct coordinates
-            if (coordsToTrigger.Contains(coordToCompare) && m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum) (int) inAction.Effects[0].ApplyToRestrictions, unitID, faction.Faction))
+            if (targetCoordinates.Contains(targetUnitCoordinate) && m_PathFindingSystem.ValidateUnitTarget(targetEntity, (UnitRequisitesEnum) (int) usingUnitAction.Effects[0].ApplyToRestrictions, usingUnitID, usingUnitfaction))
             {
-                if (componentReferences.UnitEffectsComp.AxaShield && spawnShieldOrbits != 0)
+                Vector3 getHitPosition;
+
+                if (usingUnitHitTransform)
+                    getHitPosition = usingUnitHitTransform.position;
+                else
+                    getHitPosition = CellGridMethods.CubeToPos(targetUnitCoordinate, gameState.MapCenter);
+
+                if (targetUnitEffects.AxaShield && spawnShieldOrbits != 0)
                 {
                     //if we need to spawn shieldorbits spaWN SHIELDorbits
                     for (int i = 0; i < spawnShieldOrbits; i++)
                     {
-                        AxaShieldOrbit go = Object.Instantiate(componentReferences.UnitEffectsComp.AxaShield.OrbitPrefab, componentReferences.UnitEffectsComp.AxaShield.transform.position, Quaternion.LookRotation(hitTransform.position - componentReferences.UnitEffectsComp.AxaShield.transform.position), componentReferences.UnitEffectsComp.AxaShield.transform);
+                        AxaShieldOrbit go = Object.Instantiate(targetUnitEffects.AxaShield.OrbitPrefab, targetUnitEffects.AxaShield.transform.position, Quaternion.LookRotation(getHitPosition - targetUnitEffects.AxaShield.transform.position), targetUnitEffects.AxaShield.transform);
                         go.GetComponent<MovementAnimComponent>().RotationAxis = new Vector3(Random.Range(0f, 1f), Random.Range(0f, 1f), 0f);
-                        componentReferences.UnitEffectsComp.AxaShield.Orbits.Add(go);
+                        targetUnitEffects.AxaShield.Orbits.Add(go);
                     }
                 }
-                componentReferences.UnitEffectsComp.GetHitEffects.Add(inAction, hitTransform.position);
+                targetUnitEffects.GetHitEffects.Add(usingUnitAction, getHitPosition);
             }
         }
     }
 
-    public void LaunchProjectile(Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
+    public void LaunchProjectile(uint usingUnitFaction, Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
     {
         bool AoEcontainsTarget = false;
 
@@ -389,7 +409,7 @@ public class ActionEffectsSystem : ComponentSystem
             projectile.UnitId = unitId;
             projectile.Action = inAction;
             projectile.SpawnTransform = spawnTransform;
-
+            projectile.UnitFaction = usingUnitFaction;
 
             //save targetPosition / targetYOffset on units?
             Vector3 offSetTarget = new Vector3(targetPos.x, targetPos.y + yOffset + projectile.TargetYOffset, targetPos.z);
@@ -405,7 +425,6 @@ public class ActionEffectsSystem : ComponentSystem
             {
                 s.maxDistance = distance.magnitude / projectileFab.SpringJoints.Count;
             }
-
 
             projectile.TravellingCurve = travellingPoints;
             projectile.IsTravelling = true;

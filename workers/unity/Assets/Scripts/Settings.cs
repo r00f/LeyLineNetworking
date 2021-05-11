@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -23,5 +23,6 @@ public class Settings : ScriptableObject
     [Header("GamePlaySettings")]
     public float MinimumExecuteTime;
     public float RopeTime;
+    public LayerMask MouseRayCastLayerMask;
     
 }

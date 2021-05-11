@@ -87,8 +87,8 @@ namespace LeyLineHybridECS
 
                     ComponentType.ReadWrite<MeshColor>(),
                     ComponentType.ReadWrite<ManalithClientData>(),
-                    ComponentType.ReadOnly<ManalithInitializer>(),
-                    ComponentType.ReadWrite<StudioEventEmitter>()
+                    ComponentType.ReadOnly<ManalithInitializer>()
+                    //ComponentType.ReadWrite<StudioEventEmitter>()
             );
 
             m_LineData = GetEntityQuery(
@@ -158,7 +158,7 @@ namespace LeyLineHybridECS
                         var ID = entityID[i].EntityId.Id;
                         var pos = manaLithPositions[i];
 
-                        Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData, StudioEventEmitter eventEmitter) =>
+                        Entities.With(m_CircleData).ForEach((Entity e, ManalithClientData clientData, MeshColor meshColor, ManalithInitializer initData/*, StudioEventEmitter eventEmitter*/) =>
                         {
                             var circlePos = meshColor.transform.position.sqrMagnitude;
 
@@ -305,6 +305,7 @@ namespace LeyLineHybridECS
 
 
                             }
+                            /*
                             //Transport data from manaLith into clientData.IconPrefabref
                             if (manalithFaction.Faction == playerFaction.Faction)
                             {
@@ -315,7 +316,7 @@ namespace LeyLineHybridECS
                             {
                                 eventEmitter.enabled = false;
                             }
-
+                            */
                             if (clientData.MiniMapTileInstance)
                                 clientData.MiniMapTileInstance.TileImage.color = meshColor.MapLerpColor;
                             if (clientData.BigMapTileInstance)

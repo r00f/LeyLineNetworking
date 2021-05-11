@@ -1,10 +1,11 @@
+
+#if (UNITY_EDITOR)
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor.Recorder;
 using System.IO;
 using UnityEditor.Recorder.Input;
-
 public class PortraitRenderer : MonoBehaviour
 {
 
@@ -71,7 +72,7 @@ public class PortraitRenderer : MonoBehaviour
         m_RecorderController.PrepareRecording();
         m_RecorderController.StartRecording();
         unitComponentReferences[index].AnimatorComp.Animator.Play("Idle", 0, 0);
-        StartCoroutine(WaitToNextUnitRender(5f, index , go));
+        StartCoroutine(WaitToNextUnitRender(5f, index, go));
     }
 
     IEnumerator WaitAndRenderManalithClip(int index, GameObject go, RecorderControllerSettings controllerSettings)
@@ -278,5 +279,5 @@ public class PortraitRenderer : MonoBehaviour
             }
         }
     }
-
 }
+#endif

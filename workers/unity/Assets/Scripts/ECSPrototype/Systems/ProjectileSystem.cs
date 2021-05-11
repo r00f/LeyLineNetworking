@@ -11,7 +11,7 @@ using Unity.Collections;
 //[DisableAutoCreation]
 public class ProjectileSystem : ComponentSystem
 {
-    private EntityQuery m_GameStateDate;
+    private EntityQuery m_GameStateData;
     private EntityQuery m_MoveAnimData;
     private EntityQuery m_ProjectileData;
     private EntityQuery m_UnitData;
@@ -52,9 +52,8 @@ public class ProjectileSystem : ComponentSystem
                     ComponentType.ReadWrite<AnimatorComponent>()
                 );
 
-                m_GameStateDate = Worlds.ClientWorld.CreateEntityQuery(
-                    ComponentType.ReadOnly<GameState.Component>(),
-                    ComponentType.ReadOnly<GameState.HasAuthority>()
+                m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
+                    ComponentType.ReadOnly<GameState.Component>()
                 );
 
                 m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
@@ -73,13 +72,15 @@ public class ProjectileSystem : ComponentSystem
     {
         if(WorldsInitialized())
         {
-
-            if (m_PlayerData.CalculateEntityCount() == 0)
+            if (m_PlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
                 return;
 
             var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
 
             var playerVision = playerVisionData[0];
+
+            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+
 
 
             Entities.With(m_ProjectileData).ForEach((Entity entity, Projectile projectile, Transform transform) =>
@@ -186,7 +187,7 @@ public class ProjectileSystem : ComponentSystem
 
                         if (!projectile.EffectTriggered)
                         {
-                            m_ActionEffectSystem.TriggerActionEffect(playerVision, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, projectile.AxaShieldOrbitCount);
+                            m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, playerVision, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameStates[0], projectile.AxaShieldOrbitCount);
 
                             if(projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
                             {
@@ -258,6 +259,8 @@ public class ProjectileSystem : ComponentSystem
                     }
                 }
             });
+
+            gameStates.Dispose();
             playerVisionData.Dispose();
         }
     }

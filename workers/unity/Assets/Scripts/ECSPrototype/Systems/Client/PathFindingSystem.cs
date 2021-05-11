@@ -331,18 +331,18 @@ public class PathFindingSystem : ComponentSystem
         return valid;
     }
 
-    public bool ValidateUnitTarget(Entity e, UnitRequisitesEnum restrictions, long usingUnitId, uint inFaction)
+    public bool ValidateUnitTarget(Entity targetEntity, UnitRequisitesEnum restrictions, long usingUnitId, uint usingUnitFaction)
     {
         bool valid = false;
         bool isUnit = false;
 
-        if (EntityManager.HasComponent<Actions.Component>(e))
+        if (EntityManager.HasComponent<Actions.Component>(targetEntity))
             isUnit = true;
 
         if(isUnit)
         {
-            var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
-            var unitId = EntityManager.GetComponentData<SpatialEntityId>(e);
+            var targetEntityfaction = EntityManager.GetComponentData<FactionComponent.Component>(targetEntity);
+            var targetUnitId = EntityManager.GetComponentData<SpatialEntityId>(targetEntity);
 
             switch (restrictions)
             {
@@ -350,32 +350,32 @@ public class PathFindingSystem : ComponentSystem
                     valid = true;
                     break;
                 case UnitRequisitesEnum.enemy:
-                    if (faction.Faction != inFaction)
+                    if (targetEntityfaction.Faction != usingUnitFaction)
                     {
                         valid = true;
                     }
                     break;
                 case UnitRequisitesEnum.friendly:
-                    if (faction.Faction == inFaction)
+                    if (targetEntityfaction.Faction == usingUnitFaction)
                     {
                         valid = true;
                     }
                     break;
                 case UnitRequisitesEnum.friendly_other:
-                    if (faction.Faction == inFaction && usingUnitId != unitId.EntityId.Id)
+                    if (targetEntityfaction.Faction == usingUnitFaction && usingUnitId != targetUnitId.EntityId.Id)
                     {
                         valid = true;
                     }
                     break;
                 case UnitRequisitesEnum.other:
-                    if (usingUnitId != unitId.EntityId.Id)
+                    if (usingUnitId != targetUnitId.EntityId.Id)
                     {
                         valid = true;
                     }
                     break;
                 case UnitRequisitesEnum.self:
                     //maybe selfstate becomes irrelevant once a self-target is implemented.
-                    if (usingUnitId == unitId.EntityId.Id)
+                    if (usingUnitId == targetUnitId.EntityId.Id)
                     {
                         valid = true;
                     }

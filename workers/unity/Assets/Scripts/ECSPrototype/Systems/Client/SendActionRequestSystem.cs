@@ -225,7 +225,7 @@ public class SendActionRequestSystem : ComponentSystem
 
         if (playerState.UnitTargets.Keys.Contains(entityId))
         {
-            lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates);
+            lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates.Keys);
         }
 
         m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);

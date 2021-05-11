@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Collections;
@@ -76,7 +76,7 @@ public class MouseStateSystem : JobComponentSystem
 
         ComponentDataFromEntity<CellAttributesComponent.Component> myTypeFromEntity = GetComponentDataFromEntity<CellAttributesComponent.Component>(true);
 
-        if (Physics.Raycast(ray, out RaycastHit hit) && !eventSystem.IsPointerOverGameObject())
+        if (Physics.Raycast(ray, out RaycastHit hit, 100, settings.MouseRayCastLayerMask) && !eventSystem.IsPointerOverGameObject())
         {
             float dist = Vector3.Distance(ray.origin, hit.point);
             Debug.DrawRay(ray.origin, ray.direction * dist, Color.red);

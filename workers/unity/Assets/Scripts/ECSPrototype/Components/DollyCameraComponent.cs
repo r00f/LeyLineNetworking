@@ -7,6 +7,7 @@ using Generic;
 using Unity.Entities;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
+using FMODUnity;
 
 public class DollyCameraComponent : MonoBehaviour
 {
@@ -16,12 +17,8 @@ public class DollyCameraComponent : MonoBehaviour
     CinemachineBrain cameraBrain;
     [SerializeField]
     float UIDisplayDelatTime;
-    //[SerializeField]
-    //float decalProjectorLerpInSpeed;
     [SerializeField]
     float mapTitleLerpSpeed;
-    //[SerializeField]
-    //DecalProjector decalProjector;
     [SerializeField]
     UIReferences UIRef;
     [SerializeField]
@@ -46,15 +43,22 @@ public class DollyCameraComponent : MonoBehaviour
     public bool RevealVisionTrigger;
     [SerializeField]
     VolumeProfile volumeProfile;
-    [SerializeField]
     Fog fog;
     [SerializeField]
     float fogDistanceLerpSpeed;
+    GameObject playerGO;
+    StudioListener playerListener;
+    [SerializeField]
+    StudioListener dollyCamListener;
+    [SerializeField]
+    GameObject AreaEmitter;
+
+    //[SerializeField]
+    //StudioListener playerCamStudioListener;
 
     // Start is called before the first frame update
     void Start()
     {
-        
         if(volumeProfile.TryGet(out Fog f))
         {
             fog = f;
@@ -74,12 +78,11 @@ public class DollyCameraComponent : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-
-        //volumeProfile.components[0]
         if (GameObject.FindGameObjectWithTag("Player"))
         {
-            playerCam = GameObject.FindGameObjectWithTag("Player").transform.GetComponent<Moba_Camera>();
+            playerGO = GameObject.FindGameObjectWithTag("Player");
+            playerCam = playerGO.transform.GetComponent<Moba_Camera>();
+            playerListener = playerGO.transform.GetComponent<StudioListener>();
         }
         if (!playerCam || UIRef.StartupPanel.activeSelf)
             return;
@@ -165,6 +168,12 @@ public class DollyCameraComponent : MonoBehaviour
 
         else if (!cameraBrain.IsBlending && !UIRef.UIActive)
         {
+            //UIRef.EnvironmentBus.setPaused(false);
+            //UIRef.SFXBus.setPaused(false);
+            AreaEmitter.transform.SetParent(playerGO.transform);
+            AreaEmitter.transform.localPosition = Vector3.zero;
+            dollyCamListener.enabled = false;
+            playerListener.enabled = true;
             mapTitleTextMesh.color = new Color(0, 0, 0, 0);
             UIRef.UIMainPanel.SetActive(true);
             UIRef.UIActive = true;

@@ -42,6 +42,7 @@ Transform:
   - {fileID: 2255358121004407289}
   - {fileID: 5183188501354973994}
   - {fileID: 1706615932949091136}
+  - {fileID: 3460495301083507629}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -127,14 +128,14 @@ MonoBehaviour:
   WeaponTransform: {fileID: 0}
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 0}
-  AnimationEvents: {fileID: 0}
+  AnimationEvents: {fileID: 7035004911656098394}
   ExecuteTriggerSet: 0
   InitialValuesSet: 0
   ProjectileSpawnOrigin: {fileID: 0}
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects: []
-  VoiceEmitter: {fileID: 0}
+  VoiceEmitter: {fileID: 6487833961771843619}
   FootStempEmitter: {fileID: 0}
   RotationSpeed: 4
   RotateTransform: {fileID: 5548772758455220403}
@@ -224,8 +225,7 @@ MonoBehaviour:
   UnitTypeId: 0
   UnitGroupSprite: {fileID: 0}
   UnitSprite: {fileID: 0}
-  Actions:
-  - {fileID: 11400000, guid: cf378819988d7874c80f53c1f72a1695, type: 2}
+  Actions: []
   SpawnActions: []
 --- !u!114 &1130299993275380547
 MonoBehaviour:
@@ -355,6 +355,80 @@ MonoBehaviour:
   MoveActionPrioList: []
   AttackActionPrioList: []
   UtitlityActionPrioList: []
+  AIUnitStateEnum: 0
+  ActionTypeWeightsList: []
+--- !u!1 &4731763023217622784
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3460495301083507629}
+  - component: {fileID: 6487833961771843619}
+  - component: {fileID: 7035004911656098394}
+  m_Layer: 11
+  m_Name: VoiceEmitter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3460495301083507629
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4731763023217622784}
+  m_LocalRotation: {x: 0, y: 0, z: 0.7071068, w: 0.7071068}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 800862004979978160}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+--- !u!114 &6487833961771843619
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4731763023217622784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  Event: event:/Environment/Manalith
+  PlayEvent: 0
+  StopEvent: 2
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 20
+--- !u!114 &7035004911656098394
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4731763023217622784}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a56815b5058c9848bb655b50757ba48, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  VoiceTrigger: 0
+  FootStepTrigger: 0
+  EventTrigger: 0
+  EventTriggered: 0
+  EffectGameObjectIndex: -1
 --- !u!1 &8108814016297623155
 GameObject:
   m_ObjectHideFlags: 0
@@ -548,15 +622,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7f1d8d86532f4dc44ba85df5774f3893, type: 3}
---- !u!4 &6292872232755447331 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8025587447407972750, guid: 7f1d8d86532f4dc44ba85df5774f3893,
-    type: 3}
-  m_PrefabInstance: {fileID: 4049959509909100461}
-  m_PrefabAsset: {fileID: 0}
 --- !u!198 &2445926463448940828 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 1857160487398201009, guid: 7f1d8d86532f4dc44ba85df5774f3893,
+    type: 3}
+  m_PrefabInstance: {fileID: 4049959509909100461}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &6292872232755447331 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8025587447407972750, guid: 7f1d8d86532f4dc44ba85df5774f3893,
     type: 3}
   m_PrefabInstance: {fileID: 4049959509909100461}
   m_PrefabAsset: {fileID: 0}

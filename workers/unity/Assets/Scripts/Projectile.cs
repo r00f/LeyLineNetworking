@@ -7,6 +7,7 @@ using Improbable;
 using UnityEngine.Animations;
 using Generic;
 using FMODUnity;
+using Unity.Entities;
 
 public class Projectile : MonoBehaviour
 {
@@ -66,6 +67,10 @@ public class Projectile : MonoBehaviour
     */
 
     //Internal vars
+
+    [HideInInspector]
+    public uint UnitFaction;
+
     [HideInInspector]
     public Action Action;
     [HideInInspector]

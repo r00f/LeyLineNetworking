@@ -797,12 +797,10 @@ namespace LeyLineHybridECS
                     var damagePreviewAmount = 0;
                     for (int i = 0; i < authPlayerState.UnitTargets.Count; i++)
                     {
-                        CubeCoordinateList cubeCoordinateList = authPlayerState.UnitTargets.ElementAt(i).Value;
-                        HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoordinateList.CubeCoordinates);
-
-                        if (coordHash.Contains(coord.CubeCoordinate))
+                        if (authPlayerState.UnitTargets.ElementAt(i).Value.CubeCoordinates.ContainsKey(coord.CubeCoordinate))
                         {
-                            damagePreviewAmount += cubeCoordinateList.DamageAmount;
+                            if(authPlayerState.UnitTargets.ElementAt(i).Value.CubeCoordinates[coord.CubeCoordinate])
+                                damagePreviewAmount += authPlayerState.UnitTargets.ElementAt(i).Value.DamageAmount;
                         }
                     }
 
@@ -1247,27 +1245,24 @@ namespace LeyLineHybridECS
                 {
                     unitHeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
 
-                    if (unitHeadUIRef.UnitHeadUIInstance.ActionDisplay != null)
+                    if (faction.Faction == authPlayerFaction && actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
                     {
-                        if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
+                        if (actions.LockedAction.Index < stats.Actions.Count)
                         {
-                            if (actions.LockedAction.Index < stats.Actions.Count)
-                            {
-                                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
-                                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
-                            }
-                            else
-                            {
-                                int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
-                                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
-                                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
-                            }
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
+                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
+                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
                         }
                         else
                         {
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+                            int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
+                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
+                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
                         }
+                        unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
                     }
                 }
             });
