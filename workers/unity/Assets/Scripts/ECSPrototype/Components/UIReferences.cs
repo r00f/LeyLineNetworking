@@ -74,6 +74,7 @@ public class UIReferences : MonoBehaviour
     public HealthBar PortraitHealthBar;
     */
     [Header("Actions")]
+    public Button CancelActionButton;
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
     public SwapActionGroupButton SwapActionButton;
@@ -113,7 +114,6 @@ public class UIReferences : MonoBehaviour
     public Image EnergyConnectorNegativeFill;
     public Vector2 ECFillAmounts;
 
-
     [Header("GameOver")]
     public GameObject GameOverPanel;
     public GameObject VictoryPanel;
@@ -133,24 +133,7 @@ public class UIReferences : MonoBehaviour
     */
 
     [Header("ReadyPanel")]
-    public float RopeFillsEndDist;
-    public float ReadySwooshFadeOutSpeed;
-    public float RopeEndFadeOutSpeed;
-    public float ReadyImpulseLerpSpeed;
-    public float RopeEndLerpSpeed;
-    public Text RopeTimeText;
-    public Image FriendlyReadyDot;
-    public Image EnemyReadyDot;
-    public Image FriendlyReadySwoosh;
-    public Image EnemyReadySwoosh;
-    public Image FriendlyRope;
-    public Image EnemyRope;
-    public Text TurnStateText;
-    public Animator GOButtonAnimator;
-    public float CacelGraceTime;
-    public float SlidersOpenMultiplier;
-    public GOButton GOButtonScript;
-    public StudioEventEmitter RopeLoopEmitter;
+    public TurnStatePanel TurnStatePnl;
 
     [HideInInspector]
     public bool RopeSlamOneTime;
@@ -172,24 +155,12 @@ public class UIReferences : MonoBehaviour
 
     [Header("ParticleSystems")]
     public List<ParticleSystem> CowExhaleParticleSystems;
-    public FillBarParticleComponent FriendlyReadySwooshParticle;
-    public FillBarParticleComponent EnemyReadySwooshParticle;
     public FillBarParticleComponent FriendlyRopeBarParticle;
     public FillBarParticleComponent EnemyRopeBarParticle;
     public ParticleSystem FriendlyReadyBurstPS;
     public ParticleSystem EnemyReadyBurstPS;
 
     [Header("TurnWheel")]
-    public Animator ExecuteStepPanelAnimator;
-    /*
-    public float ReadyOutSpeed;
-    public float ReadyInSpeed;
-    public ReadySlider EnemyReadySlider;
-    public ReadySlider FriendlyReadySlider;
-    public List<Image> SmallWheelColoredParts;
-    public List<Image> BigWheelColoredParts;
-    public List<Image> TurnStepFlares;
-    */
     public UIEffectsFired CurrentEffectsFiredState;
 
     [Header("FMODBusPaths")]

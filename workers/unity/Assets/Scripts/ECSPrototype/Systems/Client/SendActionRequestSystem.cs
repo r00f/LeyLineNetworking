@@ -21,6 +21,7 @@ public class SendActionRequestSystem : ComponentSystem
     EntityQuery m_CellData;
     EntityQuery m_UnitData;
     EntityQuery m_ClickedUnitData;
+    EntityQuery m_RightClickedUnitData;
     //EntityQuery m_SelectActionRequestData;
     CommandSystem m_CommandSystem;
     UISystem m_UISystem;
@@ -50,10 +51,20 @@ public class SendActionRequestSystem : ComponentSystem
         );
 
         m_ClickedUnitData = GetEntityQuery(
+
         ComponentType.ReadOnly<Actions.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<ClickEvent>()
+        );
+
+        m_RightClickedUnitData = GetEntityQuery(
+        ComponentType.ReadOnly<Actions.Component>(),
+        ComponentType.ReadOnly<FactionComponent.Component>(),
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<CubeCoordinate.Component>(),
+        ComponentType.ReadOnly<RightClickEvent>(),
+        ComponentType.ReadWrite<AnimatorComponent>()
         );
 
         m_CellData = GetEntityQuery(
@@ -101,6 +112,21 @@ public class SendActionRequestSystem : ComponentSystem
         //if the current selected unit wants an unitTarget
         if (gameState.CurrentState == GameStateEnum.planning)
         {
+            //Clear right Clicked unit actions
+            Entities.With(m_RightClickedUnitData).ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions) =>
+            {
+                if (faction.Faction == playerFaction.Faction)
+                {
+                    if (actions.LockedAction.Index != -3)
+                    {
+                        if(anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
+                        SelectActionCommand(-3, unitId.EntityId.Id);
+                    }
+                    m_UISystem.ClearSelectedActionToolTip();
+                }
+            });
+
             Entities.With(m_UnitData).ForEach((Entity e, ref MouseState mouseState, ref SpatialEntityId id, ref WorldIndex.Component wIndex, ref ClientPath.Component path, ref Actions.Component actions, ref CubeCoordinate.Component uCoord) =>
             {
                 var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
@@ -119,13 +145,15 @@ public class SendActionRequestSystem : ComponentSystem
                     {
                         if (faction.Faction == playerFaction.Faction)
                         {
+                            if (anim.AnimationEvents)
+                                anim.AnimationEvents.VoiceTrigger = true;
+
                             //if (actionsData.BasicMove.Index != -3)
                             //{
-                                //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
-                                if(anim.AnimationEvents)
-                                    anim.AnimationEvents.VoiceTrigger = true;
-                                SelectActionCommand(-3, unitEntityId.Id);
-                                //m_UISystem.InitializeSelectedActionTooltip(0);
+                            //Debug.Log("UNIT CLICKEVENT IN SENDACTIONREQSYSTEM");
+
+                            //SelectActionCommand(-3, unitEntityId.Id);
+                            //m_UISystem.InitializeSelectedActionTooltip(0);
                             //}
                         }
                     }
@@ -231,7 +259,7 @@ public class SendActionRequestSystem : ComponentSystem
         m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
         m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
-        Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
+        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
             if (idComponent.EntityId.Id == entityId)
             {
@@ -284,6 +312,8 @@ public class SendActionRequestSystem : ComponentSystem
                     }
                     else
                     {
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
                         playerHigh.TargetRestrictionIndex = 2;
                         m_HighlightingSystem.SetSelfTarget(entityId, (int)act.ActionExecuteStep);
                     }
@@ -292,7 +322,7 @@ public class SendActionRequestSystem : ComponentSystem
         });
 
         //
-        playerHigh.SelectActionBuffer = 3;
+        playerHigh.ResetHighlightsBuffer = .05f;
 
         playerState.UnitTargets = playerState.UnitTargets;
         playerStates[0] = playerState;

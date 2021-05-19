@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Unity.Entities;
 using System;
@@ -17,6 +17,7 @@ namespace LeyLineHybridECS
 
         public State CurrentState;
         public byte ClickEvent;
+        public byte RightClickEvent;
     }
 }
 

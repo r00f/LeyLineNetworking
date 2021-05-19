@@ -598,6 +598,7 @@ public static class LeyLineEntityTemplates {
         newAction.Targets = new List<ActionTarget>();
         newAction.Effects = new List<ActionEffect>();
         newAction.CombinedCost = 0;
+
         for (int i = 0; i <= inAction.Targets.Count - 1; i++)
         {
             ActionTarget newAT = new ActionTarget();

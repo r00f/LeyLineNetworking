@@ -362,8 +362,8 @@ public class ActionEffectsSystem : ComponentSystem
         .WithField("hitTransform", usingUnitHitTransform));
         */
 
-        if (playerVision.CellsInVisionrange.ContainsKey(targetUnitCoordinate))
-        {
+        //if (playerVision.CellsInVisionrange.ContainsKey(targetUnitCoordinate))
+        //{
             //only apply effect if target unit is valid or pass correct coordinates
             if (targetCoordinates.Contains(targetUnitCoordinate) && m_PathFindingSystem.ValidateUnitTarget(targetEntity, (UnitRequisitesEnum) (int) usingUnitAction.Effects[0].ApplyToRestrictions, usingUnitID, usingUnitfaction))
             {
@@ -385,7 +385,7 @@ public class ActionEffectsSystem : ComponentSystem
                     }
                 }
                 targetUnitEffects.GetHitEffects.Add(usingUnitAction, getHitPosition);
-            }
+            //}
         }
     }
 

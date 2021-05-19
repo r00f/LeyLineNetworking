@@ -72,7 +72,7 @@ namespace LeyLineHybridECS
             {
                 var gameState = gState;
 
-                Entities.With(m_PlayerData).ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction) =>
+                Entities.With(m_PlayerData).ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
                 {
                     if (playerVision.RevealVision)
                     {
@@ -118,13 +118,13 @@ namespace LeyLineHybridECS
                                 }
                                 else
                                 {
-                                    playerState = UpdateSelectedUnit(playerCam, playerState, playerHigh, playerVision);
+                                    playerState = UpdateSelectedUnit(playerCam, playerState, playerHigh, playerVision, playerFaction, playerEnergy);
 
-                                    if (playerHigh.CancelTime < UIRef.CacelGraceTime)
-                                        playerHigh.CancelTime += Time.DeltaTime * UIRef.SlidersOpenMultiplier;
+                                    if (playerHigh.CancelTime < UIRef.TurnStatePnl.CacelGraceTime)
+                                        playerHigh.CancelTime += Time.DeltaTime * UIRef.TurnStatePnl.SlidersOpenMultiplier;
                                 }
 
-                                UIRef.GOButtonAnimator.SetFloat("CancelTimer", 1 - (playerHigh.CancelTime / UIRef.CacelGraceTime));
+                                UIRef.TurnStatePnl.GOButtonAnimator.SetFloat("CancelTimer", 1 - (playerHigh.CancelTime / UIRef.TurnStatePnl.CacelGraceTime));
                             }
                             else
                             {
@@ -156,9 +156,9 @@ namespace LeyLineHybridECS
             });
         }
 
-        public PlayerState.Component UpdateSelectedUnit(Moba_Camera playerCam, PlayerState.Component playerState, HighlightingDataComponent playerHigh, Vision.Component playerVision)
+        public PlayerState.Component UpdateSelectedUnit(Moba_Camera playerCam, PlayerState.Component playerState, HighlightingDataComponent playerHigh, Vision.Component playerVision, FactionComponent.Component playerFaction, PlayerEnergy.Component playerEnergy)
         {
-            Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
+            Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref FactionComponent.Component faction, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId)
                 {
@@ -182,11 +182,10 @@ namespace LeyLineHybridECS
                             //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                             //Call methods so line/target gets disabled instantly
-                            m_HighlightingSystem.ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
-                            playerState.UnitTargets.Remove(unitId.EntityId.Id);
+                            m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                            //playerState.UnitTargets.Remove(unitId.EntityId.Id);
                             m_UISystem.ClearSelectedActionToolTip();
                         }
-                        
                     }
                     else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
                     {
@@ -201,12 +200,22 @@ namespace LeyLineHybridECS
                     {
                         if ((EntityManager.HasComponent<ManalithUnit.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
+                            if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
+                            {
+                                playerState.CurrentState = PlayerStateEnum.unit_selected;
+                            }
+                            //Debug.Log("Player Selects A New Unit with id: " + unitId.EntityId.Id);
+                            m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);
+                            m_UISystem.InitializeSelectedActionTooltip(actions.LockedAction.Index, unitComponentReferences.BaseDataSetComp.Actions.Count);
+
                             playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                             playerState.SelectedUnitId = unitId.EntityId.Id;
-                            m_UISystem.ClearSelectedActionToolTip();
+
                         }
                     }
                 }
+
+
             });
 
             return playerState;
@@ -260,6 +269,9 @@ namespace LeyLineHybridECS
                 if (playerState.CurrentState != state && playerState.CurrentState != PlayerStateEnum.ready)
                 {
                     playerState.CurrentState = state;
+
+                    if (state == PlayerStateEnum.waiting)
+                        playerState.SelectedUnitId = 0;
                 }
             });
 

@@ -225,7 +225,9 @@ MonoBehaviour:
   UnitTypeId: 0
   UnitGroupSprite: {fileID: 0}
   UnitSprite: {fileID: 0}
-  Actions: []
+  Actions:
+  - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
+  - {fileID: 11400000, guid: f6ef931d2e726d64a841328c62918a6a, type: 2}
   SpawnActions: []
 --- !u!114 &1130299993275380547
 MonoBehaviour:

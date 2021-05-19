@@ -76,7 +76,7 @@ public class MouseStateSystem : JobComponentSystem
 
         ComponentDataFromEntity<CellAttributesComponent.Component> myTypeFromEntity = GetComponentDataFromEntity<CellAttributesComponent.Component>(true);
 
-        if (Physics.Raycast(ray, out RaycastHit hit, 100, settings.MouseRayCastLayerMask) && !eventSystem.IsPointerOverGameObject())
+        if (Physics.Raycast(ray, out RaycastHit hit, 100, settings.MouseRayCastLayerMask))
         {
             float dist = Vector3.Distance(ray.origin, hit.point);
             Debug.DrawRay(ray.origin, ray.direction * dist, Color.red);
@@ -89,25 +89,30 @@ public class MouseStateSystem : JobComponentSystem
 
             Vector3 CubeCoordToWorldPos = CellGridMethods.CubeToPos(posToCubeCoord, gameStates[0].MapCenter);
 
-            if(Input.GetButtonDown("Fire1"))
+            if (!eventSystem.IsPointerOverGameObject())
             {
-                m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                //instantiate mouse particle at hitPos
-                Object.Instantiate(settings.MouseClickPS, hit.point, Quaternion.identity);
-            }
-            else
-            {
-                m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, CubeCoordToWorldPos);
+                if (Input.GetButtonDown("Fire1"))
+                {
+                    m_PlayerStateSystem.ResetInputCoolDown(0.3f);
+                    //instantiate mouse particle at hitPos
+                    Object.Instantiate(settings.MouseClickPS, hit.point, Quaternion.identity);
+                }
+                else
+                {
+                    m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, CubeCoordToWorldPos);
+                }
             }
 
             gameStates.Dispose();
 
             var mouseStateJob = new MouseStateJob
             {
+                PointerOverGO = eventSystem.IsPointerOverGameObject(),
                 HoveredCoord = posToCubeCoord,
                 CellAttributes = myTypeFromEntity,
                 PlayerEntities = m_AuthoritativePlayerData.ToEntityArray(Allocator.TempJob),
                 MouseLeftButtonDown = Input.GetButtonDown("Fire1"),
+                MouseRightButtonDown = Input.GetButtonDown("Fire2"),
                 Hit = hit,
                 PlayerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob),
                 PlayerFactions = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob),
@@ -124,12 +129,14 @@ public class MouseStateSystem : JobComponentSystem
 
     struct MouseStateJob : IJobForEachWithEntity<Position.Component, MouseState, MouseVariables, CubeCoordinate.Component, SpatialEntityId, MarkerState>
     {
+        public bool PointerOverGO;
         [ReadOnly] public ComponentDataFromEntity<CellAttributesComponent.Component> CellAttributes;
         public Vector3f HoveredCoord;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<Entity> PlayerEntities;
         public RaycastHit Hit;
         public bool MouseLeftButtonDown;
+        public bool MouseRightButtonDown;
         public EntityCommandBuffer.ParallelWriter ECBuffer;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
         public NativeArray<FactionComponent.Component> PlayerFactions;
@@ -141,27 +148,37 @@ public class MouseStateSystem : JobComponentSystem
             var playerFaction = PlayerFactions[0];
             var playerState = PlayerStates[0];
 
-            if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(HoveredCoord))
+            //Only MouseState Updates if cursor is not over a UI element
+            if(!PointerOverGO)
             {
-                if (MouseLeftButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
+                if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(HoveredCoord))
                 {
-                    ECBuffer.AddComponent(index, entity, new ClickEvent());
-                    mouseState.ClickEvent = 1;
-                }
-                else if (mouseState.CurrentState != MouseState.State.Clicked)
-                {
-                    if (mouseState.CurrentState != MouseState.State.Hovered)
+                    if (MouseRightButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
                     {
-                        ECBuffer.AddComponent(index, entity, new HoveredState());
-                        mouseState.CurrentState = MouseState.State.Hovered;
+                        ECBuffer.AddComponent(index, entity, new RightClickEvent());
+                        mouseState.RightClickEvent = 1;
+                    }
+
+                    if (MouseLeftButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
+                    {
+                        ECBuffer.AddComponent(index, entity, new ClickEvent());
+                        mouseState.ClickEvent = 1;
+                    }
+                    else if (mouseState.CurrentState != MouseState.State.Clicked)
+                    {
+                        if (mouseState.CurrentState != MouseState.State.Hovered)
+                        {
+                            ECBuffer.AddComponent(index, entity, new HoveredState());
+                            mouseState.CurrentState = MouseState.State.Hovered;
+                        }
                     }
                 }
-            }
-            else if(mouseState.CurrentState != MouseState.State.Clicked && mouseState.CurrentState != MouseState.State.Neutral)
-            {
-                if (mouseState.CurrentState == MouseState.State.Hovered)
-                    ECBuffer.RemoveComponent(index, entity, typeof(HoveredState));
-                mouseState.CurrentState = MouseState.State.Neutral;
+                else if (mouseState.CurrentState != MouseState.State.Clicked && mouseState.CurrentState != MouseState.State.Neutral)
+                {
+                    if (mouseState.CurrentState == MouseState.State.Hovered)
+                        ECBuffer.RemoveComponent(index, entity, typeof(HoveredState));
+                    mouseState.CurrentState = MouseState.State.Neutral;
+                }
             }
 
             if (mouseState.ClickEvent == 1 && !MouseLeftButtonDown)
@@ -170,6 +187,13 @@ public class MouseStateSystem : JobComponentSystem
                 mouseState.CurrentState = MouseState.State.Clicked;
                 mouseState.ClickEvent = 0;
             }
+
+            if (mouseState.RightClickEvent == 1 && !MouseRightButtonDown)
+            {
+                ECBuffer.RemoveComponent(index, entity, typeof(RightClickEvent));
+                mouseState.RightClickEvent = 0;
+            }
+
         }
     }
 

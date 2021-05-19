@@ -27,7 +27,7 @@ public class HighlightingSystem : ComponentSystem
     EntityQuery m_PlayerStateData;
     EntityQuery m_GameStateData;
     EntityQuery m_HoveredData;
-
+    EntityQuery m_RightClickedUnitData;
     ILogDispatcher m_LogDispatcher;
 
     protected override void OnCreate()
@@ -100,6 +100,14 @@ public class HighlightingSystem : ComponentSystem
             ComponentType.ReadOnly<HoveredState>()
             );
 
+        m_RightClickedUnitData = GetEntityQuery(
+            ComponentType.ReadOnly<SpatialEntityId>(),
+            ComponentType.ReadOnly<CubeCoordinate.Component>(),
+            ComponentType.ReadOnly<RightClickEvent>(),
+            ComponentType.ReadWrite<LineRendererComponent>()
+        );
+
+
     }
 
     protected override void OnStartRunning()
@@ -137,16 +145,21 @@ public class HighlightingSystem : ComponentSystem
 
         if (gameState.CurrentState == GameStateEnum.planning)
         {
-            if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate)) //&& playerHighlightingData.InputCooldown <= 0)
+            Entities.With(m_RightClickedUnitData).ForEach((Entity e, ref SpatialEntityId unitId) =>
+            {
+                ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+            });
+
+            if (Vector3fext.ToUnityVector(playerHighlightingData.HoveredCoordinate) != Vector3fext.ToUnityVector(playerHighlightingData.LastHoveredCoordinate))
             {
                 if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
-                    //Debug.Log("HighlightingSys PlayerHighAoE: " + playerHighlightingData.AoERadius);
-
+                    //Debug.Log("UpdateHighlights");
                     HashSet<Vector3f> currentActionTargetHash = new HashSet<Vector3f>();
 
                     if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
                         currentActionTargetHash = new HashSet<Vector3f>(playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Keys);
+
                     currentActionTargetHash.Add(playerHighlightingData.LastHoveredCoordinate);
 
                     playerState = FillUnitTargetsList(playerState.SelectedAction, playerHighlightingData, playerState, playerPathing, playerFaction.Faction);
@@ -159,16 +172,17 @@ public class HighlightingSystem : ComponentSystem
                 }
                 else
                 {
-                    if (playerHighlightingData.SelectActionBuffer > 0)
+                    if (playerHighlightingData.ResetHighlightsBuffer > 0)
                     {
-                        playerHighlightingData.SelectActionBuffer--;
+                        playerHighlightingData.ResetHighlightsBuffer -= Time.DeltaTime;
                     }
                     else
                         ResetHighlights(ref playerState, playerHighlightingData);
+
+                    //ResetHighlights(ref playerState, playerHighlightingData);
                 }
 
                 playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
-
             }
         }
         else
@@ -191,9 +205,6 @@ public class HighlightingSystem : ComponentSystem
 
         playerHighlightingDatas[0] = playerHighlightingData;
         m_PlayerStateData.CopyFromComponentDataArray(playerHighlightingDatas);
-
-
-     
 
         //Debug.Log(m_HoveredData.CalculateEntityCount());
         // When clicked hovered marker isnt removed <= Bug! Wrong Check in MouseState.
@@ -264,7 +275,7 @@ public class HighlightingSystem : ComponentSystem
                    
                     if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction))
                     {
-                        Debug.Log("TargetInvalid - Remove from playerTargets");
+                        //Debug.Log("TargetInvalid - Remove from playerTargets");
                         //playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
 
                         playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates[unitCoord.CubeCoordinate] = false;
@@ -571,7 +582,6 @@ public class HighlightingSystem : ComponentSystem
 
     void UpdatePathLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
     {
-
         Color turnStepColor = settings.TurnStepLineColors[2];
         Gradient gradient = new Gradient();
         gradient.SetKeys(
@@ -672,9 +682,8 @@ public class HighlightingSystem : ComponentSystem
             {
                 if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, p, unitId.EntityId.Id);
-                    p.UnitTargets.Remove(unitId.EntityId.Id);
-                    p.TargetDictChange = true;
+                    ResetUnitHighLights(e, ref p, unitId.EntityId.Id);
+
                 }
             }
         });
@@ -725,7 +734,7 @@ public class HighlightingSystem : ComponentSystem
             {
                 if (playerState.UnitTargets.ContainsKey(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, playerState, unitId.EntityId.Id);
+                    ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
                     playerState.UnitTargets.Remove(unitId.EntityId.Id);
                     playerState.TargetDictChange = true;
                 }
@@ -764,8 +773,7 @@ public class HighlightingSystem : ComponentSystem
         playerStates.Dispose();
     }
 
-
-    public void ResetUnitHighLights(Entity e, PlayerState.Component playerState, long unitId)
+    public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId)
     {
         var lineRendererComp = EntityManager.GetComponentObject<LineRendererComponent>(e);
         lineRendererComp.lineRenderer.positionCount = 0;
@@ -773,6 +781,8 @@ public class HighlightingSystem : ComponentSystem
         if (playerState.UnitTargets.ContainsKey(unitId) && playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)
         {
             ResetMarkerNumberOfTargets(playerState.UnitTargets[unitId].CubeCoordinates.Keys.ToList());
+            playerState.UnitTargets.Remove(unitId);
+            playerState.TargetDictChange = true;
         }
     }
 
