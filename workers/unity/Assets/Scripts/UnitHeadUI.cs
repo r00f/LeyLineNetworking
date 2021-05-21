@@ -19,5 +19,6 @@ public class UnitHeadUI : MonoBehaviour
     public Text ArmorText;
     public HeadUILockedActionDisplay ActionDisplay;
     public HealthBar HealthBar;
+    public Text EnergyGainText;
 
 }

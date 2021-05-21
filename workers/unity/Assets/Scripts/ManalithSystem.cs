@@ -298,7 +298,6 @@ public class ManalithSystem : ComponentSystem
             {
                 if (unitFaction.Faction == faction)
                 {
-                    energy.Harvesting = true;
                     m_node.CombinedEnergyGain += energy.EnergyIncome;
                     for (int i = m_node.Manalithslots.Count-1; i >= 0; i--)
                     {
@@ -306,6 +305,8 @@ public class ManalithSystem : ComponentSystem
                         if (slot.CorrespondingCell.UnitOnCellId == inUnitId)
                         {
                             slot.EnergyGained = energy.EnergyIncome;
+                            energy.Harvesting = true;
+                            //Debug.Log("SetHarvestingTrue on Unit: " + unitId.EntityId.Id);
                         }
                         m_node.Manalithslots[i] = slot;
                     }

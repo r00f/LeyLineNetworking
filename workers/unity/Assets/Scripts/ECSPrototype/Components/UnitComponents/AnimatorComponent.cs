@@ -11,6 +11,7 @@ public class AnimatorComponent : MonoBehaviour
 
     public List<AnimStateEffectHandler> AnimStateEffectHandlers;
     public Transform WeaponTransform;
+    public bool IsMoving;
 
     [Header("GenericAnimation")]
     [HideInInspector]

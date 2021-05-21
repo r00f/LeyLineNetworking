@@ -276,17 +276,11 @@ namespace LeyLineHybridECS
                 var eBurst = UIRef.EnemyReadyBurstPS.main;
                 eBurst.startColor = UIRef.EnemyColor;
 
-                //var main = UIRef.FriendlyReadySwooshParticle.LoopPS.main;
-                //main.startColor = UIRef.FriendlyColor;
-
                 var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
                 main1.startColor = UIRef.FriendlyColor;
 
                 var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
                 main2.startColor = UIRef.EnemyColor;
-
-                //var main3 = UIRef.EnemyReadySwooshParticle.LoopPS.main;
-                //main3.startColor = UIRef.EnemyColor;
 
                 if (!UIRef.MatchReadyPanel.activeSelf)
                 {
@@ -323,6 +317,9 @@ namespace LeyLineHybridECS
                     {
                         UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
                     }
+
+                    if(faction.Faction != 0 && energy.Harvesting)
+                        SetHealthFloatText(e, true, energy.EnergyIncome, settings.FactionIncomeColors[(int)faction.Faction -1]);
 
                     if (unitHeadUIRef.UnitHeadHealthBarInstance)
                         ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
@@ -364,6 +361,7 @@ namespace LeyLineHybridECS
 
             HandleKeyCodeInput(gameState.CurrentState);
 
+            /*
             if (!UIRef.UIActive)
             {
                 gameStates.Dispose();
@@ -373,6 +371,7 @@ namespace LeyLineHybridECS
                 playerHighlightingDatas.Dispose();
                 return;
             }
+            */
 
             #region TurnStepEffects
 
@@ -580,16 +579,6 @@ namespace LeyLineHybridECS
                 }
             }
             
-            /*else
-            {
-                if (!UIRef.PortraitHealthBar.gameObject.activeSelf)
-                {
-                    UIRef.PortraitHealthText.enabled = true;
-                    UIRef.PortraitHealthBar.gameObject.SetActive(true);
-                }
-          
-            }  */
-
             //all players
             Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
             {
@@ -610,21 +599,9 @@ namespace LeyLineHybridECS
                             UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.readyFired;
                         }
 
-                        //UIRef.FriendlyReadySwoosh.fillAmount += UIRef.ReadyImpulseLerpSpeed * Time.DeltaTime;
 
-                        //if (UIRef.FriendlyReadySwoosh.fillAmount == 0 || UIRef.FriendlyReadySwoosh.fillAmount == 1)
-                        //{
-                            UIRef.TurnStatePnl.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.TurnStatePnl.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                            //UIRef.FriendlyReadySwoosh.color -= new Color(0, 0, 0, UIRef.ReadySwooshFadeOutSpeed * Time.DeltaTime);
-                            //UIRef.FriendlyReadySwooshParticle.LoopPS.time = 0;
-                            //UIRef.FriendlyReadySwooshParticle.LoopPS.Stop();
-                        //}
-                        //else
-                        //{
-                            //UIRef.FriendlyReadySwooshParticle.LoopPS.Play();
-                        //}
+                        UIRef.TurnStatePnl.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.TurnStatePnl.ReadySwooshFadeOutSpeed * Time.DeltaTime);
 
-                        //UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition = new Vector2(UIRef.FriendlyReadySwoosh.fillAmount * UIRef.FriendlyReadySwooshParticle.ParentRect.sizeDelta.x, UIRef.FriendlyReadySwooshParticle.Rect.anchoredPosition.y);
                         UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                     }
                     else if (gameState.CurrentState == GameStateEnum.planning)
@@ -1923,10 +1900,12 @@ namespace LeyLineHybridECS
                 headUIRef.UnitHeadHealthBarInstance.HoveredImage.color = settings.FactionColors[(int) unitFaction];
             }
 
+            if(unitFaction != 0)
+                headUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) unitFaction -1];
 
             headUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
             //initialize GroupUI and hero select button
-            if (unitFaction == playerFaction)
+            if (unitFaction == playerFaction && playerFaction != 0)
             {
                 if (!stats.IsHero)
                 {

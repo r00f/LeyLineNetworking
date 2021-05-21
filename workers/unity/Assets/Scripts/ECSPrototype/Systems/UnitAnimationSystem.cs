@@ -344,15 +344,43 @@ public class UnitAnimationSystem : ComponentSystem
                 else
                     animatorComponent.Animator.SetBool("HasWindup", false);
 
+                animatorComponent.Animator.SetBool("Harvesting", energy.Harvesting);
+
                 if (animatorComponent.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
                     animatorComponent.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
 
+                if (unitEffects.HarvestingEnergyParticleSystem && visible.Value == 1)
+                {
+                    var harvestingEmission = unitEffects.HarvestingEnergyParticleSystem.emission;
+
+                    if (energy.Harvesting && !animatorComponent.IsMoving)
+                    {
+                        harvestingEmission.enabled = true;
+
+                        if(unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance)
+                        {
+                            if ((playerState.SelectedUnitId == id.EntityId.Id || Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate)) && actions.LockedAction.Index == -3 && gameStates[0].CurrentState == GameStateEnum.planning)
+                            {
+                                unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.text = "+" + energy.EnergyIncome.ToString();
+                                unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = true;
+                            }
+                            else
+                            {
+                                unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        harvestingEmission.enabled = false;
+
+                        if (unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance)
+                            unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                    }
+                        
+                }
 
             }
-
-
-            //if (animatorComponent.Animator.GetFloat("ActionIndex") != actions.LockedAction.Index)
-                //animatorComponent.Animator.SetFloat("ActionIndex", actions.LockedAction.Index);
 
             #endregion
 
@@ -366,8 +394,13 @@ public class UnitAnimationSystem : ComponentSystem
                 else
                     step = Time.DeltaTime * 1.732f;
 
+                animatorComponent.IsMoving = true;
                 //move
                 animatorComponent.transform.position = Vector3.MoveTowards(animatorComponent.transform.position, serverPosition.Coords.ToUnityVector(), step);
+            }
+            else
+            {
+                animatorComponent.IsMoving = false;
             }
 
             Vector2 posXZ = new Vector2(animatorComponent.transform.position.x, animatorComponent.transform.position.z);

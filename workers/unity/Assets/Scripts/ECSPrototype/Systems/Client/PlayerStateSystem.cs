@@ -271,7 +271,10 @@ namespace LeyLineHybridECS
                     playerState.CurrentState = state;
 
                     if (state == PlayerStateEnum.waiting)
+                    {
                         playerState.SelectedUnitId = 0;
+                        playerState.SelectedUnitCoordinate = new Vector3f(999, 999, 999);
+                    }
                 }
             });
 
