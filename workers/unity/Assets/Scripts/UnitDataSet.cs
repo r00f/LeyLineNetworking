@@ -7,10 +7,12 @@ public class UnitDataSet : MonoBehaviour
 {
 
     public string UnitName;
+    [TextArea]
+    public string UnitDescription;
     [Range(0, 20)]
     public uint VisionRange;
     public uint BaseHealth;
-    public uint EnergyBaseIncome;
+    //public uint EnergyBaseIncome;
     public uint EnergyIncome;
     [HideInInspector]
     public SelectUnitButton SelectUnitButtonInstance;

@@ -40,7 +40,6 @@ namespace LeyLineHybridECS
                 ComponentType.ReadWrite<Moba_Camera>()
             );
 
-
             m_UnitData = GetEntityQuery(
 
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -137,7 +136,6 @@ namespace LeyLineHybridECS
                             m_HighlightingSystem.ResetHighlights();
                             playerState.CurrentState = PlayerStateEnum.ready;
                         }
-
                     }
                     else
                     {
@@ -151,7 +149,6 @@ namespace LeyLineHybridECS
                             playerState.CurrentState = PlayerStateEnum.waiting;
                         }
                     }
-
                 });
             });
         }
@@ -184,7 +181,7 @@ namespace LeyLineHybridECS
                             //Call methods so line/target gets disabled instantly
                             m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
                             //playerState.UnitTargets.Remove(unitId.EntityId.Id);
-                            m_UISystem.ClearSelectedActionToolTip();
+                            //m_UISystem.ClearSelectedActionToolTip();
                         }
                     }
                     else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
@@ -206,7 +203,7 @@ namespace LeyLineHybridECS
                             }
                             //Debug.Log("Player Selects A New Unit with id: " + unitId.EntityId.Id);
                             m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);
-                            m_UISystem.InitializeSelectedActionTooltip(actions.LockedAction.Index, unitComponentReferences.BaseDataSetComp.Actions.Count);
+                            //m_UISystem.InitializeSelectedActionTooltip(actions.LockedAction.Index, unitComponentReferences.BaseDataSetComp.Actions.Count);
 
                             playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                             playerState.SelectedUnitId = unitId.EntityId.Id;

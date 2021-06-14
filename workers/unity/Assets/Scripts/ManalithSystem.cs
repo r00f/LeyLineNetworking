@@ -106,7 +106,7 @@ public class ManalithSystem : ComponentSystem
 
             if (worldIndex == manalithWorldIndex)
             {
-                manalithComp.CombinedEnergyGain = manalithComp.BaseIncome;
+                manalithComp.CombinedEnergyGain = 0;
 
                 for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
                 {
@@ -153,6 +153,8 @@ public class ManalithSystem : ComponentSystem
 
                 if (manalithComp.StateChange)
                 {
+                    Debug.Log("ManalithStateChange");
+
                     var oldFact = factionref.Faction;
                     //Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
                     uint fact = UpdateFaction(manalithComp, manalithWorldIndex);
@@ -329,27 +331,27 @@ public class ManalithSystem : ComponentSystem
             }
         });
 
-        //Update ManalithUnits
-        Entities.With(m_ManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy) =>
-        {
-            if (unitId.EntityId.Id == inUnitId)
-            {
-                unitFaction.Faction = faction;
-            }
-        });
-
         node = m_node;
     }
 
     public void UpdateManalithUnit(long inUnitId, uint faction, ref Manalith.Component node)
     {
+        if (!node.StateChange)
+            return;
+
+        var m_node = node;
+
         Entities.With(m_ManalithUnitData).ForEach((ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction, ref Energy.Component energy, ref Vision.Component vision) =>
         {
             if (unitId.EntityId.Id == inUnitId)
             {
+                Debug.Log("UpdateManalithUnit");
                 unitFaction.Faction = faction;
+                m_node.CombinedEnergyGain += energy.EnergyIncome;
                 vision.RequireUpdate = true;
             }
         });
+
+        node = m_node;
     }
 }

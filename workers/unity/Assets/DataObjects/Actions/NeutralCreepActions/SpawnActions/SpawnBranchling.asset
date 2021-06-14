@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
   targettingRange: 2
-  energyCost: 12
+  energyCost: 14
   ModToAdd: {fileID: 0}
   SecondaryTargets: []
   requireEmpty: 1
@@ -38,8 +38,8 @@ MonoBehaviour:
   ActionIcon: {fileID: -4942989930331405226, guid: 1709c699aeed51545927cddf655f0b28,
     type: 3}
   ProjectileFab: {fileID: 0}
-  ActionName: Spawn Branchling
-  Description: Spawn Branchling to test
+  ActionName: Branchling
+  Description: Spawn a Branchling.
   TimeToExecute: 2
   HasWindup: 0
   TargetToAdd: {fileID: 0}

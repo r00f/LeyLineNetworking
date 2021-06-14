@@ -202,6 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 9010769315541911250}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 9010769315532335424}
   AnimationEvents: {fileID: 5999249652935120063}
@@ -328,6 +329,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Axalotl
+  UnitDescription: The axalotl is a ranged support unit that uses an array of water
+    based spells.
   VisionRange: 5
   BaseHealth: 60
   EnergyBaseIncome: 0
@@ -465,6 +468,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 5124538558260586798}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 4290083278490143790}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

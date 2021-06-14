@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b40411e2b5873242af164d2c5e5dc7e, type: 3}
+  m_Name: HelpPanleRenderTextures
+  m_EditorClassIdentifier: 
+  RenderTex:
+  - {fileID: 8400000, guid: 8c72e17255324614b9738fdd9f1dacc7, type: 2}
+  - {fileID: 8400000, guid: 2603076b896497b4b921e62e8fb6c9fd, type: 2}
+  - {fileID: 8400000, guid: 4b9757a14450bac4880a678c0933545a, type: 2}
+  - {fileID: 8400000, guid: 6ada4524c77a69944b6861170f387a96, type: 2}
+  - {fileID: 8400000, guid: c88609dd27ae0a84eb4f61f153b8e1c5, type: 2}

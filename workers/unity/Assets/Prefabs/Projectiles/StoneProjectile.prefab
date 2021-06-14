@@ -24403,6 +24403,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnableIfVisibleObjects:
+  - {fileID: 6692764611301298036}
+  - {fileID: 3568972549326760852}
+  - {fileID: 4983943131790832294}
   DestinationObjectPrefab: {fileID: 0}
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
@@ -24436,6 +24440,7 @@ MonoBehaviour:
   - {fileID: 4077612848132569925}
   ExplosionParticleSystem: {fileID: 1731113839523245827}
   ExplosionEventEmitter: {fileID: 9193001755421976532}
+  UnitFaction: 0
   Action:
     Name: 
     CombinedCost: 0

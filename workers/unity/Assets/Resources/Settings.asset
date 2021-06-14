@@ -18,7 +18,8 @@ MonoBehaviour:
   - {r: 1, g: 0, b: 0.015686275, a: 1}
   - {r: 0, g: 0.52156866, b: 1, a: 1}
   FactionIncomeColors:
-  - {r: 0.514151, g: 0.8958895, b: 1, a: 1}
+  - {r: 1, g: 0.9979217, b: 0.5137255, a: 1}
+  - {r: 0.5137255, g: 0.8941177, b: 1, a: 1}
   - {r: 1, g: 0.6427337, b: 0.4292453, a: 1}
   FactionMapColors:
   - {r: 0.7924528, g: 0.7924528, b: 0.35510856, a: 1}
@@ -64,7 +65,7 @@ MonoBehaviour:
   ExplosionDebugSphere: {fileID: 3937053955492011579, guid: ab8f5f369440e964fa69633247f76f25,
     type: 3}
   MinimumExecuteTime: 1
-  RopeTime: 25
+  RopeTime: 35
   MouseRayCastLayerMask:
     serializedVersion: 2
     m_Bits: 7339827

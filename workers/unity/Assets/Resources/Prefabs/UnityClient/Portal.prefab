@@ -126,6 +126,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 0}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 0}
   AnimationEvents: {fileID: 7035004911656098394}
@@ -215,19 +216,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Portal
+  UnitDescription: This portal manalith can be captured by having the most units
+    on its circle. Once you control it gains you energy.
   VisionRange: 5
   BaseHealth: 100
-  EnergyBaseIncome: 0
-  EnergyIncome: 0
+  EnergyIncome: 4
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
   UIInitialized: 0
   UnitTypeId: 0
   UnitGroupSprite: {fileID: 0}
   UnitSprite: {fileID: 0}
-  Actions:
-  - {fileID: 11400000, guid: 5d8e01bbee11f564cb91858f92ebbd6a, type: 2}
-  - {fileID: 11400000, guid: f6ef931d2e726d64a841328c62918a6a, type: 2}
+  Actions: []
   SpawnActions: []
 --- !u!114 &1130299993275380547
 MonoBehaviour:
@@ -315,6 +315,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 2445926463448940828}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 95701672857648164}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

@@ -64,6 +64,7 @@ public class DollyCameraComponent : MonoBehaviour
             fog = f;
         }
 
+
         trackedDolly = dollyCam.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachineTrackedDolly;
         smoothPath = trackedDolly.m_Path as CinemachineSmoothPath;
         pathWaypoints = smoothPath.m_Waypoints.ToList();
@@ -72,6 +73,7 @@ public class DollyCameraComponent : MonoBehaviour
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
         UIRef.UIActive = false;
         UIRef.UIMainPanel.SetActive(false);
+        UIRef.DollyPathCameraActive = true;
         fog.depthExtent.value = 64;
     }
 
@@ -82,7 +84,7 @@ public class DollyCameraComponent : MonoBehaviour
         {
             playerGO = GameObject.FindGameObjectWithTag("Player");
             playerCam = playerGO.transform.GetComponent<Moba_Camera>();
-            playerListener = playerGO.transform.GetComponent<StudioListener>();
+            playerListener = playerGO.transform.GetComponentInChildren<StudioListener>();
         }
         if (!playerCam || UIRef.StartupPanel.activeSelf)
             return;
@@ -170,6 +172,7 @@ public class DollyCameraComponent : MonoBehaviour
         {
             //UIRef.EnvironmentBus.setPaused(false);
             //UIRef.SFXBus.setPaused(false);
+            UIRef.DollyPathCameraActive = false;
             AreaEmitter.transform.SetParent(playerGO.transform);
             AreaEmitter.transform.localPosition = Vector3.zero;
             dollyCamListener.enabled = false;

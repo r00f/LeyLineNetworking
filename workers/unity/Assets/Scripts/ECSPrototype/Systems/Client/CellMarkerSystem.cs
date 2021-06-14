@@ -34,7 +34,8 @@ namespace LeyLineHybridECS
                 ComponentType.ReadWrite<RequireMarkerUpdate>(),
                 ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadWrite<MarkerState>(),
-                ComponentType.ReadWrite<MarkerGameObjects>()
+                ComponentType.ReadWrite<MarkerGameObjects>(),
+                ComponentType.ReadOnly<IsVisible>()
                 );
 
             m_NewCellData = GetEntityQuery(
@@ -104,7 +105,7 @@ namespace LeyLineHybridECS
 
                 //Debug.Log("ReqMarkerUpdateCount: " + m_RequireMarkerUpdateData.CalculateEntityCount());
 
-                Entities.With(m_RequireMarkerUpdateData).ForEach((Entity e, MarkerGameObjects markerGameObjects, ref MarkerState markerState, ref CellAttributesComponent.Component cellAttributes) =>
+                Entities.With(m_RequireMarkerUpdateData).ForEach((Entity e, MarkerGameObjects markerGameObjects, ref MarkerState markerState, ref CellAttributesComponent.Component cellAttributes, ref IsVisible isVisible) =>
                 {
                     if (gameState.CurrentState != GameStateEnum.planning)
                     {
@@ -158,12 +159,19 @@ namespace LeyLineHybridECS
                                 markerGameObjects.ReachableMarker.SetActive(false);
                                 break;
                             case MarkerState.State.Hovered:
-                                if (!cellAttributes.CellAttributes.Cell.IsTaken)
+                                if(isVisible.Value == 1)
                                 {
-                                    markerGameObjects.ClickedMarker.SetActive(false);
-                                    markerGameObjects.HoveredMarker.SetActive(true);
-                                    markerGameObjects.ReachableMarker.SetActive(false);
+                                    if (!cellAttributes.CellAttributes.Cell.IsTaken)
+                                    {
+                                        markerGameObjects.HoveredMarker.SetActive(true);
+                                    }
                                 }
+                                else if (!EntityManager.HasComponent<StaticTaken.Component>(e))
+                                {
+                                    markerGameObjects.HoveredMarker.SetActive(true);
+                                }
+                                markerGameObjects.ClickedMarker.SetActive(false);
+                                markerGameObjects.ReachableMarker.SetActive(false);
                                 break;
                             case MarkerState.State.Reachable:
                                 markerGameObjects.ClickedMarker.SetActive(false);

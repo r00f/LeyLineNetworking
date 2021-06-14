@@ -9,6 +9,8 @@ public class UnitHeadUI : MonoBehaviour
     public bool FlagForDestruction;
     public float DestroyWaitTime;
 
+    public List<GameObject> EnableIfVisibleGameObjects;
+
     public Text FloatHealthText;
     public Animator FloatHealthAnimator;
     public Animator ArmorAnimator;

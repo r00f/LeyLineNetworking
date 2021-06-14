@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,10 +12,12 @@ public class BottomLeftPortraitComponent : MonoBehaviour
 
     [Header("Unit Info")]
     public GameObject UnitInfoPanel;
+    //public GameObject UnitStatsPanel;
     public Text PortraitHealthText;
     public Text PortraitArmorText;
     public Text PortraitRegenText;
     public HealthBar PortraitHealthBar;
+    public Text UnitDescription;
 
     [Header("Manalith Info")]
     public GameObject ManalithInfoPanel;

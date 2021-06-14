@@ -45,6 +45,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnableIfVisibleObjects:
+  - {fileID: 4265137128855694758}
+  - {fileID: 2211747367441822814}
   DestinationObjectPrefab: {fileID: 0}
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
@@ -5247,7 +5250,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.308875
+  m_MaxDistance: 0.30887583
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5333,7 +5336,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.308875
+  m_MaxDistance: 0.30887583
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5439,7 +5442,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.308875
+  m_MaxDistance: 0.30887583
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5561,7 +5564,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 0.308875
+  m_MaxDistance: 0.30887583
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

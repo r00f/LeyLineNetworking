@@ -42,7 +42,6 @@ public class AnimatorComponent : MonoBehaviour
     public Vector2 DestinationPosition;
 
     [Header("Death")]
-    [HideInInspector]
     public bool Dead;
     [HideInInspector]
     public bool DeathEventTrigger;

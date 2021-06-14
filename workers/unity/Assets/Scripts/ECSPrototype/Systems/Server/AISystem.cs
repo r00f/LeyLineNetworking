@@ -45,7 +45,8 @@ public class AISystem : ComponentSystem
             {
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<Health.Component>()
+            ComponentType.ReadOnly<Health.Component>(),
+            ComponentType.ReadOnly<FactionComponent.Component>()
             }
         };
 
@@ -143,13 +144,16 @@ public class AISystem : ComponentSystem
         aiUnit.AggroedUnitCoordinate = new Vector3f(999, 999, 999);
         aiUnit.AggroedUnitId = 0;
         aiUnit.AnyUnitInVisionRange = false;
+        aiUnit.AggroedUnitFaction = 0;
 
         var aiU = aiUnit;
 
-        Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
+        Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id, ref FactionComponent.Component faction) =>
         {
             if (aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
             {
+                //faction.Faction
+                aiU.AggroedUnitFaction = faction.Faction;
                 aiU.AggroedUnitCoordinate = coord.CubeCoordinate;
                 aiU.AggroedUnitId = id.EntityId.Id;
                 aiU.AnyUnitInVisionRange = true;

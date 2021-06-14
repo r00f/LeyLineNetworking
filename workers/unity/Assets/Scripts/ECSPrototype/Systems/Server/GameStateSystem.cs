@@ -93,8 +93,6 @@ namespace LeyLineHybridECS
                             {
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-
-                                m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex.Value);
                                 //raise InitMapEvent
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(),
@@ -114,8 +112,6 @@ namespace LeyLineHybridECS
                             {
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-
-                                m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex.Value);
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(),
                                 gameStateId.EntityId);
@@ -146,7 +142,8 @@ namespace LeyLineHybridECS
                         }
                         else if (AnyPlayerReady(gameStateWorldIndex.Value))
                         {
-                            gameState.CurrentRopeTime -= Time.DeltaTime;
+                            if(gameState.TurnCounter != 1)
+                                gameState.CurrentRopeTime -= Time.DeltaTime;
                         }
                         break;
                     case GameStateEnum.interrupt:
@@ -226,7 +223,13 @@ namespace LeyLineHybridECS
                                 playerVision.RequireUpdate = true;
                             });
 
+#if UNITY_EDITOR
+
+                            gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex.Value, true);
+#else
+
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex.Value);
+#endif
 
                             gameState.CurrentState = GameStateEnum.game_over;
                         }
@@ -285,11 +288,13 @@ namespace LeyLineHybridECS
 #if UNITY_EDITOR
                 if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
+                    m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex.Value);
                     gameState.CurrentState = GameStateEnum.waiting_for_players;
                 }
 #else
                         if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                         {
+                            m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex.Value);
                             gameState.CurrentState = GameStateEnum.waiting_for_players;
                         }
 #endif
@@ -411,16 +416,32 @@ namespace LeyLineHybridECS
             });
         }
 
-        private uint FindWinnerFaction(uint gameStateWorldIndex)
+        private uint FindWinnerFaction(uint gameStateWorldIndex, bool isEditor = false)
         {
             uint f = 0;
-            Entities.With(m_HeroData).ForEach((ref WorldIndex.Component worldIndex, ref FactionComponent.Component faction, ref Health.Component health) =>
+            if(!isEditor)
             {
-                if (worldIndex.Value == gameStateWorldIndex && health.CurrentHealth > 0)
+                Entities.With(m_HeroData).ForEach((ref WorldIndex.Component worldIndex, ref FactionComponent.Component faction, ref Health.Component health) =>
                 {
-                    f = faction.Faction;
-                }
-            });
+                    if (worldIndex.Value == gameStateWorldIndex && health.CurrentHealth > 0)
+                    {
+                        f = faction.Faction;
+                    }
+                });
+            }
+            else
+            {
+                Entities.With(m_HeroData).ForEach((ref WorldIndex.Component worldIndex, ref FactionComponent.Component faction, ref Health.Component health) =>
+                {
+                    if (worldIndex.Value == gameStateWorldIndex)
+                    {
+                        if (faction.Faction == 1)
+                            f = 2;
+                        else
+                            f = 1;
+                    }
+                });
+            }
             return f;
         }
 

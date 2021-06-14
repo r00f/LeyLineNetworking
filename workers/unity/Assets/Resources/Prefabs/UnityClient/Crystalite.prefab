@@ -2206,6 +2206,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 9033157902730532030}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 5559275641791118903}
   AnimationEvents: {fileID: 5163191610714612810}
@@ -2327,9 +2328,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Crystalite
+  UnitDescription: Crystal parts that have come to life. Shoots its projectile in
+    a gaussian manner.
   VisionRange: 5
   BaseHealth: 50
-  EnergyBaseIncome: 0
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -2342,7 +2344,7 @@ MonoBehaviour:
   Actions:
   - {fileID: 11400000, guid: e4bd8d366db801e49afcb3dca435b108, type: 2}
   - {fileID: 11400000, guid: ceb214bd71f768541923c2ac6d1a0081, type: 2}
-  - {fileID: 11400000, guid: f272e1de475b3414d84db91544d69681, type: 2}
+  - {fileID: 11400000, guid: 4253278b7afde924da481f1b99e701ac, type: 2}
   SpawnActions: []
 --- !u!114 &8969225205866032920
 MonoBehaviour:
@@ -2435,6 +2437,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 5919729096950799687}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 8251358940483739775}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

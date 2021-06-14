@@ -18,7 +18,7 @@ MonoBehaviour:
   ProjectileFab: {fileID: 93931158904744250, guid: efed8d62e7b8bce438c2d6591e01b410,
     type: 3}
   ActionName: Water Shield
-  Description: Gives an ally a water shield. That ally gains <color=yellow>40</color>
+  Description: Gives an ally a water shield. That ally gains <color=yellow>30</color>
     armor.
   TimeToExecute: 5
   HasWindup: 0
@@ -44,7 +44,7 @@ MonoBehaviour:
   specificTargetIdentifier: 0
   TurnDuration: 1
   ApplyToRestrictions: 0
-  ArmorAmount: 40
+  ArmorAmount: 30
 --- !u!114 &114578424212294910
 MonoBehaviour:
   m_ObjectHideFlags: 0
