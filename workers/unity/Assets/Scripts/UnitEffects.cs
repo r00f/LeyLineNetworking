@@ -13,6 +13,7 @@ public class UnitEffects : MonoBehaviour
     public GameObject DefenseParticleSystem;
     public GameObject ShieldBrakeParticleSystem;
     public ParticleSystem SecondWindParticleSystemInstance;
+    public ParticleSystem HarvestingEnergyParticleSystem;
     public AxaShield AxaShield;
 
 

@@ -5,11 +5,12 @@ import "generic/faction.schema";
 component UnitToSpawn {
 	
     id = 101;
-    string unit_name = 1;
+    	string unit_name = 1;
 	uint32 faction = 2;
 	generic.TeamColorEnum team_color = 3;
-    uint32 start_rotation = 4;
-    bool manalith_unit = 5;
-    uint32 starting_unit_index = 6;
-	
+    	uint32 start_rotation = 4;
+    	bool manalith_unit = 5;
+    	uint32 starting_unit_index = 6;
+	uint32 player_database_no = 7;
+	uint32 unit_key = 8;
 }

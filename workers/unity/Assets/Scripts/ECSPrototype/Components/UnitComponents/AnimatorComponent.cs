@@ -11,6 +11,7 @@ public class AnimatorComponent : MonoBehaviour
 
     public List<AnimStateEffectHandler> AnimStateEffectHandlers;
     public Transform WeaponTransform;
+    public bool IsMoving;
 
     [Header("GenericAnimation")]
     [HideInInspector]
@@ -41,7 +42,6 @@ public class AnimatorComponent : MonoBehaviour
     public Vector2 DestinationPosition;
 
     [Header("Death")]
-    [HideInInspector]
     public bool Dead;
     [HideInInspector]
     public bool DeathEventTrigger;

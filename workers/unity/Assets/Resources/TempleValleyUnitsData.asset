@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1cd52fe9e1ae8b84d8119def179dc45c, type: 3}
+  m_Name: TempleValleyUnitsData
+  m_EditorClassIdentifier: 
+  Name: Temple Valley
+  ManalithUnits:
+  - {fileID: 3289465276142304449, guid: f98cd905db3d85a40add1bf082b652e2, type: 3}
+  - {fileID: 3289465276142304449, guid: ea342d50bcb53d248b806fec744a3949, type: 3}
+  - {fileID: 3289465276142304449, guid: 42b29fb80517d3a4380b8a4562603e92, type: 3}
+  - {fileID: 3289465276142304449, guid: d0918f198fc703549b83096676b51828, type: 3}
+  - {fileID: 3289465276142304449, guid: 6be79b512c5a0f54a8786c746d6f2ede, type: 3}
+  NeutralUnits:
+  - {fileID: 6207505464914164933, guid: adcd2563910a019408a70007366ff397, type: 3}
+  - {fileID: 6804991996917211290, guid: 0548370afc6913f4883f746e08f5b7d5, type: 3}
+  - {fileID: 8186342005102589250, guid: 7f30544eee4467249befd6d1ffc4740c, type: 3}
+  - {fileID: 55638576014061965, guid: dacad4f0d3bfb244e9ce6a586b20dd6e, type: 3}
+  - {fileID: 2071439136966712747, guid: 8e3d0e4a8ce3c794f9803338ebb53782, type: 3}

@@ -234,6 +234,7 @@ public class AddComponentsSystem : ComponentSystem
 
         });
 
+        /*
         Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
@@ -276,7 +277,7 @@ public class AddComponentsSystem : ComponentSystem
             PostUpdateCommands.AddComponent(entity, isVisible);
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         });
-
+        */
         Entities.With(m_UnitAddedData).ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
@@ -295,7 +296,10 @@ public class AddComponentsSystem : ComponentSystem
 
             IsVisible isVisible = new IsVisible();
 
-            isVisible.Value = 1;
+            if (faction.Faction == playerFaction.Faction)
+                isVisible.Value = 1;
+            else
+                isVisible.Value = 0;
 
             if (isVisible.Value == 1)
             {
@@ -319,7 +323,6 @@ public class AddComponentsSystem : ComponentSystem
             PostUpdateCommands.AddComponent(entity, isVisible);
             PostUpdateCommands.AddComponent(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
         });
-
 
         Entities.With(m_UnitMapPopulatedData).ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible isVisible) =>
         {
@@ -348,17 +351,16 @@ public class AddComponentsSystem : ComponentSystem
         Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
         Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
 
+        //Debug.Log("IsVisible: " + isVisible);
 
         if (!isVisibleRef.MiniMapTileInstance)
         {
             isVisibleRef.MiniMapTileInstance = InstantiateMapTile(miniMap, isVisible, isVisibleRef, invertedPos, tileColor, isUnitTile);
-            //Object.Destroy(isVisibleRef.MiniMapTileInstance.BecomeVisibleMapEffect.FMODEmitter);
         }
         else if (!isVisibleRef.BigMapTileInstance)
         {
             isVisibleRef.BigMapTileInstance = InstantiateMapTile(miniMap, isVisible, isVisibleRef, invertedPos, tileColor, isUnitTile);
         }
-
     }
 
     MiniMapTile InstantiateMapTile(MinimapScript miniMap, byte isVisible, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
@@ -420,6 +422,11 @@ public class AddComponentsSystem : ComponentSystem
         }
 
         instanciatedTile.TileRect.localScale = new Vector3(1, 1, 1);
+
+        if (isVisible == 1)
+            instanciatedTile.gameObject.SetActive(true);
+        else
+            instanciatedTile.gameObject.SetActive(false);
 
         return instanciatedTile;
     }

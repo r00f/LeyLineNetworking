@@ -7,6 +7,7 @@ using LeyLineHybridECS;
 using Generic;
 using Player;
 using Unity.Collections;
+using Improbable.Gdk.Core;
 
 //[DisableAutoCreation]
 public class ProjectileSystem : ComponentSystem
@@ -18,6 +19,7 @@ public class ProjectileSystem : ComponentSystem
     EntityQuery m_PlayerData;
     bool initialized;
     ActionEffectsSystem m_ActionEffectSystem;
+    ILogDispatcher logger;
 
     protected override void OnCreate()
     {
@@ -39,6 +41,7 @@ public class ProjectileSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        logger = Worlds.ClientWorld.World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_ActionEffectSystem = Worlds.ClientWorld.World.GetExistingSystem<ActionEffectsSystem>();
     }
 
@@ -72,23 +75,27 @@ public class ProjectileSystem : ComponentSystem
     {
         if(WorldsInitialized())
         {
-            if (m_PlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
+            if (m_GameStateData.CalculateEntityCount() == 0)
                 return;
 
-            var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-
-            var playerVision = playerVisionData[0];
-
             var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-
-
-
+            /*
+            if(m_ProjectileData.CalculateEntityCount() > 0)
+            {
+                
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("ProjectileCount")
+                .WithField("Count", m_ProjectileData.CalculateEntityCount()));
+                
+            }
+            */
             Entities.With(m_ProjectileData).ForEach((Entity entity, Projectile projectile, Transform transform) =>
             {
                 if(projectile.CollisionDetection)
                 {
                     if (projectile.CollisionDetection.HasCollided)
                     {
+                        //Debug.Log("Projectile Collision Detected");
                         projectile.DestinationReached = true;
                         projectile.FlagForDestruction = true;
                     }
@@ -187,9 +194,15 @@ public class ProjectileSystem : ComponentSystem
 
                         if (!projectile.EffectTriggered)
                         {
-                            m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, playerVision, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameStates[0], projectile.AxaShieldOrbitCount);
+                            /*
+                            logger.HandleLog(LogType.Warning,
+                            new LogEvent("TriggerProjectileEvent")
+                            .WithField("InAction", projectile.UnitId));
+                            */
 
-                            if(projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
+                            m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameStates[0], projectile.AxaShieldOrbitCount);
+
+                            if (projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
                             {
                                 Object.Instantiate(projectile.DestinationExplosionPrefab, projectile.ExplosionSpawnTransform.position, Quaternion.identity, projectile.transform.parent);
                             }
@@ -199,7 +212,7 @@ public class ProjectileSystem : ComponentSystem
                                 projectile.ExplosionEventEmitter.Play();
                             }
 
-                            if(projectile.ExplosionParticleSystem)
+                            if (projectile.ExplosionParticleSystem)
                             {
                                 projectile.ExplosionParticleSystem.Play();
                             }
@@ -261,7 +274,7 @@ public class ProjectileSystem : ComponentSystem
             });
 
             gameStates.Dispose();
-            playerVisionData.Dispose();
+            //playerVisionData.Dispose();
         }
     }
 }

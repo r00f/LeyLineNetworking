@@ -3,6 +3,7 @@ using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
 using Player;
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
@@ -20,7 +21,6 @@ namespace LeyLineHybridECS
         EntityQuery m_PlayerAddedData;
         EntityQuery m_PlayerRemovedData;
         EntityQuery m_GameStateData;
-
         EntityQuery m_PlayerData;
 
         protected override void OnCreate()
@@ -31,8 +31,8 @@ namespace LeyLineHybridECS
                 None = new ComponentType[] { typeof(PlayerStateData) },
                 All = new ComponentType[] 
                 {
-                    ComponentType.ReadOnly<PlayerAttributes.Component>(),
                     ComponentType.ReadOnly<PlayerAttributes.HasAuthority>(),
+                    ComponentType.ReadWrite<PlayerAttributes.Component>(),
                     ComponentType.ReadWrite<Position.Component>(),
                     ComponentType.ReadWrite<WorldIndex.Component>(),
                     ComponentType.ReadWrite<FactionComponent.Component>()
@@ -61,7 +61,9 @@ namespace LeyLineHybridECS
             m_GameStateData = GetEntityQuery(
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<Position.Component>(),
+                ComponentType.ReadOnly<UnitDataBase.Component>(),
                 ComponentType.ReadWrite<GameState.Component>()
+                
             );
 
             m_PlayerData = GetEntityQuery(
@@ -82,14 +84,35 @@ namespace LeyLineHybridECS
                     uint wIndex = SetPlayerWorld();
                     worldIndex.Value = wIndex;
                     var c = new Position.Component();
-
-                    Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState, ref Position.Component gameStatePos) =>
-                    {
-                        if (wIndex == gameStateWorldIndex.Value)
-                            c.Coords = gameStatePos.Coords;
-                    });
-
                     factionComp = SetPlayerFaction(wIndex);
+                    uint faction = factionComp.Faction;
+                    var addedUnitDataBase = playerAddedPlayerAttributes.ActiveChampionMetaUnits;
+                    string heroName = playerAddedPlayerAttributes.HeroName;
+
+                    Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState, ref UnitDataBase.Component unitDataBase, ref Position.Component gameStatePos) =>
+                    {
+
+                        if (wIndex == gameStateWorldIndex.Value)
+                        {
+                            c.Coords = gameStatePos.Coords;
+                        }
+                        foreach(ChampionUnitTable t in unitDataBase.ChampionData)
+                        {
+                            if(t.Name == heroName)
+                            {
+                                addedUnitDataBase.ChampionData = t.ChampionData;
+                                addedUnitDataBase.ChampionData.PlayerNo = faction;
+
+                                foreach (KeyValuePair<uint, MetaUnitData> pair in t.MetaUnitDict)
+                                {
+                                    MetaUnitData temp = t.MetaUnitDict[pair.Key];
+                                    temp.PlayerNo = faction;
+                                    addedUnitDataBase.MetaUnitDict.Add(pair.Key, temp);
+                                }
+                            }
+                        }
+                    });
+                    playerAddedPlayerAttributes.ActiveChampionMetaUnits = addedUnitDataBase;
                     pos.Coords = c.Coords;
                 }
 

@@ -46,6 +46,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EnableIfVisibleObjects:
+  - {fileID: 2488993293443066607}
   DestinationObjectPrefab: {fileID: 0}
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
@@ -77,6 +79,7 @@ MonoBehaviour:
   ParticleSystemsToStop: []
   ExplosionParticleSystem: {fileID: 0}
   ExplosionEventEmitter: {fileID: 1881695939214998437}
+  UnitFaction: 0
   Action:
     Name: 
     CombinedCost: 0
@@ -210,6 +213,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: eb9740b23ee8b864fbd57b8b4ce8a0c4, type: 3}
+--- !u!1 &2488993293443066607 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5674843888201572865, guid: eb9740b23ee8b864fbd57b8b4ce8a0c4,
+    type: 3}
+  m_PrefabInstance: {fileID: 7803531189772208366}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &5458351044478033859 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2878999863451916077, guid: eb9740b23ee8b864fbd57b8b4ce8a0c4,
@@ -222,7 +231,7 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 7803531189772208366}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 2488993293443066607}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}

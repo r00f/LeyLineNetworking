@@ -109,7 +109,7 @@ public class VisionSystem_Server : ComponentSystem
                     }
 
                     var unitFaction = u_Faction.Faction;
-
+                    var coord = u_OccupiedCell.CubeCoordinate;
 
                     if (u_Vision.RequireUpdate == true)
                     {
@@ -122,7 +122,7 @@ public class VisionSystem_Server : ComponentSystem
 
                         if (v.CellsInVisionrange.Count != 0)
                         {
-                            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction) =>
+                            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction, ref SpatialEntityId p_id) =>
                             {
                                 if (p_Faction.Faction == unitFaction)
                                 {
@@ -132,6 +132,12 @@ public class VisionSystem_Server : ComponentSystem
                                     .WithField("UnitFaction", unitFaction));
                                     */
                                     p_Vision.RequireUpdate = true;
+                                }
+                                else if(p_Vision.CellsInVisionrange.ContainsKey(coord))
+                                {
+                                    m_ComponentUpdateSystem.SendEvent(
+                                    new Vision.UpdateClientVisionEvent.Event(),
+                                    p_id.EntityId);
                                 }
                             });
 

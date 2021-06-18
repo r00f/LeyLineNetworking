@@ -12,6 +12,7 @@ using Unity.Entities;
 public class Projectile : MonoBehaviour
 {
     //currently only used for axa shield
+    public List<GameObject> EnableIfVisibleObjects;
     public GameObject DestinationObjectPrefab;
     public GameObject DestinationExplosionPrefab;
     public Transform ExplosionSpawnTransform;

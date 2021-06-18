@@ -15235,6 +15235,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 5334421209155925169}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 1113965945702352347}
   AnimationEvents: {fileID: 7961001583877436035}
@@ -15367,6 +15368,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: StoneBeetle
+  UnitDescription: An animated stone beetle that likes to pince enemies.
   VisionRange: 5
   BaseHealth: 40
   EnergyBaseIncome: 0
@@ -15491,6 +15493,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 6517367550469898520}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 8851818760234318880}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

@@ -33,6 +33,7 @@ namespace LeyLineHybridECS
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<OwningWorker.Component>(),
             ComponentType.ReadOnly<PlayerState.Component>(),
+            ComponentType.ReadOnly<PlayerAttributes.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>()
             );
             m_CellData = GetEntityQuery(
@@ -77,7 +78,7 @@ namespace LeyLineHybridECS
                 {
                     if (unitToSpawn.Faction == 0)
                     {
-                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
+                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitKey, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
                     }
                 });
 
@@ -108,11 +109,13 @@ namespace LeyLineHybridECS
 
                                     if(unitToSpawn.StartingUnitIndex == 0)
                                     {
-                                        SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
+                                        //spawn hero
+                                        SpawnUnit(cellWorldIndex.Value, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId,f,0,true, unitToSpawn.StartRotation);
                                     }
-                                    else if(unitToSpawn.StartingUnitIndex <= playerAtt.StartingUnitNames.Count)
+                                    else if(unitToSpawn.StartingUnitIndex <= playerAtt.StartingUnitIds.Count)
                                     {
-                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[(int)unitToSpawn.StartingUnitIndex - 1], unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
+                                        // spawn any starting unit
+                                        SpawnUnit(cellWorldIndex.Value,  unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, f, playerAtt.StartingUnitIds[(int)unitToSpawn.StartingUnitIndex-1], false, unitToSpawn.StartRotation);
                                     }
                                 }
                             }
@@ -124,8 +127,44 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void SpawnUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0)
+        public void SpawnUnit(uint worldIndex, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint playerno, uint unitdatakey, bool isHero, uint startRotation = 0)
         {
+            MetaUnitData myMetaUnit = new MetaUnitData
+            {
+                ActionsList = new List<Unit.Action>(),
+                SpawnActionsList = new List<Unit.Action>()
+            };
+            if(playerno == 0)
+            {
+                Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component wIndex, ref GameState.Component state) =>
+                {
+                    if(wIndex.Value == worldIndex)
+                    {
+                        myMetaUnit = state.ActiveMapMetaUnits.MetaUnitDict[unitdatakey];
+                    }
+                });
+            }
+            else
+            {
+                Entities.With(m_PlayerData).ForEach((ref PlayerAttributes.Component attributes, ref FactionComponent.Component fact) =>
+                { 
+                    if (fact.Faction == playerno)
+                    {
+                        if (isHero)
+                        {
+                            myMetaUnit = attributes.ActiveChampionMetaUnits.ChampionData;
+                            Debug.Log(attributes.ActiveChampionMetaUnits.ChampionData.Name);
+                        }
+                        else
+                        {
+                            myMetaUnit = attributes.ActiveChampionMetaUnits.MetaUnitDict[unitdatakey];
+                        }
+                    }
+                });
+            }
+
+
+
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
             {
                 var coord = cCord.CubeCoordinate;
@@ -133,26 +172,50 @@ namespace LeyLineHybridECS
                 if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                 {
                     //Debug.Log("CreateEntityRequest");
-                    var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<UnitDataSet>();
-                    var entity = LeyLineEntityTemplates.Unit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation);
+                    //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<UnitDataSet>();
+                    var entity = LeyLineEntityTemplates.Unit(owningWorkerId, myMetaUnit.Name, position, coord, unitFaction, worldIndex, myMetaUnit, startRotation, isHero);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }
             });
         }
 
-        public void SpawnNeutralUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0, bool isManalithUnit = false)
+        public void SpawnNeutralUnit(uint worldIndex, uint unitdatakey, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0, bool isManalithUnit = false)
         {
+            MetaUnitData myMetaUnit = new MetaUnitData
+            {
+                ActionsList = new List<Unit.Action>(),
+                SpawnActionsList = new List<Unit.Action>()
+            };
+            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component wIndex, ref GameState.Component state) =>
+            {
+                if (isManalithUnit)
+                {
+                    if (wIndex.Value == worldIndex)
+                    {
+                        myMetaUnit = state.ActiveMapMetaUnits.MetaManalithsDict[unitdatakey];
+                    }
+                }
+                else
+                {
+                    if (wIndex.Value == worldIndex)
+                    {
+                        myMetaUnit = state.ActiveMapMetaUnits.MetaUnitDict[unitdatakey];
+                    }
+                }
+
+            });
+
             Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
             {
                 var coord = cCord.CubeCoordinate;
 
                 if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
                 {
-                    var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName);
-                    var Stats = unitGO.GetComponent<UnitDataSet>();
+                    var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + myMetaUnit.Name);
+                    //var Stats = unitGO.GetComponent<UnitDataSet>();
                     var AIStats = unitGO.GetComponent<AIUnitDataSet>();
-                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, AIStats, startRotation, isManalithUnit);
+                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, myMetaUnit.Name, position, coord, unitFaction, worldIndex, myMetaUnit, AIStats, startRotation, isManalithUnit);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }

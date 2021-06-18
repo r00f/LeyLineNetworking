@@ -189,7 +189,7 @@ public class ExecuteActionsSystem : ComponentSystem
                     m_TimerSystem.AddTimedEffect(action.Targets[0].TargetId, action.Effects[0]);
                     break;
                 case EffectTypeEnum.spawn_unit:
-                    m_SpawnSystem.SpawnUnit(worldIndex, action.Effects[j].SpawnUnitNested.UnitName, faction.Faction, action.Targets[0].TargetCoordinate, owningWorker.WorkerId);
+                    m_SpawnSystem.SpawnUnit(worldIndex, faction.Faction, action.Targets[0].TargetCoordinate, owningWorker.WorkerId, action.Effects[j].SpawnUnitNested.PlayerNo, action.Effects[j].SpawnUnitNested.UnitKey, false);
                     break;
                 case EffectTypeEnum.move_along_path:
                     break;

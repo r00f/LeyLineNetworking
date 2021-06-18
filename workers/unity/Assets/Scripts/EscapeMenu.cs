@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -21,5 +21,9 @@ public class EscapeMenu : MonoBehaviour
     public Slider MasterVolumeSlider;
     public Slider SFXVolumeSlider;
     public Slider MusicVolumeSlider;
+
+    [Header("Menu Panels")]
+    public List<MainMenuTabButton> PanelButtons;
+    public List<GameObject> Panels;
 
 }

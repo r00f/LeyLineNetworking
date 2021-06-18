@@ -16,6 +16,7 @@ component AiUnit {
     int64 aggroed_unit_id = 10;
     generic.Vector3f aggroed_unit_coordinate = 11;
     bool any_unit_in_vision_range = 12;
+    uint32 aggroed_unit_faction = 13;
 }
 
 type Vector2int

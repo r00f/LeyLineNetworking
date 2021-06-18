@@ -66,6 +66,8 @@ MonoBehaviour:
   TileColor: {r: 0, g: 0, b: 0, a: 0}
   EmitSoundEffect: 0
   DeathBlowMapEffect: {fileID: 7040417559875218784}
+  GetCapturedMapEffect: {fileID: 0}
+  AddPingSize: 0
   DeathCrossSize: {x: 0, y: 0}
   EvenOutlineOffset: 1
   DarknessTile: {fileID: 0}
@@ -136,6 +138,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -167,6 +171,8 @@ MonoBehaviour:
   TileColor: {r: 0, g: 0, b: 0, a: 0}
   EmitSoundEffect: 0
   DeathBlowMapEffect: {fileID: 0}
+  GetCapturedMapEffect: {fileID: 0}
+  AddPingSize: 0
   DeathCrossSize: {x: 0, y: 0}
   EvenOutlineOffset: 1
   DarknessTile: {fileID: 0}
@@ -236,6 +242,8 @@ MonoBehaviour:
   m_Material: {fileID: 0}
   m_Color: {r: 0.109336056, g: 0.11543554, b: 0.122641504, a: 1}
   m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -267,6 +275,8 @@ MonoBehaviour:
   TileColor: {r: 0, g: 0, b: 0, a: 0}
   EmitSoundEffect: 0
   DeathBlowMapEffect: {fileID: 0}
+  GetCapturedMapEffect: {fileID: 0}
+  AddPingSize: 0
   DeathCrossSize: {x: 0, y: 0}
   EvenOutlineOffset: 1
   DarknessTile: {fileID: 0}

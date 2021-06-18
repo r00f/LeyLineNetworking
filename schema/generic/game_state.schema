@@ -1,5 +1,6 @@
 package generic;
 import "generic/vector3.schema";
+import "generic/unit_database.schema";
 
 component GameState {
 	
@@ -17,8 +18,10 @@ component GameState {
 	float min_execute_step_time = 11;
 	map<int64, uint32> damage_dict = 12;
 	bool attack_damage_dealt = 13;
-    float init_map_wait_time = 14;
-    event InitializeMap initialize_map_event;
+    	float init_map_wait_time = 14;
+	MapUnitTable active_map_meta_units = 15;
+	string map_name = 16;
+    	event InitializeMap initialize_map_event;
 	event Cleanup cleanup_state_event;
 	event RopeEnd rope_end_event;
 }

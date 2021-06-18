@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 647203d250c3d96499ed4314e3c63122, type: 3}
+  m_Name: KingCroakUnitsData
+  m_EditorClassIdentifier: BlankProject::ChampionUnitsDataObject
+  Name: KingCroak
+  ChampionUnitFab: {fileID: 3289465276142304449, guid: 313e17de9a5fc7342a40e170b0e9c2da,
+    type: 3}
+  UnitFabs:
+  - {fileID: 3289465276142304449, guid: 8d0192a34e1f74741841eefdd24130d2, type: 3}
+  - {fileID: 8656971215830653018, guid: 8e6248aea1d28d64f924fe1d9bbb602d, type: 3}
+  - {fileID: 3289465276142304449, guid: 5b49d94af5e44374aa888f2d97b6f7b3, type: 3}
+  - {fileID: 8656971215830653018, guid: 115afa03636dd1647b251296834bda3d, type: 3}
+  - {fileID: 3289465276142304449, guid: fa56f21d7e5edf940900eab0aacdd951, type: 3}

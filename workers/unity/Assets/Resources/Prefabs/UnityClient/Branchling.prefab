@@ -125,6 +125,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 1679381631963745655}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 2809895697405541867}
   AnimationEvents: {fileID: 8397182629797879279}
@@ -230,8 +231,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Branchling
-  VisionRange: 5
-  BaseHealth: 40
+  UnitDescription: This animated branch runs fast and hits its enemies with his glowing
+    spike.
+  VisionRange: 4
+  BaseHealth: 60
   EnergyBaseIncome: 0
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
@@ -335,6 +338,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 905928209559440464}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 3186065748280144232}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

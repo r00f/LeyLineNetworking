@@ -465,6 +465,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Spike
+  UnitDescription: The spiked lizard is a tanky frontline warrior. It sports devastating
+    close range attacks.
   VisionRange: 4
   BaseHealth: 80
   EnergyBaseIncome: 0
@@ -585,6 +587,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 6277809151406041408}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 6277809151415814066}
   AnimationEvents: {fileID: 4624510965681803888}
@@ -813,6 +816,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 5049950378277404256}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 202638360942825131}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

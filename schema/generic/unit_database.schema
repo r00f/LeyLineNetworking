@@ -1,0 +1,32 @@
+package generic;
+import "unit/actions.schema";
+		
+component UnitDataBase {
+	
+    id = 131;
+    list<ChampionUnitTable> champion_data = 1;
+    list<MapUnitTable> map_data = 2;
+}
+
+type ChampionUnitTable {
+	string name = 1;
+	MetaUnitData champion_data = 2;
+	map<uint32, MetaUnitData> meta_unit_dict = 3;
+}
+
+type MapUnitTable {
+	string name = 1;
+	map<uint32, MetaUnitData> meta_manaliths_dict = 2;
+	map<uint32, MetaUnitData> meta_unit_dict = 3;
+}	
+
+type MetaUnitData {
+	uint32 key = 1;
+	uint32 player_no = 2;
+	string name = 3;
+	uint32 vision_range = 5;
+	uint32 max_health = 6;
+	uint32 energy_income = 7;
+	list<unit.Action> actions_list = 8;
+	list<unit.Action> spawn_actions_list = 9;
+}

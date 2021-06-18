@@ -37,7 +37,8 @@ namespace LeyLineHybridECS
             ComponentType.ReadWrite<Actions.Component>(),
             ComponentType.ReadWrite<MovementVariables.Component>(),
             ComponentType.ReadWrite<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<Vision.Component>()
+            ComponentType.ReadWrite<Vision.Component>(),
+            ComponentType.ReadWrite<Energy.Component>()
             );
 
         }
@@ -61,10 +62,11 @@ namespace LeyLineHybridECS
             var gameState = gameStateData[0];
 
 
-            Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref WorldIndex.Component unitWorldIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
+            Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref Energy.Component energy, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
             {
                 var unitID = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
-
+                var unitWorldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
+                
                 if (actionsData.LockedAction.Index != -3 && actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
                 {
                     if(actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
@@ -77,6 +79,8 @@ namespace LeyLineHybridECS
                         }
                         else if (gameState.CurrentState == GameStateEnum.move)
                         {
+                            energy.Harvesting = false;
+
                             if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
                             {
                                 //instead of lerping towards next pos in path, set pos and wait for client to catch up

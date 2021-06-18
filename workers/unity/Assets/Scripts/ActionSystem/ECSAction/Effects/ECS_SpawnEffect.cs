@@ -8,6 +8,7 @@ namespace LeyLineHybridECS
     [System.Serializable]
     public class ECS_SpawnEffect : ECSActionEffect
     {
-        public string UnitNameToSpawn;
+        public uint unitKey;
+        public bool neutral = true;
     }
 }

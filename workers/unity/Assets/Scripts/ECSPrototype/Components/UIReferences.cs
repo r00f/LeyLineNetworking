@@ -12,10 +12,14 @@ public class UIReferences : MonoBehaviour
     public bool OpponentReady;
     public bool UIActive;
 
+    public float EnergyLerpSpeed;
+    public bool DollyPathCameraActive;
+
 
     public Material SelectionOutlineMaterial;
 
     [Header("MenuPanels")]
+    public HelpPanel HelpPanelComponent;
     public GameObject UIMainPanel;
     public GameObject HelpPanel;
     public GameObject SkillTreePanel;
@@ -57,6 +61,7 @@ public class UIReferences : MonoBehaviour
 
     [Header("UnitPortrait")]
     public BottomLeftPortraitComponent BottomLeftPortrait;
+    public UnitInfoPanel UnitInfoPanel;
     /*
     public GameObject InfoEnabledPanel;
     public Image PortraitPlayerColor;
@@ -82,20 +87,7 @@ public class UIReferences : MonoBehaviour
     public GameObject SpawnButtonGroup;
 
     [Header("SelectedActionToolTip")]
-    public GameObject SAInfoPanel;
-    public Text SAActionName;
-    public Text SAActionDescription;
-    public Text SAEnergyText;
-    public Text SACooldownText;
-    public Image SAExecuteStepIcon;
-
-    [Header("ToolTip")]
-    public GameObject TTPanel;
-    public RectTransform TTRect;
-    public Text TTActionName;
-    public Text TTActionDescription;
-    public Text TTActionCost;
-    public Image TTExecuteStepImage;
+    public SelectedActionToolTip SAToolTip;
 
     public List<Sprite> ExecuteStepSprites;
 

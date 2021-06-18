@@ -123,7 +123,7 @@ public class SendActionRequestSystem : ComponentSystem
                             anim.AnimationEvents.VoiceTrigger = true;
                         SelectActionCommand(-3, unitId.EntityId.Id);
                     }
-                    m_UISystem.ClearSelectedActionToolTip();
+                    //m_UISystem.ClearSelectedActionToolTip();
                 }
             });
 

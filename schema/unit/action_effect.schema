@@ -3,7 +3,8 @@ package unit;
 type ActionEffect {
  EffectTypeEnum effect_type = 1;
 	type SpawnUnit {
-	string unit_name = 1;
+	uint32 unit_key = 1;
+	uint32 player_no = 2;
 	}
 	type DealDamage {
 	uint32 damage_amount = 1;

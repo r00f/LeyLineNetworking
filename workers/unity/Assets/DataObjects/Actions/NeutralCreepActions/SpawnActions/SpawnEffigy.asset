@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
   targettingRange: 2
-  energyCost: 24
+  energyCost: 20
   ModToAdd: {fileID: 0}
   SecondaryTargets: []
   requireEmpty: 1
@@ -38,8 +38,8 @@ MonoBehaviour:
   ActionIcon: {fileID: 1197253883454730662, guid: 1709c699aeed51545927cddf655f0b28,
     type: 3}
   ProjectileFab: {fileID: 0}
-  ActionName: Spawn Effigy
-  Description: Spawn Effigy to test
+  ActionName: Effigy
+  Description: Spawn an Effigy.
   TimeToExecute: 2
   HasWindup: 0
   TargetToAdd: {fileID: 0}

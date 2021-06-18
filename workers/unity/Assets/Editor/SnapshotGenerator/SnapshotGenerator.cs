@@ -49,14 +49,15 @@ namespace BlankProject.Editor
             {
                 Vector3f pos = new Vector3f(wi.transform.position.x, wi.transform.position.y, wi.transform.position.z);
                 Vector2f mapCenter = new Vector2f(wi.centerCellTransform.position.x, wi.centerCellTransform.position.z);
-                var gameState = LeyLineEntityTemplates.GameState(pos, wi.WorldIndex, mapCenter);
+                var gameState = LeyLineEntityTemplates.GameState(pos, wi, mapCenter);
                 snapshot.AddEntity(gameState);
             }
         }
 
         private static void AddManaliths(Snapshot snaphot)
         {
-            foreach (ManalithInitializer m in Object.FindObjectsOfType<ManalithInitializer>())
+
+                foreach (ManalithInitializer m in Object.FindObjectsOfType<ManalithInitializer>())
             {
                 var circle = new CellAttributeList
                 {
@@ -79,13 +80,18 @@ namespace BlankProject.Editor
 
                 Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);
                 uint worldIndex = m.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
-                var manalith = LeyLineEntityTemplates.Manalith(pos, circle, worldIndex, m.baseEnergyGain);
+                var manalith = LeyLineEntityTemplates.Manalith(pos, circle, worldIndex);
                 snaphot.AddEntity(manalith);
             }
         }
 
         private static void AddCellGrid(Snapshot snapshot)
         {
+            EditorWorldIndex temp = null;
+            foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
+            {
+                temp = wi;
+            }
             foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
             {
                 var neighbours = new CellAttributeList
@@ -108,7 +114,31 @@ namespace BlankProject.Editor
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
                 uint worldIndex = c.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
                 int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().IsManalithUnit, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
+                UnitToSpawnEditor spawnComp = c.GetComponent<UnitToSpawnEditor>();
+                uint key = 0;
+                if (spawnComp.IsUnitSpawn == true && temp != null)
+                {
+                    if(spawnComp.IsManalithUnit == true)
+                    {
+                        uint i = 0;
+                        foreach(UnitDataSet a in temp.Maps[0].ManalithUnits)
+                        {
+                            if (a.UnitName == spawnComp.UnitName) key = i;
+                            i++;
+                        }
+                    }
+                    else
+                    {
+                        uint i = 0;
+                        foreach (UnitDataSet a in temp.Maps[0].NeutralUnits)
+                        {
+                            if (a.UnitName == spawnComp.UnitName) key = i;
+                            i++;
+                        }
+                    }
+                }
+
+                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, spawnComp, key);
                 snapshot.AddEntity(cell);
             }
         }

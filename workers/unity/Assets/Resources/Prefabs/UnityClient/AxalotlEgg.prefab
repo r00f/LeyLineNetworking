@@ -4937,6 +4937,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Axalotl Egg
+  UnitDescription: 'An egg with an axalotl inside. '
   VisionRange: 2
   BaseHealth: 40
   EnergyBaseIncome: 0
@@ -5008,6 +5009,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 8846974289181975837}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 8045395822357648005}
   AnimationEvents: {fileID: 4470363488793254478}
@@ -5184,6 +5186,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 0}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 4760567433196348802}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0
