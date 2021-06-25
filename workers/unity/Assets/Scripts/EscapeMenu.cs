@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class EscapeMenu : MonoBehaviour
 {
     public Button ExitGameButton;
+    public Button ConcedeButton;
+
 
     [Header("Cam Settings")]
     public GameObject CamSettingsPanel;

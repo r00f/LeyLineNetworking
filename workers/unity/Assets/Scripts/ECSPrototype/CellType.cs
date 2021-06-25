@@ -98,6 +98,8 @@ namespace LeyLineHybridECS
                     isTaken.Value = true;
                 }
 
+                GetComponent<EditorIsCircleCell>().Value = false;
+
                 if (objectsOnTile.Count > 0)
                 {
                     for (int b = objectsOnTile.Count - 1; b >= 0; b--)

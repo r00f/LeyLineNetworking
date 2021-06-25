@@ -259,6 +259,9 @@ namespace LeyLineHybridECS
                 leyLinePath.Add(occupiedCell);
                 leyLinePath.Reverse();
                 RemovePathOverLap();
+                RemovePathOverLap();
+                RemovePathOverLap();
+                UpdatePathRenderer();
                 //connectedManaLith.GetComponentInChildren<ManalithInitializer>().connectedLeyLineRenderers.Add(leyLinePathRenderer);
             }
             else
@@ -281,8 +284,6 @@ namespace LeyLineHybridECS
                     leyLinePath.RemoveAt(0);
                 }
             }
-
-            UpdatePathRenderer();
         }
 
         #region LineRendererUpdates

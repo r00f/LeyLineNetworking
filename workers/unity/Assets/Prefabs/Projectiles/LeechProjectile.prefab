@@ -5456,10 +5456,10 @@ MonoBehaviour:
   ExplosionSpawnTransform: {fileID: 8831886338761778561}
   CollisionDetection: {fileID: 5424231664897800072}
   TravellingCurveCutOff: 0
-  TargetYOffset: 1.15
+  TargetYOffset: 0.5
   ArriveInstantly: 0
   MovementDelay: 0
-  DestroyAfterSeconds: 1.7
+  DestroyAfterSeconds: 2.3
   DestroyAtDestination: 0
   TransformToMove: {fileID: 0}
   TransformToRotate: {fileID: 0}
@@ -5476,7 +5476,7 @@ MonoBehaviour:
   RigidbodiesToLaunch:
   - {fileID: 568818124652697954}
   - {fileID: 1572524243699400934}
-  LaunchForce: 15
+  LaunchForce: 14
   ContractSpeed: 0
   ContractUpForce: 0
   SpringJoints: []

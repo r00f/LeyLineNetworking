@@ -61,7 +61,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex , uint inbaseIncome)
+    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex)
     {
         var pos = new Position.Snapshot
         {
@@ -94,7 +94,6 @@ public static class LeyLineEntityTemplates {
         var circle = new Manalith.Snapshot
         {
             CircleCoordinatesList = circleCellCoords,
-            BaseIncome = inbaseIncome,
             Manalithslots = slots
         };
 
@@ -215,7 +214,8 @@ public static class LeyLineEntityTemplates {
             MaxEnergy = 80,
             Energy = 40,
             BaseIncome = 0,
-            Income = 0
+            Income = 0,
+            IncomeAdded = true
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
@@ -490,6 +490,7 @@ public static class LeyLineEntityTemplates {
         {
             var manalithUnit = new ManalithUnit.Snapshot();
             template.AddComponent(manalithUnit, WorkerUtils.UnityGameLogic);
+            energy.Harvesting = true;
         }
         else
         {

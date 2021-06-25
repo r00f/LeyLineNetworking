@@ -143,6 +143,8 @@ namespace LeyLineHybridECS
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.waiting); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
 
+            UIRef.EscapeMenu.ConcedeButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.conceded); });
+
             for (int pi = 0; pi < UIRef.HelpPanelComponent.TabButtons.Count; pi++)
             {
                 //Debug.Log("Add Esc button listener with index: " + pi);

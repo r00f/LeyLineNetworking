@@ -33,5 +33,6 @@ enum PlayerStateEnum {
 	unit_selected = 1;
 	waiting_for_target = 2;
 	ready = 3;
+    conceded = 4;
 
 }

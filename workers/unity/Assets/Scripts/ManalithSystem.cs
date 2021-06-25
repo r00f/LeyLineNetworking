@@ -153,7 +153,7 @@ public class ManalithSystem : ComponentSystem
 
                 if (manalithComp.StateChange)
                 {
-                    Debug.Log("ManalithStateChange");
+                    //Debug.Log("ManalithStateChange");
 
                     var oldFact = factionref.Faction;
                     //Debug.Log("ManalithStateChange: Update manalith facion and units on slots.");
@@ -345,7 +345,7 @@ public class ManalithSystem : ComponentSystem
         {
             if (unitId.EntityId.Id == inUnitId)
             {
-                Debug.Log("UpdateManalithUnit");
+                //Debug.Log("UpdateManalithUnit");
                 unitFaction.Faction = faction;
                 m_node.CombinedEnergyGain += energy.EnergyIncome;
                 vision.RequireUpdate = true;

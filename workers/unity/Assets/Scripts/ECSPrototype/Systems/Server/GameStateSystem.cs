@@ -84,8 +84,20 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
+
+
+                        Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
+                        {
+                            if (playerVision.RevealVision)
+                            {
+                                playerVision.RevealVision = false;
+                                playerVision.RequireUpdate = true;
+                            }
+
+                        });
+
                         //Debug.Log("WaitingForPlayers");
-                        #if UNITY_EDITOR
+#if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1)
                         {
@@ -217,12 +229,6 @@ namespace LeyLineHybridECS
                         //check if any hero is dead to go into gameOver
                         if (CheckAnyHeroDead(gameStateWorldIndex.Value))
                         {
-                            Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
-                            {
-                                playerVision.RevealVision = true;
-                                playerVision.RequireUpdate = true;
-                            });
-
 #if UNITY_EDITOR
 
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex.Value, true);
@@ -243,13 +249,6 @@ namespace LeyLineHybridECS
 
                                 Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref Vision.Component playerVision) =>
                                 {
-                                    /*
-                                    if(playerVision.RevealVision)
-                                    {
-                                        playerVision.RequireUpdate = true;
-                                        playerVision.RevealVision = false;
-                                    }
-                                    */
                                     m_ComponentUpdateSystem.SendEvent(
                                         new Vision.UpdateClientVisionEvent.Event(),
                                         playerId.EntityId);
@@ -282,8 +281,33 @@ namespace LeyLineHybridECS
                         break;
                     case GameStateEnum.game_over:
 
+                        Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
+                        {
+                            if(!playerVision.RevealVision)
+                            {
+                                playerVision.RevealVision = true;
+                                playerVision.RequireUpdate = true;
+                            }
+
+                        });
+
+
                         break;
                 }
+
+                uint concededFaction = PlayerWithFactionConceded(gameStateWorldIndex.Value);
+
+                //if any player concedes in any step, go to gameoverstate
+                if (gameState.CurrentState != GameStateEnum.game_over && concededFaction != 0)
+                {
+                    if (concededFaction == 1)
+                        gameState.WinnerFaction = 2;
+                    else
+                        gameState.WinnerFaction = 1;
+
+                    gameState.CurrentState = GameStateEnum.game_over;
+                }
+
 
 #if UNITY_EDITOR
                 if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
@@ -316,6 +340,25 @@ namespace LeyLineHybridECS
             });
 
             return b;
+        }
+
+        private uint PlayerWithFactionConceded(uint gameStateWorldIndex)
+        {
+            uint f = 0;
+
+            Entities.With(m_PlayerData).ForEach((ref PlayerState.Component playerState, ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction) =>
+            {
+                if (playerWorldIndex.Value == gameStateWorldIndex)
+                {
+                    if (playerState.CurrentState == PlayerStateEnum.conceded)
+                    {
+                        f = playerFaction.Faction;
+                        playerState.CurrentState = PlayerStateEnum.waiting;
+                    }
+                }
+            });
+
+            return f;
         }
 
         private float HighestExecuteTime(GameStateEnum step, uint gameStateWorldIndex, float minStepTime)
