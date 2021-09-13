@@ -292,7 +292,6 @@ MonoBehaviour:
     on its circle. Once you control it it gains you energy.
   VisionRange: 5
   BaseHealth: 100
-  EnergyBaseIncome: 0
   EnergyIncome: 3
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -357,7 +356,7 @@ MonoBehaviour:
   TeamColorMeshesComp: {fileID: 4440954350749950428}
   IsVisibleRefComp: {fileID: 9121732361173887378}
   BaseDataSetComp: {fileID: 3289465276142304449}
-  HeadUIReferencesComp: {fileID: 1130299993275380547}
+  HeadUIRef: {fileID: 1130299993275380547}
   AnimPortraitComp: {fileID: 930118610718755571}
   UnitEffectsComp: {fileID: -6603811149368157288}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,

@@ -84,8 +84,7 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
-
-
+                        /*
                         Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
                         {
                             if (playerVision.RevealVision)
@@ -95,7 +94,7 @@ namespace LeyLineHybridECS
                             }
 
                         });
-
+                        */
                         //Debug.Log("WaitingForPlayers");
 #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
@@ -410,6 +409,7 @@ namespace LeyLineHybridECS
 
         private void UpdateMovedUnitCells(uint gameStateWorldIndex)
         {
+            //Heap allocation - needs to be replaced
             Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
             HashSet<Vector3f> unitCoordHash = new HashSet<Vector3f>();
 

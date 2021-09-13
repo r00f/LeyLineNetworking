@@ -21,12 +21,14 @@ public class ResourceSystem : ComponentSystem
 
     Settings settings;
     CleanupSystem m_CleanupSystem;
+    ComponentUpdateSystem componentUpdateSystem;
 
     protected override void OnCreate()
     {
         base.OnCreate();
         //var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName).GetComponent<Unit_BaseDataSet>();
         settings = Resources.Load<Settings>("Settings");
+        componentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
 
         projectorGroup = Worlds.GameLogicWorld.CreateEntityQuery(
 
@@ -136,7 +138,7 @@ public class ResourceSystem : ComponentSystem
 
     public void AddEnergy(uint playerFaction, uint energyAmount)
     {
-        Entities.With(m_PlayerData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -148,13 +150,19 @@ public class ResourceSystem : ComponentSystem
                 {
                     energyComp.Energy = energyComp.MaxEnergy;
                 }
+
+                //SEND ENERGYCHANGED EVENT
+                componentUpdateSystem.SendEvent(
+                new PlayerEnergy.EnergyChangeEvent.Event(),
+                playerId.EntityId);
+
             }
         });
     }
 
     public void SubstactEnergy(uint playerFaction, uint energyAmount)
     {
-        Entities.With(m_PlayerData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -167,6 +175,14 @@ public class ResourceSystem : ComponentSystem
                 {
                     energyComp.Energy = 0;
                 }
+
+                //SEND ENERGYCHANGEDEVENT
+                
+                componentUpdateSystem.SendEvent(
+                new PlayerEnergy.EnergyChangeEvent.Event(),
+                playerId.EntityId);
+                
+
             }
         });
     }

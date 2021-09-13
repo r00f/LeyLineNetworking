@@ -23,9 +23,14 @@ namespace LeyLineHybridECS
 
         EntityQuery m_PlayerData;
 
+        Settings settings;
+
         protected override void OnCreate()
         {
             base.OnCreate();
+            settings = Resources.Load<Settings>("Settings");
+
+
             var playerAddedDesc = new EntityQueryDesc
             {
                 None = new ComponentType[] { typeof(PlayerStateData) },
@@ -89,7 +94,14 @@ namespace LeyLineHybridECS
                             c.Coords = gameStatePos.Coords;
                     });
 
-                    factionComp = SetPlayerFaction(wIndex);
+                    if (settings.ForcePlayerFaction == 0)
+                        factionComp = SetPlayerFaction(wIndex);
+                    else
+                        factionComp = new FactionComponent.Component
+                        {
+                            Faction = settings.ForcePlayerFaction
+                        };
+
                     pos.Coords = c.Coords;
                 }
 

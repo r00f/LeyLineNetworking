@@ -13,7 +13,7 @@ public class UnitComponentReferences : MonoBehaviour
     public TeamColorMeshes TeamColorMeshesComp;
     public IsVisibleReferences IsVisibleRefComp;
     public UnitDataSet BaseDataSetComp;
-    public UnitHeadUIReferences HeadUIReferencesComp;
+    public UnitHeadUIReferences HeadUIRef;
     public AnimatedPortraitReference AnimPortraitComp;
     public UnitEffects UnitEffectsComp;
     
@@ -35,7 +35,7 @@ public class UnitComponentReferences : MonoBehaviour
         TeamColorMeshesComp = GetComponent<TeamColorMeshes>();
         IsVisibleRefComp = GetComponent<IsVisibleReferences>();
         BaseDataSetComp = GetComponent<UnitDataSet>();
-        HeadUIReferencesComp = GetComponent<UnitHeadUIReferences>();
+        HeadUIRef = GetComponent<UnitHeadUIReferences>();
         AnimPortraitComp = GetComponent<AnimatedPortraitReference>();
         UnitEffectsComp = GetComponent<UnitEffects>();
 

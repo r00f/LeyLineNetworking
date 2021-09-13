@@ -10475,6 +10475,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   AnimStateEffectHandlers: []
   WeaponTransform: {fileID: 0}
+  IsMoving: 0
   CurrentLockedAction: {fileID: 0}
   Animator: {fileID: 776014977965236327}
   AnimationEvents: {fileID: 6796634467863557578}
@@ -10586,9 +10587,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   UnitName: Effigy
+  UnitDescription: 
   VisionRange: 5
   BaseHealth: 50
-  EnergyBaseIncome: 0
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -10658,7 +10659,7 @@ MonoBehaviour:
   TeamColorMeshesComp: {fileID: 7033582344101636191}
   IsVisibleRefComp: {fileID: 2498331019447001105}
   BaseDataSetComp: {fileID: 8186342005102589250}
-  HeadUIReferencesComp: {fileID: 6022047490272934592}
+  HeadUIRef: {fileID: 6022047490272934592}
   AnimPortraitComp: {fileID: 5824645674654827376}
   UnitEffectsComp: {fileID: 8676098010572886555}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
@@ -10692,6 +10693,7 @@ MonoBehaviour:
   ShieldBrakeParticleSystem: {fileID: 1393841048670574437, guid: 2cb8262a927bbc5479d82b17e9c9e206,
     type: 3}
   SecondWindParticleSystemInstance: {fileID: 9064779284468730015}
+  HarvestingEnergyParticleSystem: {fileID: 0}
   AxaShield: {fileID: 6730978985638442407}
   HitPosition: {x: 0, y: 0, z: 0}
   CombinedArmor: 0

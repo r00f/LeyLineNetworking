@@ -15,11 +15,12 @@ using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 using Cell;
 using Improbable;
+using Unity.Jobs;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-    public class UISystem : ComponentSystem
+    public class UISystem : JobComponentSystem
     {
         //EventSystem m_EventSystem;
         HighlightingSystem m_HighlightingSystem;
@@ -141,7 +142,7 @@ namespace LeyLineHybridECS
 
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.TurnStatePnl.CacelGraceTime);});
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.waiting); });
-            UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlights(); });
+            UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlightsNoIn(); });
 
             UIRef.EscapeMenu.ConcedeButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.conceded); });
 
@@ -283,30 +284,20 @@ namespace LeyLineHybridECS
             return inButton;
         }
 
-        protected override void OnUpdate()
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
-                return;
+                return inputDeps;
 
             #region GetData
-
-            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-            var authPlayersEnergy = m_AuthoritativePlayerData.ToComponentDataArray<PlayerEnergy.Component>(Allocator.TempJob);
-            var authPlayersFaction = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-            var authPlayersState = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
-            var playerHighlightingDatas = m_AuthoritativePlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
-
             var authPlayerCameras = m_AuthoritativePlayerData.ToComponentArray<Moba_Camera>();
             var authPlayerCam = authPlayerCameras[0];
 
-            var gameState = gameStates[0];
-            var authPlayerFaction = authPlayersFaction[0].Faction;
-            var authPlayerState = authPlayersState[0];
-            var playerEnergy = authPlayersEnergy[0];
-            var playerHigh = playerHighlightingDatas[0];
-
-            //GameObject unitInfoPanel = UIRef.InfoEnabledPanel;
-
+            var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+            var authPlayerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
+            var authPlayerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
+            var playerEnergy = m_AuthoritativePlayerData.GetSingleton<PlayerEnergy.Component>();
+            var playerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
             #endregion
 
             var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
@@ -315,10 +306,9 @@ namespace LeyLineHybridECS
 
             if (initMapEvents.Count > 0)
             {
-                m_SendActionRequestSystem.RevealPlayerVision();
                 ClearUnitUIElements();
 
-                switch (authPlayersFaction[0].TeamColor)
+                switch (authPlayerFaction.TeamColor)
                 {
                     case TeamColorEnum.blue:
                         UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[1];
@@ -385,10 +375,10 @@ namespace LeyLineHybridECS
                 m_SendActionRequestSystem.RevealPlayerVision();
                 dollyCam.RevealVisionTrigger = false;
             }
-
+            
             if (cleanUpStateEvents.Count > 0)
             {
-                Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
+                Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
                 {
                     //var energy = EntityManager.GetComponentData<Energy.Component>(e);
                     var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
@@ -400,12 +390,16 @@ namespace LeyLineHybridECS
 
                     if (unitHeadUIRef.UnitHeadHealthBarInstance)
                         ResetHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, health);
-                });
+                })
+                .WithoutBurst()
+                .Run();
 
-                Entities.With(m_ManalithUnitData).ForEach((UnitHeadUIReferences unitHeadUIRef, ref FactionComponent.Component faction) =>
+                Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((UnitHeadUIReferences unitHeadUIRef, ref FactionComponent.Component faction, ref ManalithUnit.Component m) =>
                 {
                     unitHeadUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) faction.Faction];
-                });
+                })
+                .WithoutBurst()
+                .Run();
 
                 if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
                 {
@@ -440,28 +434,13 @@ namespace LeyLineHybridECS
                 UIRef.TurnStatePnl.EnemyReadyDot.color = UIRef.EnemyColor;
             }
 
-            HandleKeyCodeInput(gameState.CurrentState);
-
             HandleTutorialVideoPlayers();
-
-            /*
-            if (!UIRef.UIActive)
-            {
-                gameStates.Dispose();
-                authPlayersEnergy.Dispose();
-                authPlayersFaction.Dispose();
-                authPlayersState.Dispose();
-                playerHighlightingDatas.Dispose();
-                return;
-            }
-            */
-
 
             #region Unitloops
 
-            UnitLoop(authPlayerState, authPlayerFaction, gameState, playerEnergy, playerHigh);
+            UnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, playerEnergy, playerHigh);
 
-            ManalithUnitLoop(authPlayerState, authPlayerFaction, gameState, playerEnergy, playerHigh);
+            ManalithUnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, playerEnergy, playerHigh);
 
             #endregion
 
@@ -503,7 +482,7 @@ namespace LeyLineHybridECS
                 case GameStateEnum.planning:
                     foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                     {
-                        UpdateUnitGroupBauble(g, authPlayersFaction[0], g.transform.GetSiblingIndex());
+                        UpdateUnitGroupBauble(g, authPlayerFaction, g.transform.GetSiblingIndex());
                     }
                     break;
                 case GameStateEnum.interrupt:
@@ -553,7 +532,7 @@ namespace LeyLineHybridECS
                             //TODO: ADD GAMEOVER SOUND EFFECTS
                             FireStepChangedEffects("Draw", settings.FactionColors[0], UIRef.ExecuteStepChangePath);
                         }
-                        else if (gameState.WinnerFaction == authPlayerFaction)
+                        else if (gameState.WinnerFaction == authPlayerFaction.Faction)
                         {
                             FireStepChangedEffects("Victory", Color.green, UIRef.ExecuteStepChangePath);
                         }
@@ -584,7 +563,7 @@ namespace LeyLineHybridECS
                     UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
                     UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
                 }
-                else if (gameState.WinnerFaction == authPlayerFaction)
+                else if (gameState.WinnerFaction == authPlayerFaction.Faction)
                 {
                     if (!UIRef.GameOverPanel.activeSelf)
                     {
@@ -610,16 +589,11 @@ namespace LeyLineHybridECS
 
             #endregion
 
-
-
             #region PlayerLoops
 
             HandleMenuSettings(authPlayerCam);
 
             UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
-
-            //FillBarToDesiredValue(UIRef.HeroCurrentEnergyFill, (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount, UIRef.EnergyLerpSpeed);
-
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
@@ -678,9 +652,9 @@ namespace LeyLineHybridECS
             }
             
             //all players
-            Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
+            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
             {
-                if (authPlayerFaction == faction.Faction)
+                if (authPlayerFaction.Faction == faction.Faction)
                 {
                     if (playerState.CurrentState == PlayerStateEnum.ready)
                     {
@@ -700,12 +674,12 @@ namespace LeyLineHybridECS
 
                         UIRef.TurnStatePnl.FriendlyReadyDot.color -= new Color(0, 0, 0, UIRef.TurnStatePnl.ReadySwooshFadeOutSpeed * Time.DeltaTime);
 
-                        UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
+                        //UIRef.SlideOutUIAnimator.SetBool("SlideOut", true);
                     }
                     else if (gameState.CurrentState == GameStateEnum.planning)
                     {
                         UIRef.TurnStatePnl.GOButtonScript.PlayerReady = false;
-                        UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
+                        //UIRef.SlideOutUIAnimator.SetBool("SlideOut", false);
                     }
                 }
                 else
@@ -745,13 +719,15 @@ namespace LeyLineHybridECS
                         UIRef.OpponentReady = false;
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
             #endregion
 
             UIRef.TurnStatePnl.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
 
             //Handle Ropes
-            if (gameStates[0].CurrentRopeTime < gameStates[0].RopeTime)
+            if (gameState.CurrentRopeTime < gameState.RopeTime)
             {
                 UIRef.EnemyRopeBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.TurnStatePnl.EnemyRope.fillAmount * UIRef.EnemyRopeBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyRopeBarParticle.Rect.anchoredPosition.y);
                 UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition = new Vector2(UIRef.TurnStatePnl.FriendlyRope.fillAmount * UIRef.FriendlyRopeBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition.y);
@@ -765,7 +741,7 @@ namespace LeyLineHybridECS
                     if (!UIRef.TurnStatePnl.RopeLoopEmitter.IsPlaying())
                         UIRef.TurnStatePnl.RopeLoopEmitter.Play();
 
-                    UIRef.TurnStatePnl.RopeLoopEmitter.SetParameter("FadeInFastTikTok", 1 - gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
+                    UIRef.TurnStatePnl.RopeLoopEmitter.SetParameter("FadeInFastTikTok", 1 - gameState.CurrentRopeTime / gameState.RopeTime);
 
                     if (authPlayerState.CurrentState == PlayerStateEnum.ready)
                     {
@@ -773,7 +749,7 @@ namespace LeyLineHybridECS
                         UIRef.TurnStatePnl.RopeTimeText.color = UIRef.FriendlyColor;
 
                         if (!UIRef.OpponentReady)
-                            UIRef.TurnStatePnl.FriendlyRope.fillAmount = 1 - (gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
+                            UIRef.TurnStatePnl.FriendlyRope.fillAmount = 1 - (gameState.CurrentRopeTime / gameState.RopeTime);
                     }
                     else
                     {
@@ -781,7 +757,7 @@ namespace LeyLineHybridECS
                         UIRef.EnemyRopeBarParticle.LoopPS.Play(false);
                         UIRef.TurnStatePnl.RopeTimeText.color = UIRef.EnemyColor;
                         UIRef.TurnStatePnl.FriendlyRope.fillAmount = 0;
-                        UIRef.TurnStatePnl.EnemyRope.fillAmount = 1 - (gameStates[0].CurrentRopeTime / gameStates[0].RopeTime);
+                        UIRef.TurnStatePnl.EnemyRope.fillAmount = 1 - (gameState.CurrentRopeTime / gameState.RopeTime);
                     }
                 }
                 else
@@ -843,16 +819,11 @@ namespace LeyLineHybridECS
                 UIRef.TurnStatePnl.RopeLoopEmitter.Stop();
             }
 
-            gameStates.Dispose();
+            m_AuthoritativePlayerData.SetSingleton(playerHigh);
 
-            #region authPlayerData
-            authPlayersEnergy.Dispose();
-            authPlayersFaction.Dispose();
-            authPlayersState.Dispose();
-            //playerHighlightingDatas[0] = playerHigh;
-            //m_AuthoritativePlayerData.CopyFromComponentDataArray(playerHighlightingDatas);
-            playerHighlightingDatas.Dispose();
-            #endregion
+            HandleKeyCodeInput(gameState.CurrentState);
+
+            return inputDeps;
         }
 
         public void UpdateHoverTooltip()
@@ -885,7 +856,7 @@ namespace LeyLineHybridECS
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.With(m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
+            Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
             {
                 uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -1026,9 +997,6 @@ namespace LeyLineHybridECS
                     {
                         if (isVisible.Value == 1)
                         {
-                            if (!unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
-                                unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(true);
-
                             foreach (GameObject g in unitHeadUIRef.UnitHeadUIInstance.EnableIfVisibleGameObjects)
                             {
                                 if (!g.activeSelf)
@@ -1088,19 +1056,23 @@ namespace LeyLineHybridECS
                     {
                         if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
                         {
-                            HeadUILockedActionDisplay display = unitHeadUIRef.UnitHeadUIInstance.ActionDisplay;
-                            if (actions.LockedAction.Index < stats.Actions.Count)
-                            {
-                                display.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
-                                display.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
-                            }
-                            else
-                            {
-                                int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
-                                display.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
-                                display.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
-                            }
-                            display.gameObject.SetActive(true);
+                            //if(!unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.activeSelf)
+                            //{
+
+                                if (actions.LockedAction.Index < stats.Actions.Count)
+                                {
+                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
+                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
+                                }
+                                else
+                                {
+                                    int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
+                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
+                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
+                                }
+
+                                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
+                            //}
                         }
                         else
                         {
@@ -1108,31 +1080,31 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
+        }
+
+        public void DeactivateActionDisplay(Entity e, float buffertime)
+        {
+            if (buffertime > 0)
+            {
+                buffertime -= Time.DeltaTime;
+                DeactivateActionDisplay(e, buffertime);
+            }
+            else
+            {
+                var unitHeadUIRef = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
+                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+            }
         }
 
         public void FillUnitButtons(Actions.Component actions, UnitDataSet stats, uint faction, uint authPlayerFaction, long unitId, PlayerEnergy.Component playerEnergy)
         {
-            //UIRef.SAInfoPanel.SetActive(false);
-
             if (faction == authPlayerFaction)
             {
                 var spawnActionCount = stats.SpawnActions.Count;
                 var actionCount = stats.Actions.Count;
-
-
-                //UIRef.SAInfoPanel.SetActive(true);
-
-                /*
-                if (actions.CurrentSelected.Index == -3 && actions.LockedAction.Index == -3)
-                {
-                    UIRef.SAInfoPanel.SetActive(false);
-                }
-                else
-                {
-                    
-                }
-                */
 
                 if (stats.SpawnActions.Count == 0)
                 {
@@ -1225,7 +1197,7 @@ namespace LeyLineHybridECS
 
         public void ManalithUnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.With(m_ManalithUnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
+            Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction, ref ManalithUnit.Component m) =>
             {
                 uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -1303,13 +1275,15 @@ namespace LeyLineHybridECS
                         }
                         unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
                     }
-                    else
+                    else if(unitHeadUIRef.UnitHeadUIInstance.ActionDisplay)
                     {
                         unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
                     }
                 }
 
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
         public void SetPortraitInfo(UnitDataSet stats, uint faction, List<AnimationClip> animatedPortraits, Color teamColor, bool active)
@@ -1340,7 +1314,7 @@ namespace LeyLineHybridECS
 
         protected void PopulateManlithInfoHexes(uint selectedUnitId, uint playerFaction)
         {
-            Entities.With(m_ManalithData).ForEach((ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
+            Entities.WithStoreEntityQueryInField(ref m_ManalithData).ForEach((ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
             {
                 if (selectedUnitId == manalith.ManalithUnitId)
                 {
@@ -1348,7 +1322,7 @@ namespace LeyLineHybridECS
 
                     if (faction.Faction == playerFaction)
                     {
-                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.text = "+" + manalith.CombinedEnergyGain.ToString();
+                        UIRef.BottomLeftPortrait.ManalithEnergyGainText.text = "+" + manalith.CombinedEnergyGain;
                         //UIRef.BottomLeftPortrait.ManalithEnergyGainText.enabled = true;
                         UIRef.UnitInfoPanel.IncomeValue.text = manalith.CombinedEnergyGain.ToString();
                     }
@@ -1397,7 +1371,9 @@ namespace LeyLineHybridECS
                     }
                 }
             
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
             //set position of overhead manalith objects??
             //UpdateLeyLineTooltipPosition(clientData.IngameIconRef.RectTrans.anchoredPosition);
@@ -1476,7 +1452,7 @@ namespace LeyLineHybridECS
                 UIRef.IngameSFXBus.setMute(!UIRef.UIActive);
                 UIRef.UINonMapSFXBus.setMute(!UIRef.UIActive);
                 UIRef.EnvironmentBus.setMute(!UIRef.UIActive);
-                UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
+                //UIRef.UIMainPanel.SetActive(!UIRef.UIMainPanel.activeSelf);
                 InvertMenuPanelActive(UIRef.MapPanel.gameObject);
             }
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -1489,18 +1465,16 @@ namespace LeyLineHybridECS
             {
                 UIRef.UIActive = !UIRef.UIActive;
                 UIRef.UISFXBus.setMute(!UIRef.UIActive);
-                UIRef.Canvas.enabled = !UIRef.Canvas.enabled;
+                SetUserInterfaceEnabled(UIRef.UIActive);
             }
 
             if (gameState == GameStateEnum.planning)
             {
-
                 if (Input.GetKeyDown(KeyCode.Space))
                 {
                     if (UIRef.TurnStatePnl.GOButtonScript.Button.interactable)
                         UIRef.TurnStatePnl.GOButtonScript.Button.onClick.Invoke();
                 }
-
 
                 if (Input.GetKeyDown(KeyCode.Tab) && UIRef.SwapActionButton.gameObject.activeSelf)
                 {
@@ -1581,12 +1555,9 @@ namespace LeyLineHybridECS
 
         void SetSelectedUnitId(long unitId)
         {
-            var playerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
-            var playerState = playerStates[0];
+            var playerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
             playerState.SelectedUnitId = unitId;
-            playerStates[0] = playerState;
-            m_AuthoritativePlayerData.CopyFromComponentDataArray(playerStates);
-            playerStates.Dispose();
+            m_AuthoritativePlayerData.SetSingleton(playerState);
         }
 
         public Vector3 WorldToUISpace(Canvas parentCanvas, Vector3 worldPos)
@@ -1738,6 +1709,14 @@ namespace LeyLineHybridECS
                     }
                 }
 
+            }
+        }
+
+        public void SetUserInterfaceEnabled(bool enabled)
+        {
+            for(int i = 0; i < UIRef.Canvases.Count - 1; i++)
+            {
+                UIRef.Canvases[i].enabled = enabled;
             }
         }
 
@@ -2281,64 +2260,39 @@ namespace LeyLineHybridECS
 
         public void CancelLockedAction()
         {
-            var playerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
-            var playerFactions = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-            var playerState = playerStates[0];
-            var playerFaction = playerFactions[0];
+            var playerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
+            var playerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
 
-            /*
-            if (playerState.CurrentState != PlayerStateEnum.unit_selected)
-            {
-                m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.unit_selected);
-            }
-            */
-
-            Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions) =>
+            Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId && faction.Faction == playerFaction.Faction)
                 {
-
-                    //m_SendActionRequestSystem
-                    //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                     if (actions.LockedAction.Index != -3 || actions.CurrentSelected.Index != -3)
                     {
                         m_SendActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                         //Call methods so line/target gets disabled instantly
                         m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
-                        //playerState.UnitTargets.Remove(unitId.EntityId.Id);
-                        //ClearSelectedActionToolTip();
                     }
-
-
-                    //EntityManager.AddComponent<RightClickEvent>(e);
-                    //mouseState.RightClickEvent = 1;
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
 
-            Entities.With(m_ManalithUnitData).ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions) =>
+            Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions, ref ManalithUnit.Component m) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId && faction.Faction == playerFaction.Faction)
                 {
-                    //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                     if (actions.LockedAction.Index != -3 || actions.CurrentSelected.Index != -3)
                     {
                         m_SendActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                         //Call methods so line/target gets disabled instantly
                         m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
-                        //playerState.UnitTargets.Remove(unitId.EntityId.Id);
-                        //ClearSelectedActionToolTip();
-
                     }
-
-
-                    //EntityManager.AddComponent<RightClickEvent>(e);
-                   // mouseState.RightClickEvent = 1;
                 }
-            });
-
-            playerFactions.Dispose();
-            playerStates.Dispose();
+            })
+            .WithoutBurst()
+            .Run();
         }
     }
 }

@@ -145,11 +145,11 @@ public class AddComponentsSystem : ComponentSystem
         if (m_PlayerStateData.CalculateEntityCount() == 0)
             return;
 
-        var authPlayerWorldIndexes = m_PlayerStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-        var playerFactions = m_PlayerStateData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
+        var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
+        var authPlayerWorldIndex = m_PlayerStateData.GetSingleton<WorldIndex.Component>();
 
-        var playerFaction = playerFactions[0];
-        var authPlayerWorldIndex = authPlayerWorldIndexes[0].Value;
+
+
 
         Entities.With(m_PlayerAddedData).ForEach((Entity entity, HeroTransform htrans, ref WorldIndex.Component pWorldIndex) =>
         {
@@ -339,9 +339,6 @@ public class AddComponentsSystem : ComponentSystem
                 PostUpdateCommands.AddComponent(entity, new MapPopulatedIdentifyier{ });
             }
         });
-
-        authPlayerWorldIndexes.Dispose();
-        playerFactions.Dispose();
     }
 
     void PopulateMap(MinimapScript miniMap, byte isVisible, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)

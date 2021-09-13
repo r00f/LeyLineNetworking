@@ -5,6 +5,7 @@ using UnityEngine;
 [CreateAssetMenu, System.Serializable]
 public class Settings : ScriptableObject
 {
+    public uint ForcePlayerFaction;
     public List<Color> FactionColors;
     public List<Color> FactionIncomeColors;
     public List<Color> FactionMapColors;

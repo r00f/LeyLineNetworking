@@ -70,7 +70,9 @@ public class MouseStateSystem : JobComponentSystem
             return inputDeps;
         }
 
-        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+        var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+
+
 
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
@@ -81,13 +83,13 @@ public class MouseStateSystem : JobComponentSystem
             float dist = Vector3.Distance(ray.origin, hit.point);
             Debug.DrawRay(ray.origin, ray.direction * dist, Color.red);
 
-            Vector2 mapCenter = new Vector2(gameStates[0].MapCenter.X, gameStates[0].MapCenter.Y);
+            Vector2 mapCenter = new Vector2(gameState.MapCenter.X, gameState.MapCenter.Y);
 
             Vector2 mouseHitXZPos = (mapCenter - new Vector2(hit.point.x, hit.point.z)) * -1;
 
             Vector3f posToCubeCoord = CellGridMethods.PosToCube(mouseHitXZPos);
 
-            Vector3 CubeCoordToWorldPos = CellGridMethods.CubeToPos(posToCubeCoord, gameStates[0].MapCenter);
+            Vector3 CubeCoordToWorldPos = CellGridMethods.CubeToPos(posToCubeCoord, gameState.MapCenter);
 
             if (!eventSystem.IsPointerOverGameObject())
             {
@@ -103,8 +105,6 @@ public class MouseStateSystem : JobComponentSystem
                 }
             }
 
-            gameStates.Dispose();
-
             var mouseStateJob = new MouseStateJob
             {
                 PointerOverGO = eventSystem.IsPointerOverGameObject(),
@@ -114,15 +114,13 @@ public class MouseStateSystem : JobComponentSystem
                 MouseLeftButtonDown = Input.GetButtonDown("Fire1"),
                 MouseRightButtonDown = Input.GetButtonDown("Fire2"),
                 Hit = hit,
-                PlayerStates = m_AuthoritativePlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob),
-                PlayerFactions = m_AuthoritativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob),
+                PlayerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>(),
                 ECBuffer = entityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter()
             };
             return mouseStateJob.Schedule(this, inputDeps);
         }
         else
         {
-            gameStates.Dispose();
             return inputDeps;
         }
     }
@@ -139,27 +137,22 @@ public class MouseStateSystem : JobComponentSystem
         public bool MouseRightButtonDown;
         public EntityCommandBuffer.ParallelWriter ECBuffer;
         [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
-        public NativeArray<FactionComponent.Component> PlayerFactions;
-        [NativeDisableParallelForRestriction, DeallocateOnJobCompletion]
-        public NativeArray<PlayerState.Component> PlayerStates;
+        public PlayerState.Component PlayerState;
 
         public void Execute(Entity entity, int index, ref Position.Component pos, ref MouseState mouseState, ref MouseVariables mouseVars, ref CubeCoordinate.Component coord, ref SpatialEntityId id, ref MarkerState markerState)
         {
-            var playerFaction = PlayerFactions[0];
-            var playerState = PlayerStates[0];
-
             //Only MouseState Updates if cursor is not over a UI element
             if(!PointerOverGO)
             {
                 if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(HoveredCoord))
                 {
-                    if (MouseRightButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
+                    if (MouseRightButtonDown && PlayerState.CurrentState != PlayerStateEnum.ready)
                     {
                         ECBuffer.AddComponent(index, entity, new RightClickEvent());
                         mouseState.RightClickEvent = 1;
                     }
 
-                    if (MouseLeftButtonDown && playerState.CurrentState != PlayerStateEnum.ready)
+                    if (MouseLeftButtonDown && PlayerState.CurrentState != PlayerStateEnum.ready)
                     {
                         ECBuffer.AddComponent(index, entity, new ClickEvent());
                         mouseState.ClickEvent = 1;

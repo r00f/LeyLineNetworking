@@ -86,7 +86,7 @@ public class Projectile : MonoBehaviour
     public bool QueuedForDestruction;
     [HideInInspector]
     public Transform SpawnTransform;
-    [HideInInspector]
+    //[HideInInspector]
     public List<Vector3> TravellingCurve;
     [HideInInspector]
     public int CurrentTargetId = 0;

@@ -67,15 +67,7 @@ namespace LeyLineHybridECS
             if (m_AuthorativePlayerData.CalculateEntityCount() == 0)
                 return;
 
-            //var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-            //var gameState = gameStateData[0];
-
             var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
-
-            //if(gameState.CurrentState == GameStateEnum.move || gameState.CurrentState == GameStateEnum.cleanup)
-                
-            //else
-                //ProjectorCamera.enabled = false;
 
             if(updateVisionEvents.Count > 0)
             {
@@ -184,11 +176,8 @@ namespace LeyLineHybridECS
 
         public void UpdateVision()
         {
-            var playerVisions = m_AuthorativePlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-            var playerFactions = m_AuthorativePlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-
-            var playerVision = playerVisions[0];
-            var playerFaction = playerFactions[0].Faction;
+            var playerVision = m_AuthorativePlayerData.GetSingleton<Vision.Component>();
+            var playerFaction = m_AuthorativePlayerData.GetSingleton<FactionComponent.Component>();
 
             //HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
@@ -198,7 +187,7 @@ namespace LeyLineHybridECS
                 UpdateUnitMapTilePosition(UIRef.MinimapComponent, coord.CubeCoordinate, ref isVisibleGOs, true);
                 UpdateUnitMapTilePosition(UIRef.BigMapComponent, coord.CubeCoordinate, ref isVisibleGOs, false);
 
-                if (faction.Faction != playerFaction)
+                if (faction.Faction != playerFaction.Faction)
                 {
                     if (playerVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
                     {
@@ -267,9 +256,6 @@ namespace LeyLineHybridECS
                     }
                 }
             });
-
-            playerFactions.Dispose();
-            playerVisions.Dispose();
         }
 
         void UpdateUnitMapTilePosition(MinimapScript map, Vector3f coord, ref IsVisibleReferences isVisibleRef, bool isMiniMap)

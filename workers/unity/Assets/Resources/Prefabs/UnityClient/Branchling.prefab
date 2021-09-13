@@ -235,7 +235,6 @@ MonoBehaviour:
     spike.
   VisionRange: 4
   BaseHealth: 60
-  EnergyBaseIncome: 0
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -305,7 +304,7 @@ MonoBehaviour:
   TeamColorMeshesComp: {fileID: 1207630673980746896}
   IsVisibleRefComp: {fileID: 6049964325842822366}
   BaseDataSetComp: {fileID: 55638576014061965}
-  HeadUIReferencesComp: {fileID: 2507533135946710543}
+  HeadUIRef: {fileID: 2507533135946710543}
   AnimPortraitComp: {fileID: 2417126995848513471}
   UnitEffectsComp: {fileID: 664739988800558804}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,

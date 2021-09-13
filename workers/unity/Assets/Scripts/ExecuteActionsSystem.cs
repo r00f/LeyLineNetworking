@@ -56,10 +56,8 @@ public class ExecuteActionsSystem : ComponentSystem
         if (m_GameStateData.CalculateEntityCount() == 0)
             return;
 
-        var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-        var gameStateWorldIndexData = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-        var gameState = gameStateData[0];
-        var gamestateWorldIndex = gameStateWorldIndexData[0];
+        var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var gamestateWorldIndex = m_GameStateData.GetSingleton<WorldIndex.Component>();
 
         GetUnitActions(gameState, gamestateWorldIndex);
 
@@ -70,12 +68,7 @@ public class ExecuteActionsSystem : ComponentSystem
             gameState.AttackDamageDealt = true;
         }
 
-        #region Dispose
-        gameStateData[0] = gameState;
-        m_GameStateData.CopyFromComponentDataArray(gameStateData);
-        gameStateWorldIndexData.Dispose();
-        gameStateData.Dispose();
-        #endregion
+        m_GameStateData.SetSingleton(gameState);
     }
 
     public void GetUnitActions(GameState.Component gameState, WorldIndex.Component gamestateWorldIndex)

@@ -9,9 +9,10 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Cell;
 using Player;
+using Unity.Jobs;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-public class UnitAnimationSystem : ComponentSystem
+public class UnitAnimationSystem : JobComponentSystem
 {
     ActionEffectsSystem m_ActionEffectsSystem;
     UISystem m_UISystem;
@@ -81,29 +82,25 @@ public class UnitAnimationSystem : ComponentSystem
 
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
-            return;
+            return inputDeps;
 
-        var playerHighs = m_PlayerData.ToComponentDataArray<HighlightingDataComponent>(Allocator.TempJob);
-        var playerVisionData = m_PlayerData.ToComponentDataArray<Vision.Component>(Allocator.TempJob);
-        var playerStateData = m_PlayerData.ToComponentDataArray<PlayerState.Component>(Allocator.TempJob);
         var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
-        var playerFactions = m_PlayerData.ToComponentDataArray<FactionComponent.Component>(Allocator.TempJob);
-        var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-
-        var playerFaction = playerFactions[0];
-        var playerState = playerStateData[0];
-        var playerVision = playerVisionData[0];
         var playerHeroTransform = playerHeroTransforms[0];
-        var playerHigh = playerHighs[0];
+
+        var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
+        var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
+        var playerVision = m_PlayerData.GetSingleton<Vision.Component>();
+        var playerHigh = m_PlayerData.GetSingleton<HighlightingDataComponent>();
 
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref FactionComponent.Component faction) =>
+            Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref FactionComponent.Component faction) =>
             {
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
@@ -131,11 +128,13 @@ public class UnitAnimationSystem : ComponentSystem
                     animatorComponent.Animator.ResetTrigger("DestinationReached");
                 }
 
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
 
-        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy) =>
+        Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, AnimatorComponent animatorComponent, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy) =>
         {
             var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
             var serverPosition = EntityManager.GetComponentData<Position.Component>(e);
@@ -216,11 +215,11 @@ public class UnitAnimationSystem : ComponentSystem
                     }
                 }
 
-                else if (gameStates[0].CurrentState != GameStateEnum.planning)
+                else if (gameState.CurrentState != GameStateEnum.planning)
                 {
-                    if(gameStates[0].CurrentState == GameStateEnum.interrupt)
+                    if(gameState.CurrentState == GameStateEnum.interrupt)
                     {
-                        animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
+                        animatorComponent.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
                     }
 
 
@@ -231,7 +230,7 @@ public class UnitAnimationSystem : ComponentSystem
                         {
                             if (animatorComponent.CurrentLockedAction.ProjectileFab)
                             {
-                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameStates[0].MapCenter);
+                                Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
                                 float targetYoffset = 0;
                                 if (animatorComponent.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
                                 {
@@ -241,7 +240,7 @@ public class UnitAnimationSystem : ComponentSystem
                             }
                             else
                             {
-                                m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform, gameStates[0]);
+                                m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, animatorComponent.WeaponTransform, gameState);
                             }
 
                             animatorComponent.AnimationEvents.EventTriggered = true;
@@ -251,12 +250,12 @@ public class UnitAnimationSystem : ComponentSystem
 
                     if (!animatorComponent.ExecuteTriggerSet)
                     {
-                        ExecuteActionAnimation(unitEffects, actions, animatorComponent, gameStates[0], worldIndex.Value);
+                        ExecuteActionAnimation(unitEffects, actions, animatorComponent, gameState, worldIndex.Value);
                     }
                     else
                     {
                         //constantly rotate towards serverposition if moving
-                        if (gameStates[0].CurrentState == GameStateEnum.move)
+                        if (gameState.CurrentState == GameStateEnum.move)
                         {
                             if (animatorComponent.RotationTarget != serverPosition.Coords.ToUnityVector())
                                 animatorComponent.RotationTarget = serverPosition.Coords.ToUnityVector();
@@ -285,16 +284,16 @@ public class UnitAnimationSystem : ComponentSystem
                         harvestingEmission.enabled = true;
                     }
 
-                    if (unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance)
+                    if (unitComponentReferences.HeadUIRef.UnitHeadUIInstance)
                     {
-                        if ((playerState.SelectedUnitId == id.EntityId.Id || Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate)) && actions.LockedAction.Index == -3 && gameStates[0].CurrentState == GameStateEnum.planning && faction.Faction == playerFaction.Faction)
+                        if ((playerState.SelectedUnitId == id.EntityId.Id || Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate)) && actions.LockedAction.Index == -3 && gameState.CurrentState == GameStateEnum.planning && faction.Faction == playerFaction.Faction)
                         {
-                            unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.text = "+" + energy.EnergyIncome.ToString();
-                            unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = true;
+                            unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.text = "+" + energy.EnergyIncome.ToString();
+                            unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = true;
                         }
                         else
                         {
-                            unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                            unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
                         }
                     }
                 }
@@ -305,14 +304,14 @@ public class UnitAnimationSystem : ComponentSystem
                         var harvestingEmission = unitEffects.HarvestingEnergyParticleSystem.emission;
                         harvestingEmission.enabled = false;
                     }
-                    if (unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance)
-                        unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                    if (unitComponentReferences.HeadUIRef.UnitHeadUIInstance)
+                        unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
                 }
             }
             else
             {
-                if (unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance)
-                    unitComponentReferences.HeadUIReferencesComp.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                if (unitComponentReferences.HeadUIRef.UnitHeadUIInstance)
+                    unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
 
                 if (unitEffects.HarvestingEnergyParticleSystem)
                 {
@@ -353,7 +352,7 @@ public class UnitAnimationSystem : ComponentSystem
             if (animatorComponent.Animator)
             {
                 #region Set Animator Variables
-                if (gameStates[0].CurrentState == GameStateEnum.planning)
+                if (gameState.CurrentState == GameStateEnum.planning)
                 {
                     if (visible.Value == 1 && !playerVision.RevealVision)
                     {
@@ -444,13 +443,18 @@ public class UnitAnimationSystem : ComponentSystem
             }
 
             #endregion
-        });
-
+        })
+        .WithoutBurst()
+        .Run();
+        /*
         playerFactions.Dispose();
         playerStateData.Dispose();
         playerVisionData.Dispose();
         playerHighs.Dispose();
         gameStates.Dispose();
+        */
+
+        return inputDeps;
     }
 
     public void ExecuteActionAnimation(UnitEffects unitEffects, Actions.Component actions, AnimatorComponent animatorComponent, GameState.Component gameState, uint worldIndex)

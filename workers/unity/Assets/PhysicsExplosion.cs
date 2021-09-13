@@ -16,13 +16,21 @@ public class PhysicsExplosion : MonoBehaviour
     public float explosionRadius;
     public int upForce;
     public List<Animator> AnimatorsToDisable;
+    public float minTimeScale;
+    public float slowdownSpeed;
+    public float waitTime;
+    float currentWaitTime;
 
 
-
+    public void SetExplodeTriggerTrue()
+    {
+        ExplodeTrigger = true;
+    }
 
     // Start is called before the first frame update
     void Start()
     {
+        currentWaitTime = waitTime;
         SceneRigidbodies = FindObjectsOfType<Rigidbody>();
 
         foreach(Rigidbody r in SceneRigidbodies)
@@ -51,11 +59,29 @@ public class PhysicsExplosion : MonoBehaviour
         if(ExplodeTrigger)
         {
             Explode();
-            ExplodeTrigger = false;
+
+            if (Time.timeScale > minTimeScale)
+            {
+                Time.timeScale /= slowdownSpeed;
+                Time.fixedDeltaTime = 0.02F * Time.timeScale;
+            }
+            else
+            {
+                if (currentWaitTime <= 0)
+                {
+                    ExplodeTrigger = false;
+                    Time.timeScale = 1;
+                    Time.fixedDeltaTime = 0.02F;
+                    currentWaitTime = waitTime;
+                }
+                else
+                    currentWaitTime -= Time.deltaTime/Time.timeScale;
+            }
         }
 
         if(ResetTrigger)
         {
+            ExplodeTrigger = false;
             Reset();
             ResetTrigger = false;
         }
@@ -63,6 +89,10 @@ public class PhysicsExplosion : MonoBehaviour
 
     public void Reset()
     {
+        Time.timeScale = 1;
+        Time.fixedDeltaTime = 0.02F;
+        currentWaitTime = waitTime;
+
         foreach (Animator a in AnimatorsToDisable)
         {
             a.enabled = true;

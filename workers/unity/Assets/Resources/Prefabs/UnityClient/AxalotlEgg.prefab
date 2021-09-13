@@ -4940,7 +4940,6 @@ MonoBehaviour:
   UnitDescription: 'An egg with an axalotl inside. '
   VisionRange: 2
   BaseHealth: 40
-  EnergyBaseIncome: 0
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
   IsHero: 0
@@ -4971,7 +4970,7 @@ MonoBehaviour:
   TeamColorMeshesComp: {fileID: 3665762739044415094}
   IsVisibleRefComp: {fileID: 209969215213833698}
   BaseDataSetComp: {fileID: 8656971215830653018}
-  HeadUIReferencesComp: {fileID: 6210986102677212119}
+  HeadUIRef: {fileID: 6210986102677212119}
   AnimPortraitComp: {fileID: 4367961099226942553}
   UnitEffectsComp: {fileID: -979750950693851312}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
@@ -5017,14 +5016,13 @@ MonoBehaviour:
   InitialValuesSet: 0
   ProjectileSpawnOrigin: {fileID: 0}
   Visuals:
-  - {fileID: 7550265048827665365}
-  - {fileID: 7550265048827665363}
-  EnableVisualsDelay: 2.1
+  - {fileID: 7550265048827665367}
+  EnableVisualsDelay: 3.6
   CharacterEffects: []
   VoiceEmitter: {fileID: 0}
   FootStempEmitter: {fileID: 0}
-  RotationSpeed: 0
-  RotateTransform: {fileID: 7550265048827693047}
+  RotationSpeed: 4
+  RotateTransform: {fileID: 1438956700697232851}
   DestinationReachTriggerSet: 0
   RotationTarget: {x: 0, y: 0, z: 0}
   DestinationPosition: {x: 0, y: 0}
@@ -5075,7 +5073,8 @@ MonoBehaviour:
   Collider: {fileID: 6943022816249909003}
   MeshRenderer: {fileID: 7550265048825398549}
   GameObjects:
-  - {fileID: 7550265048827665367}
+  - {fileID: 7550265048827665365}
+  - {fileID: 7550265048827665363}
   - {fileID: 336235651974697613}
   MiniMapTilePrefab: {fileID: 3617814909377836915, guid: bfd99edd86ed99e4f8715eca14362a8f,
     type: 3}
@@ -5964,7 +5963,7 @@ PrefabInstance:
     - target: {fileID: 1792217656049989567, guid: 068ccc5c2dde91f40bf1505534d190ca,
         type: 3}
       propertyPath: m_Name
-      value: EggSpawnPS
+      value: EggDustSpawnPS
       objectReference: {fileID: 0}
     - target: {fileID: 3899901818714536530, guid: 068ccc5c2dde91f40bf1505534d190ca,
         type: 3}
@@ -6044,7 +6043,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 100002, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 100002, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
       propertyPath: m_Layer
@@ -6169,6 +6168,18 @@ PrefabInstance:
     - target: {fileID: 400000, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 400000, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e92f6362d6f75964e8ca2af4bea3a123, type: 3}

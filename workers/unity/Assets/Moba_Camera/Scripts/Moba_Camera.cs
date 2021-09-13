@@ -300,7 +300,7 @@ public class Moba_Camera : MonoBehaviour {
 	}
 	
 	// Update is called once per frame
-	void Update() {
+	void LateUpdate() {
 		if(!useFixedUpdate) {
 			CameraUpdate();	
 		}

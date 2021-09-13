@@ -19,66 +19,102 @@ MonoBehaviour:
     LocalBuildConfig:
       BuildTargets:
       - Options: 1
+        Deprecated: 0
         Enabled: 1
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 1
     CloudBuildConfig:
       BuildTargets:
       - Options: 0
+        Deprecated: 1
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 1
         Required: 0
+        scriptingImplementation: 0
       - Options: 16384
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 1
   - WorkerType: UnityGameLogic
     ScenesForWorker:
     - {fileID: 102900000, guid: aaa9e72f9f3224639850bd7b630960be, type: 3}
     LocalBuildConfig:
       BuildTargets:
       - Options: 1
+        Deprecated: 0
         Enabled: 1
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 1
     CloudBuildConfig:
       BuildTargets:
       - Options: 0
+        Deprecated: 1
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 16384
+        Deprecated: 0
         Enabled: 1
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 0
       - Options: 0
+        Deprecated: 0
         Enabled: 0
         Required: 0
+        scriptingImplementation: 1
   isInitialised: 1

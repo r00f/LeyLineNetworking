@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-3789763146850443324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 02066dac5f91c724b94b937f8f18aa46, type: 3}
+  m_Name: T_Cell(Clone)
+  m_EditorClassIdentifier: 
+  HighlighterToUse: 1
+  targettingRange: 25
+  energyCost: 0
+  ModToAdd: {fileID: 0}
+  SecondaryTargets: []
+  requireEmpty: 1
+  MainTargetCoordinate:
+    X: 0
+    Y: 0
+    Z: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5625c70152e482244b31b9a0d802d986, type: 3}
+  m_Name: SpawnSpikeCheat
+  m_EditorClassIdentifier: 
+  ActionExecuteStep: 0
+  ActionIcon: {fileID: 1521786813588733549, guid: 1709c699aeed51545927cddf655f0b28,
+    type: 3}
+  ProjectileFab: {fileID: 0}
+  ActionName: Spike
+  Description: 
+  TimeToExecute: 2
+  HasWindup: 0
+  TargetToAdd: {fileID: 0}
+  EffectToAdd: {fileID: 0}
+  Targets:
+  - {fileID: -3789763146850443324}
+  Effects:
+  - {fileID: 2790540010281604678}
+--- !u!114 &2790540010281604678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43cb690f53afba849bd1b6d695e07014, type: 3}
+  m_Name: E_Spawn(Clone)
+  m_EditorClassIdentifier: 
+  ApplyToTargets: 0
+  specificTargetIdentifier: 0
+  TurnDuration: 0
+  ApplyToRestrictions: 5
+  UnitNameToSpawn: Spike

@@ -100,8 +100,7 @@ namespace LeyLineHybridECS
             //CHANGE TO REACTIVE COMPONENT FLAG ISSET > RequireMarkerStateUpdate Component
             if (m_RequireMarkerUpdateData.CalculateEntityCount() > 0)
             {
-                var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-                var gameState = gameStateData[0];
+                var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
                 //Debug.Log("ReqMarkerUpdateCount: " + m_RequireMarkerUpdateData.CalculateEntityCount());
 
@@ -184,7 +183,6 @@ namespace LeyLineHybridECS
 
                     }
                 });
-                gameStateData.Dispose();
             }
         }
     }

@@ -56,10 +56,8 @@ namespace LeyLineHybridECS
             if (m_GameStateData.CalculateEntityCount() == 0)
                 return;
 
-            var gameStateWindexData = m_GameStateData.ToComponentDataArray<WorldIndex.Component>(Allocator.TempJob);
-            var gameStateData = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-            var gameStateWIndex = gameStateWindexData[0];
-            var gameState = gameStateData[0];
+            var gameStateWIndex = m_GameStateData.GetSingleton<WorldIndex.Component>();
+            var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
 
             Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref Energy.Component energy, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
@@ -71,8 +69,6 @@ namespace LeyLineHybridECS
                 {
                     if(actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
                     {
-                        var currentPath = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs;
-
                         if (gameState.CurrentState == GameStateEnum.interrupt)
                         {
                             actionsData = CompareCullableActions(actionsData, gameStateWIndex.Value, unitID);
@@ -81,7 +77,7 @@ namespace LeyLineHybridECS
                         {
                             energy.Harvesting = false;
 
-                            if (currentPath.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
+                            if (actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
                             {
                                 //instead of lerping towards next pos in path, set pos and wait for client to catch up
                                 if (m.TimeLeft >= 0)
@@ -90,9 +86,9 @@ namespace LeyLineHybridECS
                                 }
                                 else
                                 {
-                                    position.Coords = new Coordinates(currentPath[0].WorldPosition.X, currentPath[0].WorldPosition.Y, currentPath[0].WorldPosition.Z);
+                                    position.Coords = new Coordinates(actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].WorldPosition.X, actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].WorldPosition.Y, actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].WorldPosition.Z);
 
-                                    if (currentPath.Count == 1)
+                                    if (actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count == 1)
                                     {
                                         m.TimeLeft = 0;
                                     }
@@ -101,23 +97,20 @@ namespace LeyLineHybridECS
                                         m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
                                     }
 
-                                    coord.CubeCoordinate = currentPath[0].CubeCoordinate;
+                                    coord.CubeCoordinate = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].CubeCoordinate;
                                     /*
                                     logger.HandleLog(LogType.Warning,
                                     new LogEvent("Set Unit ReqUpdate from MovementSystem")
                                     .WithField("AYAYA", "AYAYA"));
                                     */
                                     vision.RequireUpdate = true;
-                                    currentPath.RemoveAt(0);
+                                    actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(0);
                                 }
                             }
                         }
                     }
                 }
             });
-
-            gameStateWindexData.Dispose();
-            gameStateData.Dispose();
         }
 
         private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)

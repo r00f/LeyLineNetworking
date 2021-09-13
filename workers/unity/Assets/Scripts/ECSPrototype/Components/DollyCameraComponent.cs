@@ -8,9 +8,11 @@ using Unity.Entities;
 using UnityEngine.Rendering.HighDefinition;
 using UnityEngine.Rendering;
 using FMODUnity;
+using LeyLineHybridECS;
 
 public class DollyCameraComponent : MonoBehaviour
 {
+
     [SerializeField]
     CinemachineVirtualCamera dollyCam;
     [SerializeField]
@@ -39,8 +41,10 @@ public class DollyCameraComponent : MonoBehaviour
     Moba_Camera playerCam;
     bool directionSet;
     [SerializeField]
+    bool skipPath;
     bool endPath;
-    public bool RevealVisionTrigger;
+    [HideInInspector]
+    public bool RevealVisionTrigger = true;
     [SerializeField]
     VolumeProfile volumeProfile;
     Fog fog;
@@ -64,7 +68,6 @@ public class DollyCameraComponent : MonoBehaviour
             fog = f;
         }
 
-
         trackedDolly = dollyCam.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachineTrackedDolly;
         smoothPath = trackedDolly.m_Path as CinemachineSmoothPath;
         pathWaypoints = smoothPath.m_Waypoints.ToList();
@@ -72,7 +75,7 @@ public class DollyCameraComponent : MonoBehaviour
         dollyCam.Priority = 11;
         mapTitleTextMesh.color = new Color(mapTitleTextMesh.color.r, mapTitleTextMesh.color.g, mapTitleTextMesh.color.b, 0);
         UIRef.UIActive = false;
-        UIRef.UIMainPanel.SetActive(false);
+        SetUserInterfaceEnabled(false);
         UIRef.DollyPathCameraActive = true;
         fog.depthExtent.value = 64;
     }
@@ -114,7 +117,7 @@ public class DollyCameraComponent : MonoBehaviour
         {
             if (smoothPath.m_Waypoints.Length != 0)
             {
-                if ((trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset || Input.anyKeyDown) && !endPath)
+                if ((trackedDolly.m_PathPosition >= smoothPath.m_Waypoints.Length - pathEndOffset || Input.anyKeyDown || skipPath) && !endPath)
                 {
                     RevealVisionTrigger = true;
                     endPath = true;
@@ -146,7 +149,7 @@ public class DollyCameraComponent : MonoBehaviour
         //path movement lock player cam
         distancePercentage = trackedDolly.m_PathPosition / smoothPath.m_Waypoints.Length;
         cameraSpeed = speedCurve.Evaluate(distancePercentage);
-        UIRef.UIMainPanel.SetActive(false);
+        //SetUserInterfaceEnabled(false);
         playerCam.settings.cameraLocked = true;
         trackedDolly.m_PathPosition += cameraSpeed * Time.deltaTime;
     }
@@ -178,9 +181,17 @@ public class DollyCameraComponent : MonoBehaviour
             dollyCamListener.enabled = false;
             playerListener.enabled = true;
             mapTitleTextMesh.color = new Color(0, 0, 0, 0);
-            UIRef.UIMainPanel.SetActive(true);
+            SetUserInterfaceEnabled(true);
             UIRef.UIActive = true;
             Destroy(gameObject);
+        }
+    }
+
+    public void SetUserInterfaceEnabled(bool enabled)
+    {
+        for (int i = 0; i < UIRef.Canvases.Count - 1; i++)
+        {
+            UIRef.Canvases[i].enabled = enabled;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Core.Commands;
@@ -26,9 +26,9 @@ public class ClientCleanupSystem : ComponentSystem
 
     private bool WorldsInitialized()
     {
-        if (Worlds.ClientWorld != null)
+        if (!initialized)
         {
-            if (!initialized)
+            if (Worlds.ClientWorld != default)
             {
                 m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
@@ -36,7 +36,6 @@ public class ClientCleanupSystem : ComponentSystem
                 initialized = true;
             }
         }
-
         return initialized;
     }
 
@@ -50,49 +49,48 @@ public class ClientCleanupSystem : ComponentSystem
                 return;
             }
 
-            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
-            var gameState = gameStates[0];
-            var garbageCollector = m_GarbageCollectorData.ToComponentArray<GarbageCollectorComponent>()[0];
+            var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
-            if (gameState.CurrentState == GameStateEnum.planning)
+            Entities.With(m_GarbageCollectorData).ForEach((GarbageCollectorComponent garbageCollector) =>
             {
-                if(garbageCollector.SinkDelay >= 0)
+                if (gameState.CurrentState == GameStateEnum.planning)
                 {
-                    garbageCollector.SinkDelay -= Time.DeltaTime;
-                }
-                else if(garbageCollector.CurrentSinkTime >= 0)
-                {
-                    garbageCollector.CurrentSinkTime -= Time.DeltaTime;
-                    foreach (Rigidbody r in garbageCollector.GarbageRigidbodies)
+                    if (garbageCollector.SinkDelay >= 0)
                     {
-                        if (!r.isKinematic)
-                            r.isKinematic = true;
+                        garbageCollector.SinkDelay -= Time.DeltaTime;
                     }
-
-                    foreach (GameObject g in garbageCollector.GarbageObjects)
+                    else if (garbageCollector.CurrentSinkTime >= 0)
                     {
-                        g.transform.position -= new Vector3(0, garbageCollector.SinkSpeed * Time.DeltaTime, 0);
+                        garbageCollector.CurrentSinkTime -= Time.DeltaTime;
+                        foreach (Rigidbody r in garbageCollector.GarbageRigidbodies)
+                        {
+                            if (!r.isKinematic)
+                                r.isKinematic = true;
+                        }
+
+                        foreach (GameObject g in garbageCollector.GarbageObjects)
+                        {
+                            g.transform.position -= new Vector3(0, garbageCollector.SinkSpeed * Time.DeltaTime, 0);
+                        }
+                    }
+                    else
+                    {
+                        for (int i = 0; i < garbageCollector.GarbageObjects.Count; i++)
+                        {
+                            Object.Destroy(garbageCollector.GarbageObjects[i]);
+                        }
+                        garbageCollector.GarbageObjects.Clear();
+                        garbageCollector.GarbageRigidbodies.Clear();
                     }
                 }
                 else
                 {
-                    for (int i = 0; i < garbageCollector.GarbageObjects.Count; i++)
-                    {
-                        Object.Destroy(garbageCollector.GarbageObjects[i]);
-                    }
-                    garbageCollector.GarbageObjects.Clear();
-                    garbageCollector.GarbageRigidbodies.Clear();
+                    if (garbageCollector.CurrentSinkTime != garbageCollector.MaxSinkTime)
+                        garbageCollector.CurrentSinkTime = garbageCollector.MaxSinkTime;
+                    if (garbageCollector.SinkDelay != garbageCollector.MaxSinkDelay)
+                        garbageCollector.SinkDelay = garbageCollector.MaxSinkDelay;
                 }
-            }
-            else
-            {
-                if (garbageCollector.CurrentSinkTime != garbageCollector.MaxSinkTime)
-                    garbageCollector.CurrentSinkTime = garbageCollector.MaxSinkTime;
-                if (garbageCollector.SinkDelay != garbageCollector.MaxSinkDelay)
-                    garbageCollector.SinkDelay = garbageCollector.MaxSinkDelay;
-            }
-
-            gameStates.Dispose();
+            });
         }
     }
 }

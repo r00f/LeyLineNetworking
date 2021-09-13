@@ -41,16 +41,21 @@ public class ProjectileSystem : ComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
-        logger = Worlds.ClientWorld.World.GetExistingSystem<WorkerSystem>().LogDispatcher;
-        m_ActionEffectSystem = Worlds.ClientWorld.World.GetExistingSystem<ActionEffectsSystem>();
+
+        if(Worlds.ClientWorld != default)
+        {
+            logger = Worlds.ClientWorld.World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+            m_ActionEffectSystem = Worlds.ClientWorld.World.GetExistingSystem<ActionEffectsSystem>();
+        }
     }
 
     private bool WorldsInitialized()
     {
-        if (Worlds.ClientWorld != null)
+        if (!initialized)
         {
-            if(!initialized)
+            if (Worlds.ClientWorld != default)
             {
+
                 m_UnitData = Worlds.ClientWorld.CreateEntityQuery(
                     ComponentType.ReadWrite<AnimatorComponent>()
                 );
@@ -67,7 +72,6 @@ public class ProjectileSystem : ComponentSystem
                 initialized = true;
             }
         }
-
         return initialized;
     }
 
@@ -78,7 +82,8 @@ public class ProjectileSystem : ComponentSystem
             if (m_GameStateData.CalculateEntityCount() == 0)
                 return;
 
-            var gameStates = m_GameStateData.ToComponentDataArray<GameState.Component>(Allocator.TempJob);
+            var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+
             /*
             if(m_ProjectileData.CalculateEntityCount() > 0)
             {
@@ -200,7 +205,7 @@ public class ProjectileSystem : ComponentSystem
                             .WithField("InAction", projectile.UnitId));
                             */
 
-                            m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameStates[0], projectile.AxaShieldOrbitCount);
+                            m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameState, projectile.AxaShieldOrbitCount);
 
                             if (projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
                             {
@@ -272,9 +277,6 @@ public class ProjectileSystem : ComponentSystem
                     }
                 }
             });
-
-            gameStates.Dispose();
-            //playerVisionData.Dispose();
         }
     }
 }

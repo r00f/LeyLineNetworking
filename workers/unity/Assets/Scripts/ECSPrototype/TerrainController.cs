@@ -64,15 +64,12 @@ namespace LeyLineHybridECS
         [SerializeField]
         float[,] strength;
 
-
 #if UNITY_EDITOR
-
 
         public void SaveTerrainAsset()
         {
             AssetDatabase.SaveAssets();
         }
-
 
         public void UpdateAllMapTileTextures()
         {

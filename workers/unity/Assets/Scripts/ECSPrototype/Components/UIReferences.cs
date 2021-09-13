@@ -7,7 +7,7 @@ public class UIReferences : MonoBehaviour
 {
     public Canvas Canvas;
 
-    public Animator SlideOutUIAnimator;
+    //public Animator SlideOutUIAnimator;
 
     public bool OpponentReady;
     public bool UIActive;
@@ -18,9 +18,12 @@ public class UIReferences : MonoBehaviour
 
     public Material SelectionOutlineMaterial;
 
+    [Header("SubCanvases")]
+    public List<Canvas> Canvases;
+
     [Header("MenuPanels")]
     public HelpPanel HelpPanelComponent;
-    public GameObject UIMainPanel;
+    //public GameObject UIMainPanel;
     public GameObject HelpPanel;
     public GameObject SkillTreePanel;
 
