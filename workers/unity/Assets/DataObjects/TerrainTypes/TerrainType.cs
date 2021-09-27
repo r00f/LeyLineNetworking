@@ -16,6 +16,7 @@ public class TerrainType : ScriptableObject
     public int MapCellColorIndex;
     public int textureIndex;
 
+    /*
     [Header("Trees")]
     public Vector2 TreeHeightMinMax;
     public Vector2 TreeIndexMinMax;
@@ -23,13 +24,18 @@ public class TerrainType : ScriptableObject
     public Vector2 NeighbourAmountMinMax;
     [Range(0, 100)]
     public int probabilityToSpawnNeighbourAsset;
+    */
 
-    [Header ("Detail Objects")]
+    [Header("Detail Objects")]
+    public List<DetailType> Details;
+
+    /*
     public int RandomDetailRotationIncrement;
     public List<Vector2> DetailObjectIndexRanges;
     public List<Vector2> DetailObjectAmounts;
     public List<int> DetailObjectSpawnProbabilities;
     public List<Vector2> DetailObjectRanges;
+    */
 
     [Header("Height Offset")]
     [Range (-15.0f, 15.0f)]

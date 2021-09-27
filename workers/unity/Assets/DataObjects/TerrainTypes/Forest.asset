@@ -19,16 +19,8 @@ MonoBehaviour:
   MapCellIconIndex: 1
   MapCellColorIndex: 1
   textureIndex: 5
-  TreeHeightMinMax: {x: 1, y: 1.3}
-  TreeIndexMinMax: {x: 1, y: 1}
-  NeighbourIndexMinMax: {x: 8, y: 8}
-  NeighbourAmountMinMax: {x: 1, y: 1}
-  probabilityToSpawnNeighbourAsset: 20
-  RandomDetailRotationIncrement: 60
-  DetailObjectIndexRanges: []
-  DetailObjectAmounts: []
-  DetailObjectSpawnProbabilities: 
-  DetailObjectRanges: []
+  Details:
+  - {fileID: 11400000, guid: 650b1d346c5042e44a14fd8e34cbdc09, type: 2}
   yOffset: 0.1
   cellTerrainYOffset: 0
   DetailObjectSpawnYOffset: 0

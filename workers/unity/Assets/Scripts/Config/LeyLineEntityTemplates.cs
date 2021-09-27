@@ -61,59 +61,11 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
+    /*
     public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex)
     {
-        var pos = new Position.Snapshot
-        {
-            Coords = new Coordinates
-            {
-                X = position.X,
-                Y = position.Y,
-                Z = position.Z
-            }
-        };
-
-        List<ManalithSlot> slots = new List<ManalithSlot>();
-        foreach (CellAttribute n in circleCells.CellAttributes)
-        {
-            if (n.IsTaken != true)
-            {
-                ManalithSlot go = new ManalithSlot();
-                go.CorrespondingCell = n;
-                slots.Add(go);
-            }
-        }
-
-        var circleCellCoords = new List<Vector3f>();
-
-        foreach(CellAttribute c in circleCells.CellAttributes)
-        {
-            circleCellCoords.Add(c.CubeCoordinate);
-        }
-
-        var circle = new Manalith.Snapshot
-        {
-            CircleCoordinatesList = circleCellCoords,
-            Manalithslots = slots
-        };
-
-        var wIndex = new WorldIndex.Snapshot
-        {
-            Value = worldIndex
-        };
-
-
-        var template = new EntityTemplate();
-        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Metadata.Snapshot { EntityType = "Manalith" }, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
-        template.AddComponent(new FactionComponent.Snapshot(), WorkerUtils.UnityGameLogic);
-        template.AddComponent(circle, WorkerUtils.UnityGameLogic);
-        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
-        return template;
     }
-
+    */
     public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, bool isManalithUnitSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -391,6 +343,128 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
+    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, CellAttributeList circleCells, List<Vector3f> pathCellCoords, Vector3f connectedManalithCoord)
+    {
+        var turnTimer = new TurnTimer.Snapshot
+        {
+            Timers = new List<Timer>()
+        };
+
+        var pos = new Position.Snapshot
+        {
+            Coords = position.Coords
+        };
+
+        var coord = new CubeCoordinate.Snapshot
+        {
+            CubeCoordinate = cubeCoordinate
+        };
+
+        TeamColorEnum factionColor = new TeamColorEnum();
+
+        if (faction == 0)
+        {
+            //add yellow
+            factionColor = TeamColorEnum.blue;
+        }
+        if (faction % 2 == 1)
+        {
+            factionColor = TeamColorEnum.blue;
+        }
+        else if (faction % 2 == 0)
+        {
+            factionColor = TeamColorEnum.red;
+        }
+
+        var factionSnapshot = new FactionComponent.Snapshot
+        {
+            Faction = faction,
+            TeamColor = factionColor
+        };
+
+        var cellsToMarkSnapshot = new CellsToMark.Snapshot
+        {
+            CellsInRange = new List<CellAttributes>(),
+            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
+        };
+
+        var wIndex = new WorldIndex.Snapshot
+        {
+            Value = worldIndex
+        };
+
+        var unitVision = new Vision.Snapshot
+        {
+            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
+            Lastvisible = new List<Vector3f>(),
+            Positives = new List<Vector3f>(),
+            Negatives = new List<Vector3f>(),
+            RequireUpdate = true,
+            InitialWaitTime = .1f,
+            VisionRange = Stats.VisionRange
+        };
+
+        var energy = new Energy.Snapshot
+        {
+            //SpawnCost = Stats.SpawnCost,
+            //EnergyUpkeep = Stats.EnergyUpkeep,
+            EnergyIncome = Stats.EnergyIncome
+        };
+
+        var movementVariables = new MovementVariables.Snapshot
+        {
+            TravelTime = 1.7f,
+            StartRotation = startRotation
+        };
+
+        var actions = SetActions(Stats);
+        energy.Harvesting = true;
+
+        List<ManalithSlot> slots = new List<ManalithSlot>();
+
+        foreach (CellAttribute n in circleCells.CellAttributes)
+        {
+            if (n.IsTaken != true)
+            {
+                ManalithSlot go = new ManalithSlot();
+                go.CorrespondingCell = n;
+                slots.Add(go);
+            }
+        }
+
+        var circleCellCoords = new List<Vector3f>();
+
+        foreach (CellAttribute c in circleCells.CellAttributes)
+        {
+            circleCellCoords.Add(c.CubeCoordinate);
+        }
+
+        var manalith = new Manalith.Snapshot
+        {
+            CircleCoordinatesList = circleCellCoords,
+            PathCoordinatesList = pathCellCoords,
+            ConnectedManalithCoordinate = connectedManalithCoord,
+            Manalithslots = slots
+        };
+
+
+        var template = new EntityTemplate();
+        template.AddComponent(manalith, WorkerUtils.UnityGameLogic);
+        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(energy, WorkerUtils.UnityGameLogic);
+        template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
+        template.AddComponent(coord, WorkerUtils.UnityGameLogic);
+        template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
+        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
+        template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
+        template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
+        template.AddComponent(actions, WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        return template;
+    }
+
     public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, bool isManalithUnit = false)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
@@ -486,56 +560,46 @@ public static class LeyLineEntityTemplates {
         if (Stats.IsHero)
             template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
 
-        if (isManalithUnit)
+        var aiUnit = new AiUnit.Snapshot
         {
-            var manalithUnit = new ManalithUnit.Snapshot();
-            template.AddComponent(manalithUnit, WorkerUtils.UnityGameLogic);
-            energy.Harvesting = true;
-        }
-        else
+            ActionTypeWeightsList = new List<Vector3f>(),
+            MoveActionsPrioList = new List<Vector2int>(),
+            AttackActionsPrioList = new List<Vector2int>(),
+            UtilityActionsPrioList = new List<Vector2int>(),
+            CulledMoveActionsPrioList = new List<Vector2int>(),
+            CulledAttackActionsPrioList = new List<Vector2int>(),
+            CulledUtilityActionsPrioList = new List<Vector2int>()
+
+        };
+
+        foreach (Vector3 v3 in aiUnitData.ActionTypeWeightsList)
         {
-
-            var aiUnit = new AiUnit.Snapshot
-            {
-                ActionTypeWeightsList = new List<Vector3f>(),
-                MoveActionsPrioList = new List<Vector2int>(),
-                AttackActionsPrioList = new List<Vector2int>(),
-                UtilityActionsPrioList = new List<Vector2int>(),
-                CulledMoveActionsPrioList = new List<Vector2int>(),
-                CulledAttackActionsPrioList = new List<Vector2int>(),
-                CulledUtilityActionsPrioList = new List<Vector2int>()
-
-            };
-
-            foreach(Vector3 v3 in aiUnitData.ActionTypeWeightsList)
-            {
-                aiUnit.ActionTypeWeightsList.Add(new Vector3f(v3.x, v3.y, v3.z));
-            }
-
-            foreach(Vector2 v2 in aiUnitData.MoveActionPrioList)
-            {
-                aiUnit.MoveActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
-            }
-            foreach (Vector2 v2 in aiUnitData.AttackActionPrioList)
-            {
-                aiUnit.AttackActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
-            }
-            foreach (Vector2 v2 in aiUnitData.UtitlityActionPrioList)
-            {
-                aiUnit.UtilityActionsPrioList.Add(new Vector2int((int)v2.x, (int) v2.y));
-            }
-
-
-
-            var health = new Health.Snapshot
-            {
-                MaxHealth = Stats.BaseHealth,
-                CurrentHealth = Stats.BaseHealth
-            };
-
-            template.AddComponent(aiUnit, WorkerUtils.UnityGameLogic);
-            template.AddComponent(health, WorkerUtils.UnityGameLogic);
+            aiUnit.ActionTypeWeightsList.Add(new Vector3f(v3.x, v3.y, v3.z));
         }
+
+        foreach (Vector2 v2 in aiUnitData.MoveActionPrioList)
+        {
+            aiUnit.MoveActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
+        }
+        foreach (Vector2 v2 in aiUnitData.AttackActionPrioList)
+        {
+            aiUnit.AttackActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
+        }
+        foreach (Vector2 v2 in aiUnitData.UtitlityActionPrioList)
+        {
+            aiUnit.UtilityActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
+        }
+
+
+
+        var health = new Health.Snapshot
+        {
+            MaxHealth = Stats.BaseHealth,
+            CurrentHealth = Stats.BaseHealth
+        };
+
+        template.AddComponent(aiUnit, WorkerUtils.UnityGameLogic);
+        template.AddComponent(health, WorkerUtils.UnityGameLogic);
 
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);

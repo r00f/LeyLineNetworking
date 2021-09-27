@@ -126,7 +126,10 @@ namespace LeyLineHybridECS
                             {
                                 g.SetActive(false);
                             }
-                            isVisibleGOs.Collider.enabled = false;
+
+                            if (isVisibleGOs.Collider)
+                                isVisibleGOs.Collider.enabled = false;
+
                             PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
                         }
                         else
@@ -135,7 +138,10 @@ namespace LeyLineHybridECS
                             {
                                 g.SetActive(true);
                             }
-                            isVisibleGOs.Collider.enabled = true;
+
+                            if(isVisibleGOs.Collider)
+                                isVisibleGOs.Collider.enabled = true;
+
                             PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
                         }
                     }

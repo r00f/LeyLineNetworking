@@ -65,7 +65,7 @@ namespace LeyLineHybridECS
             );
 
             m_ManalithUnitData = GetEntityQuery(
-                ComponentType.ReadOnly<ManalithUnit.Component>(),
+                ComponentType.ReadOnly<Manalith.Component>(),
                 ComponentType.ReadOnly<Energy.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
@@ -394,7 +394,7 @@ namespace LeyLineHybridECS
                 .WithoutBurst()
                 .Run();
 
-                Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((UnitHeadUIReferences unitHeadUIRef, ref FactionComponent.Component faction, ref ManalithUnit.Component m) =>
+                Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((UnitHeadUIReferences unitHeadUIRef, ref FactionComponent.Component faction, ref Manalith.Component m) =>
                 {
                     unitHeadUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) faction.Faction];
                 })
@@ -541,52 +541,12 @@ namespace LeyLineHybridECS
                             FireStepChangedEffects("Defeat", Color.red, UIRef.ExecuteStepChangePath);
                         }
 
+                        HandleGameOver(gameState, authPlayerFaction);
+
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.gameOverFired;
                     }
                     break;
             }
-            #endregion
-
-            #region GameOver
-            if (gameState.CurrentState == GameStateEnum.game_over)
-            {
-
-                if (gameState.WinnerFaction == 0)
-                {
-                    if (!UIRef.GameOverPanel.activeSelf)
-                    {
-                        UIRef.DrawPanel.SetActive(true);
-                        UIRef.GameOverPanel.SetActive(true);
-                    }
-
-                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
-                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
-                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
-                }
-                else if (gameState.WinnerFaction == authPlayerFaction.Faction)
-                {
-                    if (!UIRef.GameOverPanel.activeSelf)
-                    {
-                        UIRef.VictoryPanel.SetActive(true);
-                        UIRef.GameOverPanel.SetActive(true);
-                    }
-
-                }
-                else
-                {
-                    if (!UIRef.GameOverPanel.activeSelf)
-                    {
-                        UIRef.DefeatPanel.SetActive(true);
-                        UIRef.GameOverPanel.SetActive(true);
-                    }
-                    UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
-                    UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
-                    UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
-                }
-
-
-            }
-
             #endregion
 
             #region PlayerLoops
@@ -824,6 +784,58 @@ namespace LeyLineHybridECS
             HandleKeyCodeInput(gameState.CurrentState);
 
             return inputDeps;
+        }
+
+        public void HandleGameOver(GameState.Component gameState, FactionComponent.Component authPlayerFaction)
+        {
+            if (gameState.WinnerFaction == 0)
+            {
+                if (!UIRef.GameOverPanel.activeSelf)
+                {
+                    UIRef.DrawPanel.SetActive(true);
+                    UIRef.GameOverPanel.SetActive(true);
+                }
+                /*
+                UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
+                UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
+                UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
+                */
+            }
+            else if (gameState.WinnerFaction == authPlayerFaction.Faction)
+            {
+                if (!UIRef.GameOverPanel.activeSelf)
+                {
+                    UIRef.VictoryPanel.SetActive(true);
+                    UIRef.GameOverPanel.SetActive(true);
+                }
+            }
+            else
+            {
+                if (!UIRef.GameOverPanel.activeSelf)
+                {
+                    UIRef.DefeatPanel.SetActive(true);
+                    UIRef.GameOverPanel.SetActive(true);
+                }
+                /*
+                UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
+                UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
+                UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
+                */
+            }
+
+            UIRef.MainMenuButton.gameObject.SetActive(false);
+            //Disable all but menu canvas
+            DisableAllCanvases(3);
+
+        }
+
+        public void DisableAllCanvases(int skipDisableIndex)
+        {
+            for(int i = 0; i < UIRef.Canvases.Count; i++)
+            {
+                if (i != skipDisableIndex)
+                    UIRef.Canvases[i].enabled = false;
+            }
         }
 
         public void UpdateHoverTooltip()
@@ -1197,7 +1209,7 @@ namespace LeyLineHybridECS
 
         public void ManalithUnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction, ref ManalithUnit.Component m) =>
+            Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction, ref Manalith.Component m) =>
             {
                 uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -1314,9 +1326,9 @@ namespace LeyLineHybridECS
 
         protected void PopulateManlithInfoHexes(uint selectedUnitId, uint playerFaction)
         {
-            Entities.WithStoreEntityQueryInField(ref m_ManalithData).ForEach((ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
+            Entities.WithStoreEntityQueryInField(ref m_ManalithData).ForEach((ref SpatialEntityId id, ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
             {
-                if (selectedUnitId == manalith.ManalithUnitId)
+                if (selectedUnitId == id.EntityId.Id)
                 {
                     UIRef.BottomLeftPortrait.ManalithEnergyGainText.color = settings.FactionIncomeColors[(int) faction.Faction];
 
@@ -2279,7 +2291,7 @@ namespace LeyLineHybridECS
             .Run();
 
 
-            Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions, ref ManalithUnit.Component m) =>
+            Entities.WithStoreEntityQueryInField(ref m_ManalithUnitData).ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions, ref Manalith.Component m) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId && faction.Faction == playerFaction.Faction)
                 {

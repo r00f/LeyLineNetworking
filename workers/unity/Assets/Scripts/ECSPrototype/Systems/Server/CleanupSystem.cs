@@ -6,6 +6,7 @@ using Unit;
 using Generic;
 using LeyLineHybridECS;
 using Unity.Collections;
+using Cell;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class CleanupSystem : ComponentSystem
@@ -33,12 +34,22 @@ public class CleanupSystem : ComponentSystem
         ComponentType.ReadWrite<Actions.Component>()
         );
 
-        m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
-        ComponentType.ReadWrite<Actions.Component>()
-        );
+        var unitsToRemoveDesc = new EntityQueryDesc
+        {
+            None = new ComponentType[]
+            {
+                ComponentType.ReadOnly<Manalith.Component>()
+            },
+            All = new ComponentType[]
+            {
+                ComponentType.ReadOnly<SpatialEntityId>(),
+                ComponentType.ReadOnly<CubeCoordinate.Component>(),
+                ComponentType.ReadOnly<WorldIndex.Component>(),
+                ComponentType.ReadWrite<Actions.Component>()
+            }
+        };
+
+        m_UnitData = GetEntityQuery(unitsToRemoveDesc);
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<WorldIndex.Component>(),

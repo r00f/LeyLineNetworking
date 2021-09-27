@@ -28,3 +28,14 @@ MonoBehaviour:
       DeploymentLocationType: 0
       Tags: []
     SimulatedPlayerDeploymentConfigs: []
+  - ProjectName: beta_zulu_jig_924
+    AssemblyName: LeyLineTest
+    Deployment:
+      Name: leylinetest
+      SnapshotPath: snapshots/default.snapshot
+      LaunchJson: cloud_launch.json
+      Region: 1
+      Cluster: 
+      DeploymentLocationType: 0
+      Tags: []
+    SimulatedPlayerDeploymentConfigs: []

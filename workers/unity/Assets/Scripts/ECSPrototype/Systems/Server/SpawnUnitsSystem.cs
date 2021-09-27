@@ -147,7 +147,7 @@ namespace LeyLineHybridECS
             {
                 var coord = cCord.CubeCoordinate;
 
-                if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
+                if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord) && !isManalithUnit)
                 {
                     var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName);
                     var Stats = unitGO.GetComponent<UnitDataSet>();

@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,11 @@ using System.Collections;
 using UnityEngine.UI;
 using UnityEditor;
 using Unity.Mathematics;
+
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+
 
 namespace LeyLineHybridECS
 {
@@ -17,22 +23,27 @@ namespace LeyLineHybridECS
         DijkstraPathfinding pathFinder;
         HexagonalHexGridGenerator gridGenerator;
         Transform manaLithParent;
-        public bool meshGenerated;
 
-        [SerializeField, HideInInspector]
+
+        [SerializeField]
+        public List<bool> TakenNeighbours = new List<bool>();
+
+        //public bool meshGenerated;
+
+        [SerializeField]
         public Cell occupiedCell;
 
         [SerializeField]
         LineRenderer leyLinePathRenderer;
         //[SerializeField]
         //LineRenderer leyLineCircleRenderer;
-        Mesh leyLinePathMesh;
+        //Mesh leyLinePathMesh;
         Mesh leyLineCircleMesh;
 
-        [SerializeField]
-        public MeshFilter leyLinePathMeshFilter;
-        [SerializeField]
-        MeshFilter leyLineCircleMeshFilter;
+        //[SerializeField]
+        //public MeshFilter leyLinePathMeshFilter;
+        //[SerializeField]
+        //MeshFilter leyLineCircleMeshFilter;
 
         /*
         [SerializeField]
@@ -65,7 +76,7 @@ namespace LeyLineHybridECS
         //List<Cell> otherManaliths = new List<Cell>();
 
         [SerializeField]
-        [Range(3, 256)]
+        [Range(0, 256)]
         int circleSegments = 256;
 
         [SerializeField]
@@ -106,15 +117,16 @@ namespace LeyLineHybridECS
 
         }
 
+        
         public void GenerateMeshes()
         {
             //manaLithParent = GameObject.Find("Manaliths").transform;
             //transform.parent = manaLithParent;
-            terrainController = FindObjectOfType<TerrainController>();
-            projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
-            leyLinePathMesh = new Mesh();
-            UpdatePathRenderer();
-
+            //terrainController = FindObjectOfType<TerrainController>();
+            //projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
+            //leyLinePathMesh = new Mesh();
+            //UpdatePathRenderer();
+            /*
             if (leyLinePathMeshFilter.sharedMesh != null)
             {
                 //create unique name for the asset
@@ -130,7 +142,7 @@ namespace LeyLineHybridECS
                 var mesh = Resources.Load("ManalithMeshes/" + assetName);
                 leyLinePathMeshFilter.sharedMesh = (Mesh)mesh;
             }
-
+            */
             /*
             if(leyLineCircleMeshFilter.sharedMesh != null)
             {
@@ -153,116 +165,220 @@ namespace LeyLineHybridECS
 
         }
 
-
-        public void ConnectManaLith()
+        /*
+        public void InitManalithCircle()
         {
-            terrainController = FindObjectOfType<TerrainController>();
-            terrainController.leyLineCrackPositions.Clear();
+
+            UpdateLeyLineCircle();
 
             //otherManaliths.Clear();
-            /*
+
             foreach (ManalithInitializer m in FindObjectsOfType<ManalithInitializer>())
             {
                 if (m != this && !otherManaliths.Contains(m.transform.GetComponentInParent<Cell>()))
                     otherManaliths.Add(m.transform.GetComponentInParent<Cell>());
             }
             otherManaliths = otherManaliths.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).ToList();
-            */
 
             //if this manalith has no connected Manalith, destroy MeshGradientColor component on pressing connect
-            if(!connectedManaLith && transform.GetComponent<MeshGradientColor>())
-            {
-                DestroyImmediate(transform.GetComponent<MeshGradientColor>());
-            }
+            //if(!connectedManaLith && transform.GetComponent<MeshGradientColor>())
+            //{
+            //DestroyImmediate(transform.GetComponent<MeshGradientColor>());
+            //}
+
             projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
             gridGenerator = FindObjectOfType<HexagonalHexGridGenerator>();
             pathFinder = new DijkstraPathfinding();
 
             //leyLineCircleMesh = new Mesh();
-            leyLinePathMesh = new Mesh();
+            //leyLinePathMesh = new Mesh();
 
-
-            UpdateLeyLineCircle();
-
-
-            terrainController.UpdateLeyLineCracks();
-
+        }
+    */
+        public void GeneratePathAndFinalize()
+        {
+            UpdateLeyLinePath();
             FillCircleCoordinatesList();
             FillPathCoordinatesList();
-
-
-            //UpdateLeyLinePath();
-            //RemovePathOverLap();
+            PrefabUtility.RecordPrefabInstancePropertyModifications(this);
+            PrefabUtility.RecordPrefabInstancePropertyModifications(leyLinePathRenderer.gameObject);
+            EditorSceneManager.MarkSceneDirty(gameObject.scene);
+            EditorUtility.SetDirty(this);
+            EditorUtility.SetDirty(leyLinePathRenderer.gameObject);
         }
 
         public void UpdateLeyLineCircle()
         {
+            if(!terrainController)
+                terrainController = FindObjectOfType<TerrainController>();
 
             foreach (Cell c in leyLineCircle)
             {
                 if(c.GetComponent<EditorIsCircleCell>())
-                    c.GetComponent<EditorIsCircleCell>().Value = false;
+                    c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell = false;
+            }
+
+            if (TakenNeighbours.Count == 6)
+            {
+                SetTakenNeighbours();
             }
 
             switch (circleSize)
             {
                 case CircleSize.Three:
-                    circleCenter = transform.position + new Vector3(occupiedCell.GetComponent<CellDimensions>().Value.x / 2, 0, 0);
+
+                    var coord = Vector3fext.ToVector3f(occupiedCell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+                    var circleCoords = CellGridMethods.CircleDegreeToCoords(coord, occupiedCell.GetComponent<CellType>().ManalithSpawnDirection);
+
+                    //Debug.Log(Vector3fext.ToUnityVector(circleCoords.Key) + " " + Vector3fext.ToUnityVector(circleCoords.Value));
+
+                    //factor in direction to determine circle center
+                    circleCenter = occupiedCell.transform.position + transform.forward * (occupiedCell.GetComponent<CellDimensions>().Value.x / 2);
+
+                    leyLineCircle.Clear();
+
                     leyLineCircle.Add(occupiedCell);
-                    if(leyLineCircle.Count == 1)
-                        leyLineCircle.AddRange(occupiedCell.GetComponent<Neighbours>().NeighboursList);
-                    for (int i = leyLineCircle.Count - 1; i >= 3; i--)
+
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
                     {
-                        leyLineCircle.RemoveAt(i);
+                        if (Vector3fext.ToFloat3(circleCoords.Key).Equals(occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<CoordinateDataComponent>().Value.CubeCoordinate) || Vector3fext.ToFloat3(circleCoords.Value).Equals(occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<CoordinateDataComponent>().Value.CubeCoordinate))
+                            leyLineCircle.Add(occupiedCell.GetComponent<Neighbours>().NeighboursList[i]);
                     }
                     foreach (Cell c in leyLineCircle)
                     {
-                        c.GetComponent<EditorIsCircleCell>().Value = true;
-                        //GetComponent<UnitsOnManalith>().UnitsOnCells.Add(c.GetComponent<UnitOnCell>());
+                        c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell = true;
                     }
-                    UpdateLeyLinePath();
+
                     UpdateCircleRenderer();
                     return;
 
                 case CircleSize.Seven:
                     circleCenter = transform.position;
                     leyLineCircle.Add(occupiedCell);
+
                     if (leyLineCircle.Count == 1)
                         leyLineCircle.AddRange(occupiedCell.GetComponent<Neighbours>().NeighboursList);
+
                     for (int i = leyLineCircle.Count - 1; i >= 7; i--)
                     {
                         leyLineCircle.RemoveAt(i);
                     }
                     foreach (Cell c in leyLineCircle)
                     {
-                        c.GetComponent<EditorIsCircleCell>().Value = true;
-                        //GetComponent<UnitsOnManalith>().UnitsOnCells.Add(c.GetComponent<UnitOnCell>());
+                        c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell = true;
                     }
-                    UpdateLeyLinePath();
+
+
                     UpdateCircleRenderer();
                     return;
             }
 
         }
 
+        public void SetTakenNeighbours()
+        {
+            switch (occupiedCell.GetComponent<CellType>().ManalithSpawnDirection)
+            {
+                case 30:
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
+                    {
+                        if (i < 2)
+                        {
+                            if (TakenNeighbours[i + 4])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                        else
+                        {
+                            if (TakenNeighbours[i - 2])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                    }
+                    break;
+                case 90:
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
+                    {
+                        if (i == 0)
+                        {
+                            if (TakenNeighbours[i + 5])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                        else
+                        {
+                            if (TakenNeighbours[i - 1])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                    }
+                    break;
+                case 150:
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
+                    {
+                        if (TakenNeighbours[i])
+                            occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                    }
+                    break;
+                case 210:
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
+                    {
+                        if (i < 5)
+                        {
+                            if (TakenNeighbours[i + 1])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                        else
+                        {
+                            if (TakenNeighbours[i - 5])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                    }
+                    break;
+                case 270:
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
+                    {
+                        if (i < 4)
+                        {
+                            if (TakenNeighbours[i + 2])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                        else
+                        {
+                            if (TakenNeighbours[i - 4])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                    }
+                    break;
+                case 330:
+                    for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
+                    {
+                        if (i < 3)
+                        {
+                            if (TakenNeighbours[i + 3])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                        else
+                        {
+                            if (TakenNeighbours[i - 3])
+                                occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<IsTaken>().Value = true;
+                        }
+                    }
+                    break;
+            }
+        }
+
         public void UpdateLeyLinePath()
         {
             leyLinePath.Clear();
+            pathFinder = new DijkstraPathfinding();
             gridGenerator = FindObjectOfType<HexagonalHexGridGenerator>();
 
             if (connectedManaLith != null && connectedManaLith != this)
             {
-                leyLinePathRenderer.GetComponentInParent<MeshGradientColor>().ManalithColor = GetComponent<MeshColor>();
                 leyLinePathRenderer.GetComponentInParent<MeshGradientColor>().ConnectedManalithColor = connectedManaLith.GetComponent<MeshColor>();
                 leyLinePathRenderer.gameObject.SetActive(true);
                 leyLinePath.AddRange(FindPath(gridGenerator.hexagons.ToArray(), connectedManaLith.occupiedCell));
                 leyLinePath.Add(occupiedCell);
                 leyLinePath.Reverse();
                 RemovePathOverLap();
-                RemovePathOverLap();
-                RemovePathOverLap();
                 UpdatePathRenderer();
-                //connectedManaLith.GetComponentInChildren<ManalithInitializer>().connectedLeyLineRenderers.Add(leyLinePathRenderer);
             }
             else
             {
@@ -275,6 +391,25 @@ namespace LeyLineHybridECS
         {
             if (leyLinePath.Count > 2)
             {
+                for(int i = leyLinePath.Count - 1; i > leyLinePath.Count/2; i--)
+                {
+                    if(leyLinePath[i - 1].GetComponent<EditorIsCircleCell>().IsLeylineCircleCell)
+                    {
+                        leyLinePath.RemoveAt(i);
+                    }
+                }
+
+                for (int i = 0; i < leyLinePath.Count/2; i++)
+                {
+                    if (leyLinePath[i + 1].GetComponent<EditorIsCircleCell>().IsLeylineCircleCell)
+                    {
+                        leyLinePath.RemoveAt(i);
+                    }
+                }
+
+
+
+                /*
                 if (leyLinePath[leyLinePath.Count - 2].GetComponent<EditorIsCircleCell>().Value)
                 {
                     leyLinePath.RemoveAt(leyLinePath.Count - 1);
@@ -283,6 +418,7 @@ namespace LeyLineHybridECS
                 {
                     leyLinePath.RemoveAt(0);
                 }
+                */
             }
         }
 
@@ -293,41 +429,58 @@ namespace LeyLineHybridECS
             leyLinePathRenderer.positionCount = leyLinePath.Count;
             for (int i = 0; i < leyLinePathRenderer.positionCount; i++)
             {
-                Vector3 pos = leyLinePath[i].transform.position + offset - transform.position;
+                Vector3 pos = leyLinePath[i].transform.position + offset;
                 leyLinePathRenderer.SetPosition(i, pos);
             }
+            //leyLinePathRenderer.transform.rotation = Quaternion.Euler(0, -transform.rotation.y, 0);
 
             for (int i = 0; i < leyLinePath.Count - 1; i++)
             {
-                Vector3 currentPos = leyLinePath[i].transform.position + offset;
-                Vector3 nextPos = leyLinePath[i + 1].transform.position + offset;
-
-                Vector3 direction = nextPos - currentPos;
-
-                for (int s = 1; s <= lineSegments + 1; s++)
+                if(!leyLinePath[i].GetComponent<CellType>().ignoreLeylineStamp || !leyLinePath[i + 1].GetComponent<CellType>().ignoreLeylineStamp)
                 {
-                    Vector3 segmentPos = currentPos + (direction * s / lineSegments);
+                    Vector3 currentPos = leyLinePath[i].transform.position + offset;
+                    Vector3 nextPos = leyLinePath[i + 1].transform.position + offset;
+                    Vector3 direction = nextPos - currentPos;
 
-                    if (!terrainController.leyLineCrackPositions.Contains(segmentPos))
-                        terrainController.leyLineCrackPositions.Add(segmentPos - new Vector3(0, 0.1f, 0));
+
+
+                    if (!leyLinePath[i].GetComponent<CellType>().ignoreLeylineStamp)
+                    {
+                        leyLinePath[i].GetComponent<EditorIsCircleCell>().IsLeylinePathCell = true;
+
+                        if (leyLinePath[i + 1].GetComponent<CellType>().ignoreLeylineStamp)
+                            direction /= 2;
+                    }
+
+                    if(leyLinePath[i].GetComponent<CellType>().ignoreLeylineStamp && !leyLinePath[i + 1].GetComponent<CellType>().ignoreLeylineStamp)
+                    {
+                        direction /= 2;
+                        currentPos += direction;
+                    }
+
+
+                    for (int s = 1; s <= lineSegments + 1; s++)
+                    {
+                        Vector3 segmentPos = currentPos + (direction * s / lineSegments);
+
+                        if (!terrainController.leyLineCrackPositions.Contains(segmentPos))
+                            terrainController.leyLineCrackPositions.Add(segmentPos - new Vector3(0, 0.1f, 0));
+                    }
                 }
             }
 
-            leyLinePathRenderer.BakeMesh(leyLinePathMesh, projectorCam);
-
-
+            //leyLinePathRenderer.BakeMesh(leyLinePathMesh, projectorCam);
             //ParticleSystem pPs = pathPs;
             //var pathShapeModule = pPs.shape;
             //pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
             //pathShapeModule.mesh = leyLinePathMesh;
 
-            leyLinePathMeshFilter.mesh = leyLinePathMesh;
-            leyLinePathRenderer.enabled = false;
+            //leyLinePathMeshFilter.mesh = leyLinePathMesh;
+            //leyLinePathRenderer.enabled = false;
         }
 
         void UpdateCircleRenderer()
         {
-
             CalculateCircle(Vector3.Distance(circleCenter, leyLineCircle[1].transform.position));
             //leyLineCircleRenderer.BakeMesh(leyLineCircleMesh, projectorCam);
 
@@ -407,6 +560,9 @@ namespace LeyLineHybridECS
 
         #endregion
 
-    #endif
+        #endif
     }
+
 }
+
+

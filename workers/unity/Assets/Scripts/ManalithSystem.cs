@@ -43,7 +43,7 @@ public class ManalithSystem : ComponentSystem
         {
             None = new ComponentType[]
             {
-                typeof(ManalithUnit.Component)
+                typeof(Manalith.Component)
             },
             All = new ComponentType[]
             {
@@ -70,7 +70,7 @@ public class ManalithSystem : ComponentSystem
         
 
         m_ManalithUnitData = GetEntityQuery(
-            ComponentType.ReadOnly<ManalithUnit.Component>(),
+            ComponentType.ReadOnly<Manalith.Component>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadWrite<FactionComponent.Component>(),
@@ -187,7 +187,7 @@ public class ManalithSystem : ComponentSystem
                         UpdateUnit(slot.CorrespondingCell.UnitOnCellId, faction.Faction, ref manalithComp);
                     }
 
-                    UpdateManalithUnit(manalithComp.ManalithUnitId, faction.Faction, ref manalithComp);
+                    UpdateManalithUnit(entityId.EntityId.Id, faction.Faction, ref manalithComp);
 
                     manalithComp.StateChange = false;
 
@@ -199,13 +199,7 @@ public class ManalithSystem : ComponentSystem
                         componentUpdateSystem.SendEvent(
                          new Manalith.ManalithFactionChangeEvent.Event(),
                          entityId.EntityId);
-
-
-                        //Vision.req
                     }
-
-                    //Apply manalith Faction to manalithUnitFaction
-
                 }
             }
         });

@@ -17,8 +17,8 @@ namespace LeyLineHybridECS
         public bool IsLerping;
         //public List<MeshRenderer> EmissionColorRenderers;
         //public List<Light> Lights;
-        public ParticleSystem CirclePs;
-        public ManalithObject ManaLithObject;
+        //public ParticleSystem CirclePs;
+        //public ManalithObject ManaLithObject;
         public float EmissionMultiplier;
     }
 

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace LeyLineHybridECS
@@ -6,9 +6,10 @@ namespace LeyLineHybridECS
     public class MeshGradientColor : MonoBehaviour
     {
 
-        public MeshColor ManalithColor;
+        public LineRenderer LeylineRenderer;
+        //public MeshColor ManalithColor;
         public MeshColor ConnectedManalithColor;
-        public MeshFilter PathMeshFilter;
+        //public MeshFilter PathMeshFilter;
         [HideInInspector]
         public Mesh mesh;
         public Vector2[] uv;
@@ -18,12 +19,14 @@ namespace LeyLineHybridECS
         public Color[] colors;
         public float EmissionMultiplier;
 
+        /*
         void Start()
         {
             mesh = PathMeshFilter.mesh;
             uv = mesh.uv;
             colors = new Color[uv.Length];
         }
+        */
 
     }
 

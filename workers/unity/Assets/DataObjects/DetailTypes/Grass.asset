@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7caeda9a969676f4986ead58b5da2444, type: 3}
+  m_Name: Grass
+  m_EditorClassIdentifier: 
+  DetailObjectSpawnProbability: 100
+  RandomDetailRotationIncrement: 60
+  DetailObjectIndexRange: {x: 5, y: 5}
+  DetailObjectAmount: {x: 1, y: 1}
+  DetailObjectRange: {x: 0, y: 0}
+  UseSpawnAngle: 0

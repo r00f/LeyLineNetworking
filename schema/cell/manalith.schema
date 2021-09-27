@@ -7,11 +7,11 @@ component Manalith
 {
     id = 113;
 	list<generic.Vector3f> circle_coordinates_list = 1;
-	uint32 combined_energy_gain = 2;
-	list<ManalithSlot> manalithslots = 3;
-	bool state_change = 4;
-    int64 manalith_unit_id = 5;
-    generic.Vector3f manalith_unit_coordinate = 6;
+    list<generic.Vector3f> path_coordinates_list = 2;
+    generic.Vector3f connected_manalith_coordinate = 3;
+	uint32 combined_energy_gain = 4;
+	list<ManalithSlot> manalithslots = 5;
+	bool state_change = 6;
 	event ManalithFactionChange manalith_faction_change_event;
 }
 

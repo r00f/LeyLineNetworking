@@ -1,3 +1,4 @@
+#if UNITY_EDITOR
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,26 +10,33 @@ namespace LeyLineHybridECS
     [ExecuteInEditMode()]
     public class CellType : MonoBehaviour
     {
-        public int ManalithChainIndex;
-        [SerializeField]
-        IsTaken isTaken;
-        [SerializeField]
-        Position3DDataComponent pos3D;
-        [SerializeField]
-        CellDimensions cellDimensions;
-        [SerializeField]
-        TerrainController terrainController;
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
+        IsTaken isTaken;
+        [SerializeField, HideInInspector]
+        Position3DDataComponent pos3D;
+        [SerializeField, HideInInspector]
+        CellDimensions cellDimensions;
+        [SerializeField, HideInInspector]
+        TerrainController terrainController;
+        [SerializeField, HideInInspector]
         List<GameObject> objectsOnTile = new List<GameObject>();
 
+        [Header("Generic Cell Settings")]
         public TerrainType thisCellsTerrain;
-
         [SerializeField]
         [Range(0, 10)]
         float terrainHeightOffset;
+        public bool ignoreLeylineStamp;
+        public Vector2 DetailPathSpawnDirectionMinMax = new Vector2(0, 360);
 
-        #if UNITY_EDITOR
+
+        [Header("Manalith Settings")]
+        public int ManalithChainIndex;
+        [SerializeField]
+        GameObject ManalithObject;
+        [SerializeField]
+        public uint ManalithSpawnDirection;
 
         // Use this for initialization
         void OnEnable()
@@ -87,7 +95,7 @@ namespace LeyLineHybridECS
                 terrainController.SetHexagonTerrainHeight(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0));
                 terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
                 //terrainController.SetHexagonTerrainDetails(cellDimensions.Size, transform.position, thisCellsTerrain.detailIndex, thisCellsTerrain.detailSpawnPercentage);
-                terrainController.UpdateHexagonTrees();
+                //terrainController.UpdateTerrainDetailObjects();
 
                 if (thisCellsTerrain.Walkable)
                 {
@@ -98,7 +106,7 @@ namespace LeyLineHybridECS
                     isTaken.Value = true;
                 }
 
-                GetComponent<EditorIsCircleCell>().Value = false;
+                GetComponent<EditorIsCircleCell>().IsLeylineCircleCell = false;
 
                 if (objectsOnTile.Count > 0)
                 {
@@ -113,22 +121,37 @@ namespace LeyLineHybridECS
                 {
                     if (thisCellsTerrain.TerrainName == "Manalith")
                     {
-                        var manaLithParent = GameObject.Find("Manaliths").transform;
-                        var manaLithGroup = manaLithParent.GetComponent<ManalithGroup>();
-                        GameObject go = Instantiate(thisCellsTerrain.AssetsToSpawn[0], transform.position, Quaternion.identity, manaLithParent);
-                        var initializer = go.GetComponent<ManalithInitializer>();
-                        initializer.occupiedCell = GetComponent<Cell>();
-                        go.transform.SetSiblingIndex(ManalithChainIndex);
-                        manaLithGroup.ManalithInitializers[ManalithChainIndex] = initializer;
-                        manaLithGroup.ConnectManalithInitializerScripts();
-                        objectsOnTile.Add(go);
+                        if(ManalithObject)
+                        {
+                            var manaLithParent = GameObject.Find("Manaliths").transform;
+                            var manaLithGroup = manaLithParent.GetComponent<ManalithGroup>();
+                            GameObject go = (GameObject) PrefabUtility.InstantiatePrefab(ManalithObject);
+                            go.transform.position = transform.position;
+                            go.transform.Rotate(new Vector3(0, ManalithSpawnDirection, 0));
+                            go.transform.parent = manaLithParent;
+                            var initializer = go.GetComponent<ManalithInitializer>();
+                            initializer.occupiedCell = GetComponent<Cell>();
+                            GetComponent<IsTaken>().Value = true;
+                            go.transform.SetSiblingIndex(ManalithChainIndex);
+                            manaLithGroup.ManalithInitializers[ManalithChainIndex] = initializer;
+                            manaLithGroup.ConnectManalithInitializerScripts();
+                            objectsOnTile.Add(go);
+                        }
+                        else
+                        {
+                            Debug.LogError("No Manalith Object Assigned to Manalith Cell - Assign Manalith Object to Cell in editor");
+                        }
+
                     }
+
                 }
             }
         }
 
-#endif
+
     }
 
 
 }
+
+#endif

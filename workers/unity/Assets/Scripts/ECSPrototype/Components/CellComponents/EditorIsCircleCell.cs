@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 namespace LeyLineHybridECS
 {
     public class EditorIsCircleCell : MonoBehaviour
     {
-        public bool Value;
+        public bool IsLeylineCircleCell;
+        public bool IsLeylinePathCell;
     }
 }

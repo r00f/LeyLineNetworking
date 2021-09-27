@@ -441,6 +441,21 @@ public class UnitAnimationSystem : JobComponentSystem
 
                 #endregion
             }
+            else
+            {
+                if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                {
+                    m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
+
+                    foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                        g.layer = 21;
+                }
+                else
+                {
+                    foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+                        g.layer = 11;
+                }
+            }
 
             #endregion
         })

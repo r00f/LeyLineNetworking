@@ -19,13 +19,13 @@ public class ManalithObjectHelper : Editor
     {
         base.OnInspectorGUI();
         serializedObject.Update();
-
+        /*
         if (GUILayout.Button("Initialize CompReferences"))
         {
             myTarget.FillSelectionOutlineObjects();
             serializedObject.ApplyModifiedProperties();
             PrefabUtility.SavePrefabAsset(myTarget.gameObject);
         }
-
+        */
     }
 }

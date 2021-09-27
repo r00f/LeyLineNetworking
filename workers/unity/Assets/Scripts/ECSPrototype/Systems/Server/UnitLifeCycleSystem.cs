@@ -61,7 +61,7 @@ public class UnitLifeCycleSystem : ComponentSystem
             },
             All = new ComponentType[]
             {
-                ComponentType.ReadOnly<ManalithUnit.Component>(),
+                ComponentType.ReadOnly<Manalith.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
@@ -133,6 +133,7 @@ public class UnitLifeCycleSystem : ComponentSystem
             PostUpdateCommands.AddComponent(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction });
         });
 
+        /*
         Entities.With(m_ManalithUnitAddedData).ForEach((Entity e, ref WorldIndex.Component unitWorldIndex, ref CubeCoordinate.Component unitCubeCoordinate, ref SpatialEntityId unitEntityId, ref FactionComponent.Component unitFaction) =>
         {
             var coordComp = unitCubeCoordinate;
@@ -140,6 +141,7 @@ public class UnitLifeCycleSystem : ComponentSystem
             var worldIndex = unitWorldIndex;
             var id = unitEntityId.EntityId.Id;
 
+            
             Entities.With(m_ManalithData).ForEach((ref Manalith.Component manalithComponent, ref WorldIndex.Component manalithWorldIndex) =>
             {
                 if(worldIndex.Value == manalithWorldIndex.Value && manalithComponent.CircleCoordinatesList.Contains(coordComp.CubeCoordinate))
@@ -148,9 +150,10 @@ public class UnitLifeCycleSystem : ComponentSystem
                     manalithComponent.ManalithUnitCoordinate = coordComp.CubeCoordinate;
                 }
             });
-
-            PostUpdateCommands.AddComponent(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction });
+            
+        PostUpdateCommands.AddComponent(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction });
         });
+        */
 
         Entities.With(m_UnitChangedData).ForEach((Entity e, ref SpatialEntityId unitEntityId, ref CubeCoordinate.Component unitCubeCoord, ref UnitStateData unitState, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component unitFaction) =>
         {

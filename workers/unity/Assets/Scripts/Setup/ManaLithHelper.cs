@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using UnityEditor;
 
@@ -22,16 +22,18 @@ namespace LeyLineHybridECS
         {
             base.OnInspectorGUI();
             serializedObject.Update();
-
+            /*
             if (GUILayout.Button("Connect Manalith"))
             {
-                myTarget.ConnectManaLith();
+                myTarget.InitManalithCircle();
             }
+            */
 
             if (GUILayout.Button("Generate Meshes"))
             {
                 myTarget.GenerateMeshes();
             }
+
             /*
             if (GUILayout.Button("Fill Circle Coords"))
             {

@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Generic;
-
+using Unity.Mathematics;
 
 public static class Vector3fext
 {
@@ -19,6 +19,16 @@ public static class Vector3fext
     public static Vector3 ToUnityVector(Vector3f inVector)
     {
         return new Vector3(inVector.X, inVector.Y, inVector.Z);
+    }
+
+    public static Vector3f ToVector3f(float3 inVector)
+    {
+        return new Vector3f(inVector.x, inVector.y, inVector.z);
+    }
+
+    public static float3 ToFloat3(Vector3f inVector)
+    {
+        return new float3(inVector.X, inVector.Y, inVector.Z);
     }
 
 }

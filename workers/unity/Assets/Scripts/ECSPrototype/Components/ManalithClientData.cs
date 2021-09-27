@@ -8,10 +8,5 @@ public class ManalithClientData : MonoBehaviour
 {
     public long ManalithEntityID = 0;
     public string NodeName;
-    public MiniMapTile MiniMapTilePrefab;
-    [HideInInspector]
-    public MiniMapTile MiniMapTileInstance;
-    [HideInInspector]
-    public MiniMapTile BigMapTileInstance;
-    public TeamColorMeshes ManalithUnitTeamColorMeshes;
+
 }

@@ -102,6 +102,7 @@ namespace LeyLineHybridECS
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
+                                gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 //raise InitMapEvent
@@ -121,6 +122,7 @@ namespace LeyLineHybridECS
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
+                                gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 m_ComponentUpdateSystem.SendEvent(
@@ -294,19 +296,21 @@ namespace LeyLineHybridECS
                         break;
                 }
 
-                uint concededFaction = PlayerWithFactionConceded(gameStateWorldIndex.Value);
-
-                //if any player concedes in any step, go to gameoverstate
-                if (gameState.CurrentState != GameStateEnum.game_over && concededFaction != 0)
+                if (gameState.CurrentState != GameStateEnum.game_over && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
-                    if (concededFaction == 1)
-                        gameState.WinnerFaction = 2;
-                    else
-                        gameState.WinnerFaction = 1;
+                    uint concededFaction = PlayerWithFactionConceded(gameStateWorldIndex.Value);
 
-                    gameState.CurrentState = GameStateEnum.game_over;
+                    //if any player concedes in any step other than game over / waiting for players, go to gameoverstate
+                    if (concededFaction != 0)
+                    {
+                        if (concededFaction == 1)
+                            gameState.WinnerFaction = 2;
+                        else
+                            gameState.WinnerFaction = 1;
+
+                        gameState.CurrentState = GameStateEnum.game_over;
+                    }
                 }
-
 
 #if UNITY_EDITOR
                 if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
@@ -352,7 +356,6 @@ namespace LeyLineHybridECS
                     if (playerState.CurrentState == PlayerStateEnum.conceded)
                     {
                         f = playerFaction.Faction;
-                        playerState.CurrentState = PlayerStateEnum.waiting;
                     }
                 }
             });

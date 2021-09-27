@@ -31,7 +31,7 @@ public class TerrainControllerHelper : Editor
 
             if (GUILayout.Button("Update Trees"))
             {
-                myTarget.UpdateHexagonTrees();
+                myTarget.UpdateTerrainDetailObjects();
             }
 
             if (GUILayout.Button("Set Slope Texture"))
@@ -64,6 +64,19 @@ public class TerrainControllerHelper : Editor
             {
                 myTarget.UpdateAllMapTiles();
             }
+
+            if (GUILayout.Button("Connect Manaliths"))
+            {
+                myTarget.ConnectManaliths();
+            }
+
+
+            if (GUILayout.Button("Generate Map"))
+            {
+                myTarget.GenerateMap();
+            }
+
+
 
             serializedObject.ApplyModifiedProperties();
         }

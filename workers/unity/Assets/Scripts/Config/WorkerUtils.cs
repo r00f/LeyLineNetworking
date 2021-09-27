@@ -21,6 +21,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<HighlightingSystem>();
         world.GetOrCreateSystem<ActionEffectsSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
+        world.GetOrCreateSystem<ManalithSystemClient>();
         //world.GetOrCreateManager<ClientCleanupSystem>();
         //world.GetOrCreateManager<ProjectileSystem>();
     }

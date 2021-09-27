@@ -10,6 +10,8 @@ using Unity.Entities;
 using UnityEngine;
 using Snapshot = Improbable.Gdk.Core.Snapshot;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Unity.Mathematics;
 
 namespace BlankProject.Editor
 {
@@ -63,23 +65,52 @@ namespace BlankProject.Editor
                     CellAttributes = new List<CellAttribute>()
                 };
 
-
                 foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
-                   //if (n.GetComponent<IsTaken>().Value != true){
-                        circle.CellAttributes.Add(new CellAttribute
-                        {
-                            Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                            CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
-                            IsTaken = n.GetComponent<IsTaken>().Value,
-                            MovementCost = n.GetComponent<MovementCost>().Value
-                        });
-                   //}
+                    circle.CellAttributes.Add(new CellAttribute
+                    {
+                        Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
+                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                        IsTaken = n.GetComponent<IsTaken>().Value,
+                        MovementCost = n.GetComponent<MovementCost>().Value
+                    });
                 }
 
-                Vector3f pos = new Vector3f(m.transform.position.x, m.transform.position.y, m.transform.position.z);
+                Position.Component pos = new Position.Component
+                {
+                    Coords = new Coordinates
+                    {
+                        X = m.transform.position.x,
+                        Y = m.transform.position.y,
+                        Z = m.transform.position.z
+                    }
+                };
+
                 uint worldIndex = m.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
-                var manalith = LeyLineEntityTemplates.Manalith(pos, circle, worldIndex);
+
+                var stats = m.GetComponent<UnitDataSet>();
+                var AIstats = m.GetComponent<AIUnitDataSet>();
+
+                var coordComp = m.GetComponent<ManalithInitializer>().occupiedCell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
+
+                var coord = new Vector3f(coordComp.x, coordComp.y, coordComp.z);
+
+                //Debug.Log(Regex.Replace(stats.UnitName, @"\s+", ""));
+                //Debug.Log("AddManalithUnitToSnapshot");
+
+                var connectedManalithCoord = new Vector3f();
+
+                if(m.connectedManaLith)
+                    connectedManalithCoord = Vector3fext.ToVector3f(m.connectedManaLith.occupiedCell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+
+                var pathCoordList = new List<Vector3f>();
+
+                foreach(float3 f3 in m.leyLinePathCoords)
+                {
+                    pathCoordList.Add(Vector3fext.ToVector3f(f3));
+                }
+
+                var manalith = LeyLineEntityTemplates.ManalithUnit(m.name, pos, coord, 0, worldIndex, stats, AIstats, (uint)m.transform.eulerAngles.y, circle, pathCoordList, connectedManalithCoord);
                 snaphot.AddEntity(manalith);
             }
         }
@@ -108,7 +139,7 @@ namespace BlankProject.Editor
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
                 uint worldIndex = c.transform.parent.parent.GetComponent<EditorWorldIndex>().WorldIndex;
                 int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().Value, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().IsManalithUnit, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
+                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().IsManalithUnit, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
                 snapshot.AddEntity(cell);
             }
         }

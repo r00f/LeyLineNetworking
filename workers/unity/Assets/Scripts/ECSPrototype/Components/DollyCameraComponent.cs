@@ -83,34 +83,29 @@ public class DollyCameraComponent : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (GameObject.FindGameObjectWithTag("Player"))
+        if (!playerGO)
         {
-            playerGO = GameObject.FindGameObjectWithTag("Player");
-            playerCam = playerGO.transform.GetComponent<Moba_Camera>();
-            playerListener = playerGO.transform.GetComponentInChildren<StudioListener>();
-        }
-        if (!playerCam || UIRef.StartupPanel.activeSelf)
-            return;
-
-        if (playerCam.playerFaction != 0 && playerFaction == 0)
-        {
-            if (pathWaypoints.Count != 0)
+            if(GameObject.FindGameObjectWithTag("Player"))
             {
-                //if faction is odd, reverse path
-                if ((playerCam.playerFaction & 1) == 0)
-                {
-                    //Debug.Log("REVERSECAMPATH");
-                    mapTitleTextMesh.transform.eulerAngles = mapTitleTextMesh.transform.eulerAngles + new Vector3(0, 180, 0);
-                    pathWaypoints.Reverse();
-                    smoothPath.m_Waypoints = pathWaypoints.ToArray();
-                    smoothPath.InvalidateDistanceCache();
-                }
-
-                playerFaction = playerCam.playerFaction;
-
-                directionSet = true;
+                playerGO = GameObject.FindGameObjectWithTag("Player");
+                playerCam = playerGO.transform.GetComponent<Moba_Camera>();
+                playerListener = playerGO.transform.GetComponentInChildren<StudioListener>();
+            }
+        }
+        else if (playerCam.playerFaction != 0 && !directionSet && !UIRef.StartupPanel.activeSelf)
+        {
+            //if faction is odd, reverse path
+            if ((playerCam.playerFaction & 1) == 0)
+            {
+                //Debug.Log("REVERSECAMPATH");
+                mapTitleTextMesh.transform.eulerAngles = mapTitleTextMesh.transform.eulerAngles + new Vector3(0, 180, 0);
+                pathWaypoints.Reverse();
+                smoothPath.m_Waypoints = pathWaypoints.ToArray();
+                smoothPath.InvalidateDistanceCache();
             }
 
+            playerFaction = playerCam.playerFaction;
+            directionSet = true;
         }
 
         if(directionSet)

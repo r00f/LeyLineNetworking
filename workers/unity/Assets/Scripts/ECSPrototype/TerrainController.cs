@@ -1,3 +1,4 @@
+
 using UnityEngine;
 using System.Collections;
 using UnityEditor;
@@ -10,6 +11,7 @@ namespace LeyLineHybridECS
 
     public class TerrainController : MonoBehaviour
     {
+        #if UNITY_EDITOR
         [SerializeField]
         Terrain terrain;
 
@@ -42,6 +44,8 @@ namespace LeyLineHybridECS
 
         //[SerializeField]
         //float grassCircleRange;
+        [SerializeField]
+        ManalithGroup manalithGroup;
 
         [SerializeField]
         int randomGrasRotationMax;
@@ -64,7 +68,18 @@ namespace LeyLineHybridECS
         [SerializeField]
         float[,] strength;
 
-#if UNITY_EDITOR
+
+
+        public void GenerateMap()
+        {
+            UpdateAllMapTiles();
+            manalithGroup.ConnectManaliths();
+            SmoothTerrainHeights();
+            SmoothTerrainHeights();
+            manalithGroup.ConnectManaliths();
+            SetSlopeTexture();
+            UpdateTerrainDetailObjects();
+        }
 
         public void SaveTerrainAsset()
         {
@@ -77,7 +92,11 @@ namespace LeyLineHybridECS
             {
                 c.GetComponent<CellType>().UpdateTerrainTexture();
             }
+        }
 
+        public void ConnectManaliths()
+        {
+            manalithGroup.ConnectManaliths();
         }
 
 
@@ -155,63 +174,68 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void UpdateHexagonTrees()
+        public void UpdateTerrainDetailObjects()
         {
             treeList = new List<TreeInstance>();
 
             foreach (Cell c in hexGridGenerator.hexagons)
             {
-                TerrainType terrainType = c.GetComponent<CellType>().thisCellsTerrain;
-
-                int treeRot = 0;
-
-                if (terrainType.RandomDetailRotationIncrement != 0)
+                if(!c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell && !c.GetComponent<EditorIsCircleCell>().IsLeylinePathCell)
                 {
-                    treeRot = UnityEngine.Random.Range(0, 360 / terrainType.RandomDetailRotationIncrement) * terrainType.RandomDetailRotationIncrement;
-                }
-                
+                    TerrainType terrainType = c.GetComponent<CellType>().thisCellsTerrain;
 
+                    int treeRot = 0;
 
-                if (terrainType.NeighbourAmountMinMax.y != 0)
-                {
-                    int grassAmount = UnityEngine.Random.Range((int)terrainType.NeighbourAmountMinMax.x, (int)terrainType.NeighbourAmountMinMax.y + 1);
-
-                    foreach(Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                    if (terrainType.Details.Count != 0)
                     {
-                        if (n.GetComponent<CellType>().thisCellsTerrain.Walkable && UnityEngine.Random.Range(0, 100) <= terrainType.probabilityToSpawnNeighbourAsset)
-                            SpawnDetailPatch(grassAmount, n, terrainType.NeighbourIndexMinMax, 0.6f, UnityEngine.Random.Range(0,360));
-                    }
-                }
-
-                if(terrainType.DetailObjectIndexRanges.Count != 0 && terrainType.DetailObjectAmounts.Count != 0 && terrainType.DetailObjectSpawnProbabilities.Count != 0)
-                {
-                    for(int i = 0; i < terrainType.DetailObjectIndexRanges.Count; i++)
-                    {
-                        int grassAmount = (int)UnityEngine.Random.Range(terrainType.DetailObjectAmounts[i].x, terrainType.DetailObjectAmounts[i].y);
-
-                        if (UnityEngine.Random.Range(0, 100) <= terrainType.DetailObjectSpawnProbabilities[i])
+                        for (int i = 0; i < terrainType.Details.Count; i++)
                         {
-                            float randomRange = 0f;
-                            if (terrainType.DetailObjectRanges.Count != 0)
-                                randomRange = UnityEngine.Random.Range(terrainType.DetailObjectRanges[i].x, terrainType.DetailObjectRanges[i].y);
+                            if (terrainType.Details[i].RandomDetailRotationIncrement != 0)
+                            {
+                                treeRot = UnityEngine.Random.Range(0, 360 / terrainType.Details[i].RandomDetailRotationIncrement) * terrainType.Details[i].RandomDetailRotationIncrement;
+                            }
 
-                            SpawnDetailPatch(grassAmount, c, terrainType.DetailObjectIndexRanges[i], randomRange, treeRot, terrainType.DetailObjectSpawnYOffset + UnityEngine.Random.Range(terrainType.DetailObjectSpawnYOffsetMinMax.x, terrainType.DetailObjectSpawnYOffsetMinMax.y));
+                            int grassAmount = (int) UnityEngine.Random.Range(terrainType.Details[i].DetailObjectAmount.x, terrainType.Details[i].DetailObjectAmount.y);
+
+                            if (UnityEngine.Random.Range(0, 100) <= terrainType.Details[i].DetailObjectSpawnProbability)
+                            {
+                                float randomRange = 0f;
+                                randomRange = UnityEngine.Random.Range(terrainType.Details[i].DetailObjectRange.x, terrainType.Details[i].DetailObjectRange.y);
+
+                                SpawnDetailPatch(grassAmount, c, new Vector2(1,1), terrainType.Details[i].DetailObjectIndexRange, randomRange, c.GetComponent<CellType>().DetailPathSpawnDirectionMinMax, terrainType.Details[i].UseSpawnAngle, treeRot, terrainType.DetailObjectSpawnYOffset + UnityEngine.Random.Range(terrainType.DetailObjectSpawnYOffsetMinMax.x, terrainType.DetailObjectSpawnYOffsetMinMax.y));
+                            }
+
+                            if(terrainType.Details[i] is NeighbouredDetailType)
+                            {
+                                var d = terrainType.Details[i] as NeighbouredDetailType;
+
+                                if (d.NeighbourAmountMinMax.y != 0)
+                                {
+                                    //int neighbourGrassAmount = UnityEngine.Random.Range((int) d.NeighbourAmountMinMax.x, (int) d.NeighbourAmountMinMax.y + 1);
+                                    foreach (Cell n in c.GetComponent<Neighbours>().NeighboursList)
+                                    {
+                                        if (n.GetComponent<CellType>().thisCellsTerrain.Walkable && UnityEngine.Random.Range(0, 100) <= d.probabilityToSpawnNeighbourAsset)
+                                            SpawnDetailPatch(grassAmount, n, d.TreeHeightMinMax, d.NeighbourIndexMinMax, 0.6f, c.GetComponent<CellType>().DetailPathSpawnDirectionMinMax, d.UseSpawnAngle, UnityEngine.Random.Range(0, 360));
+                                    }
+                                }
+                            }
                         }
                     }
-                }
-
-                if (terrainType.TreeIndexMinMax.y != 0)
-                {
-                    TreeInstance treeInstance = new TreeInstance()
+                    /*
+                    if (terrainType.TreeIndexMinMax.y != 0)
                     {
-                        prototypeIndex = UnityEngine.Random.Range((int) terrainType.TreeIndexMinMax.x, (int) terrainType.TreeIndexMinMax.y + 1) - 1,
-                        //color = Color.white,
-                        //lightmapColor = Color.white,
-                        heightScale = UnityEngine.Random.Range(terrainType.TreeHeightMinMax.x, terrainType.TreeHeightMinMax.y),
-                        widthScale = 1,
-                        rotation = treeRot
-                    };
-                    SpawnHexagonTree(c.transform.position - transform.parent.position, treeInstance);
+                        TreeInstance treeInstance = new TreeInstance()
+                        {
+                            prototypeIndex = UnityEngine.Random.Range((int) terrainType.TreeIndexMinMax.x, (int) terrainType.TreeIndexMinMax.y + 1) - 1,
+                            //color = Color.white,
+                            //lightmapColor = Color.white,
+                            heightScale = UnityEngine.Random.Range(terrainType.TreeHeightMinMax.x, terrainType.TreeHeightMinMax.y),
+                            widthScale = 1,
+                            rotation = treeRot
+                        };
+                        SpawnHexagonTree(c.transform.position - transform.parent.position, treeInstance);
+                    }
+                    */
                 }
             }
 
@@ -221,7 +245,7 @@ namespace LeyLineHybridECS
             terrain.Flush();
         }
 
-        public void SpawnDetailPatch(int grassAmount, Cell c, Vector2 treeIndexMinMax, float spawnCircleRange, float randomRotation = 0f, float yOffset = 0f)
+        public void SpawnDetailPatch(int grassAmount, Cell c, Vector2 heightMinMax, Vector2 treeIndexMinMax, float spawnCircleRange, Vector2 angleMinMax, bool useSpawnAngle, float randomRotation = 0f, float yOffset = 0f)
         {
             for (int i = 0; i < grassAmount; i++)
             {
@@ -230,13 +254,20 @@ namespace LeyLineHybridECS
                     prototypeIndex = UnityEngine.Random.Range((int)treeIndexMinMax.x, (int)treeIndexMinMax.y + 1) - 1,
                     color = Color.white,
                     lightmapColor = Color.white,
-                    heightScale = UnityEngine.Random.Range(grassHeightMinMax.x, grassHeightMinMax.y),
+                    heightScale = UnityEngine.Random.Range(heightMinMax.x, heightMinMax.y),
                     widthScale = 1,
                     rotation = randomRotation * Mathf.Deg2Rad
                 };
 
+                float randomAngle;
+
+                if(useSpawnAngle)
+                    randomAngle = UnityEngine.Random.Range(angleMinMax.x, angleMinMax.y);
+                else
+                    randomAngle = UnityEngine.Random.Range(0, 359);
+
                 //can spawn at same place
-                Vector2 randomOffset = UnityEngine.Random.insideUnitCircle.normalized * spawnCircleRange;
+                Vector2 randomOffset = PointOnAngle(spawnCircleRange, randomAngle);
 
                 Vector3 pos = c.transform.position - transform.parent.position + new Vector3(randomOffset.x, 0, randomOffset.y) + new Vector3(0, yOffset, 0);
 
@@ -244,6 +275,14 @@ namespace LeyLineHybridECS
             }
 
         }
+
+        Vector2 PointOnAngle(float radius, float angle)
+        {
+            float rad = angle * Mathf.Deg2Rad;
+            Vector2 position = new Vector3(Mathf.Sin(rad), Mathf.Cos(rad));
+            return position * radius;
+        }
+
 
         public void SpawnHexagonTree(Vector3 hexPos, TreeInstance treeInstance)
         {
@@ -848,7 +887,7 @@ namespace LeyLineHybridECS
 
             terrain.terrainData.SetAlphamaps(0, 0, alphaMap);
         }
-
         #endif
     }
 }
+

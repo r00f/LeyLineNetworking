@@ -7,6 +7,7 @@ using UnityEngine;
 using Unity.Collections;
 using System.Collections.Generic;
 using Unity.Jobs;
+using Cell;
 
 namespace LeyLineHybridECS
 {
@@ -71,14 +72,17 @@ namespace LeyLineHybridECS
             if (m_GameStateData.CalculateEntityCount() == 0)
                 return inputDeps;
 
-            var gameState = GetSingleton<GameState.Component>();
+            var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
-            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
+
+            Entities.ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
             {
+                /*
                 if (playerVision.RevealVision)
                 {
                     return;
                 }
+                */
 
                 var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
                 var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
@@ -104,7 +108,7 @@ namespace LeyLineHybridECS
                 {
                     if (ropeEndEvents.Count == 0)
                     {
-                        if (playerState.CurrentState != PlayerStateEnum.ready)
+                        if (playerState.CurrentState != PlayerStateEnum.ready && playerState.CurrentState != PlayerStateEnum.conceded)
                         {
                             if (playerHigh.CancelState)
                             {
@@ -203,7 +207,7 @@ namespace LeyLineHybridECS
 
                     if (mouseState.ClickEvent == 1)
                     {
-                        if ((EntityManager.HasComponent<ManalithUnit.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                        if ((EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
                             if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
                             {
@@ -230,7 +234,7 @@ namespace LeyLineHybridECS
 
         public void ResetInputCoolDown(float coolDown)
         {
-            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((Entity e, ref HighlightingDataComponent highlightingData) =>
+            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref HighlightingDataComponent highlightingData) =>
             {
                 highlightingData.InputCooldown = coolDown;
             })
@@ -240,7 +244,7 @@ namespace LeyLineHybridECS
 
         public void SetHoveredCoordinates(Vector3f cubeCoord, Vector3 pos)
         {
-            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((Entity e, ref HighlightingDataComponent highlightingData) => 
+            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref HighlightingDataComponent highlightingData) => 
             {
                 highlightingData.HoveredCoordinate = cubeCoord;
                 highlightingData.HoveredPosition = pos;
@@ -266,21 +270,20 @@ namespace LeyLineHybridECS
 
         public void SetPlayerState(PlayerStateEnum state)
         {
-            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref PlayerState.Component playerState) =>
-            {
-                if (playerState.CurrentState != state && playerState.CurrentState != PlayerStateEnum.ready)
-                {
-                    playerState.CurrentState = state;
+            var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
 
-                    if (state == PlayerStateEnum.waiting)
-                    {
-                        playerState.SelectedUnitId = 0;
-                        playerState.SelectedUnitCoordinate = new Vector3f(999, 999, 999);
-                    }
+            if (playerState.CurrentState != state && playerState.CurrentState != PlayerStateEnum.ready)
+            {
+                playerState.CurrentState = state;
+
+                if (state == PlayerStateEnum.waiting)
+                {
+                    playerState.SelectedUnitId = 0;
+                    playerState.SelectedUnitCoordinate = new Vector3f(999, 999, 999);
                 }
-            })
-            .WithoutBurst()
-            .Run();
+            }
+
+            m_PlayerData.SetSingleton(playerState);
         }
     
         private bool AnyUnitClicked()

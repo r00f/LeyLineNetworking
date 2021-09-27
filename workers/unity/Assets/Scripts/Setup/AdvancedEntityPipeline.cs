@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using FMODUnity;
 //using Fps.Movement;
 //using Fps.SchemaExtensions;
 using Improbable;
@@ -47,7 +48,12 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
             typeof(AnimatedPortraitReference),
             typeof(UnitComponentReferences),
             typeof(GarbageCollectorComponent),
-            typeof(UnitHeadUI)
+            typeof(UnitHeadUI),
+            typeof(ManalithInitializer),
+            typeof(MeshColor),
+            typeof(MeshGradientColor),
+            typeof(ManalithObject),
+            typeof(StudioEventEmitter)
     };
 
     public AdvancedEntityPipeline(WorkerInWorld worker)

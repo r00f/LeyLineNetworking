@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 
@@ -8,7 +8,7 @@ namespace LeyLineHybridECS
 
     public class CellTypeHelper : Editor
     {
-#if UNITY_EDITOR
+        #if UNITY_EDITOR
         CellType[] myCellTypes;
 
         private void OnEnable()
@@ -20,6 +20,31 @@ namespace LeyLineHybridECS
                 myCellTypes[i] = monoObjects[i] as CellType;
             }
 
+        }
+
+        protected virtual void OnSceneGUI()
+        {
+            for (int i = myCellTypes.Length - 1; i >= 0; i--)
+            {
+                if (myCellTypes[i] == null)
+                {
+                    return;
+                }
+
+                if (myCellTypes[i].DetailPathSpawnDirectionMinMax.x != 0 || myCellTypes[i].DetailPathSpawnDirectionMinMax.y != 360)
+                {
+                    Handles.color = Color.cyan;
+                    Handles.ArrowHandleCap(0, myCellTypes[i].transform.position, Quaternion.Euler(new Vector3(0, myCellTypes[i].DetailPathSpawnDirectionMinMax.x, 0)), 1f, EventType.Repaint);
+                    Handles.ArrowHandleCap(0, myCellTypes[i].transform.position, Quaternion.Euler(new Vector3(0, myCellTypes[i].DetailPathSpawnDirectionMinMax.y, 0)), 1f, EventType.Repaint);
+                }
+
+
+                if (myCellTypes[i].ManalithSpawnDirection != 0)
+                {
+                    Handles.color = Color.yellow;
+                    Handles.ArrowHandleCap(0, myCellTypes[i].transform.position, Quaternion.Euler(new Vector3(0, myCellTypes[i].ManalithSpawnDirection, 0)), 1f, EventType.Repaint);
+                }
+            }
         }
 
         public override void OnInspectorGUI()
@@ -36,8 +61,6 @@ namespace LeyLineHybridECS
             }
 
 
-
-
             if (GUILayout.Button("Apply Height Offset"))
             {
                 for (int i = myCellTypes.Length - 1; i >= 0; i--)
@@ -48,7 +71,7 @@ namespace LeyLineHybridECS
 
             serializedObject.ApplyModifiedProperties();
         }
-#endif
+        #endif
     }
 
 }

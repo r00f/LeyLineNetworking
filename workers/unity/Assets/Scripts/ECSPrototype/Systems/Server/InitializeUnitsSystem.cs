@@ -11,6 +11,7 @@ public class InitializeUnitsSystem : ComponentSystem
 {
     EntityQuery m_PlayerData;
     EntityQuery m_UnitData;
+    EntityQuery m_ManalithUnitData;
     Settings settings;
 
     protected override void OnCreate()
@@ -31,6 +32,12 @@ public class InitializeUnitsSystem : ComponentSystem
             ComponentType.ReadOnly<MovementVariables.Component>()
             );
 
+        m_ManalithUnitData = GetEntityQuery(
+            ComponentType.ReadWrite<Transform>(),
+            ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
+            ComponentType.ReadOnly<MovementVariables.Component>()
+            );
+
         m_PlayerData = GetEntityQuery(
             ComponentType.ReadOnly<HeroTransform>(),
             ComponentType.ReadOnly<FactionComponent.Component>()
@@ -41,6 +48,12 @@ public class InitializeUnitsSystem : ComponentSystem
 
     protected override void OnUpdate()
     {
+
+        Entities.With(m_ManalithUnitData).ForEach((Transform t, ref MovementVariables.Component move) =>
+        {
+            t.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
+        });
+
         Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent anim, ref FactionComponent.Component unitFactionComp, ref Health.Component health, ref MovementVariables.Component move) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
@@ -51,7 +64,7 @@ public class InitializeUnitsSystem : ComponentSystem
             anim.RotateTransform.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
             unitEffects.CurrentHealth = health.CurrentHealth;
 
-            if(anim.Animator)
+            if (anim.Animator)
                 anim.AnimStateEffectHandlers.AddRange(anim.Animator.GetBehaviours<AnimStateEffectHandler>());
 
 

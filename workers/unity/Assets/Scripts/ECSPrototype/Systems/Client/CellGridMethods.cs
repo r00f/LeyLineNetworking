@@ -51,6 +51,35 @@ public static class CellGridMethods
     }
     */
 
+    public static KeyValuePair<Vector3f, Vector3f> CircleDegreeToCoords(Vector3f origin, uint degree)
+    {
+        var coords = new KeyValuePair<Vector3f, Vector3f>();
+
+        switch (degree)
+        {
+            case (30):
+                coords = new KeyValuePair<Vector3f, Vector3f>(CubeNeighbour(origin, 1), CubeNeighbour(origin, 2));
+                break;
+            case (90):
+                coords = new KeyValuePair<Vector3f, Vector3f>(CubeNeighbour(origin, 0), CubeNeighbour(origin, 1));
+                break;
+            case (150):
+                coords = new KeyValuePair<Vector3f, Vector3f>(CubeNeighbour(origin, 5), CubeNeighbour(origin, 0));
+                break;
+            case (210):
+                coords = new KeyValuePair<Vector3f, Vector3f>(CubeNeighbour(origin, 4), CubeNeighbour(origin, 5));
+                break;
+            case (270):
+                coords = new KeyValuePair<Vector3f, Vector3f>(CubeNeighbour(origin, 3), CubeNeighbour(origin, 4));
+                break;
+            case (330):
+                coords = new KeyValuePair<Vector3f, Vector3f>(CubeNeighbour(origin, 2), CubeNeighbour(origin, 3));
+                break;
+        }
+
+        return coords;
+    }
+
     public static Vector3f CubeDirection(uint direction)
     {
         if (direction < 6)
