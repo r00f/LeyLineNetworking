@@ -94,7 +94,7 @@ public class SendActionRequestSystem : JobComponentSystem
         if (gameState.CurrentState == GameStateEnum.planning)
         {
             //Clear right Clicked unit actions
-            Entities.WithStoreEntityQueryInField(ref m_RightClickedUnitData).ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions, ref RightClickEvent rightClickEvent) =>
+            Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions, ref RightClickEvent rightClickEvent) =>
             {
                 if (faction.Faction == playerFaction.Faction)
                 {
@@ -109,7 +109,7 @@ public class SendActionRequestSystem : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, AnimatorComponent anim, ref MouseState mouseState, ref SpatialEntityId id, ref FactionComponent.Component faction, ref Actions.Component actions, ref CubeCoordinate.Component uCoord) =>
+            Entities.ForEach((Entity e, AnimatorComponent anim, ref MouseState mouseState, ref SpatialEntityId id, ref FactionComponent.Component faction, ref Actions.Component actions, ref CubeCoordinate.Component uCoord) =>
             {
                 //set unit action to basic move if is clicked and player has energy
                 if (mouseState.ClickEvent == 1)
@@ -154,7 +154,7 @@ public class SendActionRequestSystem : JobComponentSystem
 
     public void RevealPlayerVision()
     {
-        Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref SpatialEntityId playerId,  ref Vision.Component playerVision, ref PlayerState.HasAuthority auth) =>
+        Entities.ForEach((ref SpatialEntityId playerId,  ref Vision.Component playerVision, ref PlayerState.HasAuthority auth) =>
         {
             var request = new Vision.RevealVisionCommand.Request
             (
@@ -190,7 +190,7 @@ public class SendActionRequestSystem : JobComponentSystem
         m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
         m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
-        Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
+        Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
             if (idComponent.EntityId.Id == entityId)
             {

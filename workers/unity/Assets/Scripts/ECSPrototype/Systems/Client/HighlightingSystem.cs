@@ -139,7 +139,7 @@ public class HighlightingSystem : JobComponentSystem
 
         if (gameState.CurrentState == GameStateEnum.planning)
         {
-            Entities.WithStoreEntityQueryInField(ref m_RightClickedUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref RightClickEvent r) =>
+            Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref RightClickEvent r) =>
             {
                 ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
             })
@@ -190,7 +190,7 @@ public class HighlightingSystem : JobComponentSystem
         else
         {
 
-            Entities.WithStoreEntityQueryInField(ref m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState) =>
+            Entities.ForEach((Entity e, ref MarkerState markerState) =>
             {
                 if (markerState.NumberOfTargets > 0 || markerState.CurrentState == MarkerState.State.Hovered)
                 {
@@ -201,7 +201,7 @@ public class HighlightingSystem : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.WithStoreEntityQueryInField(ref m_ActiveUnitData).ForEach((LineRendererComponent lineRenderer) =>
+            Entities.ForEach((LineRendererComponent lineRenderer) =>
             {
                 lineRenderer.lineRenderer.positionCount = 0;
             })
@@ -260,7 +260,7 @@ public class HighlightingSystem : JobComponentSystem
             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
         }
 
-        Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>
+        Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>
         {
             if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
             {
@@ -369,7 +369,7 @@ public class HighlightingSystem : JobComponentSystem
     {
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-        Entities.WithStoreEntityQueryInField(ref m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((Entity e, ref MarkerState markerState, ref CubeCoordinate.Component coord) =>
         {
             uint nOfTargets = 0;
             int turnStepIndex = 0;
@@ -413,7 +413,7 @@ public class HighlightingSystem : JobComponentSystem
         var playerPathing = inPlayerPathing;
         var playerState = inPlayerState;
 
-        Entities.WithStoreEntityQueryInField(ref m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref WorldIndex.Component worldIndex, ref MouseState mouseState, ref FactionComponent.Component faction)=>
+        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref WorldIndex.Component worldIndex, ref MouseState mouseState, ref FactionComponent.Component faction)=>
         {
             if (iD.EntityId.Id == playerState.SelectedUnitId)
             {
@@ -683,7 +683,7 @@ public class HighlightingSystem : JobComponentSystem
 
         HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
-        Entities.WithStoreEntityQueryInField(ref m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
+        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
         {
             //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
             if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3)
@@ -700,7 +700,7 @@ public class HighlightingSystem : JobComponentSystem
 
         playerState = p;
 
-        Entities.WithStoreEntityQueryInField(ref m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
@@ -735,7 +735,7 @@ public class HighlightingSystem : JobComponentSystem
 
         //HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
-        Entities.WithStoreEntityQueryInField(ref m_ActiveUnitData).ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
+        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
         {
             if(actions.CurrentSelected.Index != -3)
             {
@@ -755,7 +755,7 @@ public class HighlightingSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithStoreEntityQueryInField(ref m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
@@ -808,7 +808,7 @@ public class HighlightingSystem : JobComponentSystem
         HashSet<Vector3f> coordHash = new HashSet<Vector3f>(cubeCoords);
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-        Entities.WithStoreEntityQueryInField(ref m_MarkerStateData).ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
             if (coordHash.Contains(coord.CubeCoordinate) && markerState.NumberOfTargets > 0)
             {
@@ -834,7 +834,7 @@ public class HighlightingSystem : JobComponentSystem
 
         HashSet<Vector3f> playerCellsInRangeHash = new HashSet<Vector3f>(playerPathing.CoordinatesInRange);
 
-        Entities.WithStoreEntityQueryInField(ref m_MarkerStateData).ForEach((Entity e, ref MarkerState marker, ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((Entity e, ref MarkerState marker, ref CubeCoordinate.Component coord) =>
         {
             if (marker.CurrentState == MarkerState.State.Hovered || marker.CurrentState == MarkerState.State.Clicked)
             {
@@ -861,7 +861,7 @@ public class HighlightingSystem : JobComponentSystem
 
         playerState.UnitTargets.Remove(entityID);
 
-        Entities.WithStoreEntityQueryInField(ref m_ActiveUnitData).ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component coord) =>
         {
             if (iD.EntityId.Id == entityID)
             {
@@ -884,7 +884,7 @@ public class HighlightingSystem : JobComponentSystem
     public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
     {
         int leftOverEnergy = 0;
-        Entities.WithStoreEntityQueryInField(ref m_PlayerStateData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
         {
             if (playerFaction == faction.Faction)
             {

@@ -42,6 +42,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadWrite<Moba_Camera>()
             );
 
+            /*
             m_UnitData = GetEntityQuery(
 
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -53,7 +54,7 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadWrite<UnitComponentReferences>()
             );
-
+            */
         }
 
         protected override void OnStartRunning()
@@ -74,16 +75,8 @@ namespace LeyLineHybridECS
 
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
-
             Entities.ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
             {
-                /*
-                if (playerVision.RevealVision)
-                {
-                    return;
-                }
-                */
-
                 var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
                 var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
 
@@ -159,14 +152,12 @@ namespace LeyLineHybridECS
             .WithoutBurst()
             .Run();
 
-            //gameStates.Dispose();
-
             return inputDeps;
         }
 
         public PlayerState.Component UpdateSelectedUnit(Moba_Camera playerCam, PlayerState.Component playerState, HighlightingDataComponent playerHigh, Vision.Component playerVision, FactionComponent.Component playerFaction, PlayerEnergy.Component playerEnergy)
         {
-            Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref FactionComponent.Component faction, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref FactionComponent.Component faction, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId)
                 {
@@ -234,7 +225,7 @@ namespace LeyLineHybridECS
 
         public void ResetInputCoolDown(float coolDown)
         {
-            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref HighlightingDataComponent highlightingData) =>
+            Entities.ForEach((ref HighlightingDataComponent highlightingData) =>
             {
                 highlightingData.InputCooldown = coolDown;
             })
@@ -244,7 +235,7 @@ namespace LeyLineHybridECS
 
         public void SetHoveredCoordinates(Vector3f cubeCoord, Vector3 pos)
         {
-            Entities.WithStoreEntityQueryInField(ref m_PlayerData).ForEach((ref HighlightingDataComponent highlightingData) => 
+            Entities.ForEach((ref HighlightingDataComponent highlightingData) => 
             {
                 highlightingData.HoveredCoordinate = cubeCoord;
                 highlightingData.HoveredPosition = pos;
@@ -290,7 +281,7 @@ namespace LeyLineHybridECS
         {
             bool b = false;
 
-            Entities.WithStoreEntityQueryInField(ref m_UnitData).ForEach((ref MouseState mouseState) =>
+            Entities.ForEach((ref MouseState mouseState) =>
             {
                 if (mouseState.CurrentState == MouseState.State.Clicked)
                     b = true;

@@ -19,6 +19,7 @@ public class CleanupSystem : ComponentSystem
 
     EntityQuery m_GameStateData;
     EntityQuery m_UnitData;
+    //EntityQuery m_UnitToRemoveData;
     EntityQuery m_HealthUnitData;
     EntityQuery m_UnitRemovedData;
 
@@ -34,6 +35,7 @@ public class CleanupSystem : ComponentSystem
         ComponentType.ReadWrite<Actions.Component>()
         );
 
+        /*
         var unitsToRemoveDesc = new EntityQueryDesc
         {
             None = new ComponentType[]
@@ -49,7 +51,15 @@ public class CleanupSystem : ComponentSystem
             }
         };
 
-        m_UnitData = GetEntityQuery(unitsToRemoveDesc);
+        m_UnitToRemoveData = GetEntityQuery(unitsToRemoveDesc);
+        */
+
+        m_UnitData = GetEntityQuery(
+        ComponentType.ReadOnly<SpatialEntityId>(),
+        ComponentType.ReadOnly<CubeCoordinate.Component>(),
+        ComponentType.ReadOnly<WorldIndex.Component>(),
+        ComponentType.ReadWrite<Actions.Component>()
+        );
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<WorldIndex.Component>(),
@@ -114,6 +124,7 @@ public class CleanupSystem : ComponentSystem
         return actions;
     }
 
+    /*
     public void DeleteNeutralUnits(uint worldIndex)
     {
         Entities.With(m_UnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
@@ -125,10 +136,11 @@ public class CleanupSystem : ComponentSystem
             }
         });
     }
+    */
 
     public void DeleteAllUnits(uint worldIndex)
     {
-        Entities.With(m_UnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        Entities.With(m_HealthUnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
         {
             if (unitWorldIndex.Value == worldIndex)
             {

@@ -345,6 +345,8 @@ public static class LeyLineEntityTemplates {
 
     public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, CellAttributeList circleCells, List<Vector3f> pathCellCoords, Vector3f connectedManalithCoord)
     {
+
+        //var workerId = 
         var turnTimer = new TurnTimer.Snapshot
         {
             Timers = new List<Timer>()
@@ -432,6 +434,8 @@ public static class LeyLineEntityTemplates {
             }
         }
 
+        var owningComponent = new OwningWorker.Snapshot();
+
         var circleCellCoords = new List<Vector3f>();
 
         foreach (CellAttribute c in circleCells.CellAttributes)
@@ -449,6 +453,7 @@ public static class LeyLineEntityTemplates {
 
 
         var template = new EntityTemplate();
+        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(manalith, WorkerUtils.UnityGameLogic);
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
@@ -483,7 +488,6 @@ public static class LeyLineEntityTemplates {
         {
             CubeCoordinate = cubeCoordinate
         };
-
 
         TeamColorEnum factionColor = new TeamColorEnum();
 
@@ -533,8 +537,6 @@ public static class LeyLineEntityTemplates {
             InitialWaitTime = .1f,
             VisionRange = Stats.VisionRange
         };
-
-
 
         var energy = new Energy.Snapshot
         {
@@ -590,8 +592,6 @@ public static class LeyLineEntityTemplates {
             aiUnit.UtilityActionsPrioList.Add(new Vector2int((int) v2.x, (int) v2.y));
         }
 
-
-
         var health = new Health.Snapshot
         {
             MaxHealth = Stats.BaseHealth,
@@ -604,8 +604,6 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
-        //template.AddComponent(clientHeartbeat, client);
-        //template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
         template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
 
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
