@@ -148,7 +148,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         }
                     }
 
-
                     unitActions.LastSelected = unitActions.CurrentSelected;
                     unitCellsToMark.SetClientRange = true;
                     unitCellsToMark.CachedPaths = unitCellsToMark.CachedPaths;
@@ -184,7 +183,6 @@ public class HandleCellGridRequestsSystem : ComponentSystem
                         switch (unitActions.CurrentSelected.Targets[0].TargetType)
                         {
                             case TargetTypeEnum.cell:
-
                                 Entities.With(m_CellData).ForEach((ref SpatialEntityId cellId, ref CellAttributesComponent.Component cellAtts, ref CubeCoordinate.Component cCoord) =>
                                 {
                                     var cell = cellAtts.CellAttributes.Cell;

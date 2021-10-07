@@ -270,11 +270,7 @@ namespace LeyLineHybridECS
 
                                     gameState.CurrentState = GameStateEnum.calculate_energy;
                                 }
-
                             }
-
-
-
                         }
                         break;
                     case GameStateEnum.calculate_energy:

@@ -102,7 +102,7 @@ public class ManalithSystemClient : JobComponentSystem
                 var manalith = manalithComps[i];
                 var meshGradientColor = meshGradientColors[i];
 
-                Entities.ForEach((CubeCoordinate.Component coord, MeshColor meshColor) =>
+                Entities.ForEach((MeshColor meshColor, in CubeCoordinate.Component coord) =>
                 {
                     if(Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(manalith.ConnectedManalithCoordinate))
                     {
@@ -115,7 +115,7 @@ public class ManalithSystemClient : JobComponentSystem
 
             manalithComps.Dispose();
 
-            Entities.ForEach((Entity e, FactionComponent.Component faction, ManalithObject manalithObject, MeshColor meshColor, ManalithInitializer initData, Manalith.Component manalith) =>
+            Entities.ForEach((Entity e, ManalithObject manalithObject, MeshColor meshColor, ManalithInitializer initData, in Manalith.Component manalith, in FactionComponent.Component faction) =>
             {
                 meshColor.MapColor = settings.FactionMapColors[(int)faction.Faction];
                 meshColor.Color = settings.FactionColors[(int)faction.Faction];
@@ -149,7 +149,7 @@ public class ManalithSystemClient : JobComponentSystem
         {
             var EventID = manalithFactionChangeEvents[q].EntityId.Id;
 
-            Entities.ForEach((Entity e, SpatialEntityId id, MeshColor meshColor, ManalithObject manalithObject, FactionComponent.Component faction, StudioEventEmitter eventEmitter) =>
+            Entities.ForEach((Entity e, MeshColor meshColor, ManalithObject manalithObject, FactionComponent.Component faction, StudioEventEmitter eventEmitter, in SpatialEntityId id) =>
             {
                 if (id.EntityId.Id == EventID)
                 {

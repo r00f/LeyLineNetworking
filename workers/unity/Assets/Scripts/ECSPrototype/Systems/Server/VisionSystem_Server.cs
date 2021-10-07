@@ -88,7 +88,6 @@ public class VisionSystem_Server : ComponentSystem
                 BuildRawClusters();
             }
             else {
-
                 Entities.With(m_UnitData).ForEach((ref SpatialEntityId id, ref WorldIndex.Component u_worldIndex, ref Vision.Component u_Vision, ref CubeCoordinate.Component u_OccupiedCell, ref FactionComponent.Component u_Faction) =>
                 {
                     /*
