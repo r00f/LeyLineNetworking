@@ -6,4 +6,10 @@ component Health {
 	uint32 max_health = 1;
 	uint32 current_health = 2;
 	uint32 armor = 3;
+    event ArmorChange armor_change_event;
+}
+
+type ArmorChange
+{
+
 }

@@ -190,7 +190,7 @@ public class SendActionRequestSystem : JobComponentSystem
         m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
         m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
-        Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
+        Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref SpatialEntityId idComponent, ref Actions.Component actions) =>
         {
             if (idComponent.EntityId.Id == entityId)
             {
@@ -243,12 +243,14 @@ public class SendActionRequestSystem : JobComponentSystem
                     }
                     else
                     {
-                        if (anim.AnimationEvents)
-                            anim.AnimationEvents.VoiceTrigger = true;
+                        if (unitCompRef.AnimatorComp.AnimationEvents)
+                            unitCompRef.AnimatorComp.AnimationEvents.VoiceTrigger = true;
                         playerHigh.TargetRestrictionIndex = 2;
                         m_HighlightingSystem.SetSelfTarget(entityId, (int)act.ActionExecuteStep);
                         m_UISystem.DeactivateActionDisplay(e, .3f);
                     }
+
+                    m_UISystem.InitializeUnitOverHeadActionDisplay(actionIndex, unitCompRef.BaseDataSetComp, unitCompRef.HeadUIRef);
                 }
             }
         })

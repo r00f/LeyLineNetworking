@@ -27,6 +27,7 @@ namespace LeyLineHybridECS
         PlayerStateSystem m_PlayerStateSystem;
         SendActionRequestSystem m_SendActionRequestSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
+        CommandSystem m_CommandSystem;
         EntityQuery m_PlayerData;
         EntityQuery m_AuthoritativePlayerData;
         EntityQuery m_GameStateData;
@@ -117,6 +118,7 @@ namespace LeyLineHybridECS
             dollyCam = Object.FindObjectOfType<DollyCameraComponent>();
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+            m_CommandSystem = World.GetExistingSystem<CommandSystem>();
             UIRef = Object.FindObjectOfType<UIReferences>();
             UIRef.MasterBus = RuntimeManager.GetBus(UIRef.MasterBusString);
             UIRef.IngameSFXBus = RuntimeManager.GetBus(UIRef.InGameSFXBusString);
@@ -290,8 +292,8 @@ namespace LeyLineHybridECS
                 return inputDeps;
 
             #region GetData
-            var authPlayerCameras = m_AuthoritativePlayerData.ToComponentArray<Moba_Camera>();
-            var authPlayerCam = authPlayerCameras[0];
+            var authPlayerEntity = m_AuthoritativePlayerData.GetSingletonEntity();
+            var authPlayerCam = EntityManager.GetComponentObject<Moba_Camera>(authPlayerEntity);
 
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();
             var authPlayerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
@@ -301,8 +303,22 @@ namespace LeyLineHybridECS
             #endregion
 
             var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
-
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+            var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
+            var armorChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Health.ArmorChangeEvent.Event>();
+
+            for (int i = 0; i < armorChangeEvents.Count; i++)
+            {
+                var armorChangeUnitId = armorChangeEvents[i].EntityId.Id;
+
+                Entities.ForEach((ref SpatialEntityId id, ref Health.Component health, ref FactionComponent.Component faction) =>
+                {
+                    if(authPlayerState.SelectedUnitId == id.EntityId.Id && armorChangeUnitId == id.EntityId.Id)
+                        UpdatePortraitHealthText(authPlayerFaction.Faction, faction.Faction, health);
+                })
+                .WithoutBurst()
+                .Run();
+            }
 
             if (initMapEvents.Count > 0)
             {
@@ -358,24 +374,13 @@ namespace LeyLineHybridECS
                 }
             }
 
-            if (gameState.CurrentState != GameStateEnum.waiting_for_players)
+            if (energyChangeEvents.Count > 0)
             {
-                if (UIRef.StartUpWaitTime > 0)
-                {
-                    UIRef.StartUpWaitTime -= Time.DeltaTime;
-                }
-                else
-                {
-                    UIRef.StartupPanel.SetActive(false);
-                }
+                //Only convert energy numbers to string when energy change event is fired
+                UIRef.CurrentEnergyText.text = playerEnergy.Energy.ToString();
+                UIRef.MaxEnergyText.text = playerEnergy.MaxEnergy.ToString();
             }
 
-            if (dollyCam.RevealVisionTrigger)
-            {
-                m_SendActionRequestSystem.RevealPlayerVision();
-                dollyCam.RevealVisionTrigger = false;
-            }
-            
             if (cleanUpStateEvents.Count > 0)
             {
                 Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
@@ -432,30 +437,51 @@ namespace LeyLineHybridECS
 
                 UIRef.TurnStatePnl.FriendlyReadyDot.color = UIRef.FriendlyColor;
                 UIRef.TurnStatePnl.EnemyReadyDot.color = UIRef.EnemyColor;
+
+                //UIRef.TotalEnergyIncomeText.text = "+" + playerEnergy.Income.ToString();
             }
 
-            HandleTutorialVideoPlayers();
+            if (gameState.CurrentState != GameStateEnum.waiting_for_players)
+            {
+                if (UIRef.StartUpWaitTime > 0)
+                {
+                    UIRef.StartUpWaitTime -= Time.DeltaTime;
+                }
+                else
+                {
+                    UIRef.StartupPanel.SetActive(false);
+                }
+            }
 
-            #region Unitloops
+            if (dollyCam.RevealVisionTrigger)
+            {
+                m_SendActionRequestSystem.RevealPlayerVision();
+                dollyCam.RevealVisionTrigger = false;
+            }
+            
+            HandleTutorialVideoPlayers();
 
             UnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, playerEnergy, playerHigh);
 
             ManalithUnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, playerEnergy, playerHigh);
 
-            #endregion
-
-            #region TurnStepEffects
-
             if (gameState.CurrentState != GameStateEnum.planning)
             {
                 UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetBool("Planning", false);
                 UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) gameState.CurrentState - 1);
-            }
 
+                if (UIRef.TurnStatePnl.GOButtonScript.Button.interactable)
+                {
+                    UIRef.TurnStatePnl.GOButtonScript.Button.interactable = false;
+                }
+
+                UIRef.TurnStatePnl.RopeLoopEmitter.Stop();
+            }
             else
             {
-                UpdateHoverTooltip();
+                UpdateActionHoverTooltip();
                 UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetBool("Planning", true);
+
                 var hoveredTurnstepIndex = -1;
                 for(int i = 0; i < UIRef.TurnStatePnl.TurnStepHoveredHandlers.Count; i++)
                 {
@@ -472,10 +498,23 @@ namespace LeyLineHybridECS
                     UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetInteger("TurnStep", hoveredTurnstepIndex + 1);
                 else
                     UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetInteger("TurnStep", 0);
+
+
+                if (authPlayerState.CurrentState == PlayerStateEnum.ready || UIRef.TurnStatePnl.GOButtonScript.RotatingBack)
+                {
+                    UIRef.TurnStatePnl.GOButtonScript.Button.interactable = false;
+                }
+                else
+                {
+                    UIRef.TurnStatePnl.GOButtonScript.Button.interactable = true;
+                }
+
+                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount - .003f)
+                {
+                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float) playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
+                    //FillBarToDesiredValue(UIRef.HeroEnergyIncomeFill, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float) playerEnergy.MaxEnergy * UIRef.MaxFillAmount, UIRef.EnergyLerpSpeed);
+                }
             }
-
-
-
 
             switch (gameState.CurrentState)
             {
@@ -486,24 +525,15 @@ namespace LeyLineHybridECS
                     }
                     break;
                 case GameStateEnum.interrupt:
-
                     if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
                     {
-                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
-
-
-
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.interruptFired;
                     }
-
-                    //ClearSelectedActionToolTip();
                     break;
                 case GameStateEnum.attack:
-
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.attackFired)
                     {
-                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.attackFired;
                     }
@@ -511,7 +541,6 @@ namespace LeyLineHybridECS
                 case GameStateEnum.move:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.moveFired)
                     {
-                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.moveFired;
                     }
@@ -519,7 +548,6 @@ namespace LeyLineHybridECS
                 case GameStateEnum.skillshot:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.skillshotFired)
                     {
-                        //AND SET UIEFFECTSFIREDSTATE TO INTERRUPTFIRED
                         FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
                     }
@@ -540,50 +568,17 @@ namespace LeyLineHybridECS
                         {
                             FireStepChangedEffects("Defeat", Color.red, UIRef.ExecuteStepChangePath);
                         }
-
                         HandleGameOver(gameState, authPlayerFaction);
-
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.gameOverFired;
                     }
                     break;
             }
-            #endregion
 
             #region PlayerLoops
 
             HandleMenuSettings(authPlayerCam);
 
             UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
-
-            if (gameState.CurrentState != GameStateEnum.planning)
-            {
-                if (UIRef.TurnStatePnl.GOButtonScript.Button.interactable)
-                {
-                    UIRef.TurnStatePnl.GOButtonScript.Button.interactable = false;
-                }
-            }
-            else
-            {
-                if (authPlayerState.CurrentState == PlayerStateEnum.ready || UIRef.TurnStatePnl.GOButtonScript.RotatingBack)
-                {
-                    UIRef.TurnStatePnl.GOButtonScript.Button.interactable = false;
-                }
-                else
-                {
-                    UIRef.TurnStatePnl.GOButtonScript.Button.interactable = true;
-                }
-
-                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount - .003f)
-                {
-                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float) playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
-                    //FillBarToDesiredValue(UIRef.HeroEnergyIncomeFill, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float) playerEnergy.MaxEnergy * UIRef.MaxFillAmount, UIRef.EnergyLerpSpeed);
-                }
-            }
-
-            UIRef.CurrentEnergyText.text = playerEnergy.Energy.ToString();
-            UIRef.MaxEnergyText.text = playerEnergy.MaxEnergy.ToString();
-
-            UIRef.TotalEnergyIncomeText.text = "+" + playerEnergy.Income.ToString();
 
             if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
@@ -682,6 +677,7 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
+
             #endregion
 
             UIRef.TurnStatePnl.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
@@ -747,7 +743,6 @@ namespace LeyLineHybridECS
                     {
                         if (UIRef.TurnStatePnl.FriendlyRope.color.a == 1)
                         {
-                            //BURST
                             UIRef.FriendlyRopeBarParticle.LoopPS.Stop();
                             UIRef.FriendlyRopeBarParticle.BurstPS.time = 0;
                             UIRef.FriendlyRopeBarParticle.BurstPS.Play();
@@ -755,7 +750,6 @@ namespace LeyLineHybridECS
 
                         if (UIRef.TurnStatePnl.EnemyRope.color.a == 1)
                         {
-                            //BURST
                             UIRef.EnemyRopeBarParticle.LoopPS.Stop();
                             UIRef.EnemyRopeBarParticle.BurstPS.time = 0;
                             UIRef.EnemyRopeBarParticle.BurstPS.Play();
@@ -774,11 +768,6 @@ namespace LeyLineHybridECS
                 UIRef.TurnStatePnl.RopeTimeText.enabled = false;
             }
 
-            if (gameState.CurrentState != GameStateEnum.planning)
-            {
-                UIRef.TurnStatePnl.RopeLoopEmitter.Stop();
-            }
-
             m_AuthoritativePlayerData.SetSingleton(playerHigh);
 
             HandleKeyCodeInput(gameState.CurrentState);
@@ -795,11 +784,6 @@ namespace LeyLineHybridECS
                     UIRef.DrawPanel.SetActive(true);
                     UIRef.GameOverPanel.SetActive(true);
                 }
-                /*
-                UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
-                UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
-                UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
-                */
             }
             else if (gameState.WinnerFaction == authPlayerFaction.Faction)
             {
@@ -816,11 +800,6 @@ namespace LeyLineHybridECS
                     UIRef.DefeatPanel.SetActive(true);
                     UIRef.GameOverPanel.SetActive(true);
                 }
-                /*
-                UIRef.HeroHealthBar.HealthFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.HealthFill.fillAmount, 0, Time.DeltaTime);
-                UIRef.HeroHealthBar.ArmorFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.ArmorFill.fillAmount, 0, Time.DeltaTime);
-                UIRef.HeroHealthBar.DamageFill.fillAmount = Mathf.Lerp(UIRef.HeroHealthBar.DamageFill.fillAmount, 0, Time.DeltaTime);
-                */
             }
 
             UIRef.MainMenuButton.gameObject.SetActive(false);
@@ -838,7 +817,7 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void UpdateHoverTooltip()
+        public void UpdateActionHoverTooltip()
         {
             var anyButtonHovered = false;
             foreach(ActionButton b in UIRef.Actions)
@@ -868,24 +847,14 @@ namespace LeyLineHybridECS
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
             {
-                uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
+                uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
-                var position = EntityManager.GetComponentObject<Transform>(e).position;
-                var energy = EntityManager.GetComponentData<Energy.Component>(e);
-                var lineRenderer = EntityManager.GetComponentObject<LineRendererComponent>(e);
-                var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
-                var animatedPortraits = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClips;
-                var factionColor = faction.TeamColor;
-                var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
-                int actionCount = stats.Actions.Count;
-                int spawnActionCount = stats.SpawnActions.Count;
-                var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
 
-                if(EntityManager.HasComponent<AiUnit.Component>(e) && unitHeadUIRef.UnitHeadUIInstance)
+                if (EntityManager.HasComponent<AiUnit.Component>(e) && unitCompRef.HeadUIRef.UnitHeadUIInstance)
                 {
-                    var AIUnitHeadUIRef = unitHeadUIRef.UnitHeadUIInstance as AIUnitHeadUI;
+                    var AIUnitHeadUIRef = unitCompRef.HeadUIRef.UnitHeadUIInstance as AIUnitHeadUI;
                     var AIUnit = EntityManager.GetComponentData<AiUnit.Component>(e);
 
                     if (gameState.CurrentState == GameStateEnum.planning)
@@ -902,30 +871,31 @@ namespace LeyLineHybridECS
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
                     var damagePreviewAmount = 0;
-                    for (int i = 0; i < authPlayerState.UnitTargets.Count; i++)
+
+                    foreach(KeyValuePair<long, CubeCoordinateList> kv in authPlayerState.UnitTargets)
                     {
-                        if (authPlayerState.UnitTargets.ElementAt(i).Value.CubeCoordinates.ContainsKey(coord.CubeCoordinate))
+                        if(kv.Value.CubeCoordinates.ContainsKey(coord.CubeCoordinate))
                         {
-                            if(authPlayerState.UnitTargets.ElementAt(i).Value.CubeCoordinates[coord.CubeCoordinate])
-                                damagePreviewAmount += authPlayerState.UnitTargets.ElementAt(i).Value.DamageAmount;
+                            if (kv.Value.CubeCoordinates[coord.CubeCoordinate])
+                                damagePreviewAmount += kv.Value.DamageAmount;
                         }
                     }
 
-                    unitHeadUIRef.IncomingDamage = (uint) damagePreviewAmount;
+                    unitCompRef.HeadUIRef.IncomingDamage = (uint) damagePreviewAmount;
                 }
 
-                if (stats.SelectUnitButtonInstance)
-                    UpdateSelectUnitButton(actions, stats.SelectUnitButtonInstance, energy, faction);
+                if (unitCompRef.BaseDataSetComp.SelectUnitButtonInstance)
+                    UpdateSelectUnitButton(actions, unitCompRef.BaseDataSetComp.SelectUnitButtonInstance, energy, faction);
 
                 //set topLeft healthBar values for this players hero
-                if (stats.IsHero && faction.Faction == authPlayerFaction)
+                if (unitCompRef.BaseDataSetComp.IsHero && faction.Faction == authPlayerFaction)
                 {
-                    if (unitHeadUIRef.UnitHeadHealthBarInstance)
-                        EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.HeroHealthBar, faction.Faction, authPlayerFaction);
+                    if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance)
+                        EqualizeHealthBarFillAmounts(unitCompRef.HeadUIRef.UnitHeadHealthBarInstance, UIRef.HeroHealthBar, faction.Faction, authPlayerFaction);
 
                     if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        UpdateHeroBauble(lineRenderer, actions, UIRef.TopEnergyFill, UIRef.HeroBaubleEnergyText, energy, faction, (int) playerEnergy.BaseIncome);
+                        UpdateHeroBauble(actions, UIRef.TopEnergyFill, UIRef.HeroBaubleEnergyText, energy, faction, (int) playerEnergy.BaseIncome);
                     }
                 }
 
@@ -938,28 +908,9 @@ namespace LeyLineHybridECS
                         UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(true);
                         UIRef.UnitInfoPanel.UnitStatsPanel.SetActive(true);
                     }
-                    //UpdateSAEnergyText(lineRenderer, actions, UIRef.SAToolTip.EnergyText);
-                    SetPortraitInfo(stats, faction.Faction, animatedPortraits, unitEffects.PlayerColor, true);
 
-                    string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
-
-                    if (health.Armor > 0 && faction.Faction == authPlayerFaction)
-                    {
-
-                        UIRef.BottomLeftPortrait.PortraitArmorText.enabled = true;
-                        UIRef.BottomLeftPortrait.PortraitHealthText.text = currentMaxHealth;
-                        UIRef.BottomLeftPortrait.PortraitArmorText.text = health.Armor.ToString();
-
-                    }
-                    else
-                    {
-                        UIRef.BottomLeftPortrait.PortraitArmorText.enabled = false;
-                        UIRef.BottomLeftPortrait.PortraitHealthText.text = currentMaxHealth;
-                    }
-
-                    if (unitHeadUIRef.UnitHeadHealthBarInstance)
-                        EqualizeHealthBarFillAmounts(unitHeadUIRef.UnitHeadHealthBarInstance, UIRef.BottomLeftPortrait.PortraitHealthBar, faction.Faction, authPlayerFaction);
-
+                    if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance)
+                        EqualizeHealthBarFillAmounts(unitCompRef.HeadUIRef.UnitHeadHealthBarInstance, UIRef.BottomLeftPortrait.PortraitHealthBar, faction.Faction, authPlayerFaction);
                 }
 
                 if (authPlayerState.SelectedUnitId == 0)
@@ -967,134 +918,219 @@ namespace LeyLineHybridECS
                     if (UIRef.SwapActionButton.gameObject.activeSelf)
                         UIRef.SwapActionButton.gameObject.SetActive(false);
 
-                    SetPortraitInfo(stats, faction.Faction, animatedPortraits, unitEffects.PlayerColor, false);
+                    SetPortraitInfo(unitCompRef.BaseDataSetComp, faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor, false);
                 }
 
-                if (!stats.UIInitialized)
+                if (!unitCompRef.BaseDataSetComp.UIInitialized)
                 {
-                    InitializeUnitUI(unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
-                    stats.UIInitialized = true;
+                    InitializeUnitUI(unitCompRef.HeadUIRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction);
+                    unitCompRef.BaseDataSetComp.UIInitialized = true;
                 }
-                else if(unitHeadUIRef.UnitHeadUIInstance)
+                else
                 {
-                    if(UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
+                    if (unitCompRef.UnitEffectsComp.CurrentHealth == 0)
                     {
-                        if (faction.Faction == authPlayerFaction && energy.Harvesting)
+                        if (unitCompRef.HeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
                         {
-                            //Debug.Log("SetHealthFloatText EnergyGain");
-                            SetHealthFloatText(e, true, energy.EnergyIncome, settings.FactionIncomeColors[(int) faction.Faction]);
-                        }
-                    }
-
-                    if (UIRef.UIActive && unitHeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.gameObject.activeInHierarchy)
-                        unitHeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.SetFloat("WaitTime", unitHeadUIRef.HealthTextDelay);
-
-                    if (unitHeadUIRef.HealthTextDelay > 0)
-                    {
-                        unitHeadUIRef.HealthTextDelay -= Time.DeltaTime;
-                    }
-                    else if(UIRef.UIActive && unitHeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.gameObject.activeInHierarchy)
-                    {
-                        unitHeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.SetBool("Delayed", false);
-                    }
-
-                    if (unitEffects.CurrentHealth == 0)
-                    {
-                        if (unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
-                        {
-                            CleanupUnitUI(isVisibleRef, unitHeadUIRef, stats, unitId, faction.Faction, authPlayerFaction);
+                            CleanupUnitUI(unitCompRef.IsVisibleRefComp, unitCompRef.HeadUIRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction);
                         }
                     }
                     else
                     {
-                        if (isVisible.Value == 1)
-                        {
-                            foreach (GameObject g in unitHeadUIRef.UnitHeadUIInstance.EnableIfVisibleGameObjects)
-                            {
-                                if (!g.activeSelf)
-                                    g.SetActive(true);
-                            }
+                        unitCompRef.HeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
+                        unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
+                        SetHealthBarFillAmounts(gameState.CurrentState, unitCompRef.UnitEffectsComp, unitCompRef.HeadUIRef, unitCompRef.HeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
+                        HandleEnergyGainOverHeadDisplay(isVisible, actions, energy, authPlayerState, unitId, faction.Faction, authPlayerFaction, unitCompRef, coord.CubeCoordinate, playerHigh, gameState);
+                        HandleUnitVisibility(isVisible, unitCompRef, health, faction.Faction, authPlayerFaction);
 
-                            if (unitEffects.CurrentHealth < health.MaxHealth || unitHeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && faction.Faction == authPlayerFaction))
+                        if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
+                        {
+                            if (faction.Faction == authPlayerFaction && energy.Harvesting)
                             {
-                                if (!unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
-                                    unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(true);
-                            }
-                            else if (unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
-                            {
-                                unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
+                                SetHealthFloatText(e, true, energy.EnergyIncome, settings.FactionIncomeColors[(int) faction.Faction]);
                             }
                         }
-                        else
+
+                        if (UIRef.UIActive && unitCompRef.HeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.gameObject.activeInHierarchy)
+                            unitCompRef.HeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.SetFloat("WaitTime", unitCompRef.HeadUIRef.HealthTextDelay);
+
+                        if (unitCompRef.HeadUIRef.HealthTextDelay > 0)
                         {
-                            if (unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
-                                unitHeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
-
-
-                            foreach(GameObject g in unitHeadUIRef.UnitHeadUIInstance.EnableIfVisibleGameObjects)
-                            {
-                                if (g.activeSelf)
-                                    g.SetActive(false);
-                            }
+                            unitCompRef.HeadUIRef.HealthTextDelay -= Time.DeltaTime;
                         }
-                    }
-
-                    if (unitHeadUIRef.UnitHeadUIInstance && unitHeadUIRef.UnitHeadHealthBarInstance)
-                    {
-                        unitHeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
-                        unitHeadUIRef.UnitHeadHealthBarInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
-                        SetHealthBarFillAmounts(gameState.CurrentState, unitEffects, unitHeadUIRef, unitHeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
-                    }
-
-                    if (gameState.CurrentState == GameStateEnum.planning || gameState.CurrentState == GameStateEnum.game_over)
-                    {
-                        if (unitHeadUIRef.UnitHeadUIInstance)
+                        else if (UIRef.UIActive && unitCompRef.HeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.gameObject.activeInHierarchy)
                         {
-                            if (unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime > 0)
+                            unitCompRef.HeadUIRef.UnitHeadUIInstance.FloatHealthAnimator.SetBool("Delayed", false);
+                        }
+
+                        if (gameState.CurrentState == GameStateEnum.planning || gameState.CurrentState == GameStateEnum.game_over)
+                        {
+                            if (unitCompRef.HeadUIRef.UnitHeadUIInstance.PlanningBufferTime > 0)
                             {
-                                unitHeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.DeltaTime;
+                                unitCompRef.HeadUIRef.UnitHeadUIInstance.PlanningBufferTime -= Time.DeltaTime;
                             }
-                            else if (unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.activeSelf)
+                            else if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ArmorPanel.activeSelf)
                             {
                                 if (UIRef.UIActive)
-                                    unitHeadUIRef.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
+                                    unitCompRef.HeadUIRef.UnitHeadUIInstance.ArmorAnimator.SetTrigger("IdleTrigger");
 
-                                unitHeadUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+                                unitCompRef.HeadUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
                             }
                         }
-                    }
 
-                    if (unitHeadUIRef.UnitHeadUIInstance.ActionDisplay != null)
-                    {
-                        if (actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
+                        if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay != null)
                         {
-                            //if(!unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.activeSelf)
-                            //{
-
-                                if (actions.LockedAction.Index < stats.Actions.Count)
-                                {
-                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
-                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
-                                }
-                                else
-                                {
-                                    int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
-                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
-                                    unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
-                                }
-
-                                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
-                            //}
-                        }
-                        else
-                        {
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+                            if ((actions.CurrentSelected.Index != -3 || actions.LockedAction.Index != -3) && gameState.CurrentState == GameStateEnum.planning)
+                            {
+                                unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
+                            }
+                            else
+                            {
+                                unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+                            }
                         }
                     }
                 }
             })
             .WithoutBurst()
             .Run();
+        }
+
+        public void ManalithUnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
+        {
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction, ref Manalith.Component m) =>
+            {
+                uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
+                var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
+
+                if (authPlayerState.SelectedUnitId == unitId)
+                {
+                    if (!UIRef.BottomLeftPortrait.ManalithInfoPanel.activeSelf)
+                    {
+                        UIRef.BottomLeftPortrait.ManalithInfoPanel.SetActive(true);
+                        UIRef.UnitInfoPanel.ManalithStatsPanel.SetActive(true);
+                        UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(false);
+                        UIRef.UnitInfoPanel.UnitStatsPanel.SetActive(false);
+                    }
+                }
+
+                if (authPlayerState.SelectedUnitId == 0)
+                {
+                    if (UIRef.SwapActionButton.gameObject.activeSelf)
+                        UIRef.SwapActionButton.gameObject.SetActive(false);
+
+                    SetPortraitInfo(unitCompRef.BaseDataSetComp, faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, false);
+                }
+
+                if (!unitCompRef.BaseDataSetComp.UIInitialized)
+                {
+                    InitializeManalithUnitUI(unitCompRef.HeadUIRef);
+                    unitCompRef.BaseDataSetComp.UIInitialized = true;
+                }
+                else
+                {
+                    HandleEnergyGainOverHeadDisplay(isVisible, actions, energy, authPlayerState, unitId, faction.Faction, authPlayerFaction, unitCompRef, coord.CubeCoordinate, playerHigh, gameState);
+
+                    if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
+                    {
+                        if (faction.Faction == authPlayerFaction && energy.Harvesting)
+                        {
+                            SetHealthFloatText(e, true, energy.EnergyIncome, settings.FactionIncomeColors[(int) faction.Faction]);
+                        }
+                    }
+
+                    unitCompRef.HeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
+
+                    if (faction.Faction == authPlayerFaction && (actions.CurrentSelected.Index != -3 || actions.LockedAction.Index != -3) && gameState.CurrentState == GameStateEnum.planning)
+                    {
+                        unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
+                    }
+                    else if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay)
+                    {
+                        unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
+                    }
+                }
+            })
+            .WithoutBurst()
+            .Run();
+        }
+
+        public void HandleUnitVisibility(IsVisible isVisible, UnitComponentReferences unitCompRef, Health.Component health, uint unitFaction, uint playerFaction)
+        {
+            if (isVisible.Value == 1)
+            {
+                foreach (GameObject g in unitCompRef.HeadUIRef.UnitHeadUIInstance.EnableIfVisibleGameObjects)
+                {
+                    if (!g.activeSelf)
+                        g.SetActive(true);
+                }
+
+                if (unitCompRef.UnitEffectsComp.CurrentHealth < health.MaxHealth || unitCompRef.HeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && unitFaction == playerFaction))
+                {
+                    if (!unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
+                        unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(true);
+                }
+                else if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
+                {
+                    unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
+                    unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
+
+                foreach (GameObject g in unitCompRef.HeadUIRef.UnitHeadUIInstance.EnableIfVisibleGameObjects)
+                {
+                    if (g.activeSelf)
+                        g.SetActive(false);
+                }
+            }
+        }
+
+        public void HandleEnergyGainOverHeadDisplay(IsVisible isVisible, Actions.Component actions, Energy.Component energy, PlayerState.Component authPlayerState, uint unitId, uint unitFaction, uint playerFaction, UnitComponentReferences unitCompRef, Vector3f unitCoord, HighlightingDataComponent playerHigh, GameState.Component gameState)
+        {
+            if (isVisible.Value == 1)
+            {
+                if (energy.Harvesting && !unitCompRef.AnimatorComp.IsMoving)
+                {
+                    if ((authPlayerState.SelectedUnitId == unitId || Vector3fext.ToUnityVector(unitCoord) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate)) && actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3 && gameState.CurrentState == GameStateEnum.planning && unitFaction == playerFaction)
+                    {
+                        if (!unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled)
+                        {
+                            unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.text = "+" + energy.EnergyIncome.ToString();
+                            unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = true;
+                        }
+                    }
+                    else
+                    {
+                        unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                    }
+                }
+                else
+                {
+                    unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                }
+            }
+            else
+            {
+                unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
+            }
+        }
+
+        public void InitializeUnitOverHeadActionDisplay(int actionIndex, UnitDataSet stats, UnitHeadUIReferences unitHeadUIRef)
+        {
+            if (actionIndex < stats.Actions.Count)
+            {
+                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.Actions[actionIndex].ActionIcon;
+                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int)stats.Actions[actionIndex].ActionExecuteStep + 1];
+            }
+            else
+            {
+                int spawnactionindex = actionIndex - stats.Actions.Count;
+                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
+                unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
+            }
         }
 
         public void DeactivateActionDisplay(Entity e, float buffertime)
@@ -1207,97 +1243,6 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void ManalithUnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
-        {
-            Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction, ref Manalith.Component m) =>
-            {
-                uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
-                var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
-                var position = EntityManager.GetComponentObject<Transform>(e).position;
-                var energy = EntityManager.GetComponentData<Energy.Component>(e);
-                var lineRenderer = EntityManager.GetComponentObject<LineRendererComponent>(e);
-                var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(e);
-                var animatedPortraits = EntityManager.GetComponentObject<AnimatedPortraitReference>(e).PortraitClips;
-                var factionColor = faction.TeamColor;
-                var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
-                int actionCount = stats.Actions.Count;
-                int spawnActionCount = stats.SpawnActions.Count;
-                //var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
-                var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
-
-
-
-
-                if (authPlayerState.SelectedUnitId == unitId)
-                {
-                   //UpdateSAEnergyText(lineRenderer, actions, UIRef.SAToolTip.EnergyText);
-
-                    if (!UIRef.BottomLeftPortrait.ManalithInfoPanel.activeSelf)
-                    {
-                        UIRef.BottomLeftPortrait.ManalithInfoPanel.SetActive(true);
-                        UIRef.UnitInfoPanel.ManalithStatsPanel.SetActive(true);
-                        UIRef.BottomLeftPortrait.UnitInfoPanel.SetActive(false);
-                        UIRef.UnitInfoPanel.UnitStatsPanel.SetActive(false);
-                    }
-
-                    PopulateManlithInfoHexes(unitId, authPlayerFaction);
-
-                    SetPortraitInfo(stats, faction.Faction, animatedPortraits, teamColorMeshes.color, true);
-
-                }
-
-                if (authPlayerState.SelectedUnitId == 0)
-                {
-                    if (UIRef.SwapActionButton.gameObject.activeSelf)
-                        UIRef.SwapActionButton.gameObject.SetActive(false);
-
-                    SetPortraitInfo(stats, faction.Faction, animatedPortraits, teamColorMeshes.color, false);
-                }
-
-                if (!stats.UIInitialized)
-                {
-                    InitializeManalithUnitUI(unitHeadUIRef);
-                    stats.UIInitialized = true;
-                }
-                else
-                {
-                    if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
-                    {
-                        if (faction.Faction == authPlayerFaction && energy.Harvesting)
-                        {
-                            //Debug.Log("SetHealthFloatText EnergyGain");
-                            SetHealthFloatText(e, true, energy.EnergyIncome, settings.FactionIncomeColors[(int) faction.Faction]);
-                        }
-                    }
-
-                    unitHeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, position + new Vector3(0, unitHeadUIRef.HealthBarYOffset, 0)));
-
-                    if (faction.Faction == authPlayerFaction && actions.LockedAction.Index != -3 && gameState.CurrentState == GameStateEnum.planning)
-                    {
-                        if (actions.LockedAction.Index < stats.Actions.Count)
-                        {
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.Actions[actions.LockedAction.Index].ActionIcon;
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.Actions[actions.LockedAction.Index].ActionExecuteStep + 1];
-                        }
-                        else
-                        {
-                            int spawnactionindex = actions.LockedAction.Index - stats.Actions.Count;
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.ActionImage.sprite = stats.SpawnActions[spawnactionindex].ActionIcon;
-                            unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.TurnStepColorBG.color = settings.TurnStepColors[(int) stats.SpawnActions[spawnactionindex].ActionExecuteStep + 1];
-                        }
-                        unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
-                    }
-                    else if(unitHeadUIRef.UnitHeadUIInstance.ActionDisplay)
-                    {
-                        unitHeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(false);
-                    }
-                }
-
-            })
-            .WithoutBurst()
-            .Run();
-        }
-
         public void SetPortraitInfo(UnitDataSet stats, uint faction, List<AnimationClip> animatedPortraits, Color teamColor, bool active)
         {
             if(active)
@@ -1324,7 +1269,24 @@ namespace LeyLineHybridECS
             }
         }
 
-        protected void PopulateManlithInfoHexes(uint selectedUnitId, uint playerFaction)
+        public void UpdatePortraitHealthText(uint playerFaction, uint unitFaction, Health.Component health)
+        {
+            string currentMaxHealth = health.CurrentHealth + "/" + health.MaxHealth;
+
+            if (health.Armor > 0 && unitFaction == playerFaction)
+            {
+                UIRef.BottomLeftPortrait.PortraitArmorText.enabled = true;
+                UIRef.BottomLeftPortrait.PortraitHealthText.text = currentMaxHealth;
+                UIRef.BottomLeftPortrait.PortraitArmorText.text = health.Armor.ToString();
+            }
+            else
+            {
+                UIRef.BottomLeftPortrait.PortraitArmorText.enabled = false;
+                UIRef.BottomLeftPortrait.PortraitHealthText.text = currentMaxHealth;
+            }
+        }
+
+        public void PopulateManlithInfoHexes(uint selectedUnitId, uint playerFaction)
         {
             Entities.ForEach((ref SpatialEntityId id, ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
             {
@@ -1592,7 +1554,6 @@ namespace LeyLineHybridECS
             if (actions.LockedAction.Index != -3)
             {
                 unitButton.EnergyAmountChange -= (int) actions.LockedAction.CombinedCost;
-
             }
 
             if (unitButton.EnergyAmountChange > 0)
@@ -1602,7 +1563,6 @@ namespace LeyLineHybridECS
             }
             else if (unitButton.EnergyAmountChange < 0)
             {
-
                 unitButton.EnergyFill.enabled = true;
                 unitButton.EnergyFill.color = settings.FactionColors[(int) inFaction.TeamColor + 1];
             }
@@ -1732,27 +1692,7 @@ namespace LeyLineHybridECS
             }
         }
 
-        /*
-        void UpdateSAEnergyText(LineRendererComponent lineRenderer, Actions.Component actions, Text inEnergyText)
-        {
-            //hacky fix to set current cost of move with linerenderer.count
-            if (actions.CurrentSelected.Index == -2)
-            {
-                inEnergyText.text = (lineRenderer.lineRenderer.positionCount - 1).ToString();
-            }
-            else if (actions.CurrentSelected.Index != -3 && inEnergyText.text != actions.CurrentSelected.CombinedCost.ToString())
-            {
-                inEnergyText.text = actions.CurrentSelected.CombinedCost.ToString();
-            }
-
-            if (actions.LockedAction.Index != -3)
-            {
-                inEnergyText.text = actions.LockedAction.CombinedCost.ToString();
-            }
-        }
-        */
-
-        void UpdateHeroBauble(LineRendererComponent lineRenderer, Actions.Component actions, Image inEnergyFill, Text inEnergyText, Energy.Component inEnergy, FactionComponent.Component inFaction, int baseManaGain)
+        void UpdateHeroBauble(Actions.Component actions, Image inEnergyFill, Text inEnergyText, Energy.Component inEnergy, FactionComponent.Component inFaction, int baseManaGain)
         {
             int EnergyChangeAmount = baseManaGain;
 
@@ -1760,15 +1700,6 @@ namespace LeyLineHybridECS
             {
                 EnergyChangeAmount += (int) inEnergy.EnergyIncome;
             }
-
-            /*  if (actions.CurrentSelected.Index == -2)
-              {
-                  EnergyChangeAmount -= lineRenderer.lineRenderer.positionCount - 1;
-              }
-              else if (actions.CurrentSelected.Index != -3)
-              {
-                  EnergyChangeAmount -= (int)actions.CurrentSelected.CombinedCost;
-              }*/
 
             if (actions.LockedAction.Index != -3)
             {
@@ -2156,8 +2087,6 @@ namespace LeyLineHybridECS
 
         void CleanupUnitUI(IsVisibleReferences isVisibleRef, UnitHeadUIReferences unitHeadUIRef, UnitDataSet stats, long unitID, uint unitFaction, uint playerFaction)
         {
-            Debug.Log("CleanupUnitUI");
-
             if (isVisibleRef.MiniMapTileInstance)
             {
                 if (isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
@@ -2226,49 +2155,6 @@ namespace LeyLineHybridECS
             UIRef.SAToolTip.ExecuteStepIcon.color = settings.TurnStepBgColors[actionButton.ExecuteStepIndex];
             //UIRef.SAInfoPanel.SetActive(true);
         }
-
-        /*
-        public void InitializeSelectedActionTooltip(int index, int actionsCount)
-        {
-            //Debug.Log("Init Selected Action Tooltip with index: " + index);
-
-            if(index == -3)
-            {
-                //ClearSelectedActionToolTip();
-            }
-            else
-            {
-                if (actionsCount > index)
-                {
-                    UIRef.SAEnergyText.text = UIRef.Actions[index].EnergyCost.ToString();
-                    UIRef.SAActionDescription.text = UIRef.Actions[index].ActionDescription;
-                    UIRef.SAActionName.text = UIRef.Actions[index].ActionName;
-                    UIRef.SAExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[UIRef.Actions[index].ExecuteStepIndex];
-                    UIRef.SAExecuteStepIcon.color = settings.TurnStepBgColors[UIRef.Actions[index].ExecuteStepIndex];
-                }
-                else
-                {
-                    UIRef.SAEnergyText.text = UIRef.SpawnActions[index - actionsCount].EnergyCost.ToString();
-                    UIRef.SAActionDescription.text = UIRef.SpawnActions[index - actionsCount].ActionDescription;
-                    UIRef.SAActionName.text = UIRef.SpawnActions[index - actionsCount].ActionName;
-                    UIRef.SAExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[UIRef.SpawnActions[index - actionsCount].ExecuteStepIndex];
-                    UIRef.SAExecuteStepIcon.color = settings.TurnStepBgColors[UIRef.SpawnActions[index - actionsCount].ExecuteStepIndex];
-                }
-            }
-        }
-        */
-
-        /*
-        public void ClearSelectedActionToolTip()
-        {
-            //UIRef.SAInfoPanel.SetActive(false);
-            UIRef.SAExecuteStepIcon.sprite = null;
-            UIRef.SAActionName.text = "";
-            UIRef.SAActionDescription.text = "";
-            UIRef.SAEnergyText.text = "";
-            UIRef.SACooldownText.text = "";
-        }
-        */
 
         public void CancelLockedAction()
         {

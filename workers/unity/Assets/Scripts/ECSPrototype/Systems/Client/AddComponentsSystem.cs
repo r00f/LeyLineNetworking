@@ -235,9 +235,15 @@ public class AddComponentsSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<WorldIndexStateData>().ForEach((Entity entity, AnimatorComponent anim, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        Entities.WithNone<WorldIndexStateData>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
+
+            foreach (Renderer r in unitComponentReferences.TeamColorMeshesComp.HarvestingEmissionColorMeshes)
+            {
+                //instantiate material instances on initialization to prevent GC alloc in Update later on
+                unitComponentReferences.TeamColorMeshesComp.HarvestingEmissionColorMaterials.Add(r.materials[r.materials.Length - 1]);
+            }
 
             MouseState mouseState = new MouseState
             {

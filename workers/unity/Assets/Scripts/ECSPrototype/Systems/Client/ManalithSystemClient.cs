@@ -248,8 +248,8 @@ public class ManalithSystemClient : JobComponentSystem
 
             if (meshGradientColor.ConnectedManalithColor && (meshColor.IsLerping || meshGradientColor.ConnectedManalithColor.IsLerping))
             {
-                meshGradientColor.Gradient = ConstructGradient(meshColor.LerpColor, meshGradientColor.ConnectedManalithColor.LerpColor);
-                meshGradientColor.MapGradient = ConstructGradient(meshColor.MapLerpColor, meshGradientColor.ConnectedManalithColor.MapLerpColor);
+                ConstructGradient(meshGradientColor.colorKeys, meshGradientColor.alphaKeys, ref meshGradientColor.Gradient, meshColor.LerpColor, meshGradientColor.ConnectedManalithColor.LerpColor);
+                ConstructGradient(meshGradientColor.colorKeys, meshGradientColor.alphaKeys, ref meshGradientColor.MapGradient, meshColor.MapLerpColor, meshGradientColor.ConnectedManalithColor.MapLerpColor);
 
                 if (manalithObject.MiniMapTileInstance)
                 {
@@ -271,30 +271,24 @@ public class ManalithSystemClient : JobComponentSystem
         return inputDeps;
     }
 
-    Gradient ConstructGradient(Color c1, Color c2)
+    void ConstructGradient(GradientColorKey[] colorKeys, GradientAlphaKey[] alphaKeys, ref Gradient gradient, Color c1, Color c2)
     {
-        Gradient g = new Gradient();
-
         // Populate the color keys at the relative time 0 and 1 (0 and 100%)
-        var colorKey = new GradientColorKey[4];
-        colorKey[0].color = c1;
-        colorKey[0].time = 0.0f;
-        colorKey[1].color = c1;
-        colorKey[1].time = .25f;
-        colorKey[2].color = c2;
-        colorKey[2].time = .75f;
-        colorKey[3].color = c2;
-        colorKey[3].time = 1.0f;
+        colorKeys[0].color = c1;
+        colorKeys[0].time = 0.0f;
+        colorKeys[1].color = c1;
+        colorKeys[1].time = .25f;
+        colorKeys[2].color = c2;
+        colorKeys[2].time = .75f;
+        colorKeys[3].color = c2;
+        colorKeys[3].time = 1.0f;
 
-        var alphaKey = new GradientAlphaKey[2];
-        alphaKey[0].alpha = 1.0f;
-        alphaKey[0].time = 0.0f;
-        alphaKey[1].alpha = 1.0f;
-        alphaKey[1].time = 1.0f;
+        alphaKeys[0].alpha = 1.0f;
+        alphaKeys[0].time = 0.0f;
+        alphaKeys[1].alpha = 1.0f;
+        alphaKeys[1].time = 1.0f;
 
-        g.SetKeys(colorKey, alphaKey);
-
-        return g;
+        gradient.SetKeys(colorKeys, alphaKeys);
     }
 
     void PopulateMap(float scale, Transform parent, Vector3f coord, List<Vector3f> pathCoords, ref ManalithObject manalithObject, Color tileColor)

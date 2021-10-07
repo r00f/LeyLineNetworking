@@ -135,7 +135,7 @@ public class HighlightingSystem : JobComponentSystem
         var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
         #endregion
 
-        var activeUnitLineRenderers = m_ActiveUnitData.ToComponentArray<LineRendererComponent>();
+        //var activeUnitLineRenderers = m_ActiveUnitData.ToComponentArray<LineRendererComponent>();
 
         if (gameState.CurrentState == GameStateEnum.planning)
         {
@@ -728,12 +728,7 @@ public class HighlightingSystem : JobComponentSystem
         var playerHigh = m_PlayerStateData.GetSingleton<HighlightingDataComponent>();
         var playerState = m_PlayerStateData.GetSingleton<PlayerState.Component>();
 
-
-
-
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
-
-        //HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
         Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
         {

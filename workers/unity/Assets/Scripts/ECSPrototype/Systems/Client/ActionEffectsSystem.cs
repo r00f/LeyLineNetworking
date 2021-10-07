@@ -6,13 +6,12 @@ using Unity.Entities;
 using Generic;
 using Unit;
 using System.Collections.Generic;
-using Unity.Collections;
-using System.Collections;
+using Unity.Jobs;
 using Player;
 using System.Linq;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(UnitAnimationSystem))]
-public class ActionEffectsSystem : ComponentSystem
+public class ActionEffectsSystem : JobComponentSystem
 {
 
     ILogDispatcher logger;
@@ -23,10 +22,10 @@ public class ActionEffectsSystem : ComponentSystem
     UnitAnimationSystem m_UnitAnimationSystem;
     HighlightingSystem m_HighlightingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
-    EntityQuery m_UnitData;
-    EntityQuery m_CellData;
+    //EntityQuery m_UnitData;
+    //EntityQuery m_CellData;
     EntityQuery m_GameStateData;
-    EntityQuery m_PlayerData;
+    //EntityQuery m_PlayerData;
     GameObject GarbageCollection;
     EntityQuery m_GarbageCollection;
 
@@ -35,6 +34,7 @@ public class ActionEffectsSystem : ComponentSystem
         base.OnCreate();
         settings = Resources.Load<Settings>("Settings");
 
+        /*
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<Vision.Component>(),
         ComponentType.ReadOnly<PlayerState.HasAuthority>()
@@ -57,6 +57,7 @@ public class ActionEffectsSystem : ComponentSystem
         ComponentType.ReadOnly<MarkerState>(),
         ComponentType.ReadWrite<MarkerGameObjects>()
         );
+        */
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>()
@@ -80,13 +81,18 @@ public class ActionEffectsSystem : ComponentSystem
         );
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        if (m_GameStateData.CalculateEntityCount() == 0)
+            return inputDeps;
+
+        var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.With(m_UnitData).ForEach((Entity e, UnitComponentReferences componentReferences, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
+            Entities.ForEach((Entity e, UnitComponentReferences componentReferences, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
             {
                 if (componentReferences.UnitEffectsComp.AxaShield && componentReferences.UnitEffectsComp.AxaShield.Orbits.Count != 0)
                 {
@@ -108,172 +114,205 @@ public class ActionEffectsSystem : ComponentSystem
                 }
                 componentReferences.UnitEffectsComp.CombinedArmor = 0;
                 componentReferences.UnitEffectsComp.CurrentArmor = 0;
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
-        Entities.With(m_GameStateData).ForEach((ref GameState.Component gameState) =>
+        if (gameState.CurrentState != GameStateEnum.planning)
         {
-            if (gameState.CurrentState != GameStateEnum.planning)
+            Entities.ForEach((Entity e, AnimatorComponent animator, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions, ref IsVisible isVisible) =>
             {
-                Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent animator, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions, ref IsVisible isVisible) =>
+                var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
+                var capsuleCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
+                var headUI = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
+
+                //DOES THE SAME FOR EACH GETHITEFFECT IN LIST (TWO DAMAGE NUMBERS AT THE SAME TIME) - ADD BEHAVIOUR TO ADD DAMAGE NUBERS AND ONLY DISPLAY 1 EFFECT 
+                for (int i = 0; i < unitEffects.GetHitEffects.Count; i++)
                 {
-                    var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
-                    var capsuleCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
-                    var headUI = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
+                    unitEffects.HitPosition = capsuleCollider.ClosestPoint(unitEffects.GetHitEffects.ElementAt(i).Value);
+                    Vector3 dir = unitEffects.GetHitEffects.ElementAt(i).Value - unitEffects.HitPosition;
 
-                    //DOES THE SAME FOR EACH GETHITEFFECT IN LIST (TWO DAMAGE NUMBERS AT THE SAME TIME) - ADD BEHAVIOUR TO ADD DAMAGE NUBERS AND ONLY DISPLAY 1 EFFECT 
-                    for (int i = 0; i < unitEffects.GetHitEffects.Count; i++)
+                    foreach (ActionEffect effect in unitEffects.GetHitEffects.ElementAt(i).Key.Effects)
                     {
-                        unitEffects.HitPosition = capsuleCollider.ClosestPoint(unitEffects.GetHitEffects.ElementAt(i).Value);
-                        Vector3 dir = unitEffects.GetHitEffects.ElementAt(i).Value - unitEffects.HitPosition;
-
-                        foreach (ActionEffect effect in unitEffects.GetHitEffects.ElementAt(i).Key.Effects)
+                        switch (effect.EffectType)
                         {
-                            switch (effect.EffectType)
-                            {
-                                case EffectTypeEnum.deal_damage:
+                            case EffectTypeEnum.deal_damage:
 
-                                    uint damageAmount = effect.DealDamageNested.DamageAmount;
+                                uint damageAmount = effect.DealDamageNested.DamageAmount;
 
-                                    if (unitEffects.CurrentArmor > 0)
+                                if (unitEffects.CurrentArmor > 0)
+                                {
+                                    //handle axa shield orbits
+                                    if (unitEffects.AxaShield && unitEffects.AxaShield.Orbits.Count != 0)
                                     {
-                                        //handle axa shield orbits
-                                        if (unitEffects.AxaShield && unitEffects.AxaShield.Orbits.Count != 0)
+                                        int remainingDamage = (int) damageAmount;
+
+                                        for (int j = unitEffects.AxaShield.Orbits.Count - 1; j >= 0; j--)
                                         {
-                                            int remainingDamage = (int) damageAmount;
+                                            AxaShieldOrbit o = unitEffects.AxaShield.Orbits[j];
 
-                                            for (int j = unitEffects.AxaShield.Orbits.Count - 1; j >= 0; j--)
+                                            if (remainingDamage - 10 >= 0)
                                             {
-                                                AxaShieldOrbit o = unitEffects.AxaShield.Orbits[j];
-
-                                                if (remainingDamage - 10 >= 0)
+                                                foreach (ParticleSystem loopPS in o.LoopingSystems)
                                                 {
-                                                    foreach (ParticleSystem loopPS in o.LoopingSystems)
-                                                    {
-                                                        loopPS.Stop();
-                                                    }
-                                                    foreach (ParticleSystem explosionPS in o.ExplosionSystems)
-                                                    {
-                                                        explosionPS.Play();
-                                                    }
-                                                    Object.Destroy(o.gameObject, .2f);
-                                                    remainingDamage -= 10;
-                                                    unitEffects.AxaShield.Orbits.Remove(o);
+                                                    loopPS.Stop();
                                                 }
-                                            }
-                                        }
-
-                                        if (damageAmount < unitEffects.CurrentArmor)
-                                        {
-                                            //do armor damage Stuff
-
-                                            if (isVisible.Value == 1)
-                                            {
-                                                Object.Instantiate(unitEffects.DefenseParticleSystem, unitEffects.HitPosition, Quaternion.identity);
-                                            }
-                                            unitEffects.CurrentArmor -= damageAmount;
-                                            m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, 5f);
-                                            m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.yellow);
-                                        }
-                                        else
-                                        {
-                                            //shatter shield
-                                            uint remainingDamage = damageAmount - unitEffects.CurrentArmor;
-
-                                            if (isVisible.Value == 1)
-                                            {
-                                                Object.Instantiate(unitEffects.ShieldBrakeParticleSystem, unitEffects.HitPosition, Quaternion.identity);
-                                            }
-
-                                            m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red, 0.4f);
-
-                                            m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f, true);
-
-                                            unitEffects.CurrentArmor = 0;
-
-                                            if ((int) unitEffects.CurrentHealth - (int) remainingDamage > 0)
-                                            {
-                                                unitEffects.CurrentHealth -= remainingDamage;
-                                            }
-                                            else
-                                            {
-                                                unitEffects.CurrentHealth = 0;
+                                                foreach (ParticleSystem explosionPS in o.ExplosionSystems)
+                                                {
+                                                    explosionPS.Play();
+                                                }
+                                                Object.Destroy(o.gameObject, .2f);
+                                                remainingDamage -= 10;
+                                                unitEffects.AxaShield.Orbits.Remove(o);
                                             }
                                         }
                                     }
-                                    else
+
+                                    if (damageAmount < unitEffects.CurrentArmor)
                                     {
+                                        //do armor damage Stuff
+
                                         if (isVisible.Value == 1)
                                         {
-                                            PlayerColor_ParticleSystem go = Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
-                                            for (int ii = 0; ii < go.SetParticleSystem_BaseColor.Count; ii++)
-                                            {
-                                                ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
-                                                main.startColor = unitEffects.PlayerColor;
-                                            }
+                                            Object.Instantiate(unitEffects.DefenseParticleSystem, unitEffects.HitPosition, Quaternion.identity);
+                                        }
+                                        unitEffects.CurrentArmor -= damageAmount;
+                                        m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, 5f);
+                                        m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.yellow);
+                                    }
+                                    else
+                                    {
+                                        //shatter shield
+                                        uint remainingDamage = damageAmount - unitEffects.CurrentArmor;
+
+                                        if (isVisible.Value == 1)
+                                        {
+                                            Object.Instantiate(unitEffects.ShieldBrakeParticleSystem, unitEffects.HitPosition, Quaternion.identity);
                                         }
 
+                                        m_UISystem.SetHealthFloatText(e, false, remainingDamage, Color.red, 0.4f);
 
-                                        //if the unit survives
-                                        if ((int) unitEffects.CurrentHealth - (int) damageAmount > 0)
+                                        m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f, true);
+
+                                        unitEffects.CurrentArmor = 0;
+
+                                        if ((int) unitEffects.CurrentHealth - (int) remainingDamage > 0)
                                         {
-                                            m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
-                                            unitEffects.CurrentHealth -= damageAmount;
+                                            unitEffects.CurrentHealth -= remainingDamage;
                                         }
                                         else
                                         {
                                             unitEffects.CurrentHealth = 0;
                                         }
                                     }
-
-                                    if (headUI.UnitHeadHealthBarInstance)
+                                }
+                                else
+                                {
+                                    if (isVisible.Value == 1)
                                     {
-                                        if (headUI.IncomingDamage - damageAmount >= 0)
+                                        PlayerColor_ParticleSystem go = Object.Instantiate(unitEffects.BloodParticleSystem, unitEffects.HitPosition, Quaternion.LookRotation(dir));
+                                        for (int ii = 0; ii < go.SetParticleSystem_BaseColor.Count; ii++)
                                         {
-                                            headUI.IncomingDamage -= damageAmount;
-                                        }
-                                        else
-                                        {
-                                            headUI.IncomingDamage = 0;
-                                        }
-
-                                        if (unitEffects.CurrentHealth + unitEffects.CurrentArmor >= health.MaxHealth)
-                                        {
-                                            headUI.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (unitEffects.CurrentHealth + unitEffects.CurrentArmor) / (health.MaxHealth + unitEffects.CombinedArmor));
-                                        }
-                                        else
-                                        {
-                                            headUI.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (unitEffects.CurrentHealth + unitEffects.CurrentArmor) / health.MaxHealth);
+                                            ParticleSystem.MainModule main = go.SetParticleSystem_BaseColor[ii].main;
+                                            main.startColor = unitEffects.PlayerColor;
                                         }
                                     }
-                                    if (animator.Animator)
-                                        animator.Animator.SetTrigger("GetHit");
 
-                                    break;
 
-                                case EffectTypeEnum.gain_armor:
+                                    //if the unit survives
+                                    if ((int) unitEffects.CurrentHealth - (int) damageAmount > 0)
+                                    {
+                                        m_UISystem.SetHealthFloatText(e, false, damageAmount, Color.red);
+                                        unitEffects.CurrentHealth -= damageAmount;
+                                    }
+                                    else
+                                    {
+                                        unitEffects.CurrentHealth = 0;
+                                    }
+                                }
 
-                                    //enter defensive stance in animator
+                                if (headUI.UnitHeadHealthBarInstance)
+                                {
+                                    if (headUI.IncomingDamage - damageAmount >= 0)
+                                    {
+                                        headUI.IncomingDamage -= damageAmount;
+                                    }
+                                    else
+                                    {
+                                        headUI.IncomingDamage = 0;
+                                    }
 
-                                    uint armorAmount = unitEffects.GetHitEffects.ElementAt(i).Key.Effects[0].GainArmorNested.ArmorAmount;
-                                    //do gainArmorStuff
-                                    unitEffects.CombinedArmor += armorAmount;
-                                    unitEffects.CurrentArmor += armorAmount;
-                                    m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f);
-                                    m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);
-                                    break;
-                            }
+                                    if (unitEffects.CurrentHealth + unitEffects.CurrentArmor >= health.MaxHealth)
+                                    {
+                                        headUI.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (unitEffects.CurrentHealth + unitEffects.CurrentArmor) / (health.MaxHealth + unitEffects.CombinedArmor));
+                                    }
+                                    else
+                                    {
+                                        headUI.UnitHeadHealthBarInstance.BgFill.fillAmount = 1 - ((float) (unitEffects.CurrentHealth + unitEffects.CurrentArmor) / health.MaxHealth);
+                                    }
+                                }
+                                if (animator.Animator)
+                                    animator.Animator.SetTrigger("GetHit");
+
+                                break;
+
+                            case EffectTypeEnum.gain_armor:
+
+                                //enter defensive stance in animator
+
+                                uint armorAmount = unitEffects.GetHitEffects.ElementAt(i).Key.Effects[0].GainArmorNested.ArmorAmount;
+                                //do gainArmorStuff
+                                unitEffects.CombinedArmor += armorAmount;
+                                unitEffects.CurrentArmor += armorAmount;
+                                m_UISystem.SetArmorDisplay(e, unitEffects.CurrentArmor, .5f);
+                                m_UISystem.SetHealthFloatText(e, true, armorAmount, Color.yellow);
+                                break;
                         }
-
-                        unitEffects.CurrentGetHitEffect = unitEffects.GetHitEffects.ElementAt(i);
-                        unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
                     }
 
-                    if (unitEffects.CurrentHealth == 0 && !animator.Dead && isVisible.Value == 1)
+                    unitEffects.CurrentGetHitEffect = unitEffects.GetHitEffects.ElementAt(i);
+                    unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
+                }
+
+                if (unitEffects.CurrentHealth == 0 && !animator.Dead && isVisible.Value == 1)
+                {
+                    if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.CurrentGetHitEffect.Key.ActionExecuteStep)
                     {
-                        if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.CurrentGetHitEffect.Key.ActionExecuteStep)
+                        //NORMAL DEATH - INSTANTLY DIE
+                        if (unitEffects.DisplayDeathSkull)
+                            m_UISystem.TriggerUnitDeathUI(e);
+
+                        if (unitEffects.BodyPartBloodParticleSystem)
                         {
-                            //NORMAL DEATH - INSTANTLY DIE
+                            Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor, unitEffects.BodyPartBloodParticleSystem);
+                        }
+                        else
+                        {
+                            Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
+                        }
+                    }
+                    else
+                    {
+                        //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
+                        if (unitEffects.SecondWindParticleSystemInstance)
+                        {
+                            ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
+
+                            if (!ps.isPlaying)
+                                ps.Play();
+                        }
+
+                        if (animator.AnimationEvents.EventTriggered)
+                        {
+                            if (unitEffects.SecondWindParticleSystemInstance)
+                            {
+                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
+
+                                if (ps.isPlaying)
+                                    ps.Stop();
+                            }
+
                             if (unitEffects.DisplayDeathSkull)
                                 m_UISystem.TriggerUnitDeathUI(e);
 
@@ -285,49 +324,19 @@ public class ActionEffectsSystem : ComponentSystem
                             {
                                 Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
                             }
-                        }
-                        else
-                        {
-                            //SECOND WIND DEATH - DIE WHEN ANIM IS DONE
-                            if (unitEffects.SecondWindParticleSystemInstance)
-                            {
-                                ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
 
-                                if (!ps.isPlaying)
-                                    ps.Play();
-                            }
-
-                            if (animator.AnimationEvents.EventTriggered)
-                            {
-                                if (unitEffects.SecondWindParticleSystemInstance)
-                                {
-                                    ParticleSystem ps = unitEffects.SecondWindParticleSystemInstance;
-
-                                    if (ps.isPlaying)
-                                        ps.Stop();
-                                }
-
-                                if (unitEffects.DisplayDeathSkull)
-                                    m_UISystem.TriggerUnitDeathUI(e);
-
-                                if (unitEffects.BodyPartBloodParticleSystem)
-                                {
-                                    Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor, unitEffects.BodyPartBloodParticleSystem);
-                                }
-                                else
-                                {
-                                    Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
-                                }
-
-                            }
                         }
                     }
+                }
 
-                    if (animator.Animator)
-                        animator.Animator.SetInteger("Armor", (int) unitEffects.CurrentArmor);
-                });
-            }
-        });
+                if (animator.Animator)
+                    animator.Animator.SetInteger("Armor", (int) unitEffects.CurrentArmor);
+            })
+            .WithoutBurst()
+            .Run();
+        }
+
+        return inputDeps;
     }
 
     public void TriggerActionEffect(uint usingUnitFaction, Action usingUnitAction, long usingUnitID, Transform hitTransform, GameState.Component gameState, int spawnShieldOrbits = 0)
@@ -344,13 +353,15 @@ public class ActionEffectsSystem : ComponentSystem
         }
 
         //ALL POSSIBLE TARGET UNITS
-        Entities.With(m_UnitData).ForEach((Entity targetEntity, UnitEffects targetUnitEffects, ref CubeCoordinate.Component targetCubeCoord) =>
+        Entities.ForEach((Entity targetEntity, UnitEffects targetUnitEffects, ref CubeCoordinate.Component targetCubeCoord) =>
         {
             if ((int)usingUnitAction.ActionExecuteStep < 2)
                 AddGetHitEffect(targetEntity, targetUnitEffects.OriginCoordinate, coordsToTrigger, targetUnitEffects, spawnShieldOrbits, usingUnitID, hitTransform, usingUnitFaction, usingUnitAction, gameState);
             else
                 AddGetHitEffect(targetEntity, targetUnitEffects.DestinationCoordinate, coordsToTrigger, targetUnitEffects, spawnShieldOrbits, usingUnitID, hitTransform, usingUnitFaction, usingUnitAction, gameState);
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void AddGetHitEffect(Entity targetEntity,  Vector3f targetUnitCoordinate, HashSet<Vector3f> targetCoordinates, UnitEffects targetUnitEffects, int spawnShieldOrbits, long usingUnitID, Transform usingUnitHitTransform, uint usingUnitfaction, Action usingUnitAction, GameState.Component gameState)

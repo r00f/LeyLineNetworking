@@ -1,23 +1,24 @@
 using UnityEngine;
-using System.Collections;
 using Unity.Entities;
 using Improbable.Gdk.Core;
-using LeyLineHybridECS;
 using Generic;
-using Unity.Collections;
 using Unit;
+using Cell;
+using Unity.Jobs;
+using Player;
 
-public class InitializeUnitsSystem : ComponentSystem
+[DisableAutoCreation]
+public class InitializeUnitsSystem : JobComponentSystem
 {
     EntityQuery m_PlayerData;
-    EntityQuery m_UnitData;
-    EntityQuery m_ManalithUnitData;
+    //EntityQuery m_UnitData;
+    //EntityQuery m_ManalithUnitData;
     Settings settings;
 
     protected override void OnCreate()
     {
         base.OnCreate();
-
+        /*
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<UnitDataSet>(),
@@ -32,13 +33,15 @@ public class InitializeUnitsSystem : ComponentSystem
             ComponentType.ReadOnly<MovementVariables.Component>()
             );
 
+
         m_ManalithUnitData = GetEntityQuery(
             ComponentType.ReadWrite<Transform>(),
             ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
             ComponentType.ReadOnly<MovementVariables.Component>()
             );
-
+            */
         m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadOnly<HeroTransform>(),
             ComponentType.ReadOnly<FactionComponent.Component>()
             );
@@ -46,15 +49,23 @@ public class InitializeUnitsSystem : ComponentSystem
         settings = Resources.Load<Settings>("Settings");
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-
-        Entities.With(m_ManalithUnitData).ForEach((Transform t, ref MovementVariables.Component move) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, ref MovementVariables.Component move, ref Manalith.Component manalith) =>
         {
             t.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
-        Entities.With(m_UnitData).ForEach((Entity e, AnimatorComponent anim, ref FactionComponent.Component unitFactionComp, ref Health.Component health, ref MovementVariables.Component move) =>
+        if (m_PlayerData.CalculateEntityCount() == 0)
+            return inputDeps;
+
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerFactionComp = m_PlayerData.GetSingleton<FactionComponent.Component>();
+        var heroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
+
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref FactionComponent.Component unitFactionComp, ref Health.Component health, ref MovementVariables.Component move) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
@@ -66,7 +77,6 @@ public class InitializeUnitsSystem : ComponentSystem
 
             if (anim.Animator)
                 anim.AnimStateEffectHandlers.AddRange(anim.Animator.GetBehaviours<AnimStateEffectHandler>());
-
 
             switch (unitFactionComp.TeamColor)
             {
@@ -87,9 +97,6 @@ public class InitializeUnitsSystem : ComponentSystem
                 teamColorMeshes.color = settings.FactionColors[0];
                 unitEffects.PlayerColor = settings.FactionColors[0];
             }
-
-
-
 
             for (int m = 0; m < teamColorMeshes.detailColorMeshes.Count; m++)
             {
@@ -171,14 +178,16 @@ public class InitializeUnitsSystem : ComponentSystem
 
             if (stats.IsHero)
             {
-                Entities.With(m_PlayerData).ForEach((HeroTransform heroTransform, ref FactionComponent.Component playerFactionComp) =>
+                if (playerFactionComp.Faction == unitFComp.Faction && heroTransform.Transform == null)
                 {
-                    if (playerFactionComp.Faction == unitFComp.Faction && heroTransform.Transform == null)
-                    {
-                        heroTransform.Transform = unitTransform;
-                    }
-                });
+                    heroTransform.Transform = unitTransform;
+                }
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
+
+
+        return inputDeps;
     }
 }

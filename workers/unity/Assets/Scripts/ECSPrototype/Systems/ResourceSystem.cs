@@ -227,6 +227,10 @@ public class ResourceSystem : ComponentSystem
             {
                 health.Armor += armorAmount;
 
+                componentUpdateSystem.SendEvent(
+                new Health.ArmorChangeEvent.Event(),
+                id.EntityId);
+
             }
         });
     }
@@ -238,6 +242,10 @@ public class ResourceSystem : ComponentSystem
             if (unitID == id.EntityId.Id)
             {
                 health.Armor -= armorAmount;
+
+                componentUpdateSystem.SendEvent(
+                new Health.ArmorChangeEvent.Event(),
+                id.EntityId);
             }
         });
     }
@@ -246,10 +254,13 @@ public class ResourceSystem : ComponentSystem
     {
         Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id, ref WorldIndex.Component unitWorldIndex) =>
         {
-
             if (worldIndex == unitWorldIndex.Value)
             {
                 health.Armor = 0;
+
+                componentUpdateSystem.SendEvent(
+                new Health.ArmorChangeEvent.Event(),
+                id.EntityId);
             }
         });
     }

@@ -9,21 +9,19 @@ public static class WorkerUtils
 
     public static void AddClientSystems(World world)
     {
+        world.GetOrCreateSystem<InitializeUnitsSystem>();
         world.GetOrCreateSystem<MouseStateSystem>();
         world.GetOrCreateSystem<CellMarkerSystem>();
         world.GetOrCreateSystem<AddComponentsSystem>();
         world.GetOrCreateSystem<PlayerStateSystem>();
         world.GetOrCreateSystem<SendActionRequestSystem>();
         world.GetOrCreateSystem<UnitAnimationSystem>();
-        world.GetOrCreateSystem<InitializeUnitsSystem>();
         world.GetOrCreateSystem<VisionSystem_Client>();
         world.GetOrCreateSystem<UISystem>();
         world.GetOrCreateSystem<HighlightingSystem>();
         world.GetOrCreateSystem<ActionEffectsSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
         world.GetOrCreateSystem<ManalithSystemClient>();
-        //world.GetOrCreateManager<ClientCleanupSystem>();
-        //world.GetOrCreateManager<ProjectileSystem>();
     }
 
     public static void AddGameLogicSystems(World world)

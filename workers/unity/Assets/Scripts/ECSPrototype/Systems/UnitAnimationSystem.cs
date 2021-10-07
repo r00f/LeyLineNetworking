@@ -93,8 +93,8 @@ public class UnitAnimationSystem : JobComponentSystem
         if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
             return inputDeps;
 
-        var playerHeroTransforms = m_PlayerData.ToComponentArray<HeroTransform>();
-        var playerHeroTransform = playerHeroTransforms[0];
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerHeroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
@@ -188,25 +188,12 @@ public class UnitAnimationSystem : JobComponentSystem
     {
         if (visible.Value == 1)
         {
-            if (energy.Harvesting && !unitComponentReferences.AnimatorComp.IsMoving)
+            if (energy.Harvesting && !unitComponentReferences.AnimatorComp.IsMoving && unitComponentReferences.UnitEffectsComp.CurrentHealth > 0)
             {
                 if (unitComponentReferences.UnitEffectsComp.HarvestingEnergyParticleSystem)
                 {
                     var harvestingEmission = unitComponentReferences.UnitEffectsComp.HarvestingEnergyParticleSystem.emission;
                     harvestingEmission.enabled = true;
-                }
-
-                if (unitComponentReferences.HeadUIRef.UnitHeadUIInstance)
-                {
-                    if ((playerState.SelectedUnitId == id.EntityId.Id || Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate)) && actions.LockedAction.Index == -3 && currentGameState == GameStateEnum.planning && unitFaction.Faction == playerFaction.Faction)
-                    {
-                        unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.text = "+" + energy.EnergyIncome.ToString();
-                        unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = true;
-                    }
-                    else
-                    {
-                        unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
-                    }
                 }
             }
             else
@@ -216,8 +203,6 @@ public class UnitAnimationSystem : JobComponentSystem
                     var harvestingEmission = unitComponentReferences.UnitEffectsComp.HarvestingEnergyParticleSystem.emission;
                     harvestingEmission.enabled = false;
                 }
-                if (unitComponentReferences.HeadUIRef.UnitHeadUIInstance)
-                    unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
             }
         }
         else
@@ -226,9 +211,6 @@ public class UnitAnimationSystem : JobComponentSystem
             {
                 g.SetActive(false);
             }
-
-            if (unitComponentReferences.HeadUIRef.UnitHeadUIInstance)
-                unitComponentReferences.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
 
             if (unitComponentReferences.UnitEffectsComp.HarvestingEnergyParticleSystem)
             {
@@ -455,20 +437,19 @@ public class UnitAnimationSystem : JobComponentSystem
 
     public void SetHarvestingEmissiveColorMeshes(UnitComponentReferences unitComponentReferences, Energy.Component energy)
     {
-        foreach (Renderer r in unitComponentReferences.TeamColorMeshesComp.HarvestingEmissionColorMeshes)
+        if (energy.Harvesting)
         {
-            if (energy.Harvesting)
-            {
-                unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor = Color.Lerp(unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor, unitComponentReferences.TeamColorMeshesComp.color * unitComponentReferences.TeamColorMeshesComp.EmissionIntensity, Time.DeltaTime * unitComponentReferences.TeamColorMeshesComp.EmissionLerpTime);
-            }
-            else
-            {
-                unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor = Color.Lerp(unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor, Color.black, Time.DeltaTime * unitComponentReferences.TeamColorMeshesComp.EmissionLerpTime);
-            }
-
-            r.materials[r.materials.Length - 1].SetColor("_EmissiveColor", unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor);
+            unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor = Color.Lerp(unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor, unitComponentReferences.TeamColorMeshesComp.color * unitComponentReferences.TeamColorMeshesComp.EmissionIntensity, Time.DeltaTime * unitComponentReferences.TeamColorMeshesComp.EmissionLerpTime);
+        }
+        else
+        {
+            unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor = Color.Lerp(unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor, Color.black, Time.DeltaTime * unitComponentReferences.TeamColorMeshesComp.EmissionLerpTime);
         }
 
+        foreach (Material m in unitComponentReferences.TeamColorMeshesComp.HarvestingEmissionColorMaterials)
+        {
+            m.SetColor("_EmissiveColor", unitComponentReferences.TeamColorMeshesComp.EmissionLerpColor);
+        }
     }
 
     public void SetHoveredOutlineColor(UnitComponentReferences unitComponentReferences, Vector3f unitCoord, Vector3f playerHoveredCoord, PlayerStateEnum currentPlayerState)

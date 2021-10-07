@@ -5,29 +5,16 @@ namespace LeyLineHybridECS
 {
     public class MeshGradientColor : MonoBehaviour
     {
-
         public LineRenderer LeylineRenderer;
-        //public MeshColor ManalithColor;
         public MeshColor ConnectedManalithColor;
-        //public MeshFilter PathMeshFilter;
-        [HideInInspector]
-        public Mesh mesh;
-        public Vector2[] uv;
         public Gradient Gradient;
         public Gradient MapGradient;
-        //[ColorUsage(true, true)]
-        public Color[] colors;
         public float EmissionMultiplier;
 
-        /*
-        void Start()
-        {
-            mesh = PathMeshFilter.mesh;
-            uv = mesh.uv;
-            colors = new Color[uv.Length];
-        }
-        */
-
+        [HideInInspector]
+        public GradientAlphaKey[] alphaKeys = new GradientAlphaKey[2];
+        [HideInInspector]
+        public GradientColorKey[] colorKeys = new GradientColorKey[4];
     }
 
 }

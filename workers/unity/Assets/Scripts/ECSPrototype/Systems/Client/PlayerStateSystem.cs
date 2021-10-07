@@ -33,6 +33,7 @@ namespace LeyLineHybridECS
             );
 
             m_PlayerData = GetEntityQuery(
+                ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<Vision.Component>(),
@@ -70,99 +71,109 @@ namespace LeyLineHybridECS
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_GameStateData.CalculateEntityCount() == 0)
+            if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
                 return inputDeps;
 
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
-            Entities.ForEach((Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, ref Vision.Component playerVision, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
+            var playerEntity = m_PlayerData.GetSingletonEntity();
+            var playerCam = EntityManager.GetComponentObject<Moba_Camera>(playerEntity);
+
+            var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
+            var playerHigh = m_PlayerData.GetSingleton<HighlightingDataComponent>();
+            var playerVision = m_PlayerData.GetSingleton<Vision.Component>();
+            var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
+            var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
+
+            var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+            var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
+
+            if (playerCam.PlayerMapTileInstance)
             {
-                var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
-                var ropeEndEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.RopeEndEvent.Event>();
+                playerCam.PlayerMapTileInstance.TileRect.anchoredPosition = (new Vector2(gameState.MapCenter.X, gameState.MapCenter.Y) - new Vector2(playerCam.transform.position.x, playerCam.transform.position.z)) * -5.8f;
+                //Equalize rot with player rot
+                Vector3 compassRotation = playerCam.PlayerMapTileInstance.TileRect.eulerAngles;
+                compassRotation.z = -playerCam.transform.eulerAngles.y;
+                playerCam.PlayerMapTileInstance.TileRect.eulerAngles = compassRotation;
+            }
 
-                if (playerCam.PlayerMapTileInstance)
+            if (playerCam.playerFaction != playerFaction.Faction)
+                playerCam.playerFaction = playerFaction.Faction;
+
+            if (cleanUpStateEvents.Count > 0)
+            {
+                playerHigh.CancelState = false;
+            }
+
+            if (gameState.CurrentState == GameStateEnum.planning)
+            {
+                if (ropeEndEvents.Count == 0)
                 {
-                    playerCam.PlayerMapTileInstance.TileRect.anchoredPosition = (new Vector2(gameState.MapCenter.X, gameState.MapCenter.Y) - new Vector2(playerCam.transform.position.x, playerCam.transform.position.z)) * -5.8f;
-                    //Equalize rot with player rot
-                    Vector3 compassRotation = playerCam.PlayerMapTileInstance.TileRect.eulerAngles;
-                    compassRotation.z = -playerCam.transform.eulerAngles.y;
-                    playerCam.PlayerMapTileInstance.TileRect.eulerAngles = compassRotation;
-                }
-
-                if (playerCam.playerFaction != playerFaction.Faction)
-                    playerCam.playerFaction = playerFaction.Faction;
-
-                if (cleanUpStateEvents.Count > 0)
-                {
-                    playerHigh.CancelState = false;
-                }
-
-                if (gameState.CurrentState == GameStateEnum.planning)
-                {
-                    if (ropeEndEvents.Count == 0)
+                    if (playerState.CurrentState != PlayerStateEnum.ready && playerState.CurrentState != PlayerStateEnum.conceded)
                     {
-                        if (playerState.CurrentState != PlayerStateEnum.ready && playerState.CurrentState != PlayerStateEnum.conceded)
+                        if (playerHigh.CancelState)
                         {
-                            if (playerHigh.CancelState)
-                            {
-                                if (playerHigh.CancelTime >= 0)
-                                    playerHigh.CancelTime -= Time.DeltaTime;
-                                else
-                                {
-                                    //Debug.Log("SetPlayerReady");
-                                    playerState.CurrentState = PlayerStateEnum.ready;
-                                    //Debug.Log((int) playerState.CurrentState);
-                                }
-                            }
+                            if (playerHigh.CancelTime >= 0)
+                                playerHigh.CancelTime -= Time.DeltaTime;
                             else
                             {
-                                playerState = UpdateSelectedUnit(playerCam, playerState, playerHigh, playerVision, playerFaction, playerEnergy);
-
-                                if (playerHigh.CancelTime < UIRef.TurnStatePnl.CacelGraceTime)
-                                    playerHigh.CancelTime += Time.DeltaTime * UIRef.TurnStatePnl.SlidersOpenMultiplier;
+                                //Debug.Log("SetPlayerReady");
+                                playerState.CurrentState = PlayerStateEnum.ready;
+                                //Debug.Log((int) playerState.CurrentState);
                             }
-
-                            UIRef.TurnStatePnl.GOButtonAnimator.SetFloat("CancelTimer", 1 - (playerHigh.CancelTime / UIRef.TurnStatePnl.CacelGraceTime));
                         }
                         else
                         {
-                            if (playerState.SelectedUnitId != 0)
-                                playerState.SelectedUnitId = 0;
+                            UpdateSelectedUnit(playerCam, ref playerState, ref playerHigh, playerVision, playerFaction, playerEnergy);
+
+                            if (playerHigh.CancelTime < UIRef.TurnStatePnl.CacelGraceTime)
+                                playerHigh.CancelTime += Time.DeltaTime * UIRef.TurnStatePnl.SlidersOpenMultiplier;
                         }
+
+                        UIRef.TurnStatePnl.GOButtonAnimator.SetFloat("CancelTimer", 1 - (playerHigh.CancelTime / UIRef.TurnStatePnl.CacelGraceTime));
                     }
                     else
                     {
-                        m_HighlightingSystem.ResetHighlightsNoIn();
-                        playerState.CurrentState = PlayerStateEnum.ready;
+                        if (playerState.SelectedUnitId != 0)
+                            playerState.SelectedUnitId = 0;
                     }
                 }
                 else
                 {
-                    if (playerState.CurrentState != PlayerStateEnum.waiting && gameState.CurrentState != GameStateEnum.interrupt)
-                    {
-                        if (playerState.UnitTargets.Count != 0)
-                        {
-                            playerState.UnitTargets.Clear();
-                            playerState.UnitTargets = playerState.UnitTargets;
-                        }
-                        playerState.CurrentState = PlayerStateEnum.waiting;
-                    }
+                    m_HighlightingSystem.ResetHighlightsNoIn();
+                    playerState.CurrentState = PlayerStateEnum.ready;
                 }
-            })
-            .WithoutBurst()
-            .Run();
+            }
+            else
+            {
+                if (playerState.CurrentState != PlayerStateEnum.waiting && gameState.CurrentState != GameStateEnum.interrupt)
+                {
+                    if (playerState.UnitTargets.Count != 0)
+                    {
+                        playerState.UnitTargets.Clear();
+                        playerState.UnitTargets = playerState.UnitTargets;
+                    }
+                    playerState.CurrentState = PlayerStateEnum.waiting;
+                }
+            }
+
+            m_PlayerData.SetSingleton(playerState);
+            m_PlayerData.SetSingleton(playerHigh);
 
             return inputDeps;
         }
 
-        public PlayerState.Component UpdateSelectedUnit(Moba_Camera playerCam, PlayerState.Component playerState, HighlightingDataComponent playerHigh, Vision.Component playerVision, FactionComponent.Component playerFaction, PlayerEnergy.Component playerEnergy)
+        public void UpdateSelectedUnit(Moba_Camera playerCam, ref PlayerState.Component playerState, ref HighlightingDataComponent playerHigh, Vision.Component playerVision, FactionComponent.Component playerFaction, PlayerEnergy.Component playerEnergy)
         {
+            var pHigh = playerHigh;
+            var pState = playerState;
+
             Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref FactionComponent.Component faction, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
             {
-                if (unitId.EntityId.Id == playerState.SelectedUnitId)
+                if (unitId.EntityId.Id == pState.SelectedUnitId)
                 {
-                    if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
-                        playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+                    if (Vector3fext.ToUnityVector(pState.SelectedUnitCoordinate) != Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
+                        pState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
 
                     playerCam.SetTargetTransform(unitComponentReferences.transform);
 
@@ -170,9 +181,9 @@ namespace LeyLineHybridECS
 
                     if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
                     {
-                        if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                        if (pState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
-                            playerState.CurrentState = PlayerStateEnum.waiting_for_target;
+                            pState.CurrentState = PlayerStateEnum.waiting_for_target;
                         }
                         
                         //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
@@ -181,15 +192,15 @@ namespace LeyLineHybridECS
                             //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                             //Call methods so line/target gets disabled instantly
-                            m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                            m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id);
                             //m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);
                             //playerState.UnitTargets.Remove(unitId.EntityId.Id);
                             //m_UISystem.ClearSelectedActionToolTip();
                         }
                     }
-                    else if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
+                    else if (pState.CurrentState != PlayerStateEnum.unit_selected && !pHigh.CancelState)
                     {
-                        playerState.CurrentState = PlayerStateEnum.unit_selected;
+                        pState.CurrentState = PlayerStateEnum.unit_selected;
                     }
                 }
                 else
@@ -198,29 +209,43 @@ namespace LeyLineHybridECS
 
                     if (mouseState.ClickEvent == 1)
                     {
-                        if ((EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && playerState.CurrentState != PlayerStateEnum.waiting_for_target)
+                        if ((EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && pState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
-                            if (playerState.CurrentState != PlayerStateEnum.unit_selected && !playerHigh.CancelState)
+                            if (pState.CurrentState != PlayerStateEnum.unit_selected && !pHigh.CancelState)
                             {
-                                playerState.CurrentState = PlayerStateEnum.unit_selected;
+                                pState.CurrentState = PlayerStateEnum.unit_selected;
                             }
                             //Debug.Log("Player Selects A New Unit with id: " + unitId.EntityId.Id);
                             m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);
+                            m_UISystem.SetPortraitInfo(unitComponentReferences.BaseDataSetComp, faction.Faction, unitComponentReferences.AnimPortraitComp.PortraitClips, unitComponentReferences.TeamColorMeshesComp.color, true);
+
+                            if(!EntityManager.HasComponent<Manalith.Component>(e))
+                            {
+                                m_UISystem.UpdatePortraitHealthText(playerFaction.Faction, faction.Faction, EntityManager.GetComponentData<Health.Component>(e));
+                            }
+                            else
+                            {
+                                m_UISystem.PopulateManlithInfoHexes((uint)unitId.EntityId.Id, playerFaction.Faction);
+                            }
+                            //m_UISystem.InitializeUnitPortraitInfo(playerFaction.Faction, faction.Faction, , health);
                             //m_UISystem.InitializeSelectedActionTooltip(actions.LockedAction.Index, unitComponentReferences.BaseDataSetComp.Actions.Count);
 
-                            playerState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
-                            playerState.SelectedUnitId = unitId.EntityId.Id;
+                            pState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
+                            pState.SelectedUnitId = unitId.EntityId.Id;
 
+
+                            //pHigh.CurrentSelectedUnitId = unitId.EntityId.Id;
+                            //Selected UnitChange Event Occurs here
+                            //pHigh.LastSelectedUnitId = pHigh.CurrentSelectedUnitId;
                         }
                     }
                 }
-
-
             })
             .WithoutBurst()
             .Run();
 
-            return playerState;
+            playerState = pState;
+            playerHigh = pHigh;
         }
 
         public void ResetInputCoolDown(float coolDown)

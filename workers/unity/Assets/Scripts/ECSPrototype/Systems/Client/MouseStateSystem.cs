@@ -72,8 +72,6 @@ public class MouseStateSystem : JobComponentSystem
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
-
-
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         ComponentDataFromEntity<CellAttributesComponent.Component> myTypeFromEntity = GetComponentDataFromEntity<CellAttributesComponent.Component>(true);

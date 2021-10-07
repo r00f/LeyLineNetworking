@@ -23,6 +23,8 @@ public class TeamColorMeshes : MonoBehaviour
     public List<Renderer> FullColorMeshes = new List<Renderer>();
     [SerializeField]
     public List<Renderer> HarvestingEmissionColorMeshes = new List<Renderer>();
+    [HideInInspector]
+    public List<Material> HarvestingEmissionColorMaterials = new List<Material>();
     [SerializeField]
     public List<Renderer> EmissionColorMeshes = new List<Renderer>();
     [SerializeField]
