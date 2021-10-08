@@ -70,6 +70,9 @@ public class MouseStateSystem : JobComponentSystem
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
         var playerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
+        var playerEntity = m_AuthoritativePlayerData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit, 100, settings.MouseRayCastLayerMask))
@@ -90,7 +93,9 @@ public class MouseStateSystem : JobComponentSystem
             if (mouseLeftClick)
             {
                 m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                Object.Instantiate(settings.MouseClickPS, hit.point, Quaternion.identity);
+                playerEffects.MouseClickSFX.transform.position = hit.point;
+                playerEffects.MouseClickSFX.PS.Play();
+                playerEffects.MouseClickSFX.SoundEmitter.Play();
             }
             else
                 m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, CubeCoordToWorldPos);

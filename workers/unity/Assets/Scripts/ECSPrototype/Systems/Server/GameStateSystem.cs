@@ -5,12 +5,12 @@ using Player;
 using System.Collections.Generic;
 using Unit;
 using Unity.Entities;
-using UnityEngine;
+using Unity.Jobs;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
-    public class GameStateSystem : ComponentSystem
+    public class GameStateSystem : JobComponentSystem
     {
         ResourceSystem m_ResourceSystem;
         ManalithSystem m_ManalithSystem;
@@ -19,13 +19,15 @@ namespace LeyLineHybridECS
         SpawnUnitsSystem m_SpawnSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         
-
+        /*
         EntityQuery m_CellData;
         EntityQuery m_HeroData;
         EntityQuery m_UnitData;
         EntityQuery m_PlayerData;
         EntityQuery m_GameStateData;
+        */
 
+        /*
         protected override void OnCreate()
         {
             base.OnCreate();
@@ -65,6 +67,7 @@ namespace LeyLineHybridECS
             ComponentType.ReadWrite<GameState.Component>()
             );
         }
+        */
 
         protected override void OnStartRunning()
         {
@@ -77,25 +80,13 @@ namespace LeyLineHybridECS
             m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
         }
 
-        protected override void OnUpdate()
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            Entities.With(m_GameStateData).ForEach((ref GameState.Component gameState, ref WorldIndex.Component gameStateWorldIndex, ref SpatialEntityId gameStateId) =>
+            Entities.ForEach((ref GameState.Component gameState, in WorldIndex.Component gameStateWorldIndex, in SpatialEntityId gameStateId) =>
             {
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
-                        /*
-                        Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
-                        {
-                            if (playerVision.RevealVision)
-                            {
-                                playerVision.RevealVision = false;
-                                playerVision.RequireUpdate = true;
-                            }
-
-                        });
-                        */
-                        //Debug.Log("WaitingForPlayers");
 #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1)
@@ -137,10 +128,6 @@ namespace LeyLineHybridECS
 #endif
                         break;
                     case GameStateEnum.planning:
-                        //DEBUGGING INSTA ROPE
-                        //#if UNITY_EDITOR
-                        //gameState.CurrentRopeTime -= Time.DeltaTime;
-                        //#endif
                         if(gameState.CurrentRopeTime <= 0)
                         {
                             m_ComponentUpdateSystem.SendEvent(
@@ -160,7 +147,6 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.interrupt:
-
                         if (gameState.HighestExecuteTime == 0)
                         {
                             gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex.Value, gameState.MinExecuteStepTime);
@@ -181,7 +167,6 @@ namespace LeyLineHybridECS
                         {
                             gameState.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex.Value, gameState.MinExecuteStepTime);
                         }
-
                         else
                         {
                             gameState.HighestExecuteTime -= Time.DeltaTime;
@@ -248,12 +233,14 @@ namespace LeyLineHybridECS
                             {
                                 gameState.CurrentRopeTime = gameState.RopeTime;
 
-                                Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref Vision.Component playerVision) =>
+                                Entities.WithAll<PlayerAttributes.Component>().ForEach((in SpatialEntityId playerId) =>
                                 {
                                     m_ComponentUpdateSystem.SendEvent(
                                         new Vision.UpdateClientVisionEvent.Event(),
                                         playerId.EntityId);
-                                });
+                                })
+                                .WithoutBurst()
+                                .Run();
 
                                 m_CleanUpSystem.DeleteDeadUnits(gameStateWorldIndex.Value);
 
@@ -277,18 +264,16 @@ namespace LeyLineHybridECS
                         gameState.CurrentState = GameStateEnum.planning;
                         break;
                     case GameStateEnum.game_over:
-
-                        Entities.With(m_PlayerData).ForEach((ref Vision.Component playerVision) =>
+                        Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component playerVision) =>
                         {
-                            if(!playerVision.RevealVision)
+                            if (!playerVision.RevealVision)
                             {
                                 playerVision.RevealVision = true;
                                 playerVision.RequireUpdate = true;
                             }
-
-                        });
-
-
+                        })
+                        .WithoutBurst()
+                        .Run();
                         break;
                 }
 
@@ -321,22 +306,27 @@ namespace LeyLineHybridECS
                             gameState.CurrentState = GameStateEnum.waiting_for_players;
                         }
 #endif
+            })
+            .WithoutBurst()
+            .Run();
 
-            });
+            return inputDeps;
         }
 
         private bool AnyPlayerReady(uint gameStateWorldIndex)
         {
             bool b = false;
 
-            Entities.With(m_PlayerData).ForEach((ref PlayerState.Component playerState, ref WorldIndex.Component playerWorldIndex) =>
+            Entities.ForEach((in PlayerState.Component playerState, in WorldIndex.Component playerWorldIndex) =>
             {
                 if (playerWorldIndex.Value == gameStateWorldIndex)
                 {
                     if (playerState.CurrentState == PlayerStateEnum.ready)
                         b = true;
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
             return b;
         }
@@ -345,7 +335,7 @@ namespace LeyLineHybridECS
         {
             uint f = 0;
 
-            Entities.With(m_PlayerData).ForEach((ref PlayerState.Component playerState, ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction) =>
+            Entities.ForEach((in PlayerState.Component playerState, in WorldIndex.Component playerWorldIndex, in FactionComponent.Component playerFaction) =>
             {
                 if (playerWorldIndex.Value == gameStateWorldIndex)
                 {
@@ -354,7 +344,9 @@ namespace LeyLineHybridECS
                         f = playerFaction.Faction;
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
             return f;
         }
@@ -363,7 +355,7 @@ namespace LeyLineHybridECS
         {
             float highestTime = minStepTime;
 
-            Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component unitAction) =>
+            Entities.ForEach((in WorldIndex.Component unitWorldIndex, in Actions.Component unitAction) =>
             {
                 var lockedAction = unitAction.LockedAction;
 
@@ -384,7 +376,9 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
             return highestTime;
         }
@@ -393,15 +387,16 @@ namespace LeyLineHybridECS
         {
             bool b = true;
 
-            Entities.With(m_PlayerData).ForEach((ref PlayerState.Component playerState, ref WorldIndex.Component playerWorldIndex) =>
+            Entities.ForEach((in PlayerState.Component playerState, in WorldIndex.Component playerWorldIndex) =>
             {
-
                 if (playerWorldIndex.Value == gameStateWorldIndex)
                 {
                     if (playerState.CurrentState != PlayerStateEnum.ready)
                         b = false;
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
             return b;
         }
@@ -414,7 +409,7 @@ namespace LeyLineHybridECS
 
             //Debug.Log(m_UnitData.CalculateEntityCount());
 
-            Entities.With(m_UnitData).ForEach((ref WorldIndex.Component worldIndex, ref CubeCoordinate.Component cubeCoord, ref SpatialEntityId entityId, ref Actions.Component actions) =>
+            Entities.ForEach((ref WorldIndex.Component worldIndex, ref CubeCoordinate.Component cubeCoord, ref SpatialEntityId entityId, ref Actions.Component actions) =>
             {
                 if (gameStateWorldIndex == worldIndex.Value)
                 {
@@ -433,9 +428,11 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
-            Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref CubeCoordinate.Component cellCubeCoordinate, ref CellAttributesComponent.Component cellAtt) =>
+            Entities.ForEach((ref WorldIndex.Component cellWorldIndex, ref CubeCoordinate.Component cellCubeCoordinate, ref CellAttributesComponent.Component cellAtt) =>
             {
                 if (gameStateWorldIndex == cellWorldIndex.Value)
                 {
@@ -455,7 +452,9 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
         private uint FindWinnerFaction(uint gameStateWorldIndex, bool isEditor = false)
@@ -463,17 +462,19 @@ namespace LeyLineHybridECS
             uint f = 0;
             if(!isEditor)
             {
-                Entities.With(m_HeroData).ForEach((ref WorldIndex.Component worldIndex, ref FactionComponent.Component faction, ref Health.Component health) =>
+                Entities.WithAll<Hero.Component>().ForEach((in WorldIndex.Component worldIndex, in FactionComponent.Component faction, in Health.Component health) =>
                 {
                     if (worldIndex.Value == gameStateWorldIndex && health.CurrentHealth > 0)
                     {
                         f = faction.Faction;
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
             }
             else
             {
-                Entities.With(m_HeroData).ForEach((ref WorldIndex.Component worldIndex, ref FactionComponent.Component faction, ref Health.Component health) =>
+                Entities.WithAll<Hero.Component>().ForEach((in WorldIndex.Component worldIndex, in FactionComponent.Component faction, in Health.Component health) =>
                 {
                     if (worldIndex.Value == gameStateWorldIndex)
                     {
@@ -482,7 +483,9 @@ namespace LeyLineHybridECS
                         else
                             f = 1;
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
             }
             return f;
         }
@@ -490,13 +493,16 @@ namespace LeyLineHybridECS
         private bool CheckAnyHeroDead(uint gameStateWorldIndex)
         {
             bool b = false;
-            Entities.With(m_HeroData).ForEach((ref WorldIndex.Component worldIndex, ref FactionComponent.Component faction, ref Health.Component health) =>
+            Entities.WithAll<Hero.Component>().ForEach((in WorldIndex.Component worldIndex, in FactionComponent.Component faction, in Health.Component health) =>
             {
                 if (worldIndex.Value == gameStateWorldIndex && health.CurrentHealth <= 0)
                 {
                     b =true;
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
+
             return b;
         }
     }

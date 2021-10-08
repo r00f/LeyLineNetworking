@@ -28,7 +28,8 @@ public class AdvancedEntityPipeline : IEntityGameObjectCreator
     {
             typeof(Transform),
             typeof(Moba_Camera),
-            typeof(HeroTransform)
+            typeof(HeroTransform),
+            typeof(PlayerEffects)
     };
 
     private readonly Type[] componentsToAdd =

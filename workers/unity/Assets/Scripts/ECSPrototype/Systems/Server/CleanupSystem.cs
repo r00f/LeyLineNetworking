@@ -1,15 +1,13 @@
-using UnityEngine;
 using Unity.Entities;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.Core.Commands;
 using Unit;
 using Generic;
 using LeyLineHybridECS;
-using Unity.Collections;
-using Cell;
+using Unity.Jobs;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
-public class CleanupSystem : ComponentSystem
+public class CleanupSystem : JobComponentSystem
 {
     CommandSystem m_CommandSystem;
     ResourceSystem m_ResourceSystem;
@@ -17,54 +15,56 @@ public class CleanupSystem : ComponentSystem
     TimerSystem m_TimerSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
 
-    EntityQuery m_GameStateData;
-    EntityQuery m_UnitData;
+    //EntityQuery m_GameStateData;
+    //EntityQuery m_UnitData;
     //EntityQuery m_UnitToRemoveData;
-    EntityQuery m_HealthUnitData;
+    //EntityQuery m_HealthUnitData;
     EntityQuery m_UnitRemovedData;
 
     protected override void OnCreate()
     {
         base.OnCreate();
 
-        m_HealthUnitData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
-        ComponentType.ReadOnly<Health.Component>(),
-        ComponentType.ReadWrite<Actions.Component>()
-        );
-
         /*
-        var unitsToRemoveDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                ComponentType.ReadOnly<Manalith.Component>()
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<SpatialEntityId>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadWrite<Actions.Component>()
-            }
-        };
+m_HealthUnitData = GetEntityQuery(
+ComponentType.ReadOnly<SpatialEntityId>(),
+ComponentType.ReadOnly<CubeCoordinate.Component>(),
+ComponentType.ReadOnly<WorldIndex.Component>(),
+ComponentType.ReadOnly<Health.Component>(),
+ComponentType.ReadWrite<Actions.Component>()
+);
 
-        m_UnitToRemoveData = GetEntityQuery(unitsToRemoveDesc);
-        */
 
-        m_UnitData = GetEntityQuery(
+var unitsToRemoveDesc = new EntityQueryDesc
+{
+    None = new ComponentType[]
+    {
+        ComponentType.ReadOnly<Manalith.Component>()
+    },
+    All = new ComponentType[]
+    {
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadWrite<Actions.Component>()
-        );
+    }
+};
 
-        m_GameStateData = GetEntityQuery(
-        ComponentType.ReadOnly<WorldIndex.Component>(),
-        ComponentType.ReadOnly<GameState.Component>()
-        );
+m_UnitToRemoveData = GetEntityQuery(unitsToRemoveDesc);
+
+
+m_UnitData = GetEntityQuery(
+ComponentType.ReadOnly<SpatialEntityId>(),
+ComponentType.ReadOnly<CubeCoordinate.Component>(),
+ComponentType.ReadOnly<WorldIndex.Component>(),
+ComponentType.ReadWrite<Actions.Component>()
+);
+
+m_GameStateData = GetEntityQuery(
+ComponentType.ReadOnly<WorldIndex.Component>(),
+ComponentType.ReadOnly<GameState.Component>()
+);
+*/
 
         var unitRemovedDesc = new EntityQueryDesc
         {
@@ -91,9 +91,9 @@ public class CleanupSystem : ComponentSystem
         m_TimerSystem = World.GetExistingSystem<TimerSystem>();
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.With(m_GameStateData).ForEach((ref GameState.Component gameState, ref WorldIndex.Component WorldIndex) =>
+        Entities.ForEach((in GameState.Component gameState, in WorldIndex.Component WorldIndex) =>
         {
             if (gameState.CurrentState == GameStateEnum.cleanup)
             {
@@ -101,18 +101,24 @@ public class CleanupSystem : ComponentSystem
 
                 m_ResourceSystem.ResetArmor(WorldIndex.Value);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
+
+        return inputDeps;
     }
 
     public void ClearAllLockedActions(uint worldIndex)
     {
-        Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions) =>
+        Entities.ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions) =>
         {
             if (unitWorldIndex.Value == worldIndex)
             {
                 actions = ClearLockedActions(actions);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public Actions.Component ClearLockedActions(Actions.Component actions)
@@ -124,65 +130,47 @@ public class CleanupSystem : ComponentSystem
         return actions;
     }
 
-    /*
-    public void DeleteNeutralUnits(uint worldIndex)
-    {
-        Entities.With(m_UnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
-        {
-            if (unitWorldIndex.Value == worldIndex && faction.Faction == 0)
-            {
-                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
-                m_CommandSystem.SendCommand(deleteEntityRequest);
-            }
-        });
-    }
-    */
-
     public void DeleteAllUnits(uint worldIndex)
     {
-        Entities.With(m_HealthUnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        Entities.WithAll<Health.Component>().ForEach((in SpatialEntityId entityId, in WorldIndex.Component unitWorldIndex) =>
         {
             if (unitWorldIndex.Value == worldIndex)
             {
                 var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
                 m_CommandSystem.SendCommand(deleteEntityRequest);
             }
-        });
+        })
+        .WithoutBurst() 
+        .Run();
     }
 
     public void DeleteDeadUnits(uint worldIndex)
     {
-        Entities.With(m_HealthUnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref Health.Component health) =>
+        Entities.ForEach((in SpatialEntityId entityId, in WorldIndex.Component unitWorldIndex, in Health.Component health) =>
         {
             if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
             {
-                //RAISE CLIENT UI CLEANUP EVENT ON HEALTH COMPONENT AND DELETE ENTITY WHENEVER UI IS CLEANED ON ALL CLIENTS
-                /*
-                m_ComponentUpdateSystem.SendEvent(
-                new Health.CleanupUiEvent.Event(),
-                entityId.EntityId);
-                */
-
-                //if(m_ComponentUpdateSystem.GetEventsReceived<Health.CleanupUiEvent.Event>().Count == 0)
-                //{
-                    var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
-                    m_CommandSystem.SendCommand(deleteEntityRequest);
-                //}
+                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+                m_CommandSystem.SendCommand(deleteEntityRequest);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public bool CheckAllDeadUnitsDeleted(uint worldIndex)
     {
         bool allUnitsDeleted = true;
 
-        Entities.With(m_HealthUnitData).ForEach((ref SpatialEntityId entityId, ref WorldIndex.Component unitWorldIndex, ref Health.Component health) =>
+        Entities.ForEach((in SpatialEntityId entityId, in WorldIndex.Component unitWorldIndex, in Health.Component health) =>
         {
             if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
             {
                 allUnitsDeleted = false;
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         if (m_UnitRemovedData.CalculateEntityCount() > 0)
             allUnitsDeleted = false;

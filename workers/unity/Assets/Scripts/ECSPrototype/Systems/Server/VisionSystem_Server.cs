@@ -1,27 +1,23 @@
-using UnityEngine;
 using Unity.Entities;
-using Improbable;
 using Improbable.Gdk.Core;
-using LeyLineHybridECS;
 using System.Collections.Generic;
 using Generic;
 using Cell;
 using Player;
-using Unit;
 using System.Linq;
-using Unity.Collections;
+using Unity.Jobs;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-public class VisionSystem_Server : ComponentSystem
+public class VisionSystem_Server : JobComponentSystem
 {
     //HandleCellGridRequestsSystem m_GridSystem;
     ILogDispatcher logger;
     CommandSystem m_CommandSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
-    EntityQuery m_UnitData;
-    EntityQuery m_PlayerData;
+    //EntityQuery m_UnitData;
+    //EntityQuery m_PlayerData;
     EntityQuery m_CellData;
-    EntityQuery m_GameStateData;
+    //EntityQuery m_GameStateData;
 
 
     bool Init = false;
@@ -32,12 +28,12 @@ public class VisionSystem_Server : ComponentSystem
     {
         base.OnCreate();
 
+        /*
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<Vision.Component>()
             );
 
@@ -47,11 +43,13 @@ public class VisionSystem_Server : ComponentSystem
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<Vision.Component>()
             );
+         */
 
         m_CellData = GetEntityQuery(
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<CellAttributesComponent.Component>()
             );
+
     }
 
     protected override void OnStartRunning()
@@ -62,7 +60,7 @@ public class VisionSystem_Server : ComponentSystem
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var revealVisionRequests = m_CommandSystem.GetRequests<Vision.RevealVisionCommand.ReceivedRequest>();
 
@@ -70,14 +68,16 @@ public class VisionSystem_Server : ComponentSystem
         {
             var revealVisionRequest = revealVisionRequests[i];
 
-            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref SpatialEntityId p_id) =>
+            Entities.ForEach((ref Vision.Component p_Vision, ref SpatialEntityId p_id) =>
             {
                 if(p_id.EntityId == revealVisionRequest.EntityId)
                 {
                     p_Vision.RequireUpdate = true;
                     p_Vision.RevealVision = !p_Vision.RevealVision;
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
         if (m_CellData.CalculateEntityCount() == mapSize)
@@ -88,7 +88,7 @@ public class VisionSystem_Server : ComponentSystem
                 BuildRawClusters();
             }
             else {
-                Entities.With(m_UnitData).ForEach((ref SpatialEntityId id, ref WorldIndex.Component u_worldIndex, ref Vision.Component u_Vision, ref CubeCoordinate.Component u_OccupiedCell, ref FactionComponent.Component u_Faction) =>
+                Entities.ForEach((ref Vision.Component u_Vision, in WorldIndex.Component u_worldIndex, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
                 {
                     /*
                     if (u_Vision.VisionRange > 0)
@@ -121,7 +121,7 @@ public class VisionSystem_Server : ComponentSystem
 
                         if (v.CellsInVisionrange.Count != 0)
                         {
-                            Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction, ref SpatialEntityId p_id) =>
+                            Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id) =>
                             {
                                 if (p_Faction.Faction == unitFaction)
                                 {
@@ -138,15 +138,19 @@ public class VisionSystem_Server : ComponentSystem
                                     new Vision.UpdateClientVisionEvent.Event(),
                                     p_id.EntityId);
                                 }
-                            });
+                            })
+                            .WithoutBurst()
+                            .Run();
 
                             u_Vision = v;
                             u_Vision.RequireUpdate = false;
                         }
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
 
-                Entities.With(m_PlayerData).ForEach((ref Vision.Component p_Vision, ref FactionComponent.Component p_Faction, ref SpatialEntityId p_id) =>
+                Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id) =>
                 {
                     if (p_Vision.RequireUpdate)
                     {
@@ -158,8 +162,6 @@ public class VisionSystem_Server : ComponentSystem
                             new LogEvent("playerVision.ReqUpdate = true")
                             .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
                             */
-
-
                             p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
 
                             p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
@@ -189,9 +191,14 @@ public class VisionSystem_Server : ComponentSystem
                             p_Vision.RequireUpdate = false;
                         }
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
             }
+            return inputDeps;
         }
+
+        return inputDeps;
     }
 
     private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
@@ -270,10 +277,12 @@ public class VisionSystem_Server : ComponentSystem
         inVision.CellsInVisionrange.Clear();
 
         //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
-        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coord) =>
+        Entities.ForEach((in CubeCoordinate.Component coord, in CellAttributesComponent.Component cellAtt) =>
         {
             inVision.CellsInVisionrange.Add(coord.CubeCoordinate, 0);
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         return inVision;
     }
@@ -303,7 +312,7 @@ public class VisionSystem_Server : ComponentSystem
 
         var currentVision = new HashSet<Vector3f>();
 
-        Entities.With(m_UnitData).ForEach((ref Vision.Component unitVision, ref FactionComponent.Component unitFaction) =>
+        Entities.WithAll<CubeCoordinate.Component>().ForEach((in Vision.Component unitVision, in FactionComponent.Component unitFaction) =>
         {
             if (faction == unitFaction.Faction)
             {
@@ -313,7 +322,9 @@ public class VisionSystem_Server : ComponentSystem
                     currentVision.Add(v);
                 }
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         inVision.CellsInVisionrange = currentVision.ToDictionary(item => item, item => (uint)0);
 
@@ -341,13 +352,16 @@ public class VisionSystem_Server : ComponentSystem
         List<CellAttributesComponent.Component> obstructed = new List<CellAttributesComponent.Component>();
 
         //Debug.Log("cell entity count" + m_CellData.CalculateEntityCount());
-        Entities.With(m_CellData).ForEach((ref CellAttributesComponent.Component cellAttributes) =>
+        Entities.ForEach((in CellAttributesComponent.Component cellAttributes) =>
         {
             if (cellAttributes.CellAttributes.Cell.ObstructVision)
             {
                 obstructed.Add(cellAttributes);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
+
         //Debug.Log("obstructed:" + obstructed.Count);
         List<RawCluster> raw = new List<RawCluster>();
         while (obstructed.Count > 0)

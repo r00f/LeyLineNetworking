@@ -2,15 +2,10 @@ using FMODUnity;
 using Generic;
 using Improbable.Gdk.Core;
 using Player;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Unit;
-using Unity.Collections;
 using Unity.Entities;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 using Cell;
@@ -923,7 +918,7 @@ namespace LeyLineHybridECS
 
                 if (!unitCompRef.BaseDataSetComp.UIInitialized)
                 {
-                    InitializeUnitUI(unitCompRef.HeadUIRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction);
+                    InitializeUnitUI(playerEnergy, actions, unitCompRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction);
                     unitCompRef.BaseDataSetComp.UIInitialized = true;
                 }
                 else
@@ -1975,24 +1970,22 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void InitializeUnitUI(UnitHeadUIReferences headUIRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction)
+        public void InitializeUnitUI(PlayerEnergy.Component playerEnergy, Actions.Component actions,  UnitComponentReferences unitCompRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction)
         {
-            //Spawn UnitHeadUI / UnitGroup / SelectUnitButton
+            unitCompRef.HeadUIRef.UnitHeadUIInstance = Object.Instantiate(unitCompRef.HeadUIRef.UnitHeadUIPrefab, unitCompRef.HeadUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
+            unitCompRef.HeadUIRef.UnitHeadHealthBarInstance = unitCompRef.HeadUIRef.UnitHeadUIInstance.HealthBar;
+            unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.transform.SetParent(UIRef.HealthBarsPanel.transform, false);
 
-            headUIRef.UnitHeadUIInstance = Object.Instantiate(headUIRef.UnitHeadUIPrefab, headUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
-            headUIRef.UnitHeadHealthBarInstance = headUIRef.UnitHeadUIInstance.HealthBar;
-            headUIRef.UnitHeadHealthBarInstance.transform.SetParent(UIRef.HealthBarsPanel.transform, false);
-
-            if (headUIRef.UnitHeadHealthBarInstance.PlayerColorImage && headUIRef.UnitHeadHealthBarInstance.HoveredImage)
+            if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.PlayerColorImage && unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.HoveredImage)
             {
-                headUIRef.UnitHeadHealthBarInstance.PlayerColorImage.color = settings.FactionColors[(int) unitFaction];
-                headUIRef.UnitHeadHealthBarInstance.HoveredImage.color = settings.FactionColors[(int) unitFaction];
+                unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.PlayerColorImage.color = settings.FactionColors[(int) unitFaction];
+                unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.HoveredImage.color = settings.FactionColors[(int) unitFaction];
             }
 
             if(unitFaction != 0)
-                headUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) unitFaction];
+                unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) unitFaction];
 
-            headUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
+            unitCompRef.HeadUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
             //initialize GroupUI and hero select button
             if (unitFaction == playerFaction && playerFaction != 0)
             {
@@ -2035,13 +2028,15 @@ namespace LeyLineHybridECS
                         stats.SelectUnitButtonInstance = unitButton;
                         //problematic if unit has a locked action
                         //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                        unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                        unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); });
+
+
+                        
+
                         unitGroup.ExistingUnitIds.Add(unitId);
                         unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
                         //IF PEASANT SET AS FIRST SIBLING
-
-
                     }
                     else
                     {
@@ -2064,7 +2059,7 @@ namespace LeyLineHybridECS
                             stats.SelectUnitButtonInstance = unitButton;
                             //problematic if unit has a locked action
                             //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                            unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                            unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); });
                             unitGroup.ExistingUnitIds.Add(unitId);
                             unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         }
@@ -2073,11 +2068,11 @@ namespace LeyLineHybridECS
                 else
                 {
                     UIRef.SelectHeroButton.UnitId = unitId;
-                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); });
+                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); });
                 }
             }
-            else if (headUIRef.UnitHeadUIInstance.ActionDisplay)
-                Object.Destroy(headUIRef.UnitHeadUIInstance.ActionDisplay.gameObject);
+            else if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay)
+                Object.Destroy(unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject);
         }
 
         public void InitializeManalithUnitUI(UnitHeadUIReferences headUIRef)

@@ -1,26 +1,24 @@
 using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
-using Unit;
-using Improbable;
-using LeyLineHybridECS;
 using Generic;
 using Player;
-using Unity.Collections;
+using Unity.Jobs;
 using Improbable.Gdk.Core;
 
 //[DisableAutoCreation]
-public class ProjectileSystem : ComponentSystem
+public class ProjectileSystem : JobComponentSystem
 {
     private EntityQuery m_GameStateData;
-    private EntityQuery m_MoveAnimData;
-    private EntityQuery m_ProjectileData;
-    private EntityQuery m_UnitData;
-    EntityQuery m_PlayerData;
+    //private EntityQuery m_MoveAnimData;
+    //private EntityQuery m_ProjectileData;
+    //private EntityQuery m_UnitData;
+    //EntityQuery m_PlayerData;
     bool initialized;
     ActionEffectsSystem m_ActionEffectSystem;
     ILogDispatcher logger;
 
+    /*
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -33,10 +31,8 @@ public class ProjectileSystem : ComponentSystem
         ComponentType.ReadWrite<MovementAnimComponent>(),
         ComponentType.ReadWrite<Transform>()
         );
-
-
-
     }
+    */
 
     protected override void OnStartRunning()
     {
@@ -55,46 +51,37 @@ public class ProjectileSystem : ComponentSystem
         {
             if (Worlds.ClientWorld != default)
             {
-
+                /*
                 m_UnitData = Worlds.ClientWorld.CreateEntityQuery(
                     ComponentType.ReadWrite<AnimatorComponent>()
                 );
+                */
 
                 m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
                 );
-
+/*
                 m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
                 ComponentType.ReadOnly<Vision.Component>(),
                 ComponentType.ReadOnly<PlayerState.HasAuthority>()
                 );
-
+                */
                 initialized = true;
             }
         }
         return initialized;
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         if(WorldsInitialized())
         {
             if (m_GameStateData.CalculateEntityCount() == 0)
-                return;
+                return inputDeps;
 
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
-            /*
-            if(m_ProjectileData.CalculateEntityCount() > 0)
-            {
-                
-                logger.HandleLog(LogType.Warning,
-                new LogEvent("ProjectileCount")
-                .WithField("Count", m_ProjectileData.CalculateEntityCount()));
-                
-            }
-            */
-            Entities.With(m_ProjectileData).ForEach((Entity entity, Projectile projectile, Transform transform) =>
+            Entities.ForEach((Entity entity, Projectile projectile, Transform transform) =>
             {
                 if(projectile.CollisionDetection)
                 {
@@ -254,9 +241,11 @@ public class ProjectileSystem : ComponentSystem
 
                     projectile.QueuedForDestruction = true;
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
-            Entities.With(m_MoveAnimData).ForEach((Entity entity, MovementAnimComponent anim, Transform transform) =>
+            Entities.ForEach((Entity entity, MovementAnimComponent anim, Transform transform) =>
             {
                 if (anim.DegreesPerSecond != 0 && transform)
                     transform.RotateAround(transform.position, transform.right + anim.RotationAxis, anim.DegreesPerSecond * Time.DeltaTime);
@@ -276,7 +265,11 @@ public class ProjectileSystem : ComponentSystem
                         anim.RotationAxis.z = Mathf.Lerp(anim.RotationAxis.z, anim.RotationAxis.z += Random.Range(-.1f, .1f), Time.DeltaTime);
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
+
+        return inputDeps;
     }
 }

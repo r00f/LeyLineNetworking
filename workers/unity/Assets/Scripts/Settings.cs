@@ -15,10 +15,10 @@ public class Settings : ScriptableObject
     public List<Color> TurnStepLineColors;
 
     public Color UINeutralColor;
-    public Mesh TestMesh;
-    public Material TestMat;
+    //public Mesh TestMesh;
+    //public Material TestMat;
     public List<Texture2D> ParialColorMasks;
-    public GameObject MouseClickPS;
+    //public GameObject MouseClickPS;
     public GameObject ExplosionDebugSphere;
 
     [Header("GamePlaySettings")]

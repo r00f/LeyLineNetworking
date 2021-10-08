@@ -5,13 +5,13 @@ using LeyLineHybridECS;
 using Generic;
 using Player;
 using Unit;
-using Unity.Collections;
+using Unity.Jobs;
 using Cell;
 using System.Collections.Generic;
 
 [DisableAutoCreation]
 [UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
-public class ResourceSystem : ComponentSystem
+public class ResourceSystem : JobComponentSystem
 {
     EntityQuery m_PlayerData;
     EntityQuery m_UnitData;
@@ -69,58 +69,63 @@ public class ResourceSystem : ComponentSystem
         m_CleanupSystem = World.GetExistingSystem<CleanupSystem>();
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) => 
+        Entities.ForEach((in WorldIndex.Component gameStateWorldIndex, in GameState.Component gameState) => 
         {
             if (gameState.CurrentState == GameStateEnum.interrupt)
             {
                 AddIncome(gameStateWorldIndex.Value);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
+
+        return inputDeps;
     }
 
     public void CalculateIncome(uint worldIndex)
     {
         var workerSystem = World.GetExistingSystem<WorkerSystem>();
 
-        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref FactionComponent.Component playerFaction, ref PlayerEnergy.Component playerEnergy) =>
+        Entities.ForEach((ref PlayerEnergy.Component playerEnergy, in WorldIndex.Component playerWorldIndex, in FactionComponent.Component playerFaction) =>
         {
-            var pFaction = playerFaction;
-            var pEnergy = playerEnergy;
-
             if (playerWorldIndex.Value == worldIndex)
             {
-                if (pEnergy.IncomeAdded == true)
+                if (playerEnergy.IncomeAdded == true)
                 {
-                    pEnergy.Income = pEnergy.BaseIncome;
-
-                    Entities.With(m_ManalithData).ForEach((ref WorldIndex.Component manalithWorldIndex, ref FactionComponent.Component manalithFaction, ref Manalith.Component manalith) =>
-                    {
-                        if (manalithFaction.Faction == pFaction.Faction)
-                        {
-                            pEnergy.Income += manalith.CombinedEnergyGain;
-                        }
-                    });
-
-                    //Debug.Log("CalculateIncome: " + pEnergy.Income);
-                    pEnergy.IncomeAdded = false;
-                    playerEnergy = pEnergy;
+                    playerEnergy.Income = AddIncomeFromManaliths(playerEnergy.BaseIncome, playerFaction.Faction);
+                    playerEnergy.IncomeAdded = false;
                 }
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
+    }
+
+    uint AddIncomeFromManaliths(uint income, uint playerFaction)
+    {
+        Entities.ForEach((in FactionComponent.Component manalithFaction, in Manalith.Component manalith) =>
+        {
+            if (manalithFaction.Faction == playerFaction)
+            {
+                income += manalith.CombinedEnergyGain;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+
+        return income;
     }
 
     void AddIncome(uint worldIndex)
     {
-        Entities.With(m_PlayerData).ForEach((ref WorldIndex.Component playerWorldIndex, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.ForEach((ref PlayerEnergy.Component energyComp, in WorldIndex.Component playerWorldIndex, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
         {
             if (playerWorldIndex.Value == worldIndex)
             {
                 if (energyComp.IncomeAdded == false)
                 {
-                    //Debug.Log("Add Income: " + energyComp.Income);
-
                     if (energyComp.Energy + energyComp.Income < energyComp.MaxEnergy)
                     {
                         energyComp.Energy += energyComp.Income;
@@ -130,15 +135,21 @@ public class ResourceSystem : ComponentSystem
                         energyComp.Energy = energyComp.MaxEnergy;
                     }
 
+                    componentUpdateSystem.SendEvent(
+                    new PlayerEnergy.EnergyChangeEvent.Event(),
+                    playerId.EntityId);
+
                     energyComp.IncomeAdded = true;
                 }
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void AddEnergy(uint playerFaction, uint energyAmount)
     {
-        Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -151,18 +162,18 @@ public class ResourceSystem : ComponentSystem
                     energyComp.Energy = energyComp.MaxEnergy;
                 }
 
-                //SEND ENERGYCHANGED EVENT
                 componentUpdateSystem.SendEvent(
                 new PlayerEnergy.EnergyChangeEvent.Event(),
                 playerId.EntityId);
-
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void SubstactEnergy(uint playerFaction, uint energyAmount)
     {
-        Entities.With(m_PlayerData).ForEach((ref SpatialEntityId playerId, ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -176,33 +187,33 @@ public class ResourceSystem : ComponentSystem
                     energyComp.Energy = 0;
                 }
 
-                //SEND ENERGYCHANGEDEVENT
-                
                 componentUpdateSystem.SendEvent(
                 new PlayerEnergy.EnergyChangeEvent.Event(),
                 playerId.EntityId);
-                
-
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
     {
         int leftOverEnergy = 0;
-        Entities.With(m_PlayerData).ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.ForEach((in PlayerEnergy.Component energyComp, in FactionComponent.Component faction) =>
         {
             if (playerFaction == faction.Faction)
             {
                 leftOverEnergy = (int)energyComp.Energy - (int)energyCost;
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
         return leftOverEnergy;
     }
 
     public void Heal(long unitID, uint healAmount)
     {
-        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
+        Entities.ForEach((ref Health.Component health, in SpatialEntityId id) =>
         {
             if (id.EntityId.Id == unitID)
             {
@@ -214,14 +225,15 @@ public class ResourceSystem : ComponentSystem
                 {
                     health.CurrentHealth = health.MaxHealth;
                 }
-
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void AddArmor(long unitID, uint armorAmount)
     {
-        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
+        Entities.ForEach((ref Health.Component health, in SpatialEntityId id) =>
         {
             if (unitID == id.EntityId.Id)
             {
@@ -230,14 +242,15 @@ public class ResourceSystem : ComponentSystem
                 componentUpdateSystem.SendEvent(
                 new Health.ArmorChangeEvent.Event(),
                 id.EntityId);
-
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void RemoveArmor(long unitID, uint armorAmount)
     {
-        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
+        Entities.ForEach((ref Health.Component health, ref SpatialEntityId id) =>
         {
             if (unitID == id.EntityId.Id)
             {
@@ -247,12 +260,14 @@ public class ResourceSystem : ComponentSystem
                 new Health.ArmorChangeEvent.Event(),
                 id.EntityId);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void ResetArmor(uint worldIndex)
     {
-        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id, ref WorldIndex.Component unitWorldIndex) =>
+        Entities.ForEach((ref Health.Component health, in SpatialEntityId id, in WorldIndex.Component unitWorldIndex) =>
         {
             if (worldIndex == unitWorldIndex.Value)
             {
@@ -262,40 +277,14 @@ public class ResourceSystem : ComponentSystem
                 new Health.ArmorChangeEvent.Event(),
                 id.EntityId);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
-
-    /*
-    public void DealDamage(long unitID, uint damageAmount, ExecuteStepEnum executeStep)
-    {
-        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
-        {
-            if (unitID == id.EntityId.Id)
-            {
-                
-                var combinedHealth = health.CurrentHealth + health.Armor;
-
-                if ((int)combinedHealth - (int)damageAmount > 0)
-                {
-                    combinedHealth -= damageAmount;
-                    if (health.CurrentHealth > combinedHealth)
-                        health.CurrentHealth = combinedHealth;
-                    else
-                        health.Armor = combinedHealth - health.CurrentHealth;
-                }
-                else
-                {
-                    health.CurrentHealth = 0;
-                    Die(unitID, executeStep);
-                }
-            }
-        });
-    }
-    */
 
     public void DealDamage(Dictionary<long, uint> damageDict, ExecuteStepEnum executeStep)
     {
-        Entities.With(m_UnitData).ForEach((ref Health.Component health, ref SpatialEntityId id) =>
+        Entities.ForEach((ref Health.Component health, in SpatialEntityId id) =>
         {
             if (damageDict.ContainsKey(id.EntityId.Id))
             {
@@ -315,19 +304,22 @@ public class ResourceSystem : ComponentSystem
                     Die(id.EntityId.Id, executeStep);
                 }
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
-
 
     public void Die(long unitID, ExecuteStepEnum killingExecuteStep)
     {
-        Entities.With(m_UnitData).ForEach((ref Actions.Component actions, ref SpatialEntityId id) =>
+        Entities.ForEach((ref Actions.Component actions, in SpatialEntityId id) =>
         {
             //clear dying unit actions if its lockedAction is in an later step then the killing action;
             if (unitID == id.EntityId.Id && actions.LockedAction.ActionExecuteStep > killingExecuteStep)
             {
                 actions = m_CleanupSystem.ClearLockedActions(actions);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 }

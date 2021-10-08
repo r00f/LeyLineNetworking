@@ -1,16 +1,14 @@
 using Unity.Entities;
-using UnityEngine;
 using Unit;
 using Improbable.Gdk.Core;
 using Generic;
-using Cell;
 using LeyLineHybridECS;
 using System.Collections.Generic;
-using Unity.Collections;
+using Unity.Jobs;
 using Improbable.Gdk.PlayerLifecycle;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
-public class ExecuteActionsSystem : ComponentSystem
+public class ExecuteActionsSystem : JobComponentSystem
 {
     PathFindingSystem m_PathFindingSystem;
     HandleCellGridRequestsSystem m_HandleCellGridSystem;
@@ -25,12 +23,12 @@ public class ExecuteActionsSystem : ComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-
+        /*
         m_CellData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadWrite<CubeCoordinate.Component>()
         );
-
+        */
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadWrite<GameState.Component>()
@@ -46,34 +44,35 @@ public class ExecuteActionsSystem : ComponentSystem
         m_TimerSystem = World.GetExistingSystem<TimerSystem>();
         m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
 
+        /*
         m_UnitData = GetEntityQuery(
         EntityArchetypes.UnitArchetype.GetComponentTypes()
         );
+        */
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_GameStateData.CalculateEntityCount() == 0)
-            return;
+        Entities.ForEach((ref GameState.Component gameState, in WorldIndex.Component gamestateWorldIndex) =>
+        {
+            GetUnitActions(gameState, gamestateWorldIndex);
 
-        var gameState = m_GameStateData.GetSingleton<GameState.Component>();
-        var gamestateWorldIndex = m_GameStateData.GetSingleton<WorldIndex.Component>();
+            if (!gameState.AttackDamageDealt && gameState.DamageDict.Count != 0)
+            {
+                m_ResourceSystem.DealDamage(gameState.DamageDict, (ExecuteStepEnum) (int) gameState.CurrentState - 2);
+                gameState.DamageDict.Clear();
+                gameState.AttackDamageDealt = true;
+            }
+        })
+        .WithoutBurst()
+        .Run();
 
-        GetUnitActions(gameState, gamestateWorldIndex);
-
-        if (!gameState.AttackDamageDealt && gameState.DamageDict.Count != 0)
-        { 
-            m_ResourceSystem.DealDamage(gameState.DamageDict, (ExecuteStepEnum)(int)gameState.CurrentState - 2);
-            gameState.DamageDict.Clear();
-            gameState.AttackDamageDealt = true;
-        }
-
-        m_GameStateData.SetSingleton(gameState);
+        return inputDeps;
     }
 
     public void GetUnitActions(GameState.Component gameState, WorldIndex.Component gamestateWorldIndex)
     {
-        Entities.With(m_UnitData).ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref OwningWorker.Component owningWOrker) =>
+        Entities.ForEach((ref Actions.Component actions, in WorldIndex.Component unitWorldIndex, in SpatialEntityId unitId, in FactionComponent.Component faction, in OwningWorker.Component owningWOrker) =>
         {
             var uWi = unitWorldIndex.Value;
             var a = actions;
@@ -115,7 +114,9 @@ public class ExecuteActionsSystem : ComponentSystem
                 }
             }
             actions = a;
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public void AddDamageToDict(GameState.Component gameState, long unitId, uint damageAmount)
@@ -195,7 +196,7 @@ public class ExecuteActionsSystem : ComponentSystem
         HashSet<Vector3f> Coords = new HashSet<Vector3f>(inCoords);
         List<long> unitIds = new List<long>();
 
-        Entities.With(m_UnitData).ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId) =>
+        Entities.WithAll<Health.Component>().ForEach((Entity e, in CubeCoordinate.Component unitCoord, in SpatialEntityId unitId) =>
         {
             if (Coords.Contains(unitCoord.CubeCoordinate))
             {
@@ -204,7 +205,9 @@ public class ExecuteActionsSystem : ComponentSystem
                     unitIds.Add(unitId.EntityId.Id);
                 }
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         return unitIds;
     }

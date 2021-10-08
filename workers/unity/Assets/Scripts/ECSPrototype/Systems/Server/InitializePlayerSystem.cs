@@ -1,27 +1,25 @@
-using Cell;
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
 using Player;
-using Unity.Collections;
+using Unity.Jobs;
 using Unity.Entities;
 using UnityEngine;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-    public class InitializePlayerSystem : ComponentSystem
+    public class InitializePlayerSystem : JobComponentSystem
     {
         public struct PlayerStateData : ISystemStateComponentData
         {
             public WorldIndex.Component WorldIndexState;
         }
 
-        EntityQuery m_PlayerAddedData;
-        EntityQuery m_PlayerRemovedData;
-        EntityQuery m_GameStateData;
-
-        EntityQuery m_PlayerData;
+        //EntityQuery m_PlayerAddedData;
+        //EntityQuery m_PlayerRemovedData;
+        //EntityQuery m_GameStateData;
+        //EntityQuery m_PlayerData;
 
         Settings settings;
 
@@ -30,7 +28,7 @@ namespace LeyLineHybridECS
             base.OnCreate();
             settings = Resources.Load<Settings>("Settings");
 
-
+            /*
             var playerAddedDesc = new EntityQueryDesc
             {
                 None = new ComponentType[] { typeof(PlayerStateData) },
@@ -75,12 +73,12 @@ namespace LeyLineHybridECS
                 ComponentType.ReadWrite<PlayerAttributes.Component>(),
                 ComponentType.ReadWrite<FactionComponent.Component>()
             );
+            */
         }
 
-        protected override void OnUpdate()
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            
-            Entities.With(m_PlayerAddedData).ForEach((Entity entity, ref WorldIndex.Component worldIndex, ref FactionComponent.Component factionComp, ref Position.Component pos, ref FactionComponent.Component playerAddedFaction, ref PlayerAttributes.Component playerAddedPlayerAttributes) =>
+            Entities.WithNone<PlayerStateData>().ForEach((Entity entity, ref WorldIndex.Component worldIndex, ref FactionComponent.Component factionComp, ref Position.Component pos, in PlayerAttributes.Component playerAddedPlayerAttributes) =>
             {
                 if (worldIndex.Value == 0)
                 {
@@ -88,11 +86,13 @@ namespace LeyLineHybridECS
                     worldIndex.Value = wIndex;
                     var c = new Position.Component();
 
-                    Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState, ref Position.Component gameStatePos) =>
+                    Entities.ForEach((in WorldIndex.Component gameStateWorldIndex, in GameState.Component gameState, in Position.Component gameStatePos) =>
                     {
                         if (wIndex == gameStateWorldIndex.Value)
                             c.Coords = gameStatePos.Coords;
-                    });
+                    })
+                    .WithoutBurst()
+                    .Run();
 
                     if (settings.ForcePlayerFaction == 0)
                         factionComp = SetPlayerFaction(wIndex);
@@ -101,25 +101,34 @@ namespace LeyLineHybridECS
                         {
                             Faction = settings.ForcePlayerFaction
                         };
-
                     pos.Coords = c.Coords;
                 }
 
-                PostUpdateCommands.AddComponent(entity, new PlayerStateData { WorldIndexState = worldIndex });
-            });
+                EntityManager.AddComponentData(entity, new PlayerStateData { WorldIndexState = worldIndex });
+            })
+            .WithStructuralChanges()
+            .WithoutBurst()
+            .Run();
 
-            Entities.With(m_PlayerRemovedData).ForEach((Entity entity, ref PlayerStateData worldIndex) =>
+            Entities.WithNone<PlayerAttributes.Component>().ForEach((Entity entity, ref PlayerStateData worldIndex) =>
             {
                 var wI = worldIndex;
-                Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component gameStateWorldIndex, ref GameState.Component gameState) =>
+                Entities.ForEach((ref GameState.Component gameState, in WorldIndex.Component gameStateWorldIndex) =>
                 {
                     if (gameStateWorldIndex.Value == wI.WorldIndexState.Value)
                     {
                         gameState.PlayersOnMapCount--;
                     }
-                });
-                PostUpdateCommands.RemoveComponent<PlayerStateData>(entity);
-            });
+                })
+                .WithoutBurst()
+                .Run();
+                EntityManager.RemoveComponent<PlayerStateData>(entity);
+            })
+            .WithStructuralChanges()
+            .WithoutBurst()
+            .Run();
+
+            return inputDeps;
         }
 
         public uint SetPlayerWorld()
@@ -127,7 +136,7 @@ namespace LeyLineHybridECS
             uint sortIndex = 1;
             uint wIndex = 0;
 
-            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component mapWorldIndex, ref GameState.Component gameState) =>
+            Entities.ForEach((ref GameState.Component gameState, in WorldIndex.Component mapWorldIndex) =>
             {
                 if (mapWorldIndex.Value == sortIndex)
                 {
@@ -136,16 +145,10 @@ namespace LeyLineHybridECS
                         gameState.PlayersOnMapCount++;
                         wIndex = mapWorldIndex.Value;
                     }
-                    /*
-                    else
-                    {
-                        sortIndex++;
-                        i = -1;
-                    }
-                    */
                 }
-
-            });
+            })
+            .WithoutBurst()
+            .Run();
 
             return wIndex;
         }
@@ -154,7 +157,7 @@ namespace LeyLineHybridECS
         {
             FactionComponent.Component factionComponent = new FactionComponent.Component();
 
-            Entities.With(m_GameStateData).ForEach((ref WorldIndex.Component mapWorldIndex, ref GameState.Component gameState) =>
+            Entities.ForEach((in WorldIndex.Component mapWorldIndex, in GameState.Component gameState) =>
             {
                 var mWorldIndex = mapWorldIndex.Value;
                 if (mapWorldIndex.Value == worldIndex)
@@ -165,23 +168,13 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        Entities.With(m_PlayerData).ForEach((ref FactionComponent.Component factionC, ref WorldIndex.Component pWorldIndex) =>
-                        {
-                            if (pWorldIndex.Value == mWorldIndex && factionC.Faction != 0)
-                            {
-                                if (factionC.Faction % 2 == 1)
-                                {
-                                    factionComponent.Faction = (mWorldIndex - 1) * 2 + 2;
-                                }
-                                else if (factionC.Faction % 2 == 0)
-                                {
-                                    factionComponent.Faction = (mWorldIndex - 1) * 2 + 1;
-                                }
-                            }
-                        });
+                        factionComponent.Faction = FindFactionWithPlayers(mapWorldIndex.Value, factionComponent);
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
+
             if (factionComponent.Faction % 2 == 1)
             {
                 factionComponent.TeamColor = TeamColorEnum.blue;
@@ -190,7 +183,31 @@ namespace LeyLineHybridECS
             {
                 factionComponent.TeamColor = TeamColorEnum.red;
             }
+
             return factionComponent;
+        }
+
+
+        public uint FindFactionWithPlayers(uint mWorldIndex, FactionComponent.Component factionComponent)
+        {
+            Entities.WithAll<PlayerAttributes.Component>().ForEach((in FactionComponent.Component factionC, in WorldIndex.Component pWorldIndex) =>
+            {
+                if (pWorldIndex.Value == mWorldIndex && factionC.Faction != 0)
+                {
+                    if (factionC.Faction % 2 == 1)
+                    {
+                        factionComponent.Faction = (mWorldIndex - 1) * 2 + 2;
+                    }
+                    else if (factionC.Faction % 2 == 0)
+                    {
+                        factionComponent.Faction = (mWorldIndex - 1) * 2 + 1;
+                    }
+                }
+            })
+            .WithoutBurst()
+            .Run();
+
+            return factionComponent.Faction;
         }
     }
 }

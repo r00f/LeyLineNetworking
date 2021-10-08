@@ -1,47 +1,44 @@
 using UnityEngine;
 using Unity.Entities;
-using System.Collections.Generic;
 using Improbable.Gdk.Core;
 using Generic;
 using Unit;
-using Cell;
 using Improbable;
-using System.Linq;
-using Unity.Collections;
+using Unity.Jobs;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-    public class MovementSystem : ComponentSystem
+    public class MovementSystem : JobComponentSystem
     {
         ILogDispatcher logger;
+        /*
+EntityQuery m_GameStateData;
+EntityQuery m_CellData;
+EntityQuery m_UnitData;
 
-        EntityQuery m_GameStateData;
-        EntityQuery m_CellData;
-        EntityQuery m_UnitData;
+protected override void OnCreate()
+{
+    base.OnCreate();
 
-        protected override void OnCreate()
-        {
-            base.OnCreate();
+    m_GameStateData = GetEntityQuery(
+    ComponentType.ReadOnly<WorldIndex.Component>(),
+    ComponentType.ReadOnly<GameState.Component>()
+    );
 
-            m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadOnly<GameState.Component>()
-            );
-
-            m_UnitData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadOnly<CellsToMark.Component>(),
-            ComponentType.ReadWrite<Position.Component>(),
-            ComponentType.ReadWrite<Actions.Component>(),
-            ComponentType.ReadWrite<MovementVariables.Component>(),
-            ComponentType.ReadWrite<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<Vision.Component>(),
-            ComponentType.ReadWrite<Energy.Component>()
-            );
-
-        }
+    m_UnitData = GetEntityQuery(
+    ComponentType.ReadOnly<SpatialEntityId>(),
+    ComponentType.ReadOnly<WorldIndex.Component>(),
+    ComponentType.ReadOnly<CellsToMark.Component>(),
+    ComponentType.ReadWrite<Position.Component>(),
+    ComponentType.ReadWrite<Actions.Component>(),
+    ComponentType.ReadWrite<MovementVariables.Component>(),
+    ComponentType.ReadWrite<CubeCoordinate.Component>(),
+    ComponentType.ReadWrite<Vision.Component>(),
+    ComponentType.ReadWrite<Energy.Component>()
+    );
+}
+*/
 
         protected override void OnStartRunning()
         {
@@ -50,28 +47,32 @@ namespace LeyLineHybridECS
 
         }
 
-        protected override void OnUpdate()
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-
-            if (m_GameStateData.CalculateEntityCount() == 0)
-                return;
-
-            var gameStateWIndex = m_GameStateData.GetSingleton<WorldIndex.Component>();
-            var gameState = m_GameStateData.GetSingleton<GameState.Component>();
-
-
-            Entities.With(m_UnitData).ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref Energy.Component energy, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
+            Entities.ForEach((in WorldIndex.Component gameStateWorldIndex, in GameState.Component gameState) =>
             {
-                var unitID = EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
+                if(gameState.CurrentState != GameStateEnum.planning)
+                    UnitLoop(gameStateWorldIndex.Value, gameState);
+            })
+            .WithoutBurst()
+            .Run();
+
+            return inputDeps;
+        }
+
+        public void UnitLoop(uint WorldIndex, GameState.Component gameState)
+        {
+            Entities.ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref Energy.Component energy, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision, in SpatialEntityId unitId) =>
+            {
                 var unitWorldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
-                
+
                 if (actionsData.LockedAction.Index != -3 && actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
                 {
-                    if(actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
+                    if (actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
                     {
                         if (gameState.CurrentState == GameStateEnum.interrupt)
                         {
-                            actionsData = CompareCullableActions(actionsData, gameStateWIndex.Value, unitID);
+                            actionsData = CompareCullableActions(actionsData, WorldIndex, unitId.EntityId.Id);
                         }
                         else if (gameState.CurrentState == GameStateEnum.move)
                         {
@@ -110,12 +111,14 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
         private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)
         {
-            Entities.With(m_UnitData).ForEach((ref SpatialEntityId otherUnitId, ref Actions.Component otherUnitActions, ref WorldIndex.Component otherUnitWorldIndex) =>
+            Entities.ForEach((ref Actions.Component otherUnitActions, in WorldIndex.Component otherUnitWorldIndex, in SpatialEntityId otherUnitId) =>
             {
                 if (worldIndex == otherUnitWorldIndex.Value && unitId != otherUnitId.EntityId.Id && otherUnitActions.LockedAction.Index != -3 && unitActions.LockedAction.Index != -3)
                 {
@@ -144,7 +147,9 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
             return unitActions;
         }
 

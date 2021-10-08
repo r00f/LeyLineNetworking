@@ -149,7 +149,7 @@ public class ManalithSystemClient : JobComponentSystem
         {
             var EventID = manalithFactionChangeEvents[q].EntityId.Id;
 
-            Entities.ForEach((Entity e, MeshColor meshColor, ManalithObject manalithObject, FactionComponent.Component faction, StudioEventEmitter eventEmitter, in SpatialEntityId id) =>
+            Entities.ForEach((Entity e, MeshColor meshColor, ManalithObject manalithObject, StudioEventEmitter eventEmitter, in SpatialEntityId id, in FactionComponent.Component faction) =>
             {
                 if (id.EntityId.Id == EventID)
                 {

@@ -279,7 +279,6 @@ public class AddComponentsSystem : JobComponentSystem
                 IsUnit = 1
             };
 
-
             EntityManager.AddComponentData(entity, mouseVars);
             EntityManager.AddComponentData(entity, markerState);
             EntityManager.AddComponentData(entity, mouseState);
