@@ -1,37 +1,67 @@
 package unit;
+import "generic/vector3.schema";
 
 type ActionEffect {
- EffectTypeEnum effect_type = 1;
-	type SpawnUnit {
-	string unit_name = 1;
-	}
-	type DealDamage {
-	uint32 damage_amount = 1;
-	uint32 explosion_force = 2;
-	uint32 up_force = 3;
-	float explosion_radius = 4;
-	}
-	type GainArmor {
-	uint32 armor_amount = 1;
-	}
-	type MoveAlongPath{
-	float time_per_cell = 1;
-	}
-	SpawnUnit spawn_unit_nested = 2;
-	DealDamage deal_damage_nested = 3;
-	GainArmor gain_armor_nested = 4;
-	MoveAlongPath move_along_path_nested = 5;
-	int32 target_specification = 6;
-	uint32 turn_duration = 7;
-	ApplyToTargetsEnum apply_to_target = 8;
-	ApplyToRestrictionsEnum apply_to_restrictions = 9;
+EffectTypeEnum effect_type = 1;
+SpawnUnit spawn_unit_nested = 2;
+DealDamage deal_damage_nested = 3;
+GainArmor gain_armor_nested = 4;
+MoveAlongPath move_along_path_nested = 5;
+int32 target_specification = 6;
+uint32 turn_duration = 7;
+ApplyToTargetsEnum apply_to_target = 8;
+ApplyToRestrictionsEnum apply_to_restrictions = 9;
+list<generic.Vector3f> target_coordinates = 10;
+uint32 origin_unit_faction = 11;
+int64 origin_unit_id = 12;
+uint32 unit_duration = 13;
+generic.Vector3f target_position = 14;
+
+}
+
+type CoordinatePositionPair {
+
+	generic.Vector3f cube_coordinate = 1;
+	generic.Vector3f world_position = 2;
+
+}
+
+type IncomingActionEffect
+{
+EffectTypeEnum effect_type = 1;
+SpawnUnit spawn_unit_nested = 2;
+DealDamage deal_damage_nested = 3;
+GainArmor gain_armor_nested = 4;
+MoveAlongPath move_along_path_nested = 5;
+uint32 unit_duration = 13;
+}
+
+type SpawnUnit {
+string unit_name = 1;
+}
+
+type DealDamage {
+uint32 damage_amount = 1;
+uint32 explosion_force = 2;
+uint32 up_force = 3;
+float explosion_radius = 4;
+}
+
+type GainArmor {
+uint32 armor_amount = 1;
+}
+
+type MoveAlongPath {
+float time_per_cell = 1;
+list<CoordinatePositionPair> coordinate_position_pairs = 2;
 }
 
 enum EffectTypeEnum {
-spawn_unit = 0;
-deal_damage = 1;
-gain_armor = 2;
-move_along_path = 3;
+none = 0;
+spawn_unit = 1;
+deal_damage = 2;
+gain_armor = 3;
+move_along_path = 4;
 }
 
 enum ApplyToTargetsEnum

@@ -300,6 +300,8 @@ namespace LeyLineHybridECS
             var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
+
+            /*
             var armorChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Health.ArmorChangeEvent.Event>();
 
             for (int i = 0; i < armorChangeEvents.Count; i++)
@@ -314,24 +316,19 @@ namespace LeyLineHybridECS
                 .WithoutBurst()
                 .Run();
             }
+            */
 
             if (initMapEvents.Count > 0)
             {
                 ClearUnitUIElements();
 
-                switch (authPlayerFaction.TeamColor)
-                {
-                    case TeamColorEnum.blue:
-                        UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[1];
-                        UIRef.FriendlyColor = settings.FactionColors[1];
-                        UIRef.EnemyColor = settings.FactionColors[2];
-                        break;
-                    case TeamColorEnum.red:
-                        UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[2];
-                        UIRef.FriendlyColor = settings.FactionColors[2];
-                        UIRef.EnemyColor = settings.FactionColors[1];
-                        break;
-                }
+                UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[(int)authPlayerFaction.Faction];
+                UIRef.FriendlyColor = settings.FactionColors[(int)authPlayerFaction.Faction];
+
+                if(authPlayerFaction.Faction == 1)
+                    UIRef.EnemyColor = settings.FactionColors[2];
+                else
+                    UIRef.EnemyColor = settings.FactionColors[1];
 
                 UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
                 UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
@@ -378,7 +375,7 @@ namespace LeyLineHybridECS
 
             if (cleanUpStateEvents.Count > 0)
             {
-                Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref FactionComponent.Component faction, ref Energy.Component energy) =>
+                Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref Energy.Component energy, in FactionComponent.Component faction) =>
                 {
                     //var energy = EntityManager.GetComponentData<Energy.Component>(e);
                     var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
@@ -394,7 +391,7 @@ namespace LeyLineHybridECS
                 .WithoutBurst()
                 .Run();
 
-                Entities.ForEach((UnitHeadUIReferences unitHeadUIRef, ref FactionComponent.Component faction, ref Manalith.Component m) =>
+                Entities.ForEach((UnitHeadUIReferences unitHeadUIRef, ref Manalith.Component m, in FactionComponent.Component faction) =>
                 {
                     unitHeadUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) faction.Faction];
                 })
@@ -463,7 +460,7 @@ namespace LeyLineHybridECS
             if (gameState.CurrentState != GameStateEnum.planning)
             {
                 UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetBool("Planning", false);
-                UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int) gameState.CurrentState - 1);
+                UIRef.TurnStatePnl.ExecuteStepPanelAnimator.SetInteger("TurnStep", (int)gameState.CurrentState - 2);
 
                 if (UIRef.TurnStatePnl.GOButtonScript.Button.interactable)
                 {
@@ -522,28 +519,28 @@ namespace LeyLineHybridECS
                 case GameStateEnum.interrupt:
                     if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 2], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.interruptFired;
                     }
                     break;
                 case GameStateEnum.attack:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.attackFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 2], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.attackFired;
                     }
                     break;
                 case GameStateEnum.move:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.moveFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 2], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.moveFired;
                     }
                     break;
                 case GameStateEnum.skillshot:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.skillshotFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 1], UIRef.ExecuteStepChangePath);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int)gameState.CurrentState - 2], UIRef.ExecuteStepChangePath);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
                     }
                     break;
@@ -602,7 +599,7 @@ namespace LeyLineHybridECS
             }
             
             //all players
-            Entities.ForEach((ref FactionComponent.Component faction, ref PlayerState.Component playerState) =>
+            Entities.ForEach((ref PlayerState.Component playerState, in FactionComponent.Component faction) =>
             {
                 if (authPlayerFaction.Faction == faction.Faction)
                 {
@@ -683,7 +680,7 @@ namespace LeyLineHybridECS
                 UIRef.EnemyRopeBarParticle.Rect.anchoredPosition = new Vector2(1 - (UIRef.TurnStatePnl.EnemyRope.fillAmount * UIRef.EnemyRopeBarParticle.ParentRect.sizeDelta.x), UIRef.EnemyRopeBarParticle.Rect.anchoredPosition.y);
                 UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition = new Vector2(UIRef.TurnStatePnl.FriendlyRope.fillAmount * UIRef.FriendlyRopeBarParticle.ParentRect.sizeDelta.x, UIRef.FriendlyRopeBarParticle.Rect.anchoredPosition.y);
 
-                UIRef.TurnStatePnl.RopeTimeText.text = "0:" + ((int) gameState.CurrentRopeTime).ToString("D2");
+                UIRef.TurnStatePnl.RopeTimeText.text = "0:" + ((int)gameState.CurrentRopeTime).ToString("D2");
 
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
@@ -842,7 +839,7 @@ namespace LeyLineHybridECS
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, in FactionComponent.Component faction) =>
             {
                 uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -865,18 +862,22 @@ namespace LeyLineHybridECS
 
                 if (gameState.CurrentState == GameStateEnum.planning)
                 {
-                    var damagePreviewAmount = 0;
+                    uint damagePreviewAmount = 0;
+                    uint armorPreviewAmount = 0;
 
                     foreach(KeyValuePair<long, CubeCoordinateList> kv in authPlayerState.UnitTargets)
                     {
                         if(kv.Value.CubeCoordinates.ContainsKey(coord.CubeCoordinate))
                         {
                             if (kv.Value.CubeCoordinates[coord.CubeCoordinate])
+                            {
+                                armorPreviewAmount += kv.Value.ArmorAmount;
                                 damagePreviewAmount += kv.Value.DamageAmount;
+                            }
                         }
                     }
-
-                    unitCompRef.HeadUIRef.IncomingDamage = (uint) damagePreviewAmount;
+                    unitCompRef.HeadUIRef.IncomingDamage = damagePreviewAmount;
+                    unitCompRef.HeadUIRef.IncomingArmor = armorPreviewAmount;
                 }
 
                 if (unitCompRef.BaseDataSetComp.SelectUnitButtonInstance)
@@ -932,8 +933,10 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        unitCompRef.HeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
-                        unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
+                        if(unitCompRef.HeadUIRef.UnitHeadUIInstance)
+                            unitCompRef.HeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
+                        if(unitCompRef.HeadUIRef.UnitHeadHealthBarInstance)
+                            unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
                         SetHealthBarFillAmounts(gameState.CurrentState, unitCompRef.UnitEffectsComp, unitCompRef.HeadUIRef, unitCompRef.HeadUIRef.UnitHeadHealthBarInstance, health, faction.Faction, authPlayerFaction);
                         HandleEnergyGainOverHeadDisplay(isVisible, actions, energy, authPlayerState, unitId, faction.Faction, authPlayerFaction, unitCompRef, coord.CubeCoordinate, playerHigh, gameState);
                         HandleUnitVisibility(isVisible, unitCompRef, health, faction.Faction, authPlayerFaction);
@@ -993,7 +996,7 @@ namespace LeyLineHybridECS
 
         public void ManalithUnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref FactionComponent.Component faction, ref Manalith.Component m) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref Manalith.Component m, in FactionComponent.Component faction) =>
             {
                 uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -1060,12 +1063,12 @@ namespace LeyLineHybridECS
                         g.SetActive(true);
                 }
 
-                if (unitCompRef.UnitEffectsComp.CurrentHealth < health.MaxHealth || unitCompRef.HeadUIRef.IncomingDamage > 0 || (health.Armor > 0 && unitFaction == playerFaction))
+                if (unitCompRef.UnitEffectsComp.CurrentHealth < health.MaxHealth || unitCompRef.HeadUIRef.IncomingDamage > 0 || unitCompRef.HeadUIRef.IncomingArmor > 0)
                 {
                     if (!unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
                         unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(true);
                 }
-                else if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
+                else if (unitCompRef.HeadUIRef.UnitHeadHealthBarInstance && unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.activeSelf)
                 {
                     unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.gameObject.SetActive(false);
                 }
@@ -1283,7 +1286,7 @@ namespace LeyLineHybridECS
 
         public void PopulateManlithInfoHexes(uint selectedUnitId, uint playerFaction)
         {
-            Entities.ForEach((ref SpatialEntityId id, ref Manalith.Component manalith, ref FactionComponent.Component faction) =>
+            Entities.ForEach((ref SpatialEntityId id, ref Manalith.Component manalith, in FactionComponent.Component faction) =>
             {
                 if (selectedUnitId == id.EntityId.Id)
                 {
@@ -1559,7 +1562,7 @@ namespace LeyLineHybridECS
             else if (unitButton.EnergyAmountChange < 0)
             {
                 unitButton.EnergyFill.enabled = true;
-                unitButton.EnergyFill.color = settings.FactionColors[(int) inFaction.TeamColor + 1];
+                unitButton.EnergyFill.color = settings.FactionColors[(int)inFaction.Faction];
             }
             else
             {
@@ -1714,7 +1717,7 @@ namespace LeyLineHybridECS
                 else
                 {
                     inEnergyText.text = EnergyChangeAmount.ToString();
-                    inEnergyFill.color = settings.FactionColors[(int) inFaction.TeamColor + 1];
+                    inEnergyFill.color = settings.FactionColors[(int)inFaction.Faction];
                 }
             }
             else
@@ -1772,9 +1775,9 @@ namespace LeyLineHybridECS
 
             if (gameState == GameStateEnum.planning)
             {
-                combinedHealth = health.CurrentHealth + health.Armor;
+                combinedHealth = health.CurrentHealth + unitHeadUiRef.IncomingArmor;
                 healthPercentage = (float) health.CurrentHealth / health.MaxHealth;
-                armorPercentage = (float) health.Armor / combinedHealth;
+                armorPercentage = (float) unitHeadUiRef.IncomingArmor / combinedHealth;
                 healthBar.BgFill.fillAmount = 0;
 
                 if (combinedHealth < health.MaxHealth)
@@ -1790,7 +1793,7 @@ namespace LeyLineHybridECS
                         //EnableHealthBarParts(healthBar.Parts,);
                         //healthBar.Parts.pixelsPerUnitMultiplier = (float) health.MaxHealth / 40f;
                         //healthBar.Parts.material.mainTextureScale = new Vector2((float)health.MaxHealth / 20f, 1f);
-                        FillBarToDesiredValue(healthBar.ArmorFill, healthBar.HealthFill.fillAmount + ((float) health.Armor / health.MaxHealth));
+                        FillBarToDesiredValue(healthBar.ArmorFill, healthBar.HealthFill.fillAmount + ((float) unitHeadUiRef.IncomingArmor / health.MaxHealth));
                         //healthBar.ArmorFill.fillAmount = Mathf.Lerp(healthBar.ArmorFill.fillAmount, healthBar.HealthFill.fillAmount + ((float) health.Armor / health.MaxHealth), Time.DeltaTime);
                     }
                     else
@@ -2156,7 +2159,7 @@ namespace LeyLineHybridECS
             var playerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
             var playerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
 
-            Entities.ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions) =>
+            Entities.ForEach((Entity e, ref SpatialEntityId unitId,  ref Actions.Component actions, in FactionComponent.Component faction) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId && faction.Faction == playerFaction.Faction)
                 {
@@ -2172,7 +2175,7 @@ namespace LeyLineHybridECS
             .Run();
 
 
-            Entities.ForEach((Entity e, ref SpatialEntityId unitId, ref FactionComponent.Component faction, ref Actions.Component actions, ref Manalith.Component m) =>
+            Entities.ForEach((Entity e, ref SpatialEntityId unitId, ref Actions.Component actions, ref Manalith.Component m, in FactionComponent.Component faction) =>
             {
                 if (unitId.EntityId.Id == playerState.SelectedUnitId && faction.Faction == playerFaction.Faction)
                 {

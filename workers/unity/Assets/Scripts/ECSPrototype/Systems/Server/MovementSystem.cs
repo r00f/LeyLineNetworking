@@ -22,13 +22,12 @@ protected override void OnCreate()
     base.OnCreate();
 
     m_GameStateData = GetEntityQuery(
-    ComponentType.ReadOnly<WorldIndex.Component>(),
+
     ComponentType.ReadOnly<GameState.Component>()
     );
 
     m_UnitData = GetEntityQuery(
     ComponentType.ReadOnly<SpatialEntityId>(),
-    ComponentType.ReadOnly<WorldIndex.Component>(),
     ComponentType.ReadOnly<CellsToMark.Component>(),
     ComponentType.ReadWrite<Position.Component>(),
     ComponentType.ReadWrite<Actions.Component>(),
@@ -44,27 +43,87 @@ protected override void OnCreate()
         {
             base.OnStartRunning();
             logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
-
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            Entities.ForEach((in WorldIndex.Component gameStateWorldIndex, in GameState.Component gameState) =>
+            /*
+            Entities.ForEach(( in GameState.Component gameState) =>
             {
                 if(gameState.CurrentState != GameStateEnum.planning)
                     UnitLoop(gameStateWorldIndex.Value, gameState);
             })
             .WithoutBurst()
             .Run();
+            */
+
+            /*
+Entities.WithAll<StartExecuteTag>().ForEach((Entity e, ref Actions.Component actionsData, in SpatialEntityId unitId) =>
+{
+    if (actionsData.LockedAction.Index != -3 && actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
+    {
+        if (actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
+        {
+            Debug.Log("CullMoveAction");
+            actionsData = CompareCullableActions(actionsData, worldIndex.Value, unitId.EntityId.Id);
+        }
+    }
+})
+.WithoutBurst()
+.Run();
+
+var deltaTime = Time.DeltaTime;
+
+
+JobHandle a = Entities.WithAll<MoveTag>().ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref Energy.Component energy, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision) =>
+{
+    if (actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move && actionsData.LockedAction.Targets[0].Mods.Count != 0 && actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
+    {
+        energy.Harvesting = false;
+
+        if (actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
+        {
+            //instead of lerping towards next pos in path, set pos and wait for client to catch up
+            if (m.TimeLeft >= 0)
+            {
+                m.TimeLeft -= deltaTime;
+            }
+            else
+            {
+                position.Coords = new Coordinates(actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].WorldPosition.X, actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].WorldPosition.Y, actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].WorldPosition.Z);
+
+                if (actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count == 1)
+                {
+                    m.TimeLeft = 0;
+                }
+                else
+                {
+                    m.TimeLeft = actionsData.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell;
+                }
+
+                coord.CubeCoordinate = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].CubeCoordinate;
+
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("Set Unit ReqUpdate from MovementSystem")
+                .WithField("AYAYA", "AYAYA"));
+
+                vision.RequireUpdate = true;
+                actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(0);
+            }
+        }
+    }
+})
+.Schedule(inputDeps);
+*/
 
             return inputDeps;
         }
 
+        /*
         public void UnitLoop(uint WorldIndex, GameState.Component gameState)
         {
             Entities.ForEach((Entity e, ref MovementVariables.Component m, ref Actions.Component actionsData, ref Energy.Component energy, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision, in SpatialEntityId unitId) =>
             {
-                var unitWorldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
 
                 if (actionsData.LockedAction.Index != -3 && actionsData.LockedAction.ActionExecuteStep == ExecuteStepEnum.move)
                 {
@@ -78,7 +137,7 @@ protected override void OnCreate()
                         {
                             energy.Harvesting = false;
 
-                            if (actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0 /*&& cellsToMark.CellsInRange.Count != 0*/)
+                            if (actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count != 0)
                             {
                                 //instead of lerping towards next pos in path, set pos and wait for client to catch up
                                 if (m.TimeLeft >= 0)
@@ -99,11 +158,11 @@ protected override void OnCreate()
                                     }
 
                                     coord.CubeCoordinate = actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs[0].CubeCoordinate;
-                                    /*
+                                    
                                     logger.HandleLog(LogType.Warning,
                                     new LogEvent("Set Unit ReqUpdate from MovementSystem")
                                     .WithField("AYAYA", "AYAYA"));
-                                    */
+                                    
                                     vision.RequireUpdate = true;
                                     actionsData.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.RemoveAt(0);
                                 }
@@ -116,9 +175,10 @@ protected override void OnCreate()
             .Run();
         }
 
+
         private Actions.Component CompareCullableActions(Actions.Component unitActions, uint worldIndex, long unitId)
         {
-            Entities.ForEach((ref Actions.Component otherUnitActions, in WorldIndex.Component otherUnitWorldIndex, in SpatialEntityId otherUnitId) =>
+            Entities.ForEach((ref Actions.Component otherUnitActions, in SpatialEntityId otherUnitId) =>
             {
                 if (worldIndex == otherUnitWorldIndex.Value && unitId != otherUnitId.EntityId.Id && otherUnitActions.LockedAction.Index != -3 && unitActions.LockedAction.Index != -3)
                 {
@@ -187,6 +247,7 @@ protected override void OnCreate()
             }
             return unitActions;
         }
+                */
     }
 }
 

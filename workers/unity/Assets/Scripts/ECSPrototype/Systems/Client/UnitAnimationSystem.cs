@@ -43,7 +43,6 @@ public class UnitAnimationSystem : JobComponentSystem
 
                 m_CellData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<Position.Component>(),
         ComponentType.ReadOnly<CellAttributesComponent.Component>()
@@ -51,7 +50,6 @@ public class UnitAnimationSystem : JobComponentSystem
 
 
         m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<IsVisible>(),
         //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
@@ -106,7 +104,7 @@ public class UnitAnimationSystem : JobComponentSystem
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy, ref FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref Actions.Component actions, ref Energy.Component energy, in FactionComponent.Component faction) =>
             {
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
 
@@ -136,7 +134,7 @@ public class UnitAnimationSystem : JobComponentSystem
             .Run();
         }
 
-        Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref Position.Component serverPosition, ref FactionComponent.Component faction, ref WorldIndex.Component worldIndex, ref Actions.Component actions, ref Energy.Component energy) =>
+        Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref Position.Component serverPosition, ref Actions.Component actions, ref Energy.Component energy, in FactionComponent.Component faction) =>
         {
             var moveVars = EntityManager.GetComponentData<MovementVariables.Component>(e);
             var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
@@ -151,7 +149,7 @@ public class UnitAnimationSystem : JobComponentSystem
 
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
 
-            HandleLockedAction(unitComponentReferences, actions, faction, gameState, serverPosition, worldIndex, id, playerVision, coord);
+            HandleLockedAction(unitComponentReferences, actions, faction, gameState, serverPosition, id, playerVision, coord);
 
             HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
 
@@ -220,10 +218,11 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void HandleLockedAction(UnitComponentReferences unitComponentReferences, Actions.Component actions, FactionComponent.Component faction, GameState.Component gameState, Position.Component serverPosition, WorldIndex.Component worldIndex, SpatialEntityId id, Vision.Component playerVision, CubeCoordinate.Component coord)
+    public void HandleLockedAction(UnitComponentReferences unitComponentReferences, Actions.Component actions, FactionComponent.Component faction, GameState.Component gameState, Position.Component serverPosition, SpatialEntityId id, Vision.Component playerVision, CubeCoordinate.Component coord)
     {
         if (actions.LockedAction.Index != -3)
         {
+            //Debug.Log("LockedActionNotNull");
             if (!unitComponentReferences.AnimatorComp.CurrentLockedAction)
             {
                 if (actions.LockedAction.Index >= 0)
@@ -240,6 +239,7 @@ public class UnitAnimationSystem : JobComponentSystem
             }
             else if (gameState.CurrentState != GameStateEnum.planning)
             {
+                //Debug.Log("LockedActionNotNullExecute");
                 if (gameState.CurrentState == GameStateEnum.interrupt)
                 {
                     unitComponentReferences.AnimatorComp.RotationTarget = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter); //&CoordinateToWorldPosition(worldIndex.Value, actions.LockedAction.Targets[0].TargetCoordinate);
@@ -247,9 +247,12 @@ public class UnitAnimationSystem : JobComponentSystem
 
                 if (unitComponentReferences.AnimatorComp.AnimationEvents)
                 {
+                    //Debug.Log("AnimationEventsNotNullExecute");
                     //event triggered from animation
                     if (unitComponentReferences.AnimatorComp.AnimationEvents.EventTrigger)
                     {
+                        //Debug.Log("EventTrigger from unit animation system");
+
                         if (unitComponentReferences.AnimatorComp.CurrentLockedAction.ProjectileFab)
                         {
                             Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
@@ -262,6 +265,7 @@ public class UnitAnimationSystem : JobComponentSystem
                         }
                         else
                         {
+                            //Debug.Log("TriggerActionEffect from unit animation system");
                             m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, unitComponentReferences.AnimatorComp.WeaponTransform, gameState);
                         }
 
@@ -272,7 +276,7 @@ public class UnitAnimationSystem : JobComponentSystem
 
                 if (!unitComponentReferences.AnimatorComp.ExecuteTriggerSet)
                 {
-                    ExecuteActionAnimation(unitComponentReferences, gameState, actions, worldIndex.Value);
+                    ExecuteActionAnimation(unitComponentReferences, gameState, actions);
                 }
                 else
                 {
@@ -468,9 +472,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void ExecuteActionAnimation(UnitComponentReferences unitComponentReferences, GameState.Component gameState, Actions.Component actions, uint worldIndex)
+    public void ExecuteActionAnimation(UnitComponentReferences unitComponentReferences, GameState.Component gameState, Actions.Component actions)
     {
-        if ((int)actions.LockedAction.ActionExecuteStep == (int) gameState.CurrentState - 2)
+        if ((int)actions.LockedAction.ActionExecuteStep == (int)gameState.CurrentState - 3)
         {
             if (!unitComponentReferences.AnimatorComp.InitialValuesSet)
             {

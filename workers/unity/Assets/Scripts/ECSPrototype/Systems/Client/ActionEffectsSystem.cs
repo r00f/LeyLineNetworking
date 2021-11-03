@@ -341,9 +341,19 @@ public class ActionEffectsSystem : JobComponentSystem
 
     public void TriggerActionEffect(uint usingUnitFaction, Action usingUnitAction, long usingUnitID, Transform hitTransform, GameState.Component gameState, int spawnShieldOrbits = 0)
     {
-        //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
-        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f> { usingUnitAction.Targets[0].TargetCoordinate };
 
+        //Validate targets from CellgridMethods (ActionHelperMethods whenever we create it)
+        HashSet<Vector3f> coordsToTrigger = new HashSet<Vector3f>();
+
+        foreach(ActionEffect e in usingUnitAction.Effects)
+        {
+            foreach(Vector3f v in e.TargetCoordinates)
+                coordsToTrigger.Add(v);
+        }
+
+        //Debug.Log("Trigger Unit Action with coords to trigger: " + coordsToTrigger.Count);
+
+        /*
         if (usingUnitAction.Targets[0].Mods.Count != 0)
         {
             foreach (CoordinatePositionPair p in usingUnitAction.Targets[0].Mods[0].CoordinatePositionPairs)
@@ -351,6 +361,7 @@ public class ActionEffectsSystem : JobComponentSystem
                 coordsToTrigger.Add(p.CubeCoordinate);
             }
         }
+        */
 
         //ALL POSSIBLE TARGET UNITS
         Entities.ForEach((Entity targetEntity, UnitEffects targetUnitEffects, ref CubeCoordinate.Component targetCubeCoord) =>
@@ -373,9 +384,14 @@ public class ActionEffectsSystem : JobComponentSystem
         logger.HandleLog(LogType.Warning,
         new LogEvent("AddGetHitEffect")
         .WithField("hitTransform", usingUnitHitTransform));
+
+        if (targetCoordinates.Contains(targetUnitCoordinate))
+        {
+            Debug.Log("Target valid from AddGetHitEffect = " + m_PathFindingSystem.ValidateUnitTarget(targetEntity, usingUnitAction.Effects[0].ApplyToRestrictions, usingUnitID, usingUnitfaction) + ", Using unit id = " + usingUnitID + ", Target unit id = " + EntityManager.GetComponentData<SpatialEntityId>(targetEntity).EntityId.Id);
+        }
         */
 
-        if (targetCoordinates.Contains(targetUnitCoordinate) && m_PathFindingSystem.ValidateUnitTarget(targetEntity, (UnitRequisitesEnum) (int) usingUnitAction.Effects[0].ApplyToRestrictions, usingUnitID, usingUnitfaction))
+        if (targetCoordinates.Contains(targetUnitCoordinate) && m_PathFindingSystem.ValidateUnitTarget(targetEntity, usingUnitAction.Effects[0].ApplyToRestrictions, usingUnitID, usingUnitfaction))
         {
             Vector3 getHitPosition;
 
@@ -396,6 +412,7 @@ public class ActionEffectsSystem : JobComponentSystem
             }
 
             targetUnitEffects.GetHitEffects.Add(usingUnitAction, getHitPosition);
+            //Debug.Log("Add Get Hit Effect: " + usingUnitAction.Name);
         }
     }
 

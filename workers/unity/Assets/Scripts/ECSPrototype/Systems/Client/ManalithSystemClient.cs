@@ -39,7 +39,6 @@ public class ManalithSystemClient : JobComponentSystem
         ComponentType.ReadOnly<MouseState>(),
         ComponentType.ReadOnly<Actions.Component>(),
         ComponentType.ReadOnly<ClientPath.Component>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>()
         );
 
@@ -71,7 +70,6 @@ public class ManalithSystemClient : JobComponentSystem
         );
 
         m_GameStateData = GetEntityQuery(
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<GameState.Component>()
         );
 

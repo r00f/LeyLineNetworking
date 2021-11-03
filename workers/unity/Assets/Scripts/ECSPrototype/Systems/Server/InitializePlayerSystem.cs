@@ -8,120 +8,62 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializeWorldsSystem))]
     public class InitializePlayerSystem : JobComponentSystem
     {
         public struct PlayerStateData : ISystemStateComponentData
         {
-            public WorldIndex.Component WorldIndexState;
+            public uint WorldIndexState;
         }
 
-        //EntityQuery m_PlayerAddedData;
-        //EntityQuery m_PlayerRemovedData;
-        //EntityQuery m_GameStateData;
-        //EntityQuery m_PlayerData;
-
         Settings settings;
+        private BeginSimulationEntityCommandBufferSystem entityCommandBufferSystem;
 
         protected override void OnCreate()
         {
             base.OnCreate();
+            entityCommandBufferSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
             settings = Resources.Load<Settings>("Settings");
-
-            /*
-            var playerAddedDesc = new EntityQueryDesc
-            {
-                None = new ComponentType[] { typeof(PlayerStateData) },
-                All = new ComponentType[] 
-                {
-                    ComponentType.ReadOnly<PlayerAttributes.Component>(),
-                    ComponentType.ReadOnly<PlayerAttributes.HasAuthority>(),
-                    ComponentType.ReadWrite<Position.Component>(),
-                    ComponentType.ReadWrite<WorldIndex.Component>(),
-                    ComponentType.ReadWrite<FactionComponent.Component>()
-                }
-            };
-
-            m_PlayerAddedData = GetEntityQuery(playerAddedDesc);
-
-            var playerRemovedDesc = new EntityQueryDesc
-            {
-                None = new ComponentType[] 
-                {
-                    ComponentType.ReadOnly<PlayerAttributes.Component>(),
-                    ComponentType.ReadWrite<Position.Component>(),
-                    ComponentType.ReadWrite<WorldIndex.Component>(),
-                    ComponentType.ReadWrite<FactionComponent.Component>()
-                },
-                All = new ComponentType[]
-                {
-                     typeof(PlayerStateData)
-                }
-            };
-
-            m_PlayerRemovedData = GetEntityQuery(playerRemovedDesc);
-
-            m_GameStateData = GetEntityQuery(
-                ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadOnly<Position.Component>(),
-                ComponentType.ReadWrite<GameState.Component>()
-            );
-
-            m_PlayerData = GetEntityQuery(
-                ComponentType.ReadOnly<WorldIndex.Component>(),
-                ComponentType.ReadOnly<PlayerStateData>(),
-                ComponentType.ReadWrite<PlayerAttributes.Component>(),
-                ComponentType.ReadWrite<FactionComponent.Component>()
-            );
-            */
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            Entities.WithNone<PlayerStateData>().ForEach((Entity entity, ref WorldIndex.Component worldIndex, ref FactionComponent.Component factionComp, ref Position.Component pos, in PlayerAttributes.Component playerAddedPlayerAttributes) =>
+            EntityCommandBuffer ECBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
+            Entities.WithNone<PlayerStateData, WorldIndexShared>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, in PlayerAttributes.Component playerAddedPlayerAttributes) =>
             {
-                if (worldIndex.Value == 0)
+                var wIndex = new WorldIndexShared { Value = SetPlayerWorld(factionComp.Faction) };
+
+                //Debug.Log("PlayerWorldIndexValue = " + wIndex.Value);
+
+                //Prevent PlayerFaction being initialized with WorldIndex 0 because gamestate has not had its WorldIndexShared added
+                if(wIndex.Value != 0)
                 {
-                    uint wIndex = SetPlayerWorld();
-                    worldIndex.Value = wIndex;
-                    var c = new Position.Component();
+                    //if (settings.ForcePlayerFaction == 0)
 
-                    Entities.ForEach((in WorldIndex.Component gameStateWorldIndex, in GameState.Component gameState, in Position.Component gameStatePos) =>
-                    {
-                        if (wIndex == gameStateWorldIndex.Value)
-                            c.Coords = gameStatePos.Coords;
-                    })
-                    .WithoutBurst()
-                    .Run();
+                    factionComp.Faction = SetPlayerFaction(wIndex);
 
-                    if (settings.ForcePlayerFaction == 0)
-                        factionComp = SetPlayerFaction(wIndex);
-                    else
+                    /*else
                         factionComp = new FactionComponent.Component
                         {
                             Faction = settings.ForcePlayerFaction
                         };
-                    pos.Coords = c.Coords;
-                }
+                    */
 
-                EntityManager.AddComponentData(entity, new PlayerStateData { WorldIndexState = worldIndex });
+                    Debug.Log("PlayerFaction after SetPlayerFaction(WorldIndex) = " + factionComp.Faction);
+
+                    pos.Coords = SetPlayerPosition(wIndex, factionComp.Faction);
+
+                    ECBuffer.AddSharedComponent(entity, wIndex);
+                    ECBuffer.AddComponent(entity, new PlayerStateData { WorldIndexState = wIndex.Value });
+                }
             })
-            .WithStructuralChanges()
             .WithoutBurst()
             .Run();
 
-            Entities.WithNone<PlayerAttributes.Component>().ForEach((Entity entity, ref PlayerStateData worldIndex) =>
+            Entities.WithNone<PlayerAttributes.Component>().ForEach((Entity entity, in PlayerStateData worldIndex) =>
             {
-                var wI = worldIndex;
-                Entities.ForEach((ref GameState.Component gameState, in WorldIndex.Component gameStateWorldIndex) =>
-                {
-                    if (gameStateWorldIndex.Value == wI.WorldIndexState.Value)
-                    {
-                        gameState.PlayersOnMapCount--;
-                    }
-                })
-                .WithoutBurst()
-                .Run();
+                SubstractPlayerOnMapCount(worldIndex);
                 EntityManager.RemoveComponent<PlayerStateData>(entity);
             })
             .WithStructuralChanges()
@@ -131,20 +73,49 @@ namespace LeyLineHybridECS
             return inputDeps;
         }
 
-        public uint SetPlayerWorld()
+        void SubstractPlayerOnMapCount(PlayerStateData worldIndex)
         {
-            uint sortIndex = 1;
-            uint wIndex = 0;
-
-            Entities.ForEach((ref GameState.Component gameState, in WorldIndex.Component mapWorldIndex) =>
+            var wI = new WorldIndexShared { Value = worldIndex.WorldIndexState };
+            Entities.WithSharedComponentFilter(wI).ForEach((ref GameState.Component gameState) =>
             {
-                if (mapWorldIndex.Value == sortIndex)
+                gameState.PlayersOnMapCount--;
+            })
+            .WithoutBurst()
+            .Run();
+        }
+
+        Coordinates SetPlayerPosition(WorldIndexShared worldIndex, uint faction)
+        {
+            var c = new Coordinates();
+
+            var xOffsetPos = faction * 2;
+
+            Entities.WithSharedComponentFilter(worldIndex).WithAll<GameState.Component>().ForEach((in Position.Component gameStatePos) =>
+            {
+                c.X = gameStatePos.Coords.X + xOffsetPos;
+                c.Y = gameStatePos.Coords.Y;
+                c.Z = gameStatePos.Coords.Z;
+            })
+            .WithoutBurst()
+            .Run();
+
+            return c;
+        }
+
+        public uint SetPlayerWorld(uint faction)
+        {
+            uint wIndex = 0;
+            //Debug.Log("SetPlayerWorld");
+
+            Entities.ForEach((ref GameState.Component gameState, in WorldIndexShared mapWorldIndex) =>
+            {
+                //Debug.Log("MapWorldIndexShared in SetPlayerWorld() = " + mapWorldIndex.Value);
+                if (gameState.PlayersOnMapCount < 2)
                 {
-                    if (gameState.PlayersOnMapCount < 2)
-                    {
+                    //check if this is not an old player from last editor session before incrementing playersOnMapCount
+                    if (faction == 0)
                         gameState.PlayersOnMapCount++;
-                        wIndex = mapWorldIndex.Value;
-                    }
+                    wIndex = mapWorldIndex.Value;
                 }
             })
             .WithoutBurst()
@@ -153,54 +124,33 @@ namespace LeyLineHybridECS
             return wIndex;
         }
 
-        public FactionComponent.Component SetPlayerFaction(uint worldIndex)
+        public uint SetPlayerFaction(WorldIndexShared worldIndex)
         {
-            FactionComponent.Component factionComponent = new FactionComponent.Component();
+            uint faction = 0;
 
-            Entities.ForEach((in WorldIndex.Component mapWorldIndex, in GameState.Component gameState) =>
+            Entities.WithSharedComponentFilter(worldIndex).ForEach((in GameState.Component gameState) =>
             {
-                var mWorldIndex = mapWorldIndex.Value;
-                if (mapWorldIndex.Value == worldIndex)
-                {
-                    if (gameState.PlayersOnMapCount == 1)
-                    {
-                        factionComponent.Faction = (mapWorldIndex.Value - 1) * 2 + 1;
-                    }
-                    else
-                    {
-                        factionComponent.Faction = FindFactionWithPlayers(mapWorldIndex.Value, factionComponent);
-                    }
-                }
+                faction = gameState.PlayersOnMapCount;
             })
             .WithoutBurst()
             .Run();
 
-            if (factionComponent.Faction % 2 == 1)
-            {
-                factionComponent.TeamColor = TeamColorEnum.blue;
-            }
-            else if (factionComponent.Faction % 2 == 0)
-            {
-                factionComponent.TeamColor = TeamColorEnum.red;
-            }
-
-            return factionComponent;
+            return faction;
         }
 
-
-        public uint FindFactionWithPlayers(uint mWorldIndex, FactionComponent.Component factionComponent)
+        public uint FindFactionWithPlayers(WorldIndexShared mWorldIndex, FactionComponent.Component factionComponent)
         {
-            Entities.WithAll<PlayerAttributes.Component>().ForEach((in FactionComponent.Component factionC, in WorldIndex.Component pWorldIndex) =>
+            Entities.WithSharedComponentFilter(mWorldIndex).WithAll<PlayerAttributes.Component>().ForEach((in FactionComponent.Component factionC) =>
             {
-                if (pWorldIndex.Value == mWorldIndex && factionC.Faction != 0)
+                if (factionC.Faction != 0)
                 {
                     if (factionC.Faction % 2 == 1)
                     {
-                        factionComponent.Faction = (mWorldIndex - 1) * 2 + 2;
+                        factionComponent.Faction = (mWorldIndex.Value - 1) * 2 + 2;
                     }
                     else if (factionC.Faction % 2 == 0)
                     {
-                        factionComponent.Faction = (mWorldIndex - 1) * 2 + 1;
+                        factionComponent.Faction = (mWorldIndex.Value - 1) * 2 + 1;
                     }
                 }
             })

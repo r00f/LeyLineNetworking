@@ -6,6 +6,7 @@ using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Player;
 using Unity.Jobs;
+using UnityEngine;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(SpawnUnitsSystem))]
 public class UnitLifeCycleSystem : JobComponentSystem
@@ -14,11 +15,12 @@ public class UnitLifeCycleSystem : JobComponentSystem
     {
         public FactionComponent.Component FactionState;
         public CubeCoordinate.Component CubeCoordState;
-        public WorldIndex.Component WorldIndexState;
+        public WorldIndexShared WorldIndexState;
         public long EntityId;
     }
 
     HandleCellGridRequestsSystem m_CellGridSystem;
+    GameStateSystem m_GameStateSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_CellData;
     EntityQuery m_UnitAddedData;
@@ -31,7 +33,9 @@ public class UnitLifeCycleSystem : JobComponentSystem
     {
         base.OnCreate();
         m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
+        m_GameStateSystem = World.GetExistingSystem<GameStateSystem>();
 
+        /*
         var unitAddedDesc = new EntityQueryDesc
         {
             None = new ComponentType[] 
@@ -43,7 +47,6 @@ public class UnitLifeCycleSystem : JobComponentSystem
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadOnly<Health.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>()
             }
         };
@@ -60,7 +63,6 @@ public class UnitLifeCycleSystem : JobComponentSystem
                 ComponentType.ReadOnly<Manalith.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Actions.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>()
             }
         };
@@ -82,7 +84,6 @@ public class UnitLifeCycleSystem : JobComponentSystem
         m_UnitRemovedData = GetEntityQuery(unitRemovedDesc);
 
         m_ManalithData = GetEntityQuery(
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadWrite<Manalith.Component>(),
         ComponentType.ReadWrite<FactionComponent.Component>()
@@ -97,33 +98,31 @@ public class UnitLifeCycleSystem : JobComponentSystem
 
         m_UnitChangedData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadWrite<UnitStateData>()
             );
 
         m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadWrite<CellAttributesComponent.Component>()
             );
+            */
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-
-        Entities.WithNone<UnitStateData>().ForEach((Entity e, in WorldIndex.Component unitWorldIndex, in CubeCoordinate.Component unitCubeCoordinate, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId) =>
+        Entities.WithNone<UnitStateData>().ForEach((Entity e, in WorldIndexShared unitWorldIndex, in CubeCoordinate.Component unitCubeCoordinate, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId) =>
         {
             var coordComp = unitCubeCoordinate;
             var coord = Vector3fext.ToUnityVector(unitCubeCoordinate.CubeCoordinate);
             var worldIndex = unitWorldIndex;
             var id = unitEntityId.EntityId.Id;
 
-            Entities.ForEach((ref CubeCoordinate.Component cellCubeCoordinate, ref WorldIndex.Component cellWorldIndex, ref CellAttributesComponent.Component cellAttribute) =>
+            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((ref CubeCoordinate.Component cellCubeCoordinate, ref CellAttributesComponent.Component cellAttribute, in WorldIndexShared cellWorldIndex) =>
             {
-                if (coord == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && worldIndex.Value == cellWorldIndex.Value)
+                if (coord == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate))
                 {
-                    cellAttribute.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAttribute.CellAttributes, true, id, cellWorldIndex.Value);
+                    cellAttribute.CellAttributes = m_GameStateSystem.SetCellAttributes(cellAttribute.CellAttributes, true, id, cellWorldIndex);
                 }
             })
             .WithoutBurst()
@@ -135,7 +134,7 @@ public class UnitLifeCycleSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.ForEach((Entity e, in CubeCoordinate.Component unitCubeCoord, in UnitStateData unitState, in WorldIndex.Component unitWorldIndex, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId) =>
+        Entities.ForEach((Entity e, in CubeCoordinate.Component unitCubeCoord, in UnitStateData unitState, in WorldIndexShared unitWorldIndex, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId) =>
         {
             if (Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate) != Vector3fext.ToUnityVector(unitCubeCoord.CubeCoordinate) || unitState.WorldIndexState.Value != unitWorldIndex.Value)
             {
@@ -150,7 +149,7 @@ public class UnitLifeCycleSystem : JobComponentSystem
         {
             var unitStateVar = unitState;
             var unitCubeCoordinate = Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate);
-            var unitWorldIndex = unitState.WorldIndexState.Value;
+            var unitWorldIndex = unitState.WorldIndexState;
 
             //Tell player to update his vision
             Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction) =>
@@ -161,11 +160,11 @@ public class UnitLifeCycleSystem : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.ForEach((ref CellAttributesComponent.Component cellAttribute, in CubeCoordinate.Component cellCubeCoordinate, in WorldIndex.Component cellWorldIndex) =>
+            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((ref CellAttributesComponent.Component cellAttribute, in CubeCoordinate.Component cellCubeCoordinate) =>
             {
-                if (unitCubeCoordinate == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && unitWorldIndex == cellWorldIndex.Value && cellAttribute.CellAttributes.Cell.UnitOnCellId == unitStateVar.EntityId)
+                if (unitCubeCoordinate == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && cellAttribute.CellAttributes.Cell.UnitOnCellId == unitStateVar.EntityId)
                 {
-                    cellAttribute.CellAttributes = m_CellGridSystem.SetCellAttributes(cellAttribute.CellAttributes, false, 0, cellWorldIndex.Value);
+                    cellAttribute.CellAttributes = m_GameStateSystem.SetCellAttributes(cellAttribute.CellAttributes, false, 0, unitWorldIndex);
                 }
             })
             .WithoutBurst()

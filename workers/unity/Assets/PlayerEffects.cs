@@ -4,5 +4,6 @@ using UnityEngine;
 
 public class PlayerEffects : MonoBehaviour
 {
-    public SFXComponent MouseClickSFX;
+    public int CurrentMouseClickIndex;
+    public List<SFXComponent> MouseClickSFXComponents;
 }

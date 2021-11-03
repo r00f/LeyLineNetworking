@@ -1,4 +1,4 @@
-﻿using Unity.Entities;
+using Unity.Entities;
 using Improbable.Gdk.Core;
 using Unit;
 using Generic;
@@ -13,7 +13,6 @@ public class TimerSystem : ComponentSystem
         base.OnCreate();
         m_TimerData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadWrite<TurnTimer.Component>()
         );
     }
@@ -24,10 +23,9 @@ public class TimerSystem : ComponentSystem
 
     public void SubstractTurnDurations(uint worldIndex)
     {
-        Entities.With(m_TimerData).ForEach((ref TurnTimer.Component timer, ref WorldIndex.Component timerWorldIndex) =>
+        Entities.With(m_TimerData).ForEach((ref TurnTimer.Component timer) =>
         {
-            if (worldIndex == timerWorldIndex.Value)
-            {
+
                 for (int t = 0; t < timer.Timers.Count; t++)
                 {
                     if (timer.Timers[t].TurnDuration > 1)
@@ -41,9 +39,6 @@ public class TimerSystem : ComponentSystem
                         timer.Timers.Remove(timer.Timers[t]);
                     }
                 }
-
-                //timer.Timers = timer.Timers;
-            }
         });
     }
 

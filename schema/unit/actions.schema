@@ -37,15 +37,14 @@ type ActionTarget {
 		bool require_visible = 2;
 	}
 
-	int64 target_id = 1;
-	generic.Vector3f target_coordinate = 2;
-	int32 targettingrange = 3;
-	uint32 energy_cost = 4;
-	UseHighlighterEnum higlighter = 5;
-	TargetTypeEnum target_type = 6;
-	CellTarget cell_target_nested = 7;
-	UnitTarget unit_target_nested = 8;
-	list<TargetMod> mods = 9;
+	generic.Vector3f target_coordinate = 1;
+	int32 targettingrange = 2;
+	uint32 energy_cost = 3;
+	UseHighlighterEnum higlighter = 4;
+	TargetTypeEnum target_type = 5;
+	CellTarget cell_target_nested = 6;
+	UnitTarget unit_target_nested = 7;
+	list<TargetMod> mods = 8;
 }
 type TargetMod {
 	
@@ -65,7 +64,7 @@ type TargetMod {
 		uint32 radius = 1;
         uint32 extent = 2;
 	}
-	list<CoordinatePositionPair> coordinate_position_pairs = 1;
+	list<unit.CoordinatePositionPair> coordinate_position_pairs = 1;
 	AoE aoe_nested = 2;
 	Path path_nested = 3;
 	Ring ring_nested = 4;
@@ -73,12 +72,7 @@ type TargetMod {
 	ModTypeEnum mod_type = 6;
 }
 
-type CoordinatePositionPair {
 
-	generic.Vector3f cube_coordinate = 1;
-	generic.Vector3f world_position = 2;
-
-}
 
 enum ExecuteStepEnum {
     interrupt = 0;

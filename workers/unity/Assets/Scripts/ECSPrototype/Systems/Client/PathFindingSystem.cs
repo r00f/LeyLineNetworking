@@ -9,9 +9,10 @@ using Generic;
 using Cell;
 using Unit;
 using Unity.Collections;
+using Unity.Jobs;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-public class PathFindingSystem : ComponentSystem
+public class PathFindingSystem : JobComponentSystem
 {
     DijkstraPathfinding pathfinder = new DijkstraPathfinding();
 
@@ -21,9 +22,9 @@ public class PathFindingSystem : ComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
+        /*
         m_CellData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<Position.Component>(),
         ComponentType.ReadWrite<CellAttributesComponent.Component>()
@@ -31,20 +32,21 @@ public class PathFindingSystem : ComponentSystem
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<Actions.Component>(),
         ComponentType.ReadWrite<CellsToMark.Component>()
         );
+        */
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        return inputDeps;
     }
 
-    public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, uint unitWorldIndex)
+    public List<CellAttributes> GetRadius(Vector3f originCellCubeCoordinate, uint radius, WorldIndexShared unitWorldIndex)
     {
         //returns a list of offsetCoordinates
         var cellsInRadius = new List<CellAttributes>();
@@ -63,20 +65,55 @@ public class PathFindingSystem : ComponentSystem
 
         //use a hashset instead of a list to improve contains performance
 
-        Entities.With(m_CellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref CubeCoordinate.Component cubeCoordinate, ref CellAttributesComponent.Component cellAttributes) =>
+        Entities.WithSharedComponentFilter(unitWorldIndex).ForEach(( ref CellAttributesComponent.Component cellAttributes, in CubeCoordinate.Component cubeCoordinate) =>
         {
-            if (cellWorldIndex.Value == unitWorldIndex)
+            if (Vector3fext.ToUnityVector(cubeCoordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCellCubeCoordinate))
             {
-                if (Vector3fext.ToUnityVector(cubeCoordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCellCubeCoordinate))
-                {
-                    cellsInRadius[0] = cellAttributes.CellAttributes;
-                }
-                else if (coordHash.Contains(cubeCoordinate.CubeCoordinate))
-                {
-                    cellsInRadius.Add(cellAttributes.CellAttributes);
-                }
+                cellsInRadius[0] = cellAttributes.CellAttributes;
             }
-        });
+            else if (coordHash.Contains(cubeCoordinate.CubeCoordinate))
+            {
+                cellsInRadius.Add(cellAttributes.CellAttributes);
+            }
+        })
+        .WithoutBurst()
+        .Run();
+
+        return cellsInRadius;
+    }
+
+    public List<CellAttributes> GetRadiusClient(Vector3f originCellCubeCoordinate, uint radius)
+    {
+        //returns a list of offsetCoordinates
+        var cellsInRadius = new List<CellAttributes>();
+        //reserve first index for origin
+        cellsInRadius.Add(new CellAttributes { Neighbours = new CellAttributeList(new List<CellAttribute>()) });
+
+        //get all cubeCordinates within range
+        var coordList = CellGridMethods.CircleDraw(originCellCubeCoordinate, radius);
+
+        HashSet<Vector3f> coordHash = new HashSet<Vector3f>();
+
+        foreach (Vector3f v in coordList)
+        {
+            coordHash.Add(v);
+        }
+
+        //use a hashset instead of a list to improve contains performance
+
+        Entities.ForEach((in CubeCoordinate.Component cubeCoordinate, in CellAttributesComponent.Component cellAttributes) =>
+        {
+            if (Vector3fext.ToUnityVector(cubeCoordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCellCubeCoordinate))
+            {
+                cellsInRadius[0] = cellAttributes.CellAttributes;
+            }
+            else if (coordHash.Contains(cubeCoordinate.CubeCoordinate))
+            {
+                cellsInRadius.Add(cellAttributes.CellAttributes);
+            }
+        })
+        .WithoutBurst()
+        .Run();
 
         return cellsInRadius;
     }
@@ -110,13 +147,15 @@ public class PathFindingSystem : ComponentSystem
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
     {
         CellAttribute origin = new CellAttribute();
-        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coordinate, ref CellAttributesComponent.Component cellAttribute) =>
+        Entities.ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
         {
             if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCoord))
             {
                 origin = cellAttribute.CellAttributes.Cell;
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         var paths = CachePaths(cellsInRange, origin);
         var cachedPaths = new Dictionary<CellAttribute, CellAttributeList>();
@@ -198,13 +237,15 @@ public class PathFindingSystem : ComponentSystem
     {
         CellAttribute destination = new CellAttribute();
 
-        Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component coordinate, ref CellAttributesComponent.Component cellAttribute) =>
+        Entities.ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
         {
             if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
             {
                 destination = cellAttribute.CellAttributes.Cell;
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         if (cachedPaths.ContainsKey(destination))
         {
@@ -214,7 +255,7 @@ public class PathFindingSystem : ComponentSystem
             return new CellAttributeList(new List<CellAttribute>());
     }
 
-    public bool ValidateTarget(Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths)
+    public bool ValidateTarget(WorldIndexShared worldIndex, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths)
     {
         bool valid = false;
 
@@ -224,8 +265,7 @@ public class PathFindingSystem : ComponentSystem
         switch (inAction.Targets[0].TargetType)
         {
             case TargetTypeEnum.cell:
-
-                Entities.With(m_CellData).ForEach((ref SpatialEntityId cellId, ref CellAttributesComponent.Component cellAtts, ref CubeCoordinate.Component cellCoord) =>
+                Entities.WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cellCoord) =>
                 {
                     var cell = cellAtts.CellAttributes.Cell;
 
@@ -254,27 +294,31 @@ public class PathFindingSystem : ComponentSystem
                             }
                         }
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
                 break;
             case TargetTypeEnum.unit:
-                Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId targetUnitId, ref CubeCoordinate.Component targetUnitCoord, ref FactionComponent.Component targetUnitFaction) =>
+                Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity e, in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
                 {
                     if (Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
                     {
                         if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
                         {
-                            valid = ValidateUnitTarget(e, inAction.Targets[0].UnitTargetNested.UnitReq, usingUnitId, inFaction);
+                            valid = ValidateUnitTarget(e, inAction.Effects[0].ApplyToRestrictions, usingUnitId, inFaction);
                             //Debug.Log("UNIT VALID IN PATHFINDING SYS: " + valid);
                         }
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
                 break;
         }
         
         return valid;
     }
 
-    public bool ValidateTarget(Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths, CellAttribute cellAtt)
+    public bool ValidateTargetWithCellAtt(WorldIndexShared worldIndex, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths, CellAttribute cellAtt)
     {
         bool valid = false;
 
@@ -314,24 +358,88 @@ public class PathFindingSystem : ComponentSystem
                 }
                 break;
             case TargetTypeEnum.unit:
-                Entities.With(m_UnitData).ForEach((Entity e, ref SpatialEntityId targetUnitId, ref CubeCoordinate.Component targetUnitCoord, ref FactionComponent.Component targetUnitFaction) =>
+                Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity e, in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
                 {
                     if (Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
                     {
                         if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
                         {
-                            valid = ValidateUnitTarget(e, inAction.Targets[0].UnitTargetNested.UnitReq, usingUnitId, inFaction);
+                            valid = ValidateUnitTarget(e, inAction.Effects[0].ApplyToRestrictions, usingUnitId, inFaction);
                             //Debug.Log("UNIT VALID IN PATHFINDING SYS: " + valid);
                         }
                     }
-                });
+                })
+                .WithoutBurst()
+                .Run();
                 break;
         }
 
         return valid;
     }
 
-    public bool ValidateUnitTarget(Entity targetEntity, UnitRequisitesEnum restrictions, long usingUnitId, uint usingUnitFaction)
+    public bool ValidateTargetClient(Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths)
+    {
+        bool valid = false;
+
+        if (inAction.Index == -3)
+            return valid;
+
+        switch (inAction.Targets[0].TargetType)
+        {
+            case TargetTypeEnum.cell:
+                Entities.ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cellCoord) =>
+                {
+                    var cell = cellAtts.CellAttributes.Cell;
+
+                    if (Vector3fext.ToUnityVector(cellCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    {
+                        if (inCachedPaths.Count != 0)
+                        {
+                            if (inCachedPaths.ContainsKey(cell))
+                            {
+                                valid = true;
+                            }
+                        }
+                        else
+                        {
+                            if (CellGridMethods.GetDistance(cellCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                            {
+                                if (inAction.Targets[0].CellTargetNested.RequireEmpty)
+                                {
+                                    if (!cell.IsTaken)
+                                        valid = true;
+                                }
+                                else
+                                {
+                                    valid = true;
+                                }
+                            }
+                        }
+                    }
+                })
+                .WithoutBurst()
+                .Run();
+                break;
+            case TargetTypeEnum.unit:
+                Entities.ForEach((Entity e, in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
+                {
+                    if (Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    {
+                        if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                        {
+                            valid = ValidateUnitTarget(e, inAction.Effects[0].ApplyToRestrictions, usingUnitId, inFaction);
+                        }
+                    }
+                })
+                .WithoutBurst()
+                .Run();
+                break;
+        }
+
+        return valid;
+    }
+
+    public bool ValidateUnitTarget(Entity targetEntity, ApplyToRestrictionsEnum restrictions, long usingUnitId, uint usingUnitFaction)
     {
         bool valid = false;
         bool isUnit = false;
@@ -346,34 +454,34 @@ public class PathFindingSystem : ComponentSystem
 
             switch (restrictions)
             {
-                case UnitRequisitesEnum.any:
+                case ApplyToRestrictionsEnum.any:
                     valid = true;
                     break;
-                case UnitRequisitesEnum.enemy:
+                case ApplyToRestrictionsEnum.enemy:
                     if (targetEntityfaction.Faction != usingUnitFaction)
                     {
                         valid = true;
                     }
                     break;
-                case UnitRequisitesEnum.friendly:
+                case ApplyToRestrictionsEnum.friendly:
                     if (targetEntityfaction.Faction == usingUnitFaction)
                     {
                         valid = true;
                     }
                     break;
-                case UnitRequisitesEnum.friendly_other:
+                case ApplyToRestrictionsEnum.friendly_other:
                     if (targetEntityfaction.Faction == usingUnitFaction && usingUnitId != targetUnitId.EntityId.Id)
                     {
                         valid = true;
                     }
                     break;
-                case UnitRequisitesEnum.other:
+                case ApplyToRestrictionsEnum.other:
                     if (usingUnitId != targetUnitId.EntityId.Id)
                     {
                         valid = true;
                     }
                     break;
-                case UnitRequisitesEnum.self:
+                case ApplyToRestrictionsEnum.self:
                     //maybe selfstate becomes irrelevant once a self-target is implemented.
                     if (usingUnitId == targetUnitId.EntityId.Id)
                     {

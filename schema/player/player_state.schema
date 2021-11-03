@@ -21,8 +21,9 @@ type CubeCoordinateList {
 
 	map<generic.Vector3f, bool> cube_coordinates = 1;
 	int32 turn_step_index = 2;
-	int32 damage_amount = 3;
-    bool is_unit_target = 4;
+	uint32 damage_amount = 3;
+    uint32 armor_amount = 4;
+    bool is_unit_target = 5;
 }
 
 

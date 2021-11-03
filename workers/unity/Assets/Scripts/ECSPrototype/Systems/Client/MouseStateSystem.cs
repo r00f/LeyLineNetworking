@@ -93,9 +93,7 @@ public class MouseStateSystem : JobComponentSystem
             if (mouseLeftClick)
             {
                 m_PlayerStateSystem.ResetInputCoolDown(0.3f);
-                playerEffects.MouseClickSFX.transform.position = hit.point;
-                playerEffects.MouseClickSFX.PS.Play();
-                playerEffects.MouseClickSFX.SoundEmitter.Play();
+                PlaySFXAndIncrement(playerEffects, hit.point);
             }
             else
                 m_PlayerStateSystem.SetHoveredCoordinates(posToCubeCoord, CubeCoordToWorldPos);
@@ -152,5 +150,20 @@ public class MouseStateSystem : JobComponentSystem
         }
         else
             return inputDeps;
+    }
+
+    void PlaySFXAndIncrement(PlayerEffects playerEffects, Vector3 position)
+    {
+        if (playerEffects.MouseClickSFXComponents.Count == 0)
+            return;
+
+        playerEffects.MouseClickSFXComponents[playerEffects.CurrentMouseClickIndex].transform.position = position;
+        playerEffects.MouseClickSFXComponents[playerEffects.CurrentMouseClickIndex].PS.Play();
+        playerEffects.MouseClickSFXComponents[playerEffects.CurrentMouseClickIndex].SoundEmitter.Play();
+
+        if (playerEffects.CurrentMouseClickIndex + 1 < playerEffects.MouseClickSFXComponents.Count)
+            playerEffects.CurrentMouseClickIndex++;
+        else
+            playerEffects.CurrentMouseClickIndex = 0;
     }
 }

@@ -262,6 +262,7 @@ MonoBehaviour:
   FullColorMeshes:
   - {fileID: 1706615932947190176}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -293,7 +294,8 @@ MonoBehaviour:
   UnitTypeId: 0
   UnitGroupSprite: {fileID: 0}
   UnitSprite: {fileID: 0}
-  Actions: []
+  Actions:
+  - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
   SpawnActions: []
 --- !u!114 &1130299993275380547
 MonoBehaviour:
@@ -534,8 +536,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LeylineRenderer: {fileID: 1225239250679471773}
   ConnectedManalithColor: {fileID: 0}
-  mesh: {fileID: 0}
-  uv: []
   Gradient:
     serializedVersion: 2
     key0: {r: 1, g: 1, b: 1, a: 1}
@@ -594,7 +594,6 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  colors: []
   EmissionMultiplier: 5
 --- !u!114 &1584525966286985061
 MonoBehaviour:

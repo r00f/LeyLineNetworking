@@ -14,14 +14,12 @@ using Unity.Jobs;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class AddComponentsSystem : JobComponentSystem
 {
-    public struct WorldIndexStateData : ISystemStateComponentData
+    public struct ComponentsAddedIdentifier : ISystemStateComponentData
     {
-        public WorldIndex.Component WorldIndexState;
     }
 
-    public struct MapPopulatedIdentifyier : IComponentData
+    public struct MapPopulatedIdentifiier : IComponentData
     {
-
     }
 
     EntityQuery m_UnitMapPopulatedData;
@@ -55,7 +53,6 @@ public class AddComponentsSystem : JobComponentSystem
             },
             All = new ComponentType[]
             {
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<Projectile>()
             }
         };
@@ -70,7 +67,6 @@ public class AddComponentsSystem : JobComponentSystem
             },
             All = new ComponentType[]
             {
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
                 ComponentType.ReadOnly<Transform>(),
@@ -107,7 +103,6 @@ public class AddComponentsSystem : JobComponentSystem
             },
             All = new ComponentType[]
             {
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<CellAttributesComponent.Component>()
             }
         };
@@ -122,7 +117,6 @@ public class AddComponentsSystem : JobComponentSystem
             },
             All = new ComponentType[]
             {
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<PlayerState.Component>(),
                 ComponentType.ReadOnly<HeroTransform>(),
                 ComponentType.ReadWrite<Moba_Camera>()
@@ -133,7 +127,6 @@ public class AddComponentsSystem : JobComponentSystem
         */
 
         m_PlayerStateData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<PlayerState.HasAuthority>()
             );
@@ -145,9 +138,8 @@ public class AddComponentsSystem : JobComponentSystem
             return inputDeps;
 
         var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
-        var authPlayerWorldIndex = m_PlayerStateData.GetSingleton<WorldIndex.Component>();
 
-        Entities.WithNone<WorldIndexStateData>().ForEach((Entity entity, HeroTransform htrans, ref WorldIndex.Component pWorldIndex) =>
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, HeroTransform htrans) =>
         {
             HighlightingDataComponent highlightingData = new HighlightingDataComponent
             {
@@ -160,13 +152,13 @@ public class AddComponentsSystem : JobComponentSystem
             EntityManager.AddComponentData(entity, highlightingData);
             UIRef.MinimapComponent.h_Transform = htrans;
 
-            EntityManager.AddComponentData(entity, new WorldIndexStateData { WorldIndexState = pWorldIndex });
+            EntityManager.AddComponentData(entity, new ComponentsAddedIdentifier {});
         })
         .WithStructuralChanges()
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<WorldIndexStateData>().ForEach((Entity entity, ref WorldIndex.Component cellWorldIndex, ref CellAttributesComponent.Component cellAtt) =>
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, ref CellAttributesComponent.Component cellAtt) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
             int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
@@ -202,40 +194,31 @@ public class AddComponentsSystem : JobComponentSystem
                     IsUnit = 0
                 };
 
-                RequireMarkerUpdate requireMarkerUpdate = new RequireMarkerUpdate();
+                EntityManager.AddComponents(entity, new ComponentTypes(typeof(MouseVariables), typeof(MouseState), typeof(MarkerState), typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
 
-
-                EntityManager.AddComponentData(entity, mouseVars);
-                EntityManager.AddComponentData(entity, mouseState);
-                EntityManager.AddComponentData(entity, markerState);
-                EntityManager.AddComponentData(entity, isVisible);
-                EntityManager.AddComponentData(entity, requireMarkerUpdate);
+                EntityManager.SetComponentData(entity, mouseVars);
+                EntityManager.SetComponentData(entity, markerState);
+                EntityManager.SetComponentData(entity, mouseState);
+                EntityManager.SetComponentData(entity, isVisible);
             }
             //if it is water, only add visibility component to exclude water from highlighting / mouse behaviour
             else
             {
-
                 IsVisible isVisible = new IsVisible
                 {
                     Value = 0,
                     LerpSpeed = 0.5f,
                 };
 
-                RequireMarkerUpdate requireMarkerUpdate = new RequireMarkerUpdate();
-
-                EntityManager.AddComponentData(entity, isVisible);
-                EntityManager.AddComponentData(entity, requireMarkerUpdate);
-
+                EntityManager.AddComponents(entity, new ComponentTypes(typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
+                EntityManager.SetComponentData(entity, isVisible);
             }
-
-            EntityManager.AddComponentData(entity, new WorldIndexStateData { WorldIndexState = cellWorldIndex });
-
         })
         .WithStructuralChanges()
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<WorldIndexStateData>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, ref WorldIndex.Component unitWorldIndex, ref FactionComponent.Component faction) =>
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, in FactionComponent.Component faction) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
@@ -279,17 +262,21 @@ public class AddComponentsSystem : JobComponentSystem
                 IsUnit = 1
             };
 
-            EntityManager.AddComponentData(entity, mouseVars);
-            EntityManager.AddComponentData(entity, markerState);
-            EntityManager.AddComponentData(entity, mouseState);
-            EntityManager.AddComponentData(entity, isVisible);
-            EntityManager.AddComponentData(entity, new WorldIndexStateData { WorldIndexState = unitWorldIndex });
+            //ComponentTypes cTypes = new ComponentTypes();
+            //cTypes.m_masks.c
+
+            EntityManager.AddComponents(entity, new ComponentTypes(typeof(MouseVariables), typeof(MouseState), typeof(MarkerState), typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
+
+            EntityManager.SetComponentData(entity, mouseVars);
+            EntityManager.SetComponentData(entity, markerState);
+            EntityManager.SetComponentData(entity, mouseState);
+            EntityManager.SetComponentData(entity, isVisible);
         })
         .WithStructuralChanges()
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<MapPopulatedIdentifyier>().ForEach((Entity entity, AnimatorComponent anim, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible isVisible) =>
+        Entities.WithNone<MapPopulatedIdentifiier>().ForEach((Entity entity, AnimatorComponent anim, ref CubeCoordinate.Component coord, ref IsVisible isVisible, in FactionComponent.Component faction) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
             unitEffects.OriginCoordinate = coord.CubeCoordinate;
@@ -301,7 +288,7 @@ public class AddComponentsSystem : JobComponentSystem
                 //Debug.Log(isVisible.Value);
                 PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
                 PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
-                EntityManager.AddComponentData(entity, new MapPopulatedIdentifyier{ });
+                EntityManager.AddComponentData(entity, new MapPopulatedIdentifiier{ });
             }
         })
         .WithStructuralChanges()

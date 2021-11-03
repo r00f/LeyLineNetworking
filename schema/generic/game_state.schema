@@ -44,12 +44,13 @@ enum GameStateEnum {
 	
 	waiting_for_players = 0;
 	planning = 1;
-	interrupt = 2;
-	attack = 3;
-	move = 4;
-	skillshot = 5;
-	cleanup = 6;
-	calculate_energy = 7;
-	game_over = 8;
+    start_execute = 2;
+	interrupt = 3;
+	attack = 4;
+	move = 5;
+	skillshot = 6;
+	cleanup = 7;
+	calculate_energy = 8;
+	game_over = 9;
 
 }

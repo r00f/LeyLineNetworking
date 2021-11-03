@@ -1,5 +1,6 @@
 using System.IO;
 using Cell;
+using Unit;
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
@@ -35,13 +36,15 @@ namespace BlankProject.Editor
             Debug.Log($"Writing snapshot to: {DefaultSnapshotPath}");
             snapshot.WriteToFile(DefaultSnapshotPath);
         }
+
         private static Snapshot CreateSnapshot()
         {
             var snapshot = new Snapshot();
-            AddPlayerSpawner(snapshot);
             AddGameState(snapshot);
+            AddPlayerSpawner(snapshot);
             AddCellGrid(snapshot);
             AddManaliths(snapshot);
+            AddEffectStack(snapshot);
             return snapshot;
         }
 
@@ -169,5 +172,53 @@ namespace BlankProject.Editor
 
             snapshot.AddEntity(template);
         }
+
+        private static void AddEffectStack(Snapshot snapshot)
+        {
+            var serverAttribute = UnityGameLogicConnector.WorkerType;
+
+            Position.Snapshot pos = new Position.Snapshot
+            {
+                Coords = new Coordinates
+                {
+                    X = 0,
+                    Y = 0,
+                    Z = 0
+                }
+            };
+
+
+            var gameStateStacks = new List<GameStateEffectStack>();
+
+            foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
+            {
+                gameStateStacks.Add(new GameStateEffectStack
+                {
+                    WorldIndex = wi.WorldIndex,
+                    InterruptEffects = new List<ActionEffect>(),
+                    AttackEffects = new List<ActionEffect>(),
+                    MoveEffects = new List<ActionEffect>(),
+                    SkillshotEffects = new List<ActionEffect>()
+                }
+                );
+            }
+
+            EffectStack.Snapshot effectStack = new EffectStack.Snapshot
+            {
+                GameStateEffectStacks = gameStateStacks
+            };
+
+            var template = new EntityTemplate();
+            template.AddComponent(pos, serverAttribute);
+            template.AddComponent(new Metadata.Snapshot { EntityType = "EffectStack" }, serverAttribute);
+            template.AddComponent(new Persistence.Snapshot(), serverAttribute);
+            template.AddComponent(effectStack, serverAttribute);
+
+            template.SetReadAccess(UnityClientConnector.WorkerType, UnityGameLogicConnector.WorkerType);
+            template.SetComponentWriteAccess(EntityAcl.ComponentId, serverAttribute);
+
+            snapshot.AddEntity(template);
+        }
+
     }
 }

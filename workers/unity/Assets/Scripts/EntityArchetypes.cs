@@ -18,8 +18,6 @@ public sealed class EntityArchetypes
         UnitArchetype = entityManager.CreateArchetype(
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
-        //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadWrite<Actions.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadOnly<OwningWorker.Component>()

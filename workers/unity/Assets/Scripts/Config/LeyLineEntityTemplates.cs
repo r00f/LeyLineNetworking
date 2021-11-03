@@ -225,9 +225,9 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation)
+    public static EntityTemplate Unit(/*string workerId,*/ string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation)
     {
-        var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
+        var client = EntityTemplate.GetWorkerAccessAttribute(WorkerUtils.UnityClient);
 
         var turnTimer = new TurnTimer.Snapshot
         {
@@ -244,27 +244,9 @@ public static class LeyLineEntityTemplates {
             CubeCoordinate = cubeCoordinate
         };
 
-
-        TeamColorEnum factionColor = new TeamColorEnum();
-
-        if(faction == 0)
-        {
-            //add yellow
-            factionColor = TeamColorEnum.blue;
-        }
-        if (faction % 2 == 1)
-        {
-            factionColor = TeamColorEnum.blue;
-        }
-        else if (faction % 2 == 0)
-        {
-            factionColor = TeamColorEnum.red;
-        }
-
         var factionSnapshot = new FactionComponent.Snapshot
         {
-            Faction = faction,
-            TeamColor = factionColor
+            Faction = faction
         };
 
         var cellsToMarkSnapshot = new CellsToMark.Snapshot
@@ -314,21 +296,31 @@ public static class LeyLineEntityTemplates {
         };
 
         var actions = SetActions(Stats);
+
+        var incomingActionEffects = new IncomingActionEffects.Snapshot
+        {
+            InterruptEffects = new List<IncomingActionEffect>(),
+            AttackEffects = new List<IncomingActionEffect>(),
+            MoveEffects = new List<IncomingActionEffect>(),
+            SkillshotEffects = new List<IncomingActionEffect>()
+        };
+
         //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
-        var owningComponent = new OwningWorker.Snapshot {WorkerId = workerId};
+        //var owningComponent = new OwningWorker.Snapshot {WorkerId = workerId};
 
         var template = new EntityTemplate();
 
         if(Stats.IsHero)
             template.AddComponent(new Hero.Snapshot(), WorkerUtils.UnityGameLogic);
 
+        template.AddComponent(incomingActionEffects, WorkerUtils.UnityGameLogic);
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
         //template.AddComponent(clientHeartbeat, client);
        // template.AddComponent(serverHeartbeat, WorkerUtils.UnityGameLogic);
-        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(cellsToMarkSnapshot, WorkerUtils.UnityGameLogic);
@@ -362,26 +354,9 @@ public static class LeyLineEntityTemplates {
             CubeCoordinate = cubeCoordinate
         };
 
-        TeamColorEnum factionColor = new TeamColorEnum();
-
-        if (faction == 0)
-        {
-            //add yellow
-            factionColor = TeamColorEnum.blue;
-        }
-        if (faction % 2 == 1)
-        {
-            factionColor = TeamColorEnum.blue;
-        }
-        else if (faction % 2 == 0)
-        {
-            factionColor = TeamColorEnum.red;
-        }
-
         var factionSnapshot = new FactionComponent.Snapshot
         {
-            Faction = faction,
-            TeamColor = factionColor
+            Faction = faction
         };
 
         var cellsToMarkSnapshot = new CellsToMark.Snapshot
@@ -489,26 +464,9 @@ public static class LeyLineEntityTemplates {
             CubeCoordinate = cubeCoordinate
         };
 
-        TeamColorEnum factionColor = new TeamColorEnum();
-
-        if (faction == 0)
-        {
-            //add yellow
-            factionColor = TeamColorEnum.blue;
-        }
-        if (faction % 2 == 1)
-        {
-            factionColor = TeamColorEnum.blue;
-        }
-        else if (faction % 2 == 0)
-        {
-            factionColor = TeamColorEnum.red;
-        }
-
         var factionSnapshot = new FactionComponent.Snapshot
         {
-            Faction = faction,
-            TeamColor = factionColor
+            Faction = faction
         };
 
         var cellsToMarkSnapshot = new CellsToMark.Snapshot
@@ -552,6 +510,14 @@ public static class LeyLineEntityTemplates {
         };
 
         var actions = SetActions(Stats);
+
+        var incomingActionEffects = new IncomingActionEffects.Snapshot
+        {
+            InterruptEffects = new List<IncomingActionEffect>(),
+            AttackEffects = new List<IncomingActionEffect>(),
+            MoveEffects = new List<IncomingActionEffect>(),
+            SkillshotEffects = new List<IncomingActionEffect>()
+        };
 
         //var clientHeartbeat = new PlayerHeartbeatClient.Snapshot();
         //var serverHeartbeat = new PlayerHeartbeatServer.Snapshot();
@@ -598,6 +564,7 @@ public static class LeyLineEntityTemplates {
             CurrentHealth = Stats.BaseHealth
         };
 
+        template.AddComponent(incomingActionEffects, WorkerUtils.UnityGameLogic);
         template.AddComponent(aiUnit, WorkerUtils.UnityGameLogic);
         template.AddComponent(health, WorkerUtils.UnityGameLogic);
 
@@ -627,7 +594,6 @@ public static class LeyLineEntityTemplates {
         myNullableAction.Targets = new List<ActionTarget>();
         myNullableAction.Effects = new List<ActionEffect>();
         List<Action> myOtherActions = new List<Action>();
-
 
         for (int i = 0; i < inStats.Actions.Count; i++)
         {
@@ -835,7 +801,12 @@ public static class LeyLineEntityTemplates {
         for(int i = 0; i <= inAction.Effects.Count - 1; i++)
         {
             ActionEffect AF = new ActionEffect();
-            if(inAction.Effects[i] is ECS_SpawnEffect)
+            AF.TargetCoordinates = new List<Vector3f>();
+            AF.TurnDuration = inAction.Effects[i].TurnDuration;
+            AF.UnitDuration = inAction.Effects[i].UnitDuration;
+            AF.MoveAlongPathNested.CoordinatePositionPairs = new List<CoordinatePositionPair>();
+
+            if (inAction.Effects[i] is ECS_SpawnEffect)
             {
                 ECS_SpawnEffect go = inAction.Effects[i] as ECS_SpawnEffect;
                 AF.EffectType = EffectTypeEnum.spawn_unit;
@@ -844,6 +815,7 @@ public static class LeyLineEntityTemplates {
             if (inAction.Effects[i] is ECS_MoveAlongPathEffect)
             {
                 ECS_MoveAlongPathEffect go = inAction.Effects[i] as ECS_MoveAlongPathEffect;
+
                 AF.EffectType = EffectTypeEnum.move_along_path;
                 AF.MoveAlongPathNested.TimePerCell = go.TimePerCell;
             }
@@ -862,7 +834,6 @@ public static class LeyLineEntityTemplates {
                 AF.EffectType = EffectTypeEnum.gain_armor;
                 AF.GainArmorNested.ArmorAmount = go.ArmorAmount;
             }
-            AF.TurnDuration = inAction.Effects[i].TurnDuration;
 
             switch (inAction.Effects[i].ApplyToTargets)
             {

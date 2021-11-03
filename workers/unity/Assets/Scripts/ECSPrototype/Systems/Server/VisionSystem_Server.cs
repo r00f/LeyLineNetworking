@@ -31,7 +31,6 @@ public class VisionSystem_Server : JobComponentSystem
         /*
         m_UnitData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadWrite<Vision.Component>()
@@ -88,7 +87,7 @@ public class VisionSystem_Server : JobComponentSystem
                 BuildRawClusters();
             }
             else {
-                Entities.ForEach((ref Vision.Component u_Vision, in WorldIndex.Component u_worldIndex, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
+                Entities.ForEach((ref Vision.Component u_Vision, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
                 {
                     /*
                     if (u_Vision.VisionRange > 0)
@@ -117,7 +116,7 @@ public class VisionSystem_Server : JobComponentSystem
                         new LogEvent("u_Vision.ReqUpdate = true")
                         .WithField("unitId", id.EntityId.Id));
                         */
-                        var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, u_worldIndex.Value);
+                        var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction);
 
                         if (v.CellsInVisionrange.Count != 0)
                         {
@@ -150,19 +149,18 @@ public class VisionSystem_Server : JobComponentSystem
                 .WithoutBurst()
                 .Run();
 
-                Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id) =>
+                Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id, in WorldIndexShared p_windex) =>
                 {
                     if (p_Vision.RequireUpdate)
                     {
                         if (!p_Vision.RevealVision)
                         {
-
                             /*
                             logger.HandleLog(LogType.Warning,
                             new LogEvent("playerVision.ReqUpdate = true")
                             .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
                             */
-                            p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction);
+                            p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex);
 
                             p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
                             p_Vision.Positives = p_Vision.Positives;
@@ -201,7 +199,7 @@ public class VisionSystem_Server : JobComponentSystem
         return inputDeps;
     }
 
-    private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, uint inWorldIndex)
+    private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction)
     {
         List<Vector3f> sight = CellGridMethods.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
         var sightHash = new HashSet<Vector3f>();
@@ -287,7 +285,7 @@ public class VisionSystem_Server : JobComponentSystem
         return inVision;
     }
 
-    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction)
+    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, WorldIndexShared worldIndex)
     {
         //Debug.Log("UpdatePlayerVision: " + faction);
         /*
@@ -312,7 +310,7 @@ public class VisionSystem_Server : JobComponentSystem
 
         var currentVision = new HashSet<Vector3f>();
 
-        Entities.WithAll<CubeCoordinate.Component>().ForEach((in Vision.Component unitVision, in FactionComponent.Component unitFaction) =>
+        Entities.WithSharedComponentFilter(worldIndex).WithAll<CubeCoordinate.Component>().ForEach((in Vision.Component unitVision, in FactionComponent.Component unitFaction) =>
         {
             if (faction == unitFaction.Faction)
             {

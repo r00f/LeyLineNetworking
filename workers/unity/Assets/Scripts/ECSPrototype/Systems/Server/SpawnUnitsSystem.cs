@@ -9,11 +9,12 @@ using Player;
 using Improbable.Gdk.PlayerLifecycle;
 using Unity.Collections;
 using System.Collections.Generic;
+using Unity.Jobs;
 
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(ExecuteActionsSystem))]
-    public class SpawnUnitsSystem : ComponentSystem
+    public class SpawnUnitsSystem : JobComponentSystem
     {
         GameStateSystem m_GameStateSystem;
         CommandSystem m_CommandSystem;
@@ -30,27 +31,23 @@ namespace LeyLineHybridECS
             base.OnCreate();
 
             m_PlayerData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<OwningWorker.Component>(),
             ComponentType.ReadOnly<PlayerState.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>()
             );
             m_CellData = GetEntityQuery(
             ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Position.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>()
             );
             m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<GameState.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>()
+            ComponentType.ReadOnly<GameState.Component>()
             );
 
             m_SpawnCellData = GetEntityQuery(
                 //ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
                 ComponentType.ReadOnly<CellAttributesComponent.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<IsSpawn.Component>(),
                 ComponentType.ReadWrite<UnitToSpawn.Component>()
             );
@@ -67,96 +64,94 @@ namespace LeyLineHybridECS
             m_ManalithSystem = World.GetExistingSystem<ManalithSystem>();
         }
 
-        protected override void OnUpdate()
+        protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
             
             if (initMapEvents.Count > 0)
             {
-                Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
+                Entities.WithAll<IsSpawn.Component>().ForEach((in UnitToSpawn.Component unitToSpawn, in CubeCoordinate.Component coord, in Position.Component position, in WorldIndexShared cellWorldIndex) =>
                 {
                     if (unitToSpawn.Faction == 0)
                     {
-                        SpawnNeutralUnit(cellWorldIndex.Value, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
-                    }
-                });
+                        var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName);
+                        //Debug.Log(unitGO.name);
+                        var Stats = unitGO.GetComponent<UnitDataSet>();
+                        var AIStats = unitGO.GetComponent<AIUnitDataSet>();
+                        var entity = LeyLineEntityTemplates.NeutralUnit(m_WorkerSystem.WorkerId, unitToSpawn.UnitName, position, coord.CubeCoordinate, unitToSpawn.Faction, cellWorldIndex.Value, Stats, AIStats, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
+                        var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
+                        m_CommandSystem.SendCommand(createEntitiyRequest);
 
-                Entities.With(m_PlayerData).ForEach((Entity entity, ref FactionComponent.Component faction, ref WorldIndex.Component worldIndex, ref PlayerAttributes.Component playerAttribute, ref OwningWorker.Component owningWorker) =>
+                        //SpawnNeutralUnit(cellWorldIndex, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
+                    }
+                })
+                .WithoutBurst()
+                .Run();
+
+                Entities.ForEach((Entity entity, in FactionComponent.Component faction, in WorldIndexShared worldIndex, in PlayerAttributes.Component playerAttribute, in OwningWorker.Component owningWorker) =>
                 {
-                    if (worldIndex.Value != 0)
-                    {
-                        var playerAtt = playerAttribute;
-                        var playerWIndex = worldIndex.Value;
-                        var f = faction.Faction;
-                        var heroName = playerAttribute.HeroName;
-                        var owningW = owningWorker;
-
-                        Entities.With(m_SpawnCellData).ForEach((ref WorldIndex.Component cellWorldIndex, ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
-                        {
-                            if (cellWorldIndex.Value == playerWIndex)
-                            {
-                                if (unitToSpawn.Faction == f)
-                                {
-                                    /*
-                                    SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
-
-                                    for (int i = 0; i < playerAtt.StartingUnitNames.Count; i++)
-                                    {
-                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[i], unitToSpawn.Faction, CellGridMethods.LineDraw(new List<Vector3f>(), coord.CubeCoordinate, new Vector3f(0, 0, 0))[i + 1], owningW.WorkerId, unitToSpawn.StartRotation);
-                                    }
-                                    */
-
-                                    if(unitToSpawn.StartingUnitIndex == 0)
-                                    {
-                                        SpawnUnit(cellWorldIndex.Value, heroName, unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
-                                    }
-                                    else if(unitToSpawn.StartingUnitIndex <= playerAtt.StartingUnitNames.Count)
-                                    {
-                                        SpawnUnit(cellWorldIndex.Value, playerAtt.StartingUnitNames[(int)unitToSpawn.StartingUnitIndex - 1], unitToSpawn.Faction, coord.CubeCoordinate, owningW.WorkerId, unitToSpawn.StartRotation);
-                                    }
-                                }
-                            }
-                        });
-
-                        //m_ManalithSystem.UpdateManaliths(worldIndex.Value);
-                    }
-                });
+                    SpawnPlayerUnits(worldIndex, faction.Faction, playerAttribute);
+                })
+                .WithoutBurst()
+                .Run();
             }
+
+            return inputDeps;
         }
 
-        public void SpawnUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0)
+        public void SpawnPlayerUnits(WorldIndexShared worldIndex, uint unitFaction, PlayerAttributes.Component playerAttributes)
         {
-            Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
+            Entities.WithAll<IsSpawn.Component>().WithSharedComponentFilter(worldIndex).ForEach((ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
             {
-                var coord = cCord.CubeCoordinate;
-
-                if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord))
+                if (unitToSpawn.Faction == unitFaction)
                 {
-                    //Debug.Log("CreateEntityRequest");
+                    if (unitToSpawn.StartingUnitIndex == 0)
+                    {
+                        SpawnUnit(worldIndex, playerAttributes.HeroName, unitToSpawn.Faction, coord.CubeCoordinate, unitToSpawn.StartRotation);
+                    }
+                    else if (unitToSpawn.StartingUnitIndex <= playerAttributes.StartingUnitNames.Count)
+                    {
+                        SpawnUnit(worldIndex, playerAttributes.StartingUnitNames[(int) unitToSpawn.StartingUnitIndex - 1], unitToSpawn.Faction, coord.CubeCoordinate, unitToSpawn.StartRotation);
+                    }
+                }
+            })
+            .WithoutBurst()
+            .Run();
+        }
+
+        public void SpawnUnit(WorldIndexShared worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, uint startRotation = 0)
+        {
+            Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component cCord, in Position.Component position, in CellAttributesComponent.Component cell) =>
+            {
+                if (Vector3fext.ToUnityVector(cCord.CubeCoordinate) == Vector3fext.ToUnityVector(cubeCoord))
+                {
                     var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName).GetComponent<UnitDataSet>();
-                    var entity = LeyLineEntityTemplates.Unit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, startRotation);
+                    var entity = LeyLineEntityTemplates.Unit(unitName, position, cCord.CubeCoordinate, unitFaction, worldIndex.Value, Stats, startRotation);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
 
-        public void SpawnNeutralUnit(uint worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0, bool isManalithUnit = false)
+        public void SpawnNeutralUnit(WorldIndexShared worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, string owningWorkerId, uint startRotation = 0, bool isManalithUnit = false)
         {
-            Entities.With(m_CellData).ForEach((ref CubeCoordinate.Component cCord, ref Position.Component position, ref CellAttributesComponent.Component cell, ref WorldIndex.Component cellWorldIndex) =>
+            Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component cCord, in Position.Component position, in CellAttributesComponent.Component cell) =>
             {
-                var coord = cCord.CubeCoordinate;
-
-                if (Vector3fext.ToUnityVector(coord) == Vector3fext.ToUnityVector(cubeCoord) && !isManalithUnit)
+                if (Vector3fext.ToUnityVector(cCord.CubeCoordinate) == Vector3fext.ToUnityVector(cubeCoord) && !isManalithUnit)
                 {
                     var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitName);
+                    Debug.Log(unitGO.name);
                     var Stats = unitGO.GetComponent<UnitDataSet>();
                     var AIStats = unitGO.GetComponent<AIUnitDataSet>();
-                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, coord, unitFaction, worldIndex, Stats, AIStats, startRotation, isManalithUnit);
+                    var entity = LeyLineEntityTemplates.NeutralUnit(owningWorkerId, unitName, position, cCord.CubeCoordinate, unitFaction, worldIndex.Value, Stats, AIStats, startRotation, isManalithUnit);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 }
-            });
+            })
+            .WithoutBurst()
+            .Run();
         }
     }
 }

@@ -26,6 +26,7 @@ public static class WorkerUtils
 
     public static void AddGameLogicSystems(World world)
     {
+        world.GetOrCreateSystem<InitializeWorldsSystem>();
         world.GetOrCreateSystem<InitializePlayerSystem>();
         world.GetOrCreateSystem<GameStateSystem>();
         world.GetOrCreateSystem<SpawnUnitsSystem>();

@@ -36,29 +36,7 @@ public class ResourceSystem : JobComponentSystem
                ComponentType.ReadWrite<Projector>()
         );
 
-        m_ManalithData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadWrite<Manalith.Component>(),
-            ComponentType.ReadWrite<FactionComponent.Component>()
-        );
-
-        m_PlayerData = Worlds.GameLogicWorld.CreateEntityQuery(
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadWrite<PlayerEnergy.Component>()
-
-            );
-        m_UnitData = Worlds.GameLogicWorld.CreateEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
-            ComponentType.ReadWrite<Health.Component>(),
-            ComponentType.ReadWrite<Actions.Component>(),
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<Energy.Component>()
-        );
-
         m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<GameState.Component>()
         );
     }
@@ -71,11 +49,11 @@ public class ResourceSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.ForEach((in WorldIndex.Component gameStateWorldIndex, in GameState.Component gameState) => 
+        Entities.ForEach((in WorldIndexShared gameStateWorldIndex, in GameState.Component gameState) => 
         {
             if (gameState.CurrentState == GameStateEnum.interrupt)
             {
-                AddIncome(gameStateWorldIndex.Value);
+                AddIncome(gameStateWorldIndex);
             }
         })
         .WithoutBurst()
@@ -84,28 +62,25 @@ public class ResourceSystem : JobComponentSystem
         return inputDeps;
     }
 
-    public void CalculateIncome(uint worldIndex)
+    public void CalculateIncome(WorldIndexShared worldIndex)
     {
         var workerSystem = World.GetExistingSystem<WorkerSystem>();
 
-        Entities.ForEach((ref PlayerEnergy.Component playerEnergy, in WorldIndex.Component playerWorldIndex, in FactionComponent.Component playerFaction) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref PlayerEnergy.Component playerEnergy, in FactionComponent.Component playerFaction) =>
         {
-            if (playerWorldIndex.Value == worldIndex)
+            if (playerEnergy.IncomeAdded == true)
             {
-                if (playerEnergy.IncomeAdded == true)
-                {
-                    playerEnergy.Income = AddIncomeFromManaliths(playerEnergy.BaseIncome, playerFaction.Faction);
-                    playerEnergy.IncomeAdded = false;
-                }
+                playerEnergy.Income = AddIncomeFromManaliths(worldIndex, playerEnergy.BaseIncome, playerFaction.Faction);
+                playerEnergy.IncomeAdded = false;
             }
         })
         .WithoutBurst()
         .Run();
     }
 
-    uint AddIncomeFromManaliths(uint income, uint playerFaction)
+    uint AddIncomeFromManaliths(WorldIndexShared worldIndex, uint income, uint playerFaction)
     {
-        Entities.ForEach((in FactionComponent.Component manalithFaction, in Manalith.Component manalith) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in FactionComponent.Component manalithFaction, in Manalith.Component manalith) =>
         {
             if (manalithFaction.Faction == playerFaction)
             {
@@ -118,38 +93,35 @@ public class ResourceSystem : JobComponentSystem
         return income;
     }
 
-    void AddIncome(uint worldIndex)
+    void AddIncome(WorldIndexShared worldIndex)
     {
-        Entities.ForEach((ref PlayerEnergy.Component energyComp, in WorldIndex.Component playerWorldIndex, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
         {
-            if (playerWorldIndex.Value == worldIndex)
+            if (energyComp.IncomeAdded == false)
             {
-                if (energyComp.IncomeAdded == false)
+                if (energyComp.Energy + energyComp.Income < energyComp.MaxEnergy)
                 {
-                    if (energyComp.Energy + energyComp.Income < energyComp.MaxEnergy)
-                    {
-                        energyComp.Energy += energyComp.Income;
-                    }
-                    else
-                    {
-                        energyComp.Energy = energyComp.MaxEnergy;
-                    }
-
-                    componentUpdateSystem.SendEvent(
-                    new PlayerEnergy.EnergyChangeEvent.Event(),
-                    playerId.EntityId);
-
-                    energyComp.IncomeAdded = true;
+                    energyComp.Energy += energyComp.Income;
                 }
+                else
+                {
+                    energyComp.Energy = energyComp.MaxEnergy;
+                }
+
+                componentUpdateSystem.SendEvent(
+                new PlayerEnergy.EnergyChangeEvent.Event(),
+                playerId.EntityId);
+
+                energyComp.IncomeAdded = true;
             }
         })
         .WithoutBurst()
         .Run();
     }
 
-    public void AddEnergy(uint playerFaction, uint energyAmount)
+    public void AddEnergy(WorldIndexShared worldIndex, uint playerFaction, uint energyAmount)
     {
-        Entities.ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -171,9 +143,9 @@ public class ResourceSystem : JobComponentSystem
         .Run();
     }
 
-    public void SubstactEnergy(uint playerFaction, uint energyAmount)
+    public void SubstactEnergy(WorldIndexShared worldIndex, uint playerFaction, uint energyAmount)
     {
-        Entities.ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction, in SpatialEntityId playerId) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -196,10 +168,10 @@ public class ResourceSystem : JobComponentSystem
         .Run();
     }
 
-    public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
+    public int CheckPlayerEnergy(WorldIndexShared worldIndex, uint playerFaction, uint energyCost = 0)
     {
         int leftOverEnergy = 0;
-        Entities.ForEach((in PlayerEnergy.Component energyComp, in FactionComponent.Component faction) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in PlayerEnergy.Component energyComp, in FactionComponent.Component faction) =>
         {
             if (playerFaction == faction.Faction)
             {
@@ -265,18 +237,14 @@ public class ResourceSystem : JobComponentSystem
         .Run();
     }
 
-    public void ResetArmor(uint worldIndex)
+    public void ResetArmor(WorldIndexShared worldIndex)
     {
-        Entities.ForEach((ref Health.Component health, in SpatialEntityId id, in WorldIndex.Component unitWorldIndex) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Health.Component health, in SpatialEntityId id) =>
         {
-            if (worldIndex == unitWorldIndex.Value)
-            {
-                health.Armor = 0;
-
-                componentUpdateSystem.SendEvent(
-                new Health.ArmorChangeEvent.Event(),
-                id.EntityId);
-            }
+            health.Armor = 0;
+            componentUpdateSystem.SendEvent(
+            new Health.ArmorChangeEvent.Event(),
+            id.EntityId);
         })
         .WithoutBurst()
         .Run();

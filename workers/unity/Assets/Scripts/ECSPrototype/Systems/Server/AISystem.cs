@@ -11,9 +11,10 @@ using Improbable.Gdk.PlayerLifecycle;
 using Unity.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Jobs;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-public class AISystem : ComponentSystem
+public class AISystem : JobComponentSystem
 {
     EntityQuery m_AiUnitData;
     EntityQuery m_PlayerUnitData;
@@ -29,7 +30,6 @@ public class AISystem : ComponentSystem
             ComponentType.ReadWrite<AiUnit.Component>(),
             ComponentType.ReadWrite<Actions.Component>(),
             ComponentType.ReadOnly<Vision.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadWrite<CellsToMark.Component>()
         );
@@ -61,7 +61,7 @@ public class AISystem : ComponentSystem
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
     }
 
-    protected override void OnUpdate()
+    protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
@@ -69,14 +69,14 @@ public class AISystem : ComponentSystem
         {
             UpdateAIUnits();
         }
+
+        return inputDeps;
     }
 
     public void UpdateAIUnits()
     {
-        Entities.With(m_AiUnitData).ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord) =>
+        Entities.ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord, in WorldIndexShared unitWorldIndex) =>
         {
-            var unitWorldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
-
             SetAggroedUnit(vision, ref aiUnit, actions, AIid, unitCoord);
 
             aiUnit.CulledMoveActionsPrioList = CullPrioList(aiUnit.CulledMoveActionsPrioList, aiUnit.MoveActionsPrioList, actions, unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate, 1);
@@ -88,9 +88,11 @@ public class AISystem : ComponentSystem
             if(aiUnit.CurrentState != AiUnitStateEnum.idle && aiUnit.CurrentState != AiUnitStateEnum.returning)
             {
                 SetChosenActionType(ref aiUnit);
-                ChooseAIAction(ref aiUnit, ref actions, AIid, unitCellsToMark, unitCoord, unitWorldIndex.Value);
+                ChooseAIAction(ref aiUnit, ref actions, AIid, unitCellsToMark, unitCoord, unitWorldIndex);
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
     }
 
     public List<Vector2int> CullPrioList(List<Vector2int> culledActionPrioList, List<Vector2int> actionPrioList, Actions.Component actions, Vector3f unitCoord, Vector3f targetCoord, int inExtraRange = 0)
@@ -148,7 +150,7 @@ public class AISystem : ComponentSystem
 
         var aiU = aiUnit;
 
-        Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id, ref FactionComponent.Component faction) =>
+        Entities.WithNone<AiUnit.Component>().WithAll<Health.Component>().ForEach((in CubeCoordinate.Component coord, in SpatialEntityId id, in FactionComponent.Component faction) =>
         {
             if (aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
             {
@@ -158,7 +160,9 @@ public class AISystem : ComponentSystem
                 aiU.AggroedUnitId = id.EntityId.Id;
                 aiU.AnyUnitInVisionRange = true;
             }
-        });
+        })
+        .WithoutBurst()
+        .Run();
 
         aiUnit = aiU;
     }
@@ -168,15 +172,16 @@ public class AISystem : ComponentSystem
         bool aggroedUnitExists = false;
         var aiU = aiUnit;
 
-        Entities.With(m_PlayerUnitData).ForEach((ref CubeCoordinate.Component coord, ref SpatialEntityId id) =>
+        Entities.WithNone<AiUnit.Component>().WithAll<Health.Component>().ForEach((in CubeCoordinate.Component coord, in SpatialEntityId id) =>
         {
             if (aiU.AggroedUnitId == id.EntityId.Id && aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
             {
                 aggroedUnitExists = true;
                 aiU.AggroedUnitCoordinate = coord.CubeCoordinate;
             }
-        });
-
+        })
+        .WithoutBurst()
+        .Run();
 
         aiUnit = aiU;
 
@@ -333,7 +338,7 @@ public class AISystem : ComponentSystem
         }
     }
 
-    public void ChooseAIAction(ref AiUnit.Component aiUnit, ref Actions.Component actions, SpatialEntityId AIid, CellsToMark.Component unitCellsToMark, CubeCoordinate.Component unitCoord, uint unitWorldIndex)
+    public void ChooseAIAction(ref AiUnit.Component aiUnit, ref Actions.Component actions, SpatialEntityId AIid, CellsToMark.Component unitCellsToMark, CubeCoordinate.Component unitCoord, WorldIndexShared unitWorldIndex)
     {
         unitCellsToMark.CellsInRange.Clear();
         unitCellsToMark.CachedPaths.Clear();

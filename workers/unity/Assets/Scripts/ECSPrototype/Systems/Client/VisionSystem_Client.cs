@@ -187,7 +187,7 @@ namespace LeyLineHybridECS
 
             //HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
 
-            Entities.With(m_UnitData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref FactionComponent.Component faction, ref CubeCoordinate.Component coord, ref IsVisible visible) =>
+            Entities.With(m_UnitData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref CubeCoordinate.Component coord, ref IsVisible visible, ref FactionComponent.Component faction) =>
             {
                 //UIReferences.
                 UpdateUnitMapTilePosition(UIRef.MinimapComponent, coord.CubeCoordinate, ref isVisibleGOs, true);

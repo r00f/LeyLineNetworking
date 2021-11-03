@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,6 +16,7 @@ namespace LeyLineHybridECS
         public ApplyTo ApplyToTargets;
         public int specificTargetIdentifier = 0;
         public uint TurnDuration = 0;
+        public uint UnitDuration = 0;
         public enum applyRestrictions
         {
             Friendly,

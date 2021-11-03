@@ -4,13 +4,5 @@ component FactionComponent {
 	
     id = 102;
     uint32 faction = 1;
-	TeamColorEnum team_color = 2;
 	
-}
-
-enum TeamColorEnum {
-
-	blue = 0;
-	red = 1;
-
 }

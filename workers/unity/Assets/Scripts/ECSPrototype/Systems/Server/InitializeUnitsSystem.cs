@@ -65,7 +65,7 @@ public class InitializeUnitsSystem : JobComponentSystem
         var playerFactionComp = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var heroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
 
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref FactionComponent.Component unitFactionComp, ref Health.Component health, ref MovementVariables.Component move) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref Health.Component health, ref MovementVariables.Component move, in FactionComponent.Component unitFactionComp) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
@@ -78,19 +78,8 @@ public class InitializeUnitsSystem : JobComponentSystem
             if (anim.Animator)
                 anim.AnimStateEffectHandlers.AddRange(anim.Animator.GetBehaviours<AnimStateEffectHandler>());
 
-            switch (unitFactionComp.TeamColor)
-            {
-                case TeamColorEnum.blue:
-                    //markerObjects.Outline.color = 1;
-                    teamColorMeshes.color = settings.FactionColors[1];
-                    unitEffects.PlayerColor = settings.FactionColors[1];
-                    break;
-                case TeamColorEnum.red:
-                    //markerObjects.Outline.color = 2;
-                    teamColorMeshes.color = settings.FactionColors[2];
-                    unitEffects.PlayerColor = settings.FactionColors[2];
-                    break;
-            }
+            teamColorMeshes.color = settings.FactionColors[(int)unitFactionComp.Faction];
+            unitEffects.PlayerColor = settings.FactionColors[(int)unitFactionComp.Faction];
 
             if (unitFactionComp.Faction == 0)
             {
@@ -172,13 +161,11 @@ public class InitializeUnitsSystem : JobComponentSystem
                     tr.colorGradient = gradient;
                 }
             }
-
-            var unitFComp = unitFactionComp;
             var unitTrans = unitTransform;
 
             if (stats.IsHero)
             {
-                if (playerFactionComp.Faction == unitFComp.Faction && heroTransform.Transform == null)
+                if (playerFactionComp.Faction == unitFactionComp.Faction && heroTransform.Transform == null)
                 {
                     heroTransform.Transform = unitTransform;
                 }

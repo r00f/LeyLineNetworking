@@ -12,6 +12,7 @@ using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
+using Action = Unit.Action;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HighlightingSystem : JobComponentSystem
@@ -37,19 +38,16 @@ public class HighlightingSystem : JobComponentSystem
         entityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         settings = Resources.Load<Settings>("Settings");
 
-
         m_CellData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<MouseState>(),
             ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MarkerState>()
             );
 
         m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<GameState.Component>()
             );
 
@@ -57,7 +55,6 @@ public class HighlightingSystem : JobComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<Actions.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<UnitDataSet>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MouseState>(),
@@ -70,7 +67,6 @@ public class HighlightingSystem : JobComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MouseState>(),
-            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<LineRendererComponent>(),
             ComponentType.ReadOnly<Transform>()
@@ -79,14 +75,12 @@ public class HighlightingSystem : JobComponentSystem
         m_MarkerStateData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<Position.Component>(),
             ComponentType.ReadOnly<MouseState>(),
             ComponentType.ReadOnly<MarkerState>()
             );
 
         m_PlayerStateData = GetEntityQuery(
-            ComponentType.ReadOnly<WorldIndex.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadWrite<PlayerState.Component>(),
             ComponentType.ReadWrite<PlayerPathing.Component>(),
@@ -130,7 +124,6 @@ public class HighlightingSystem : JobComponentSystem
         #region playerStateData
         var playerPathing = m_PlayerStateData.GetSingleton<PlayerPathing.Component>();
         var playerState = m_PlayerStateData.GetSingleton<PlayerState.Component>();
-        var playerWorldIndex = m_PlayerStateData.GetSingleton<WorldIndex.Component>();
         var playerHighlightingData = m_PlayerStateData.GetSingleton<HighlightingDataComponent>();
         var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
         #endregion
@@ -161,7 +154,6 @@ public class HighlightingSystem : JobComponentSystem
                     playerState = FillUnitTargetsList(playerState.SelectedAction, playerHighlightingData, playerState, playerPathing, playerFaction.Faction);
                     playerPathing = UpdateSelectedUnit(playerState, playerPathing, playerHighlightingData);
                     SetNumberOfTargets(playerState, currentActionTargetHash);
-
 
                     SetSingleton(playerPathing);
                     SetSingleton(playerState);
@@ -215,10 +207,10 @@ public class HighlightingSystem : JobComponentSystem
 
     }
 
-    public PlayerState.Component FillUnitTargetsList(Unit.Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
+    public PlayerState.Component FillUnitTargetsList(Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
     {
         //need to call validateTarget with hoveredCoord before doing anything
-        if(!m_PathFindingSystem.ValidateTarget(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedPaths))
+        if(!m_PathFindingSystem.ValidateTargetClient(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedPaths))
         {
             playerState.TargetValid = false;
             //if hovered cell / unit is not valid
@@ -231,23 +223,23 @@ public class HighlightingSystem : JobComponentSystem
 
         if (inHinghlightningData.AoERadius > 0)
         {
-            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius)), (int) inAction.ActionExecuteStep, (int) inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
+            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.CircleDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.AoERadius)), (int) inAction.ActionExecuteStep, inAction.Effects[0].DealDamageNested.DamageAmount, inAction.Effects[0].GainArmorNested.ArmorAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
         }
         else if (inHinghlightningData.RingRadius > 0)
         {
-            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.RingDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.RingRadius)), (int) inAction.ActionExecuteStep, (int) inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
+            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.RingDraw(inHinghlightningData.HoveredCoordinate, inHinghlightningData.RingRadius)), (int) inAction.ActionExecuteStep, inAction.Effects[0].DealDamageNested.DamageAmount, inAction.Effects[0].GainArmorNested.ArmorAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
         }
         else if (inHinghlightningData.LineAoE == 1)
         {
-            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.LineDraw(new List<Vector3f>(), playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate)), (int) inAction.ActionExecuteStep, (int) inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
+            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.LineDraw(new List<Vector3f>(), playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate)), (int) inAction.ActionExecuteStep, inAction.Effects[0].DealDamageNested.DamageAmount, inAction.Effects[0].GainArmorNested.ArmorAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
         }
         else if(inHinghlightningData.ConeExtent != 0)
         {
-            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.ConeDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inHinghlightningData.ConeRadius, inHinghlightningData.ConeExtent)), (int) inAction.ActionExecuteStep, (int) inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
+            playerState.UnitTargets[playerState.SelectedUnitId] = new CubeCoordinateList(ConvertCoordinatleListToDict(CellGridMethods.ConeDraw(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inHinghlightningData.ConeRadius, inHinghlightningData.ConeExtent)), (int)inAction.ActionExecuteStep, inAction.Effects[0].DealDamageNested.DamageAmount, inAction.Effects[0].GainArmorNested.ArmorAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
         }
         else
         {
-            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new Dictionary<Vector3f, bool>(), (int)inAction.ActionExecuteStep, (int)inAction.Effects[0].DealDamageNested.DamageAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
+            CubeCoordinateList cubeCoordList = new CubeCoordinateList(new Dictionary<Vector3f, bool>(), (int)inAction.ActionExecuteStep, inAction.Effects[0].DealDamageNested.DamageAmount, inAction.Effects[0].GainArmorNested.ArmorAmount, Convert.ToBoolean(inHinghlightningData.IsUnitTarget));
             cubeCoordList.CubeCoordinates.Add(inHinghlightningData.HoveredCoordinate, true);
 
             HashSet<long> unitIds = new HashSet<long>(playerState.UnitTargets.Keys);
@@ -260,7 +252,7 @@ public class HighlightingSystem : JobComponentSystem
             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
         }
 
-        Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref FactionComponent.Component unitFaction) =>
+        Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, in FactionComponent.Component unitFaction) =>
         {
             if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
             {
@@ -268,7 +260,7 @@ public class HighlightingSystem : JobComponentSystem
                 {
                     //if target is not valid, remove it from UnitTargets Dict
                    
-                    if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget(e, (UnitRequisitesEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction))
+                    if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget(e, (ApplyToRestrictionsEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction))
                     {
                         //Debug.Log("TargetInvalid - Remove from playerTargets");
                         //playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
@@ -277,7 +269,6 @@ public class HighlightingSystem : JobComponentSystem
 
                         if(Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) == Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
                             playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
-
                     }
                 }
             }
@@ -413,7 +404,7 @@ public class HighlightingSystem : JobComponentSystem
         var playerPathing = inPlayerPathing;
         var playerState = inPlayerState;
 
-        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref WorldIndex.Component worldIndex, ref MouseState mouseState, ref FactionComponent.Component faction)=>
+        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref MouseState mouseState, in FactionComponent.Component faction)=>
         {
             if (iD.EntityId.Id == playerState.SelectedUnitId)
             {
@@ -437,7 +428,7 @@ public class HighlightingSystem : JobComponentSystem
                            }
                         }
 
-                        List<CellAttributes> go = m_PathFindingSystem.GetRadius(occCoord.CubeCoordinate, range, worldIndex.Value);
+                        List<CellAttributes> go = m_PathFindingSystem.GetRadiusClient(occCoord.CubeCoordinate, range);
                         playerPathing.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, go, occCoord.CubeCoordinate);
 
                         /*
@@ -462,7 +453,7 @@ public class HighlightingSystem : JobComponentSystem
                     }
                     else
                     {
-                        List<CellAttributes> go = m_PathFindingSystem.GetRadius(occCoord.CubeCoordinate, playerHighlightingData.Range, worldIndex.Value);
+                        List<CellAttributes> go = m_PathFindingSystem.GetRadiusClient(occCoord.CubeCoordinate, playerHighlightingData.Range);
                         foreach (CellAttributes c in go)
                         {
                             playerPathing.CellsInRange.Add(c.Cell);
@@ -850,25 +841,16 @@ public class HighlightingSystem : JobComponentSystem
 
     }
 
-    public void SetSelfTarget(long entityID, int executeStep)
+    public void SetSelfTarget(long entityID, Action action, Vector3f coord, LineRendererComponent lineRendererComp)
     {
         var playerState = m_PlayerStateData.GetSingleton<PlayerState.Component>();
 
         playerState.UnitTargets.Remove(entityID);
 
-        Entities.ForEach((LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component coord) =>
-        {
-            if (iD.EntityId.Id == entityID)
-            {
-                lineRendererComp.lineRenderer.positionCount = 0;
-                CubeCoordinateList list = new CubeCoordinateList(new Dictionary<Vector3f, bool>(), executeStep, 0, true);
-                list.CubeCoordinates.Add(coord.CubeCoordinate, true);
-                playerState.UnitTargets.Add(iD.EntityId.Id, list);
-
-            }
-        })
-        .WithoutBurst()
-        .Run();
+        lineRendererComp.lineRenderer.positionCount = 0;
+        CubeCoordinateList list = new CubeCoordinateList(new Dictionary<Vector3f, bool>(), (int) action.ActionExecuteStep, action.Effects[0].DealDamageNested.DamageAmount, action.Effects[0].GainArmorNested.ArmorAmount, true);
+        list.CubeCoordinates.Add(coord, true);
+        playerState.UnitTargets.Add(entityID, list);
 
         playerState.TargetDictChange = true;
 
@@ -879,7 +861,7 @@ public class HighlightingSystem : JobComponentSystem
     public int CheckPlayerEnergy(uint playerFaction, uint energyCost = 0)
     {
         int leftOverEnergy = 0;
-        Entities.ForEach((ref PlayerEnergy.Component energyComp, ref FactionComponent.Component faction) =>
+        Entities.ForEach((ref PlayerEnergy.Component energyComp, in FactionComponent.Component faction) =>
         {
             if (playerFaction == faction.Faction)
             {

@@ -28,14 +28,12 @@ namespace LeyLineHybridECS
             base.OnCreate();
 
             m_GameStateData = GetEntityQuery(
-                ComponentType.ReadOnly<GameState.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>()
+                ComponentType.ReadOnly<GameState.Component>()
             );
 
             m_PlayerData = GetEntityQuery(
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<WorldIndex.Component>(),
                 ComponentType.ReadOnly<Vision.Component>(),
                 ComponentType.ReadWrite<HighlightingDataComponent>(),
                 ComponentType.ReadOnly<PlayerState.HasAuthority>(),
@@ -168,7 +166,7 @@ namespace LeyLineHybridECS
             var pHigh = playerHigh;
             var pState = playerState;
 
-            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref FactionComponent.Component faction, ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences,  ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, in FactionComponent.Component faction) =>
             {
                 if (unitId.EntityId.Id == pState.SelectedUnitId)
                 {

@@ -1,0 +1,11 @@
+package unit;
+import "unit/action_effect.schema";
+
+component IncomingActionEffects {
+    id = 132;
+    list<unit.IncomingActionEffect> interrupt_effects = 1;
+    list<unit.IncomingActionEffect> attack_effects = 2;
+    list<unit.IncomingActionEffect> move_effects = 3;
+    list<unit.IncomingActionEffect> skillshot_effects = 4;
+}
+

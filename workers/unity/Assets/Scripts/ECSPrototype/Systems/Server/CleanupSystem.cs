@@ -29,7 +29,6 @@ public class CleanupSystem : JobComponentSystem
 m_HealthUnitData = GetEntityQuery(
 ComponentType.ReadOnly<SpatialEntityId>(),
 ComponentType.ReadOnly<CubeCoordinate.Component>(),
-ComponentType.ReadOnly<WorldIndex.Component>(),
 ComponentType.ReadOnly<Health.Component>(),
 ComponentType.ReadWrite<Actions.Component>()
 );
@@ -45,7 +44,6 @@ var unitsToRemoveDesc = new EntityQueryDesc
     {
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<WorldIndex.Component>(),
         ComponentType.ReadWrite<Actions.Component>()
     }
 };
@@ -56,12 +54,10 @@ m_UnitToRemoveData = GetEntityQuery(unitsToRemoveDesc);
 m_UnitData = GetEntityQuery(
 ComponentType.ReadOnly<SpatialEntityId>(),
 ComponentType.ReadOnly<CubeCoordinate.Component>(),
-ComponentType.ReadOnly<WorldIndex.Component>(),
 ComponentType.ReadWrite<Actions.Component>()
 );
 
 m_GameStateData = GetEntityQuery(
-ComponentType.ReadOnly<WorldIndex.Component>(),
 ComponentType.ReadOnly<GameState.Component>()
 );
 */
@@ -93,13 +89,13 @@ ComponentType.ReadOnly<GameState.Component>()
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.ForEach((in GameState.Component gameState, in WorldIndex.Component WorldIndex) =>
+        Entities.ForEach((in GameState.Component gameState, in WorldIndexShared WorldIndex) =>
         {
             if (gameState.CurrentState == GameStateEnum.cleanup)
             {
                 m_TimerSystem.SubstractTurnDurations(WorldIndex.Value);
 
-                m_ResourceSystem.ResetArmor(WorldIndex.Value);
+                m_ResourceSystem.ResetArmor(WorldIndex);
             }
         })
         .WithoutBurst()
@@ -108,14 +104,11 @@ ComponentType.ReadOnly<GameState.Component>()
         return inputDeps;
     }
 
-    public void ClearAllLockedActions(uint worldIndex)
+    public void ClearAllLockedActions(WorldIndexShared worldIndex)
     {
-        Entities.ForEach((ref WorldIndex.Component unitWorldIndex, ref Actions.Component actions) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Actions.Component actions) =>
         {
-            if (unitWorldIndex.Value == worldIndex)
-            {
-                actions = ClearLockedActions(actions);
-            }
+            actions = ClearLockedActions(actions);
         })
         .WithoutBurst()
         .Run();
@@ -130,44 +123,35 @@ ComponentType.ReadOnly<GameState.Component>()
         return actions;
     }
 
-    public void DeleteAllUnits(uint worldIndex)
+    public void DeleteAllUnits(WorldIndexShared worldIndex)
     {
-        Entities.WithAll<Health.Component>().ForEach((in SpatialEntityId entityId, in WorldIndex.Component unitWorldIndex) =>
+        Entities.WithSharedComponentFilter(worldIndex).WithAll<Health.Component>().ForEach((in SpatialEntityId entityId) =>
         {
-            if (unitWorldIndex.Value == worldIndex)
-            {
-                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
-                m_CommandSystem.SendCommand(deleteEntityRequest);
-            }
+            var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+            m_CommandSystem.SendCommand(deleteEntityRequest);
         })
         .WithoutBurst() 
         .Run();
     }
 
-    public void DeleteDeadUnits(uint worldIndex)
+    public void DeleteDeadUnits(WorldIndexShared worldIndex)
     {
-        Entities.ForEach((in SpatialEntityId entityId, in WorldIndex.Component unitWorldIndex, in Health.Component health) =>
+        Entities.WithSharedComponentFilter(worldIndex).WithAll<IsDeadTag>().ForEach((in SpatialEntityId entityId) =>
         {
-            if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
-            {
-                var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
-                m_CommandSystem.SendCommand(deleteEntityRequest);
-            }
+            var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+            m_CommandSystem.SendCommand(deleteEntityRequest);
         })
         .WithoutBurst()
         .Run();
     }
 
-    public bool CheckAllDeadUnitsDeleted(uint worldIndex)
+    public bool CheckAllDeadUnitsDeleted(WorldIndexShared worldIndex)
     {
         bool allUnitsDeleted = true;
 
-        Entities.ForEach((in SpatialEntityId entityId, in WorldIndex.Component unitWorldIndex, in Health.Component health) =>
+        Entities.WithSharedComponentFilter(worldIndex).WithAll<IsDeadTag>().ForEach((in SpatialEntityId entityId) =>
         {
-            if (unitWorldIndex.Value == worldIndex && health.CurrentHealth == 0)
-            {
-                allUnitsDeleted = false;
-            }
+            allUnitsDeleted = false;
         })
         .WithoutBurst()
         .Run();

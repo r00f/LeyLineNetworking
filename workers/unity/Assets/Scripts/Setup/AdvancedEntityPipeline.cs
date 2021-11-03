@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using FMODUnity;
+using Generic;
 //using Fps.Movement;
 //using Fps.SchemaExtensions;
 using Improbable;
