@@ -233,7 +233,29 @@ public class PathFindingSystem : JobComponentSystem
             return new CellAttributeList(new List<CellAttribute>());
     }
 
-    public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
+    public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths, WorldIndexShared worldIndex)
+    {
+        CellAttribute destination = new CellAttribute();
+
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
+        {
+            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
+            {
+                destination = cellAttribute.CellAttributes.Cell;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new CellAttributeList(new List<CellAttribute>());
+    }
+
+    public CellAttributeList FindPathClient(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
     {
         CellAttribute destination = new CellAttribute();
 

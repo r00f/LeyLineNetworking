@@ -111,7 +111,7 @@ public class ManalithSystem : JobComponentSystem
             if (manalithComp.StateChange)
             {
                 var oldFact = faction.Faction;
-                uint fact = UpdateFaction(manalithComp, worldIndex);
+                uint fact = UpdateFaction(manalithComp);
 
                 faction = new FactionComponent.Component
                 {
@@ -212,14 +212,14 @@ public class ManalithSystem : JobComponentSystem
         manalith.StateChange = true;
     }
 
-    public uint UpdateFaction(Manalith.Component manalith, WorldIndexShared worldIndex)
+    public uint UpdateFaction(Manalith.Component manalith)
     {
         int player0Units = 0;
         int player1Units = 0;
         int player2Units = 0;
 
-        uint player1Faction = (worldIndex.Value - 1) * 2 + 1;
-        uint player2Faction = (worldIndex.Value - 1) * 2 + 2;
+        uint player1Faction = 1;
+        uint player2Faction = 2;
 
         for (int cci = 0; cci < manalith.Manalithslots.Count; cci++)
         {

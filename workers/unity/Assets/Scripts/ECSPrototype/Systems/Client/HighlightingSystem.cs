@@ -114,7 +114,7 @@ public class HighlightingSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_PlayerStateData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
+        if (m_PlayerStateData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
 
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
@@ -491,7 +491,7 @@ public class HighlightingSystem : JobComponentSystem
                         if (playerHighlightingData.PathLine == 1)
                         {
                             CellAttributeList Path = new CellAttributeList();
-                            Path = m_PathFindingSystem.FindPath(playerHighlightingData.HoveredCoordinate, playerPathing.CachedPaths);
+                            Path = m_PathFindingSystem.FindPathClient(playerHighlightingData.HoveredCoordinate, playerPathing.CachedPaths);
 
                             /*
                             m_LogDispatcher.HandleLog(LogType.Warning,

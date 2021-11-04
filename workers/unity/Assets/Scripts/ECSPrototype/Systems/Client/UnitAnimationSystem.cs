@@ -88,7 +88,7 @@ public class UnitAnimationSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
+        if (m_GameStateData.CalculateEntityCount() != 1 || m_PlayerData.CalculateEntityCount() == 0)
             return inputDeps;
 
         var playerEntity = m_PlayerData.GetSingletonEntity();

@@ -301,7 +301,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     }
                     break;
                 case ModTypeEnum.path:
-                    foreach (CellAttribute c in m_PathFindingSystem.FindPath(targetCoord, cellsToMark.CachedPaths).CellAttributes)
+                    foreach (CellAttribute c in m_PathFindingSystem.FindPath(targetCoord, cellsToMark.CachedPaths, worldIndex).CellAttributes)
                     {
                         mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
                         effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));

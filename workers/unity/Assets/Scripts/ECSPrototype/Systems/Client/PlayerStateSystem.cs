@@ -69,7 +69,7 @@ namespace LeyLineHybridECS
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_GameStateData.CalculateEntityCount() == 0 || m_PlayerData.CalculateEntityCount() == 0)
+            if (m_GameStateData.CalculateEntityCount() != 1 || m_PlayerData.CalculateEntityCount() == 0)
                 return inputDeps;
 
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();

@@ -65,7 +65,7 @@ public class MouseStateSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (eventSystem.IsPointerOverGameObject() || m_AuthoritativePlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() == 0)
+        if (eventSystem.IsPointerOverGameObject() || m_AuthoritativePlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();

@@ -39,7 +39,7 @@ public class ClientCleanupSystem : JobComponentSystem
     {
         if(WorldsInitialized())
         {
-            if (m_GameStateData.CalculateEntityCount() == 0 || m_GarbageCollectorData.CalculateEntityCount() == 0)
+            if (m_GameStateData.CalculateEntityCount() != 1 || m_GarbageCollectorData.CalculateEntityCount() == 0)
             {
                 return inputDeps;
             }

@@ -83,7 +83,7 @@ public class ActionEffectsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_GameStateData.CalculateEntityCount() == 0)
+        if (m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();

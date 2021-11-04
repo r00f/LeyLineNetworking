@@ -75,9 +75,9 @@ public class AISystem : JobComponentSystem
 
     public void UpdateAIUnits()
     {
-        Entities.ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord, in WorldIndexShared unitWorldIndex) =>
+        Entities.ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord, in WorldIndexShared worldIndex) =>
         {
-            SetAggroedUnit(vision, ref aiUnit, actions, AIid, unitCoord);
+            SetAggroedUnit(vision, ref aiUnit, actions, AIid, unitCoord, worldIndex);
 
             aiUnit.CulledMoveActionsPrioList = CullPrioList(aiUnit.CulledMoveActionsPrioList, aiUnit.MoveActionsPrioList, actions, unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate, 1);
             aiUnit.CulledAttackActionsPrioList = CullPrioList(aiUnit.CulledAttackActionsPrioList, aiUnit.AttackActionsPrioList, actions, unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate);
@@ -88,7 +88,7 @@ public class AISystem : JobComponentSystem
             if(aiUnit.CurrentState != AiUnitStateEnum.idle && aiUnit.CurrentState != AiUnitStateEnum.returning)
             {
                 SetChosenActionType(ref aiUnit);
-                ChooseAIAction(ref aiUnit, ref actions, AIid, unitCellsToMark, unitCoord, unitWorldIndex);
+                ChooseAIAction(ref aiUnit, ref actions, AIid, unitCellsToMark, unitCoord, worldIndex);
             }
         })
         .WithoutBurst()
@@ -120,7 +120,7 @@ public class AISystem : JobComponentSystem
 
     }
 
-    public void SetAggroedUnit(Vision.Component vision, ref AiUnit.Component aiUnit, Actions.Component actions, SpatialEntityId AIid, CubeCoordinate.Component unitCoord)
+    public void SetAggroedUnit(Vision.Component vision, ref AiUnit.Component aiUnit, Actions.Component actions, SpatialEntityId AIid, CubeCoordinate.Component unitCoord, WorldIndexShared worldIndex)
     {
         var extrarange = 0;
 
@@ -133,15 +133,15 @@ public class AISystem : JobComponentSystem
         //check if last action in actionsList (action with the highest range) can reach Current aggroed unit and randomize aggroed unit if not
         if (aiUnit.CurrentState == AiUnitStateEnum.idle || CellGridMethods.GetDistance(unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate) > actions.ActionsList[actions.ActionsList.Count - 1].Targets[0].Targettingrange + extrarange)
         {
-            RandomizeUnitAggression(vision, ref aiUnit, actions, AIid);
+            RandomizeUnitAggression(vision, ref aiUnit, actions, AIid, worldIndex);
         }
         else
         {
-            RefreshUnitAggression(vision, ref aiUnit, actions, AIid);
+            RefreshUnitAggression(vision, ref aiUnit, actions, AIid, worldIndex);
         }
     }
 
-    public void RandomizeUnitAggression(Vision.Component aiVision, ref AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId)
+    public void RandomizeUnitAggression(Vision.Component aiVision, ref AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId, WorldIndexShared worldIndex)
     {
         aiUnit.AggroedUnitCoordinate = new Vector3f(999, 999, 999);
         aiUnit.AggroedUnitId = 0;
@@ -150,7 +150,7 @@ public class AISystem : JobComponentSystem
 
         var aiU = aiUnit;
 
-        Entities.WithNone<AiUnit.Component>().WithAll<Health.Component>().ForEach((in CubeCoordinate.Component coord, in SpatialEntityId id, in FactionComponent.Component faction) =>
+        Entities.WithSharedComponentFilter(worldIndex).WithNone<AiUnit.Component>().WithAll<Health.Component>().ForEach((in CubeCoordinate.Component coord, in SpatialEntityId id, in FactionComponent.Component faction) =>
         {
             if (aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
             {
@@ -167,12 +167,12 @@ public class AISystem : JobComponentSystem
         aiUnit = aiU;
     }
 
-    public void RefreshUnitAggression(Vision.Component aiVision, ref AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId)
+    public void RefreshUnitAggression(Vision.Component aiVision, ref AiUnit.Component aiUnit, Actions.Component act, SpatialEntityId aiId, WorldIndexShared worldIndex)
     {
         bool aggroedUnitExists = false;
         var aiU = aiUnit;
 
-        Entities.WithNone<AiUnit.Component>().WithAll<Health.Component>().ForEach((in CubeCoordinate.Component coord, in SpatialEntityId id) =>
+        Entities.WithSharedComponentFilter(worldIndex).WithNone<AiUnit.Component>().WithAll<Health.Component>().ForEach((in CubeCoordinate.Component coord, in SpatialEntityId id) =>
         {
             if (aiU.AggroedUnitId == id.EntityId.Id && aiVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
             {
@@ -188,7 +188,7 @@ public class AISystem : JobComponentSystem
         if (aggroedUnitExists)
             return;
         else
-            RandomizeUnitAggression(aiVision, ref aiUnit, act, aiId);
+            RandomizeUnitAggression(aiVision, ref aiUnit, act, aiId, worldIndex);
     }
 
     public void SetAIUnitState(ref AiUnit.Component aiUnit)

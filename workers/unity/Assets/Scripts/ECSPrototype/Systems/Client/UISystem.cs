@@ -283,7 +283,7 @@ namespace LeyLineHybridECS
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_GameStateData.CalculateEntityCount() == 0 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
+            if (m_GameStateData.CalculateEntityCount() != 1 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
                 return inputDeps;
 
             #region GetData

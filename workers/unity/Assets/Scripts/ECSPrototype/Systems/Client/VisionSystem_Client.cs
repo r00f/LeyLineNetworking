@@ -60,6 +60,7 @@ namespace LeyLineHybridECS
             UIRef = Object.FindObjectOfType<UIReferences>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             ProjectorCamera = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
+
         }
 
         protected override void OnUpdate()
@@ -78,6 +79,7 @@ namespace LeyLineHybridECS
             if(m_RequireVisibleUpdateData.CalculateEntityCount() > 0)
             {
                 ProjectorCamera.enabled = true;
+                
                 //Debug.Log("Require Visible Update Data > 0");
                 //REDUCED AMOUNT OF OBJECTS THAT ARE IN VISIBLEDATA 650 x if (isVisibleComp.RequireUpdate == 1) uses .5ms while doing nothing at all
                 Entities.With(m_RequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>

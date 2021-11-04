@@ -30,7 +30,7 @@ namespace LeyLineHybridECS
         {
             EntityCommandBuffer ECBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-            Entities.WithNone<PlayerStateData, WorldIndexShared>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, in PlayerAttributes.Component playerAddedPlayerAttributes) =>
+            Entities.WithNone<WorldIndexShared>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, in PlayerAttributes.Component playerAddedPlayerAttributes) =>
             {
                 var wIndex = new WorldIndexShared { Value = SetPlayerWorld(factionComp.Faction) };
 
@@ -54,8 +54,8 @@ namespace LeyLineHybridECS
 
                     pos.Coords = SetPlayerPosition(wIndex, factionComp.Faction);
 
-                    ECBuffer.AddSharedComponent(entity, wIndex);
                     ECBuffer.AddComponent(entity, new PlayerStateData { WorldIndexState = wIndex.Value });
+                    ECBuffer.AddSharedComponent(entity, wIndex);
                 }
             })
             .WithoutBurst()
@@ -71,6 +71,28 @@ namespace LeyLineHybridECS
             .Run();
 
             return inputDeps;
+        }
+
+        uint SetPlayerWorld(uint faction)
+        {
+            uint wIndex = 0;
+            //Debug.Log("SetPlayerWorld");
+
+            Entities.ForEach((ref GameState.Component gameState, in WorldIndexShared mapWorldIndex) =>
+            {
+                //Debug.Log("MapWorldIndexShared in SetPlayerWorld() = " + mapWorldIndex.Value);
+                if (mapWorldIndex.Value == 2 && gameState.PlayersOnMapCount < 2)
+                {
+                    //check if this is not an old player from last editor session before incrementing playersOnMapCount
+                    if (faction == 0)
+                        gameState.PlayersOnMapCount++;
+                    wIndex = mapWorldIndex.Value;
+                }
+            })
+            .WithoutBurst()
+            .Run();
+
+            return wIndex;
         }
 
         void SubstractPlayerOnMapCount(PlayerStateData worldIndex)
@@ -100,28 +122,6 @@ namespace LeyLineHybridECS
             .Run();
 
             return c;
-        }
-
-        public uint SetPlayerWorld(uint faction)
-        {
-            uint wIndex = 0;
-            //Debug.Log("SetPlayerWorld");
-
-            Entities.ForEach((ref GameState.Component gameState, in WorldIndexShared mapWorldIndex) =>
-            {
-                //Debug.Log("MapWorldIndexShared in SetPlayerWorld() = " + mapWorldIndex.Value);
-                if (gameState.PlayersOnMapCount < 2)
-                {
-                    //check if this is not an old player from last editor session before incrementing playersOnMapCount
-                    if (faction == 0)
-                        gameState.PlayersOnMapCount++;
-                    wIndex = mapWorldIndex.Value;
-                }
-            })
-            .WithoutBurst()
-            .Run();
-
-            return wIndex;
         }
 
         public uint SetPlayerFaction(WorldIndexShared worldIndex)

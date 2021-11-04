@@ -123,7 +123,7 @@ public static class LeyLineEntityTemplates {
             unitToSpawn = new UnitToSpawn.Snapshot
             {
                 UnitName = unitName,
-                Faction = (worldIndex - 1) * 2 + faction,
+                Faction = faction,
                 StartRotation = startRotation,
                 ManalithUnit = isManalithUnitSpawn,
                 StartingUnitIndex = startingUnitIndex
@@ -207,8 +207,8 @@ public static class LeyLineEntityTemplates {
 
         };
 
-        var wIndex = new WorldIndex.Snapshot();
-        var pos = new Position.Snapshot { Coords = new Coordinates() };
+        //var wIndex = new WorldIndex.Snapshot();
+        var pos = new Position.Snapshot { Coords = new Coordinates{X = -200, Y= 0, Z = 0 } };
         var template = new EntityTemplate();
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
@@ -216,7 +216,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerState, client);
         template.AddComponent(playerPathing, client);
-        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
@@ -337,7 +337,6 @@ public static class LeyLineEntityTemplates {
 
     public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, CellAttributeList circleCells, List<Vector3f> pathCellCoords, Vector3f connectedManalithCoord)
     {
-
         //var workerId = 
         var turnTimer = new TurnTimer.Snapshot
         {
