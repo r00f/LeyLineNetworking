@@ -245,6 +245,11 @@ namespace LeyLineHybridECS
             terrain.Flush();
         }
 
+        public void FlushTerrain()
+        {
+            terrain.Flush();
+        }
+
         public void SpawnDetailPatch(int grassAmount, Cell c, Vector2 heightMinMax, Vector2 treeIndexMinMax, float spawnCircleRange, Vector2 angleMinMax, bool useSpawnAngle, float randomRotation = 0f, float yOffset = 0f)
         {
             for (int i = 0; i < grassAmount; i++)
@@ -283,10 +288,8 @@ namespace LeyLineHybridECS
             return position * radius;
         }
 
-
         public void SpawnHexagonTree(Vector3 hexPos, TreeInstance treeInstance)
         {
-
             float xCenter = 1 / terrain.terrainData.size.x * hexPos.x;
             float zCenter = 1 / terrain.terrainData.size.z * hexPos.z;
             float yCenter = hexPos.y / resolutionHeight;

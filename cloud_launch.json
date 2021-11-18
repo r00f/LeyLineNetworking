@@ -20,9 +20,14 @@
     "layer_configurations": [
       {
         "layer": "UnityGameLogic",
-        "rectangle_grid": {
-          "cols": 2,
-          "rows": 1
+        "points_of_interest": {
+          "num_workers": 1,
+          "points": [
+            {
+              "x": 0,
+              "z": 0
+            }
+          ]
         }
       }
     ]

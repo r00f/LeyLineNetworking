@@ -16,7 +16,14 @@ public class UnitComponentReferences : MonoBehaviour
     public UnitHeadUIReferences HeadUIRef;
     public AnimatedPortraitReference AnimPortraitComp;
     public UnitEffects UnitEffectsComp;
-    
+
+    [HideInInspector]
+    public float CurrentMoveTime;
+    [HideInInspector]
+    public int CurrentMoveIndex;
+    [HideInInspector]
+    public Vector3 LastStationaryPosition;
+
     [Header("HealthBar")]
     public GameObject HealthbarPrefab;
     public GameObject HealthBarInstance;

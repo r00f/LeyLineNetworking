@@ -21,7 +21,7 @@ public class VisionSystem_Server : JobComponentSystem
     EntityQuery m_GameStateData;
     EntityQuery m_EntityWithoutWorldIndexSharedData;
 
-    bool Init = false;
+    bool init = false;
     int mapSize = 631;
     private List<RawCluster> FixClusters = new List<RawCluster>();
 
@@ -85,12 +85,14 @@ public class VisionSystem_Server : JobComponentSystem
 
         mapSize = m_GameStateData.CalculateEntityCount() * 631;
 
+        //Debug.Log("VisionSystemServer init bool = " + init + ", mapsize = " + mapSize + ", CellDataCount = " + m_CellData.CalculateEntityCount());
+
         //if any unit requires an update, update player aswell
-        if (!Init)
+        if (!init)
         {
             if (m_CellData.CalculateEntityCount() == mapSize)
             {
-                Debug.Log("m_CellData  = Mapsize - init Clusters");
+                //Debug.Log("m_CellData  = Mapsize - init Clusters");
                 BuildRawClusters();
             }
         }
@@ -388,7 +390,7 @@ public class VisionSystem_Server : JobComponentSystem
         }
         //Debug.Log("NumberofClusters" + FixClusters.Count());
 
-        Init = true;
+        init = true;
     }
 
     private void BuildCluster(CellAttributesComponent.Component cell, RawCluster cluster, List<CellAttributesComponent.Component> obstructed, out List<CellAttributesComponent.Component> newObstructed)

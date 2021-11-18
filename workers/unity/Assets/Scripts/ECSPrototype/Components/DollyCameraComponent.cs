@@ -67,7 +67,8 @@ public class DollyCameraComponent : MonoBehaviour
         {
             fog = f;
         }
-
+        UIRef = FindObjectOfType<UIReferences>();
+        UIRef.dollyCam = this;
         trackedDolly = dollyCam.GetCinemachineComponent(CinemachineCore.Stage.Body) as CinemachineTrackedDolly;
         smoothPath = trackedDolly.m_Path as CinemachineSmoothPath;
         pathWaypoints = smoothPath.m_Waypoints.ToList();

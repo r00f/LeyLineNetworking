@@ -13,6 +13,7 @@ using Improbable.Gdk.Subscriptions;
 using LeyLineHybridECS;
 using Unity.Entities;
 using UnityEngine;
+using static LeyLineHybridECS.InitializePlayerSystem;
 
 public class AdvancedEntityPipeline : IEntityGameObjectCreator
 {

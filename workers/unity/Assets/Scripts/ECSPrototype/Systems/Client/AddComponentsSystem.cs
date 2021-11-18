@@ -9,7 +9,7 @@ using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 using Unity.Jobs;
-
+using Improbable;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class AddComponentsSystem : JobComponentSystem
@@ -22,6 +22,7 @@ public class AddComponentsSystem : JobComponentSystem
     {
     }
 
+    ILogDispatcher logger;
     EntityQuery m_UnitMapPopulatedData;
     EntityQuery m_PlayerStateData;
     EntityQuery m_PlayerAddedData;
@@ -29,15 +30,13 @@ public class AddComponentsSystem : JobComponentSystem
     EntityQuery m_UnitAddedData;
     EntityQuery m_UnitRemovedData;
     EntityQuery m_CellAddedData;
+    EntityQuery m_GameStateData;
 
     UIReferences UIRef;
     Settings settings;
+    MapVisuals map;
 
-    protected override void OnStartRunning()
-    {
-        UIRef = Object.FindObjectOfType<UIReferences>();
-        base.OnStartRunning();
-    }
+    bool clientPositionSet;
 
     protected override void OnCreate()
     {
@@ -128,16 +127,43 @@ public class AddComponentsSystem : JobComponentSystem
 
         m_PlayerStateData = GetEntityQuery(
             ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<PlayerState.HasAuthority>()
+            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
+            ComponentType.ReadOnly<SpatialEntityId>()
             );
+
+        m_GameStateData = GetEntityQuery(
+            ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<Position.Component>(),
+            ComponentType.ReadOnly<SpatialEntityId>()
+            );
+    }
+
+    protected override void OnStartRunning()
+    {
+        base.OnStartRunning();
+        map = Object.FindObjectOfType<MapVisuals>();
+        UIRef = Object.FindObjectOfType<UIReferences>();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_PlayerStateData.CalculateEntityCount() == 0)
+        if (m_PlayerStateData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
+        {
             return inputDeps;
+        }
+
+        var gameStatePosition = m_GameStateData.GetSingleton<Position.Component>();
+
+        if (!clientPositionSet)
+        {
+            map.transform.position = new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
+            map.Terrain.Flush();
+            clientPositionSet = true;
+        }
 
         var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
+        var playerId = m_PlayerStateData.GetSingleton<SpatialEntityId>();
 
         Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, HeroTransform htrans) =>
         {
@@ -222,6 +248,16 @@ public class AddComponentsSystem : JobComponentSystem
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
+            if (EntityManager.HasComponent<ManalithInitializer>(entity))
+            {
+                var manalithInit = EntityManager.GetComponentObject<ManalithInitializer>(entity);
+
+                for (int i = 0; i < manalithInit.leyLinePathRenderer.positionCount; i++)
+                {
+                    manalithInit.leyLinePathRenderer.SetPosition(i, manalithInit.leyLinePathRenderer.GetPosition(i) + new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z));
+                }
+            }
+
             foreach (Renderer r in unitComponentReferences.TeamColorMeshesComp.HarvestingEmissionColorMeshes)
             {
                 //instantiate material instances on initialization to prevent GC alloc in Update later on
@@ -276,36 +312,31 @@ public class AddComponentsSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<MapPopulatedIdentifiier>().ForEach((Entity entity, AnimatorComponent anim, ref CubeCoordinate.Component coord, ref IsVisible isVisible, in FactionComponent.Component faction) =>
+        if(UIRef)
         {
-            var unitEffects = EntityManager.GetComponentObject<UnitEffects>(entity);
-            unitEffects.OriginCoordinate = coord.CubeCoordinate;
-            unitEffects.DestinationCoordinate = coord.CubeCoordinate;
-            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
-
-            if (anim.EnableVisualsDelay <= 0)
+            Entities.WithNone<MapPopulatedIdentifiier>().ForEach((Entity entity, UnitComponentReferences unitCompRef, ref CubeCoordinate.Component coord, ref IsVisible isVisible, in FactionComponent.Component faction) =>
             {
-                //Debug.Log(isVisible.Value);
-                PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
-                PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref isVisibleRef, settings.FactionMapColors[(int)faction.Faction], true);
-                EntityManager.AddComponentData(entity, new MapPopulatedIdentifiier{ });
-            }
-        })
-        .WithStructuralChanges()
-        .WithoutBurst()
-        .Run();
+                unitCompRef.UnitEffectsComp.OriginCoordinate = coord.CubeCoordinate;
+                unitCompRef.UnitEffectsComp.DestinationCoordinate = coord.CubeCoordinate;
 
+                if (unitCompRef.AnimatorComp.EnableVisualsDelay <= 0)
+                {
+                    PopulateMap(UIRef.MinimapComponent, isVisible.Value, coord.CubeCoordinate, ref unitCompRef.IsVisibleRefComp, settings.FactionMapColors[(int) faction.Faction], true);
+                    PopulateMap(UIRef.BigMapComponent, isVisible.Value, coord.CubeCoordinate, ref unitCompRef.IsVisibleRefComp, settings.FactionMapColors[(int) faction.Faction], true);
+                    EntityManager.AddComponentData(entity, new MapPopulatedIdentifiier { });
+                }
+            })
+            .WithStructuralChanges()
+            .WithoutBurst()
+            .Run();
+        }
         return inputDeps;
     }
 
     void PopulateMap(MinimapScript miniMap, byte isVisible, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)
     {
-        float offsetMultiplier = miniMap.MapSize;
-        //Instantiate MiniMapTile into Map
         Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
-        Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
-
-        //Debug.Log("IsVisible: " + isVisible);
+        Vector2 invertedPos = new Vector2(pos.x * miniMap.MapSize, pos.z * miniMap.MapSize);
 
         if (!isVisibleRef.MiniMapTileInstance)
         {
@@ -377,9 +408,30 @@ public class AddComponentsSystem : JobComponentSystem
         instanciatedTile.TileRect.localScale = new Vector3(1, 1, 1);
 
         if (isVisible == 1)
+        {
+            /*
+            if(isUnitTile)
+            {
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("Set unit tile active")
+                .WithField("Index", isVisibleRef.transform.name));
+            }
+            */
             instanciatedTile.gameObject.SetActive(true);
+        }
         else
+        {
+            /*
+            if(isUnitTile)
+            {
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("Set unit tile not active")
+                .WithField("Index", isVisibleRef.transform.name));
+            }
+            */
             instanciatedTile.gameObject.SetActive(false);
+        }
+
 
         return instanciatedTile;
     }

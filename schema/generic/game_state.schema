@@ -15,9 +15,7 @@ component GameState {
 	generic.Vector2f map_center = 9;
 	uint32 turn_counter = 10;
 	float min_execute_step_time = 11;
-	map<int64, uint32> damage_dict = 12;
-	bool attack_damage_dealt = 13;
-    float init_map_wait_time = 14;
+    float init_map_wait_time = 12;
     event InitializeMap initialize_map_event;
 	event Cleanup cleanup_state_event;
 	event RopeEnd rope_end_event;
@@ -25,7 +23,7 @@ component GameState {
 
 type InitializeMap
 {
-
+    uint32 world_index = 1;
 }
 
 type RopeEnd
@@ -50,7 +48,6 @@ enum GameStateEnum {
 	move = 5;
 	skillshot = 6;
 	cleanup = 7;
-	calculate_energy = 8;
-	game_over = 9;
+	game_over = 8;
 
 }

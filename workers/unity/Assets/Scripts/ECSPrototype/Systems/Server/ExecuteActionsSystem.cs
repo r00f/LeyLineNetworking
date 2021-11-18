@@ -14,6 +14,7 @@ using Improbable;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : JobComponentSystem
 {
+    ILogDispatcher logger;
     PathFindingSystem m_PathFindingSystem;
     HandleCellGridRequestsSystem m_HandleCellGridSystem;
     ResourceSystem m_ResourceSystem;
@@ -49,6 +50,8 @@ public class ExecuteActionsSystem : JobComponentSystem
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
         m_TimerSystem = World.GetExistingSystem<TimerSystem>();
         m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -126,6 +129,7 @@ public class ExecuteActionsSystem : JobComponentSystem
                         writeInterruptEffectDataJob.Complete();
 
                         CompareAndCullInterruptSpawnEffects(ref gameStateEffectStack.InterruptEffects);
+                        effectStack.GameStateEffectStacks[i] = gameStateEffectStack;
 
                         for (int y = 0; y < effectStack.GameStateEffectStacks[i].InterruptEffects.Count; y++)
                         {
@@ -350,8 +354,8 @@ public class ExecuteActionsSystem : JobComponentSystem
                         }
 
                         CompareAndCullMoveInterruptEffects(gameStateEffectStack.InterruptEffects, ref gameStateEffectStack.MoveEffects);
-
                         CompareAndCullMoveEffects(ref gameStateEffectStack.MoveEffects);
+                        effectStack.GameStateEffectStacks[i] = gameStateEffectStack;
 
                         JobHandle denormalizeMoveEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
                         {
@@ -363,8 +367,6 @@ public class ExecuteActionsSystem : JobComponentSystem
                                 {
                                     if (currentEffect.OriginUnitId == id.EntityId.Id)
                                     {
-                                        //Debug.Log("WriteMoveAlongPathEffectIntoUnit");
-
                                         var incEffect = new IncomingActionEffect
                                         {
                                             EffectType = currentEffect.EffectType,
@@ -559,6 +561,8 @@ public class ExecuteActionsSystem : JobComponentSystem
             #endregion
         }
 
+        m_EffectStackData.SetSingleton(effectStack);
+
         #region DenormalizedUnitLoops
         /// <summary>
         ///
@@ -682,7 +686,11 @@ public class ExecuteActionsSystem : JobComponentSystem
                     case EffectTypeEnum.move_along_path:
                         //instead of moving the unit along a path on the server, teleport it to destination and handle path movement on the client
                         var pathCount = incomingEffect.MoveAlongPathNested.CoordinatePositionPairs.Count - 1;
-                        position.Coords = new Coordinates(incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.X, incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.Y, incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.Z);
+                        position = new Position.Component
+                        {
+                            Coords = new Coordinates(incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.X, incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.Y, incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.Z)
+                        };
+
                         coord.CubeCoordinate = incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].CubeCoordinate;
                         vision.RequireUpdate = true;
                         break;
@@ -742,8 +750,6 @@ public class ExecuteActionsSystem : JobComponentSystem
         .Schedule(inputDeps);
 
         #endregion
-
-        m_EffectStackData.SetSingleton(effectStack);
 
         return inputDeps;
     }

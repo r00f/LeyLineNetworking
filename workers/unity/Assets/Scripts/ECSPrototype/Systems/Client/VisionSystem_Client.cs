@@ -42,9 +42,9 @@ namespace LeyLineHybridECS
                 );
 
             m_RequireVisibleUpdateData = GetEntityQuery(
-            ComponentType.ReadWrite<RequireVisibleUpdate>(),
-            ComponentType.ReadWrite<IsVisible>(),
-            ComponentType.ReadWrite<IsVisibleReferences>()
+                ComponentType.ReadWrite<RequireVisibleUpdate>(),
+                ComponentType.ReadWrite<IsVisible>(),
+                ComponentType.ReadWrite<IsVisibleReferences>()
             );
 
             m_AuthorativePlayerData = GetEntityQuery(
@@ -59,14 +59,22 @@ namespace LeyLineHybridECS
             base.OnStartRunning();
             UIRef = Object.FindObjectOfType<UIReferences>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
-            ProjectorCamera = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
-
         }
 
         protected override void OnUpdate()
         {
             if (m_AuthorativePlayerData.CalculateEntityCount() == 0)
                 return;
+
+            if (!ProjectorCamera)
+            {
+                if (GameObject.FindGameObjectWithTag("Projector"))
+                {
+                    ProjectorCamera = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
+                }
+                else
+                    return;
+            }
 
             var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
 
@@ -177,9 +185,6 @@ namespace LeyLineHybridECS
             {
                 ProjectorCamera.enabled = false;
             }
-
-
-            //gameStateData.Dispose();
         }
 
         public void UpdateVision()
@@ -187,14 +192,8 @@ namespace LeyLineHybridECS
             var playerVision = m_AuthorativePlayerData.GetSingleton<Vision.Component>();
             var playerFaction = m_AuthorativePlayerData.GetSingleton<FactionComponent.Component>();
 
-            //HashSet<Vector3f> visionCoordsHash = new HashSet<Vector3f>(playerVision.CellsInVisionrange);
-
             Entities.With(m_UnitData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref CubeCoordinate.Component coord, ref IsVisible visible, ref FactionComponent.Component faction) =>
             {
-                //UIReferences.
-                UpdateUnitMapTilePosition(UIRef.MinimapComponent, coord.CubeCoordinate, ref isVisibleGOs, true);
-                UpdateUnitMapTilePosition(UIRef.BigMapComponent, coord.CubeCoordinate, ref isVisibleGOs, false);
-
                 if (faction.Faction != playerFaction.Faction)
                 {
                     if (playerVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
@@ -266,19 +265,5 @@ namespace LeyLineHybridECS
             });
         }
 
-        void UpdateUnitMapTilePosition(MinimapScript map, Vector3f coord, ref IsVisibleReferences isVisibleRef, bool isMiniMap)
-        {
-            float offsetMultiplier = map.MapSize;
-            //Instantiate MiniMapTile into Map
-            Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
-            Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
-
-                if (isVisibleRef.MiniMapTileInstance && isMiniMap)
-                    isVisibleRef.MiniMapTileInstance.TileRect.anchoredPosition = invertedPos;
-
-                if (isVisibleRef.BigMapTileInstance && !isMiniMap)
-                    isVisibleRef.BigMapTileInstance.TileRect.anchoredPosition = invertedPos;
-        }
-        
-        }
+    }
 }

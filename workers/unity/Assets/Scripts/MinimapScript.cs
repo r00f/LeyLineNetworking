@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -60,7 +60,7 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
         if (Input.GetButton("Fire1") && isHovered) { 
             Vector2 MouseScreenPos = Input.mousePosition;
             Vector2 RectPos = Map.position;
-            Vector2 Dir = (MouseScreenPos - RectPos) / (Screen.width / Map.rect.width); //* scale);
+            Vector2 Dir = (MouseScreenPos - RectPos) / (Screen.width / Map.rect.width);
             Vector3 PlanePosition = new Vector3(MapCenter.x + (scale * Dir.x), 0, MapCenter.z + (scale * Dir.y));
 
             if(h_Transform != null)

@@ -142,19 +142,15 @@ namespace LeyLineHybridECS
                     playerState.CurrentState = PlayerStateEnum.ready;
                 }
             }
-            else
+            else if (playerState.CurrentState != PlayerStateEnum.waiting)
             {
-                if (playerState.CurrentState != PlayerStateEnum.waiting && gameState.CurrentState != GameStateEnum.interrupt)
+                if (playerState.UnitTargets.Count != 0)
                 {
-                    if (playerState.UnitTargets.Count != 0)
-                    {
-                        playerState.UnitTargets.Clear();
-                        playerState.UnitTargets = playerState.UnitTargets;
-                    }
-                    playerState.CurrentState = PlayerStateEnum.waiting;
+                    playerState.UnitTargets.Clear();
+                    playerState.UnitTargets = playerState.UnitTargets;
                 }
+                playerState.CurrentState = PlayerStateEnum.waiting;
             }
-
             m_PlayerData.SetSingleton(playerState);
             m_PlayerData.SetSingleton(playerHigh);
 

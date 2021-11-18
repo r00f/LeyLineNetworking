@@ -10,6 +10,7 @@ using UnityEngine;
 public class InitializeWorldsSystem : JobComponentSystem
 {
     EntityQuery m_NoWorldIndexSharedData;
+    ILogDispatcher logger;
 
     protected override void OnCreate()
     {
@@ -29,29 +30,30 @@ public class InitializeWorldsSystem : JobComponentSystem
         m_NoWorldIndexSharedData = GetEntityQuery(noWorldIndexSharedDesc);
     }
 
+    protected override void OnStartRunning()
+    {
+        base.OnStartRunning();
+
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+    }
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.WithNone<WorldIndexShared>().ForEach((Entity e, in WorldIndex.Component entityWorldIndex) =>
+        Entities.WithNone<WorldIndexShared, PlayerAttributes.Component, NewlyAddedSpatialOSEntity>().ForEach((Entity e, in WorldIndex.Component entityWorldIndex) =>
         {
+            /*
+            if(EntityManager.HasComponent<GameState.Component>(e))
+            {
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("Add WorldIndexShared to gameState")
+                .WithField("Index", entityWorldIndex.Value));
+            }
+            */
             EntityManager.AddSharedComponentData(e, new WorldIndexShared { Value = entityWorldIndex.Value });
         })
         .WithStructuralChanges()
         .WithoutBurst()
         .Run();
-
-        Entities.WithAll<WorldIndex.Component>().WithNone<WorldIndexShared>().ForEach((Entity e) =>
-        {
-           Debug.Log( EntityManager.GetName(e));
-        })
-        .WithoutBurst()
-        .Run();
-
-        if (m_NoWorldIndexSharedData.CalculateEntityCount() == 0)
-            Debug.Log("No Entities without worldIndexShared found");
-        else
-            Debug.Log("Entity count without worldIndexShared = " + m_NoWorldIndexSharedData.CalculateEntityCount());
-
-
 
         return inputDeps;
     }

@@ -34,7 +34,7 @@ namespace LeyLineHybridECS
         public Cell occupiedCell;
 
         [SerializeField]
-        LineRenderer leyLinePathRenderer;
+        public LineRenderer leyLinePathRenderer;
         //[SerializeField]
         //LineRenderer leyLineCircleRenderer;
         //Mesh leyLinePathMesh;

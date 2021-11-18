@@ -14,6 +14,7 @@ public class Settings : ScriptableObject
     public List<Color> TurnStepBgColors;
     public List<Color> TurnStepLineColors;
 
+    public GameObject TempleValleyClientMap;
     public Color UINeutralColor;
     //public Mesh TestMesh;
     //public Material TestMat;

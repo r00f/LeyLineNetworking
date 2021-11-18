@@ -14,6 +14,7 @@ using Unity.Jobs;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : JobComponentSystem
 {
+    ILogDispatcher logger;
     ActionEffectsSystem m_ActionEffectsSystem;
     UISystem m_UISystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
@@ -83,6 +84,7 @@ public class UnitAnimationSystem : JobComponentSystem
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
     }
 
@@ -111,6 +113,12 @@ public class UnitAnimationSystem : JobComponentSystem
                 if (unitComponentReferences.SelectionMeshRenderer.material.HasProperty("_UnlitColor"))
                     unitComponentReferences.SelectionMeshRenderer.material.SetColor("_UnlitColor", settings.FactionColors[(int)faction.Faction]);
 
+
+                unitComponentReferences.CurrentMoveIndex = -1;
+                unitComponentReferences.CurrentMoveTime = 0;
+                unitComponentReferences.LastStationaryPosition = unitComponentReferences.transform.position;
+
+
                 unitComponentReferences.AnimatorComp.DestinationPosition = Vector2.zero;
                 unitComponentReferences.UnitEffectsComp.OriginCoordinate = coord.CubeCoordinate;
                 unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = false;
@@ -134,47 +142,54 @@ public class UnitAnimationSystem : JobComponentSystem
             .Run();
         }
 
-        Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref Position.Component serverPosition, ref Actions.Component actions, ref Energy.Component energy, in FactionComponent.Component faction) =>
+        Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, in SpatialEntityId id, in Actions.Component actions, in Energy.Component energy, in CubeCoordinate.Component coord, in FactionComponent.Component faction, in IncomingActionEffects.Component incomingActionEffects) =>
         {
             var moveVars = EntityManager.GetComponentData<MovementVariables.Component>(e);
-            var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
             var visible = EntityManager.GetComponentData<IsVisible>(e);
 
+            HandleEnableVisualsDelay(unitComponentReferences, moveVars, playerHeroTransform.Transform);
+            HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
+            HandleLockedAction(unitComponentReferences, actions, faction, gameState, id, playerVision, coord);
+            HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
+            SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
+            SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
+
+            if (gameState.CurrentState == GameStateEnum.planning)
+            {
+                if (visible.Value == 1 && !playerVision.RevealVision)
+                {
+                    SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
+                }
+                else
+                    unitComponentReferences.SelectionCircleGO.SetActive(false);
+            }
+            else
+            {
+                HandleAnimStateEffects(unitComponentReferences, visible);
+
+                if (incomingActionEffects.MoveEffects.Count != 0)
+                {
+                    logger.HandleLog(LogType.Warning,
+                    new LogEvent("Call MoveUnit Method")
+                    .WithField("Unit", unitComponentReferences.transform.name));
+
+                    MoveUnit(unitComponentReferences, incomingActionEffects);
+                }
+            }
+        })
+        .WithoutBurst()
+        .Run();
+
+        Entities.WithAll<Manalith.Component>().ForEach((Entity e, IsVisible visible, UnitComponentReferences unitComponentReferences, in SpatialEntityId id, in Actions.Component actions, in CubeCoordinate.Component coord, in FactionComponent.Component faction) =>
+        {
             if (gameState.CurrentState != GameStateEnum.planning)
             {
                 HandleAnimStateEffects(unitComponentReferences, visible);
             }
 
-            HandleEnableVisualsDelay(unitComponentReferences, moveVars, playerHeroTransform.Transform);
-
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
-
-            HandleLockedAction(unitComponentReferences, actions, faction, gameState, serverPosition, id, playerVision, coord);
-
-            HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
-
-            if (unitComponentReferences.AnimatorComp.Animator)
-            {
-                if(gameState.CurrentState == GameStateEnum.planning)
-                {
-                    if (visible.Value == 1 && !playerVision.RevealVision)
-                    {
-                        SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
-                    }
-                    else
-                        unitComponentReferences.SelectionCircleGO.SetActive(false);
-                }
-
-                SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
-
-                SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
-
-                MoveUnit(unitComponentReferences, serverPosition, actions);
-            }
-            else if (gameState.CurrentState == GameStateEnum.planning)
-            {
-                SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
-            }
+            HandleLockedAction(unitComponentReferences, actions, faction, gameState, id, playerVision, coord);
+            SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
         })
         .WithoutBurst()
         .Run();
@@ -218,7 +233,7 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void HandleLockedAction(UnitComponentReferences unitComponentReferences, Actions.Component actions, FactionComponent.Component faction, GameState.Component gameState, Position.Component serverPosition, SpatialEntityId id, Vision.Component playerVision, CubeCoordinate.Component coord)
+    public void HandleLockedAction(UnitComponentReferences unitComponentReferences, Actions.Component actions, FactionComponent.Component faction, GameState.Component gameState, SpatialEntityId id, Vision.Component playerVision, CubeCoordinate.Component coord)
     {
         if (actions.LockedAction.Index != -3)
         {
@@ -277,15 +292,6 @@ public class UnitAnimationSystem : JobComponentSystem
                 if (!unitComponentReferences.AnimatorComp.ExecuteTriggerSet)
                 {
                     ExecuteActionAnimation(unitComponentReferences, gameState, actions);
-                }
-                else
-                {
-                    //constantly rotate towards serverposition if moving
-                    if (gameState.CurrentState == GameStateEnum.move)
-                    {
-                        if (unitComponentReferences.AnimatorComp.RotationTarget != serverPosition.Coords.ToUnityVector())
-                            unitComponentReferences.AnimatorComp.RotationTarget = serverPosition.Coords.ToUnityVector();
-                    }
                 }
 
                 if(unitComponentReferences.AnimatorComp.RotateTransform)
@@ -383,33 +389,37 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void MoveUnit(UnitComponentReferences unitComponentReferences, Position.Component serverPosition, Actions.Component actions)
+    public void MoveUnit(UnitComponentReferences unitComponentReferences, IncomingActionEffects.Component incomingEffects)
     {
-        if (unitComponentReferences.AnimatorComp.transform.position != serverPosition.Coords.ToUnityVector())
+        if (incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs.Count > unitComponentReferences.CurrentMoveIndex)
         {
-            float step;
-            if (actions.LockedAction.Index != -3)
-                step = (Time.DeltaTime / actions.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell) * 1.732f;
-            else
-                step = Time.DeltaTime * 1.732f;
+            if(unitComponentReferences.CurrentMoveIndex >= 0)
+                unitComponentReferences.AnimatorComp.RotationTarget = Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition);
 
-            unitComponentReferences.AnimatorComp.IsMoving = true;
-            unitComponentReferences.AnimatorComp.transform.position = Vector3.MoveTowards(unitComponentReferences.AnimatorComp.transform.position, serverPosition.Coords.ToUnityVector(), step);
-        }
-        else
-        {
-            unitComponentReferences.AnimatorComp.IsMoving = false;
-        }
-
-        Vector2 posXZ = new Vector2(unitComponentReferences.AnimatorComp.transform.position.x, unitComponentReferences.AnimatorComp.transform.position.z);
-
-        if (Vector2.Distance(posXZ, unitComponentReferences.AnimatorComp.DestinationPosition) <= 0.2f)
-        {
-            if (!unitComponentReferences.AnimatorComp.DestinationReachTriggerSet)
+            if (unitComponentReferences.CurrentMoveTime > 0)
             {
-                unitComponentReferences.AnimatorComp.Animator.SetTrigger("DestinationReached");
-                unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = true;
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("Moving Unit")
+                .WithField("NextPathIndex", unitComponentReferences.CurrentMoveIndex));
+
+                unitComponentReferences.CurrentMoveTime -= Time.DeltaTime;
+                float normalizedTime = 1f - (unitComponentReferences.CurrentMoveTime / incomingEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell);
+
+                if(unitComponentReferences.CurrentMoveIndex == 0)
+                    unitComponentReferences.AnimatorComp.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                else
+                    unitComponentReferences.AnimatorComp.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex -1].WorldPosition), Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
             }
+            else
+            {
+                unitComponentReferences.CurrentMoveIndex++;
+                unitComponentReferences.CurrentMoveTime = incomingEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell;
+            }
+        }
+        else if (!unitComponentReferences.AnimatorComp.DestinationReachTriggerSet)
+        {
+            unitComponentReferences.AnimatorComp.Animator.SetTrigger("DestinationReached");
+            unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = true;
         }
     }
 
@@ -463,12 +473,16 @@ public class UnitAnimationSystem : JobComponentSystem
             m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
 
             foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+            {
                 g.layer = 21;
+            }
         }
         else
         {
             foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
+            {
                 g.layer = 11;
+            }
         }
     }
 

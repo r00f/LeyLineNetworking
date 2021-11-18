@@ -67,10 +67,12 @@ namespace LeyLineHybridECS
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
-            
-            if (initMapEvents.Count > 0)
+
+            for(int i = 0; i < initMapEvents.Count; i++)
             {
-                Entities.WithAll<IsSpawn.Component>().ForEach((in UnitToSpawn.Component unitToSpawn, in CubeCoordinate.Component coord, in Position.Component position, in WorldIndexShared cellWorldIndex) =>
+                var worldIndex = new WorldIndexShared { Value = initMapEvents[i].Event.Payload.WorldIndex };
+
+                Entities.WithSharedComponentFilter(worldIndex).WithAll<IsSpawn.Component>().ForEach((in UnitToSpawn.Component unitToSpawn, in CubeCoordinate.Component coord, in Position.Component position) =>
                 {
                     if (unitToSpawn.Faction == 0)
                     {
@@ -78,7 +80,7 @@ namespace LeyLineHybridECS
                         //Debug.Log(unitGO.name);
                         var Stats = unitGO.GetComponent<UnitDataSet>();
                         var AIStats = unitGO.GetComponent<AIUnitDataSet>();
-                        var entity = LeyLineEntityTemplates.NeutralUnit(m_WorkerSystem.WorkerId, unitToSpawn.UnitName, position, coord.CubeCoordinate, unitToSpawn.Faction, cellWorldIndex.Value, Stats, AIStats, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
+                        var entity = LeyLineEntityTemplates.NeutralUnit(m_WorkerSystem.WorkerId, unitToSpawn.UnitName, position, coord.CubeCoordinate, unitToSpawn.Faction, worldIndex.Value, Stats, AIStats, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
                         var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                         m_CommandSystem.SendCommand(createEntitiyRequest);
 
@@ -88,14 +90,13 @@ namespace LeyLineHybridECS
                 .WithoutBurst()
                 .Run();
 
-                Entities.ForEach((Entity entity, in FactionComponent.Component faction, in WorldIndexShared worldIndex, in PlayerAttributes.Component playerAttribute, in OwningWorker.Component owningWorker) =>
+                Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity entity, in FactionComponent.Component faction, in PlayerAttributes.Component playerAttribute, in OwningWorker.Component owningWorker) =>
                 {
                     SpawnPlayerUnits(worldIndex, faction.Faction, playerAttribute);
                 })
                 .WithoutBurst()
                 .Run();
             }
-
             return inputDeps;
         }
 

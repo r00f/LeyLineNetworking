@@ -1,4 +1,4 @@
-﻿using Improbable.Gdk.Core;
+using Improbable.Gdk.Core;
 using Improbable.Gdk.Core.Representation;
 using Improbable.Gdk.GameObjectCreation;
 using Improbable.Gdk.PlayerLifecycle;
@@ -17,7 +17,6 @@ namespace BlankProject
         {
             Application.targetFrameRate = 60;
             PlayerLifecycleConfig.CreatePlayerEntityTemplate = LeyLineEntityTemplates.Player;
-
 
             IConnectionFlow flow;
             ConnectionParameters connectionParameters;

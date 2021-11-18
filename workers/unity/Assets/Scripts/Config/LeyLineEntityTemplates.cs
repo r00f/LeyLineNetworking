@@ -33,7 +33,7 @@ public static class LeyLineEntityTemplates {
             CurrentRopeTime = 30f,
             MapCenter = mapCenter,
             MinExecuteStepTime = settings.MinimumExecuteTime,
-            DamageDict = new Dictionary<long, uint>()
+            InitMapWaitTime = 2f
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -61,11 +61,6 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    /*
-    public static EntityTemplate Manalith(Vector3f position, CellAttributeList circleCells, uint worldIndex)
-    {
-    }
-    */
     public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, bool isManalithUnitSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
     {
         var gameLogic = WorkerUtils.UnityGameLogic;
@@ -204,10 +199,9 @@ public static class LeyLineEntityTemplates {
                 Effects = new List<ActionEffect>(),
                 Index = -3
             }
-
         };
 
-        //var wIndex = new WorldIndex.Snapshot();
+        var wIndex = new WorldIndex.Snapshot();
         var pos = new Position.Snapshot { Coords = new Coordinates{X = -200, Y= 0, Z = 0 } };
         var template = new EntityTemplate();
         template.AddComponent(pos, WorkerUtils.UnityGameLogic);
@@ -216,7 +210,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerState, client);
         template.AddComponent(playerPathing, client);
-        //template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
+        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
         template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());

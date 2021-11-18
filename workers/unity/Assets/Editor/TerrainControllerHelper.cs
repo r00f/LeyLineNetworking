@@ -22,12 +22,10 @@ public class TerrainControllerHelper : Editor
             base.OnInspectorGUI();
             serializedObject.Update();
 
-
-            if (GUILayout.Button("Save Terrain Asset"))
+            if (GUILayout.Button("Flush"))
             {
-                myTarget.SaveTerrainAsset();
+                myTarget.FlushTerrain();
             }
-
 
             if (GUILayout.Button("Update Trees"))
             {

@@ -17,11 +17,11 @@ public static class WorkerUtils
         world.GetOrCreateSystem<SendActionRequestSystem>();
         world.GetOrCreateSystem<UnitAnimationSystem>();
         world.GetOrCreateSystem<VisionSystem_Client>();
-        world.GetOrCreateSystem<UISystem>();
         world.GetOrCreateSystem<HighlightingSystem>();
         world.GetOrCreateSystem<ActionEffectsSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
         world.GetOrCreateSystem<ManalithSystemClient>();
+        world.GetOrCreateSystem<UISystem>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -31,7 +31,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<GameStateSystem>();
         world.GetOrCreateSystem<SpawnUnitsSystem>();
         world.GetOrCreateSystem<HandleCellGridRequestsSystem>();
-        world.GetOrCreateSystem<MovementSystem>();
+        //world.GetOrCreateSystem<MovementSystem>();
         world.GetOrCreateSystem<ManalithSystem>();
         world.GetOrCreateSystem<UnitLifeCycleSystem>();
         world.GetOrCreateSystem<ResourceSystem>();

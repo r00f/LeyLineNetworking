@@ -20,6 +20,7 @@ namespace LeyLineHybridECS
         SpawnUnitsSystem m_SpawnSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         private BeginSimulationEntityCommandBufferSystem entityCommandBufferSystem;
+        ILogDispatcher logger;
 
         /*
         EntityQuery m_CellData;
@@ -82,6 +83,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
             m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
             m_ManalithSystem = World.GetExistingSystem<ManalithSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
@@ -116,12 +118,10 @@ namespace LeyLineHybridECS
                                 gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-                                //raise InitMapEvent
                                 m_ComponentUpdateSystem.SendEvent(
-                                new GameState.InitializeMapEvent.Event(),
-                                gameStateId.EntityId);
-
-                                gameState.InitMapWaitTime = 2f;
+                                new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value)),
+                                gameStateId.EntityId 
+                                );
 
                                 UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
                                 gameState.CurrentState = GameStateEnum.cleanup;
@@ -138,9 +138,9 @@ namespace LeyLineHybridECS
                                 gameState.TurnCounter = 0;
                                 gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 m_ComponentUpdateSystem.SendEvent(
-                                new GameState.InitializeMapEvent.Event(),
-                                gameStateId.EntityId);
-                                gameState.InitMapWaitTime = 2f;
+                                new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value)),
+                                gameStateId.EntityId 
+                                );
                                 UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
@@ -152,12 +152,22 @@ namespace LeyLineHybridECS
                     case GameStateEnum.planning:
                         if(gameState.CurrentRopeTime <= 0)
                         {
+                            /*
+                            logger.HandleLog(LogType.Warning,
+                            new LogEvent("Send endRopeEvent")
+                            .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
+                            */
                             m_ComponentUpdateSystem.SendEvent(
                             new GameState.RopeEndEvent.Event(),
                             gameStateId.EntityId);
                         }
                         if (AllPlayersReady(gameStateWorldIndex))
                         {
+                            /*
+                            logger.HandleLog(LogType.Warning,
+                            new LogEvent("All Players Ready - move to startExecute step")
+                            .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
+                            */
                             gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                             UpdateUnitsGameStateTag(GameStateEnum.start_execute, gameStateWorldIndex, ECBuffer);
                             gameState.CurrentState = GameStateEnum.start_execute;
@@ -184,7 +194,6 @@ namespace LeyLineHybridECS
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.attack, gameStateWorldIndex, ECBuffer);
-                                gameState.AttackDamageDealt = false;
                                 SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.attack);
                                 gameState.CurrentState = GameStateEnum.attack;
                                 gameState.HighestExecuteTime = 0;
@@ -202,8 +211,6 @@ namespace LeyLineHybridECS
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.move, gameStateWorldIndex, ECBuffer);
-
-                                gameState.AttackDamageDealt = false;
                                 SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.move);
                                 gameState.CurrentState = GameStateEnum.move;
                                 gameState.HighestExecuteTime = 0;
@@ -222,7 +229,6 @@ namespace LeyLineHybridECS
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.skillshot, gameStateWorldIndex, ECBuffer);
                                 UpdateMovedUnitCells(gameStateWorldIndex);
-                                gameState.AttackDamageDealt = false;
                                 SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.skillshot);
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
@@ -239,7 +245,6 @@ namespace LeyLineHybridECS
                             gameState.HighestExecuteTime -= Time.DeltaTime;
                             if (gameState.HighestExecuteTime <= .1f)
                             {
-                                gameState.AttackDamageDealt = false;
                                 UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
                                 SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.cleanup);
                                 gameState.CurrentState = GameStateEnum.cleanup;
@@ -284,14 +289,11 @@ namespace LeyLineHybridECS
                                     UpdateUnitsGameStateTag(GameStateEnum.planning, gameStateWorldIndex, ECBuffer);
                                     CleanUpUnitIncomingEffects(gameStateWorldIndex);
                                     CleanUpEffectStack(effectStack, gameStateWorldIndex.Value);
-                                    gameState.CurrentState = GameStateEnum.calculate_energy;
+                                    SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.planning);
+                                    gameState.CurrentState = GameStateEnum.planning;
                                 }
                             }
                         }
-                        break;
-                    case GameStateEnum.calculate_energy:
-                        SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.planning);
-                        gameState.CurrentState = GameStateEnum.planning;
                         break;
                     case GameStateEnum.game_over:
                         RevealPlayerVisions(gameStateWorldIndex);
@@ -317,12 +319,14 @@ namespace LeyLineHybridECS
                 if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
                     m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
+                    gameState.InitMapWaitTime = 2f;
                     gameState.CurrentState = GameStateEnum.waiting_for_players;
                 }
 #else
                         if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                         {
                             m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
+                            gameState.InitMapWaitTime = 2f;
                             gameState.CurrentState = GameStateEnum.waiting_for_players;
                         }
 #endif
@@ -437,6 +441,10 @@ namespace LeyLineHybridECS
                 {
                     if (incomingEffects.MoveEffects[i - 1].UnitDuration == 0)
                     {
+                        logger.HandleLog(LogType.Warning,
+                        new LogEvent("Remove incoming move")
+                        .WithField("UnitIndex", e.Index));
+
                         incomingEffects.MoveEffects.RemoveAt(i - 1);
                     }
                 }
@@ -581,19 +589,18 @@ namespace LeyLineHybridECS
             float highestTime = minStepTime;
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in Actions.Component unitAction) =>
             {
-                var lockedAction = unitAction.LockedAction;
-                if ((int) lockedAction.ActionExecuteStep == (int) gameState - 3)
+                if (unitAction.LockedAction.Index != -3 && (int) unitAction.LockedAction.ActionExecuteStep == (int) gameState - 3)
                 {
-                    if (gameState == GameStateEnum.move && lockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                    if (unitAction.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                     {
-                        float unitMoveTime = lockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (lockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1);
+                        float unitMoveTime = unitAction.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (unitAction.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count + 1);
                         if (unitMoveTime > highestTime)
                             highestTime = unitMoveTime;
                     }
                     else
                     {
-                        if (lockedAction.TimeToExecute > highestTime)
-                            highestTime = lockedAction.TimeToExecute;
+                        if (unitAction.LockedAction.TimeToExecute > highestTime)
+                            highestTime = unitAction.LockedAction.TimeToExecute;
                     }
                 }
             })
@@ -609,6 +616,12 @@ namespace LeyLineHybridECS
 
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in PlayerState.Component playerState) =>
             {
+                /*
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("Player with shared worldIndex found")
+                .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
+                */
+
                 if (playerState.CurrentState != PlayerStateEnum.ready)
                     b = false;
             })

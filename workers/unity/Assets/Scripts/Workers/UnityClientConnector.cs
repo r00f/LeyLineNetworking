@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Improbable.Gdk.Core;
 using Improbable.Gdk.GameObjectCreation;
 using Improbable.Gdk.PlayerLifecycle;
@@ -6,6 +6,7 @@ using Improbable.Worker.CInterop;
 using UnityEngine;
 using Unity.Entities;
 using Improbable.Gdk.Core.Representation;
+using System.Collections;
 
 namespace BlankProject
 {
@@ -57,9 +58,8 @@ namespace BlankProject
             Worlds.DefaultWorld = World.All[0].EntityManager;
             WorkerUtils.AddClientSystems(Worker.World);
             //var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin);
-            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World,  new AdvancedEntityPipeline(Worker), entityRepresentationMapping, gameObject);
+            GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker), entityRepresentationMapping, gameObject);
             PlayerLifecycleHelper.AddClientSystems(Worker.World);
         }
-
     }
 }

@@ -15,8 +15,8 @@ public class UIReferences : MonoBehaviour
     public float EnergyLerpSpeed;
     public bool DollyPathCameraActive;
 
-
     public Material SelectionOutlineMaterial;
+    public DollyCameraComponent dollyCam;
 
     [Header("SubCanvases")]
     public List<Canvas> Canvases;
