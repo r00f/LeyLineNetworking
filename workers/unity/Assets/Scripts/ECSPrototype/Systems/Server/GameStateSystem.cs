@@ -117,14 +117,14 @@ namespace LeyLineHybridECS
                             {
                                 gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
-                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value)),
-                                gameStateId.EntityId 
+                                gameStateId.EntityId
                                 );
-
+                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
                                 gameState.CurrentState = GameStateEnum.cleanup;
+
                             }
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
@@ -136,11 +136,11 @@ namespace LeyLineHybridECS
                             {
                                 gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
-                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 m_ComponentUpdateSystem.SendEvent(
                                 new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value)),
-                                gameStateId.EntityId 
+                                gameStateId.EntityId
                                 );
+                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                 UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
                                 gameState.CurrentState = GameStateEnum.cleanup;
                             }
@@ -441,9 +441,11 @@ namespace LeyLineHybridECS
                 {
                     if (incomingEffects.MoveEffects[i - 1].UnitDuration == 0)
                     {
+                        /*
                         logger.HandleLog(LogType.Warning,
                         new LogEvent("Remove incoming move")
                         .WithField("UnitIndex", e.Index));
+                        */
 
                         incomingEffects.MoveEffects.RemoveAt(i - 1);
                     }

@@ -71,12 +71,12 @@ public class VisionSystem_Server : JobComponentSystem
         {
             var revealVisionRequest = revealVisionRequests[i];
 
-            Entities.ForEach((ref Vision.Component p_Vision, ref SpatialEntityId p_id) =>
+            Entities.WithAll<WorldIndexShared>().ForEach((ref Vision.Component p_Vision, in SpatialEntityId p_id) =>
             {
                 if(p_id.EntityId == revealVisionRequest.EntityId)
                 {
-                    p_Vision.RequireUpdate = true;
                     p_Vision.RevealVision = !p_Vision.RevealVision;
+                    p_Vision.RequireUpdate = true;
                 }
             })
             .WithoutBurst()
@@ -90,6 +90,12 @@ public class VisionSystem_Server : JobComponentSystem
         //if any unit requires an update, update player aswell
         if (!init)
         {
+            /*
+            logger.HandleLog(LogType.Warning,
+            new LogEvent("MapNotInitialized")
+            .WithField("CellDataCount", m_CellData.CalculateEntityCount()));
+            */
+
             if (m_CellData.CalculateEntityCount() == mapSize)
             {
                 //Debug.Log("m_CellData  = Mapsize - init Clusters");
@@ -160,18 +166,30 @@ public class VisionSystem_Server : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id, in WorldIndexShared p_windex) =>
+            Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id, in WorldIndex.Component p_windex) =>
             {
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("playerVision.ReqUpdate")
+                .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate)
+                .WithField("PlayerId", p_id.EntityId.Id));
+
                 if (p_Vision.RequireUpdate)
                 {
+                    /*
+                    logger.HandleLog(LogType.Warning,
+                    new LogEvent("playerVision.ReqUpdate")
+                    .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+                    */
+
                     if (!p_Vision.RevealVision)
                     {
                         /*
                         logger.HandleLog(LogType.Warning,
-                        new LogEvent("playerVision.ReqUpdate = true")
-                        .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+                        new LogEvent("playerVision.RevealVision")
+                        .WithField("playerVision.RevealVision", p_Vision.RevealVision));
                         */
-                        p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex);
+
+                        p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value);
 
                         p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
                         p_Vision.Positives = p_Vision.Positives;
@@ -186,7 +204,7 @@ public class VisionSystem_Server : JobComponentSystem
                     }
                     else
                     {
-                        p_Vision = RevealMap(p_windex, p_Vision);
+                        p_Vision = RevealMap(p_windex.Value, p_Vision);
 
                         p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
                         p_Vision.Positives = p_Vision.Positives;
@@ -279,12 +297,12 @@ public class VisionSystem_Server : JobComponentSystem
         return inVision;
     }
 
-    private Vision.Component RevealMap(WorldIndexShared worldIndex, Vision.Component inVision)
+    private Vision.Component RevealMap(uint worldIndex, Vision.Component inVision)
     {
         inVision.CellsInVisionrange.Clear();
 
         //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component coord, in CellAttributesComponent.Component cellAtt) =>
+        Entities.WithSharedComponentFilter(new WorldIndexShared { Value = worldIndex }).ForEach((in CubeCoordinate.Component coord, in CellAttributesComponent.Component cellAtt) =>
         {
             inVision.CellsInVisionrange.Add(coord.CubeCoordinate, 0);
         })
@@ -294,7 +312,7 @@ public class VisionSystem_Server : JobComponentSystem
         return inVision;
     }
 
-    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, WorldIndexShared worldIndex)
+    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, uint worldIndex)
     {
         //Debug.Log("UpdatePlayerVision: " + faction);
         /*
@@ -319,7 +337,7 @@ public class VisionSystem_Server : JobComponentSystem
 
         var currentVision = new HashSet<Vector3f>();
 
-        Entities.WithSharedComponentFilter(worldIndex).WithAll<CubeCoordinate.Component>().ForEach((in Vision.Component unitVision, in FactionComponent.Component unitFaction) =>
+        Entities.WithSharedComponentFilter(new WorldIndexShared {  Value = worldIndex }).WithAll<CubeCoordinate.Component>().ForEach((in Vision.Component unitVision, in FactionComponent.Component unitFaction) =>
         {
             if (faction == unitFaction.Faction)
             {

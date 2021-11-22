@@ -51,9 +51,9 @@ public class InitializeUnitsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, ref MovementVariables.Component move, ref Manalith.Component manalith) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, ref StartRotation.Component startRotation, ref Manalith.Component manalith) =>
         {
-            t.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
+            t.rotation = Quaternion.Euler(new Vector3(0, startRotation.Value, 0));
         })
         .WithoutBurst()
         .Run();
@@ -65,14 +65,14 @@ public class InitializeUnitsSystem : JobComponentSystem
         var playerFactionComp = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var heroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
 
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref Health.Component health, ref MovementVariables.Component move, in FactionComponent.Component unitFactionComp) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref Health.Component health, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
             var unitTransform = EntityManager.GetComponentObject<Transform>(e);
             var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
 
-            anim.RotateTransform.rotation = Quaternion.Euler(new Vector3(0, move.StartRotation, 0));
+            anim.RotateTransform.rotation = Quaternion.Euler(new Vector3(0, startRotation.Value, 0));
             unitEffects.CurrentHealth = health.CurrentHealth;
 
             if (anim.Animator)

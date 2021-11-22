@@ -144,10 +144,10 @@ public class UnitAnimationSystem : JobComponentSystem
 
         Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, in SpatialEntityId id, in Actions.Component actions, in Energy.Component energy, in CubeCoordinate.Component coord, in FactionComponent.Component faction, in IncomingActionEffects.Component incomingActionEffects) =>
         {
-            var moveVars = EntityManager.GetComponentData<MovementVariables.Component>(e);
+            var startRotation = EntityManager.GetComponentData<StartRotation.Component>(e);
             var visible = EntityManager.GetComponentData<IsVisible>(e);
 
-            HandleEnableVisualsDelay(unitComponentReferences, moveVars, playerHeroTransform.Transform);
+            HandleEnableVisualsDelay(unitComponentReferences, startRotation, playerHeroTransform.Transform);
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
             HandleLockedAction(unitComponentReferences, actions, faction, gameState, id, playerVision, coord);
             HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
@@ -169,10 +169,11 @@ public class UnitAnimationSystem : JobComponentSystem
 
                 if (incomingActionEffects.MoveEffects.Count != 0)
                 {
+                    /*
                     logger.HandleLog(LogType.Warning,
                     new LogEvent("Call MoveUnit Method")
                     .WithField("Unit", unitComponentReferences.transform.name));
-
+                    */
                     MoveUnit(unitComponentReferences, incomingActionEffects);
                 }
             }
@@ -180,7 +181,7 @@ public class UnitAnimationSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithAll<Manalith.Component>().ForEach((Entity e, IsVisible visible, UnitComponentReferences unitComponentReferences, in SpatialEntityId id, in Actions.Component actions, in CubeCoordinate.Component coord, in FactionComponent.Component faction) =>
+        Entities.WithAll<Manalith.Component>().ForEach((Entity e, UnitComponentReferences unitComponentReferences, in IsVisible visible, in SpatialEntityId id, in Actions.Component actions, in CubeCoordinate.Component coord, in FactionComponent.Component faction) =>
         {
             if (gameState.CurrentState != GameStateEnum.planning)
             {
@@ -308,14 +309,14 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void HandleEnableVisualsDelay(UnitComponentReferences unitComponentReferences, MovementVariables.Component moveVars, Transform playerHeroTransform)
+    public void HandleEnableVisualsDelay(UnitComponentReferences unitComponentReferences, StartRotation.Component startRotation, Transform playerHeroTransform)
     {
         if (unitComponentReferences.AnimatorComp.Visuals.Count != 0)
         {
             if (unitComponentReferences.AnimatorComp.EnableVisualsDelay >= 0)
             {
                 //initially rotate visuals AWAY from hero(so leech makes more sense)
-                if (playerHeroTransform && moveVars.StartRotation == 0)
+                if (playerHeroTransform && startRotation.Value == 0)
                 {
                     Vector3 dir = unitComponentReferences.AnimatorComp.RotateTransform.position - playerHeroTransform.position;
                     dir.y = 0;
@@ -398,9 +399,11 @@ public class UnitAnimationSystem : JobComponentSystem
 
             if (unitComponentReferences.CurrentMoveTime > 0)
             {
+                /*
                 logger.HandleLog(LogType.Warning,
                 new LogEvent("Moving Unit")
                 .WithField("NextPathIndex", unitComponentReferences.CurrentMoveIndex));
+                */
 
                 unitComponentReferences.CurrentMoveTime -= Time.DeltaTime;
                 float normalizedTime = 1f - (unitComponentReferences.CurrentMoveTime / incomingEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell);

@@ -48,7 +48,7 @@ namespace LeyLineHybridECS
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            EntityCommandBuffer ECBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+            EntityCommandBuffer ecb = entityCommandBufferSystem.CreateCommandBuffer();
             /*
             logger.HandleLog(LogType.Warning,
             new LogEvent("GameStates with worldIndexShared Count")
@@ -79,8 +79,8 @@ namespace LeyLineHybridECS
                         */
 
                         pos.Coords = SetPlayerPosition(spatialWorldIndex.Value, factionComp.Faction);
-                        ECBuffer.AddSharedComponent(entity, new WorldIndexShared { Value = spatialWorldIndex.Value });
-                        ECBuffer.AddComponent(entity, new PlayerStateData { WorldIndexState = spatialWorldIndex.Value });
+                        ecb.AddSharedComponent(entity, new WorldIndexShared { Value = spatialWorldIndex.Value });
+                        ecb.AddComponent(entity, new PlayerStateData { WorldIndexState = spatialWorldIndex.Value });
                     }
                 }
                 else
@@ -91,8 +91,8 @@ namespace LeyLineHybridECS
                     new LogEvent("Reinitialize old player with worldindex")
                     .WithField("WorldIndex", spatialWorldIndex.Value));
                     */
-                    ECBuffer.AddSharedComponent(entity, new WorldIndexShared { Value = spatialWorldIndex.Value });
-                    ECBuffer.AddComponent(entity, new PlayerStateData { WorldIndexState = spatialWorldIndex.Value });
+                    ecb.AddSharedComponent(entity, new WorldIndexShared { Value = spatialWorldIndex.Value });
+                    ecb.AddComponent(entity, new PlayerStateData { WorldIndexState = spatialWorldIndex.Value });
                 }
             })
             .WithStructuralChanges()
@@ -102,7 +102,7 @@ namespace LeyLineHybridECS
             Entities.WithNone<PlayerAttributes.Component>().ForEach((Entity entity, in PlayerStateData worldIndex) =>
             {
                 SubstractPlayerOnMapCount(worldIndex);
-                EntityManager.RemoveComponent<PlayerStateData>(entity);
+                ecb.RemoveComponent<PlayerStateData>(entity);
             })
             .WithStructuralChanges()
             .WithoutBurst()

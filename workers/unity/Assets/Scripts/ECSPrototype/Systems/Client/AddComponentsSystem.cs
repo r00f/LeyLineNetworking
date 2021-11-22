@@ -360,16 +360,18 @@ public class AddComponentsSystem : JobComponentSystem
 
         if (!isUnitTile)
         {
-            instanciatedTile.transform.parent = miniMap.MiniMapCellTilesPanel.transform;
+            instanciatedTile.transform.SetParent(miniMap.MiniMapCellTilesPanel.transform, false);
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
+
+            instanciatedTile.DarknessTile.transform.SetParent(miniMap.MiniMapDarknessTilesPanel.transform, false);
+            instanciatedTile.DarknessTile.anchoredPosition = invertedPos;
             instanciatedTile.DarknessTile.sizeDelta = miniMap.MapCellDarknessPixelSize;
-            instanciatedTile.DarknessTile.transform.parent = miniMap.MiniMapDarknessTilesPanel.transform;
-            instanciatedTile.DarknessTile.localScale = new Vector3(1, 1, 1);
+
         }
         else
         {
-            instanciatedTile.transform.parent = miniMap.MiniMapUnitTilesPanel.transform;
+            instanciatedTile.transform.SetParent(miniMap.MiniMapUnitTilesPanel.transform, false);
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapUnitPixelSize;
 

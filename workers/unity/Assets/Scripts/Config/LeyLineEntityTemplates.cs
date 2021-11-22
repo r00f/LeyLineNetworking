@@ -222,11 +222,12 @@ public static class LeyLineEntityTemplates {
     public static EntityTemplate Unit(/*string workerId,*/ string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(WorkerUtils.UnityClient);
-
+        /*
         var turnTimer = new TurnTimer.Snapshot
         {
             Timers = new List<Timer>()
         };
+        */
 
         var pos = new Position.Snapshot
         {
@@ -249,10 +250,12 @@ public static class LeyLineEntityTemplates {
             CachedPaths = new Dictionary<CellAttribute, CellAttributeList>()
         };
 
+        /*
         var clientPathSnapshot = new ClientPath.Snapshot
         {
             Path = new CellAttributeList(new List<CellAttribute>()),
         };
+        */
 
         var wIndex = new WorldIndex.Snapshot
         {
@@ -283,10 +286,10 @@ public static class LeyLineEntityTemplates {
             EnergyIncome = Stats.EnergyIncome
         };
 
-        var movementVariables = new MovementVariables.Snapshot
+
+        var movementVariables = new StartRotation.Snapshot
         {
-            TravelTime = 1.7f,
-            StartRotation = startRotation
+            Value = startRotation
         };
 
         var actions = SetActions(Stats);
@@ -321,9 +324,9 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(clientPathSnapshot, client);
+        //template.AddComponent(clientPathSnapshot, client);
         template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
-        template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
+        //template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
@@ -381,10 +384,9 @@ public static class LeyLineEntityTemplates {
             EnergyIncome = Stats.EnergyIncome
         };
 
-        var movementVariables = new MovementVariables.Snapshot
+        var movementVariables = new StartRotation.Snapshot
         {
-            TravelTime = 1.7f,
-            StartRotation = startRotation
+            Value = startRotation
         };
 
         var actions = SetActions(Stats);
@@ -396,8 +398,10 @@ public static class LeyLineEntityTemplates {
         {
             if (n.IsTaken != true)
             {
-                ManalithSlot go = new ManalithSlot();
-                go.CorrespondingCell = n;
+                ManalithSlot go = new ManalithSlot
+                {
+                    CorrespondingCell = n
+                };
                 slots.Add(go);
             }
         }
@@ -496,10 +500,9 @@ public static class LeyLineEntityTemplates {
             EnergyIncome = Stats.EnergyIncome
         };
 
-        var movementVariables = new MovementVariables.Snapshot
+        var movementVariables = new StartRotation.Snapshot
         {
-            TravelTime = 1.7f,
-            StartRotation = startRotation
+            Value = startRotation
         };
 
         var actions = SetActions(Stats);
@@ -582,10 +585,12 @@ public static class LeyLineEntityTemplates {
 
     static Actions.Snapshot SetActions (UnitDataSet inStats){
 
-        Action myNullableAction = new Action();
-        myNullableAction.Index = -3;
-        myNullableAction.Targets = new List<ActionTarget>();
-        myNullableAction.Effects = new List<ActionEffect>();
+        Action myNullableAction = new Action
+        {
+            Index = -3,
+            Targets = new List<ActionTarget>(),
+            Effects = new List<ActionEffect>()
+        };
         List<Action> myOtherActions = new List<Action>();
 
         for (int i = 0; i < inStats.Actions.Count; i++)
@@ -612,21 +617,25 @@ public static class LeyLineEntityTemplates {
 
     static Action SetAction (ECSAction inAction, int index)
     {
-        Action newAction = new Action();
-        newAction.TimeToExecute = inAction.TimeToExecute;
-        newAction.ActionExecuteStep = (ExecuteStepEnum)(int)inAction.ActionExecuteStep;
-        newAction.Name = inAction.name;
-        newAction.Index = index;
-        newAction.Targets = new List<ActionTarget>();
-        newAction.Effects = new List<ActionEffect>();
-        newAction.CombinedCost = 0;
+        Action newAction = new Action
+        {
+            TimeToExecute = inAction.TimeToExecute,
+            ActionExecuteStep = (ExecuteStepEnum) (int) inAction.ActionExecuteStep,
+            Name = inAction.name,
+            Index = index,
+            Targets = new List<ActionTarget>(),
+            Effects = new List<ActionEffect>(),
+            CombinedCost = 0
+        };
 
         for (int i = 0; i <= inAction.Targets.Count - 1; i++)
         {
-            ActionTarget newAT = new ActionTarget();
-            newAT.EnergyCost = inAction.Targets[i].energyCost;
-            newAT.Targettingrange = inAction.Targets[i].targettingRange;
-            newAT.Mods = new List<TargetMod>();
+            ActionTarget newAT = new ActionTarget
+            {
+                EnergyCost = inAction.Targets[i].energyCost,
+                Targettingrange = inAction.Targets[i].targettingRange,
+                Mods = new List<TargetMod>()
+            };
 
             if (inAction.Targets[i] is ECSATarget_Tile)
             {
@@ -655,44 +664,54 @@ public static class LeyLineEntityTemplates {
                     if (t is SecondaryArea)
                     {
                         SecondaryArea go1 = t as SecondaryArea;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.aoe;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.aoe
+                        };
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryPath)
                     {
                         SecondaryPath go1 = t as SecondaryPath;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.path;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.path
+                        };
                         mod.PathNested.Costpertile = go1.costPerTile;
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryLine)
                     {
                         SecondaryLine go1 = t as SecondaryLine;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.line;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.line
+                        };
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryRing)
                     {
                         SecondaryRing go1 = t as SecondaryRing;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.ring;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.ring
+                        };
                         mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryCone)
                     {
                         SecondaryCone go1 = t as SecondaryCone;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.cone;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.cone
+                        };
                         mod.ConeNested.Radius = go1.radius;
                         mod.ConeNested.Extent = go1.extent;
                         newAT.Mods.Add(mod);
@@ -744,44 +763,54 @@ public static class LeyLineEntityTemplates {
                     if (t is SecondaryArea)
                     {
                         SecondaryArea go1 = t as SecondaryArea;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.aoe;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.aoe
+                        };
                         mod.AoeNested.Radius = go1.areaSize;
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryPath)
                     {
                         SecondaryPath go1 = t as SecondaryPath;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.path;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.path
+                        };
                         newAT.Mods.Add(mod);
 
                     }
                     if (t is SecondaryLine)
                     {
                         SecondaryLine go1 = t as SecondaryLine;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.line;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.line
+                        };
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryRing)
                     {
                         SecondaryRing go1 = t as SecondaryRing;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.ring;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.ring
+                        };
                         mod.RingNested.Radius = go1.radius;
                         newAT.Mods.Add(mod);
                     }
                     if (t is SecondaryCone)
                     {
                         SecondaryCone go1 = t as SecondaryCone;
-                        TargetMod mod = new TargetMod();
-                        mod.CoordinatePositionPairs = new List<CoordinatePositionPair>();
-                        mod.ModType = ModTypeEnum.cone;
+                        TargetMod mod = new TargetMod
+                        {
+                            CoordinatePositionPairs = new List<CoordinatePositionPair>(),
+                            ModType = ModTypeEnum.cone
+                        };
                         mod.ConeNested.Radius = go1.radius;
                         mod.ConeNested.Extent = go1.extent;
                         newAT.Mods.Add(mod);
@@ -793,10 +822,12 @@ public static class LeyLineEntityTemplates {
         }
         for(int i = 0; i <= inAction.Effects.Count - 1; i++)
         {
-            ActionEffect AF = new ActionEffect();
-            AF.TargetCoordinates = new List<Vector3f>();
-            AF.TurnDuration = inAction.Effects[i].TurnDuration;
-            AF.UnitDuration = inAction.Effects[i].UnitDuration;
+            ActionEffect AF = new ActionEffect
+            {
+                TargetCoordinates = new List<Vector3f>(),
+                TurnDuration = inAction.Effects[i].TurnDuration,
+                UnitDuration = inAction.Effects[i].UnitDuration
+            };
             AF.MoveAlongPathNested.CoordinatePositionPairs = new List<CoordinatePositionPair>();
 
             if (inAction.Effects[i] is ECS_SpawnEffect)

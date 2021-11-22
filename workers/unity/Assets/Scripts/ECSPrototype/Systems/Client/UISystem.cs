@@ -1400,13 +1400,6 @@ namespace LeyLineHybridECS
             }
         }
 
-        /*
-        void InvertMenuPanelActive(GameObject menuPanel)
-        {
-            menuPanel.SetActive(!menuPanel.activeSelf);
-        }
-        */
-
         void HandleKeyCodeInput(GameStateEnum gameState)
         {
             if (UIRef.DollyPathCameraActive)
@@ -2086,7 +2079,7 @@ namespace LeyLineHybridECS
                 if (isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)
                 {
                     isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.Rect.sizeDelta = isVisibleRef.MiniMapTileInstance.DeathCrossSize;
-                    isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.transform.parent = UIRef.MinimapComponent.MiniMapEffectsPanel.transform;
+                    isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.transform.SetParent(UIRef.MinimapComponent.MiniMapEffectsPanel.transform, false);
                     isVisibleRef.MiniMapTileInstance.DeathBlowMapEffect.gameObject.SetActive(true);
 
                     if (isVisibleRef.MiniMapTileInstance.EmitSoundEffect && isVisibleRef.MiniMapTileInstance.isActiveAndEnabled)

@@ -77,14 +77,11 @@ namespace LeyLineHybridECS
                     if (unitToSpawn.Faction == 0)
                     {
                         var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + unitToSpawn.UnitName);
-                        //Debug.Log(unitGO.name);
                         var Stats = unitGO.GetComponent<UnitDataSet>();
                         var AIStats = unitGO.GetComponent<AIUnitDataSet>();
                         var entity = LeyLineEntityTemplates.NeutralUnit(m_WorkerSystem.WorkerId, unitToSpawn.UnitName, position, coord.CubeCoordinate, unitToSpawn.Faction, worldIndex.Value, Stats, AIStats, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
                         var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                         m_CommandSystem.SendCommand(createEntitiyRequest);
-
-                        //SpawnNeutralUnit(cellWorldIndex, unitToSpawn.UnitName, unitToSpawn.Faction, coord.CubeCoordinate, m_WorkerSystem.WorkerId, unitToSpawn.StartRotation, unitToSpawn.ManalithUnit);
                     }
                 })
                 .WithoutBurst()
@@ -96,6 +93,7 @@ namespace LeyLineHybridECS
                 })
                 .WithoutBurst()
                 .Run();
+
             }
             return inputDeps;
         }

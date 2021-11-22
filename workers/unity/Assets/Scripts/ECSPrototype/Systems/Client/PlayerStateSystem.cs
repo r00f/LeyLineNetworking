@@ -115,9 +115,7 @@ namespace LeyLineHybridECS
                                 playerHigh.CancelTime -= Time.DeltaTime;
                             else
                             {
-                                //Debug.Log("SetPlayerReady");
                                 playerState.CurrentState = PlayerStateEnum.ready;
-                                //Debug.Log((int) playerState.CurrentState);
                             }
                         }
                         else
@@ -149,8 +147,13 @@ namespace LeyLineHybridECS
                     playerState.UnitTargets.Clear();
                     playerState.UnitTargets = playerState.UnitTargets;
                 }
+
+                //reset CancelStae variables to prevent players from getting set to ready instantly when entering planning
+                playerHigh.CancelTime = 0.1f;
+                playerHigh.CancelState = false;
                 playerState.CurrentState = PlayerStateEnum.waiting;
             }
+
             m_PlayerData.SetSingleton(playerState);
             m_PlayerData.SetSingleton(playerHigh);
 
@@ -277,7 +280,7 @@ namespace LeyLineHybridECS
 
             m_PlayerData.SetSingleton(playerHigh);
         }
-
+        
         public void SetPlayerState(PlayerStateEnum state)
         {
             var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();

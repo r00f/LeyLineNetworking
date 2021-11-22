@@ -27,12 +27,13 @@ public class ExecuteActionsSystem : JobComponentSystem
     EntityQuery m_UnitData;
     EntityQuery m_EffectStackData;
 
-    private BeginSimulationEntityCommandBufferSystem entityCommandBufferSystem;
+
+    private EndSimulationEntityCommandBufferSystem endSimulationEntityCommandBufferSystem;
 
     protected override void OnCreate()
     {
         base.OnCreate();
-        entityCommandBufferSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
+        endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
 
         m_EffectStackData = GetEntityQuery(
         ComponentType.ReadWrite<EffectStack.Component>()
@@ -57,7 +58,7 @@ public class ExecuteActionsSystem : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var effectStack = m_EffectStackData.GetSingleton<EffectStack.Component>();
-        EntityCommandBuffer.ParallelWriter ECBuffer = entityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+        EntityCommandBuffer.ParallelWriter ecb = endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
         for (int i = 0; i < effectStack.GameStateEffectStacks.Count; i++)
         {
@@ -77,9 +78,11 @@ public class ExecuteActionsSystem : JobComponentSystem
                     effectStack.GameStateEffectStacks[i].InterruptEffects.Add(e);
                 }
                 effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
-                ECBuffer.RemoveComponent<LockedInterruptTag>(entityInQueryIndex, entity);
+                ecb.RemoveComponent<LockedInterruptTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
+
+            endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeInterruptEffectDataJob);
 
             JobHandle writeAttackEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedAttackTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
             {
@@ -88,9 +91,12 @@ public class ExecuteActionsSystem : JobComponentSystem
                     effectStack.GameStateEffectStacks[i].AttackEffects.Add(e);
                 }
                 effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
-                ECBuffer.RemoveComponent<LockedAttackTag>(entityInQueryIndex, entity);
+                ecb.RemoveComponent<LockedAttackTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
+
+            endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeAttackEffectDataJob);
+
 
             JobHandle writeMoveEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedMoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
             {
@@ -99,9 +105,11 @@ public class ExecuteActionsSystem : JobComponentSystem
                     effectStack.GameStateEffectStacks[i].MoveEffects.Add(e);
                 }
                 effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
-                ECBuffer.RemoveComponent<LockedMoveTag>(entityInQueryIndex, entity);
+                ecb.RemoveComponent<LockedMoveTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
+
+            endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeMoveEffectDataJob);
 
             JobHandle writeSkillshotEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedSkillshotTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
             {
@@ -110,9 +118,11 @@ public class ExecuteActionsSystem : JobComponentSystem
                     effectStack.GameStateEffectStacks[i].SkillshotEffects.Add(e);
                 }
                 effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
-                ECBuffer.RemoveComponent<LockedSkillshotTag>(entityInQueryIndex, entity);
+                ecb.RemoveComponent<LockedSkillshotTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
+
+            endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeSkillshotEffectDataJob);
             #endregion
 
             #region DenormalizeEffectData
@@ -230,13 +240,15 @@ public class ExecuteActionsSystem : JobComponentSystem
 
                                         if (incomingEffects.InterruptEffects.Count == 1)
                                         {
-                                            ECBuffer.AddComponent<IncomingInterruptTag>(entityInQueryIndex, entity);
+                                            ecb.AddComponent<IncomingInterruptTag>(entityInQueryIndex, entity);
                                         }
                                     }
                                 }
                             }
                         })
                         .Schedule(writeInterruptEffectDataJob);
+
+                        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(denormalizeInterruptEffectsJob);
 
                         SubtractTurnTimers(ref gameStateEffectStack.InterruptEffects);
                         break;
@@ -318,14 +330,14 @@ public class ExecuteActionsSystem : JobComponentSystem
 
                                         if (incomingEffects.AttackEffects.Count == 1)
                                         {
-                                            ECBuffer.AddComponent<IncomingAttackTag>(entityInQueryIndex, entity);
+                                            ecb.AddComponent<IncomingAttackTag>(entityInQueryIndex, entity);
                                         }
                                     }
                                 }
                             }
                         })
                         .Schedule(writeAttackEffectDataJob);
-
+                        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(denormalizeAttackEffectDataJob);
                         SubtractTurnTimers(ref gameStateEffectStack.AttackEffects);
                         break;
                     case GameStateEnum.move:
@@ -379,7 +391,7 @@ public class ExecuteActionsSystem : JobComponentSystem
 
                                         if (incomingEffects.MoveEffects.Count == 1)
                                         {
-                                            ECBuffer.AddComponent<IncomingMoveTag>(entityInQueryIndex, entity);
+                                            ecb.AddComponent<IncomingMoveTag>(entityInQueryIndex, entity);
                                         }
                                     }
                                 }
@@ -454,14 +466,14 @@ public class ExecuteActionsSystem : JobComponentSystem
 
                                         if (incomingEffects.MoveEffects.Count == 1)
                                         {
-                                            ECBuffer.AddComponent<IncomingMoveTag>(entityInQueryIndex, entity);
+                                            ecb.AddComponent<IncomingMoveTag>(entityInQueryIndex, entity);
                                         }
                                     }
                                 }
                             }
                         })
                         .Schedule(writeMoveEffectDataJob);
-
+                        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(denormalizeMoveEffectDataJob);
                         SubtractTurnTimers(ref gameStateEffectStack.MoveEffects);
                         break;
                     case GameStateEnum.skillshot:
@@ -542,14 +554,14 @@ public class ExecuteActionsSystem : JobComponentSystem
 
                                         if (incomingEffects.SkillshotEffects.Count == 1)
                                         {
-                                            ECBuffer.AddComponent<IncomingSkillshotTag>(entityInQueryIndex, entity);
+                                            ecb.AddComponent<IncomingSkillshotTag>(entityInQueryIndex, entity);
                                         }
                                     }
                                 }
                             }
                         })
                         .Schedule(writeSkillshotEffectDataJob);
-
+                        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(denormalizeSkillshotEffectDataJob);
                         SubtractTurnTimers(ref gameStateEffectStack.SkillshotEffects);
                         break;
                 }
@@ -595,7 +607,7 @@ public class ExecuteActionsSystem : JobComponentSystem
                         else
                         {
                             health.CurrentHealth = 0;
-                            ECBuffer.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
+                            ecb.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
                         }
                         break;
                     case EffectTypeEnum.gain_armor:
@@ -610,7 +622,7 @@ public class ExecuteActionsSystem : JobComponentSystem
                 }
             }
             incomingEffects.InterruptEffects = incomingEffects.InterruptEffects;
-            ECBuffer.RemoveComponent<InterruptTag>(entityInQueryIndex, entity);
+            ecb.RemoveComponent<InterruptTag>(entityInQueryIndex, entity);
         })
         .Schedule(inputDeps);
 
@@ -639,7 +651,7 @@ public class ExecuteActionsSystem : JobComponentSystem
                         else
                         {
                             health.CurrentHealth = 0;
-                            ECBuffer.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
+                            ecb.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
                         }
                         break;
                 }
@@ -651,11 +663,11 @@ public class ExecuteActionsSystem : JobComponentSystem
                 }
             }
             incomingEffects.AttackEffects = incomingEffects.AttackEffects;
-            ECBuffer.RemoveComponent<AttackTag>(entityInQueryIndex, entity);
+            ecb.RemoveComponent<AttackTag>(entityInQueryIndex, entity);
         })
         .Schedule(inputDeps);
 
-        JobHandle applyMoveDataTransformationJob = Entities.WithAll<IncomingMoveTag, MoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision, ref Energy.Component energy,  ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
+        JobHandle applyMoveDataTransformationJob = Entities.WithAll<IncomingMoveTag, MoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision, ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
         {
             var combinedHealth = health.CurrentHealth + health.Armor;
 
@@ -680,7 +692,7 @@ public class ExecuteActionsSystem : JobComponentSystem
                         else
                         {
                             health.CurrentHealth = 0;
-                            ECBuffer.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
+                            ecb.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
                         }
                         break;
                     case EffectTypeEnum.move_along_path:
@@ -690,9 +702,13 @@ public class ExecuteActionsSystem : JobComponentSystem
                         {
                             Coords = new Coordinates(incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.X, incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.Y, incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].WorldPosition.Z)
                         };
-
                         coord.CubeCoordinate = incomingEffect.MoveAlongPathNested.CoordinatePositionPairs[pathCount].CubeCoordinate;
                         vision.RequireUpdate = true;
+                        /*
+                        l.HandleLog(LogType.Warning,
+                        new LogEvent("UnitPosition after move action")
+                        .WithField("Position", position.Coords.ToUnityVector()));
+                        */
                         break;
                 }
 
@@ -704,7 +720,8 @@ public class ExecuteActionsSystem : JobComponentSystem
             }
 
             incomingEffects.MoveEffects = incomingEffects.MoveEffects;
-            ECBuffer.RemoveComponent<MoveTag>(entityInQueryIndex, entity);
+            //EntityManager.RemoveComponent<MoveTag>(entity);
+            ecb.RemoveComponent<MoveTag>(entityInQueryIndex, entity);
         })
         .Schedule(inputDeps);
 
@@ -733,7 +750,7 @@ public class ExecuteActionsSystem : JobComponentSystem
                         else
                         {
                             health.CurrentHealth = 0;
-                            ECBuffer.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
+                            ecb.AddComponent<IsDeadTag>(entityInQueryIndex, entity);
                         }
                         break;
                 }
@@ -745,11 +762,16 @@ public class ExecuteActionsSystem : JobComponentSystem
                 }
             }
             incomingEffects.SkillshotEffects = incomingEffects.SkillshotEffects;
-            ECBuffer.RemoveComponent<SkillshotTag>(entityInQueryIndex, entity);
+            ecb.RemoveComponent<SkillshotTag>(entityInQueryIndex, entity);
         })
         .Schedule(inputDeps);
 
         #endregion
+
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyInterruptDataTransformationJob);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyAttackDataTransformationJob);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyMoveDataTransformationJob);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applySkillshotDataTransformationJob);
 
         return inputDeps;
     }
