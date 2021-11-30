@@ -32,7 +32,6 @@ namespace LeyLineHybridECS
         EntityQuery m_UnitData;
         EntityQuery m_EffectStackData;
 
-
         protected override void OnCreate()
         {
             base.OnCreate();
@@ -109,6 +108,7 @@ namespace LeyLineHybridECS
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
+                       /*
 #if UNITY_EDITOR
                         //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
                         if (gameState.PlayersOnMapCount == 1)
@@ -130,6 +130,7 @@ namespace LeyLineHybridECS
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
 #else
+*/
                         if (gameState.PlayersOnMapCount == 2)
                         {
                             if (gameState.CurrentWaitTime <= 0)
@@ -147,7 +148,7 @@ namespace LeyLineHybridECS
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
-#endif
+//#endif
                         break;
                     case GameStateEnum.planning:
                         if(gameState.CurrentRopeTime <= 0)
@@ -315,6 +316,7 @@ namespace LeyLineHybridECS
                         gameState.CurrentState = GameStateEnum.game_over;
                     }
                 }
+                /*
 #if UNITY_EDITOR
                 if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
@@ -323,13 +325,14 @@ namespace LeyLineHybridECS
                     gameState.CurrentState = GameStateEnum.waiting_for_players;
                 }
 #else
+*/
                         if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
                         {
                             m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
                             gameState.InitMapWaitTime = 2f;
                             gameState.CurrentState = GameStateEnum.waiting_for_players;
                         }
-#endif
+//#endif
             })
             .WithoutBurst()
             .Run();
@@ -346,11 +349,8 @@ namespace LeyLineHybridECS
                     var e = effectStack.GameStateEffectStacks[i];
                     e.CurrentState = gameState;
                     e.EffectsExecuted = false;
-                    effectStack.GameStateEffectStacks[i] = e;
-                }
+                    effectStack.GameStateEffectStacks[i] = e;                }
             }
-            effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
-
             m_EffectStackData.SetSingleton(effectStack);
         }
 
@@ -390,8 +390,6 @@ namespace LeyLineHybridECS
                     }
                 }
             }
-            effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
-
             m_EffectStackData.SetSingleton(effectStack);
         }
 

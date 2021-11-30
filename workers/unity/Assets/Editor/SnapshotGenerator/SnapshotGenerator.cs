@@ -190,6 +190,8 @@ namespace BlankProject.Editor
 
             var gameStateStacks = new List<GameStateEffectStack>();
 
+
+
             foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
             {
                 gameStateStacks.Add(new GameStateEffectStack
@@ -202,6 +204,8 @@ namespace BlankProject.Editor
                 }
                 );
             }
+
+            gameStateStacks.Sort((x, y) => x.WorldIndex.CompareTo(y.WorldIndex));
 
             EffectStack.Snapshot effectStack = new EffectStack.Snapshot
             {

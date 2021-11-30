@@ -117,4 +117,56 @@ MonoBehaviour:
         Enabled: 0
         Required: 0
         scriptingImplementation: 1
+  - WorkerType: SimulatedPlayerCoordinator
+    ScenesForWorker:
+    - {fileID: 102900000, guid: 1aa76a577ee2dd844969da4d4b9d77e4, type: 3}
+    LocalBuildConfig:
+      BuildTargets:
+      - Options: 0
+        Deprecated: 0
+        Enabled: 1
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 0
+        Deprecated: 0
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 0
+        Deprecated: 0
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 1
+    CloudBuildConfig:
+      BuildTargets:
+      - Options: 0
+        Deprecated: 1
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 0
+        Deprecated: 0
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 16384
+        Deprecated: 0
+        Enabled: 1
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 0
+        Deprecated: 0
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 0
+        Deprecated: 0
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 0
+      - Options: 0
+        Deprecated: 0
+        Enabled: 0
+        Required: 0
+        scriptingImplementation: 1
   isInitialised: 1

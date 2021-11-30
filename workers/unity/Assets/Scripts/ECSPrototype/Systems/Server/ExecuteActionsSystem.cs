@@ -63,7 +63,6 @@ public class ExecuteActionsSystem : JobComponentSystem
         for (int i = 0; i < effectStack.GameStateEffectStacks.Count; i++)
         {
             var gameStateEffectStack = effectStack.GameStateEffectStacks[i];
-            var worldIndex = new WorldIndexShared { Value = gameStateEffectStack.WorldIndex };
 
             #region NormalizeEffectData
             /// <summary>
@@ -71,59 +70,58 @@ public class ExecuteActionsSystem : JobComponentSystem
             /// Units copy their locked action effect data into effectsDataBase when the correct step begins
             ///
             /// </summary>
-            JobHandle writeInterruptEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedInterruptTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
+            JobHandle writeInterruptEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().WithAll<LockedInterruptTag>().ForEach((Entity entity, int entityInQueryIndex, in Actions.Component actions) =>
             {
-                foreach (ActionEffect e in actions.LockedAction.Effects)
+                foreach (ActionEffect effect in actions.LockedAction.Effects)
                 {
-                    effectStack.GameStateEffectStacks[i].InterruptEffects.Add(e);
+                    effectStack.GameStateEffectStacks[i].InterruptEffects.Add(effect);
                 }
-                effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
                 ecb.RemoveComponent<LockedInterruptTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
 
             endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeInterruptEffectDataJob);
 
-            JobHandle writeAttackEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedAttackTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
+            JobHandle writeAttackEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().WithAll<LockedAttackTag>().ForEach((Entity entity, int entityInQueryIndex, in Actions.Component actions) =>
             {
-                foreach (ActionEffect e in actions.LockedAction.Effects)
+                foreach (ActionEffect effect in actions.LockedAction.Effects)
                 {
-                    effectStack.GameStateEffectStacks[i].AttackEffects.Add(e);
+                    effectStack.GameStateEffectStacks[i].AttackEffects.Add(effect);
                 }
-                effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
                 ecb.RemoveComponent<LockedAttackTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
 
             endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeAttackEffectDataJob);
 
-
-            JobHandle writeMoveEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedMoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
+            JobHandle writeMoveEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().WithAll<LockedMoveTag>().ForEach((Entity entity, int entityInQueryIndex, in Actions.Component actions) =>
             {
-                foreach (ActionEffect e in actions.LockedAction.Effects)
+                foreach (ActionEffect effect in actions.LockedAction.Effects)
                 {
-                    effectStack.GameStateEffectStacks[i].MoveEffects.Add(e);
+                    //Debug.Log("Write MoveEffect into effectstack with Type = " + effect.EffectType.ToString());
+                    effectStack.GameStateEffectStacks[i].MoveEffects.Add(effect);
                 }
-                effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
                 ecb.RemoveComponent<LockedMoveTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
 
             endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeMoveEffectDataJob);
 
-            JobHandle writeSkillshotEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().WithAll<LockedSkillshotTag>().ForEach((Entity entity, int entityInQueryIndex, ref Actions.Component actions) =>
+            JobHandle writeSkillshotEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().WithAll<LockedSkillshotTag>().ForEach((Entity entity, int entityInQueryIndex, in Actions.Component actions) =>
             {
-                foreach (ActionEffect e in actions.LockedAction.Effects)
+                foreach (ActionEffect effect in actions.LockedAction.Effects)
                 {
-                    effectStack.GameStateEffectStacks[i].SkillshotEffects.Add(e);
+                    effectStack.GameStateEffectStacks[i].SkillshotEffects.Add(effect);
                 }
-                effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
                 ecb.RemoveComponent<LockedSkillshotTag>(entityInQueryIndex, entity);
             })
             .Schedule(inputDeps);
 
             endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(writeSkillshotEffectDataJob);
             #endregion
+
+            writeInterruptEffectDataJob.Complete();
+            writeMoveEffectDataJob.Complete();
 
             #region DenormalizeEffectData
             /// <summary>
@@ -133,13 +131,11 @@ public class ExecuteActionsSystem : JobComponentSystem
             /// </summary>
             if (!effectStack.GameStateEffectStacks[i].EffectsExecuted)
             {
-                switch (gameStateEffectStack.CurrentState)
+                switch (effectStack.GameStateEffectStacks[i].CurrentState)
                 {
                     case GameStateEnum.interrupt:
-                        writeInterruptEffectDataJob.Complete();
 
                         CompareAndCullInterruptSpawnEffects(ref gameStateEffectStack.InterruptEffects);
-                        effectStack.GameStateEffectStacks[i] = gameStateEffectStack;
 
                         for (int y = 0; y < effectStack.GameStateEffectStacks[i].InterruptEffects.Count; y++)
                         {
@@ -163,46 +159,45 @@ public class ExecuteActionsSystem : JobComponentSystem
                             }
                         }
 
-                        JobHandle denormalizeInterruptEffectsJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
+                        JobHandle denormalizeInterruptEffectsJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
                         {
                             for (int y = 0; y < effectStack.GameStateEffectStacks[i].InterruptEffects.Count; y++)
                             {
-                                if (effectStack.GameStateEffectStacks[i].InterruptEffects[y].TargetCoordinates.Contains(unitCoord.CubeCoordinate))
+                                if (effectStack.GameStateEffectStacks[i].InterruptEffects[y].TargetCoordinates != null && effectStack.GameStateEffectStacks[i].InterruptEffects[y].TargetCoordinates.Contains(unitCoord.CubeCoordinate))
                                 {
-                                    var currentEffect = effectStack.GameStateEffectStacks[i].InterruptEffects[y];
                                     bool valid = false;
 
-                                    switch (currentEffect.ApplyToRestrictions)
+                                    switch (effectStack.GameStateEffectStacks[i].InterruptEffects[y].ApplyToRestrictions)
                                     {
                                         case ApplyToRestrictionsEnum.any:
                                             valid = true;
                                             break;
                                         case ApplyToRestrictionsEnum.enemy:
-                                            if (unitFaction.Faction != currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction != effectStack.GameStateEffectStacks[i].InterruptEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].InterruptEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly_other:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction && currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].InterruptEffects[y].OriginUnitFaction && effectStack.GameStateEffectStacks[i].InterruptEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.other:
-                                            if (currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].InterruptEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.self:
-                                            if (currentEffect.OriginUnitId == id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].InterruptEffects[y].OriginUnitId == id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
@@ -217,21 +212,21 @@ public class ExecuteActionsSystem : JobComponentSystem
                                     {
                                         var incEffect = new IncomingActionEffect
                                         {
-                                            EffectType = currentEffect.EffectType,
-                                            UnitDuration = currentEffect.UnitDuration,
-                                            MoveAlongPathNested = currentEffect.MoveAlongPathNested
+                                            EffectType = effectStack.GameStateEffectStacks[i].InterruptEffects[y].EffectType,
+                                            UnitDuration = effectStack.GameStateEffectStacks[i].InterruptEffects[y].UnitDuration,
+                                            MoveAlongPathNested = effectStack.GameStateEffectStacks[i].InterruptEffects[y].MoveAlongPathNested
                                         };
 
                                         switch (incEffect.EffectType)
                                         {
                                             case EffectTypeEnum.gain_armor:
-                                                incEffect.GainArmorNested = currentEffect.GainArmorNested;
+                                                incEffect.GainArmorNested = effectStack.GameStateEffectStacks[i].InterruptEffects[y].GainArmorNested;
                                                 break;
                                             case EffectTypeEnum.spawn_unit:
-                                                incEffect.SpawnUnitNested = currentEffect.SpawnUnitNested;
+                                                incEffect.SpawnUnitNested = effectStack.GameStateEffectStacks[i].InterruptEffects[y].SpawnUnitNested;
                                                 break;
                                             case EffectTypeEnum.deal_damage:
-                                                incEffect.DealDamageNested = currentEffect.DealDamageNested;
+                                                incEffect.DealDamageNested = effectStack.GameStateEffectStacks[i].InterruptEffects[y].DealDamageNested;
                                                 break;
                                         }
 
@@ -253,46 +248,46 @@ public class ExecuteActionsSystem : JobComponentSystem
                         SubtractTurnTimers(ref gameStateEffectStack.InterruptEffects);
                         break;
                     case GameStateEnum.attack:
-                        JobHandle denormalizeAttackEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
+                        JobHandle denormalizeAttackEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
                         {
                             for (int y = 0; y < effectStack.GameStateEffectStacks[i].AttackEffects.Count; y++)
                             {
-                                if (effectStack.GameStateEffectStacks[i].AttackEffects[y].TargetCoordinates.Contains(unitCoord.CubeCoordinate))
+                                if (effectStack.GameStateEffectStacks[i].AttackEffects[y].TargetCoordinates != null && effectStack.GameStateEffectStacks[i].AttackEffects[y].TargetCoordinates.Contains(unitCoord.CubeCoordinate))
                                 {
-                                    var currentEffect = effectStack.GameStateEffectStacks[i].AttackEffects[y];
+                                    //var currentEffect = effectStack.GameStateEffectStacks[i].AttackEffects[y];
                                     bool valid = false;
 
-                                    switch (currentEffect.ApplyToRestrictions)
+                                    switch (effectStack.GameStateEffectStacks[i].AttackEffects[y].ApplyToRestrictions)
                                     {
                                         case ApplyToRestrictionsEnum.any:
                                             valid = true;
                                             break;
                                         case ApplyToRestrictionsEnum.enemy:
-                                            if (unitFaction.Faction != currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction != effectStack.GameStateEffectStacks[i].AttackEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].AttackEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly_other:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction && currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].AttackEffects[y].OriginUnitFaction && effectStack.GameStateEffectStacks[i].AttackEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.other:
-                                            if (currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].AttackEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.self:
-                                            if (currentEffect.OriginUnitId == id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].AttackEffects[y].OriginUnitId == id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
@@ -307,21 +302,21 @@ public class ExecuteActionsSystem : JobComponentSystem
                                     {
                                         var incEffect = new IncomingActionEffect
                                         {
-                                            EffectType = currentEffect.EffectType,
-                                            UnitDuration = currentEffect.UnitDuration,
-                                            MoveAlongPathNested = currentEffect.MoveAlongPathNested
+                                            EffectType = effectStack.GameStateEffectStacks[i].AttackEffects[y].EffectType,
+                                            UnitDuration = effectStack.GameStateEffectStacks[i].AttackEffects[y].UnitDuration,
+                                            MoveAlongPathNested = effectStack.GameStateEffectStacks[i].AttackEffects[y].MoveAlongPathNested
                                         };
 
                                         switch (incEffect.EffectType)
                                         {
                                             case EffectTypeEnum.gain_armor:
-                                                incEffect.GainArmorNested = currentEffect.GainArmorNested;
+                                                incEffect.GainArmorNested = effectStack.GameStateEffectStacks[i].AttackEffects[y].GainArmorNested;
                                                 break;
                                             case EffectTypeEnum.spawn_unit:
-                                                incEffect.SpawnUnitNested = currentEffect.SpawnUnitNested;
+                                                incEffect.SpawnUnitNested = effectStack.GameStateEffectStacks[i].AttackEffects[y].SpawnUnitNested;
                                                 break;
                                             case EffectTypeEnum.deal_damage:
-                                                incEffect.DealDamageNested = currentEffect.DealDamageNested;
+                                                incEffect.DealDamageNested = effectStack.GameStateEffectStacks[i].AttackEffects[y].DealDamageNested;
                                                 break;
                                         }
 
@@ -341,7 +336,6 @@ public class ExecuteActionsSystem : JobComponentSystem
                         SubtractTurnTimers(ref gameStateEffectStack.AttackEffects);
                         break;
                     case GameStateEnum.move:
-                        writeMoveEffectDataJob.Complete();
 
                         for (int y = 0; y < effectStack.GameStateEffectStacks[i].MoveEffects.Count; y++)
                         {
@@ -365,25 +359,44 @@ public class ExecuteActionsSystem : JobComponentSystem
                             }
                         }
 
-                        CompareAndCullMoveInterruptEffects(gameStateEffectStack.InterruptEffects, ref gameStateEffectStack.MoveEffects);
-                        CompareAndCullMoveEffects(ref gameStateEffectStack.MoveEffects);
-                        effectStack.GameStateEffectStacks[i] = gameStateEffectStack;
+                        /*
+                        logger.HandleLog(LogType.Warning,
+                        new LogEvent("Before Cull Method")
+                        .WithField("MoveEffectCount", gameStateEffectStack.MoveEffects.Count));
+                        */
 
-                        JobHandle denormalizeMoveEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
+                        gameStateEffectStack.MoveEffects = CompareAndCullMoveInterruptEffects(effectStack.GameStateEffectStacks[i].InterruptEffects, gameStateEffectStack.MoveEffects);
+                        gameStateEffectStack.MoveEffects = CompareAndCullMoveEffects(gameStateEffectStack.MoveEffects);
+
+                        /*
+                        logger.HandleLog(LogType.Warning,
+                        new LogEvent("After Cull Complete")
+                        .WithField("MoveEffectCount", gameStateEffectStack.MoveEffects.Count));
+                        */
+
+                        /*
+                        Debug.Log("MoveCount = " + effectStack.GameStateEffectStacks[i].MoveEffects.Count + ", World = " + effectStack.GameStateEffectStacks[i].WorldIndex);
+
+
+                        foreach (ActionEffect e in effectStack.GameStateEffectStacks[i].MoveEffects)
+                        {
+                            Debug.Log("MoveEffectTypes before denormalization: " + e.EffectType.ToString());
+                        }
+                        */
+
+                        JobHandle denormalizeMoveEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
                         {
                             for (int y = 0; y < effectStack.GameStateEffectStacks[i].MoveEffects.Count; y++)
                             {
-                                var currentEffect = effectStack.GameStateEffectStacks[i].MoveEffects[y];
-
-                                if (currentEffect.EffectType == EffectTypeEnum.move_along_path)
+                                if (effectStack.GameStateEffectStacks[i].MoveEffects[y].EffectType == EffectTypeEnum.move_along_path)
                                 {
-                                    if (currentEffect.OriginUnitId == id.EntityId.Id)
+                                    if (effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitId == id.EntityId.Id)
                                     {
                                         var incEffect = new IncomingActionEffect
                                         {
-                                            EffectType = currentEffect.EffectType,
-                                            UnitDuration = currentEffect.UnitDuration,
-                                            MoveAlongPathNested = currentEffect.MoveAlongPathNested
+                                            EffectType = effectStack.GameStateEffectStacks[i].MoveEffects[y].EffectType,
+                                            UnitDuration = effectStack.GameStateEffectStacks[i].MoveEffects[y].UnitDuration,
+                                            MoveAlongPathNested = effectStack.GameStateEffectStacks[i].MoveEffects[y].MoveAlongPathNested
                                         };
 
                                         incomingEffects.MoveEffects.Add(incEffect);
@@ -395,40 +408,40 @@ public class ExecuteActionsSystem : JobComponentSystem
                                         }
                                     }
                                 }
-                                else if (currentEffect.TargetCoordinates.Contains(unitCoord.CubeCoordinate))
+                                else if (effectStack.GameStateEffectStacks[i].MoveEffects[y].TargetCoordinates != null && effectStack.GameStateEffectStacks[i].MoveEffects[y].TargetCoordinates.Contains(unitCoord.CubeCoordinate))
                                 {
                                     bool valid = false;
-                                    switch (currentEffect.ApplyToRestrictions)
+                                    switch (effectStack.GameStateEffectStacks[i].MoveEffects[y].ApplyToRestrictions)
                                     {
                                         case ApplyToRestrictionsEnum.any:
                                             valid = true;
                                             break;
                                         case ApplyToRestrictionsEnum.enemy:
-                                            if (unitFaction.Faction != currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction != effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly_other:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction && currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitFaction && effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.other:
-                                            if (currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.self:
-                                            if (currentEffect.OriginUnitId == id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].MoveEffects[y].OriginUnitId == id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
@@ -443,21 +456,21 @@ public class ExecuteActionsSystem : JobComponentSystem
                                     {
                                         var incEffect = new IncomingActionEffect
                                         {
-                                            EffectType = currentEffect.EffectType,
-                                            UnitDuration = currentEffect.UnitDuration,
-                                            MoveAlongPathNested = currentEffect.MoveAlongPathNested
+                                            EffectType = effectStack.GameStateEffectStacks[i].MoveEffects[y].EffectType,
+                                            UnitDuration = effectStack.GameStateEffectStacks[i].MoveEffects[y].UnitDuration,
+                                            MoveAlongPathNested = effectStack.GameStateEffectStacks[i].MoveEffects[y].MoveAlongPathNested
                                         };
 
                                         switch (incEffect.EffectType)
                                         {
                                             case EffectTypeEnum.gain_armor:
-                                                incEffect.GainArmorNested = currentEffect.GainArmorNested;
+                                                incEffect.GainArmorNested = effectStack.GameStateEffectStacks[i].MoveEffects[y].GainArmorNested;
                                                 break;
                                             case EffectTypeEnum.spawn_unit:
-                                                incEffect.SpawnUnitNested = currentEffect.SpawnUnitNested;
+                                                incEffect.SpawnUnitNested = effectStack.GameStateEffectStacks[i].MoveEffects[y].SpawnUnitNested;
                                                 break;
                                             case EffectTypeEnum.deal_damage:
-                                                incEffect.DealDamageNested = currentEffect.DealDamageNested;
+                                                incEffect.DealDamageNested = effectStack.GameStateEffectStacks[i].MoveEffects[y].DealDamageNested;
                                                 break;
                                         }
 
@@ -474,49 +487,48 @@ public class ExecuteActionsSystem : JobComponentSystem
                         })
                         .Schedule(writeMoveEffectDataJob);
                         endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(denormalizeMoveEffectDataJob);
+                        denormalizeMoveEffectDataJob.Complete();
                         SubtractTurnTimers(ref gameStateEffectStack.MoveEffects);
                         break;
                     case GameStateEnum.skillshot:
-                        JobHandle denormalizeSkillshotEffectDataJob = Entities.WithSharedComponentFilter(worldIndex).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
+                        JobHandle denormalizeSkillshotEffectDataJob = Entities.WithSharedComponentFilter(new WorldIndexShared { Value = effectStack.GameStateEffectStacks[i].WorldIndex }).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
                         {
                             for (int y = 0; y < effectStack.GameStateEffectStacks[i].SkillshotEffects.Count; y++)
                             {
-                                var currentEffect = effectStack.GameStateEffectStacks[i].SkillshotEffects[y];
-
-                                if (currentEffect.TargetCoordinates.Contains(unitCoord.CubeCoordinate))
+                                if (effectStack.GameStateEffectStacks[i].SkillshotEffects[y].TargetCoordinates != null && effectStack.GameStateEffectStacks[i].SkillshotEffects[y].TargetCoordinates.Contains(unitCoord.CubeCoordinate))
                                 {
                                     bool valid = false;
-                                    switch (currentEffect.ApplyToRestrictions)
+                                    switch (effectStack.GameStateEffectStacks[i].SkillshotEffects[y].ApplyToRestrictions)
                                     {
                                         case ApplyToRestrictionsEnum.any:
                                             valid = true;
                                             break;
                                         case ApplyToRestrictionsEnum.enemy:
-                                            if (unitFaction.Faction != currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction != effectStack.GameStateEffectStacks[i].SkillshotEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].SkillshotEffects[y].OriginUnitFaction)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.friendly_other:
-                                            if (unitFaction.Faction == currentEffect.OriginUnitFaction && currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (unitFaction.Faction == effectStack.GameStateEffectStacks[i].SkillshotEffects[y].OriginUnitFaction && effectStack.GameStateEffectStacks[i].SkillshotEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.other:
-                                            if (currentEffect.OriginUnitId != id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].SkillshotEffects[y].OriginUnitId != id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
                                             break;
                                         case ApplyToRestrictionsEnum.self:
-                                            if (currentEffect.OriginUnitId == id.EntityId.Id)
+                                            if (effectStack.GameStateEffectStacks[i].SkillshotEffects[y].OriginUnitId == id.EntityId.Id)
                                             {
                                                 valid = true;
                                             }
@@ -531,21 +543,21 @@ public class ExecuteActionsSystem : JobComponentSystem
                                     {
                                         var incEffect = new IncomingActionEffect
                                         {
-                                            EffectType = currentEffect.EffectType,
-                                            UnitDuration = currentEffect.UnitDuration,
-                                            MoveAlongPathNested = currentEffect.MoveAlongPathNested
+                                            EffectType = effectStack.GameStateEffectStacks[i].SkillshotEffects[y].EffectType,
+                                            UnitDuration = effectStack.GameStateEffectStacks[i].SkillshotEffects[y].UnitDuration,
+                                            MoveAlongPathNested = effectStack.GameStateEffectStacks[i].SkillshotEffects[y].MoveAlongPathNested
                                         };
 
                                         switch (incEffect.EffectType)
                                         {
                                             case EffectTypeEnum.gain_armor:
-                                                incEffect.GainArmorNested = currentEffect.GainArmorNested;
+                                                incEffect.GainArmorNested = effectStack.GameStateEffectStacks[i].SkillshotEffects[y].GainArmorNested;
                                                 break;
                                             case EffectTypeEnum.spawn_unit:
-                                                incEffect.SpawnUnitNested = currentEffect.SpawnUnitNested;
+                                                incEffect.SpawnUnitNested = effectStack.GameStateEffectStacks[i].SkillshotEffects[y].SpawnUnitNested;
                                                 break;
                                             case EffectTypeEnum.deal_damage:
-                                                incEffect.DealDamageNested = currentEffect.DealDamageNested;
+                                                incEffect.DealDamageNested = effectStack.GameStateEffectStacks[i].SkillshotEffects[y].DealDamageNested;
                                                 break;
                                         }
 
@@ -566,14 +578,15 @@ public class ExecuteActionsSystem : JobComponentSystem
                         break;
                 }
 
+                
+
                 gameStateEffectStack.EffectsExecuted = true;
                 effectStack.GameStateEffectStacks[i] = gameStateEffectStack;
-                effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
+                //effectStack.GameStateEffectStacks = effectStack.GameStateEffectStacks;
+                m_EffectStackData.SetSingleton(effectStack);
             }
             #endregion
         }
-
-        m_EffectStackData.SetSingleton(effectStack);
 
         #region DenormalizedUnitLoops
         /// <summary>
@@ -827,7 +840,7 @@ public class ExecuteActionsSystem : JobComponentSystem
         }
     }
 
-    void CompareAndCullMoveInterruptEffects(in List<ActionEffect> interruptEffects, ref List<ActionEffect> moveEffects)
+    List<ActionEffect> CompareAndCullMoveInterruptEffects(in List<ActionEffect> interruptEffects, List<ActionEffect> moveEffects)
     {
         //find all effects with the same target coord
         for (int i = 0; i < interruptEffects.Count; i++)
@@ -848,9 +861,17 @@ public class ExecuteActionsSystem : JobComponentSystem
                 }
             }
         }
+        for (int i = moveEffects.Count; i > 0; i--)
+        {
+            if (moveEffects[i - 1].EffectType == EffectTypeEnum.move_along_path && moveEffects[i - 1].MoveAlongPathNested.CoordinatePositionPairs.Count == 0)
+            {
+                moveEffects.RemoveAt(i - 1);
+            }
+        }
+        return moveEffects;
     }
 
-    void CompareAndCullMoveEffects(ref List<ActionEffect> moveEffects)
+    List<ActionEffect> CompareAndCullMoveEffects(List<ActionEffect> moveEffects)
     {
         //Debug.Log("StartCullMethod");
         //find all effects with the same target coord
@@ -898,7 +919,6 @@ public class ExecuteActionsSystem : JobComponentSystem
                                     pathCount--;
                                 }
                             }
-
                             culledAPath = true;
                         }
                     }
@@ -907,17 +927,17 @@ public class ExecuteActionsSystem : JobComponentSystem
         }
 
         if (culledAPath)
-            CompareAndCullMoveEffects(ref moveEffects);
+            return CompareAndCullMoveEffects(moveEffects);
         else
         {
             for (int i = moveEffects.Count; i > 0; i--)
             {
                 if (moveEffects[i - 1].EffectType == EffectTypeEnum.move_along_path && moveEffects[i - 1].MoveAlongPathNested.CoordinatePositionPairs.Count == 0)
                 {
-                    //Debug.Log("Empty move in effect Stack - removing.");
                     moveEffects.RemoveAt(i - 1);
                 }
             }
+            return moveEffects;
         }
     }
 }

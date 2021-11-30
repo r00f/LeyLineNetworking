@@ -1,0 +1,7 @@
+package player;
+
+component SimulatedPlayer {
+    id = 133;
+    bool is_simulated_player = 1;
+    bool actions_selected = 2;
+}

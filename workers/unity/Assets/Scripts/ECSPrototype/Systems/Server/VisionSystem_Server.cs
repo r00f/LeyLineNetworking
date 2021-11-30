@@ -168,11 +168,12 @@ public class VisionSystem_Server : JobComponentSystem
 
             Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id, in WorldIndex.Component p_windex) =>
             {
+                /*
                 logger.HandleLog(LogType.Warning,
                 new LogEvent("playerVision.ReqUpdate")
                 .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate)
                 .WithField("PlayerId", p_id.EntityId.Id));
-
+                */
                 if (p_Vision.RequireUpdate)
                 {
                     /*

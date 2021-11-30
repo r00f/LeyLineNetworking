@@ -5,7 +5,7 @@ public static class WorkerUtils
 {
     public const string UnityClient = "UnityClient";
     public const string UnityGameLogic = "UnityGameLogic";
-
+    public const string SimulatedPlayerCoordinator = "SimulatedPlayerCoordinator";
 
     public static void AddClientSystems(World world)
     {
@@ -41,5 +41,11 @@ public static class WorkerUtils
         world.GetOrCreateSystem<PathFindingSystem>();
         world.GetOrCreateSystem<VisionSystem_Server>();
         world.GetOrCreateSystem<AISystem>();
+    }
+
+    public static void AddSimulatedPlayerSystems(World world)
+    {
+        world.GetOrCreateSystem<SimulatedPlayerSystem>();
+        world.GetOrCreateSystem<SimulatedActionRequestSystem>();
     }
 }

@@ -1,5 +1,5 @@
 {
-  "template": "n1standard2_std40_r0500",
+  "template": "sim_players",
   "world": {
     "chunkEdgeLengthMeters": 50,
     "snapshots": {
@@ -11,10 +11,6 @@
     },
     "legacy_flags": [
       {
-        "name": "bridge_qos_max_timeout",
-        "value": "0"
-      },
-      {
         "name": "interest_queries_components_are_filtered_by_component_delivery",
         "value": "false"
       }
@@ -23,7 +19,7 @@
   "load_balancing": {
     "layer_configurations": [
       {
-        "layer": "UnityGameLogic",
+        "layer": "SimulatedPlayerCoordinator",
         "points_of_interest": {
           "num_workers": 1,
           "points": [
@@ -32,60 +28,30 @@
               "z": 0
             }
           ]
-        },
-        "options": {
-          "manual_worker_connection_only": true
         }
       }
     ]
   },
   "workers": [
     {
-      "worker_type": "UnityGameLogic",
-      "permissions": [
-        {
-          "all": {}
-        }
-      ],
-      "flags": [
-        {
-          "name": "fps_simulated_players_target_deployment",
-          "value": "fps_simulated_players_target_deployment"
-        }
-      ]
-    },
-    {
       "worker_type": "SimulatedPlayerCoordinator",
       "flags": [
         {
           "name": "world_size",
-          "value": "4"
+          "value": "24"
         },
         {
           "name": "fps_simulated_players_per_coordinator",
-          "value": "2"
+          "value": "20"
         },
         {
           "name": "fps_simulated_players_creation_interval",
-          "value": "5"
+          "value": "1"
         }
       ],
       "permissions": [
         {
           "all": {}
-        }
-      ]
-    },
-    {
-      "worker_type": "UnityClient",
-      "permissions": [
-        {
-          "entity_query": {
-            "allow": true,
-            "components": [
-              "*"
-            ]
-          }
         }
       ]
     }

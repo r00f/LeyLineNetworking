@@ -208,6 +208,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new SimulatedPlayer.Snapshot(), client);
         template.AddComponent(playerState, client);
         template.AddComponent(playerPathing, client);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);

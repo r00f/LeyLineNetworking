@@ -3,17 +3,11 @@
     "tasks": [
       {
         "name": "Codegen",
-        "steps": [{"name": "** Load Unity to generate code **", "command": "echo", "arguments": ["No-op."]}]
+        "steps": [{"name": "** Run ci/codegen.sh instead **", "command": "echo", "arguments": ["No-op."]}]
       },
       {
         "name": "build",
-        "steps": [
-          {
-            "name": "** Run ci/build-gamelogic.sh instead **",
-            "command": "echo",
-            "arguments": [ "No-op." ]
-          }
-        ]
+        "steps": [{"name": "** Run ci/build-gamelogic.sh instead **", "command": "echo", "arguments": ["No-op."]}]
       },
       {
         "name": "clean",
@@ -24,12 +18,12 @@
   "bridge": {
     "worker_attribute_set": {
       "attributes": [
-        "UnityGameLogic"
+        "SimulatedPlayerCoordinator"
       ]
     },
     "entity_interest": {
       "range_entity_interest": {
-        "radius": 5000
+        "radius": 80
       }
     },
     "component_delivery": {
@@ -41,45 +35,51 @@
     "default": {
       "run_type": "EXECUTABLE",
       "windows": {
-        "command": "build/worker/UnityGameLogic@Windows/UnityGameLogic@Windows.exe",
+        "command": "build/worker/SimulatedPlayerCoordinator@Windows/SimulatedPlayerCoordinator@Windows.exe",
         "arguments": [
           "+workerType",
-          "UnityGameLogic",
+          "SimulatedPlayerCoordinator",
+          "+deploymentName",
+          "${IMPROBABLE_DEPLOYMENT_NAME}",
           "-batchmode",
           "-nographics",
           "-logfile",
-          "../../logs/external-default-unitygamelogic.log"
+          "../../logs/external-default-simulatedplayercoordinator.log"
         ]
       },
       "macos": {
         "command": "open",
         "arguments": [
           "-n",
-          "./build/worker/UnityGameLogic@Mac/UnityGameLogic@Mac.app",
+          "./build/worker/SimulatedPlayerCoordinator@Mac/SimulatedPlayerCoordinator@Mac.app",
           "--args",
+          "+deploymentName",
+          "${IMPROBABLE_DEPLOYMENT_NAME}",
           "+workerType",
-          "UnityGameLogic",
+          "SimulatedPlayerCoordinator",
           "-batchmode",
           "-nographics",
           "-logfile",
-          "../../logs/external-default-unitygamelogic.log"
+          "../../logs/external-default-simulatedplayercoordinator.log"
         ]
       }
     }
   },
   "managed": {
     "windows": {
-      "artifact_name": "UnityGameLogic@Windows.zip",
-      "command": "UnityGameLogic@Windows.exe",
+      "artifact_name": "SimulatedPlayerCoordinator@Windows.zip",
+      "command": "SimulatedPlayerCoordinator@Windows.exe",
       "arguments": [
         "+workerType",
-        "UnityGameLogic",
+        "SimulatedPlayerCoordinator",
         "+workerId",
         "${IMPROBABLE_WORKER_ID}",
         "+receptionistHost",
         "${IMPROBABLE_RECEPTIONIST_HOST}",
         "+receptionistPort",
         "${IMPROBABLE_RECEPTIONIST_PORT}",
+        "+deploymentName",
+        "${IMPROBABLE_DEPLOYMENT_NAME}",
         "+linkProtocol",
         "Tcp",
         "-batchmode",
@@ -89,17 +89,21 @@
       ]
     },
     "macos": {
-      "artifact_name": "UnityGameLogic@Mac.zip",
-      "command": "UnityGameLogic@Mac.app/Contents/MacOS/UnityGameLogic@Mac",
+      "artifact_name": "SimulatedPlayerCoordinator@Mac.zip",
+      "command": "SimulatedPlayerCoordinator@Mac.app/Contents/MacOS/SimulatedPlayerCoordinator@Mac",
       "arguments": [
         "+workerType",
-        "UnityGameLogic",
+        "SimulatedPlayerCoordinator",
         "+workerId",
         "${IMPROBABLE_WORKER_ID}",
+        "+projectName",
+        "${IMPROBABLE_PROJECT_NAME}",
         "+receptionistHost",
         "${IMPROBABLE_RECEPTIONIST_HOST}",
         "+receptionistPort",
         "${IMPROBABLE_RECEPTIONIST_PORT}",
+        "+deploymentName",
+        "${IMPROBABLE_DEPLOYMENT_NAME}",
         "+linkProtocol",
         "Tcp",
         "-batchmode",
@@ -109,17 +113,19 @@
       ]
     },
     "linux": {
-      "artifact_name": "UnityGameLogic@Linux.zip",
-      "command": "UnityGameLogic@Linux",
+      "artifact_name": "SimulatedPlayerCoordinator@Linux.zip",
+      "command": "SimulatedPlayerCoordinator@Linux",
       "arguments": [
         "+workerType",
-        "UnityGameLogic",
+        "SimulatedPlayerCoordinator",
         "+workerId",
         "${IMPROBABLE_WORKER_ID}",
         "+receptionistHost",
         "${IMPROBABLE_RECEPTIONIST_HOST}",
         "+receptionistPort",
         "${IMPROBABLE_RECEPTIONIST_PORT}",
+        "+deploymentName",
+        "${IMPROBABLE_DEPLOYMENT_NAME}",
         "+linkProtocol",
         "Tcp",
         "-batchmode",

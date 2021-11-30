@@ -13,10 +13,11 @@ type GameStateEffectStack
     	generic.GameStateEnum current_state = 1;
         uint32 world_index = 2;
         bool effects_executed = 3;
-        list<unit.ActionEffect> interrupt_effects = 4;
-        list<unit.ActionEffect> attack_effects = 5;
-        list<unit.ActionEffect> move_effects = 6;
-        list<unit.ActionEffect> skillshot_effects = 7;
+        bool effects_culled = 4;
+        list<unit.ActionEffect> interrupt_effects = 5;
+        list<unit.ActionEffect> attack_effects = 6;
+        list<unit.ActionEffect> move_effects = 7;
+        list<unit.ActionEffect> skillshot_effects = 8;
 }
 
 type GameStateStaticMapData

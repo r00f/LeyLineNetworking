@@ -155,8 +155,8 @@ public class HighlightingSystem : JobComponentSystem
                     playerPathing = UpdateSelectedUnit(playerState, playerPathing, playerHighlightingData);
                     SetNumberOfTargets(playerState, currentActionTargetHash);
 
-                    SetSingleton(playerPathing);
-                    SetSingleton(playerState);
+                    m_PlayerStateData.SetSingleton(playerPathing);
+                    m_PlayerStateData.SetSingleton(playerState);
                     /*
                     playerStates[0] = playerState;
                     playerPathings[0] = playerPathing;

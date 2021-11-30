@@ -26,8 +26,20 @@ MonoBehaviour:
       Region: 1
       Cluster: 
       DeploymentLocationType: 0
+      Tags:
+      - dev_login
+    SimulatedPlayerDeploymentConfigs:
+    - Name: leyline_sim1
+      SnapshotPath: 
+      LaunchJson: simulated_player_launch.json
+      Region: 1
+      Cluster: 
+      DeploymentLocationType: 0
       Tags: []
-    SimulatedPlayerDeploymentConfigs: []
+      TargetDeploymentName: leyline
+      FlagPrefix: fps
+      WorkerType: SimulatedPlayerCoordinator
+      WorkerTypeId: 0
   - ProjectName: beta_zulu_jig_924
     AssemblyName: LeyLineTest
     Deployment:
