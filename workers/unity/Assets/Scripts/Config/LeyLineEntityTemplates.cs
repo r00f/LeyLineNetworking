@@ -23,6 +23,7 @@ public static class LeyLineEntityTemplates {
     public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter)
     {
         settings = Resources.Load<Settings>("Settings");
+
         var gameState = new GameState.Snapshot
         {
             CurrentState = GameStateEnum.waiting_for_players,
@@ -34,6 +35,14 @@ public static class LeyLineEntityTemplates {
             MapCenter = mapCenter,
             MinExecuteStepTime = settings.MinimumExecuteTime,
             InitMapWaitTime = 2f
+        };
+
+        var effectStack = new EffectStack.Snapshot
+        {
+            InterruptEffects = new List<ActionEffect>(),
+            AttackEffects = new List<ActionEffect>(),
+            MoveEffects = new List<ActionEffect>(),
+            SkillshotEffects = new List<ActionEffect>()
         };
 
         var wIndex = new WorldIndex.Snapshot
@@ -56,6 +65,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(new Metadata.Snapshot { EntityType = "GameState" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(gameState, WorkerUtils.UnityGameLogic);
+        template.AddComponent(effectStack, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;

@@ -93,17 +93,9 @@ namespace LeyLineHybridECS
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            if (m_EffectStackData.CalculateEntityCount() == 0)
-            {
-                //Debug.Log("EffectStackDataCount = 0");
-                return inputDeps;
-            }
-
             EntityCommandBuffer ECBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-            var effectStack = m_EffectStackData.GetSingleton<EffectStack.Component>();
-
-            Entities.ForEach((ref GameState.Component gameState, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId) =>
+            Entities.ForEach((ref GameState.Component gameState, ref EffectStack.Component effectStack, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId) =>
             {
                 switch (gameState.CurrentState)
                 {
@@ -181,7 +173,7 @@ namespace LeyLineHybridECS
                         break;
                     case GameStateEnum.start_execute:
                         UpdateUnitsGameStateTag(GameStateEnum.interrupt, gameStateWorldIndex, ECBuffer);
-                        SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.interrupt);
+                        effectStack.EffectsExecuted = false;
                         gameState.CurrentState = GameStateEnum.interrupt;
                         break;
                     case GameStateEnum.interrupt:
@@ -195,7 +187,7 @@ namespace LeyLineHybridECS
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.attack, gameStateWorldIndex, ECBuffer);
-                                SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.attack);
+                                effectStack.EffectsExecuted = false;
                                 gameState.CurrentState = GameStateEnum.attack;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -212,7 +204,7 @@ namespace LeyLineHybridECS
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.move, gameStateWorldIndex, ECBuffer);
-                                SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.move);
+                                effectStack.EffectsExecuted = false;
                                 gameState.CurrentState = GameStateEnum.move;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -229,8 +221,8 @@ namespace LeyLineHybridECS
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.skillshot, gameStateWorldIndex, ECBuffer);
-                                UpdateMovedUnitCells(gameStateWorldIndex);
-                                SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.skillshot);
+                                UpdateMovedUnitCells(gameStateWorldIndex, new Dictionary<Vector3f, long>());
+                                effectStack.EffectsExecuted = false;
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -247,7 +239,7 @@ namespace LeyLineHybridECS
                             if (gameState.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
-                                SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.cleanup);
+                                effectStack.EffectsExecuted = false;
                                 gameState.CurrentState = GameStateEnum.cleanup;
                                 gameState.HighestExecuteTime = 0;
                             }
@@ -263,7 +255,7 @@ namespace LeyLineHybridECS
 #else
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex);
 #endif
-                            CleanUpEffectStack(effectStack, gameStateWorldIndex.Value);
+                            effectStack = CleanUpEffectStack(effectStack);
                             gameState.CurrentState = GameStateEnum.game_over;
                         }
                         else
@@ -289,15 +281,19 @@ namespace LeyLineHybridECS
 
                                     UpdateUnitsGameStateTag(GameStateEnum.planning, gameStateWorldIndex, ECBuffer);
                                     CleanUpUnitIncomingEffects(gameStateWorldIndex);
-                                    CleanUpEffectStack(effectStack, gameStateWorldIndex.Value);
-                                    SetEffectStackInfo(effectStack, gameStateWorldIndex.Value, GameStateEnum.planning);
+                                    effectStack = CleanUpEffectStack(effectStack);
+                                    effectStack.EffectsExecuted = false;
                                     gameState.CurrentState = GameStateEnum.planning;
                                 }
                             }
                         }
                         break;
                     case GameStateEnum.game_over:
-                        RevealPlayerVisions(gameStateWorldIndex);
+                        //Cycle back to Start in order to stresstest
+                        m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
+                        gameState.InitMapWaitTime = 2f;
+                        gameState.CurrentState = GameStateEnum.waiting_for_players;
+                        //RevealPlayerVisions(gameStateWorldIndex);
                         break;
                 }
 
@@ -339,8 +335,8 @@ namespace LeyLineHybridECS
 
             return inputDeps;
         }
-
-        void SetEffectStackInfo(EffectStack.Component effectStack, uint worldIndex, GameStateEnum gameState)
+        /*
+        void SetEffectStackInfo(GameState.Component)
         {
             for(int i = 0; i < effectStack.GameStateEffectStacks.Count; i++)
             {
@@ -353,44 +349,41 @@ namespace LeyLineHybridECS
             }
             m_EffectStackData.SetSingleton(effectStack);
         }
+        */
 
-        void CleanUpEffectStack(EffectStack.Component effectStack, uint worldIndex)
+        EffectStack.Component CleanUpEffectStack(EffectStack.Component effectStack)
         {
-            for (int i = 0; i < effectStack.GameStateEffectStacks.Count; i++)
+
+            for (int y = effectStack.InterruptEffects.Count; y > 0; y--)
             {
-                if (effectStack.GameStateEffectStacks[i].WorldIndex == worldIndex)
+                if (effectStack.InterruptEffects[y - 1].TurnDuration == 0)
                 {
-                    for (int y = effectStack.GameStateEffectStacks[i].InterruptEffects.Count; y > 0; y--)
-                    {
-                        if (effectStack.GameStateEffectStacks[i].InterruptEffects[y - 1].TurnDuration == 0)
-                        {
-                            effectStack.GameStateEffectStacks[i].InterruptEffects.RemoveAt(y - 1);
-                        }
-                    }
-                    for (int y = effectStack.GameStateEffectStacks[i].AttackEffects.Count; y > 0; y--)
-                    {
-                        if (effectStack.GameStateEffectStacks[i].AttackEffects[y - 1].TurnDuration == 0)
-                        {
-                            effectStack.GameStateEffectStacks[i].AttackEffects.RemoveAt(y - 1);
-                        }
-                    }
-                    for (int y = effectStack.GameStateEffectStacks[i].MoveEffects.Count; y > 0; y--)
-                    {
-                        if (effectStack.GameStateEffectStacks[i].MoveEffects[y - 1].TurnDuration == 0)
-                        {
-                            effectStack.GameStateEffectStacks[i].MoveEffects.RemoveAt(y - 1);
-                        }
-                    }
-                    for (int y = effectStack.GameStateEffectStacks[i].SkillshotEffects.Count; y > 0; y--)
-                    {
-                        if (effectStack.GameStateEffectStacks[i].SkillshotEffects[y - 1].TurnDuration == 0)
-                        {
-                            effectStack.GameStateEffectStacks[i].SkillshotEffects.RemoveAt(y - 1);
-                        }
-                    }
+                    effectStack.InterruptEffects.RemoveAt(y - 1);
                 }
             }
-            m_EffectStackData.SetSingleton(effectStack);
+            for (int y = effectStack.AttackEffects.Count; y > 0; y--)
+            {
+                if (effectStack.AttackEffects[y - 1].TurnDuration == 0)
+                {
+                    effectStack.AttackEffects.RemoveAt(y - 1);
+                }
+            }
+            for (int y = effectStack.MoveEffects.Count; y > 0; y--)
+            {
+                if (effectStack.MoveEffects[y - 1].TurnDuration == 0)
+                {
+                    effectStack.MoveEffects.RemoveAt(y - 1);
+                }
+            }
+            for (int y = effectStack.SkillshotEffects.Count; y > 0; y--)
+            {
+                if (effectStack.SkillshotEffects[y - 1].TurnDuration == 0)
+                {
+                    effectStack.SkillshotEffects.RemoveAt(y - 1);
+                }
+            }
+
+            return effectStack;
         }
 
         void CleanUpUnitIncomingEffects(WorldIndexShared gameStateWorldIndex)
@@ -631,22 +624,16 @@ namespace LeyLineHybridECS
             return b;
         }
 
-        private void UpdateMovedUnitCells(WorldIndexShared gameStateWorldIndex)
+        private void UpdateMovedUnitCells(WorldIndexShared gameStateWorldIndex, Dictionary<Vector3f, long> unitDict)
         {
-            //Heap allocation - needs to be replaced
-            Dictionary<Vector3f, long> unitDict = new Dictionary<Vector3f, long>();
-            //HashSet<Vector3f> unitCoordHash = new HashSet<Vector3f>();
-
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in CubeCoordinate.Component cubeCoord, in SpatialEntityId entityId, in Actions.Component actions, in Health.Component health, in IncomingActionEffects.Component incomingEffects) =>
             {
                 if (incomingEffects.MoveEffects.Count != 0 && health.CurrentHealth > 0 && incomingEffects.MoveEffects[0].EffectType == EffectTypeEnum.move_along_path)
                 {
-                    //Debug.Log("AddMovedUnitToDict");
                     if (!unitDict.ContainsKey(cubeCoord.CubeCoordinate))
-                    {
-                        unitDict.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate, entityId.EntityId.Id);
                         unitDict.Add(cubeCoord.CubeCoordinate, entityId.EntityId.Id);
-                    }
+                    if (!unitDict.ContainsKey(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate))
+                        unitDict.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate, entityId.EntityId.Id);
                 }
             })
             .WithoutBurst()

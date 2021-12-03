@@ -350,12 +350,16 @@ public class AISystem : JobComponentSystem
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledMoveActionsPrioList, actions);
                 unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint) actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex);
                 unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius((uint) actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-                var request = new Actions.SetTargetCommand.Request
-                (
-                    AIid.EntityId,
-                    new SetTargetRequest(ClosestPathTarget(aiUnit.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
-                );
-                m_CommandSystem.SendCommand(request);
+
+                if(unitCellsToMark.CachedPaths.Count > 0)
+                {
+                    var request = new Actions.SetTargetCommand.Request
+                    (
+                        AIid.EntityId,
+                        new SetTargetRequest(ClosestPathTarget(aiUnit.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
+                    );
+                    m_CommandSystem.SendCommand(request);
+                }
                 break;
 
             case ActionTypeEnum.attack:

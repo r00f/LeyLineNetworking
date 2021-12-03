@@ -1,5 +1,6 @@
 package generic;
 import "generic/vector3.schema";
+import "unit/action_effect.schema";
 
 component GameState {
 	
@@ -35,8 +36,6 @@ type Cleanup
 {
 
 }
-
-
 
 enum GameStateEnum {
 	

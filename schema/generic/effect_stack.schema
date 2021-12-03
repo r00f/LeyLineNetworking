@@ -1,29 +1,12 @@
 package generic;
 import "unit/action_effect.schema";
-import "generic/game_state.schema";
 
 component EffectStack {
-	
     id = 131;
-	list<GameStateEffectStack> game_state_effect_stacks = 1;
+    bool effects_executed = 1;
+    list<unit.ActionEffect> interrupt_effects = 2;
+    list<unit.ActionEffect> attack_effects = 3;
+    list<unit.ActionEffect> move_effects = 4;
+    list<unit.ActionEffect> skillshot_effects = 5;
 }
 
-type GameStateEffectStack
-{
-    	generic.GameStateEnum current_state = 1;
-        uint32 world_index = 2;
-        bool effects_executed = 3;
-        bool effects_culled = 4;
-        list<unit.ActionEffect> interrupt_effects = 5;
-        list<unit.ActionEffect> attack_effects = 6;
-        list<unit.ActionEffect> move_effects = 7;
-        list<unit.ActionEffect> skillshot_effects = 8;
-}
-
-type GameStateStaticMapData
-{
-    
-
-
-
-}

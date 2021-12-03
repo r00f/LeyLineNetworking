@@ -22,7 +22,12 @@ public class Settings : ScriptableObject
     //public GameObject MouseClickPS;
     public GameObject ExplosionDebugSphere;
 
-    [Header("GamePlaySettings")]
+    [Header("Snapshot Settings")]
+    public uint MapCount;
+    public uint MapsPerRow;
+    public uint MapOffset;
+
+    [Header("Gameplay Settings")]
     public float MinimumExecuteTime;
     public float RopeTime;
     public LayerMask MouseRayCastLayerMask;

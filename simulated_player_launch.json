@@ -6,7 +6,7 @@
       "snapshotWritePeriodSeconds": 0
     },
     "dimensions": {
-      "xMeters": 4000,
+      "xMeters": 2000,
       "zMeters": 2000
     },
     "legacy_flags": [
@@ -42,7 +42,7 @@
         },
         {
           "name": "fps_simulated_players_per_coordinator",
-          "value": "20"
+          "value": "100"
         },
         {
           "name": "fps_simulated_players_creation_interval",
