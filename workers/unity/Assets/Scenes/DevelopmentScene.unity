@@ -39,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 5904640984428946566}
-  m_IndirectSpecularColor: {r: 5008.974, g: 3474.6606, b: 3390.8657, a: 1}
+  m_IndirectSpecularColor: {r: 4961.735, g: 3512.2368, b: 3584.659, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -589,7 +589,7 @@ PrefabInstance:
     - target: {fileID: 195072527898059093, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.182917
+      value: 18.182922
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
@@ -641,7 +641,7 @@ PrefabInstance:
     - target: {fileID: 7196706022515433626, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -400
       objectReference: {fileID: 0}
     - target: {fileID: 7196706022515433626, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
@@ -3164,7 +3164,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1031266339
 Transform:
   m_ObjectHideFlags: 0
@@ -3173,7 +3173,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1031266338}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -400, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 741781389}
@@ -21161,6 +21161,11 @@ PrefabInstance:
       propertyPath: terrainController
       value: 
       objectReference: {fileID: 1645598754}
+    - target: {fileID: 8945263940642425466, guid: 76d5c07d66e1e1f4f9bc0cc5e7208df3,
+        type: 3}
+      propertyPath: WorldIndex
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 76d5c07d66e1e1f4f9bc0cc5e7208df3, type: 3}
 --- !u!1001 &2714420043361456106
@@ -21993,7 +21998,7 @@ PrefabInstance:
     - target: {fileID: 195072527898059093, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.182917
+      value: 18.182922
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}

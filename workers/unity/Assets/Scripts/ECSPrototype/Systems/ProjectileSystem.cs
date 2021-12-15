@@ -38,10 +38,10 @@ public class ProjectileSystem : JobComponentSystem
     {
         base.OnStartRunning();
 
-        if(Worlds.ClientWorld != default)
+        if(Worlds.ClientWorldWorker != default)
         {
-            logger = Worlds.ClientWorld.World.GetExistingSystem<WorkerSystem>().LogDispatcher;
-            m_ActionEffectSystem = Worlds.ClientWorld.World.GetExistingSystem<ActionEffectsSystem>();
+            logger = Worlds.ClientWorldWorker.World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+            m_ActionEffectSystem = Worlds.ClientWorldWorker.World.GetExistingSystem<ActionEffectsSystem>();
         }
     }
 
@@ -49,7 +49,7 @@ public class ProjectileSystem : JobComponentSystem
     {
         if (!initialized)
         {
-            if (Worlds.ClientWorld != default)
+            if (Worlds.ClientWorldWorker != default)
             {
                 /*
                 m_UnitData = Worlds.ClientWorld.CreateEntityQuery(
@@ -57,7 +57,7 @@ public class ProjectileSystem : JobComponentSystem
                 );
                 */
 
-                m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
+                m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
                 );
 /*

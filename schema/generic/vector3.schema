@@ -19,3 +19,8 @@ type Vector2f {
 	float x = 1;
 	float y = 2;
 }
+
+type Vector3fList
+{
+    list<Vector3f> coordinates = 1;
+}

@@ -5,6 +5,8 @@ using Unit;
 using Generic;
 using LeyLineHybridECS;
 using Unity.Jobs;
+using Player;
+using UnityEngine;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(GameStateSystem))]
 public class CleanupSystem : JobComponentSystem
@@ -123,9 +125,19 @@ ComponentType.ReadOnly<GameState.Component>()
         return actions;
     }
 
-    public void DeleteAllUnits(WorldIndexShared worldIndex)
+    public void DeleteMap(WorldIndexShared worldIndex)
     {
-        Entities.WithSharedComponentFilter(worldIndex).WithAll<Health.Component>().ForEach((in SpatialEntityId entityId) =>
+        Debug.Log("DeleteMap");
+        //Delete units first to prevent moveUpdate from throwing index out of range
+        Entities.WithAll<Actions.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId entityId) =>
+        {
+            var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
+            m_CommandSystem.SendCommand(deleteEntityRequest);
+        })
+        .WithoutBurst()
+        .Run();
+
+        Entities.WithNone<GameState.Component, PlayerState.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId entityId) =>
         {
             var deleteEntityRequest = new WorldCommands.DeleteEntity.Request(entityId.EntityId);
             m_CommandSystem.SendCommand(deleteEntityRequest);

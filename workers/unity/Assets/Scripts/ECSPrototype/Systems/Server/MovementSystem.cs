@@ -28,7 +28,7 @@ protected override void OnCreate()
 
     m_UnitData = GetEntityQuery(
     ComponentType.ReadOnly<SpatialEntityId>(),
-    ComponentType.ReadOnly<CellsToMark.Component>(),
+
     ComponentType.ReadWrite<Position.Component>(),
     ComponentType.ReadWrite<Actions.Component>(),
     ComponentType.ReadWrite<MovementVariables.Component>(),

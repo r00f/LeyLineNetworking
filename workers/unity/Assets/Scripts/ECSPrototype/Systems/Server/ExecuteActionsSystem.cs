@@ -19,7 +19,7 @@ public class ExecuteActionsSystem : JobComponentSystem
     HandleCellGridRequestsSystem m_HandleCellGridSystem;
     ResourceSystem m_ResourceSystem;
     TimerSystem m_TimerSystem;
-    SpawnUnitsSystem m_SpawnSystem;
+    InitializeWorldSystem m_SpawnSystem;
     CommandSystem m_CommandSystem;
 
     EntityQuery m_GameStateData;
@@ -50,7 +50,7 @@ public class ExecuteActionsSystem : JobComponentSystem
         m_HandleCellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
         m_TimerSystem = World.GetExistingSystem<TimerSystem>();
-        m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
+        m_SpawnSystem = World.GetExistingSystem<InitializeWorldSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
     }
@@ -62,14 +62,13 @@ public class ExecuteActionsSystem : JobComponentSystem
         EntityCommandBuffer.ParallelWriter ecbConcurrent = endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
 
-        Entities.ForEach((ref EffectStack.Component effectStack, in GameState.Component gameState, in WorldIndexShared gameStateWorldIndex) =>
+        Entities.ForEach((ref EffectStack.Component effectStack, in ClientWorkerIds.Component clientWorkerIds, in GameState.Component gameState, in WorldIndexShared gameStateWorldIndex) =>
         {
             effectStack = NormalizeEffectData(effectStack, gameStateWorldIndex, ecb);
-            effectStack = DenormalizeEffectData(effectStack, gameState.CurrentState, gameStateWorldIndex, ecb);
+            effectStack = DenormalizeEffectData(effectStack, gameState.CurrentState, clientWorkerIds, gameStateWorldIndex, ecb);
         })
         .WithoutBurst()
         .Run();
-
 
         #region DenormalizedUnitLoops
         /// <summary>
@@ -329,7 +328,7 @@ public class ExecuteActionsSystem : JobComponentSystem
         return effectStack;
     }
 
-    EffectStack.Component DenormalizeEffectData(EffectStack.Component effectStack, GameStateEnum gameState, WorldIndexShared gameStateWorldIndex, EntityCommandBuffer ecb)
+    EffectStack.Component DenormalizeEffectData(EffectStack.Component effectStack, GameStateEnum gameState, ClientWorkerIds.Component clientWorkerIds, WorldIndexShared gameStateWorldIndex, EntityCommandBuffer ecb)
     {
         #region DenormalizeEffectData
         /// <summary>
@@ -359,8 +358,16 @@ public class ExecuteActionsSystem : JobComponentSystem
                                         Z = effectStack.InterruptEffects[y].TargetPosition.Z
                                     }
                                 };
+
+                                string clientWorkerId = "";
+
+                                if (effectStack.InterruptEffects[y].OriginUnitFaction == 1)
+                                    clientWorkerId = clientWorkerIds.ClientWorkerId1;
+                                else
+                                    clientWorkerId = clientWorkerIds.ClientWorkerId2;
+
                                 var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + effectStack.InterruptEffects[y].SpawnUnitNested.UnitName).GetComponent<UnitDataSet>();
-                                var newUnit = LeyLineEntityTemplates.Unit(effectStack.InterruptEffects[y].SpawnUnitNested.UnitName, pos, effectStack.InterruptEffects[y].TargetCoordinates[0], effectStack.InterruptEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
+                                var newUnit = LeyLineEntityTemplates.Unit(clientWorkerId, effectStack.InterruptEffects[y].SpawnUnitNested.UnitName, pos, effectStack.InterruptEffects[y].TargetCoordinates[0], effectStack.InterruptEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
                                 var createEntitiyRequest = new WorldCommands.CreateEntity.Request(newUnit);
                                 m_CommandSystem.SendCommand(createEntitiyRequest);
                                 break;
@@ -556,38 +563,24 @@ public class ExecuteActionsSystem : JobComponentSystem
                                         Z = effectStack.MoveEffects[y].TargetPosition.Z
                                     }
                                 };
+
+                                string clientWorkerId = "";
+
+                                if (effectStack.MoveEffects[y].OriginUnitFaction == 1)
+                                    clientWorkerId = clientWorkerIds.ClientWorkerId1;
+                                else
+                                    clientWorkerId = clientWorkerIds.ClientWorkerId2;
+
                                 var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + effectStack.MoveEffects[y].SpawnUnitNested.UnitName).GetComponent<UnitDataSet>();
-                                var newUnit = LeyLineEntityTemplates.Unit(effectStack.MoveEffects[y].SpawnUnitNested.UnitName, pos, effectStack.MoveEffects[y].TargetCoordinates[0], effectStack.MoveEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
+                                var newUnit = LeyLineEntityTemplates.Unit(clientWorkerId, effectStack.MoveEffects[y].SpawnUnitNested.UnitName, pos, effectStack.MoveEffects[y].TargetCoordinates[0], effectStack.MoveEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
                                 var createEntitiyRequest = new WorldCommands.CreateEntity.Request(newUnit);
                                 m_CommandSystem.SendCommand(createEntitiyRequest);
                                 break;
                         }
                     }
 
-                    /*
-                    logger.HandleLog(LogType.Warning,
-                    new LogEvent("Before Cull Method")
-                    .WithField("MoveEffectCount", g.MoveEffects.Count));
-                    */
-
                     effectStack.MoveEffects = CompareAndCullMoveInterruptEffects(effectStack.InterruptEffects, effectStack.MoveEffects);
                     effectStack.MoveEffects = CompareAndCullMoveEffects(effectStack.MoveEffects);
-
-                    /*
-                    logger.HandleLog(LogType.Warning,
-                    new LogEvent("After Cull Complete")
-                    .WithField("MoveEffectCount", g.MoveEffects.Count));
-
-
-
-                    Debug.Log("MoveCount = " + g.MoveEffects.Count + ", World = " + g.WorldIndex);
-
-
-                    foreach (ActionEffect e in g.MoveEffects)
-                    {
-                        Debug.Log("MoveEffectTypes before denormalization: " + e.EffectType.ToString());
-                    }
-                    */
 
                     Entities.WithSharedComponentFilter(gameStateWorldIndex).WithNone<IsDeadTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, in SpatialEntityId id, in FactionComponent.Component unitFaction, in CubeCoordinate.Component unitCoord) =>
                     {
@@ -836,12 +829,14 @@ public class ExecuteActionsSystem : JobComponentSystem
 
         for (int i = 0; i < indexesToRemove.Count; i++)
         {
+            /*
             logger.HandleLog
                 (LogType.Warning,
                 new LogEvent("Culling Spawn Actions")
                 .WithField("index to remove", indexesToRemove[i])
                 .WithField("interrupteffect count", interruptEffects.Count)
                 );
+                */
             interruptEffects.RemoveAt(indexesToRemove[i]);
         }
 
@@ -873,12 +868,14 @@ public class ExecuteActionsSystem : JobComponentSystem
         {
             if (moveEffects[i].EffectType == EffectTypeEnum.move_along_path && moveEffects[i].MoveAlongPathNested.CoordinatePositionPairs.Count == 0)
             {
+                /*
                 logger.HandleLog
                 (LogType.Warning,
                 new LogEvent("Removing Move Action from Cull Spawn / Move actions")
                 .WithField("index to remove", i)
                 .WithField("moveEffect count", moveEffects.Count)
                 );
+                */
                 moveEffects.RemoveAt(i);
             }
         }

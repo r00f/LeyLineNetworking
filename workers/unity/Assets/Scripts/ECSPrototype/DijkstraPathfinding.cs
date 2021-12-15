@@ -14,10 +14,14 @@ namespace LeyLineHybridECS
             IPriorityQueue<CellAttribute> frontier = new HeapPriorityQueue<CellAttribute>();
             frontier.Enqueue(originNode, 0);
 
-            Dictionary<CellAttribute, CellAttribute> cameFrom = new Dictionary<CellAttribute, CellAttribute>();
-            cameFrom.Add(originNode, default);
-            Dictionary<CellAttribute, int> costSoFar = new Dictionary<CellAttribute, int>();
-            costSoFar.Add(originNode, 0);
+            Dictionary<CellAttribute, CellAttribute> cameFrom = new Dictionary<CellAttribute, CellAttribute>
+            {
+                { originNode, default }
+            };
+            Dictionary<CellAttribute, int> costSoFar = new Dictionary<CellAttribute, int>
+            {
+                { originNode, 0 }
+            };
 
             while (frontier.Count != 0)
             {
@@ -55,10 +59,14 @@ namespace LeyLineHybridECS
             IPriorityQueue<T> frontier = new HeapPriorityQueue<T>();
             frontier.Enqueue(originNode, 0);
 
-            Dictionary<T, T> cameFrom = new Dictionary<T, T>();
-            cameFrom.Add(originNode, default);
-            Dictionary<T, int> costSoFar = new Dictionary<T, int>();
-            costSoFar.Add(originNode, 0);
+            Dictionary<T, T> cameFrom = new Dictionary<T, T>
+            {
+                { originNode, default }
+            };
+            Dictionary<T, int> costSoFar = new Dictionary<T, int>
+            {
+                { originNode, 0 }
+            };
 
             while (frontier.Count != 0)
             {

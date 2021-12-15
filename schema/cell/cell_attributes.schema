@@ -33,4 +33,10 @@ type CellAttributeList {
 
 }
 
+type CellAttributesList {
+
+	list<CellAttributes> cell_attributes = 1;
+
+}
+
 

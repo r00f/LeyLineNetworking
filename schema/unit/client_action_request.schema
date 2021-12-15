@@ -1,0 +1,8 @@
+package unit;
+import "generic/vector3.schema";
+		
+component ClientActionRequest {
+    id = 135;
+    int32 action_id = 1;
+    generic.Vector3f target_coordinate = 2;
+}

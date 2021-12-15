@@ -11,19 +11,11 @@ using UnityEngine;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class VisionSystem_Server : JobComponentSystem
 {
-    //HandleCellGridRequestsSystem m_GridSystem;
     ILogDispatcher logger;
     CommandSystem m_CommandSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
-    //EntityQuery m_UnitData;
-    //EntityQuery m_PlayerData;
     EntityQuery m_CellData;
     EntityQuery m_GameStateData;
-    EntityQuery m_EntityWithoutWorldIndexSharedData;
-
-    bool init = false;
-    int mapSize = 631;
-    private List<RawCluster> FixClusters = new List<RawCluster>();
 
     protected override void OnCreate()
     {
@@ -83,151 +75,131 @@ public class VisionSystem_Server : JobComponentSystem
             .Run();
         }
 
-        mapSize = m_GameStateData.CalculateEntityCount() * 631;
+        Entities.WithAll<GameState.Component>().ForEach((in ObstructVisionClusters.Component clusters, in WorldIndexShared worldIndex) =>
+        {
+            UpdateUnitVision(worldIndex, clusters.RawClusters);
+        })
+        .WithoutBurst()
+        .Run();
 
-        //Debug.Log("VisionSystemServer init bool = " + init + ", mapsize = " + mapSize + ", CellDataCount = " + m_CellData.CalculateEntityCount());
-
-        //if any unit requires an update, update player aswell
-        if (!init)
+        Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id, in WorldIndex.Component p_windex) =>
         {
             /*
             logger.HandleLog(LogType.Warning,
-            new LogEvent("MapNotInitialized")
-            .WithField("CellDataCount", m_CellData.CalculateEntityCount()));
+            new LogEvent("playerVision.ReqUpdate")
+            .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate)
+            .WithField("PlayerId", p_id.EntityId.Id));
             */
-
-            if (m_CellData.CalculateEntityCount() == mapSize)
-            {
-                //Debug.Log("m_CellData  = Mapsize - init Clusters");
-                BuildRawClusters();
-            }
-        }
-        else
-        {
-            Entities.ForEach((ref Vision.Component u_Vision, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id, in WorldIndexShared worldIndex) =>
-            {
-                /*
-                if (u_Vision.VisionRange > 0)
-                {
-                    logger.HandleLog(LogType.Warning,
-                    new LogEvent("initialize UnitVision")
-                    .WithField("unitId", id.EntityId.Id));
-                    u_Vision.RequireUpdate = true;
-                }
-                */
-
-                if (u_Vision.InitialWaitTime > 0)
-                {
-                    u_Vision.InitialWaitTime -= Time.DeltaTime;
-                    if (u_Vision.InitialWaitTime <= 0)
-                        u_Vision.RequireUpdate = true;
-                }
-
-                var unitFaction = u_Faction.Faction;
-                var coord = u_OccupiedCell.CubeCoordinate;
-
-                if (u_Vision.RequireUpdate == true)
-                {
-                    /*
-                    logger.HandleLog(LogType.Warning,
-                    new LogEvent("u_Vision.ReqUpdate = true")
-                    .WithField("unitId", id.EntityId.Id));
-                    */
-                    var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction);
-
-                    if (v.CellsInVisionrange.Count != 0)
-                    {
-                        Entities.WithSharedComponentFilter(worldIndex).WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id) =>
-                        {
-                            if (p_Faction.Faction == unitFaction)
-                            {
-                                /*
-                                logger.HandleLog(LogType.Warning,
-                                new LogEvent("UnitLoopSetPlayerVisionReq")
-                                .WithField("UnitFaction", unitFaction));
-                                */
-                                p_Vision.RequireUpdate = true;
-                            }
-                            else if (p_Vision.CellsInVisionrange.ContainsKey(coord))
-                            {
-                                m_ComponentUpdateSystem.SendEvent(
-                                new Vision.UpdateClientVisionEvent.Event(),
-                                p_id.EntityId);
-                            }
-                        })
-                        .WithoutBurst()
-                        .Run();
-
-                        u_Vision = v;
-                        u_Vision.RequireUpdate = false;
-                    }
-                }
-            })
-            .WithoutBurst()
-            .Run();
-
-            Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id, in WorldIndex.Component p_windex) =>
+            if (p_Vision.RequireUpdate)
             {
                 /*
                 logger.HandleLog(LogType.Warning,
                 new LogEvent("playerVision.ReqUpdate")
-                .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate)
-                .WithField("PlayerId", p_id.EntityId.Id));
+                .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
                 */
-                if (p_Vision.RequireUpdate)
+
+                if (!p_Vision.RevealVision)
                 {
                     /*
                     logger.HandleLog(LogType.Warning,
-                    new LogEvent("playerVision.ReqUpdate")
-                    .WithField("playerVision.ReqUpdate", p_Vision.RequireUpdate));
+                    new LogEvent("playerVision.RevealVision")
+                    .WithField("playerVision.RevealVision", p_Vision.RevealVision));
                     */
 
-                    if (!p_Vision.RevealVision)
-                    {
-                        /*
-                        logger.HandleLog(LogType.Warning,
-                        new LogEvent("playerVision.RevealVision")
-                        .WithField("playerVision.RevealVision", p_Vision.RevealVision));
-                        */
+                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value);
 
-                        p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value);
+                    p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
+                    p_Vision.Positives = p_Vision.Positives;
+                    p_Vision.Negatives = p_Vision.Negatives;
+                    p_Vision.Lastvisible = p_Vision.Lastvisible;
 
-                        p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                        p_Vision.Positives = p_Vision.Positives;
-                        p_Vision.Negatives = p_Vision.Negatives;
-                        p_Vision.Lastvisible = p_Vision.Lastvisible;
+                    m_ComponentUpdateSystem.SendEvent(
+                    new Vision.UpdateClientVisionEvent.Event(),
+                    p_id.EntityId);
 
-                        m_ComponentUpdateSystem.SendEvent(
-                        new Vision.UpdateClientVisionEvent.Event(),
-                        p_id.EntityId);
-
-                        p_Vision.RequireUpdate = false;
-                    }
-                    else
-                    {
-                        p_Vision = RevealMap(p_windex.Value, p_Vision);
-
-                        p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                        p_Vision.Positives = p_Vision.Positives;
-                        p_Vision.Negatives = p_Vision.Negatives;
-                        p_Vision.Lastvisible = p_Vision.Lastvisible;
-
-                        m_ComponentUpdateSystem.SendEvent(
-                        new Vision.UpdateClientVisionEvent.Event(),
-                        p_id.EntityId);
-
-                        p_Vision.RequireUpdate = false;
-                    }
+                    p_Vision.RequireUpdate = false;
                 }
-            })
-            .WithoutBurst()
-            .Run();
-        }
+                else
+                {
+                    p_Vision = RevealMap(p_windex.Value, p_Vision);
+
+                    p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
+                    p_Vision.Positives = p_Vision.Positives;
+                    p_Vision.Negatives = p_Vision.Negatives;
+                    p_Vision.Lastvisible = p_Vision.Lastvisible;
+
+                    m_ComponentUpdateSystem.SendEvent(
+                    new Vision.UpdateClientVisionEvent.Event(),
+                    p_id.EntityId);
+
+                    p_Vision.RequireUpdate = false;
+                }
+            }
+        })
+        .WithoutBurst()
+        .Run();
 
         return inputDeps;
     }
 
-    private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction)
+    private void UpdateUnitVision(WorldIndexShared worldIndex, List<CellAttributesList> obstructVisionClusters)
+    {
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Vision.Component u_Vision, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
+        {
+            if (u_Vision.InitialWaitTime > 0)
+            {
+                u_Vision.InitialWaitTime -= Time.DeltaTime;
+                if (u_Vision.InitialWaitTime <= 0)
+                    u_Vision.RequireUpdate = true;
+            }
+
+            if (u_Vision.RequireUpdate == true)
+            {
+                /*
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("u_Vision.ReqUpdate = true")
+                .WithField("unitId", id.EntityId.Id));
+                */
+                var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, obstructVisionClusters);
+
+                if (v.CellsInVisionrange.Count != 0)
+                {
+                    SetPlayerReqUpdate(u_Faction.Faction, worldIndex, u_OccupiedCell.CubeCoordinate);
+
+                    u_Vision = v;
+                    u_Vision.RequireUpdate = false;
+                }
+            }
+        })
+        .WithoutBurst()
+        .Run();
+    }
+
+    private void SetPlayerReqUpdate(uint faction, WorldIndexShared worldIndex, Vector3f coord)
+    {
+        Entities.WithSharedComponentFilter(worldIndex).WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction, in SpatialEntityId p_id) =>
+        {
+            if (p_Faction.Faction == faction)
+            {
+                /*
+                logger.HandleLog(LogType.Warning,
+                new LogEvent("UnitLoopSetPlayerVisionReq")
+                .WithField("UnitFaction", unitFaction));
+                */
+                p_Vision.RequireUpdate = true;
+            }
+            else if (p_Vision.CellsInVisionrange.ContainsKey(coord))
+            {
+                m_ComponentUpdateSystem.SendEvent(
+                new Vision.UpdateClientVisionEvent.Event(),
+                p_id.EntityId);
+            }
+        })
+        .WithoutBurst()
+        .Run();
+    }
+
+    private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, List<CellAttributesList> FixClusters)
     {
         List<Vector3f> sight = CellGridMethods.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
         var sightHash = new HashSet<Vector3f>();
@@ -239,14 +211,14 @@ public class VisionSystem_Server : JobComponentSystem
 
         List<ObstructVisionCluster> RelevantClusters = new List<ObstructVisionCluster>();
 
-        foreach(RawCluster c in FixClusters)
+        foreach(CellAttributesList c in FixClusters)
         {
             bool isRelevant = false;
             HashSet<Vector3f> set = new HashSet<Vector3f>();
-            foreach (CellAttributesComponent.Component a in c.cluster)
+            foreach (CellAttributes a in c.CellAttributes)
             {
-                if (sightHash.Contains(a.CellAttributes.Cell.CubeCoordinate)) isRelevant = true;
-                set.Add(a.CellAttributes.Cell.CubeCoordinate);
+                if (sightHash.Contains(a.Cell.CubeCoordinate)) isRelevant = true;
+                set.Add(a.Cell.CubeCoordinate);
             }
 
             if (isRelevant)
@@ -373,45 +345,7 @@ public class VisionSystem_Server : JobComponentSystem
         return inVision;
     }
 
-    private void BuildRawClusters()
-    {
-        List<CellAttributesComponent.Component> obstructed = new List<CellAttributesComponent.Component>();
-
-        //Debug.Log("cell entity count" + m_CellData.CalculateEntityCount());
-        Entities.ForEach((in CellAttributesComponent.Component cellAttributes) =>
-        {
-            if (cellAttributes.CellAttributes.Cell.ObstructVision)
-            {
-                obstructed.Add(cellAttributes);
-            }
-        })
-        .WithoutBurst()
-        .Run();
-
-        //Debug.Log("obstructed:" + obstructed.Count);
-        List<RawCluster> raw = new List<RawCluster>();
-        while (obstructed.Count > 0)
-        {
-            CellAttributesComponent.Component c = obstructed[0];
-            RawCluster go = new RawCluster(c);
-            obstructed.Remove(c);
-            BuildCluster(c, go, obstructed, out obstructed);
-            raw.Add(go);
-            //Debug.Log("Cluster:" + go.cluster.Count);
-        }
-
-        for (int i = raw.Count - 1; i >= 0; i--)
-        {
-            if (raw[i].cluster.Count > 0)
-            {
-                FixClusters.Add(raw[i]);
-            }
-        }
-        //Debug.Log("NumberofClusters" + FixClusters.Count());
-
-        init = true;
-    }
-
+    /*
     private void BuildCluster(CellAttributesComponent.Component cell, RawCluster cluster, List<CellAttributesComponent.Component> obstructed, out List<CellAttributesComponent.Component> newObstructed)
     {
         List<CellAttribute> neighbours = cell.CellAttributes.Neighbours.CellAttributes;
@@ -434,10 +368,9 @@ public class VisionSystem_Server : JobComponentSystem
         {
             bool contains = false;
 
-
-            foreach (CellAttributesComponent.Component c in cluster.cluster)
+            foreach (CellAttributes c in cluster.cluster.CellAttributes)
             {
-                if (Vector3fext.ToUnityVector(c.CellAttributes.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate)) contains = true;
+                if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate)) contains = true;
             }
 
             if (!contains)
@@ -456,7 +389,7 @@ public class VisionSystem_Server : JobComponentSystem
                 if (isSet)
                 {
                     obstructed.Remove(toRemove);
-                    cluster.cluster.Add(toRemove);
+                    cluster.cluster.CellAttributes.Add(toRemove.CellAttributes);
                     //Debug.Log("added " + i + " to" + cluster);
                     BuildCluster(toRemove, cluster, obstructed, out obstructed);
                 }
@@ -464,8 +397,8 @@ public class VisionSystem_Server : JobComponentSystem
             }
         newObstructed = obstructed;
     }
+    */
 }
-
 
 #region ClusterDef
 public struct ObstructVisionCluster
@@ -474,7 +407,6 @@ public struct ObstructVisionCluster
     public List<Angle> RelevantAngles;
     public Vector3f watcherCoor;
     public ObstructVisionCluster(HashSet<Vector3f> inCluster, Vector3f inWatcher)
-
     {
         watcherCoor = inWatcher;
         cluster = inCluster;
@@ -484,25 +416,32 @@ public struct ObstructVisionCluster
     public ObstructVisionCluster(Vector3f start, Vector3f inWatcher)
     {
         watcherCoor = inWatcher;
-        cluster = new HashSet<Vector3f>();
-        cluster.Add(start);
+        cluster = new HashSet<Vector3f>
+        {
+            start
+        };
         RelevantAngles = new List<Angle>();
     }
 }
+
 public struct RawCluster
 {
-    public List<CellAttributesComponent.Component> cluster;
+    public CellAttributesList cluster;
     
-    public RawCluster(List<CellAttributesComponent.Component> inCluster)
+    public RawCluster(CellAttributesList inCluster)
     {
         cluster = inCluster;
     }
-    public RawCluster(CellAttributesComponent.Component inStart)
+    public RawCluster(CellAttributes inStart)
     {
-        cluster = new List<CellAttributesComponent.Component>();
-        cluster.Add(inStart);
+        cluster = new CellAttributesList
+        {
+            CellAttributes = new List<CellAttributes>()
+        };
+        cluster.CellAttributes.Add(inStart);
     }
 }
+
 public struct Angle
 {
     public CellAttributesComponent.Component cell;

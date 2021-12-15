@@ -30,8 +30,7 @@ public class AISystem : JobComponentSystem
             ComponentType.ReadWrite<AiUnit.Component>(),
             ComponentType.ReadWrite<Actions.Component>(),
             ComponentType.ReadOnly<Vision.Component>(),
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<CellsToMark.Component>()
+            ComponentType.ReadOnly<CubeCoordinate.Component>()
         );
 
         var PlayerUnitDesc = new EntityQueryDesc
@@ -75,8 +74,9 @@ public class AISystem : JobComponentSystem
 
     public void UpdateAIUnits()
     {
-        Entities.ForEach((Entity e, ref AiUnit.Component aiUnit, ref Vision.Component vision, ref Actions.Component actions, ref SpatialEntityId AIid, ref CellsToMark.Component unitCellsToMark, ref CubeCoordinate.Component unitCoord, in WorldIndexShared worldIndex) =>
+        Entities.ForEach((Entity e, ref ClientActionRequest.Component actionRequest, ref AiUnit.Component aiUnit, ref Actions.Component actions, ref Vision.Component vision, ref CubeCoordinate.Component unitCoord, in WorldIndexShared worldIndex) =>
         {
+            var AIid = EntityManager.GetComponentData<SpatialEntityId>(e);
             SetAggroedUnit(vision, ref aiUnit, actions, AIid, unitCoord, worldIndex);
 
             aiUnit.CulledMoveActionsPrioList = CullPrioList(aiUnit.CulledMoveActionsPrioList, aiUnit.MoveActionsPrioList, actions, unitCoord.CubeCoordinate, aiUnit.AggroedUnitCoordinate, 1);
@@ -87,8 +87,9 @@ public class AISystem : JobComponentSystem
 
             if(aiUnit.CurrentState != AiUnitStateEnum.idle && aiUnit.CurrentState != AiUnitStateEnum.returning)
             {
+                actionRequest.TargetCoordinate = new Vector3f();
                 SetChosenActionType(ref aiUnit);
-                ChooseAIAction(ref aiUnit, ref actions, AIid, unitCellsToMark, unitCoord, worldIndex);
+                ChooseAIAction(ref aiUnit, ref actions, ref actionRequest, AIid, unitCoord, worldIndex); 
             }
         })
         .WithoutBurst()
@@ -338,33 +339,17 @@ public class AISystem : JobComponentSystem
         }
     }
 
-    public void ChooseAIAction(ref AiUnit.Component aiUnit, ref Actions.Component actions, SpatialEntityId AIid, CellsToMark.Component unitCellsToMark, CubeCoordinate.Component unitCoord, WorldIndexShared unitWorldIndex)
+    public void ChooseAIAction(ref AiUnit.Component aiUnit, ref Actions.Component actions, ref ClientActionRequest.Component actionRequest, SpatialEntityId AIid, CubeCoordinate.Component unitCoord, WorldIndexShared unitWorldIndex)
     {
-        unitCellsToMark.CellsInRange.Clear();
-        unitCellsToMark.CachedPaths.Clear();
-
         switch(aiUnit.ChosenActionType)
         {
             case ActionTypeEnum.move:
-                //Debug.Log("SetMoveAction");
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledMoveActionsPrioList, actions);
-                unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint) actions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex);
-                unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius((uint) actions.ActionsList[0].Targets[0].Targettingrange, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-
-                if(unitCellsToMark.CachedPaths.Count > 0)
-                {
-                    var request = new Actions.SetTargetCommand.Request
-                    (
-                        AIid.EntityId,
-                        new SetTargetRequest(ClosestPathTarget(aiUnit.AggroedUnitCoordinate, unitCellsToMark.CachedPaths))
-                    );
-                    m_CommandSystem.SendCommand(request);
-                }
+                //HotFix for AI requesting targetcoordinate with empty cellAttributeRadius
+                actionRequest.TargetCoordinate = ClosestPathTarget(aiUnit.AggroedUnitCoordinate, m_PathFindingSystem.GetAllPathCoordinatesInRadius((uint) actions.ActionsList[0].Targets[0].Targettingrange, m_PathFindingSystem.GetCellAttributesRadius(unitCoord.CubeCoordinate, (uint) actions.ActionsList[0].Targets[0].Targettingrange, unitWorldIndex)));
                 break;
 
             case ActionTypeEnum.attack:
-                //Debug.Log("SetAttackAction");
-
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledAttackActionsPrioList, actions);
 
                 var extrarange = 0;
@@ -380,37 +365,20 @@ public class AISystem : JobComponentSystem
                     {
                         if (CellGridMethods.GetDistance(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, j), unitCoord.CubeCoordinate) <= actions.CurrentSelected.Targets[0].Targettingrange)
                         {
-                            var attackRequest = new Actions.SetTargetCommand.Request
-                            (
-                                AIid.EntityId,
-                                new SetTargetRequest(CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, j))
-                            );
-                            m_CommandSystem.SendCommand(attackRequest);
+                            actionRequest.TargetCoordinate = CellGridMethods.CubeNeighbour(aiUnit.AggroedUnitCoordinate, j);
                         }
                     }
                 }
                 else
                 {
-                    var attackRequest = new Actions.SetTargetCommand.Request
-                    (
-                        AIid.EntityId,
-                        new SetTargetRequest(aiUnit.AggroedUnitCoordinate)
-                    );
-                    m_CommandSystem.SendCommand(attackRequest);
+                    actionRequest.TargetCoordinate = aiUnit.AggroedUnitCoordinate;
                 }
 
                 break;
 
             case ActionTypeEnum.utility:
-
-                //Debug.Log("SetUtilityAction");
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledUtilityActionsPrioList, actions);
-                var utilityRequest = new Actions.SetTargetCommand.Request
-                (
-                    AIid.EntityId,
-                    new SetTargetRequest(unitCoord.CubeCoordinate)
-                );
-                m_CommandSystem.SendCommand(utilityRequest);
+                actionRequest.TargetCoordinate = unitCoord.CubeCoordinate;
                 break;
         }
     }
@@ -444,9 +412,12 @@ public class AISystem : JobComponentSystem
         return action;
     }
 
-    public Vector3f ClosestPathTarget(Vector3f targetCoord, Dictionary<CellAttribute, CellAttributeList> inDict)
+    public Vector3f ClosestPathTarget(Vector3f targetCoord, Dictionary<Vector3f, Vector3fList> inDict)
     {
-        return inDict.Keys.OrderBy(i => CellGridMethods.GetDistance(targetCoord, i.CubeCoordinate)).ToList()[0].CubeCoordinate;
+        if (inDict.Count == 0)
+            return new Vector3f();
+
+        return inDict.Keys.OrderBy(i => CellGridMethods.GetDistance(targetCoord, i)).ToList()[0];
     }
 
 }

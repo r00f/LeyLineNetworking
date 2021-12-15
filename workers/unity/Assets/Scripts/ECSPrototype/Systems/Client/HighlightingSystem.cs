@@ -58,8 +58,6 @@ public class HighlightingSystem : JobComponentSystem
             ComponentType.ReadOnly<UnitDataSet>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MouseState>(),
-            ComponentType.ReadWrite<CellsToMark.Component>(),
-            ComponentType.ReadWrite<ClientPath.Component>(),
             ComponentType.ReadWrite<LineRendererComponent>()
             );
 
@@ -252,7 +250,7 @@ public class HighlightingSystem : JobComponentSystem
             playerState.UnitTargets[playerState.SelectedUnitId] = cubeCoordList;
         }
 
-        Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, in FactionComponent.Component unitFaction) =>
+        Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, in SpatialEntityId unitId, in FactionComponent.Component unitFaction) =>
         {
             if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
             {
@@ -260,7 +258,7 @@ public class HighlightingSystem : JobComponentSystem
                 {
                     //if target is not valid, remove it from UnitTargets Dict
                    
-                    if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget(e, (ApplyToRestrictionsEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction))
+                    if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget((ApplyToRestrictionsEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction, unitId.EntityId.Id, unitFaction.Faction))
                     {
                         //Debug.Log("TargetInvalid - Remove from playerTargets");
                         //playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
@@ -404,11 +402,10 @@ public class HighlightingSystem : JobComponentSystem
         var playerPathing = inPlayerPathing;
         var playerState = inPlayerState;
 
-        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref MouseState mouseState, in FactionComponent.Component faction)=>
+        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId iD, ref CubeCoordinate.Component occCoord, ref MouseState mouseState, in FactionComponent.Component faction, in Actions.Component actions) =>
         {
             if (iD.EntityId.Id == playerState.SelectedUnitId)
             {
-                Actions.Component actions = EntityManager.GetComponentData<Actions.Component>(e);
                 if (mouseState.CurrentState == MouseState.State.Clicked)
                 {
                     mouseState.CurrentState = MouseState.State.Neutral;
@@ -674,15 +671,14 @@ public class HighlightingSystem : JobComponentSystem
 
         HashSet<long> unitIdHash = new HashSet<long>(playerState.UnitTargets.Keys);
 
-        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref Actions.Component actions) =>
+        Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, in ClientActionRequest.Component clientActionRequest) =>
         {
             //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
-            if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3)
+            if (clientActionRequest.ActionId == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
             {
                 if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
                     ResetUnitHighLights(e, ref p, unitId.EntityId.Id);
-
                 }
             }
         })
@@ -777,8 +773,6 @@ public class HighlightingSystem : JobComponentSystem
         {
             var lineRendererComp = EntityManager.GetComponentObject<LineRendererComponent>(e);
             lineRendererComp.lineRenderer.positionCount = 0;
-
-
         }
 
         if (playerState.UnitTargets.ContainsKey(unitId) && playerState.UnitTargets[unitId].CubeCoordinates.Count != 0)

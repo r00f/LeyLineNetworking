@@ -5,10 +5,11 @@ using Player;
 using Unity.Jobs;
 using Unity.Entities;
 using UnityEngine;
+using Improbable.Gdk.PlayerLifecycle;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializeWorldsSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class InitializePlayerSystem : JobComponentSystem
     {
         public struct PlayerStateData : ISystemStateComponentData
@@ -55,12 +56,12 @@ namespace LeyLineHybridECS
             .WithField("Count", m_GameStateData.CalculateEntityCount()));
             */
 
-            Entities.WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in PlayerAttributes.Component playerAddedPlayerAttributes, in SpatialEntityId id) =>
+            Entities.WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in PlayerAttributes.Component playerAddedPlayerAttributes, in SpatialEntityId id, in OwningWorker.Component owningWorker) =>
             {
                 //Prevent PlayerFaction being initialized with WorldIndex 0 because gamestate has not had its WorldIndexShared added
                 if(spatialWorldIndex.Value == 0)
                 {
-                    spatialWorldIndex.Value = SetPlayerWorld(1);
+                    spatialWorldIndex.Value = SetPlayerWorld(1, owningWorker.WorkerId);
                     //Debug.Log("Newly added player spatialWorldIndex after SetPlayerWorld: " + spatialWorldIndex.Value);
                     /*
                     logger.HandleLog(LogType.Warning,
@@ -111,7 +112,7 @@ namespace LeyLineHybridECS
             return inputDeps;
         }
 
-        uint SetPlayerWorld(uint index)
+        uint SetPlayerWorld(uint index, string clientWorkerId)
         {
             if (m_GameStateData.CalculateEntityCount() < index)
             {
@@ -120,19 +121,24 @@ namespace LeyLineHybridECS
 
             uint wIndex = 0;
 
-            Entities.WithSharedComponentFilter(new WorldIndexShared { Value = index }).ForEach((ref GameState.Component gameState) =>
+            Entities.WithSharedComponentFilter(new WorldIndexShared { Value = index }).ForEach((ref GameState.Component gameState, ref ClientWorkerIds.Component clientWorkerIds) =>
             {
                 if (gameState.PlayersOnMapCount < 2)
                 {
                     wIndex = index;
                     gameState.PlayersOnMapCount++;
+
+                    if (gameState.PlayersOnMapCount == 1)
+                        clientWorkerIds.ClientWorkerId1 = clientWorkerId;
+                    else
+                        clientWorkerIds.ClientWorkerId2 = clientWorkerId;
                 }
             })
             .WithoutBurst()
             .Run();
 
             if (wIndex == 0)
-                return SetPlayerWorld(index + 1);
+                return SetPlayerWorld(index + 1, clientWorkerId);
             else
                 return wIndex;
         }

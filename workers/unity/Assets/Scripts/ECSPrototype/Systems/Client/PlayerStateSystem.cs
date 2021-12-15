@@ -165,7 +165,7 @@ namespace LeyLineHybridECS
             var pHigh = playerHigh;
             var pState = playerState;
 
-            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences,  ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref Actions.Component actions, ref MouseState mouseState, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences,  ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref MouseState mouseState, in Actions.Component actions, in FactionComponent.Component faction, in ClientActionRequest.Component clientActionRequest) =>
             {
                 if (unitId.EntityId.Id == pState.SelectedUnitId)
                 {
@@ -176,7 +176,7 @@ namespace LeyLineHybridECS
 
                     unitComponentReferences.SelectionCircleGO.SetActive(true);
 
-                    if (actions.LockedAction.Index == -3 && actions.CurrentSelected.Index != -3)
+                    if (clientActionRequest.ActionId != -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
                     {
                         if (pState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
@@ -186,13 +186,8 @@ namespace LeyLineHybridECS
                         //if playerState is WaitingForTarget and rightMouseButton is pressed or we click the same unit
                         if (Input.GetButtonDown("Fire2"))
                         {
-                            //Debug.Log("ClearSelectedUnitActions from PlayerStateSys");
                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
-                            //Call methods so line/target gets disabled instantly
                             m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id);
-                            //m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);
-                            //playerState.UnitTargets.Remove(unitId.EntityId.Id);
-                            //m_UISystem.ClearSelectedActionToolTip();
                         }
                     }
                     else if (pState.CurrentState != PlayerStateEnum.unit_selected && !pHigh.CancelState)

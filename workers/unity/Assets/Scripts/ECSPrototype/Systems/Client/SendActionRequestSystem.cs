@@ -18,6 +18,7 @@ using UnityEngine.EventSystems;
 public class SendActionRequestSystem : JobComponentSystem
 {
     HighlightingSystem m_HighlightingSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     //EntityQuery m_CellData;
@@ -50,7 +51,6 @@ public class SendActionRequestSystem : JobComponentSystem
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<MouseState>(),
         ComponentType.ReadOnly<Actions.Component>(),
-        ComponentType.ReadOnly<ClientPath.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>()
         );
 
@@ -71,6 +71,9 @@ public class SendActionRequestSystem : JobComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+
+
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
@@ -87,18 +90,30 @@ public class SendActionRequestSystem : JobComponentSystem
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
         var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
+        var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+
+        if (cleanUpStateEvents.Count > 0)
+        {
+            Entities.ForEach((ref ClientActionRequest.Component clientActionRequest) =>
+            {
+                clientActionRequest.TargetCoordinate = new Vector3f(0, 0, 0);
+                clientActionRequest.ActionId = -3;
+            })
+            .WithoutBurst()
+            .Run();
+        }
 
         //if the current selected unit wants an unitTarget
         if (gameState.CurrentState == GameStateEnum.planning)
         {
             //Clear right Clicked unit actions
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref Actions.Component actions, ref RightClickEvent rightClickEvent, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref RightClickEvent rightClickEvent, in FactionComponent.Component faction, in ClientActionRequest.Component clientActionRequest) =>
             {
                 if (faction.Faction == playerFaction.Faction)
                 {
-                    if (actions.LockedAction.Index != -3)
+                    if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero)
                     {
-                        if(anim.AnimationEvents)
+                        if (anim.AnimationEvents)
                             anim.AnimationEvents.VoiceTrigger = true;
                         SelectActionCommand(-3, unitId.EntityId.Id);
                     }
@@ -107,7 +122,7 @@ public class SendActionRequestSystem : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref MouseState mouseState, ref SpatialEntityId id,  ref Actions.Component actions, ref CubeCoordinate.Component uCoord, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction) =>
             {
                 //set unit action to basic move if is clicked and player has energy
                 if (mouseState.ClickEvent == 1)
@@ -124,18 +139,12 @@ public class SendActionRequestSystem : JobComponentSystem
 
                 #region Set Target Command
                 //check if unit is the selected unit in playerState and if current selected action is not empty
-                if (id.EntityId.Id == playerState.SelectedUnitId && actions.CurrentSelected.Index != -3 && Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
+                if (id.EntityId.Id == playerState.SelectedUnitId && clientActionRequest.ActionId != -3 && Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
                 {
-                    var request = new Actions.SetTargetCommand.Request
-                    (
-                        id.EntityId,
-                        new SetTargetRequest(playerHigh.HoveredCoordinate)
-                    );
+                    clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
 
                     if (anim.AnimationEvents)
                         anim.AnimationEvents.VoiceTrigger = true;
-
-                    m_CommandSystem.SendCommand(request);
 
                     m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
                 }
@@ -188,19 +197,12 @@ public class SendActionRequestSystem : JobComponentSystem
         m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
         m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
-        Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref SpatialEntityId idComponent, ref Actions.Component actions, in CubeCoordinate.Component coord) =>
+        Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref ClientActionRequest.Component clientActionRequest, in SpatialEntityId idComponent, in Actions.Component actions, in CubeCoordinate.Component coord) =>
         {
             if (idComponent.EntityId.Id == entityId)
             {
-                //Debug.Log("SendSelectActionRequest");
-                var request = new Actions.SelectActionCommand.Request
-                (
-                    idComponent.EntityId,
-                    new SelectActionRequest(actionIndex)
-                );
-
-                m_CommandSystem.SendCommand(request);
-
+                clientActionRequest.TargetCoordinate = new Vector3f(0, 0, 0);
+                clientActionRequest.ActionId = actionIndex;
                 Action act = actions.NullAction;
 
                 if (actionIndex >= 0)
@@ -214,13 +216,6 @@ public class SendActionRequestSystem : JobComponentSystem
                         }
                     }
                 }
-                /*else
-                {
-                    if (actionIndex == -2)
-                        act = actions.BasicMove;
-                    else if (actionIndex == -1)
-                        act = actions.BasicAttack;
-                }*/
 
                 playerState.SelectedAction = act;
 

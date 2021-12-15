@@ -1,0 +1,12 @@
+package generic;
+
+import "generic/vector3.schema";
+import "cell/cell_attributes.schema";
+
+component ObstructVisionClusters {
+	
+    id = 134;
+    list<cell.CellAttributesList> raw_clusters = 1;
+	
+}
+

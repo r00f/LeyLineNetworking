@@ -26,12 +26,10 @@ public static class WorkerUtils
 
     public static void AddGameLogicSystems(World world)
     {
-        world.GetOrCreateSystem<InitializeWorldsSystem>();
         world.GetOrCreateSystem<InitializePlayerSystem>();
         world.GetOrCreateSystem<GameStateSystem>();
-        world.GetOrCreateSystem<SpawnUnitsSystem>();
+        world.GetOrCreateSystem<InitializeWorldSystem>();
         world.GetOrCreateSystem<HandleCellGridRequestsSystem>();
-        //world.GetOrCreateSystem<MovementSystem>();
         world.GetOrCreateSystem<ManalithSystem>();
         world.GetOrCreateSystem<UnitLifeCycleSystem>();
         world.GetOrCreateSystem<ResourceSystem>();
@@ -47,5 +45,6 @@ public static class WorkerUtils
     {
         world.GetOrCreateSystem<SimulatedPlayerSystem>();
         world.GetOrCreateSystem<SimulatedActionRequestSystem>();
+        world.GetOrCreateSystem<PathFindingSystem>();
     }
 }

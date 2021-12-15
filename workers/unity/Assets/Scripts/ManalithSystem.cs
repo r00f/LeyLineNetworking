@@ -6,8 +6,10 @@ using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using UnityEngine;
 using Unity.Jobs;
+using Improbable;
+using System.Collections.Generic;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializeWorldSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class ManalithSystem : JobComponentSystem
 {
     private ComponentUpdateSystem componentUpdateSystem;
@@ -81,9 +83,9 @@ public class ManalithSystem : JobComponentSystem
         base.OnStartRunning();
     }
 
-    public void UpdateManaliths(WorldIndexShared worldIndex)
+    public void UpdateManaliths(WorldIndexShared worldIndex, ClientWorkerIds.Component clientWorkerIds)
     {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref Vision.Component vision, in SpatialEntityId entityId) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref EntityAcl.Component entityAcl, ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref Vision.Component vision, in SpatialEntityId entityId) =>
         {
             var manalithComp = manalith;
             manalithComp.CombinedEnergyGain = 0;
@@ -112,11 +114,11 @@ public class ManalithSystem : JobComponentSystem
             {
                 var oldFact = faction.Faction;
                 uint fact = UpdateFaction(manalithComp);
-
+                
                 faction = new FactionComponent.Component
-                {
-                    Faction = fact
-                };
+                    {
+                        Faction = fact
+                    };
 
                 for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
                 {
@@ -133,6 +135,25 @@ public class ManalithSystem : JobComponentSystem
 
                 if (oldFact != faction.Faction)
                 {
+                    var a = entityAcl.ComponentWriteAcl[135].AttributeSet[0];
+
+                    if (fact == 0)
+                    {
+                        a.Attribute[0] = "UnityClient";
+                    }
+                    else if (fact == 1)
+                    {
+                        a.Attribute[0] = "workerId:" + clientWorkerIds.ClientWorkerId1;
+                    }
+                    else if (fact == 2)
+                    {
+                        a.Attribute[0] = "workerId:" + clientWorkerIds.ClientWorkerId2;
+                    }
+
+                    entityAcl.ComponentWriteAcl[135].AttributeSet[0] = a;
+                    entityAcl.MarkDataDirty(1);
+                    //Debug.Log(entityAcl.ComponentWriteAcl[135].AttributeSet[0].Attribute[0]);
+
                     componentUpdateSystem.SendEvent(
                      new Manalith.ManalithFactionChangeEvent.Event(),
                      entityId.EntityId);

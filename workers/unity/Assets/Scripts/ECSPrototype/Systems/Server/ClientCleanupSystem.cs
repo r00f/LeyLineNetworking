@@ -24,9 +24,9 @@ public class ClientCleanupSystem : JobComponentSystem
     {
         if (!initialized)
         {
-            if (Worlds.ClientWorld != default)
+            if (Worlds.ClientWorldWorker != default)
             {
-                m_GameStateData = Worlds.ClientWorld.CreateEntityQuery(
+                m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
                 );
                 initialized = true;

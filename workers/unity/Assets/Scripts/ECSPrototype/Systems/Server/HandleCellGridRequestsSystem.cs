@@ -12,13 +12,14 @@ using Unity.Collections;
 using Player;
 using Unity.Jobs;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(InitializeWorldSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
 public class HandleCellGridRequestsSystem : JobComponentSystem
 {
     PathFindingSystem m_PathFindingSystem;
     CommandSystem m_CommandSystem;
     TimerSystem m_TimerSystem;
     ResourceSystem m_ResourceSystem;
+    ILogDispatcher logger;
 
     EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
@@ -28,23 +29,13 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-        /*
-        m_GameStateData = GetEntityQuery(
-        ComponentType.ReadOnly<GameState.Component>()
-        );
-
-        m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<Position.Component>(),
-            ComponentType.ReadWrite<CellAttributesComponent.Component>()
-            );
-            */
     }
 
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+
+        logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_TimerSystem = World.GetExistingSystem<TimerSystem>();
@@ -54,185 +45,139 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         #region select action
-
-        var selectActionRequests = m_CommandSystem.GetRequests<Actions.SelectActionCommand.ReceivedRequest>();
-
-        for (int i = 0; i < selectActionRequests.Count; i++)
+        Entities.WithNone<AiUnit.Component>().ForEach((Entity e, ref Actions.Component unitActions, in ClientActionRequest.Component clientActionRequest, in FactionComponent.Component unitFaction, in WorldIndexShared unitWorldIndex, in SpatialEntityId unitEntityId, in CubeCoordinate.Component unitCoord) =>
         {
-            var selectActionRequest = selectActionRequests[i];
-
-            Entities.ForEach((Entity e, ref Actions.Component unitActions, ref CellsToMark.Component unitCellsToMark, in FactionComponent.Component unitFaction,  in WorldIndexShared unitWorldIndex, in SpatialEntityId unitEntityId, in CubeCoordinate.Component unitCoord) =>
+            if(clientActionRequest.ActionId == -3 && (unitActions.CurrentSelected.Index != -3 || unitActions.LockedAction.Index != -3))
             {
-                //if this unit has sent a selectActionCommand
-                if (unitEntityId.EntityId.Id == selectActionRequest.EntityId.Id)
+                m_ResourceSystem.AddEnergy(unitWorldIndex, unitFaction.Faction, unitActions.LockedAction.CombinedCost);
+                unitActions.CurrentSelected = unitActions.NullAction;
+                unitActions.LastSelected = unitActions.NullAction;
+                unitActions.LockedAction = unitActions.NullAction;
+            }
+            else if (clientActionRequest.ActionId != unitActions.LastSelected.Index && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
+            {
+                m_ResourceSystem.AddEnergy(unitWorldIndex, unitFaction.Faction, unitActions.LockedAction.CombinedCost);
+                unitActions.LockedAction = unitActions.NullAction;
+                Action actionToSelect = unitActions.NullAction;
+
+                if (m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction) > 0)
                 {
-                    unitCellsToMark.SetClientRange = false;
-
-                    m_ResourceSystem.AddEnergy(unitWorldIndex, unitFaction.Faction, unitActions.LockedAction.CombinedCost);
-
-                    unitActions.LockedAction = unitActions.NullAction;
-
-                    int index = selectActionRequest.Payload.ActionId;
-                    Action actionToSelect = unitActions.NullAction;
-
-                    if (m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction) > 0)
+                    if (clientActionRequest.ActionId >= 0)
                     {
-                        if (index >= 0)
-                        {
-                            var a = unitActions.ActionsList[index];
-                            a.CombinedCost = CalculateCombinedCost(unitActions.ActionsList[index].Targets[0]);
-                            unitActions.ActionsList[index] = a;
+                        var a = unitActions.ActionsList[clientActionRequest.ActionId];
+                        a.CombinedCost = CalculateCombinedCost(unitActions.ActionsList[clientActionRequest.ActionId].Targets[0]);
+                        unitActions.ActionsList[clientActionRequest.ActionId] = a;
 
-                            if (m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction, unitActions.ActionsList[index].CombinedCost) >= 0)
-                            {
-                                actionToSelect = unitActions.ActionsList[index];
-                            }
+                        if (m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction, unitActions.ActionsList[clientActionRequest.ActionId].CombinedCost) >= 0)
+                        {
+                            actionToSelect = unitActions.ActionsList[clientActionRequest.ActionId];
                         }
                     }
-
-                    unitActions.CurrentSelected = actionToSelect;
-
-                    if (unitActions.CurrentSelected.Targets.Count != 0)
-                    {
-                        bool self = false;
-                        if (unitActions.CurrentSelected.Targets[0].TargetType == TargetTypeEnum.unit)
-                        {
-                            if (unitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
-                            {
-                                var pos = EntityManager.GetComponentData<Position.Component>(e);
-                                //Set target instantly
-                                self = true;
-                                unitActions.LockedAction = SetLockedAction(unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction, unitCellsToMark, pos);
-                                unitActions.CurrentSelected = unitActions.NullAction;
-                            }
-                        }
-                        if ((!unitActions.CurrentSelected.Equals(unitActions.LastSelected) || unitCellsToMark.CellsInRange.Count == 0) && !self)
-                        {
-                            unitCellsToMark.CellsInRange = m_PathFindingSystem.GetRadius(unitCoord.CubeCoordinate, (uint)unitActions.CurrentSelected.Targets[0].Targettingrange, unitWorldIndex);
-                            unitCellsToMark.CachedPaths.Clear();
-
-                            switch (unitActions.CurrentSelected.Targets[0].Higlighter)
-                            {
-                                case UseHighlighterEnum.pathing:
-                                    uint range = (uint)unitActions.CurrentSelected.Targets[0].Targettingrange;
-                                    if (unitActions.CurrentSelected.Effects[0].EffectType == EffectTypeEnum.move_along_path)
-                                    {
-                                        if (m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction, 0) < (uint)unitActions.CurrentSelected.Targets[0].Targettingrange)
-                                        {
-                                            range = (uint)m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction, 0);
-                                        }
-                                    }
-                                    unitCellsToMark.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, unitCellsToMark.CellsInRange, unitCellsToMark.CellsInRange[0].Cell);
-                                    break;
-                                case UseHighlighterEnum.no_pathing:
-                                    break;
-                            }
-                        }
-                    }
-
-                    unitActions.LastSelected = unitActions.CurrentSelected;
-                    unitCellsToMark.SetClientRange = true;
-                    unitCellsToMark.CachedPaths = unitCellsToMark.CachedPaths;
                 }
-            })
-            .WithoutBurst()
-            .Run();
-        }
 
-        #endregion
+                unitActions.CurrentSelected = actionToSelect;
+                bool self = false;
+
+                if (unitActions.CurrentSelected.Targets.Count != 0)
+                {
+                    if (unitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    {
+                        self = true;
+                        unitActions.LockedAction = SetLockedAction(unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction);
+                        unitActions.LastSelected = unitActions.CurrentSelected;
+                        unitActions.CurrentSelected = unitActions.NullAction;
+                    }
+
+                    if (!unitActions.CurrentSelected.Equals(unitActions.LastSelected) && !self)
+                    {
+                        switch (unitActions.CurrentSelected.Targets[0].Higlighter)
+                        {
+                            case UseHighlighterEnum.pathing:
+                                if (unitActions.CurrentSelected.Effects[0].EffectType == EffectTypeEnum.move_along_path)
+                                {
+                                    int range = unitActions.CurrentSelected.Targets[0].Targettingrange;
+                                    if (m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction, 0) < range)
+                                    {
+                                        range = m_ResourceSystem.CheckPlayerEnergy(unitWorldIndex, unitFaction.Faction, 0);
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+
+                if (!self)
+                    unitActions.LastSelected = unitActions.CurrentSelected;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+        #endregion 
 
         #region set target
-
-        //VALIDATE BEHAVIOUR NEEDS TO BE MOVED TO PATHFINDING SYSTEM SO WE CAN USE IT ON CLIENT ASWELL
-        var setTargetRequests = m_CommandSystem.GetRequests<Actions.SetTargetCommand.ReceivedRequest>();
-
-        for (int i = 0; i < setTargetRequests.Count; i++)
+        Entities.ForEach((ref Actions.Component requestingUnitActions, in ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component requestingUnitCoord, in FactionComponent.Component requestingUnitFaction, in SpatialEntityId requestingUnitId, in WorldIndexShared worldIndex) =>
         {
-            var setTargetRequest = setTargetRequests[i];
-
-            Entities.ForEach((ref Actions.Component requestingUnitActions, in CellsToMark.Component requestingUnitCellsToMark, in CubeCoordinate.Component requestingUnitCoord, in FactionComponent.Component requestingUnitFaction, in SpatialEntityId requestingUnitId, in WorldIndexShared worldIndex) =>
+            if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero && requestingUnitActions.CurrentSelected.Targets[0].Targettingrange > 0)
             {
-                if (requestingUnitId.EntityId.Id == setTargetRequest.EntityId.Id)
+                bool valid = false;
+
+                switch (requestingUnitActions.CurrentSelected.Targets[0].TargetType)
                 {
-                    var targetCoord = setTargetRequest.Payload.TargetCoordinate;
-
-                    if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3)
-                    {
-                        switch (requestingUnitActions.CurrentSelected.Targets[0].TargetType)
-                        {
-                            case TargetTypeEnum.cell:
-                                requestingUnitActions = ValidateCellTarget(worldIndex, requestingUnitActions, targetCoord, requestingUnitCoord.CubeCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark);
-                                break;
-                            case TargetTypeEnum.unit:
-                                bool valid = m_PathFindingSystem.ValidateTarget(worldIndex, requestingUnitCoord.CubeCoordinate, targetCoord, requestingUnitActions.CurrentSelected, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction, requestingUnitCellsToMark.CachedPaths);
-
-                                if (valid)
-                                {
-                                    requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, targetCoord, requestingUnitFaction.Faction, requestingUnitCellsToMark);
-                                }
-                                else
-                                {
-                                    requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
-                                }
-                                break;
-                        }
-                        requestingUnitActions.CurrentSelected = requestingUnitActions.NullAction;
-                    }
+                    case TargetTypeEnum.cell:
+                        valid = ValidateCellTarget(worldIndex, requestingUnitActions, clientActionRequest.TargetCoordinate, requestingUnitCoord.CubeCoordinate);
+                        break;
+                    case TargetTypeEnum.unit:
+                        valid = ValidateUnitTarget(worldIndex, requestingUnitActions, clientActionRequest.TargetCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction);
+                        break;
                 }
-            })
-            .WithoutBurst()
-            .Run();
-        }
-        #endregion
 
+                if (valid)
+                    requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
+                else
+                    requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
+
+                requestingUnitActions.CurrentSelected = requestingUnitActions.NullAction;
+                requestingUnitActions.LastSelected = requestingUnitActions.NullAction;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+        #endregion
         return inputDeps;
     }
 
-    public Actions.Component ValidateCellTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, Vector3f requestingUnitCoord, long requestingUnitId, uint requestingUnitFaction, CellsToMark.Component requestingUnitCellsToMark)
+    public bool ValidateCellTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, Vector3f requestingUnitCoord)
     {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cCoord, in Position.Component position) =>
+        bool valid = false;
+
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cCoord) =>
         {
             if (Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(cCoord.CubeCoordinate))
             {
-                bool valid = m_PathFindingSystem.ValidateTargetWithCellAtt(worldIndex, requestingUnitCoord, targetCoord, requestingUnitActions.CurrentSelected, requestingUnitId, requestingUnitFaction, requestingUnitCellsToMark.CachedPaths, cellAtts.CellAttributes.Cell);
-
-                if (valid)
-                {
-                    requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId, requestingUnitActions.CurrentSelected, requestingUnitCoord, targetCoord, requestingUnitFaction, requestingUnitCellsToMark, position);
-                }
-                else
-                {
-                    requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
-                }
+                valid = m_PathFindingSystem.ValidateCellTarget(requestingUnitCoord, requestingUnitActions.CurrentSelected, cellAtts.CellAttributes.Cell);
             }
         })
         .WithoutBurst()
         .Run();
 
-        return requestingUnitActions;
+        return valid;
     }
 
-    public Actions.Component ValidateUnitTarget(Actions.Component requestingUnitActions, Vector3f targetCoord, Vector3f requestingUnitCoord, long requestingUnitId, uint requestingUnitFaction, CellsToMark.Component requestingUnitCellsToMark, WorldIndexShared worldIndex)
+    public bool ValidateUnitTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, long requestingUnitId, uint requestingUnitFaction)
     {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity e, in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord) =>
+        bool valid = false;
+
+        Entities.WithAll<Health.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
         {
             if (Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
             {
-                bool valid = m_PathFindingSystem.ValidateTarget(worldIndex, requestingUnitCoord, targetCoord, requestingUnitActions.CurrentSelected, requestingUnitId, requestingUnitFaction, requestingUnitCellsToMark.CachedPaths);
-
-                if (valid)
-                {
-                    requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId, requestingUnitActions.CurrentSelected, requestingUnitCoord, targetCoord, requestingUnitFaction, requestingUnitCellsToMark);
-                }
-                else
-                {
-                    requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
-                }
+                valid = m_PathFindingSystem.ValidateUnitTarget(requestingUnitActions.CurrentSelected.Effects[0].ApplyToRestrictions, requestingUnitId, requestingUnitFaction, targetUnitId.EntityId.Id, targetUnitFaction.Faction);
             }
         })
         .WithoutBurst()
         .Run();
-        return requestingUnitActions;
+
+        return valid;
     }
 
     public uint CalculateCombinedCost(ActionTarget inActionTarget)
@@ -252,7 +197,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         return combinedCost;
     }
 
-    public Action SetLockedAction(WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction, CellsToMark.Component cellsToMark, Position.Component position = default)
+    public Action SetLockedAction(WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
     {
         Action locked = selectedAction;
         var t = locked.Targets[0];
@@ -279,7 +224,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
             else
                 effect.TargetCoordinates.Add(targetCoord);
 
-            effect.TargetPosition = new Vector3f((float)position.Coords.X, (float)position.Coords.Y, (float)position.Coords.Z);
+            effect.TargetPosition = GetPositionFromGameState(worldIndex, targetCoord);
 
             locked.Effects[i] = effect;
         }
@@ -301,15 +246,31 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     }
                     break;
                 case ModTypeEnum.path:
-                    foreach (CellAttribute c in m_PathFindingSystem.FindPath(targetCoord, cellsToMark.CachedPaths, worldIndex).CellAttributes)
+                    /*
+                    logger.HandleLog(LogType.Warning,
+                        new LogEvent("WritePathIntoMod")
+                        .WithField("WorldIndex", worldIndex.Value)
+                        .WithField("TargetingRange", (uint) t.Targettingrange)
+                        .WithField("OriginCoord", Vector3fext.ToUnityVector(originCoord))
+                        .WithField("TargetCoord", Vector3fext.ToUnityVector(targetCoord))
+                    );
+                    */
+
+                    //Hotfix for Bots targeting themselves with move action 
+                    if(Vector3fext.ToUnityVector(originCoord) != Vector3fext.ToUnityVector(targetCoord))
                     {
-                        mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
-                        effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, c.Position));
-                        //effect.TargetCoordinates.Add(c.CubeCoordinate);
+                        foreach (CellAttribute c in m_PathFindingSystem.FindPath(m_PathFindingSystem.GetCellAttributesRadius(originCoord, (uint) t.Targettingrange, worldIndex), m_PathFindingSystem.GetCellAttributeAtCoordinate(originCoord, worldIndex), m_PathFindingSystem.GetCellAttributeAtCoordinate(targetCoord, worldIndex)))
+                        {
+                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, GetPositionFromGameState(worldIndex, c.CubeCoordinate)));
+                            effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, GetPositionFromGameState(worldIndex, c.CubeCoordinate)));
+                        }
+                        mod.PathNested.OriginCoordinate = originCoord;
+                        effect.MoveAlongPathNested.OriginCoordinate = originCoord;
+                        locked.Effects[0] = effect;
+                        locked.Targets[0].Mods[0] = mod;
+                        locked.CombinedCost = CalculateCombinedCost(t);
                     }
-                    mod.PathNested.OriginCoordinate = originCoord;
-                    locked.Targets[0].Mods[0] = mod;
-                    locked.CombinedCost = CalculateCombinedCost(t);
+
                     break;
                 case ModTypeEnum.line:
                     foreach (Vector3f v in CellGridMethods.LineDraw(new List<Vector3f>(), originCoord, t.TargetCoordinate))
@@ -334,8 +295,23 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     break;
             }
         }
+
+
         m_ResourceSystem.SubstactEnergy(worldIndex, faction, locked.CombinedCost);
 
         return locked;
+    }
+
+    public Vector3f GetPositionFromGameState(WorldIndexShared worldIndex, Vector3f coord)
+    {
+        var pos = new Vector3f();
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in MapData.Component map) =>
+        {
+            pos = map.CoordinatePositionDictionary[coord];
+        })
+        .WithoutBurst()
+        .Run();
+
+        return pos;
     }
 }

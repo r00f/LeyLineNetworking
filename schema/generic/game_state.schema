@@ -17,7 +17,9 @@ component GameState {
 	uint32 turn_counter = 10;
 	float min_execute_step_time = 11;
     float init_map_wait_time = 12;
+    bool init_map_event_sent = 13;
     event InitializeMap initialize_map_event;
+    event SpawnUnits spawn_units_event;
 	event Cleanup cleanup_state_event;
 	event RopeEnd rope_end_event;
 }
@@ -25,7 +27,14 @@ component GameState {
 type InitializeMap
 {
     uint32 world_index = 1;
+    generic.Vector2f world_offset = 2;
 }
+
+type SpawnUnits
+{
+    uint32 world_index = 1;
+}
+
 
 type RopeEnd
 {

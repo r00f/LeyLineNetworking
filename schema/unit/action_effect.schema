@@ -33,7 +33,7 @@ SpawnUnit spawn_unit_nested = 2;
 DealDamage deal_damage_nested = 3;
 GainArmor gain_armor_nested = 4;
 MoveAlongPath move_along_path_nested = 5;
-uint32 unit_duration = 13;
+uint32 unit_duration = 6;
 }
 
 type SpawnUnit {
@@ -54,6 +54,7 @@ uint32 armor_amount = 1;
 type MoveAlongPath {
 float time_per_cell = 1;
 list<CoordinatePositionPair> coordinate_position_pairs = 2;
+generic.Vector3f origin_coordinate = 3;
 }
 
 enum EffectTypeEnum {

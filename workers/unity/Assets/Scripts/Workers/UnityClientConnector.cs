@@ -54,8 +54,10 @@ namespace BlankProject
 
         protected override void HandleWorkerConnectionEstablished()
         {
-            Worlds.ClientWorld = Worker.World.EntityManager;
+            Worlds.ClientWorkerId = Worker.WorkerId;
+            Worlds.ClientWorldWorker = Worker;
             Worlds.DefaultWorld = World.All[0].EntityManager;
+
             WorkerUtils.AddClientSystems(Worker.World);
             //var fallback = new GameObjectCreatorFromMetadata(Worker.WorkerType, Worker.Origin);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, new AdvancedEntityPipeline(Worker), entityRepresentationMapping, gameObject);

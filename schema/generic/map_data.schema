@@ -1,0 +1,8 @@
+package generic;
+import "generic/vector3.schema";
+
+component MapData {
+    id = 106;
+    map<generic.Vector3f, generic.Vector3f> coordinate_position_dictionary = 1;
+}
+

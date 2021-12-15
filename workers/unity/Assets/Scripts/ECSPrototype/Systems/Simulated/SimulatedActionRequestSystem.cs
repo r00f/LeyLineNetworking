@@ -17,6 +17,8 @@ using UnityEngine.EventSystems;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SimulatedActionRequestSystem : JobComponentSystem
 {
+    PathFindingSystem m_PathFindingSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     CommandSystem m_CommandSystem;
@@ -29,9 +31,9 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<PlayerEnergy.Component>(),
         ComponentType.ReadOnly<PlayerState.HasAuthority>(),
-        ComponentType.ReadWrite<SimPlayerSkipTime>(),
-        ComponentType.ReadWrite<PlayerState.Component>(),
+        ComponentType.ReadOnly<PlayerState.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
+        ComponentType.ReadWrite<SimPlayerSkipTime>(),
         ComponentType.ReadWrite<SimulatedPlayer.Component>()
         );
 
@@ -43,6 +45,8 @@ public class SimulatedActionRequestSystem : JobComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
     }
@@ -64,103 +68,84 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
         var simulatedPlayer = m_PlayerData.GetSingleton<SimulatedPlayer.Component>();
-
-        Entities.WithAll<Actions.Component>().WithNone<SimulatedUnitRequestHandler, AiUnit.Component>().ForEach((Entity e) =>
-        {
-            EntityManager.AddComponentData(e, new SimulatedUnitRequestHandler());
-        })
-        .WithStructuralChanges()
-        .WithoutBurst()
-        .Run();
+        var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
 
         var simSkipTime = m_PlayerData.GetSingleton<SimPlayerSkipTime>();
+        var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
-        if (gameState.CurrentState == GameStateEnum.planning)
+        if (cleanUpStateEvents.Count > 0)
         {
-            bool allUnitsActionLockeReqSent = true;
+            Entities.ForEach((Entity e, ref ClientActionRequest.Component clientActionRequest) =>
+            {
+                clientActionRequest.ActionId = -3;
+                clientActionRequest.TargetCoordinate = new Vector3f(0, 0, 0);
+            })
+            .WithoutBurst()
+            .Run();
+        }
+
+        if (gameState.CurrentState == GameStateEnum.planning && playerState.CurrentState != PlayerStateEnum.ready)
+        {
+            simulatedPlayer.ActionsSelected = true;
 
             if (simSkipTime.SkipTurnWaitTime > 0f)
             {
                 simSkipTime.SkipTurnWaitTime -= Time.DeltaTime;
-                Entities.ForEach((Entity e, ref SimulatedUnitRequestHandler requestHandler, in Energy.Component energy, in Actions.Component actions, in CellsToMark.Component cellsToMark, in FactionComponent.Component faction, in SpatialEntityId id) =>
+                Entities.ForEach((Entity e, ref ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component coord, in Energy.Component energy, in Actions.Component actions, in FactionComponent.Component faction, in SpatialEntityId id) =>
                 {
-                    if (faction.Faction == playerFaction.Faction && !requestHandler.LockActionRequestSent && (!energy.Harvesting || EntityManager.HasComponent<Manalith.Component>(e)))
+                    if (faction.Faction == playerFaction.Faction && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero && (!energy.Harvesting || EntityManager.HasComponent<Manalith.Component>(e)))
                     {
-                        if (actions.CurrentSelected.Index == -3)
+                        if (clientActionRequest.ActionId == -3)
                         {
-                            if (!requestHandler.SelectActionRequestSent)
-                            {
-                                var rAction = Random.Range(0, actions.ActionsList.Count);
+                            //ADD Request CD
+                            var rAction = Random.Range(0, actions.ActionsList.Count);
 
-                                if (actions.ActionsList[rAction].Targets[0].EnergyCost <= playerEnergy.Energy)
-                                {
-                                    var request = new Actions.SelectActionCommand.Request
-                                    (
-                                        id.EntityId,
-                                        new SelectActionRequest(rAction)
-                                    );
-                                    m_CommandSystem.SendCommand(request);
-                                    requestHandler.SelectActionRequestSent = true;
-                                }
+                            if (actions.ActionsList[rAction].Targets[0].EnergyCost <= playerEnergy.Energy)
+                            {
+                                clientActionRequest.TargetCoordinate = new Vector3f(0, 0, 0);
+                                clientActionRequest.ActionId = rAction;
                             }
                         }
                         else
                         {
-                            if (actions.CurrentSelected.Effects[0].EffectType != EffectTypeEnum.move_along_path)
+                            var cachedCells = m_PathFindingSystem.GetRadiusClient(coord.CubeCoordinate, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange);
+
+                            if (cachedCells.Count > 0)
                             {
-                                if (cellsToMark.CellsInRange.Count > 0)
+                                if (actions.ActionsList[clientActionRequest.ActionId].Effects[0].EffectType != EffectTypeEnum.move_along_path)
                                 {
-                                    var rCell = Random.Range(0, cellsToMark.CellsInRange.Count);
-                                    var request = new Actions.SetTargetCommand.Request
-                                    (
-                                        id.EntityId,
-                                        new SetTargetRequest(cellsToMark.CellsInRange[rCell].Cell.CubeCoordinate)
-                                    );
-                                    m_CommandSystem.SendCommand(request);
+                                    var rCell = Random.Range(0, cachedCells.Count);
+                                    if (m_PathFindingSystem.ValidateTargetClient(coord.CubeCoordinate, cachedCells[rCell].Cell.CubeCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                                        clientActionRequest.TargetCoordinate = cachedCells[rCell].Cell.CubeCoordinate;
+                                }
+                                else
+                                {
+                                    var pathsInRange = m_PathFindingSystem.GetAllPathCoordinatesInRadius((uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange, cachedCells);
+                                    if (pathsInRange.Keys.Count > 0)
+                                    {
+                                        var rCell = Random.Range(0, pathsInRange.Count);
+                                        clientActionRequest.TargetCoordinate = pathsInRange.ElementAt(rCell).Key;
+                                    }
                                 }
                             }
-                            else
-                            {
-                                if (cellsToMark.CachedPaths.Count > 0)
-                                {
-                                    var rCell = Random.Range(0, cellsToMark.CachedPaths.Count);
-                                    var request = new Actions.SetTargetCommand.Request
-                                    (
-                                        id.EntityId,
-                                        new SetTargetRequest(cellsToMark.CachedPaths.ElementAt(rCell).Key.CubeCoordinate)
-                                    );
-                                    m_CommandSystem.SendCommand(request);
-                                }
-                            }
-                            requestHandler.LockActionRequestSent = true;
                         }
-                        allUnitsActionLockeReqSent = false;
+                        simulatedPlayer.ActionsSelected = false;
                     }
                 })
                 .WithoutBurst()
                 .Run();
                 //if player has little to no energy left, pass the turn
                 if (playerEnergy.Energy < 20)
-                    allUnitsActionLockeReqSent = true;
+                    simulatedPlayer.ActionsSelected = true;
             }
             else
-                allUnitsActionLockeReqSent = true;
+                simulatedPlayer.ActionsSelected = true;
 
-
-
-            simulatedPlayer.ActionsSelected = allUnitsActionLockeReqSent;
             m_PlayerData.SetSingleton(simulatedPlayer);
         }
         else
         {
             simSkipTime.SkipTurnWaitTime = 5f;
-            Entities.ForEach((Entity e, ref SimulatedUnitRequestHandler requestHandler) =>
-            {
-                requestHandler.LockActionRequestSent = false;
-                requestHandler.SelectActionRequestSent = false;
-            })
-            .WithoutBurst()
-            .Run();
         }
 
         m_PlayerData.SetSingleton(simSkipTime);

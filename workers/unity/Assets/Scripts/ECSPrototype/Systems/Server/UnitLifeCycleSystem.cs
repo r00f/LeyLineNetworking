@@ -8,7 +8,7 @@ using Player;
 using Unity.Jobs;
 using UnityEngine;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(SpawnUnitsSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializeWorldSystem))]
 public class UnitLifeCycleSystem : JobComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData

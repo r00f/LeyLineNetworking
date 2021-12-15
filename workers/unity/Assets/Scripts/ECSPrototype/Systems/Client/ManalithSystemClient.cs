@@ -38,7 +38,6 @@ public class ManalithSystemClient : JobComponentSystem
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
         ComponentType.ReadOnly<MouseState>(),
         ComponentType.ReadOnly<Actions.Component>(),
-        ComponentType.ReadOnly<ClientPath.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>()
         );
 
@@ -87,7 +86,7 @@ public class ManalithSystemClient : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
+        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.SpawnUnitsEvent.Event>();
 
         if (initMapEvents.Count > 0)
         {

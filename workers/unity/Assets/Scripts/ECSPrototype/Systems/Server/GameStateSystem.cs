@@ -1,5 +1,6 @@
 using Cell;
 using Generic;
+using Improbable;
 using Improbable.Gdk.Core;
 using Player;
 using System.Collections.Generic;
@@ -10,24 +11,25 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(SpawnUnitsSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializeWorldSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class GameStateSystem : JobComponentSystem
     {
         ResourceSystem m_ResourceSystem;
         ManalithSystem m_ManalithSystem;
         HandleCellGridRequestsSystem m_CellGridSystem;
         CleanupSystem m_CleanUpSystem;
-        SpawnUnitsSystem m_SpawnSystem;
+        InitializeWorldSystem m_SpawnSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         private BeginSimulationEntityCommandBufferSystem entityCommandBufferSystem;
         ILogDispatcher logger;
 
         /*
-        EntityQuery m_CellData;
+
         EntityQuery m_HeroData;
         EntityQuery m_PlayerData;
         EntityQuery m_GameStateData;
         */
+        EntityQuery m_CellData;
 
         EntityQuery m_UnitData;
         EntityQuery m_EffectStackData;
@@ -88,14 +90,14 @@ namespace LeyLineHybridECS
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
-            m_SpawnSystem = World.GetExistingSystem<SpawnUnitsSystem>();
+            m_SpawnSystem = World.GetExistingSystem<InitializeWorldSystem>();
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
             EntityCommandBuffer ECBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
-            Entities.ForEach((ref GameState.Component gameState, ref EffectStack.Component effectStack, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId) =>
+            Entities.ForEach((ref GameState.Component gameState, ref EffectStack.Component effectStack, in Position.Component position, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId, in ClientWorkerIds.Component clientWorkerIds) =>
             {
                 switch (gameState.CurrentState)
                 {
@@ -129,13 +131,33 @@ namespace LeyLineHybridECS
                             {
                                 gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
-                                m_ComponentUpdateSystem.SendEvent(
-                                new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value)),
-                                gameStateId.EntityId
-                                );
-                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-                                UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
-                                gameState.CurrentState = GameStateEnum.cleanup;
+
+                                //if gameState.InitMapEventSent
+                                if(!gameState.InitMapEventSent)
+                                {
+                                    m_ComponentUpdateSystem.SendEvent(
+                                    new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value, new Vector2f((float) position.Coords.X, (float) position.Coords.Z))),
+                                    gameStateId.EntityId
+                                    );
+                                    gameState.InitMapEventSent = true;
+                                }
+                                //calculate initialized cellcount with sharedWorldIndex
+                                else if(InitializedCellCount(gameStateWorldIndex) == 631)
+                                {
+                                    //send SpawnUnitsEvent
+                                    m_ComponentUpdateSystem.SendEvent(
+                                    new GameState.SpawnUnitsEvent.Event(new SpawnUnits(gameStateWorldIndex.Value)),
+                                    gameStateId.EntityId
+                                    );
+                                    gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+                                    /*
+                                    logger.HandleLog(LogType.Warning,
+                                    new LogEvent("Exit WaitingForPlayers")
+                                    .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
+                                    */
+                                    UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
+                                    gameState.CurrentState = GameStateEnum.cleanup;
+                                }
                             }
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
@@ -143,32 +165,42 @@ namespace LeyLineHybridECS
 //#endif
                         break;
                     case GameStateEnum.planning:
-                        if(gameState.CurrentRopeTime <= 0)
+                        if (gameState.PlayersOnMapCount == 0)
                         {
-                            /*
-                            logger.HandleLog(LogType.Warning,
-                            new LogEvent("Send endRopeEvent")
-                            .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
-                            */
-                            m_ComponentUpdateSystem.SendEvent(
-                            new GameState.RopeEndEvent.Event(),
-                            gameStateId.EntityId);
+                            m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
+                            gameState.InitMapEventSent = false;
+                            gameState.InitMapWaitTime = 2f;
+                            gameState.CurrentState = GameStateEnum.waiting_for_players;
                         }
-                        if (AllPlayersReady(gameStateWorldIndex))
+                        else if (gameState.PlayersOnMapCount == 2)
                         {
-                            /*
-                            logger.HandleLog(LogType.Warning,
-                            new LogEvent("All Players Ready - move to startExecute step")
-                            .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
-                            */
-                            gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-                            UpdateUnitsGameStateTag(GameStateEnum.start_execute, gameStateWorldIndex, ECBuffer);
-                            gameState.CurrentState = GameStateEnum.start_execute;
-                        }
-                        else if (AnyPlayerReady(gameStateWorldIndex))
-                        {
-                            if(gameState.TurnCounter != 1)
-                                gameState.CurrentRopeTime -= Time.DeltaTime;
+                            if (gameState.CurrentRopeTime <= 0)
+                            {
+                                /*
+                                logger.HandleLog(LogType.Warning,
+                                new LogEvent("Send endRopeEvent")
+                                .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
+                                */
+                                m_ComponentUpdateSystem.SendEvent(
+                                new GameState.RopeEndEvent.Event(),
+                                gameStateId.EntityId);
+                            }
+                            if (AllPlayersReady(gameStateWorldIndex))
+                            {
+                                /*
+                                logger.HandleLog(LogType.Warning,
+                                new LogEvent("All Players Ready - move to startExecute step")
+                                .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
+                                */
+                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+                                UpdateUnitsGameStateTag(GameStateEnum.start_execute, gameStateWorldIndex, ECBuffer);
+                                gameState.CurrentState = GameStateEnum.start_execute;
+                            }
+                            else if (AnyPlayerReady(gameStateWorldIndex))
+                            {
+                                if (gameState.TurnCounter != 1)
+                                    gameState.CurrentRopeTime -= Time.DeltaTime;
+                            }
                         }
                         break;
                     case GameStateEnum.start_execute:
@@ -272,7 +304,7 @@ namespace LeyLineHybridECS
                                 {
                                     gameState.TurnCounter++;
                                     m_CleanUpSystem.ClearAllLockedActions(gameStateWorldIndex);
-                                    m_ManalithSystem.UpdateManaliths(gameStateWorldIndex);
+                                    m_ManalithSystem.UpdateManaliths(gameStateWorldIndex, clientWorkerIds);
                                     m_ResourceSystem.CalculateIncome(gameStateWorldIndex);
 
                                     m_ComponentUpdateSystem.SendEvent(
@@ -290,7 +322,8 @@ namespace LeyLineHybridECS
                         break;
                     case GameStateEnum.game_over:
                         //Cycle back to Start in order to stresstest
-                        m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
+                        m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
+                        gameState.InitMapEventSent = false;
                         gameState.InitMapWaitTime = 2f;
                         gameState.CurrentState = GameStateEnum.waiting_for_players;
                         //RevealPlayerVisions(gameStateWorldIndex);
@@ -312,44 +345,12 @@ namespace LeyLineHybridECS
                         gameState.CurrentState = GameStateEnum.game_over;
                     }
                 }
-                /*
-#if UNITY_EDITOR
-                if (gameState.PlayersOnMapCount == 2 && gameState.CurrentState != GameStateEnum.waiting_for_players)
-                {
-                    m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
-                    gameState.InitMapWaitTime = 2f;
-                    gameState.CurrentState = GameStateEnum.waiting_for_players;
-                }
-#else
-*/
-                        if(gameState.PlayersOnMapCount == 0 && gameState.CurrentState != GameStateEnum.waiting_for_players)
-                        {
-                            m_CleanUpSystem.DeleteAllUnits(gameStateWorldIndex);
-                            gameState.InitMapWaitTime = 2f;
-                            gameState.CurrentState = GameStateEnum.waiting_for_players;
-                        }
-//#endif
             })
             .WithoutBurst()
             .Run();
 
             return inputDeps;
         }
-        /*
-        void SetEffectStackInfo(GameState.Component)
-        {
-            for(int i = 0; i < effectStack.GameStateEffectStacks.Count; i++)
-            {
-                if (effectStack.GameStateEffectStacks[i].WorldIndex == worldIndex)
-                {
-                    var e = effectStack.GameStateEffectStacks[i];
-                    e.CurrentState = gameState;
-                    e.EffectsExecuted = false;
-                    effectStack.GameStateEffectStacks[i] = e;                }
-            }
-            m_EffectStackData.SetSingleton(effectStack);
-        }
-        */
 
         EffectStack.Component CleanUpEffectStack(EffectStack.Component effectStack)
         {
@@ -626,20 +627,20 @@ namespace LeyLineHybridECS
 
         private void UpdateMovedUnitCells(WorldIndexShared gameStateWorldIndex, Dictionary<Vector3f, long> unitDict)
         {
-            Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in CubeCoordinate.Component cubeCoord, in SpatialEntityId entityId, in Actions.Component actions, in Health.Component health, in IncomingActionEffects.Component incomingEffects) =>
+            Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in CubeCoordinate.Component cubeCoord, in SpatialEntityId entityId, in Health.Component health, in IncomingActionEffects.Component incomingEffects) =>
             {
                 if (incomingEffects.MoveEffects.Count != 0 && health.CurrentHealth > 0 && incomingEffects.MoveEffects[0].EffectType == EffectTypeEnum.move_along_path)
                 {
                     if (!unitDict.ContainsKey(cubeCoord.CubeCoordinate))
                         unitDict.Add(cubeCoord.CubeCoordinate, entityId.EntityId.Id);
-                    if (!unitDict.ContainsKey(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate))
-                        unitDict.Add(actions.LockedAction.Targets[0].Mods[0].PathNested.OriginCoordinate, entityId.EntityId.Id);
+                    if (!unitDict.ContainsKey(incomingEffects.MoveEffects[0].MoveAlongPathNested.OriginCoordinate))
+                        unitDict.Add(incomingEffects.MoveEffects[0].MoveAlongPathNested.OriginCoordinate, entityId.EntityId.Id);
                 }
             })
             .WithoutBurst()
             .Run();
 
-            Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach(( ref CellAttributesComponent.Component cellAtt, in CubeCoordinate.Component cellCubeCoordinate) =>
+            Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((ref CellAttributesComponent.Component cellAtt, in CubeCoordinate.Component cellCubeCoordinate) =>
             {
                 //Debug.Log("CellsWithWorldIndexShared");
                 if (unitDict.ContainsKey(cellCubeCoordinate.CubeCoordinate))
@@ -746,6 +747,18 @@ namespace LeyLineHybridECS
             .Run();
 
             return b;
+        }
+
+        private uint InitializedCellCount(WorldIndexShared gameStateWorldIndex)
+        {
+            Entities.WithStoreEntityQueryInField(ref m_CellData).WithAll<CellAttributesComponent.Component>().WithSharedComponentFilter(gameStateWorldIndex).ForEach((Entity e) =>
+            {
+
+            })
+            .Run();
+            //Debug.Log(InitializedCellCount(gameStateWorldIndex));
+            return (uint)m_CellData.CalculateEntityCount();
+
         }
     }
 }

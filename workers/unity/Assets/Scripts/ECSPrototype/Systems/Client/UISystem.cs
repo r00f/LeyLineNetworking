@@ -139,7 +139,7 @@ namespace LeyLineHybridECS
             var playerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
             #endregion
 
-            var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
+            var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.SpawnUnitsEvent.Event>();
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
@@ -820,10 +820,12 @@ namespace LeyLineHybridECS
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, in ClientActionRequest.Component clientActionRequest, in Actions.Component actions) =>
             {
                 uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
+                var worldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
+                var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
 
                 if (EntityManager.HasComponent<AiUnit.Component>(e) && unitCompRef.HeadUIRef.UnitHeadUIInstance)
                 {
@@ -900,7 +902,7 @@ namespace LeyLineHybridECS
 
                 if (!unitCompRef.BaseDataSetComp.UIInitialized)
                 {
-                    InitializeUnitUI(playerEnergy, actions, unitCompRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction);
+                    InitializeUnitUI(playerEnergy, actions, unitCompRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction, worldIndex.Value);
                     unitCompRef.BaseDataSetComp.UIInitialized = true;
                 }
                 else
@@ -965,7 +967,7 @@ namespace LeyLineHybridECS
 
                         if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay != null)
                         {
-                            if ((actions.CurrentSelected.Index != -3 || actions.LockedAction.Index != -3) && gameState.CurrentState == GameStateEnum.planning)
+                            if ((clientActionRequest.ActionId != -3 || Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero) && gameState.CurrentState == GameStateEnum.planning)
                             {
                                 unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
                             }
@@ -983,10 +985,11 @@ namespace LeyLineHybridECS
 
         public void ManalithUnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref Manalith.Component m, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Actions.Component actions, ref IsVisible isVisible, ref MouseState mouseState, ref Manalith.Component m, in ClientActionRequest.Component clientActionRequest) =>
             {
                 uint unitId = (uint) EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
+                var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
 
                 if (authPlayerState.SelectedUnitId == unitId)
                 {
@@ -1026,7 +1029,7 @@ namespace LeyLineHybridECS
 
                     unitCompRef.HeadUIRef.UnitHeadUIInstance.transform.localPosition = RoundVector3(WorldToUISpace(UIRef.Canvas, unitCompRef.transform.position + new Vector3(0, unitCompRef.HeadUIRef.HealthBarYOffset, 0)));
 
-                    if (faction.Faction == authPlayerFaction && (actions.CurrentSelected.Index != -3 || actions.LockedAction.Index != -3) && gameState.CurrentState == GameStateEnum.planning)
+                    if (faction.Faction == authPlayerFaction && (clientActionRequest.ActionId != -3 || Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero) && gameState.CurrentState == GameStateEnum.planning)
                     {
                         unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay.gameObject.SetActive(true);
                     }
@@ -1962,7 +1965,7 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void InitializeUnitUI(PlayerEnergy.Component playerEnergy, Actions.Component actions,  UnitComponentReferences unitCompRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction)
+        public void InitializeUnitUI(PlayerEnergy.Component playerEnergy, Actions.Component actions,  UnitComponentReferences unitCompRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction, uint worldIndex)
         {
             unitCompRef.HeadUIRef.UnitHeadUIInstance = Object.Instantiate(unitCompRef.HeadUIRef.UnitHeadUIPrefab, unitCompRef.HeadUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
             unitCompRef.HeadUIRef.UnitHeadHealthBarInstance = unitCompRef.HeadUIRef.UnitHeadUIInstance.HealthBar;
