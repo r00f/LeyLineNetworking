@@ -72,6 +72,10 @@ namespace LeyLineHybridECS
 
             Entities.WithNone<WorldIndexShared, PlayerAttributes.Component, NewlyAddedSpatialOSEntity>().ForEach((Entity e, in WorldIndex.Component entityWorldIndex) =>
             {
+                if (EntityManager.HasComponent<GameState.Component>(e))
+                    EntityManager.AddComponent<GameStateServerVariables>(e);
+
+
                 EntityManager.AddSharedComponentData(e, new WorldIndexShared { Value = entityWorldIndex.Value });
             })
             .WithStructuralChanges()

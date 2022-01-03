@@ -31,7 +31,6 @@ public class CleanupSystem : JobComponentSystem
 m_HealthUnitData = GetEntityQuery(
 ComponentType.ReadOnly<SpatialEntityId>(),
 ComponentType.ReadOnly<CubeCoordinate.Component>(),
-ComponentType.ReadOnly<Health.Component>(),
 ComponentType.ReadWrite<Actions.Component>()
 );
 
@@ -127,7 +126,6 @@ ComponentType.ReadOnly<GameState.Component>()
 
     public void DeleteMap(WorldIndexShared worldIndex)
     {
-        Debug.Log("DeleteMap");
         //Delete units first to prevent moveUpdate from throwing index out of range
         Entities.WithAll<Actions.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId entityId) =>
         {

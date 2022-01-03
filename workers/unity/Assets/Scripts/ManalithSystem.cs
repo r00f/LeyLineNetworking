@@ -60,7 +60,6 @@ public class ManalithSystem : JobComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<Actions.Component>(),
-            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<Energy.Component>()
         );
         
@@ -69,8 +68,6 @@ public class ManalithSystem : JobComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadWrite<FactionComponent.Component>(),
             ComponentType.ReadOnly<Actions.Component>(),
-            ComponentType.ReadWrite<Vision.Component>(),
-            //ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<Energy.Component>()
         );
         m_GameStateData = GetEntityQuery(
@@ -85,7 +82,7 @@ public class ManalithSystem : JobComponentSystem
 
     public void UpdateManaliths(WorldIndexShared worldIndex, ClientWorkerIds.Component clientWorkerIds)
     {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref EntityAcl.Component entityAcl, ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref Vision.Component vision, in SpatialEntityId entityId) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref EntityAcl.Component entityAcl, ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref UnitVision vision, in SpatialEntityId entityId) =>
         {
             var manalithComp = manalith;
             manalithComp.CombinedEnergyGain = 0;

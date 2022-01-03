@@ -15319,6 +15319,7 @@ MonoBehaviour:
   FullColorMeshes:
   - {fileID: 7794856084227117476}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes:
   - {fileID: 9204383765153082352}
   - {fileID: 3581725656142667359}
@@ -15369,7 +15370,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UnitName: StoneBeetle
   UnitDescription: An animated stone beetle that likes to pince enemies.
-  VisionRange: 5
+  VisionRange: 4
   BaseHealth: 40
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
@@ -15398,6 +15399,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 2
   UnitHeadUIPrefab: {fileID: 2609948338221265714, guid: a33dd47d3d0d0dd419c394e10f1024e1,
     type: 3}
@@ -15443,6 +15445,9 @@ MonoBehaviour:
   HeadUIRef: {fileID: 8371166634152211271}
   AnimPortraitComp: {fileID: 8605125013712898807}
   UnitEffectsComp: {fileID: 6906682168850062236}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}

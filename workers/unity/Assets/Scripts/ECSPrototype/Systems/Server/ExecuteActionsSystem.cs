@@ -162,7 +162,7 @@ public class ExecuteActionsSystem : JobComponentSystem
         })
         .Schedule(inputDeps);
 
-        JobHandle applyMoveDataTransformationJob = Entities.WithAll<IncomingMoveTag, MoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref Vision.Component vision, ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
+        JobHandle applyMoveDataTransformationJob = Entities.WithAll<IncomingMoveTag, MoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref UnitVision vision, ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
         {
             var combinedHealth = health.CurrentHealth + health.Armor;
 

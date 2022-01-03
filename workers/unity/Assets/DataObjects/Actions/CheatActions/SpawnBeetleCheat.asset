@@ -40,7 +40,7 @@ MonoBehaviour:
   ProjectileFab: {fileID: 0}
   ActionName: Stone Beetle
   Description: 
-  TimeToExecute: 2
+  TimeToExecute: 0
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -63,5 +63,6 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 5
   UnitNameToSpawn: StoneBeetle

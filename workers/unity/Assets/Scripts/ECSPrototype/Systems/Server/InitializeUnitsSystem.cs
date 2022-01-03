@@ -28,7 +28,6 @@ public class InitializeUnitsSystem : JobComponentSystem
             ComponentType.ReadWrite<LineRendererComponent>(),
             ComponentType.ReadWrite<TeamColorMeshes>(),
             ComponentType.ReadWrite<UnitEffects>(),
-            ComponentType.ReadOnly<Health.Component>(),
             ComponentType.ReadWrite<AnimatorComponent>(),
             ComponentType.ReadOnly<MovementVariables.Component>()
             );
@@ -65,7 +64,7 @@ public class InitializeUnitsSystem : JobComponentSystem
         var playerFactionComp = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var heroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
 
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref Health.Component health, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp, in Health.Component health) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);

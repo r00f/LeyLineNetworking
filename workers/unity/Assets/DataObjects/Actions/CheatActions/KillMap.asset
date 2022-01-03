@@ -19,7 +19,7 @@ MonoBehaviour:
   ActionName: Wax Spray
   Description: Spray the area with wax. Deals <color=red>30</color> damge to all
     enemies in the area.
-  TimeToExecute: 4
+  TimeToExecute: 0
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -80,6 +80,7 @@ MonoBehaviour:
   ApplyToTargets: 2
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 3
   DamageAmount: 100
   ExplosionRadius: 4

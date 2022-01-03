@@ -299,6 +299,7 @@ MonoBehaviour:
   FullColorMeshes:
   - {fileID: 2789597271104778442}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes:
   - {fileID: 8374859592592982903}
   EmissionIntensity: 0
@@ -345,7 +346,7 @@ MonoBehaviour:
   UnitName: Rootling
   UnitDescription: A stationary animated root that throws stones from afar. It will
     poke if you get too close.
-  VisionRange: 5
+  VisionRange: 4
   BaseHealth: 50
   EnergyIncome: 0
   SelectUnitButtonInstance: {fileID: 0}
@@ -375,6 +376,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 2.2
   UnitHeadUIPrefab: {fileID: 2609948338221265714, guid: a33dd47d3d0d0dd419c394e10f1024e1,
     type: 3}
@@ -420,6 +422,9 @@ MonoBehaviour:
   HeadUIRef: {fileID: 4518830118222795305}
   AnimPortraitComp: {fileID: 4463573164031519641}
   UnitEffectsComp: {fileID: 1532122627691920114}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}

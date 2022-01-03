@@ -285,7 +285,7 @@ MonoBehaviour:
   UnitName: Portal
   UnitDescription: This portal manalith can be captured by having the most units
     on its circle. Once you control it gains you energy.
-  VisionRange: 5
+  VisionRange: 4
   BaseHealth: 100
   EnergyIncome: 4
   SelectUnitButtonInstance: {fileID: 0}
@@ -310,6 +310,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 3
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 59087be3e665a7d45872357d0d5ede53,
     type: 3}
@@ -354,6 +355,9 @@ MonoBehaviour:
   HeadUIRef: {fileID: 1130299993275380547}
   AnimPortraitComp: {fileID: 930118610718755571}
   UnitEffectsComp: {fileID: -6603811149368157288}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}

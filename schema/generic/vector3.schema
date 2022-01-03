@@ -1,12 +1,11 @@
 package generic;
 		
 type Vector3f {
-	
 	float x = 1;
 	float y = 2;
 	float z = 3;
-
 }
+
 type Vector3i {
 	
 	int32 x = 1;
@@ -18,6 +17,11 @@ type Vector3i {
 type Vector2f {
 	float x = 1;
 	float y = 2;
+}
+
+type Vector2i {
+	sint32 x = 1;
+	sint32 y = 2;
 }
 
 type Vector3fList

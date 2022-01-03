@@ -52,7 +52,6 @@ public class UnitAnimationSystem : JobComponentSystem
 
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<IsVisible>(),
-        //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<Actions.Component>(),
         ComponentType.ReadOnly<Energy.Component>(),
@@ -149,7 +148,7 @@ public class UnitAnimationSystem : JobComponentSystem
 
             HandleEnableVisualsDelay(unitComponentReferences, startRotation, playerHeroTransform.Transform);
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
-            HandleLockedAction(unitComponentReferences, actions, faction, gameState, id, playerVision, coord);
+            HandleLockedAction(unitComponentReferences, playerVision, actions, faction, gameState, id, coord);
             HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
             SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
             SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
@@ -189,7 +188,7 @@ public class UnitAnimationSystem : JobComponentSystem
             }
 
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
-            HandleLockedAction(unitComponentReferences, actions, faction, gameState, id, playerVision, coord);
+            HandleLockedAction(unitComponentReferences, playerVision, actions, faction, gameState, id, coord);
             SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
         })
         .WithoutBurst()
@@ -234,7 +233,7 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void HandleLockedAction(UnitComponentReferences unitComponentReferences, Actions.Component actions, FactionComponent.Component faction, GameState.Component gameState, SpatialEntityId id, Vision.Component playerVision, CubeCoordinate.Component coord)
+    public void HandleLockedAction(UnitComponentReferences unitComponentReferences, Vision.Component playerVision, Actions.Component actions, FactionComponent.Component faction, GameState.Component gameState, SpatialEntityId id, CubeCoordinate.Component coord)
     {
         if (actions.LockedAction.Index != -3)
         {

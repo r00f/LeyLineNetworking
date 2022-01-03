@@ -31,7 +31,6 @@ namespace LeyLineHybridECS
             m_PlayerData = GetEntityQuery(
                 ComponentType.ReadOnly<PlayerEnergy.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<Vision.Component>(),
                 ComponentType.ReadOnly<PlayerState.HasAuthority>(),
                 ComponentType.ReadWrite<PlayerState.Component>(),
                 ComponentType.ReadWrite<SimulatedPlayer.Component>()

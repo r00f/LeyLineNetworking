@@ -18,7 +18,7 @@ MonoBehaviour:
   ProjectileFab: {fileID: 0}
   ActionName: Hatch Spike
   Description: Hatch the egg! A spiked lizard enters the fray.
-  TimeToExecute: 4
+  TimeToExecute: 2
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -42,6 +42,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 2
   UnitNameToSpawn: Spike
 --- !u!114 &114707835471737910
@@ -59,6 +60,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 2
   DamageAmount: 999
   ExplosionRadius: 2

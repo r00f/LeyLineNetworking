@@ -17,7 +17,7 @@ MonoBehaviour:
   ProjectileFab: {fileID: 0}
   ActionName: Splash
   Description: Attacks an enemy from afar. Deals <color=red>35</color> damage.
-  TimeToExecute: 4
+  TimeToExecute: 0
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -40,6 +40,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 4
   DamageAmount: 999
   ExplosionRadius: 0

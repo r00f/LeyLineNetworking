@@ -7,6 +7,7 @@ using Player;
 using System.Linq;
 using Unity.Jobs;
 using UnityEngine;
+using Unity.Collections;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class VisionSystem_Server : JobComponentSystem
@@ -26,14 +27,12 @@ public class VisionSystem_Server : JobComponentSystem
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<Vision.Component>()
             );
 
         m_PlayerData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<PlayerAttributes.Component>(),
             ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadWrite<Vision.Component>()
             );
          */
         m_GameStateData = GetEntityQuery(
@@ -106,12 +105,9 @@ public class VisionSystem_Server : JobComponentSystem
                     .WithField("playerVision.RevealVision", p_Vision.RevealVision));
                     */
 
-                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value);
+                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value, new HashSet<Vector2i>());
 
                     p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                    p_Vision.Positives = p_Vision.Positives;
-                    p_Vision.Negatives = p_Vision.Negatives;
-                    p_Vision.Lastvisible = p_Vision.Lastvisible;
 
                     m_ComponentUpdateSystem.SendEvent(
                     new Vision.UpdateClientVisionEvent.Event(),
@@ -124,9 +120,6 @@ public class VisionSystem_Server : JobComponentSystem
                     p_Vision = RevealMap(p_windex.Value, p_Vision);
 
                     p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
-                    p_Vision.Positives = p_Vision.Positives;
-                    p_Vision.Negatives = p_Vision.Negatives;
-                    p_Vision.Lastvisible = p_Vision.Lastvisible;
 
                     m_ComponentUpdateSystem.SendEvent(
                     new Vision.UpdateClientVisionEvent.Event(),
@@ -144,7 +137,7 @@ public class VisionSystem_Server : JobComponentSystem
 
     private void UpdateUnitVision(WorldIndexShared worldIndex, List<CellAttributesList> obstructVisionClusters)
     {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Vision.Component u_Vision, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref UnitVision u_Vision, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
         {
             if (u_Vision.InitialWaitTime > 0)
             {
@@ -152,7 +145,7 @@ public class VisionSystem_Server : JobComponentSystem
                 if (u_Vision.InitialWaitTime <= 0)
                     u_Vision.RequireUpdate = true;
             }
-
+            
             if (u_Vision.RequireUpdate == true)
             {
                 /*
@@ -160,15 +153,10 @@ public class VisionSystem_Server : JobComponentSystem
                 new LogEvent("u_Vision.ReqUpdate = true")
                 .WithField("unitId", id.EntityId.Id));
                 */
-                var v = UpdateUnitVision(u_OccupiedCell, u_Vision, u_Faction, obstructVisionClusters);
-
-                if (v.CellsInVisionrange.Count != 0)
-                {
-                    SetPlayerReqUpdate(u_Faction.Faction, worldIndex, u_OccupiedCell.CubeCoordinate);
-
-                    u_Vision = v;
-                    u_Vision.RequireUpdate = false;
-                }
+                var v = GenerateUnitVision(u_OccupiedCell, u_Vision, u_Faction, obstructVisionClusters);
+                SetPlayerReqUpdate(u_Faction.Faction, worldIndex, u_OccupiedCell.CubeCoordinate);
+                u_Vision = v;
+                u_Vision.RequireUpdate = false;
             }
         })
         .WithoutBurst()
@@ -188,7 +176,7 @@ public class VisionSystem_Server : JobComponentSystem
                 */
                 p_Vision.RequireUpdate = true;
             }
-            else if (p_Vision.CellsInVisionrange.ContainsKey(coord))
+            else if (p_Vision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(coord)))
             {
                 m_ComponentUpdateSystem.SendEvent(
                 new Vision.UpdateClientVisionEvent.Event(),
@@ -199,7 +187,7 @@ public class VisionSystem_Server : JobComponentSystem
         .Run();
     }
 
-    private Vision.Component UpdateUnitVision(CubeCoordinate.Component coor, Vision.Component inVision, FactionComponent.Component inFaction, List<CellAttributesList> FixClusters)
+    private UnitVision GenerateUnitVision(CubeCoordinate.Component coor, UnitVision inVision, FactionComponent.Component inFaction, List<CellAttributesList> FixClusters)
     {
         List<Vector3f> sight = CellGridMethods.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
         var sightHash = new HashSet<Vector3f>();
@@ -211,7 +199,7 @@ public class VisionSystem_Server : JobComponentSystem
 
         List<ObstructVisionCluster> RelevantClusters = new List<ObstructVisionCluster>();
 
-        foreach(CellAttributesList c in FixClusters)
+        foreach (CellAttributesList c in FixClusters)
         {
             bool isRelevant = false;
             HashSet<Vector3f> set = new HashSet<Vector3f>();
@@ -223,7 +211,7 @@ public class VisionSystem_Server : JobComponentSystem
 
             if (isRelevant)
             {
-                RelevantClusters.Add(new ObstructVisionCluster(set, coor.CubeCoordinate));            
+                RelevantClusters.Add(new ObstructVisionCluster(set, coor.CubeCoordinate));
             }
         }
 
@@ -264,8 +252,12 @@ public class VisionSystem_Server : JobComponentSystem
             //sight = new List<Vector3f>(sightHash);
         }
 
-        //inVision.CellsInVisionrange.Clear();
-        inVision.CellsInVisionrange = sightHash.ToDictionary(x => x, x => (uint)x.X);
+        inVision.Vision.Clear();
+
+        foreach (Vector3f v in sightHash)
+        {
+            inVision.Vision.Add(CellGridMethods.CubeToAxial(v));
+        }
 
         return inVision;
     }
@@ -277,7 +269,7 @@ public class VisionSystem_Server : JobComponentSystem
         //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
         Entities.WithSharedComponentFilter(new WorldIndexShared { Value = worldIndex }).ForEach((in CubeCoordinate.Component coord, in CellAttributesComponent.Component cellAtt) =>
         {
-            inVision.CellsInVisionrange.Add(coord.CubeCoordinate, 0);
+            inVision.CellsInVisionrange.Add(CellGridMethods.CubeToAxial(coord.CubeCoordinate));
         })
         .WithoutBurst()
         .Run();
@@ -285,37 +277,13 @@ public class VisionSystem_Server : JobComponentSystem
         return inVision;
     }
 
-    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, uint worldIndex)
+    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, uint worldIndex, HashSet<Vector2i> currentVision)
     {
-        //Debug.Log("UpdatePlayerVision: " + faction);
-        /*
-        logger.HandleLog(LogType.Warning,
-        new LogEvent("UpdatePlayerVision.")
-        .WithField("Faction", faction));
-        */
-
-        inVision.Lastvisible.Clear();
-        inVision.Lastvisible.AddRange(inVision.CellsInVisionrange.Keys);
-
-        inVision.Positives.Clear();
-        inVision.Negatives.Clear();
-        inVision.CellsInVisionrange.Clear();
-
-        var lastVision = new HashSet<Vector3f>();
-
-        foreach (Vector3f v in inVision.Lastvisible)
-        {
-            lastVision.Add(v);
-        }
-
-        var currentVision = new HashSet<Vector3f>();
-
-        Entities.WithSharedComponentFilter(new WorldIndexShared {  Value = worldIndex }).WithAll<CubeCoordinate.Component>().ForEach((in Vision.Component unitVision, in FactionComponent.Component unitFaction) =>
+        Entities.WithSharedComponentFilter(new WorldIndexShared {  Value = worldIndex }).WithAll<CubeCoordinate.Component>().ForEach((in UnitVision unitVision, in FactionComponent.Component unitFaction) =>
         {
             if (faction == unitFaction.Faction)
             {
-                //use a hashSet to increase performance of contains calls (O(1) vs. O(n))
-                foreach (Vector3f v in unitVision.CellsInVisionrange.Keys)
+                foreach (Vector2i v in unitVision.Vision)
                 {
                     currentVision.Add(v);
                 }
@@ -324,23 +292,7 @@ public class VisionSystem_Server : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        inVision.CellsInVisionrange = currentVision.ToDictionary(item => item, item => (uint)0);
-
-        foreach (Vector3f v in lastVision)
-        {
-            if (!currentVision.Contains(v))
-            {
-                inVision.Negatives.Add(v);
-            }
-        }
-
-        foreach (Vector3f v in currentVision)
-        {
-            if (!lastVision.Contains(v))
-            {
-                inVision.Positives.Add(v);
-            }
-        }
+        inVision.CellsInVisionrange = currentVision.ToList();
 
         return inVision;
     }

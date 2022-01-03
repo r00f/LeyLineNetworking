@@ -9,15 +9,15 @@ public static class CellGridMethods
     {
         var q = (2f / 3 * point.x);
         var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
-        return CubeRound(AxialToCube(new Vector2(q, r)));
+        return CubeRound(AxialToCube(new Vector2f(q, r)));
     }
 
     public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2f mapCenter)
     {
-        Vector2 axial = CubeToAxial(cubeCoord);
+        Vector2i axial = CubeToAxial(cubeCoord);
 
-        var x = (3f / 2 * axial.x);
-        var z = (Mathf.Sqrt(3) / 2 * axial.x + Mathf.Sqrt(3) * axial.y);
+        var x = (3f / 2 * axial.X);
+        var z = (Mathf.Sqrt(3) / 2 * axial.X + Mathf.Sqrt(3) * axial.Y);
 
         //factor in mapCenter before returning
         return new Vector3(mapCenter.X + x, 3.1f, mapCenter.Y + z);
@@ -28,14 +28,14 @@ public static class CellGridMethods
             new Vector3f(-1, +1, 0), new Vector3f(-1, 0, +1), new Vector3f(0, -1, +1)
     };
 
-    public static Vector2 CubeToAxial(Vector3f cube)
+    public static Vector2i CubeToAxial(Vector3f cube)
     {
-        return new Vector2(cube.X, cube.Y);
+        return new Vector2i((int)cube.X, (int)cube.Y);
     }
 
-    public static Vector3f AxialToCube(Vector2 axial)
+    public static Vector3f AxialToCube(Vector2f axial)
     {
-        return new Vector3f(axial.x, axial.y, -axial.x - axial.y);
+        return new Vector3f(axial.X, axial.Y, -axial.X - axial.Y);
     }
 
     //size equals width of a hexagon / 2
@@ -235,15 +235,18 @@ public static class CellGridMethods
 
     public static List<Vector3f> CircleDraw(Vector3f originCellCubeCoordinate, uint radius)
     {
-        var results = new List<Vector3f>();
-        results.Add(originCellCubeCoordinate);
-
-        for (int x = (int)(-radius); x <= radius; x++)
+        var results = new List<Vector3f>
         {
-            for (int y = (int)(Mathf.Max(-(float)radius, -x - (float)radius)); y <= (int)(Mathf.Min((float)radius, -x + radius)); y++)
+            originCellCubeCoordinate
+        };
+
+        for (int x = (int)-radius; x <= radius; x++)
+        {
+            for (int y = (int)Mathf.Max(-radius, -x - (float)radius); y <= (int)Mathf.Min(radius, -x + radius); y++)
             {
                 var z = -x - y;
-                results.Add(new Vector3f(originCellCubeCoordinate.X + x, originCellCubeCoordinate.Y + y, originCellCubeCoordinate.Z + z));
+                if(Mathf.Abs(originCellCubeCoordinate.X + x) <= 14 && Mathf.Abs(originCellCubeCoordinate.Y + y) <= 14 && Mathf.Abs(originCellCubeCoordinate.Z + z) <= 14)
+                    results.Add(new Vector3f(originCellCubeCoordinate.X + x, originCellCubeCoordinate.Y + y, originCellCubeCoordinate.Z + z));
             }
         }
         return results;

@@ -7,6 +7,7 @@ using LeyLineHybridECS;
 using Player;
 using Unity.Jobs;
 using UnityEngine;
+using Unity.Collections;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializeWorldSystem))]
 public class UnitLifeCycleSystem : JobComponentSystem
@@ -46,7 +47,6 @@ public class UnitLifeCycleSystem : JobComponentSystem
             {
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Actions.Component>(),
-                ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<CubeCoordinate.Component>()
             }
         };
@@ -93,7 +93,6 @@ public class UnitLifeCycleSystem : JobComponentSystem
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<PlayerAttributes.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
-        ComponentType.ReadWrite<Vision.Component>()
         );
 
         m_UnitChangedData = GetEntityQuery(
@@ -111,7 +110,7 @@ public class UnitLifeCycleSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.WithNone<UnitStateData>().ForEach((Entity e, in WorldIndexShared unitWorldIndex, in CubeCoordinate.Component unitCubeCoordinate, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId) =>
+        Entities.WithNone<UnitStateData>().ForEach((Entity e, in WorldIndexShared unitWorldIndex, in CubeCoordinate.Component unitCubeCoordinate, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId, in StartRotation.Component startRotation) =>
         {
             var coordComp = unitCubeCoordinate;
             var coord = Vector3fext.ToUnityVector(unitCubeCoordinate.CubeCoordinate);
@@ -128,7 +127,17 @@ public class UnitLifeCycleSystem : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            EntityManager.AddComponentData(e, new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction });
+            var unitStateData = new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction };
+            var unitVision = new UnitVision
+            {
+                InitialWaitTime = .1f,
+                VisionRange = startRotation.VisionRange,
+                Vision = new FixedList512<Vector2i>()
+            };
+
+            EntityManager.AddComponents(e, new ComponentTypes(typeof(UnitStateData), typeof(UnitVision)));
+            EntityManager.SetComponentData(e, unitVision);
+            EntityManager.SetComponentData(e, unitStateData);
         })
         .WithStructuralChanges()
         .WithoutBurst()

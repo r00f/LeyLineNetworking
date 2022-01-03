@@ -196,7 +196,7 @@ namespace LeyLineHybridECS
             {
                 if (faction.Faction != playerFaction.Faction)
                 {
-                    if (playerVision.CellsInVisionrange.ContainsKey(coord.CubeCoordinate))
+                    if (playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(coord.CubeCoordinate)))
                     {
                         if (isVisibleGOs.MiniMapTileInstance && isVisibleGOs.MiniMapTileInstance.gameObject.activeSelf == false)
                         {
@@ -246,7 +246,7 @@ namespace LeyLineHybridECS
 
             Entities.With(m_IsVisibleData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
             {
-                if(playerVision.CellsInVisionrange.ContainsKey(cubeCoord.CubeCoordinate))
+                if(playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(cubeCoord.CubeCoordinate)))
                 {
                     if (isVisibleComp.Value == 0)
                     {

@@ -36,13 +36,11 @@ public class ActionEffectsSystem : JobComponentSystem
 
         /*
         m_PlayerData = GetEntityQuery(
-        ComponentType.ReadOnly<Vision.Component>(),
         ComponentType.ReadOnly<PlayerState.HasAuthority>()
         );
 
 
         m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<CapsuleCollider>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<AnimatorComponent>(),
@@ -92,7 +90,7 @@ public class ActionEffectsSystem : JobComponentSystem
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences componentReferences, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions) =>
+            Entities.WithAll<Health.Component, CubeCoordinate.Component, Actions.Component>().ForEach((Entity e, UnitComponentReferences componentReferences) =>
             {
                 if (componentReferences.UnitEffectsComp.AxaShield && componentReferences.UnitEffectsComp.AxaShield.Orbits.Count != 0)
                 {
@@ -121,7 +119,7 @@ public class ActionEffectsSystem : JobComponentSystem
 
         if (gameState.CurrentState != GameStateEnum.planning)
         {
-            Entities.ForEach((Entity e, AnimatorComponent animator, ref Health.Component health, ref CubeCoordinate.Component coord, ref Actions.Component actions, ref IsVisible isVisible) =>
+            Entities.ForEach((Entity e, AnimatorComponent animator, ref CubeCoordinate.Component coord, ref Actions.Component actions, ref IsVisible isVisible, in Health.Component health) =>
             {
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
                 var capsuleCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
@@ -404,7 +402,7 @@ public class ActionEffectsSystem : JobComponentSystem
         {
             foreach (CoordinatePositionPair p in inAction.Targets[0].Mods[0].CoordinatePositionPairs)
             {
-                if (playerVision.CellsInVisionrange.ContainsKey(p.CubeCoordinate))
+                if (playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(p.CubeCoordinate)))
                     AoEcontainsTarget = true;
             }
         }
@@ -422,7 +420,7 @@ public class ActionEffectsSystem : JobComponentSystem
         projectile.UnitFaction = usingUnitFaction;
 
         //if any coord in an AoE is visible or Launching unit is visible or target unit is visible make projectile visible
-        if (AoEcontainsTarget || playerVision.CellsInVisionrange.ContainsKey(inAction.Targets[0].TargetCoordinate) || playerVision.CellsInVisionrange.ContainsKey(originCoord))
+        if (AoEcontainsTarget || playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(inAction.Targets[0].TargetCoordinate)) || playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(originCoord)))
         {
             foreach (GameObject g in projectile.EnableIfVisibleObjects)
             {

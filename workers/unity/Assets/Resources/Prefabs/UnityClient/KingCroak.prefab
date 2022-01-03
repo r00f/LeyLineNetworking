@@ -1014,7 +1014,7 @@ MonoBehaviour:
 
     A giant
     humanoid toad. He regurgiates eggs to summon his units.'
-  VisionRange: 5
+  VisionRange: 4
   BaseHealth: 160
   EnergyIncome: 8
   SelectUnitButtonInstance: {fileID: 0}
@@ -1179,6 +1179,7 @@ MonoBehaviour:
   - {fileID: 4313891179913746919}
   - {fileID: 3647463394036138166}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -1229,6 +1230,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 2.5
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
@@ -1274,6 +1276,9 @@ MonoBehaviour:
   HeadUIRef: {fileID: 1130299993275380547}
   AnimPortraitComp: {fileID: 930118610718755571}
   UnitEffectsComp: {fileID: 4064068440471261288}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}

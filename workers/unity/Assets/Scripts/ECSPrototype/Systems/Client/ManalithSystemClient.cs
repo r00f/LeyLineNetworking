@@ -293,7 +293,7 @@ public class ManalithSystemClient : JobComponentSystem
         float offsetMultiplier = scale;
         float tilescale = scale / 5.8f;
         //Instantiate MiniMapTile into Map
-        Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
+        Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0, 0));
 
         Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
 
@@ -316,7 +316,7 @@ public class ManalithSystemClient : JobComponentSystem
         //Instantiate MiniMapTile into Map
         foreach (Vector3f f in circleCoords)
         {
-            Vector3 pos = CellGridMethods.CubeToPos(f, new Vector2f(0f, 0f));
+            Vector3 pos = CellGridMethods.CubeToPos(f, new Vector2f(0, 0));
             Vector2 invertedPos = new Vector2(pos.x * offsetMultiplier, pos.z * offsetMultiplier);
             mapSpacePositions.Add(invertedPos);
         }
@@ -366,7 +366,7 @@ public class ManalithSystemClient : JobComponentSystem
             for (int v = 0; v < instanciatedTile.UILineRenderer.Points.Length; v++)
             {
                 var coord = new Vector3f(pathCoords[v].X, pathCoords[v].Y, pathCoords[v].Z);
-                var p = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
+                var p = CellGridMethods.CubeToPos(coord, new Vector2f(0, 0));
                 Vector2 invertedPos2 = new Vector2(p.x * scale, p.z * scale);
                 instanciatedTile.UILineRenderer.Points[v] = invertedPos2 - instanciatedTile.TileRect.anchoredPosition;
             }

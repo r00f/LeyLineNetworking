@@ -19,7 +19,7 @@ MonoBehaviour:
   ActionName: Spike Egg
   Description: Summons a spiked lizard warrior egg. They are vicious melee fighters
     that make a great frontline.
-  TimeToExecute: 4
+  TimeToExecute: 0
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -64,5 +64,6 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 5
   UnitNameToSpawn: SpikeEgg

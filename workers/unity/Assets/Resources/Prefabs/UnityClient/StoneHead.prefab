@@ -317,6 +317,7 @@ MonoBehaviour:
   FullColorMeshes:
   - {fileID: 1706615932947190176}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -359,7 +360,7 @@ MonoBehaviour:
   UnitName: Stone Head
   UnitDescription: This stone head manalith can be captured by having the most units
     on its circle. Once you control it gains you energy.
-  VisionRange: 5
+  VisionRange: 4
   BaseHealth: 100
   EnergyIncome: 2
   SelectUnitButtonInstance: {fileID: 0}
@@ -384,6 +385,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 3
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 59087be3e665a7d45872357d0d5ede53,
     type: 3}
@@ -428,6 +430,9 @@ MonoBehaviour:
   HeadUIRef: {fileID: 1130299993275380547}
   AnimPortraitComp: {fileID: 930118610718755571}
   UnitEffectsComp: {fileID: -6603811149368157288}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}
@@ -585,6 +590,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d92894df5a951ab4fbaf7bb2066adae6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  TakenNeighbours: 
   occupiedCell: {fileID: 0}
   leyLinePathRenderer: {fileID: 4828741399813337422}
   leyLinePath: []
@@ -632,8 +638,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   LeylineRenderer: {fileID: 4828741399813337422}
   ConnectedManalithColor: {fileID: 0}
-  mesh: {fileID: 0}
-  uv: []
   Gradient:
     serializedVersion: 2
     key0: {r: 1, g: 1, b: 1, a: 1}
@@ -692,7 +696,6 @@ MonoBehaviour:
     m_Mode: 0
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
-  colors: []
   EmissionMultiplier: 5
 --- !u!114 &2745106235872908921
 MonoBehaviour:

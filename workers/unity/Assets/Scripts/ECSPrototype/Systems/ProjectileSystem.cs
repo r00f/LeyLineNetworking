@@ -62,7 +62,6 @@ public class ProjectileSystem : JobComponentSystem
                 );
 /*
                 m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
-                ComponentType.ReadOnly<Vision.Component>(),
                 ComponentType.ReadOnly<PlayerState.HasAuthority>()
                 );
                 */

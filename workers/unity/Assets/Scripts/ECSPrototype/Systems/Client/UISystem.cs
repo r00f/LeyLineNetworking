@@ -44,7 +44,6 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<UnitDataSet>(),
                 ComponentType.ReadOnly<MouseState>(),
-                ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<IsVisible>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<Actions.Component>(),
@@ -143,23 +142,6 @@ namespace LeyLineHybridECS
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
-            /*
-            var armorChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Health.ArmorChangeEvent.Event>();
-
-            for (int i = 0; i < armorChangeEvents.Count; i++)
-            {
-                var armorChangeUnitId = armorChangeEvents[i].EntityId.Id;
-
-                Entities.ForEach((ref SpatialEntityId id, ref Health.Component health, ref FactionComponent.Component faction) =>
-                {
-                    if(authPlayerState.SelectedUnitId == id.EntityId.Id && armorChangeUnitId == id.EntityId.Id)
-                        UpdatePortraitHealthText(authPlayerFaction.Faction, faction.Faction, health);
-                })
-                .WithoutBurst()
-                .Run();
-            }
-            */
-
             if (initMapEvents.Count > 0)
             {
                 //ClearUnitUIElements();
@@ -223,7 +205,7 @@ namespace LeyLineHybridECS
 
             if (cleanUpStateEvents.Count > 0)
             {
-                Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Health.Component health, ref Energy.Component energy, in FactionComponent.Component faction) =>
+                Entities.ForEach((Entity e, UnitHeadUIReferences unitHeadUIRef, ref Actions.Component actions, ref Energy.Component energy, in FactionComponent.Component faction, in Health.Component health) =>
                 {
                     //var energy = EntityManager.GetComponentData<Energy.Component>(e);
                     var stats = EntityManager.GetComponentObject<UnitDataSet>(e);
@@ -820,7 +802,7 @@ namespace LeyLineHybridECS
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref Health.Component health, ref IsVisible isVisible, ref MouseState mouseState, in ClientActionRequest.Component clientActionRequest, in Actions.Component actions) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref IsVisible isVisible, ref MouseState mouseState, in ClientActionRequest.Component clientActionRequest, in Actions.Component actions, in Health.Component health) =>
             {
                 uint unitId = (uint)EntityManager.GetComponentData<SpatialEntityId>(e).EntityId.Id;
                 var worldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);

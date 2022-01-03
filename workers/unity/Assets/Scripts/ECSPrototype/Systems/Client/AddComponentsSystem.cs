@@ -335,7 +335,7 @@ public class AddComponentsSystem : JobComponentSystem
 
     void PopulateMap(MinimapScript miniMap, byte isVisible, Vector3f coord, ref IsVisibleReferences isVisibleRef, Color tileColor, bool isUnitTile = false)
     {
-        Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0f, 0f));
+        Vector3 pos = CellGridMethods.CubeToPos(coord, new Vector2f(0, 0));
         Vector2 invertedPos = new Vector2(pos.x * miniMap.MapSize, pos.z * miniMap.MapSize);
 
         if (!isVisibleRef.MiniMapTileInstance)

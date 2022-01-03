@@ -19,7 +19,7 @@ MonoBehaviour:
     type: 3}
   ActionName: Spew Leech
   Description: Summons a leech. Leeches attach to nodes to gather energy for you.
-  TimeToExecute: 4
+  TimeToExecute: 0
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -64,5 +64,6 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 5
   UnitNameToSpawn: Leech

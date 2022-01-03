@@ -194,10 +194,7 @@ public static class LeyLineEntityTemplates {
         var playerVision = new Vision.Snapshot
         {
             RequireUpdate = false,
-            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
-            Lastvisible = new List<Vector3f>(),
-            Positives = new List<Vector3f>(),
-            Negatives = new List<Vector3f>()
+            CellsInVisionrange = new List<Vector2i>()
         };
 
         var playerPathing = new PlayerPathing.Snapshot
@@ -257,21 +254,9 @@ public static class LeyLineEntityTemplates {
             Faction = faction
         };
 
-
         var wIndex = new WorldIndex.Snapshot
         {
             Value = worldIndex
-        };
-
-        var unitVision = new Vision.Snapshot
-        {
-            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
-            Lastvisible = new List<Vector3f>(),
-            Positives = new List<Vector3f>(),
-            Negatives = new List<Vector3f>(),
-            RequireUpdate = false,
-            InitialWaitTime = .1f,
-            VisionRange = Stats.VisionRange
         };
 
         var health = new Health.Snapshot
@@ -285,10 +270,10 @@ public static class LeyLineEntityTemplates {
             EnergyIncome = Stats.EnergyIncome
         };
 
-
         var movementVariables = new StartRotation.Snapshot
         {
-            Value = startRotation
+            Value = startRotation,
+            VisionRange = Stats.VisionRange
         };
 
         var clientActionRequest = new ClientActionRequest.Snapshot
@@ -322,7 +307,6 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
         return template;
@@ -355,27 +339,15 @@ public static class LeyLineEntityTemplates {
             Value = worldIndex
         };
 
-        var unitVision = new Vision.Snapshot
-        {
-            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
-            Lastvisible = new List<Vector3f>(),
-            Positives = new List<Vector3f>(),
-            Negatives = new List<Vector3f>(),
-            RequireUpdate = true,
-            InitialWaitTime = .1f,
-            VisionRange = Stats.VisionRange
-        };
-
         var energy = new Energy.Snapshot
         {
-            //SpawnCost = Stats.SpawnCost,
-            //EnergyUpkeep = Stats.EnergyUpkeep,
             EnergyIncome = Stats.EnergyIncome
         };
 
         var movementVariables = new StartRotation.Snapshot
         {
-            Value = startRotation
+            Value = startRotation,
+            VisionRange = Stats.VisionRange
         };
 
         var actions = SetActions(Stats);
@@ -423,7 +395,6 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());
@@ -464,27 +435,15 @@ public static class LeyLineEntityTemplates {
             Value = worldIndex
         };
 
-        var unitVision = new Vision.Snapshot
-        {
-            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
-            Lastvisible = new List<Vector3f>(),
-            Positives = new List<Vector3f>(),
-            Negatives = new List<Vector3f>(),
-            RequireUpdate = true,
-            InitialWaitTime = .1f,
-            VisionRange = Stats.VisionRange
-        };
-
         var energy = new Energy.Snapshot
         {
-            //SpawnCost = Stats.SpawnCost,
-            //EnergyUpkeep = Stats.EnergyUpkeep,
             EnergyIncome = Stats.EnergyIncome
         };
 
         var movementVariables = new StartRotation.Snapshot
         {
-            Value = startRotation
+            Value = startRotation,
+            VisionRange = Stats.VisionRange
         };
 
         var actions = SetActions(Stats);
@@ -519,7 +478,6 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(coord, WorkerUtils.UnityGameLogic);
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
@@ -586,27 +544,15 @@ public static class LeyLineEntityTemplates {
             Value = worldIndex
         };
 
-        var unitVision = new Vision.Snapshot
-        {
-            CellsInVisionrange = new Dictionary<Vector3f, uint>(),
-            Lastvisible = new List<Vector3f>(),
-            Positives = new List<Vector3f>(),
-            Negatives = new List<Vector3f>(),
-            RequireUpdate = true,
-            InitialWaitTime = .1f,
-            VisionRange = Stats.VisionRange
-        };
-
         var energy = new Energy.Snapshot
         {
-            //SpawnCost = Stats.SpawnCost,
-            //EnergyUpkeep = Stats.EnergyUpkeep,
             EnergyIncome = Stats.EnergyIncome
         };
 
         var movementVariables = new StartRotation.Snapshot
         {
-            Value = startRotation
+            Value = startRotation,
+            VisionRange = Stats.VisionRange
         };
 
         var actions = SetActions(Stats);
@@ -680,7 +626,6 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
 
-        template.AddComponent(unitVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(AllWorkerAttributes.ToArray());

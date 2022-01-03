@@ -48,7 +48,6 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<SpatialEntityId>(),
                 ComponentType.ReadOnly<Transform>(),
                 ComponentType.ReadOnly<MouseState>(),
-                //ComponentType.ReadOnly<Health.Component>(),
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<Actions.Component>(),
                 ComponentType.ReadWrite<UnitComponentReferences>()
@@ -201,7 +200,7 @@ namespace LeyLineHybridECS
 
                     if (mouseState.ClickEvent == 1)
                     {
-                        if ((EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.ContainsKey(unitCoord.CubeCoordinate)) && pState.CurrentState != PlayerStateEnum.waiting_for_target)
+                        if ((EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(unitCoord.CubeCoordinate))) && pState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
                             if (pState.CurrentState != PlayerStateEnum.unit_selected && !pHigh.CancelState)
                             {

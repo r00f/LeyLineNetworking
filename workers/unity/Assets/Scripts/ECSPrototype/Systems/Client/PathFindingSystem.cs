@@ -35,7 +35,6 @@ public class PathFindingSystem : JobComponentSystem
         m_UnitData = GetEntityQuery(
         ComponentType.ReadOnly<SpatialEntityId>(),
         ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        //ComponentType.ReadOnly<Health.Component>(),
         ComponentType.ReadOnly<FactionComponent.Component>(),
         ComponentType.ReadWrite<Actions.Component>(),
 

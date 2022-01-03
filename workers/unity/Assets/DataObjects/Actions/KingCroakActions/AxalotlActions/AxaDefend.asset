@@ -20,7 +20,7 @@ MonoBehaviour:
   ActionName: Water Shield
   Description: Gives an ally a water shield. That ally gains <color=yellow>30</color>
     armor.
-  TimeToExecute: 5
+  TimeToExecute: 3
   HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
@@ -43,6 +43,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 1
+  UnitDuration: 0
   ApplyToRestrictions: 0
   ArmorAmount: 30
 --- !u!114 &114578424212294910

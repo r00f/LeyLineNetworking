@@ -183,6 +183,23 @@ public class ResourceSystem : JobComponentSystem
         return leftOverEnergy;
     }
 
+    public void ResetArmor(WorldIndexShared worldIndex)
+    {
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Health.Component health, in SpatialEntityId id) =>
+        {
+            if(health.Armor > 0)
+                health.Armor = 0;
+            /*
+            componentUpdateSystem.SendEvent(
+            new Health.ArmorChangeEvent.Event(),
+            id.EntityId);
+            */
+        })
+        .WithoutBurst()
+        .Run();
+    }
+
+    /*
     public void Heal(long unitID, uint healAmount)
     {
         Entities.ForEach((ref Health.Component health, in SpatialEntityId id) =>
@@ -202,7 +219,8 @@ public class ResourceSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
     }
-
+    */
+    /*
     public void AddArmor(long unitID, uint armorAmount)
     {
         Entities.ForEach((ref Health.Component health, in SpatialEntityId id) =>
@@ -219,7 +237,8 @@ public class ResourceSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
     }
-
+    */
+    /*
     public void RemoveArmor(long unitID, uint armorAmount)
     {
         Entities.ForEach((ref Health.Component health, ref SpatialEntityId id) =>
@@ -236,20 +255,8 @@ public class ResourceSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
     }
-
-    public void ResetArmor(WorldIndexShared worldIndex)
-    {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((ref Health.Component health, in SpatialEntityId id) =>
-        {
-            health.Armor = 0;
-            componentUpdateSystem.SendEvent(
-            new Health.ArmorChangeEvent.Event(),
-            id.EntityId);
-        })
-        .WithoutBurst()
-        .Run();
-    }
-
+    */
+    /*
     public void DealDamage(Dictionary<long, uint> damageDict, ExecuteStepEnum executeStep)
     {
         Entities.ForEach((ref Health.Component health, in SpatialEntityId id) =>
@@ -276,7 +283,8 @@ public class ResourceSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
     }
-
+    */
+    /*
     public void Die(long unitID, ExecuteStepEnum killingExecuteStep)
     {
         Entities.ForEach((ref Actions.Component actions, in SpatialEntityId id) =>
@@ -290,4 +298,5 @@ public class ResourceSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
     }
+    */
 }
