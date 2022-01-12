@@ -6,35 +6,20 @@ component GameState {
 	
     id = 105;
 	GameStateEnum current_state = 1;
-	uint32 players_on_map_count = 2;
-	float highest_execute_time = 3;
-	float calculate_wait_time = 4;
-	float current_wait_time = 5;
-	float rope_time = 6;
-	float current_rope_time = 7;
-	uint32 winner_faction = 8;
-	generic.Vector2f map_center = 9;
-	uint32 turn_counter = 10;
-	float min_execute_step_time = 11;
-    float init_map_wait_time = 12;
-    bool init_map_event_sent = 13;
-    event InitializeMap initialize_map_event;
-    event SpawnUnits spawn_units_event;
+	float highest_execute_time = 2;
+	float calculate_wait_time = 3;
+	float current_wait_time = 4;
+	float rope_time = 5;
+	float current_rope_time = 6;
+	uint32 winner_faction = 7;
+	generic.Vector2f map_center = 8;
+	uint32 turn_counter = 9;
+	float min_execute_step_time = 10;
+    float init_map_wait_time = 11;
+    bool init_map_event_sent = 12;
 	event Cleanup cleanup_state_event;
 	event RopeEnd rope_end_event;
 }
-
-type InitializeMap
-{
-    uint32 world_index = 1;
-    generic.Vector2f world_offset = 2;
-}
-
-type SpawnUnits
-{
-    uint32 world_index = 1;
-}
-
 
 type RopeEnd
 {

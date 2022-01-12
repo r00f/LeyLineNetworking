@@ -9,7 +9,7 @@ using Unity.Jobs;
 using Improbable;
 using System.Collections.Generic;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializeWorldSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ManalithSystem : JobComponentSystem
 {
     private ComponentUpdateSystem componentUpdateSystem;

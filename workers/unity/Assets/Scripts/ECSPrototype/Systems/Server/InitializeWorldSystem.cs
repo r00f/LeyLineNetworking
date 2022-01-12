@@ -14,45 +14,17 @@ using Unity.Jobs;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateAfter(typeof(ExecuteActionsSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem))]
     public class InitializeWorldSystem : JobComponentSystem
     {
-        GameStateSystem m_GameStateSystem;
         CommandSystem m_CommandSystem;
-        EntityQuery m_PlayerData;
         EntityQuery m_CellData;
-        EntityQuery m_GameStateData;
-        EntityQuery m_SpawnCellData;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         WorkerSystem m_WorkerSystem;
-        ManalithSystem m_ManalithSystem;
 
         protected override void OnCreate()
         {
             base.OnCreate();
-
-            m_PlayerData = GetEntityQuery(
-            ComponentType.ReadOnly<OwningWorker.Component>(),
-            ComponentType.ReadOnly<PlayerState.Component>(),
-            ComponentType.ReadOnly<FactionComponent.Component>()
-            );
-            m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-            ComponentType.ReadOnly<Position.Component>(),
-            ComponentType.ReadOnly<CubeCoordinate.Component>()
-            );
-            m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<GameState.Component>()
-            );
-
-            m_SpawnCellData = GetEntityQuery(
-                //ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
-                ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<IsSpawn.Component>(),
-                ComponentType.ReadWrite<UnitToSpawn.Component>()
-            );
-
         }
 
         protected override void OnStartRunning()
@@ -60,22 +32,16 @@ namespace LeyLineHybridECS
             base.OnStartRunning();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_CommandSystem = World.GetExistingSystem<CommandSystem>();
-            m_GameStateSystem = World.GetExistingSystem<GameStateSystem>();
             m_WorkerSystem = World.GetExistingSystem<WorkerSystem>();
-            m_ManalithSystem = World.GetExistingSystem<ManalithSystem>();
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
-            var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.InitializeMapEvent.Event>();
-            var spawnUnitsEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.SpawnUnitsEvent.Event>();
+            var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<InitMapEvent.InitializeMapEvent.Event>();
+            var spawnUnitsEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.SpawnUnitsEvent.Event>();
 
             Entities.WithNone<WorldIndexShared, PlayerAttributes.Component, NewlyAddedSpatialOSEntity>().ForEach((Entity e, in WorldIndex.Component entityWorldIndex) =>
             {
-                if (EntityManager.HasComponent<GameState.Component>(e))
-                    EntityManager.AddComponent<GameStateServerVariables>(e);
-
-
                 EntityManager.AddSharedComponentData(e, new WorldIndexShared { Value = entityWorldIndex.Value });
             })
             .WithStructuralChanges()
@@ -87,9 +53,13 @@ namespace LeyLineHybridECS
                 var worldIndex = new WorldIndexShared { Value = initMapEvents[i].Event.Payload.WorldIndex };
                 var worldOffset = initMapEvents[i].Event.Payload.WorldOffset;
 
+                //Debug.Log("InitWorldEvent");
+
                 //replicate mapArchetype obstructVisionClusters
-                Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity e, ref ObstructVisionClusters.Component obstructVisionClusters) =>
+                Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity e, ref ClientWorkerIds.Component clientWorkerIds, ref ObstructVisionClusters.Component obstructVisionClusters) =>
                 {
+                    //Debug.Log("FindObstructVisionClusters");
+                    clientWorkerIds.SpawnUnitsEventSent = false;
                     obstructVisionClusters.RawClusters = GetMapArchetypeObstructVisionClusters(0);
                 })
                 .WithoutBurst()
@@ -147,9 +117,30 @@ namespace LeyLineHybridECS
                 .Run();
             }
 
+            Entities.ForEach((ref ClientWorkerIds.Component initMap, in WorldIndexShared worldIndexShared, in SpatialEntityId gameStateId) =>
+            {
+                //Debug.Log(InitializedEntityCount(worldIndexShared));
+
+                if (!initMap.SpawnUnitsEventSent && InitializedEntityCount(worldIndexShared) == 634)
+                {
+                    //Debug.Log("SendSpawnUnitsEvent");
+                    //send SpawnUnitsEvent
+                    m_ComponentUpdateSystem.SendEvent(
+                    new ClientWorkerIds.SpawnUnitsEvent.Event(new SpawnUnits(worldIndexShared.Value)),
+                    gameStateId.EntityId
+                    );
+
+                    initMap.SpawnUnitsEventSent = true;
+                }
+            })
+            .WithoutBurst()
+            .Run();
+
             for (int i = 0; i < spawnUnitsEvents.Count; i++)
             {
                 var worldIndex = new WorldIndexShared { Value = spawnUnitsEvents[i].Event.Payload.WorldIndex };
+
+                //Debug.Log("SpawnUnitsEvent");
 
                 Entities.WithSharedComponentFilter(worldIndex).WithAll<IsSpawn.Component>().ForEach((in UnitToSpawn.Component unitToSpawn, in CubeCoordinate.Component coord, in Position.Component position) =>
                 {
@@ -172,17 +163,18 @@ namespace LeyLineHybridECS
                 })
                 .WithoutBurst()
                 .Run();
-
             }
+
             return inputDeps;
         }
 
-        public List<CellAttributesList> GetMapArchetypeObstructVisionClusters(uint mapArchetypeIndex)
+        public List<Vector3fList> GetMapArchetypeObstructVisionClusters(uint mapArchetypeIndex)
         {
-            var rawClusters = new List<CellAttributesList>();
+            var rawClusters = new List<Vector3fList>();
 
             Entities.WithSharedComponentFilter(new WorldIndexShared { Value = mapArchetypeIndex }).ForEach((in ObstructVisionClusters.Component obstructVisionClusters) =>
             {
+                //Debug.Log("ArchetypeClustersFound");
                 rawClusters = obstructVisionClusters.RawClusters;
             })
             .WithoutBurst()
@@ -193,7 +185,7 @@ namespace LeyLineHybridECS
 
         public void SpawnPlayerUnits(string workerId, WorldIndexShared worldIndex, uint unitFaction, PlayerAttributes.Component playerAttributes)
         {
-            Entities.WithAll<IsSpawn.Component>().WithSharedComponentFilter(worldIndex).ForEach((ref UnitToSpawn.Component unitToSpawn, ref CubeCoordinate.Component coord) =>
+            Entities.WithAll<IsSpawn.Component>().WithSharedComponentFilter(worldIndex).ForEach((in UnitToSpawn.Component unitToSpawn, in CubeCoordinate.Component coord) =>
             {
                 if (unitToSpawn.Faction == unitFaction)
                 {
@@ -213,7 +205,7 @@ namespace LeyLineHybridECS
 
         public void SpawnUnit(string workerId, WorldIndexShared worldIndex, string unitName, uint unitFaction, Vector3f cubeCoord, uint startRotation = 0)
         {
-            Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component cCord, in Position.Component position, in CellAttributesComponent.Component cell) =>
+            Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component cCord, in Position.Component position) =>
             {
                 if (Vector3fext.ToUnityVector(cCord.CubeCoordinate) == Vector3fext.ToUnityVector(cubeCoord))
                 {
@@ -244,6 +236,17 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
+        }
+
+        private uint InitializedEntityCount(WorldIndexShared gameStateWorldIndex)
+        {
+            Entities.WithStoreEntityQueryInField(ref m_CellData).WithSharedComponentFilter(gameStateWorldIndex).ForEach((Entity e) =>
+            {
+
+            })
+            .Run();
+            //Debug.Log(InitializedCellCount(gameStateWorldIndex));
+            return (uint) m_CellData.CalculateEntityCount();
         }
     }
 }

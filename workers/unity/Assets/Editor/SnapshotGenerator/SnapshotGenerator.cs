@@ -48,6 +48,7 @@ namespace BlankProject.Editor
             AddCellGrid(snapshot);
             AddManaliths(snapshot);
             AddObstructVisionClusters(snapshot);
+            AddInitializeMapEventSenders(snapshot);
             return snapshot;
         }
 
@@ -76,6 +77,16 @@ namespace BlankProject.Editor
                     }
                 }
             }
+            
+        }
+
+        private static void AddInitializeMapEventSenders(Snapshot snapshot)
+        {
+            foreach(UnityGameLogicConnector gameLogic in Object.FindObjectsOfType<UnityGameLogicConnector>())
+            {
+                Vector3f p = new Vector3f(gameLogic.transform.position.x, gameLogic.transform.position.y, gameLogic.transform.position.z);
+                snapshot.AddEntity(LeyLineEntityTemplates.InitializeMapEventSender(p));
+            }
         }
 
         private static void AddObstructVisionClusters(Snapshot snapshot)
@@ -83,7 +94,20 @@ namespace BlankProject.Editor
             foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
             {
                 Vector3f pos = new Vector3f(wi.transform.position.x, 0 , wi.transform.position.z);
-                var oVisionCluster = LeyLineEntityTemplates.ObstructVisionClusters(pos, wi.WorldIndex, BuildRawClusters(wi.WorldIndex));
+
+                var obstructVision = new List<Vector3fList>();
+
+                foreach(CellAttributesList c in BuildRawClusters(wi.WorldIndex))
+                {
+                    var currentClusterList = new List<Vector3f>();
+                    foreach(CellAttributes cA in c.CellAttributes)
+                    {
+                        currentClusterList.Add(cA.Cell.CubeCoordinate);
+                    }
+                    obstructVision.Add(new Vector3fList(currentClusterList));
+                }
+
+                var oVisionCluster = LeyLineEntityTemplates.ObstructVisionClusters(pos, wi.WorldIndex, obstructVision);
                 snapshot.AddEntity(oVisionCluster);
             }
         }
@@ -169,15 +193,13 @@ namespace BlankProject.Editor
                 Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
                 uint worldIndex = 0;
                 int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
-                var cell = LeyLineEntityTemplates.Cell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
+                var cell = LeyLineEntityTemplates.ArcheTypeCell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
                 snapshot.AddEntity(cell);
             }
         }
 
         private static void AddPlayerSpawner(Snapshot snapshot)
         {
-            var serverAttribute = UnityGameLogicConnector.WorkerType;
-
             Position.Snapshot pos = new Position.Snapshot
             {
                 Coords = new Coordinates
@@ -189,13 +211,13 @@ namespace BlankProject.Editor
             };
 
             var template = new EntityTemplate();
-            template.AddComponent(pos, serverAttribute);
-            template.AddComponent(new Metadata.Snapshot { EntityType = "PlayerCreator" }, serverAttribute);
-            template.AddComponent(new Persistence.Snapshot(), serverAttribute);
-            template.AddComponent(new PlayerCreator.Snapshot(), serverAttribute);
+            template.AddComponent(pos, WorkerUtils.MapSpawn);
+            template.AddComponent(new Metadata.Snapshot { EntityType = "PlayerCreator" }, WorkerUtils.MapSpawn);
+            template.AddComponent(new Persistence.Snapshot(), WorkerUtils.MapSpawn);
+            template.AddComponent(new PlayerCreator.Snapshot(), WorkerUtils.MapSpawn);
 
-            template.SetReadAccess(UnityClientConnector.WorkerType, UnityGameLogicConnector.WorkerType);
-            template.SetComponentWriteAccess(EntityAcl.ComponentId, serverAttribute);
+            template.SetReadAccess(WorkerUtils.UnityClient, WorkerUtils.UnityGameLogic, WorkerUtils.MapSpawn);
+            template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.MapSpawn);
 
             snapshot.AddEntity(template);
         }
@@ -319,6 +341,24 @@ namespace BlankProject.Editor
                 }
             }
             newObstructed = obstructed;
+        }
+    }
+
+    public struct RawCluster
+    {
+        public CellAttributesList cluster;
+
+        public RawCluster(CellAttributesList inCluster)
+        {
+            cluster = inCluster;
+        }
+        public RawCluster(CellAttributes inStart)
+        {
+            cluster = new CellAttributesList
+            {
+                CellAttributes = new List<CellAttributes>()
+            };
+            cluster.CellAttributes.Add(inStart);
         }
     }
 }

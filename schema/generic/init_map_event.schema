@@ -1,0 +1,13 @@
+package generic;
+import "generic/vector3.schema";
+		
+component InitMapEvent {
+    id = 136;
+    event InitializeMap initialize_map_event;
+}
+
+type InitializeMap
+{
+    uint32 world_index = 1;
+    generic.Vector2f world_offset = 2;
+}

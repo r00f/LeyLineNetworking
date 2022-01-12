@@ -6,7 +6,7 @@ import "cell/cell_attributes.schema";
 component ObstructVisionClusters {
 	
     id = 134;
-    list<cell.CellAttributesList> raw_clusters = 1;
+    list<generic.Vector3fList> raw_clusters = 1;
 	
 }
 

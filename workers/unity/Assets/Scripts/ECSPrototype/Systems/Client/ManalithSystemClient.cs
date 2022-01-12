@@ -86,7 +86,7 @@ public class ManalithSystemClient : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.SpawnUnitsEvent.Event>();
+        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.SpawnUnitsEvent.Event>();
 
         if (initMapEvents.Count > 0)
         {

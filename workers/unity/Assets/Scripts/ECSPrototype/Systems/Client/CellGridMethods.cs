@@ -200,10 +200,60 @@ public static class CellGridMethods
 
         for (int i = 0; i <= n; i++)
         {
-            line.Add(CubeLerp(origin, destination, 1f / n * i));
+            var resultingCoordinate = CubeLerp(origin, destination, 1f / n * i);
+
+            if (IsCoordinateWithinMapBounds(resultingCoordinate))
+                line.Add(resultingCoordinate);
         }
 
         return line;
+    }
+
+    public static List<Vector3f> LineDrawWhitoutOrigin(List<Vector3f> line, Vector3f origin, Vector3f destination)
+    {
+        var n = GetDistance(origin, destination);
+
+        //nudge destination
+        destination = new Vector3f(destination.X + 0.000001f, destination.Y + 0.000002f, destination.Z + 0.000003f);
+
+        for (int i = 1; i <= n; i++)
+        {
+            var resultingCoordinate = CubeLerp(origin, destination, 1f / n * i);
+
+            if (IsCoordinateWithinMapBounds(resultingCoordinate))
+                line.Add(resultingCoordinate);
+        }
+
+        return line;
+    }
+
+    public static List<Vector3f> LineDrawWhithLength(List<Vector3f> line, Vector3f origin, Vector3f destination, uint length)
+    {
+        var dir = CoordinateDirection(origin, destination);
+        var cubeScale = CubeScale(dir, length);
+        var destinationCoord = CubeAdd(origin, cubeScale);
+
+        var n = GetDistance(origin, destinationCoord);
+
+        destinationCoord = new Vector3f(destinationCoord.X + 0.000001f, destinationCoord.Y + 0.000002f, destinationCoord.Z + 0.000003f);
+
+        for (int i = 1; i <= n; i++)
+        {
+            var resultingCoordinate = CubeLerp(origin, destinationCoord, 1f / n * i);
+
+            if (IsCoordinateWithinMapBounds(resultingCoordinate))
+                line.Add(resultingCoordinate);
+        }
+
+        return line;
+    }
+
+    public static bool IsCoordinateWithinMapBounds(Vector3f coord)
+    {
+        if (Mathf.Abs(coord.X) <= 14 && Mathf.Abs(coord.Y) <= 14 && Mathf.Abs(coord.Z) <= 14)
+            return true;
+        else
+            return false;
     }
 
     public static Vector3f CubeRound(Vector3f cubeFloat)
@@ -245,11 +295,33 @@ public static class CellGridMethods
             for (int y = (int)Mathf.Max(-radius, -x - (float)radius); y <= (int)Mathf.Min(radius, -x + radius); y++)
             {
                 var z = -x - y;
-                if(Mathf.Abs(originCellCubeCoordinate.X + x) <= 14 && Mathf.Abs(originCellCubeCoordinate.Y + y) <= 14 && Mathf.Abs(originCellCubeCoordinate.Z + z) <= 14)
+                var resultingCoordinate = new Vector3f(originCellCubeCoordinate.X + x, originCellCubeCoordinate.Y + y, originCellCubeCoordinate.Z + z);
+
+                if (IsCoordinateWithinMapBounds(resultingCoordinate))
+                    results.Add(resultingCoordinate);
+            }
+        }
+        return results;
+    }
+
+    public static HashSet<Vector3f> CircleDrawHash(Vector3f originCellCubeCoordinate, uint radius)
+    {
+        var results = new HashSet<Vector3f>
+        {
+            originCellCubeCoordinate
+        };
+
+        for (int x = (int) -radius; x <= radius; x++)
+        {
+            for (int y = (int) Mathf.Max(-radius, -x - (float) radius); y <= (int) Mathf.Min(radius, -x + radius); y++)
+            {
+                var z = -x - y;
+                if (Mathf.Abs(originCellCubeCoordinate.X + x) <= 14 && Mathf.Abs(originCellCubeCoordinate.Y + y) <= 14 && Mathf.Abs(originCellCubeCoordinate.Z + z) <= 14)
                     results.Add(new Vector3f(originCellCubeCoordinate.X + x, originCellCubeCoordinate.Y + y, originCellCubeCoordinate.Z + z));
             }
         }
         return results;
     }
+
 
 }

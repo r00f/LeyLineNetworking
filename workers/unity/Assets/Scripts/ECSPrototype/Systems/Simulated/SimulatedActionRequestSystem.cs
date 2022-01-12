@@ -154,7 +154,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         }
         else
         {
-            simSkipTime.StartPlanningWaitTime = 0f;
+            simSkipTime.StartPlanningWaitTime = 10f;
             simSkipTime.SkipTurnWaitTime = 5f;
         }
 

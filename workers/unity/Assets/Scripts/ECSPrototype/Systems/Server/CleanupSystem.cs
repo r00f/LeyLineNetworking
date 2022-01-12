@@ -14,7 +14,6 @@ public class CleanupSystem : JobComponentSystem
     CommandSystem m_CommandSystem;
     ResourceSystem m_ResourceSystem;
     ExecuteActionsSystem m_ExecuteSystem;
-    TimerSystem m_TimerSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
 
     //EntityQuery m_GameStateData;
@@ -85,7 +84,6 @@ ComponentType.ReadOnly<GameState.Component>()
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
         m_ExecuteSystem = World.GetExistingSystem<ExecuteActionsSystem>();
-        m_TimerSystem = World.GetExistingSystem<TimerSystem>();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -94,8 +92,6 @@ ComponentType.ReadOnly<GameState.Component>()
         {
             if (gameState.CurrentState == GameStateEnum.cleanup)
             {
-                m_TimerSystem.SubstractTurnDurations(WorldIndex.Value);
-
                 m_ResourceSystem.ResetArmor(WorldIndex);
             }
         })

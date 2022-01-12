@@ -138,19 +138,18 @@ namespace LeyLineHybridECS
             var playerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
             #endregion
 
-            var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.SpawnUnitsEvent.Event>();
+            var spawnUnitEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.SpawnUnitsEvent.Event>();
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
-            if (initMapEvents.Count > 0)
+            if (spawnUnitEvents.Count > 0)
             {
+                //Debug.Log("InitMapClientEvent");
                 //ClearUnitUIElements();
                 InitializeButtons();
 
                 UIRef.MinimapComponent.MapCenter += new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
                 UIRef.BigMapComponent.MapCenter += new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
-
-
 
                 UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[(int) authPlayerFaction.Faction];
                 UIRef.FriendlyColor = settings.FactionColors[(int) authPlayerFaction.Faction];

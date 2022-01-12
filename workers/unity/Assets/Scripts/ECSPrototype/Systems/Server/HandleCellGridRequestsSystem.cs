@@ -12,12 +12,11 @@ using Unity.Collections;
 using Player;
 using Unity.Jobs;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem)), UpdateAfter(typeof(InitializeWorldSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(GameStateSystem))]
 public class HandleCellGridRequestsSystem : JobComponentSystem
 {
     PathFindingSystem m_PathFindingSystem;
     CommandSystem m_CommandSystem;
-    TimerSystem m_TimerSystem;
     ResourceSystem m_ResourceSystem;
     ILogDispatcher logger;
 
@@ -38,7 +37,6 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
-        m_TimerSystem = World.GetExistingSystem<TimerSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
     }
 

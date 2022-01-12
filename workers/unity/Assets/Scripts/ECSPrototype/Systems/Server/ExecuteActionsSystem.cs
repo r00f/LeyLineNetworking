@@ -11,14 +11,13 @@ using Cell;
 using Improbable.Gdk.Core.Commands;
 using Improbable;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ExecuteActionsSystem : JobComponentSystem
 {
     ILogDispatcher logger;
     PathFindingSystem m_PathFindingSystem;
     HandleCellGridRequestsSystem m_HandleCellGridSystem;
     ResourceSystem m_ResourceSystem;
-    TimerSystem m_TimerSystem;
     InitializeWorldSystem m_SpawnSystem;
     CommandSystem m_CommandSystem;
 
@@ -49,7 +48,6 @@ public class ExecuteActionsSystem : JobComponentSystem
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_HandleCellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
         m_ResourceSystem = World.GetExistingSystem<ResourceSystem>();
-        m_TimerSystem = World.GetExistingSystem<TimerSystem>();
         m_SpawnSystem = World.GetExistingSystem<InitializeWorldSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 

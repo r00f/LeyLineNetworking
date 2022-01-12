@@ -24,12 +24,12 @@
   "bridge": {
     "worker_attribute_set": {
       "attributes": [
-        "UnityGameLogic"
+        "MapSpawn"
       ]
     },
     "entity_interest": {
       "range_entity_interest": {
-        "radius": 0
+        "radius": 5000
       }
     },
     "component_delivery": {
@@ -41,39 +41,39 @@
     "default": {
       "run_type": "EXECUTABLE",
       "windows": {
-        "command": "build/worker/UnityGameLogic@Windows/UnityGameLogic@Windows.exe",
+        "command": "build/worker/MapSpawn@Windows/MapSpawn@Windows.exe",
         "arguments": [
           "+workerType",
-          "UnityGameLogic",
+          "MapSpawn",
           "-batchmode",
           "-nographics",
           "-logfile",
-          "../../logs/external-default-unitygamelogic.log"
+          "../../logs/external-default-MapSpawn.log"
         ]
       },
       "macos": {
         "command": "open",
         "arguments": [
           "-n",
-          "./build/worker/UnityGameLogic@Mac/UnityGameLogic@Mac.app",
+          "./build/worker/MapSpawn@Mac/MapSpawn@Mac.app",
           "--args",
           "+workerType",
-          "UnityGameLogic",
+          "MapSpawn",
           "-batchmode",
           "-nographics",
           "-logfile",
-          "../../logs/external-default-unitygamelogic.log"
+          "../../logs/external-default-MapSpawn.log"
         ]
       }
     }
   },
   "managed": {
     "windows": {
-      "artifact_name": "UnityGameLogic@Windows.zip",
-      "command": "UnityGameLogic@Windows.exe",
+      "artifact_name": "MapSpawn@Windows.zip",
+      "command": "MapSpawn@Windows.exe",
       "arguments": [
         "+workerType",
-        "UnityGameLogic",
+        "MapSpawn",
         "+workerId",
         "${IMPROBABLE_WORKER_ID}",
         "+receptionistHost",
@@ -89,11 +89,11 @@
       ]
     },
     "macos": {
-      "artifact_name": "UnityGameLogic@Mac.zip",
-      "command": "UnityGameLogic@Mac.app/Contents/MacOS/UnityGameLogic@Mac",
+      "artifact_name": "MapSpawn@Mac.zip",
+      "command": "MapSpawn@Mac.app/Contents/MacOS/MapSpawn@Mac",
       "arguments": [
         "+workerType",
-        "UnityGameLogic",
+        "MapSpawn",
         "+workerId",
         "${IMPROBABLE_WORKER_ID}",
         "+receptionistHost",
@@ -109,11 +109,11 @@
       ]
     },
     "linux": {
-      "artifact_name": "UnityGameLogic@Linux.zip",
-      "command": "UnityGameLogic@Linux",
+      "artifact_name": "MapSpawn@Linux.zip",
+      "command": "MapSpawn@Linux",
       "arguments": [
         "+workerType",
-        "UnityGameLogic",
+        "MapSpawn",
         "+workerId",
         "${IMPROBABLE_WORKER_ID}",
         "+receptionistHost",

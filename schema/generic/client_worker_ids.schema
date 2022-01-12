@@ -1,7 +1,16 @@
 package generic;
+import "generic/vector3.schema";
 		
 component ClientWorkerIds {
     id = 109;
-    string client_worker_id_1 = 1;
-    string client_worker_id_2 = 2;
+    uint32 players_on_map_count = 1;
+    bool spawn_units_event_sent = 2;
+    string client_worker_id_1 = 3;
+    string client_worker_id_2 = 4;
+    event SpawnUnits spawn_units_event;
+}
+
+type SpawnUnits
+{
+    uint32 world_index = 1;
 }

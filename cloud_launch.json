@@ -6,7 +6,7 @@
       "snapshotWritePeriodSeconds": 0
     },
     "dimensions": {
-      "xMeters": 9000,
+      "xMeters": 4000,
       "zMeters": 4000
     },
     "legacy_flags": [
@@ -20,6 +20,30 @@
     "layer_configurations": [
       {
         "layer": "UnityGameLogic",
+        "points_of_interest": {
+          "num_workers": 4,
+          "points": [
+            {
+              "x": 800,
+              "z": 800
+            },
+            {
+              "x": 1000,
+              "z": 800
+            },
+            {
+              "x": 800,
+              "z": 1000
+            },
+            {
+              "x": 1000,
+              "z": 1000
+            }
+          ]
+        }
+      },
+      {
+        "layer": "MapSpawn",
         "points_of_interest": {
           "num_workers": 1,
           "points": [
@@ -35,6 +59,14 @@
   "workers": [
     {
       "worker_type": "UnityGameLogic",
+      "permissions": [
+        {
+          "all": {}
+        }
+      ]
+    },
+    {
+      "worker_type": "MapSpawn",
       "permissions": [
         {
           "all": {}

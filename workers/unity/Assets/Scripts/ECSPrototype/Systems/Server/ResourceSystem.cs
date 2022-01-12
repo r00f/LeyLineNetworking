@@ -10,14 +10,14 @@ using Cell;
 using System.Collections.Generic;
 
 [DisableAutoCreation]
-[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializePlayerSystem)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
+[UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(HandleCellGridRequestsSystem))]
 public class ResourceSystem : JobComponentSystem
 {
     EntityQuery m_PlayerData;
     EntityQuery m_UnitData;
     EntityQuery m_GameStateData;
     EntityQuery m_ManalithData;
-    private EntityQuery projectorGroup;
+    //private EntityQuery projectorGroup;
 
     Settings settings;
     CleanupSystem m_CleanupSystem;
@@ -30,11 +30,13 @@ public class ResourceSystem : JobComponentSystem
         settings = Resources.Load<Settings>("Settings");
         componentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
 
+        /*
         projectorGroup = Worlds.GameLogicWorld.CreateEntityQuery(
 
                ComponentType.ReadWrite<Transform>(),
                ComponentType.ReadWrite<Projector>()
         );
+        */
 
         m_GameStateData = GetEntityQuery(
             ComponentType.ReadOnly<GameState.Component>()

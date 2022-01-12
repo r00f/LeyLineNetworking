@@ -11,7 +11,7 @@ using UnityEngine;
 
 namespace LeyLineHybridECS
 {
-    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(InitializeWorldSystem)), UpdateAfter(typeof(InitializePlayerSystem))]
+    [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
     public class GameStateSystem : JobComponentSystem
     {
         AISystem m_AISystem;
@@ -26,6 +26,7 @@ namespace LeyLineHybridECS
         EntityQuery m_CellData;
         EntityQuery m_UnitData;
         EntityQuery m_EffectStackData;
+        EntityQuery m_InitMapEventSenderData;
 
         protected override void OnCreate()
         {
@@ -33,42 +34,21 @@ namespace LeyLineHybridECS
 
             entityCommandBufferSystem = World.GetOrCreateSystem<BeginSimulationEntityCommandBufferSystem>();
 
+            m_InitMapEventSenderData = GetEntityQuery(
+                ComponentType.ReadOnly<SpatialEntityId>(),
+                ComponentType.ReadOnly<InitMapEvent.Component>()
+            );
+
             m_UnitData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<Actions.Component>(),
-            ComponentType.ReadOnly<FactionComponent.Component>()
+                ComponentType.ReadOnly<SpatialEntityId>(),
+                ComponentType.ReadOnly<CubeCoordinate.Component>(),
+                ComponentType.ReadOnly<Actions.Component>(),
+                ComponentType.ReadOnly<FactionComponent.Component>()
             );
 
             m_EffectStackData = GetEntityQuery(
                  ComponentType.ReadWrite<EffectStack.Component>()
             );
-
-            //RequireSingletonForUpdate<EffectStack.Component>();
-
-            /*
-            m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<CellAttributesComponent.Component>()
-            );
-
-            m_HeroData = GetEntityQuery(
-            ComponentType.ReadOnly<Hero.Component>(),
-            ComponentType.ReadOnly<FactionComponent.Component>()
-            );
-
-
-            m_PlayerData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<PlayerAttributes.Component>(),
-            ComponentType.ReadWrite<PlayerState.Component>()
-            );
-
-            m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadWrite<GameState.Component>()
-            );
-            */
         }
 
         protected override void OnStartRunning()
@@ -88,35 +68,31 @@ namespace LeyLineHybridECS
         {
             EntityCommandBuffer ECBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
+            Entities.WithNone<WorldIndexShared, NewlyAddedSpatialOSEntity>().ForEach((Entity e, in WorldIndex.Component entityWorldIndex) =>
+            {
+                if(entityWorldIndex.Value != 0)
+                {
+                    if (EntityManager.HasComponent<GameState.Component>(e))
+                        EntityManager.AddComponent<GameStateServerVariables>(e);
+
+                    EntityManager.AddSharedComponentData(e, new WorldIndexShared { Value = entityWorldIndex.Value });
+                }
+            })
+            .WithStructuralChanges()
+            .WithoutBurst()
+            .Run();
+
+            if (m_InitMapEventSenderData.CalculateEntityCount() != 1)
+                return inputDeps;
+
+            var initMapEventSenderId = m_InitMapEventSenderData.GetSingleton<SpatialEntityId>();
+
             Entities.ForEach((ref GameState.Component gameState, ref EffectStack.Component effectStack, ref GameStateServerVariables serverVariables, in Position.Component position, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId, in ClientWorkerIds.Component clientWorkerIds) =>
             {
                 switch (gameState.CurrentState)
                 {
                     case GameStateEnum.waiting_for_players:
-                       /*
-#if UNITY_EDITOR
-                        //check if game is ready to start (> everything has been initialized) instead of checking for a hardcoded number of units on map
-                        if (gameState.PlayersOnMapCount == 1)
-                        {
-                            if (gameState.CurrentWaitTime <= 0)
-                            {
-                                gameState.WinnerFaction = 0;
-                                gameState.TurnCounter = 0;
-                                m_ComponentUpdateSystem.SendEvent(
-                                new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value)),
-                                gameStateId.EntityId
-                                );
-                                gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-                                UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
-                                gameState.CurrentState = GameStateEnum.cleanup;
-
-                            }
-                            else
-                                gameState.CurrentWaitTime -= Time.DeltaTime;
-                        }
-#else
-*/
-                        if (gameState.PlayersOnMapCount == 2)
+                        if (clientWorkerIds.PlayersOnMapCount == 2)
                         {
                             if (gameState.CurrentWaitTime <= 0)
                             {
@@ -124,22 +100,18 @@ namespace LeyLineHybridECS
                                 gameState.TurnCounter = 0;
 
                                 //if gameState.InitMapEventSent
-                                if(!gameState.InitMapEventSent)
+                                if (!gameState.InitMapEventSent)
                                 {
+                                    //Debug.Log("SendInitMapEvent");
                                     m_ComponentUpdateSystem.SendEvent(
-                                    new GameState.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value, new Vector2f((int) position.Coords.X, (int)position.Coords.Z))),
-                                    gameStateId.EntityId
+                                    new InitMapEvent.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value, new Vector2f((int) position.Coords.X, (int) position.Coords.Z))),
+                                    initMapEventSenderId.EntityId
                                     );
                                     gameState.InitMapEventSent = true;
                                 }
                                 //calculate initialized cellcount with sharedWorldIndex
-                                else if(InitializedCellCount(gameStateWorldIndex) == 631)
+                                else
                                 {
-                                    //send SpawnUnitsEvent
-                                    m_ComponentUpdateSystem.SendEvent(
-                                    new GameState.SpawnUnitsEvent.Event(new SpawnUnits(gameStateWorldIndex.Value)),
-                                    gameStateId.EntityId
-                                    );
                                     gameState.CurrentWaitTime = gameState.CalculateWaitTime;
                                     /*
                                     logger.HandleLog(LogType.Warning,
@@ -153,17 +125,16 @@ namespace LeyLineHybridECS
                             else
                                 gameState.CurrentWaitTime -= Time.DeltaTime;
                         }
-//#endif
                         break;
                     case GameStateEnum.planning:
-                        if (gameState.PlayersOnMapCount == 0)
+                        if (clientWorkerIds.PlayersOnMapCount == 0)
                         {
                             m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
                             gameState.InitMapEventSent = false;
                             gameState.InitMapWaitTime = 2f;
                             gameState.CurrentState = GameStateEnum.waiting_for_players;
                         }
-                        else if (gameState.PlayersOnMapCount == 2)
+                        else if (clientWorkerIds.PlayersOnMapCount == 2)
                         {
                             if (gameState.CurrentRopeTime <= 0)
                             {
@@ -273,7 +244,6 @@ namespace LeyLineHybridECS
                         if (CheckAnyHeroDead(gameStateWorldIndex))
                         {
 #if UNITY_EDITOR
-
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex, true);
 #else
                             gameState.WinnerFaction = FindWinnerFaction(gameStateWorldIndex);
@@ -749,8 +719,9 @@ namespace LeyLineHybridECS
             })
             .Run();
             //Debug.Log(InitializedCellCount(gameStateWorldIndex));
-            return (uint)m_CellData.CalculateEntityCount();
-
+            return (uint) m_CellData.CalculateEntityCount();
         }
+
     }
+
 }

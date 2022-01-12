@@ -7,9 +7,9 @@ using UnityEngine;
 
 namespace BlankProject
 {
-    public class UnityGameLogicConnector : WorkerConnector
+    public class MapSpawnWorkerConnector : WorkerConnector
     {
-        public const string WorkerType = "UnityGameLogic";
+        public const string WorkerType = "MapSpawn";
         [SerializeField] private EntityRepresentationMapping entityRepresentationMapping;
 
         private async void Start()
@@ -22,14 +22,14 @@ namespace BlankProject
 
             if (Application.isEditor)
             {
-                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.UnityGameLogic));
-                connectionParameters = CreateConnectionParameters(WorkerUtils.UnityGameLogic);
+                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.MapSpawn));
+                connectionParameters = CreateConnectionParameters(WorkerUtils.MapSpawn);
             }
             else
             {
-                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.UnityGameLogic),
+                flow = new ReceptionistFlow(CreateNewWorkerId(WorkerUtils.MapSpawn),
                     new CommandLineConnectionFlowInitializer());
-                connectionParameters = CreateConnectionParameters(WorkerUtils.UnityGameLogic,
+                connectionParameters = CreateConnectionParameters(WorkerUtils.MapSpawn,
                     new CommandLineConnectionParameterInitializer());
             }
 
@@ -42,10 +42,10 @@ namespace BlankProject
 
         protected override void HandleWorkerConnectionEstablished()
         {
-            //Worlds.GameLogicWorld = Worker.World.EntityManager;
-            WorkerUtils.AddGameLogicSystems(Worker.World);
+            WorkerUtils.AddMapSpawnSystems(Worker.World);
             GameObjectCreationHelper.EnableStandardGameObjectCreation(Worker.World, entityRepresentationMapping, gameObject);
             Worker.World.GetOrCreateSystem<MetricSendSystem>();
+            PlayerLifecycleHelper.AddServerSystems(Worker.World);
         }
     }
 }

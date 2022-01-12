@@ -9,18 +9,31 @@ using Player;
 using Cell;
 using Unit;
 using LeyLineHybridECS;
-using static LeyLineHybridECS.ECSAction;
-using Improbable.Gdk.Core.Representation;
-
 using Improbable.Gdk.PlayerLifecycle;
 using UnityEngine;
 
 public static class LeyLineEntityTemplates {
 
     private static readonly List<string> AllWorkerAttributes =
-        new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient };
+        new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient, WorkerUtils.MapSpawn };
+
+    private static readonly List<string> GameLogicAndClient =
+    new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.UnityClient};
+
+    private static readonly List<string> GameLogicAndMapSpawn =
+        new List<string> { WorkerUtils.UnityGameLogic, WorkerUtils.MapSpawn };
 
     static Settings settings;
+
+    public static EntityTemplate InitializeMapEventSender(Vector3f position)
+    {
+        var template = new EntityTemplate();
+        template.AddComponent(new Position.Snapshot(new Coordinates {X = position.X, Y= position.Y, Z = position.Z }), WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Metadata.Snapshot { EntityType = "InitializeMapEventSender" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new InitMapEvent.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(GameLogicAndMapSpawn.ToArray());
+        return template;
+    }
 
     public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter, Dictionary<Vector3f, Vector3f> mapData)
     {
@@ -29,7 +42,6 @@ public static class LeyLineEntityTemplates {
         var gameState = new GameState.Snapshot
         {
             CurrentState = GameStateEnum.waiting_for_players,
-            PlayersOnMapCount = 0,
             CalculateWaitTime = .5f,
             CurrentWaitTime = .5f,
             RopeTime = settings.RopeTime,
@@ -64,7 +76,7 @@ public static class LeyLineEntityTemplates {
 
         var oVisionClusters = new ObstructVisionClusters.Snapshot
         {
-            RawClusters = new List<CellAttributesList>()
+            RawClusters = new List<Vector3fList>()
         };
 
         var map = new MapData.Snapshot
@@ -73,23 +85,21 @@ public static class LeyLineEntityTemplates {
         };
 
         var template = new EntityTemplate();
-        template.AddComponent(new ClientWorkerIds.Snapshot(), WorkerUtils.UnityGameLogic);
-        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new ClientWorkerIds.Snapshot(), WorkerUtils.MapSpawn);
+        template.AddComponent(oVisionClusters, WorkerUtils.MapSpawn);
+        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
+        template.AddComponent(pos, WorkerUtils.MapSpawn);
         template.AddComponent(new Metadata.Snapshot { EntityType = "GameState" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(gameState, WorkerUtils.UnityGameLogic);
         template.AddComponent(effectStack, WorkerUtils.UnityGameLogic);
-        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(oVisionClusters, WorkerUtils.UnityGameLogic);
         template.AddComponent(map, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        template.SetReadAccess(GameLogicAndClient.ToArray());
         return template;
     }
 
     public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
     {
-        var gameLogic = WorkerUtils.UnityGameLogic;
-
         var pos = new Position.Snapshot
         {
             Coords = new Coordinates
@@ -151,21 +161,114 @@ public static class LeyLineEntityTemplates {
         };
 
         var template = new EntityTemplate();
+        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
 
-        template.AddComponent(pos, gameLogic);
-        template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, gameLogic);
-        template.AddComponent(new Persistence.Snapshot(), gameLogic);
-        template.AddComponent(unitToSpawn, gameLogic);
-        template.AddComponent(coord, gameLogic);
-        template.AddComponent(cellAttributes, gameLogic);
-        template.AddComponent(wIndex, gameLogic);
-        if (isCircleCell)
-            template.AddComponent(new IsCircleCell.Snapshot(), gameLogic);
         if (isSpawn)
-            template.AddComponent(new IsSpawn.Snapshot(), gameLogic);
+        {
+            template.AddComponent(new IsSpawn.Snapshot(), WorkerUtils.MapSpawn);
+            template.AddComponent(pos, WorkerUtils.MapSpawn);
+            template.AddComponent(coord, WorkerUtils.MapSpawn);
+            template.AddComponent(unitToSpawn, WorkerUtils.MapSpawn);
+        }
+        else
+        {
+            template.AddComponent(pos, WorkerUtils.UnityGameLogic);
+            template.AddComponent(coord, WorkerUtils.UnityGameLogic);
+        }
+
+        if (isCircleCell)
+            template.AddComponent(new IsCircleCell.Snapshot(), WorkerUtils.MapSpawn);
+
         if (isTaken)
-            template.AddComponent(new StaticTaken.Snapshot(), gameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
+            template.AddComponent(new StaticTaken.Snapshot(), WorkerUtils.MapSpawn);
+
+        template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
+        template.AddComponent(cellAttributes, WorkerUtils.UnityGameLogic);
+        template.SetReadAccess(GameLogicAndClient.ToArray());
+
+        return template;
+    }
+
+    public static EntityTemplate ArcheTypeCell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
+    {
+        var pos = new Position.Snapshot
+        {
+            Coords = new Coordinates
+            {
+                X = position.X,
+                Y = position.Y,
+                Z = position.Z
+            }
+        };
+
+        var coord = new CubeCoordinate.Snapshot
+        {
+            CubeCoordinate = cubeCoordinate
+        };
+
+        var cellAttributes = new CellAttributesComponent.Snapshot
+        {
+            CellAttributes = new CellAttributes
+            {
+                CellMapColorIndex = mapColorIndex,
+                Cell = new CellAttribute
+                {
+                    Position = position,
+                    CubeCoordinate = cubeCoordinate,
+                    IsTaken = isTaken,
+                    MovementCost = 1,
+                    ObstructVision = inObstruction
+                },
+                Neighbours = neighbours
+            }
+
+        };
+
+        var unitToSpawn = new UnitToSpawn.Snapshot();
+
+        if (faction == 0)
+        {
+            unitToSpawn = new UnitToSpawn.Snapshot
+            {
+                UnitName = unitName,
+                Faction = 0,
+                StartRotation = startRotation,
+            };
+        }
+        else
+        {
+            unitToSpawn = new UnitToSpawn.Snapshot
+            {
+                UnitName = unitName,
+                Faction = faction,
+                StartRotation = startRotation,
+                StartingUnitIndex = startingUnitIndex
+            };
+        }
+
+        var wIndex = new WorldIndex.Snapshot
+        {
+            Value = worldIndex
+        };
+
+        var template = new EntityTemplate();
+
+        template.AddComponent(pos, WorkerUtils.MapSpawn);
+        template.AddComponent(coord, WorkerUtils.MapSpawn);
+        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
+        if (isCircleCell)
+            template.AddComponent(new IsCircleCell.Snapshot(), WorkerUtils.MapSpawn);
+        if (isSpawn)
+            template.AddComponent(new IsSpawn.Snapshot(), WorkerUtils.MapSpawn);
+        if (isTaken)
+            template.AddComponent(new StaticTaken.Snapshot(), WorkerUtils.MapSpawn);
+        template.AddComponent(unitToSpawn, WorkerUtils.MapSpawn);
+
+        template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, WorkerUtils.MapSpawn);
+        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.MapSpawn);
+        template.AddComponent(cellAttributes, WorkerUtils.MapSpawn);
+        template.SetReadAccess(WorkerUtils.MapSpawn);
 
         return template;
     }
@@ -219,19 +322,23 @@ public static class LeyLineEntityTemplates {
         var wIndex = new WorldIndex.Snapshot();
         var pos = new Position.Snapshot { Coords = new Coordinates{X = -200, Y= 0, Z = 0 } };
         var template = new EntityTemplate();
-        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.UnityGameLogic);
-        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
+
+        template.AddComponent(pos, WorkerUtils.MapSpawn);
+        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
+        template.AddComponent(factionSnapshot, WorkerUtils.MapSpawn);
+        template.AddComponent(playerAttributes, WorkerUtils.MapSpawn);
+        template.AddComponent(new Metadata.Snapshot { EntityType = "Player" }, WorkerUtils.MapSpawn);
+        PlayerLifecycleHelper.AddPlayerLifecycleComponents(template, workerId, WorkerUtils.MapSpawn);
+        template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.MapSpawn);
+
+        template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);
         template.AddComponent(energy, WorkerUtils.UnityGameLogic);
         template.AddComponent(new SimulatedPlayer.Snapshot(), client);
         template.AddComponent(playerState, client);
         template.AddComponent(playerPathing, client);
-        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(playerAttributes, WorkerUtils.UnityGameLogic);
-        template.AddComponent(playerVision, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
-        template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
-        PlayerLifecycleHelper.AddPlayerLifecycleComponents(template, workerId, WorkerUtils.UnityGameLogic);
+
+        template.SetReadAccess(GameLogicAndClient.ToArray());
+
         return template;
     }
 
@@ -308,7 +415,7 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
         template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        template.SetReadAccess(GameLogicAndClient.ToArray());
         return template;
     }
 
@@ -386,18 +493,18 @@ public static class LeyLineEntityTemplates {
 
         var template = new EntityTemplate();
 
-        template.AddComponent(owningComponent, WorkerUtils.UnityGameLogic);
-        template.AddComponent(manalith, WorkerUtils.UnityGameLogic);
-        template.AddComponent(factionSnapshot, WorkerUtils.UnityGameLogic);
-        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.UnityGameLogic);
-        template.AddComponent(energy, WorkerUtils.UnityGameLogic);
-        template.AddComponent(coord, WorkerUtils.UnityGameLogic);
-        template.AddComponent(movementVariables, WorkerUtils.UnityGameLogic);
-        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
-        template.AddComponent(actions, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        template.AddComponent(owningComponent, WorkerUtils.MapSpawn);
+        template.AddComponent(manalith, WorkerUtils.MapSpawn);
+        template.AddComponent(factionSnapshot, WorkerUtils.MapSpawn);
+        template.AddComponent(pos, WorkerUtils.MapSpawn);
+        template.AddComponent(new Metadata.Snapshot { EntityType = unitName }, WorkerUtils.MapSpawn);
+        template.AddComponent(energy, WorkerUtils.MapSpawn);
+        template.AddComponent(coord, WorkerUtils.MapSpawn);
+        template.AddComponent(movementVariables, WorkerUtils.MapSpawn);
+        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
+        template.AddComponent(turnTimer, WorkerUtils.MapSpawn);
+        template.AddComponent(actions, WorkerUtils.MapSpawn);
+        template.SetReadAccess(WorkerUtils.MapSpawn);
         return template;
     }
 
@@ -481,11 +588,11 @@ public static class LeyLineEntityTemplates {
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
         template.SetComponentWriteAccess(EntityAcl.ComponentId, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        template.SetReadAccess(GameLogicAndClient.ToArray());
         return template;
     }
 
-    public static EntityTemplate ObstructVisionClusters(Vector3f position, uint worldIndex, List<CellAttributesList> rawClusters)
+    public static EntityTemplate ObstructVisionClusters(Vector3f position, uint worldIndex, List<Vector3fList> rawClusters)
     {
         var pos = new Position.Snapshot
         {
@@ -508,10 +615,10 @@ public static class LeyLineEntityTemplates {
         };
 
         var template = new EntityTemplate();
-        template.AddComponent(oVisionClusters, WorkerUtils.UnityGameLogic);
-        template.AddComponent(wIndex, WorkerUtils.UnityGameLogic);
-        template.AddComponent(pos, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Metadata.Snapshot { EntityType = "ObstructVisionClusters" }, WorkerUtils.UnityGameLogic);
+        template.AddComponent(oVisionClusters, WorkerUtils.MapSpawn);
+        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
+        template.AddComponent(pos, WorkerUtils.MapSpawn);
+        template.AddComponent(new Metadata.Snapshot { EntityType = "ObstructVisionClusters" }, WorkerUtils.MapSpawn);
         return template;
     }
 
@@ -628,7 +735,7 @@ public static class LeyLineEntityTemplates {
 
         template.AddComponent(turnTimer, WorkerUtils.UnityGameLogic);
         template.AddComponent(actions, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(AllWorkerAttributes.ToArray());
+        template.SetReadAccess(GameLogicAndClient.ToArray());
         return template;
     }
 

@@ -21,6 +21,7 @@ namespace LeyLineHybridECS
         EntityQuery m_GameStateSharedData;
         Settings settings;
         private EndSimulationEntityCommandBufferSystem entityCommandBufferSystem;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
         ILogDispatcher logger;
 
         protected override void OnCreate()
@@ -28,11 +29,11 @@ namespace LeyLineHybridECS
             base.OnCreate();
 
             m_GameStateData = GetEntityQuery(
-                ComponentType.ReadOnly<GameState.Component>()
+                ComponentType.ReadOnly<ClientWorkerIds.Component>()
             );
 
             m_GameStateSharedData = GetEntityQuery(
-                ComponentType.ReadOnly<GameState.Component>(),
+                ComponentType.ReadOnly<ClientWorkerIds.Component>(),
                 ComponentType.ReadOnly<WorldIndexShared>()
             );
 
@@ -43,7 +44,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
-
+            m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         }
 
@@ -55,8 +56,7 @@ namespace LeyLineHybridECS
             new LogEvent("GameStates with worldIndexShared Count")
             .WithField("Count", m_GameStateData.CalculateEntityCount()));
             */
-
-            Entities.WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in PlayerAttributes.Component playerAddedPlayerAttributes, in SpatialEntityId id, in OwningWorker.Component owningWorker) =>
+            Entities.WithAll<PlayerAttributes.Component>().WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in OwningWorker.Component owningWorker) =>
             {
                 //Prevent PlayerFaction being initialized with WorldIndex 0 because gamestate has not had its WorldIndexShared added
                 if(spatialWorldIndex.Value == 0)
@@ -68,7 +68,6 @@ namespace LeyLineHybridECS
                     new LogEvent("Newly added player spatialWorldIndex after SetPlayerWorld")
                     .WithField("SpatialWorldIndex", spatialWorldIndex.Value));
                     */
-
                     if (spatialWorldIndex.Value != 0)
                     {
                         factionComp.Faction = SetPlayerFaction(spatialWorldIndex.Value);
@@ -78,7 +77,6 @@ namespace LeyLineHybridECS
                         new LogEvent("Newly added player faction after SetPlayerFaction")
                         .WithField("faction", factionComp.Faction));
                         */
-
                         pos.Coords = SetPlayerPosition(spatialWorldIndex.Value, factionComp.Faction);
                         ecb.AddSharedComponent(entity, new WorldIndexShared { Value = spatialWorldIndex.Value });
                         ecb.AddComponent(entity, new PlayerStateData { WorldIndexState = spatialWorldIndex.Value });
@@ -121,17 +119,19 @@ namespace LeyLineHybridECS
 
             uint wIndex = 0;
 
-            Entities.WithSharedComponentFilter(new WorldIndexShared { Value = index }).ForEach((ref GameState.Component gameState, ref ClientWorkerIds.Component clientWorkerIds) =>
+            Entities.WithSharedComponentFilter(new WorldIndexShared { Value = index }).ForEach((ref ClientWorkerIds.Component clientWorkerIds, in Position.Component position, in SpatialEntityId gameStateId) =>
             {
-                if (gameState.PlayersOnMapCount < 2)
+                if (clientWorkerIds.PlayersOnMapCount < 2)
                 {
                     wIndex = index;
-                    gameState.PlayersOnMapCount++;
+                    clientWorkerIds.PlayersOnMapCount++;
 
-                    if (gameState.PlayersOnMapCount == 1)
+                    if (clientWorkerIds.PlayersOnMapCount == 1)
                         clientWorkerIds.ClientWorkerId1 = clientWorkerId;
                     else
+                    {
                         clientWorkerIds.ClientWorkerId2 = clientWorkerId;
+                    }
                 }
             })
             .WithoutBurst()
@@ -149,9 +149,9 @@ namespace LeyLineHybridECS
 
             //Debug.Log("Substract player from gamestate: " + worldIndex.WorldIndexState);
 
-            Entities.WithSharedComponentFilter(wI).ForEach((ref GameState.Component gameState) =>
+            Entities.WithSharedComponentFilter(wI).ForEach((ref ClientWorkerIds.Component clientWorkerIds) =>
             {
-                gameState.PlayersOnMapCount--;
+                clientWorkerIds.PlayersOnMapCount--;
             })
             .WithoutBurst()
             .Run();
@@ -165,7 +165,7 @@ namespace LeyLineHybridECS
 
             var worldIndexShared = new WorldIndexShared { Value = worldIndex };
 
-            Entities.WithSharedComponentFilter(worldIndexShared).WithAll<GameState.Component>().ForEach((in Position.Component gameStatePos) =>
+            Entities.WithSharedComponentFilter(worldIndexShared).WithAll<ClientWorkerIds.Component>().ForEach((in Position.Component gameStatePos) =>
             {
                 c.X = gameStatePos.Coords.X + xOffsetPos;
                 c.Y = gameStatePos.Coords.Y;
@@ -182,9 +182,9 @@ namespace LeyLineHybridECS
             uint faction = 0;
             var worldIndexShared = new WorldIndexShared { Value = worldIndex };
 
-            Entities.WithSharedComponentFilter(worldIndexShared).ForEach((in GameState.Component gameState) =>
+            Entities.WithSharedComponentFilter(worldIndexShared).ForEach((in ClientWorkerIds.Component clientWorkerIds) =>
             {
-                faction = gameState.PlayersOnMapCount;
+                faction = clientWorkerIds.PlayersOnMapCount;
             })
             .WithoutBurst()
             .Run();
@@ -192,6 +192,7 @@ namespace LeyLineHybridECS
             return faction;
         }
 
+        /*
         public uint FindFactionWithPlayers(WorldIndexShared mWorldIndex, FactionComponent.Component factionComponent)
         {
             Entities.WithSharedComponentFilter(mWorldIndex).WithAll<PlayerAttributes.Component>().ForEach((in FactionComponent.Component factionC) =>
@@ -213,5 +214,6 @@ namespace LeyLineHybridECS
 
             return factionComponent.Faction;
         }
+        */
     }
 }

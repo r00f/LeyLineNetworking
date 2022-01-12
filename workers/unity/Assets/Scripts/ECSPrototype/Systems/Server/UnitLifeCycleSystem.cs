@@ -9,7 +9,7 @@ using Unity.Jobs;
 using UnityEngine;
 using Unity.Collections;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem)), UpdateAfter(typeof(InitializeWorldSystem))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem))]
 public class UnitLifeCycleSystem : JobComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData

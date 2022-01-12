@@ -1,12 +1,12 @@
 {
-  "template": "n1standard2_std40_r0500",
+  "template": "n1standard1_std40_r0500",
   "world": {
     "chunkEdgeLengthMeters": 50,
     "snapshots": {
       "snapshotWritePeriodSeconds": 0
     },
     "dimensions": {
-      "xMeters": 9000,
+      "xMeters": 4000,
       "zMeters": 4000
     },
     "legacy_flags": [
@@ -24,6 +24,33 @@
     "layer_configurations": [
       {
         "layer": "UnityGameLogic",
+        "points_of_interest": {
+          "num_workers": 4,
+          "points": [
+            {
+              "x": 800,
+              "z": 900
+            },
+            {
+              "x": 1000,
+              "z": 900
+            },
+            {
+              "x": 800,
+              "z": 1000
+            },
+            {
+              "x": 1000,
+              "z": 1000
+            }
+          ]
+        },
+        "options": {
+          "manual_worker_connection_only": true
+        }
+      },
+      {
+        "layer": "MapSpawn",
         "points_of_interest": {
           "num_workers": 1,
           "points": [
@@ -51,6 +78,14 @@
         {
           "name": "fps_simulated_players_target_deployment",
           "value": "fps_simulated_players_target_deployment"
+        }
+      ]
+    },
+    {
+      "worker_type": "MapSpawn",
+      "permissions": [
+        {
+          "all": {}
         }
       ]
     },

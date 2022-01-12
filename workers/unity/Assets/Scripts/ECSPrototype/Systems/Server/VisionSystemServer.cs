@@ -10,7 +10,7 @@ using UnityEngine;
 using Unity.Collections;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-public class VisionSystem_Server : JobComponentSystem
+public class VisionSystemServer : JobComponentSystem
 {
     ILogDispatcher logger;
     CommandSystem m_CommandSystem;
@@ -21,29 +21,6 @@ public class VisionSystem_Server : JobComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-
-        /*
-        m_UnitData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            );
-
-        m_PlayerData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<PlayerAttributes.Component>(),
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            );
-         */
-        m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<GameState.Component>()
-            );
-
-        m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-            ComponentType.ReadOnly<WorldIndexShared>()
-            );
     }
 
     protected override void OnStartRunning()
@@ -74,9 +51,10 @@ public class VisionSystem_Server : JobComponentSystem
             .Run();
         }
 
-        Entities.WithAll<GameState.Component>().ForEach((in ObstructVisionClusters.Component clusters, in WorldIndexShared worldIndex) =>
+        Entities.ForEach((in GameState.Component gameState, in ObstructVisionClusters.Component clusters, in WorldIndexShared worldIndex) =>
         {
-            UpdateUnitVision(worldIndex, clusters.RawClusters);
+            if(gameState.CurrentState != GameStateEnum.planning && gameState.CurrentState != GameStateEnum.waiting_for_players && gameState.CurrentState != GameStateEnum.game_over)
+                UpdateUnitVision(worldIndex, clusters.RawClusters);
         })
         .WithoutBurst()
         .Run();
@@ -105,7 +83,7 @@ public class VisionSystem_Server : JobComponentSystem
                     .WithField("playerVision.RevealVision", p_Vision.RevealVision));
                     */
 
-                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value, new HashSet<Vector2i>());
+                    p_Vision = UpdatePlayerVision(p_Vision, p_Faction.Faction, p_windex.Value);
 
                     p_Vision.CellsInVisionrange = p_Vision.CellsInVisionrange;
 
@@ -135,7 +113,7 @@ public class VisionSystem_Server : JobComponentSystem
         return inputDeps;
     }
 
-    private void UpdateUnitVision(WorldIndexShared worldIndex, List<CellAttributesList> obstructVisionClusters)
+    private void UpdateUnitVision(WorldIndexShared worldIndex, List<Vector3fList> obstructVisionClusters)
     {
         Entities.WithSharedComponentFilter(worldIndex).ForEach((ref UnitVision u_Vision, in CubeCoordinate.Component u_OccupiedCell, in FactionComponent.Component u_Faction, in SpatialEntityId id) =>
         {
@@ -153,9 +131,8 @@ public class VisionSystem_Server : JobComponentSystem
                 new LogEvent("u_Vision.ReqUpdate = true")
                 .WithField("unitId", id.EntityId.Id));
                 */
-                var v = GenerateUnitVision(u_OccupiedCell, u_Vision, u_Faction, obstructVisionClusters);
+                u_Vision = GenerateUnitVision(u_OccupiedCell, u_Vision, u_Faction, obstructVisionClusters, new List<ObstructVisionCluster>());
                 SetPlayerReqUpdate(u_Faction.Faction, worldIndex, u_OccupiedCell.CubeCoordinate);
-                u_Vision = v;
                 u_Vision.RequireUpdate = false;
             }
         })
@@ -187,43 +164,40 @@ public class VisionSystem_Server : JobComponentSystem
         .Run();
     }
 
-    private UnitVision GenerateUnitVision(CubeCoordinate.Component coor, UnitVision inVision, FactionComponent.Component inFaction, List<CellAttributesList> FixClusters)
+    private UnitVision GenerateUnitVision(CubeCoordinate.Component coor, UnitVision inVision, FactionComponent.Component inFaction, List<Vector3fList> fixClusters, List<ObstructVisionCluster> relevantClusters)
     {
-        List<Vector3f> sight = CellGridMethods.CircleDraw(coor.CubeCoordinate, inVision.VisionRange);
-        var sightHash = new HashSet<Vector3f>();
+        var sightHash = CellGridMethods.CircleDrawHash(coor.CubeCoordinate, inVision.VisionRange);
 
-        foreach (Vector3f v in sight)
+        foreach (Vector3fList fixCluster in fixClusters)
         {
-            sightHash.Add(v);
-        }
-
-        List<ObstructVisionCluster> RelevantClusters = new List<ObstructVisionCluster>();
-
-        foreach (CellAttributesList c in FixClusters)
-        {
-            bool isRelevant = false;
-            HashSet<Vector3f> set = new HashSet<Vector3f>();
-            foreach (CellAttributes a in c.CellAttributes)
+            foreach (Vector3f fixClusterCell in fixCluster.Coordinates)
             {
-                if (sightHash.Contains(a.Cell.CubeCoordinate)) isRelevant = true;
-                set.Add(a.Cell.CubeCoordinate);
-            }
-
-            if (isRelevant)
-            {
-                RelevantClusters.Add(new ObstructVisionCluster(set, coor.CubeCoordinate));
+                if (CellGridMethods.GetDistance(fixClusterCell, coor.CubeCoordinate) <= inVision.VisionRange)
+                {
+                    relevantClusters.Add(new ObstructVisionCluster(fixCluster));
+                    break;
+                }
             }
         }
 
-        if (RelevantClusters.Count != 0)
+        if (relevantClusters.Count > 0)
         {
             List<Vector3f> Ring = CellGridMethods.RingDraw(coor.CubeCoordinate, inVision.VisionRange);
             List<List<Vector3f>> Lines = new List<List<Vector3f>>();
 
             foreach (Vector3f c in Ring)
             {
-                Lines.Add(CellGridMethods.LineDraw(new List<Vector3f>(), coor.CubeCoordinate, c));
+                Lines.Add(CellGridMethods.LineDrawWhitoutOrigin(new List<Vector3f>(), coor.CubeCoordinate, c));
             }
+
+            /*
+            foreach (ObstructVisionCluster o in relevantClusters)
+            {
+                foreach(Vector3f c in o.cluster)
+                    Lines.Add(CellGridMethods.ExtendLineToLength(new List<Vector3f>(), coor.CubeCoordinate, c, inVision.VisionRange));
+            }
+            */
+
             foreach (List<Vector3f> l in Lines)
             {
                 bool visible = true;
@@ -231,33 +205,32 @@ public class VisionSystem_Server : JobComponentSystem
                 {
                     if (visible)
                     {
-                        foreach (ObstructVisionCluster o in RelevantClusters)
+                        foreach (ObstructVisionCluster o in relevantClusters)
                         {
                             if (o.cluster.Contains(l[i]))
                             {
                                 visible = false;
-                                //first tree is visible if not removed from hash
-                                //sightHash.Remove(l[i]);
-                                //Debug.Log("contains removed Coord: " + l[i].X + "," + l[i].Y + "," + l[i].Z);
                             }
                         }
                     }
                     else
                     {
                         sightHash.Remove(l[i]);
-                        //Debug.Log("else removed Coord: " + l[i].X + "," + l[i].Y + "," + l[i].Z);
+                        /*
+                        Debug.Log("RemoveCoordinateFromVision " + inVision.Vision.RemoveSwapBack(CellGridMethods.CubeToAxial(l[i])));
+                        inVision.Vision.RemoveSwapBack(CellGridMethods.CubeToAxial(l[i]));
+                        */
                     }
                 }
             }
-            //sight = new List<Vector3f>(sightHash);
         }
 
         inVision.Vision.Clear();
 
         foreach (Vector3f v in sightHash)
-        {
             inVision.Vision.Add(CellGridMethods.CubeToAxial(v));
-        }
+
+        //Debug.Log("VisionRange = " + inVision.VisionRange + ", VisonCoordinatesCount = " + inVision.Vision.Length);
 
         return inVision;
     }
@@ -277,131 +250,44 @@ public class VisionSystem_Server : JobComponentSystem
         return inVision;
     }
 
-    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, uint worldIndex, HashSet<Vector2i> currentVision)
+    private Vision.Component UpdatePlayerVision(Vision.Component inVision, uint faction, uint worldIndex)
     {
+        inVision.CellsInVisionrange.Clear();
+
         Entities.WithSharedComponentFilter(new WorldIndexShared {  Value = worldIndex }).WithAll<CubeCoordinate.Component>().ForEach((in UnitVision unitVision, in FactionComponent.Component unitFaction) =>
         {
             if (faction == unitFaction.Faction)
             {
-                foreach (Vector2i v in unitVision.Vision)
-                {
-                    currentVision.Add(v);
-                }
+                inVision.CellsInVisionrange.AddRange(unitVision.Vision.ToArray());
             }
         })
         .WithoutBurst()
         .Run();
 
-        inVision.CellsInVisionrange = currentVision.ToList();
-
         return inVision;
     }
-
-    /*
-    private void BuildCluster(CellAttributesComponent.Component cell, RawCluster cluster, List<CellAttributesComponent.Component> obstructed, out List<CellAttributesComponent.Component> newObstructed)
-    {
-        List<CellAttribute> neighbours = cell.CellAttributes.Neighbours.CellAttributes;
-        for (int i = neighbours.Count - 1; i >= 0; i--)
-        {
-            bool contains = false;
-            {
-                foreach (CellAttributesComponent.Component c in obstructed)
-                {
-                    if (Vector3fext.ToUnityVector(c.CellAttributes.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate))
-                    {
-                        contains = true;
-                    }
-                }
-            }
-            if (!contains) neighbours.Remove(neighbours[i]);
-        }
-        
-        for (int i = neighbours.Count - 1; i >= 0; i--)
-        {
-            bool contains = false;
-
-            foreach (CellAttributes c in cluster.cluster.CellAttributes)
-            {
-                if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate)) contains = true;
-            }
-
-            if (!contains)
-            {
-                bool isSet = false;
-                CellAttributesComponent.Component toRemove = new CellAttributesComponent.Component();
-                foreach (CellAttributesComponent.Component c in obstructed)
-                {
-                    if (Vector3fext.ToUnityVector(c.CellAttributes.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate))
-                    {
-                        toRemove = c;
-                        isSet = true;
-                    }
-                }
-
-                if (isSet)
-                {
-                    obstructed.Remove(toRemove);
-                    cluster.cluster.CellAttributes.Add(toRemove.CellAttributes);
-                    //Debug.Log("added " + i + " to" + cluster);
-                    BuildCluster(toRemove, cluster, obstructed, out obstructed);
-                }
-                }
-            }
-        newObstructed = obstructed;
-    }
-    */
 }
 
-#region ClusterDef
 public struct ObstructVisionCluster
 {
     public HashSet<Vector3f> cluster;
-    public List<Angle> RelevantAngles;
-    public Vector3f watcherCoor;
-    public ObstructVisionCluster(HashSet<Vector3f> inCluster, Vector3f inWatcher)
-    {
-        watcherCoor = inWatcher;
-        cluster = inCluster;
-        RelevantAngles = new List<Angle>();
-    }
 
-    public ObstructVisionCluster(Vector3f start, Vector3f inWatcher)
+    public ObstructVisionCluster(HashSet<Vector3f> inCluster)
     {
-        watcherCoor = inWatcher;
+        cluster = inCluster;
+    }
+    
+    public ObstructVisionCluster(Vector3fList inCluster)
+    {
+        cluster = new HashSet<Vector3f>(inCluster.Coordinates);
+    }
+    
+    public ObstructVisionCluster(Vector3f start)
+    {
         cluster = new HashSet<Vector3f>
         {
             start
         };
-        RelevantAngles = new List<Angle>();
     }
 }
 
-public struct RawCluster
-{
-    public CellAttributesList cluster;
-    
-    public RawCluster(CellAttributesList inCluster)
-    {
-        cluster = inCluster;
-    }
-    public RawCluster(CellAttributes inStart)
-    {
-        cluster = new CellAttributesList
-        {
-            CellAttributes = new List<CellAttributes>()
-        };
-        cluster.CellAttributes.Add(inStart);
-    }
-}
-
-public struct Angle
-{
-    public CellAttributesComponent.Component cell;
-    public float angle_float;
-    public Angle(CellAttributesComponent.Component inCell, float inAngle)
-    {
-        cell = inCell;
-        angle_float = inAngle;
-    }
-}
-#endregion

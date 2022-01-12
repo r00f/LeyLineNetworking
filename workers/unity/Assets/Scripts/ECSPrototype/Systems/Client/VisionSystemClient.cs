@@ -13,7 +13,7 @@ using Improbable.Gdk.TransformSynchronization;
 namespace LeyLineHybridECS
 {
     [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
-    public class VisionSystem_Client : ComponentSystem
+    public class VisionSystemClient : ComponentSystem
     {
         ILogDispatcher logger;
         //EntityQuery m_GameStateData;
