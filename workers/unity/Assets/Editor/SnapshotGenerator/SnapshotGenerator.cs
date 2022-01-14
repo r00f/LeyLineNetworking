@@ -65,12 +65,22 @@ namespace BlankProject.Editor
                         Vector3f pos = new Vector3f(settings.MapOffset * y, 0, settings.MapOffset * i);
                         Vector2f mapCenter = new Vector2f(wi.centerCellTransform.position.x + settings.MapOffset * y - wi.transform.position.x, wi.centerCellTransform.position.z + settings.MapOffset * i - wi.transform.position.z);
 
-                        Dictionary<Vector3f, Vector3f> map = new Dictionary<Vector3f, Vector3f>();
+                        Dictionary<Vector2i, MapCell> map = new Dictionary<Vector2i, MapCell>();
                         foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
                         {
                             Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
+                            Vector2i axialCoord = CellGridMethods.CubeToAxial(cubeCoord);
                             Vector3f p = new Vector3f(c.transform.position.x + settings.MapOffset * y - wi.transform.position.x, c.transform.position.y, c.transform.position.z + settings.MapOffset * i - wi.transform.position.z);
-                            map.Add(cubeCoord, p);
+
+                            MapCell mapCell = new MapCell
+                            {
+                                AxialCoordinate = axialCoord,
+                                Position = p,
+                                IsTaken = c.GetComponent<IsTaken>().Value,
+                                MovementCost = (uint)c.GetComponent<MovementCost>().Value
+                            };
+
+                            map.Add(axialCoord, mapCell);
                         }
                         var gameState = LeyLineEntityTemplates.GameState(pos, (i * settings.MapsPerRow) + y + 1, mapCenter, map);
                         snapshot.AddEntity(gameState);

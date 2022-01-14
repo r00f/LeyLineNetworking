@@ -8,9 +8,11 @@ using Player;
 using Unity.Jobs;
 using UnityEngine;
 using Unity.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateAfter(typeof(HandleCellGridRequestsSystem))]
-public class UnitLifeCycleSystem : JobComponentSystem
+public class UnitLifeCycleSystemServer : JobComponentSystem
 {
     public struct UnitStateData : ISystemStateComponentData
     {
@@ -35,77 +37,6 @@ public class UnitLifeCycleSystem : JobComponentSystem
         base.OnCreate();
         m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
         m_GameStateSystem = World.GetExistingSystem<GameStateSystem>();
-
-        /*
-        var unitAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[] 
-            {
-                typeof(UnitStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<SpatialEntityId>(),
-                ComponentType.ReadOnly<Actions.Component>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>()
-            }
-        };
-        m_UnitAddedData = GetEntityQuery(unitAddedDesc);
-
-        var manalithUnitAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(UnitStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<Manalith.Component>(),
-                ComponentType.ReadOnly<SpatialEntityId>(),
-                ComponentType.ReadOnly<Actions.Component>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>()
-            }
-        };
-
-        m_ManalithUnitAddedData = GetEntityQuery(manalithUnitAddedDesc);
-
-        var unitRemovedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[] 
-            {
-                ComponentType.ReadOnly<CubeCoordinate.Component>()
-            },
-            All = new ComponentType[]
-            {
-                typeof(UnitStateData)
-            }
-        };
-
-        m_UnitRemovedData = GetEntityQuery(unitRemovedDesc);
-
-        m_ManalithData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadWrite<Manalith.Component>(),
-        ComponentType.ReadWrite<FactionComponent.Component>()
-        );
-
-        m_PlayerData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<PlayerAttributes.Component>(),
-        ComponentType.ReadOnly<FactionComponent.Component>(),
-        );
-
-        m_UnitChangedData = GetEntityQuery(
-            ComponentType.ReadOnly<SpatialEntityId>(),
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<UnitStateData>()
-            );
-
-        m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<CubeCoordinate.Component>(),
-            ComponentType.ReadWrite<CellAttributesComponent.Component>()
-            );
-            */
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -116,6 +47,16 @@ public class UnitLifeCycleSystem : JobComponentSystem
             var coord = Vector3fext.ToUnityVector(unitCubeCoordinate.CubeCoordinate);
             var worldIndex = unitWorldIndex;
             var id = unitEntityId.EntityId.Id;
+
+            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((CurrentMapState mapData) =>
+            {
+                var cell = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coordComp.CubeCoordinate)];
+                cell.IsTaken = true;
+                cell.UnitOnCellId = id;
+                mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coordComp.CubeCoordinate)] = cell;
+            })
+            .WithoutBurst()
+            .Run();
 
             Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((ref CubeCoordinate.Component cellCubeCoordinate, ref CellAttributesComponent.Component cellAttribute, in WorldIndexShared cellWorldIndex) =>
             {
@@ -143,11 +84,43 @@ public class UnitLifeCycleSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.ForEach((Entity e, in CubeCoordinate.Component unitCubeCoord, in UnitStateData unitState, in WorldIndexShared unitWorldIndex, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId) =>
+        Entities.ForEach((Entity e, in WorldIndexShared unitWorldIndex, in CubeCoordinate.Component cubeCoord, in UnitStateData unitState, in FactionComponent.Component unitFaction, in SpatialEntityId entityId, in Health.Component health, in IncomingActionEffects.Component incomingEffects) =>
         {
-            if (Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate) != Vector3fext.ToUnityVector(unitCubeCoord.CubeCoordinate) || unitState.WorldIndexState.Value != unitWorldIndex.Value)
+            if (Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate) != Vector3fext.ToUnityVector(cubeCoord.CubeCoordinate))
             {
-                EntityManager.SetComponentData(e, new UnitStateData { CubeCoordState = unitCubeCoord, WorldIndexState = unitWorldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction});
+                var unitDict = new Dictionary<Vector3f, long>();
+
+                if (incomingEffects.MoveEffects.Count != 0 && health.CurrentHealth > 0 && incomingEffects.MoveEffects[0].EffectType == EffectTypeEnum.move_along_path)
+                {
+                    if (!unitDict.ContainsKey(cubeCoord.CubeCoordinate))
+                        unitDict.Add(cubeCoord.CubeCoordinate, entityId.EntityId.Id);
+                    if (!unitDict.ContainsKey(incomingEffects.MoveEffects[0].MoveAlongPathNested.OriginCoordinate))
+                        unitDict.Add(incomingEffects.MoveEffects[0].MoveAlongPathNested.OriginCoordinate, entityId.EntityId.Id);
+                }
+
+                Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((CurrentMapState currentMapState) =>
+                {
+                    for (int i = 0; i < unitDict.Count; i++)
+                    {
+                        MapCell cell = currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)];
+
+                        if (cell.UnitOnCellId != unitDict.ElementAt(i).Value)
+                        {
+                            cell.IsTaken = true;
+                            cell.UnitOnCellId = unitDict.ElementAt(i).Value;
+                        }
+                        else if (cell.IsTaken)
+                        {
+                            cell.IsTaken = false;
+                            cell.UnitOnCellId = 0;
+                        }
+                        currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)] = cell;
+                    }
+                })
+                .WithoutBurst()
+                .Run();
+
+                EntityManager.SetComponentData(e, new UnitStateData { WorldIndexState = unitWorldIndex, CubeCoordState = cubeCoord, EntityId = entityId.EntityId.Id, FactionState = unitFaction });
             }
         })
         .WithStructuralChanges()
@@ -165,6 +138,16 @@ public class UnitLifeCycleSystem : JobComponentSystem
             {
                 if(p_Faction.Faction == unitStateVar.FactionState.Faction)
                     p_Vision.RequireUpdate = true;
+            })
+            .WithoutBurst()
+            .Run();
+
+            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((CurrentMapState mapData) =>
+            {
+                var cell = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)];
+                cell.IsTaken = false;
+                cell.UnitOnCellId = 0;
+                mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)] = cell;
             })
             .WithoutBurst()
             .Run();

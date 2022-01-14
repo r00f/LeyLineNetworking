@@ -1,8 +1,20 @@
 package generic;
 import "generic/vector3.schema";
 
+
 component MapData {
     id = 106;
-    map<generic.Vector3f, generic.Vector3f> coordinate_position_dictionary = 1;
+    map<generic.Vector2i, MapCell> coordinate_cell_dictionary = 1;
 }
 
+type MapCell {
+    generic.Vector2i axial_coordinate = 1;
+    generic.Vector3f position = 2;
+    uint32 movement_cost = 3;
+    bool is_taken = 4;
+    int64 unit_on_cell_id = 5;
+}
+
+type MapCellList {
+    list<MapCell> cells = 1;
+}

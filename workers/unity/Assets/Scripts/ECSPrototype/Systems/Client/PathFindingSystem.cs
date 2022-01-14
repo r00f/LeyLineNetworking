@@ -20,7 +20,6 @@ public class PathFindingSystem : JobComponentSystem
     EntityQuery m_UnitData;
     ILogDispatcher logger;
 
-
     protected override void OnCreate()
     {
         base.OnCreate();
@@ -53,6 +52,64 @@ public class PathFindingSystem : JobComponentSystem
         return inputDeps;
     }
 
+    public List<KeyValuePair<Vector2i, MapCell>> GetMapRadius(CurrentMapState mapData, Vector3f originCellCubeCoordinate, uint radius)
+    {
+        var cellsInRadius = new List<KeyValuePair<Vector2i, MapCell>>();
+
+        var coordList = CellGridMethods.CircleDraw(originCellCubeCoordinate, radius);
+
+        foreach (Vector3f v in coordList)
+        {
+            cellsInRadius.Add(new KeyValuePair<Vector2i, MapCell>(CellGridMethods.CubeToAxial(v), mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)]));
+        }
+
+        return cellsInRadius;
+    }
+
+    public Dictionary<MapCell, MapCellList> GetAllMapPathsInRadius(uint radius, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, Vector3f originCoord, CurrentMapState map)
+    {
+        MapCell origin = map.CoordinateCellDictionary[CellGridMethods.CubeToAxial(originCoord)];
+
+        var paths = CacheMapPaths(map, cellsInRange, origin);
+        var cachedPaths = new Dictionary<MapCell, MapCellList>();
+
+        foreach (var key in paths.Keys)
+        {
+            var path = paths[key];
+
+            int pathCost;
+
+            if (key.IsTaken)
+                continue;
+
+            pathCost = (int)path.Cells.Sum(c => c.MovementCost);
+
+            if (pathCost <= radius)
+            {
+                cachedPaths.Add(key, path);
+            }
+
+            path.Cells.Reverse();
+        }
+        return cachedPaths;
+    }
+
+    public List<MapCell> FindMapPath(CurrentMapState mapData, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, MapCell origin, MapCell destination)
+    {
+        var edges = GetMapGraphEdges(mapData, cellsInRange, origin);
+        var path = pathfinder.FindPath(edges, origin, destination);
+        path.Reverse();
+        return path;
+    }
+
+    public Dictionary<MapCell, MapCellList> CacheMapPaths(CurrentMapState mapData, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, MapCell origin)
+    {
+        var edges = GetMapGraphEdges(mapData, cellsInRange, origin);
+        var paths = pathfinder.FindAllMapPaths(edges, origin);
+        return paths;
+    }
+
+    #region Old Methods
     public CellAttribute GetCellAttributeAtCoordinate(Vector3f coordinate, WorldIndexShared worldIndex)
     {
         var cell = new CellAttribute();
@@ -156,7 +213,7 @@ public class PathFindingSystem : JobComponentSystem
 
         foreach (var key in paths.Keys)
         {
-            var path = new Vector3fList { Coordinates = new List<Vector3f>()};
+            var path = new Vector3fList { Coordinates = new List<Vector3f>() };
 
             foreach (CellAttribute c in paths[key].CellAttributes)
             {
@@ -210,9 +267,36 @@ public class PathFindingSystem : JobComponentSystem
         return cachedPaths;
     }
 
+    public Dictionary<MapCell, Dictionary<MapCell, uint>> GetMapGraphEdges(CurrentMapState mapData, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, MapCell origin)
+    {
+        Dictionary<MapCell, Dictionary<MapCell, uint>> ret = new Dictionary<MapCell, Dictionary<MapCell, uint>>();
+
+        //instead of looping over all cells in grid only loop over cells in CellsInMovementRange
+
+        for (int i = 0; i < cellsInRange.Count; ++i)
+        {
+            var isTaken = cellsInRange[i].Value.IsTaken;
+            var movementCost = cellsInRange[i].Value.MovementCost;
+
+            ret[cellsInRange[i].Value] = new Dictionary<MapCell, uint>();
+            if (!isTaken || Vector3fext.ToUnityVector(cellsInRange[i].Value.Position) == Vector3fext.ToUnityVector(origin.Position))
+            {
+                for (int y = 0; y < 6; y++)
+                {
+                    var v = CellGridMethods.CubeNeighbour(CellGridMethods.AxialToCube(cellsInRange[i].Key), (uint) y);
+
+                    if (Mathf.Abs(v.X) <= 14 && Mathf.Abs(v.Y) <= 14 && Mathf.Abs(v.Z) <= 14)
+                        ret[cellsInRange[i].Value][mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)]] = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)].MovementCost;
+                }
+            }
+        }
+        return ret;
+    }
+
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
     {
         CellAttribute origin = new CellAttribute();
+
         Entities.ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
         {
             if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(originCoord))
@@ -256,14 +340,6 @@ public class PathFindingSystem : JobComponentSystem
         return paths;
     }
 
-    public List<CellAttribute> FindPath(List<CellAttributes> cellsInRange, CellAttribute origin, CellAttribute destination)
-    {
-        var edges = GetGraphEdges(cellsInRange, origin);
-        var path = pathfinder.FindPath(edges, origin, destination);
-        path.Reverse();
-        return path;
-    }
-
     public Dictionary<CellAttribute, Dictionary<CellAttribute, int>> GetGraphEdges(List<CellAttributes> cellsInRange, CellAttribute origin)
     {
         Dictionary<CellAttribute, Dictionary<CellAttribute, int>> ret = new Dictionary<CellAttribute, Dictionary<CellAttribute, int>>();
@@ -278,9 +354,7 @@ public class PathFindingSystem : JobComponentSystem
             var movementCost = cellsInRange[i].Cell.MovementCost;
             var neighbours = cellsInRange[i].Neighbours.CellAttributes;
 
-
             ret[cell.Cell] = new Dictionary<CellAttribute, int>();
-
 
             if (!isTaken || Vector3fext.ToUnityVector(cell.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(origin.CubeCoordinate))
             {
@@ -291,7 +365,6 @@ public class PathFindingSystem : JobComponentSystem
                         ret[cell.Cell][neighbour] = neighbour.MovementCost;
                     }
                 }
-
             }
         }
         return ret;
@@ -306,6 +379,17 @@ public class PathFindingSystem : JobComponentSystem
         else
             return new CellAttributeList(new List<CellAttribute>());
     }
+
+    /*
+    public List<CellAttribute> FindPath(List<CellAttributes> cellsInRange, CellAttribute origin, CellAttribute destination)
+    {
+        var edges = GetGraphEdges(cellsInRange, origin);
+        var path = pathfinder.FindPath(edges, origin, destination);
+        path.Reverse();
+        return path;
+    }
+    */
+    #endregion
 
     public Vector3fList FindPathCoordinates(Vector3f destination, Dictionary<Vector3f, Vector3fList> cachedPaths)
     {
@@ -359,6 +443,18 @@ public class PathFindingSystem : JobComponentSystem
         }
         else
             return new CellAttributeList(new List<CellAttribute>());
+    }
+
+    public MapCellList FindMapPathClient(CurrentMapState mapData, Vector3f inDestination, Dictionary<MapCell, MapCellList> cachedPaths)
+    {
+        MapCell destination = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(inDestination)];
+
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new MapCellList(new List<MapCell>());
     }
 
     public bool ValidateCellTarget(Vector3f originCoord, Action inAction, CellAttribute cellAtt)
@@ -432,7 +528,7 @@ public class PathFindingSystem : JobComponentSystem
         return valid;
     }
 
-    public bool ValidateTargetClient(Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<CellAttribute, CellAttributeList> inCachedPaths = default)
+    public bool ValidateTargetClient(MapData.Component mapData, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction)
     {
         bool valid = false;
 
@@ -442,20 +538,11 @@ public class PathFindingSystem : JobComponentSystem
         switch (inAction.Targets[0].TargetType)
         {
             case TargetTypeEnum.cell:
-                Entities.ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cellCoord) =>
-                {
-                    var cell = cellAtts.CellAttributes.Cell;
-
-                    if (Vector3fext.ToUnityVector(cellCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    Entities.ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cellCoord) =>
                     {
-                        if (inCachedPaths != default && inCachedPaths.Count != 0)
-                        {
-                            if (inCachedPaths.ContainsKey(cell))
-                            {
-                                valid = true;
-                            }
-                        }
-                        else
+                        var cell = cellAtts.CellAttributes.Cell;
+
+                        if (Vector3fext.ToUnityVector(cellCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
                         {
                             if (CellGridMethods.GetDistance(cellCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
                             {
@@ -470,10 +557,70 @@ public class PathFindingSystem : JobComponentSystem
                                 }
                             }
                         }
+                    })
+                    .WithoutBurst()
+                    .Run();
+                break;
+            case TargetTypeEnum.unit:
+                Entities.ForEach((in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
+                {
+                    if (Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                    {
+                        if (CellGridMethods.GetDistance(targetUnitCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                        {
+                            valid = ValidateUnitTarget(inAction.Effects[0].ApplyToRestrictions, usingUnitId, inFaction, targetUnitId.EntityId.Id, targetUnitFaction.Faction);
+                        }
                     }
                 })
                 .WithoutBurst()
                 .Run();
+                break;
+        }
+
+        return valid;
+    }
+
+    public bool ValidatePathTargetClient(CurrentMapState mapData, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<MapCell, MapCellList> inCachedPaths)
+    {
+        bool valid = false;
+
+        if (inAction.Index == -3)
+            return valid;
+
+        switch (inAction.Targets[0].TargetType)
+        {
+            case TargetTypeEnum.cell:
+
+                if (inCachedPaths.Count != default)
+                {
+                    if (mapData.CoordinateCellDictionary.ContainsKey(CellGridMethods.CubeToAxial(coord)) && inCachedPaths.ContainsKey(mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coord)]))
+                        valid = true;
+                }
+                else
+                {
+                    Entities.ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cellCoord) =>
+                    {
+                        var cell = cellAtts.CellAttributes.Cell;
+
+                        if (Vector3fext.ToUnityVector(cellCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
+                        {
+                            if (CellGridMethods.GetDistance(cellCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+                            {
+                                if (inAction.Targets[0].CellTargetNested.RequireEmpty)
+                                {
+                                    if (!cell.IsTaken)
+                                        valid = true;
+                                }
+                                else
+                                {
+                                    valid = true;
+                                }
+                            }
+                        }
+                    })
+                    .WithoutBurst()
+                    .Run();
+                }
                 break;
             case TargetTypeEnum.unit:
                 Entities.ForEach((in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>

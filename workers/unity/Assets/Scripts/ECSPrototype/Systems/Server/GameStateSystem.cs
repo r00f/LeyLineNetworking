@@ -4,6 +4,7 @@ using Improbable;
 using Improbable.Gdk.Core;
 using Player;
 using System.Collections.Generic;
+using System.Linq;
 using Unit;
 using Unity.Entities;
 using Unity.Jobs;
@@ -73,7 +74,13 @@ namespace LeyLineHybridECS
                 if(entityWorldIndex.Value != 0)
                 {
                     if (EntityManager.HasComponent<GameState.Component>(e))
+                    {
+                        var mapData = EntityManager.GetComponentData<MapData.Component>(e);
                         EntityManager.AddComponent<GameStateServerVariables>(e);
+                        var curMapState = new CurrentMapState  { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
+                        EntityManager.AddComponentObject(e, curMapState);
+                        Debug.Log("Added CurrentMapState to GameLogic GameState: " + EntityManager.GetComponentObject<CurrentMapState>(e).CoordinateCellDictionary.Count);
+                    }
 
                     EntityManager.AddSharedComponentData(e, new WorldIndexShared { Value = entityWorldIndex.Value });
                 }
@@ -87,7 +94,7 @@ namespace LeyLineHybridECS
 
             var initMapEventSenderId = m_InitMapEventSenderData.GetSingleton<SpatialEntityId>();
 
-            Entities.ForEach((ref GameState.Component gameState, ref EffectStack.Component effectStack, ref GameStateServerVariables serverVariables, in Position.Component position, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId, in ClientWorkerIds.Component clientWorkerIds) =>
+            Entities.ForEach((CurrentMapState mapData, ref GameState.Component gameState, ref EffectStack.Component effectStack, ref GameStateServerVariables serverVariables, in Position.Component position, in WorldIndexShared gameStateWorldIndex, in SpatialEntityId gameStateId, in ClientWorkerIds.Component clientWorkerIds) =>
             {
                 switch (gameState.CurrentState)
                 {
@@ -215,7 +222,7 @@ namespace LeyLineHybridECS
                             if (serverVariables.HighestExecuteTime <= .1f)
                             {
                                 UpdateUnitsGameStateTag(GameStateEnum.skillshot, gameStateWorldIndex, ECBuffer);
-                                UpdateMovedUnitCells(gameStateWorldIndex, new Dictionary<Vector3f, long>());
+                                UpdateMovedUnitCells(mapData, gameStateWorldIndex, new Dictionary<Vector3f, long>());
                                 effectStack.EffectsExecuted = false;
                                 gameState.CurrentState = GameStateEnum.skillshot;
                                 serverVariables.HighestExecuteTime = 0;
@@ -587,7 +594,7 @@ namespace LeyLineHybridECS
             return b;
         }
 
-        private void UpdateMovedUnitCells(WorldIndexShared gameStateWorldIndex, Dictionary<Vector3f, long> unitDict)
+        private void UpdateMovedUnitCells(CurrentMapState mapData, WorldIndexShared gameStateWorldIndex, Dictionary<Vector3f, long> unitDict)
         {
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in CubeCoordinate.Component cubeCoord, in SpatialEntityId entityId, in Health.Component health, in IncomingActionEffects.Component incomingEffects) =>
             {
@@ -601,6 +608,25 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
+
+            /*
+            for(int i = 0; i < unitDict.Count; i++)
+            {
+                MapCell cell = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)];
+
+                if(cell.UnitOnCellId != unitDict.ElementAt(i).Value)
+                {
+                    cell.IsTaken = true;
+                    cell.UnitOnCellId = unitDict.ElementAt(i).Value;
+                }
+                else if (cell.IsTaken)
+                {
+                    cell.IsTaken = false;
+                    cell.UnitOnCellId = 0;
+                }
+                mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)] = cell;
+            }
+            */
 
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((ref CellAttributesComponent.Component cellAtt, in CubeCoordinate.Component cellCubeCoordinate) =>
             {

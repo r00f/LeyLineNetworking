@@ -64,7 +64,8 @@ public class SendActionRequestSystem : JobComponentSystem
         );
 
         m_GameStateData = GetEntityQuery(
-        ComponentType.ReadOnly<GameState.Component>()
+        ComponentType.ReadOnly<GameState.Component>(),
+        ComponentType.ReadOnly<MapData.Component>()
         );
     }
 
@@ -180,6 +181,9 @@ public class SendActionRequestSystem : JobComponentSystem
         //Debug.Log("SelectActionCommand with index: " + actionIndex + " from entity with id: " + entityId);
         bool isSelfTarget = false;
 
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+        var mapData = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
+
         var playerPathing = m_PlayerData.GetSingleton<PlayerPathing.Component>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
@@ -225,13 +229,13 @@ public class SendActionRequestSystem : JobComponentSystem
                     {
                         playerPathing.CoordinatesInRange.Clear();
                         playerPathing.CellsInRange.Clear();
-                        playerPathing.CachedPaths.Clear();
+                        playerPathing.CachedMapPaths.Clear();
                         playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
-                        playerPathing.CachedPaths = playerPathing.CachedPaths;
+                        playerPathing.CachedMapPaths = playerPathing.CachedMapPaths;
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
-                        playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerPathing, playerFaction.Faction);
-                        playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh);
+                        playerState = m_HighlightingSystem.FillUnitTargetsList(mapData, act, playerHigh, playerState, playerPathing, playerFaction.Faction);
+                        playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh, mapData);
                         m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing);
                     }
                     else

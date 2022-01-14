@@ -197,6 +197,14 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
 
     public Action SetLockedAction(WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
     {
+        var currentMapState = new CurrentMapState();
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState curMapState) =>
+        {
+            currentMapState = curMapState;
+        })
+        .WithoutBurst()
+        .Run();
+
         Action locked = selectedAction;
         var t = locked.Targets[0];
         t.TargetCoordinate = targetCoord;
@@ -257,18 +265,18 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     //Hotfix for Bots targeting themselves with move action 
                     if(Vector3fext.ToUnityVector(originCoord) != Vector3fext.ToUnityVector(targetCoord))
                     {
-                        foreach (CellAttribute c in m_PathFindingSystem.FindPath(m_PathFindingSystem.GetCellAttributesRadius(originCoord, (uint) t.Targettingrange, worldIndex), m_PathFindingSystem.GetCellAttributeAtCoordinate(originCoord, worldIndex), m_PathFindingSystem.GetCellAttributeAtCoordinate(targetCoord, worldIndex)))
+                        foreach (MapCell c in m_PathFindingSystem.FindMapPath(currentMapState, m_PathFindingSystem.GetMapRadius(currentMapState, originCoord, (uint) t.Targettingrange), currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(originCoord)], currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]))
                         {
-                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, GetPositionFromGameState(worldIndex, c.CubeCoordinate)));
-                            effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(c.CubeCoordinate, GetPositionFromGameState(worldIndex, c.CubeCoordinate)));
+                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(CellGridMethods.AxialToCube(c.AxialCoordinate), currentMapState.CoordinateCellDictionary[c.AxialCoordinate].Position));
+                            effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(CellGridMethods.AxialToCube(c.AxialCoordinate), currentMapState.CoordinateCellDictionary[c.AxialCoordinate].Position));
                         }
+
                         mod.PathNested.OriginCoordinate = originCoord;
                         effect.MoveAlongPathNested.OriginCoordinate = originCoord;
                         locked.Effects[0] = effect;
                         locked.Targets[0].Mods[0] = mod;
                         locked.CombinedCost = CalculateCombinedCost(t);
                     }
-
                     break;
                 case ModTypeEnum.line:
                     foreach (Vector3f v in CellGridMethods.LineDraw(new List<Vector3f>(), originCoord, t.TargetCoordinate))
@@ -305,7 +313,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         var pos = new Vector3f();
         Entities.WithSharedComponentFilter(worldIndex).ForEach((in MapData.Component map) =>
         {
-            pos = map.CoordinatePositionDictionary[coord];
+            pos = map.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coord)].Position;
         })
         .WithoutBurst()
         .Run();

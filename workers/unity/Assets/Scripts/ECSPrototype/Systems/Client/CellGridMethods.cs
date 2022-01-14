@@ -38,6 +38,11 @@ public static class CellGridMethods
         return new Vector3f(axial.X, axial.Y, -axial.X - axial.Y);
     }
 
+    public static Vector3f AxialToCube(Vector2i axial)
+    {
+        return new Vector3f(axial.X, axial.Y, -axial.X - axial.Y);
+    }
+
     //size equals width of a hexagon / 2
     /*
     public Vector2 CubeCoordToXZ(Vector3f coord)

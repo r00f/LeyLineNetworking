@@ -15,7 +15,18 @@ namespace LeyLineHybridECS
         /// <returns>
         /// If a path exist, method returns list of nodes that the path consists of. Otherwise, empty list is returned.
         /// </returns>
+        public abstract List<T> FindPath<T>(Dictionary<T, Dictionary<T, uint>> edges, T originNode, T destinationNode);
+
         public abstract List<T> FindPath<T>(Dictionary<T, Dictionary<T, int>> edges, T originNode, T destinationNode);
+
+        protected List<T> GetNeigbours<T>(List<T> list, Dictionary<T, Dictionary<T, uint>> edges, T node)
+        {
+            if (!edges.ContainsKey(node))
+            {
+                return list;
+            }
+            return edges[node].Keys.ToList();
+        }
 
         protected List<T> GetNeigbours<T>(List<T> list, Dictionary<T, Dictionary<T, int>> edges, T node)
         {

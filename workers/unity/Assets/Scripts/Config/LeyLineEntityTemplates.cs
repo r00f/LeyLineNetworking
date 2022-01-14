@@ -35,7 +35,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter, Dictionary<Vector3f, Vector3f> mapData)
+    public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter, Dictionary<Vector2i, MapCell> mapData)
     {
         settings = Resources.Load<Settings>("Settings");
 
@@ -81,7 +81,7 @@ public static class LeyLineEntityTemplates {
 
         var map = new MapData.Snapshot
         {
-            CoordinatePositionDictionary = mapData
+            CoordinateCellDictionary = mapData
         };
 
         var template = new EntityTemplate();
@@ -302,9 +302,9 @@ public static class LeyLineEntityTemplates {
 
         var playerPathing = new PlayerPathing.Snapshot
         {
-            CellsInRange = new List<CellAttribute>(),
-            CachedPaths = new Dictionary<CellAttribute, CellAttributeList>(),
-            CoordinatesInRange = new List<Vector3f>()
+            CellsInRange = new List<MapCell>(),
+            CoordinatesInRange = new List<Vector2i>(),
+            CachedMapPaths = new Dictionary<MapCell, MapCellList>()
         };
 
         var playerState = new PlayerState.Snapshot

@@ -11,6 +11,7 @@ public static class WorkerUtils
     public static void AddClientSystems(World world)
     {
         world.GetOrCreateSystem<InitializeUnitsSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystemClient>();
         world.GetOrCreateSystem<MouseStateSystem>();
         world.GetOrCreateSystem<CellMarkerSystem>();
         world.GetOrCreateSystem<AddComponentsSystem>();
@@ -30,7 +31,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<GameStateSystem>();
         world.GetOrCreateSystem<HandleCellGridRequestsSystem>();
         world.GetOrCreateSystem<ManalithSystem>();
-        world.GetOrCreateSystem<UnitLifeCycleSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystemServer>();
         world.GetOrCreateSystem<ResourceSystem>();
         world.GetOrCreateSystem<ExecuteActionsSystem>();
         world.GetOrCreateSystem<CleanupSystem>();

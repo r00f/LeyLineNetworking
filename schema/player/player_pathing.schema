@@ -2,12 +2,13 @@ package player;
 import "cell/cell_attributes.schema";
 import "generic/vector3.schema";
 import "unit/actions.schema";
+import "generic/map_data.schema";
 
 component PlayerPathing {
-	
     id = 127;
-
-	list<cell.CellAttribute> cells_in_range = 1;
-	map<cell.CellAttribute, cell.CellAttributeList> cached_paths = 2;
-	list<generic.Vector3f> coordinates_in_range = 3;
+	list<generic.MapCell> cells_in_range = 1;
+    list<generic.Vector2i> coordinates_in_range = 2;
+    map<generic.MapCell, generic.MapCellList> cached_map_paths = 3;
 }
+
+

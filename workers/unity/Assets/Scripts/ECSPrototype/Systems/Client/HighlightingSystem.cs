@@ -48,7 +48,8 @@ public class HighlightingSystem : JobComponentSystem
             );
 
         m_GameStateData = GetEntityQuery(
-            ComponentType.ReadOnly<GameState.Component>()
+            ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<MapData.Component>()
             );
 
         m_ActiveUnitData = GetEntityQuery(
@@ -118,6 +119,8 @@ public class HighlightingSystem : JobComponentSystem
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+        var mapData = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
 
         #region playerStateData
         var playerPathing = m_PlayerStateData.GetSingleton<PlayerPathing.Component>();
@@ -149,8 +152,8 @@ public class HighlightingSystem : JobComponentSystem
 
                     currentActionTargetHash.Add(playerHighlightingData.LastHoveredCoordinate);
 
-                    playerState = FillUnitTargetsList(playerState.SelectedAction, playerHighlightingData, playerState, playerPathing, playerFaction.Faction);
-                    playerPathing = UpdateSelectedUnit(playerState, playerPathing, playerHighlightingData);
+                    playerState = FillUnitTargetsList(mapData, playerState.SelectedAction, playerHighlightingData, playerState, playerPathing, playerFaction.Faction);
+                    playerPathing = UpdateSelectedUnit(playerState, playerPathing, playerHighlightingData, mapData);
                     SetNumberOfTargets(playerState, currentActionTargetHash);
 
                     m_PlayerStateData.SetSingleton(playerPathing);
@@ -205,10 +208,10 @@ public class HighlightingSystem : JobComponentSystem
 
     }
 
-    public PlayerState.Component FillUnitTargetsList(Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
+    public PlayerState.Component FillUnitTargetsList(CurrentMapState mapData, Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
     {
         //need to call validateTarget with hoveredCoord before doing anything
-        if(!m_PathFindingSystem.ValidateTargetClient(playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedPaths))
+        if(!m_PathFindingSystem.ValidatePathTargetClient(mapData, playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedMapPaths))
         {
             playerState.TargetValid = false;
             //if hovered cell / unit is not valid
@@ -392,7 +395,7 @@ public class HighlightingSystem : JobComponentSystem
         .Run();
     }
 
-    public PlayerPathing.Component UpdateSelectedUnit(PlayerState.Component inPlayerState, PlayerPathing.Component inPlayerPathing, HighlightingDataComponent playerHighlightingData)
+    public PlayerPathing.Component UpdateSelectedUnit(PlayerState.Component inPlayerState, PlayerPathing.Component inPlayerPathing, HighlightingDataComponent playerHighlightingData, CurrentMapState inMapData)
     {
         /*
         m_LogDispatcher.HandleLog(LogType.Warning,
@@ -425,23 +428,29 @@ public class HighlightingSystem : JobComponentSystem
                            }
                         }
 
+                        playerPathing.CachedMapPaths = m_PathFindingSystem.GetAllMapPathsInRadius(range, m_PathFindingSystem.GetMapRadius(inMapData, occCoord.CubeCoordinate, range), occCoord.CubeCoordinate, inMapData);
+
+                        /*
                         List<CellAttributes> go = m_PathFindingSystem.GetRadiusClient(occCoord.CubeCoordinate, range);
                         playerPathing.CachedPaths = m_PathFindingSystem.GetAllPathsInRadius(range, go, occCoord.CubeCoordinate);
+                        */
 
                         /*
                         m_LogDispatcher.HandleLog(LogType.Warning,
                         new LogEvent("OccupiedCoordinate")
                         .WithField("OccCoord", Vector3fext.ToUnityVector(occCoord.CubeCoordinate)));
                         */
-                        foreach (CellAttribute key in playerPathing.CachedPaths.Keys)
+
+                        foreach (MapCell key in playerPathing.CachedMapPaths.Keys)
                         {
                             playerPathing.CellsInRange.Add(key);
-                            playerPathing.CoordinatesInRange.Add(key.CubeCoordinate);
+                            playerPathing.CoordinatesInRange.Add(key.AxialCoordinate);
                         }
 
                         playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
-                        playerPathing.CachedPaths = playerPathing.CachedPaths;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
+                        playerPathing.CachedMapPaths = playerPathing.CachedMapPaths;
+
                         /*
                         m_LogDispatcher.HandleLog(LogType.Warning,
                         new LogEvent("CellsinRange")
@@ -450,17 +459,15 @@ public class HighlightingSystem : JobComponentSystem
                     }
                     else
                     {
-                        List<CellAttributes> go = m_PathFindingSystem.GetRadiusClient(occCoord.CubeCoordinate, playerHighlightingData.Range);
-                        foreach (CellAttributes c in go)
+                        foreach (KeyValuePair<Vector2i, MapCell> c in m_PathFindingSystem.GetMapRadius(inMapData, occCoord.CubeCoordinate, playerHighlightingData.Range))
                         {
-                            playerPathing.CellsInRange.Add(c.Cell);
-                            playerPathing.CoordinatesInRange.Add(c.Cell.CubeCoordinate);
+                            playerPathing.CellsInRange.Add(c.Value);
+                            playerPathing.CoordinatesInRange.Add(c.Key);
                         }
                         playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
                     }
                 }
-
                 else
                 {
                     if (playerState.TargetValid)
@@ -487,8 +494,8 @@ public class HighlightingSystem : JobComponentSystem
 
                         if (playerHighlightingData.PathLine == 1)
                         {
-                            CellAttributeList Path = new CellAttributeList();
-                            Path = m_PathFindingSystem.FindPathClient(playerHighlightingData.HoveredCoordinate, playerPathing.CachedPaths);
+                            MapCellList Path = new MapCellList();
+                            Path = m_PathFindingSystem.FindMapPathClient(inMapData, playerHighlightingData.HoveredCoordinate, playerPathing.CachedMapPaths);
 
                             /*
                             m_LogDispatcher.HandleLog(LogType.Warning,
@@ -500,7 +507,7 @@ public class HighlightingSystem : JobComponentSystem
                             new LogEvent("playerStateLocalVar")
                             .WithField("playerStateLocalVarCachedPathsCount when updating line = ", playerState.CachedPaths.Count));
                             */
-                            if (Path.CellAttributes.Count > 0)
+                            if (Path.Cells.Count > 0)
                             {
                                 UpdatePathLineRenderer(Path, lineRendererComp);
                             }
@@ -576,7 +583,7 @@ public class HighlightingSystem : JobComponentSystem
         }
     }
 
-    void UpdatePathLineRenderer(CellAttributeList inPath, LineRendererComponent inLineRendererComp)
+    void UpdatePathLineRenderer(MapCellList inPath, LineRendererComponent inLineRendererComp)
     {
         Color turnStepColor = settings.TurnStepLineColors[2];
         Gradient gradient = new Gradient();
@@ -587,12 +594,12 @@ public class HighlightingSystem : JobComponentSystem
         inLineRendererComp.lineRenderer.colorGradient = gradient;
         inLineRendererComp.lineRenderer.widthCurve = inLineRendererComp.PathLineWidthCurve;
 
-        inLineRendererComp.lineRenderer.positionCount = inPath.CellAttributes.Count + 1;
+        inLineRendererComp.lineRenderer.positionCount = inPath.Cells.Count + 1;
         inLineRendererComp.lineRenderer.SetPosition(0, inLineRendererComp.transform.position + inLineRendererComp.pathOffset);
 
-        for (int pi = 1; pi <= inPath.CellAttributes.Count; pi++)
+        for (int pi = 1; pi <= inPath.Cells.Count; pi++)
         {
-             inLineRendererComp.lineRenderer.SetPosition(pi, Vector3fext.ToUnityVector(inPath.CellAttributes[pi - 1].Position) + inLineRendererComp.pathOffset);
+             inLineRendererComp.lineRenderer.SetPosition(pi, Vector3fext.ToUnityVector(inPath.Cells[pi - 1].Position) + inLineRendererComp.pathOffset);
         }
     }
 
@@ -812,7 +819,7 @@ public class HighlightingSystem : JobComponentSystem
             playerState.TargetDictChange = true;
         }
 
-        HashSet<Vector3f> playerCellsInRangeHash = new HashSet<Vector3f>(playerPathing.CoordinatesInRange);
+        HashSet<Vector2i> playerCellsInRangeHash = new HashSet<Vector2i>(playerPathing.CoordinatesInRange);
 
         Entities.ForEach((Entity e, ref MarkerState marker, ref CubeCoordinate.Component coord) =>
         {
@@ -822,7 +829,7 @@ public class HighlightingSystem : JobComponentSystem
                 commandBuffer.AddComponent(e, new RequireMarkerUpdate());
             }
             
-            if (playerCellsInRangeHash.Contains(coord.CubeCoordinate))
+            if (playerCellsInRangeHash.Contains(CellGridMethods.CubeToAxial(coord.CubeCoordinate)))
             {
                 marker.CurrentState = MarkerState.State.Reachable;
                 commandBuffer.AddComponent(e, new RequireMarkerUpdate());

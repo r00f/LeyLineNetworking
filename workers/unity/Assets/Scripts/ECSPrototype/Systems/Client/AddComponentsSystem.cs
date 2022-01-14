@@ -31,6 +31,7 @@ public class AddComponentsSystem : JobComponentSystem
     EntityQuery m_UnitRemovedData;
     EntityQuery m_CellAddedData;
     EntityQuery m_GameStateData;
+    EntityQuery m_InitializedGameStateData;
 
     UIReferences UIRef;
     Settings settings;
@@ -136,6 +137,9 @@ public class AddComponentsSystem : JobComponentSystem
             ComponentType.ReadOnly<Position.Component>(),
             ComponentType.ReadOnly<SpatialEntityId>()
             );
+
+
+
     }
 
     protected override void OnStartRunning()
@@ -155,6 +159,8 @@ public class AddComponentsSystem : JobComponentSystem
 
         var gameStatePosition = m_GameStateData.GetSingleton<Position.Component>();
 
+
+
         if (!clientPositionSet)
         {
             map.transform.position = new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
@@ -164,6 +170,18 @@ public class AddComponentsSystem : JobComponentSystem
 
         var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
         var playerId = m_PlayerStateData.GetSingleton<SpatialEntityId>();
+
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, in MapData.Component mapData) =>
+        {
+            var curMapState = new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
+            EntityManager.AddComponentObject(entity, curMapState);
+            Debug.Log("Added CurrentMapState to Client GameState: " + EntityManager.GetComponentObject<CurrentMapState>(entity).CoordinateCellDictionary.Count);
+            EntityManager.AddComponentData(entity, new ComponentsAddedIdentifier { });
+        })
+        .WithStructuralChanges()
+        .WithoutBurst()
+        .Run();
+
 
         Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, HeroTransform htrans) =>
         {
@@ -244,7 +262,7 @@ public class AddComponentsSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, in FactionComponent.Component faction) =>
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, in FactionComponent.Component faction, in CubeCoordinate.Component coord, in SpatialEntityId id) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 

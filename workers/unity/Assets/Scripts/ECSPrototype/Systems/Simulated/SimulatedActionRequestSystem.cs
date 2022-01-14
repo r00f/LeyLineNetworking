@@ -39,6 +39,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>(),
+        ComponentType.ReadOnly<MapData.Component>(),
         ComponentType.ReadOnly<SpatialEntityId>()
         );
     }
@@ -66,6 +67,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var mapData = m_GameStateData.GetSingleton<MapData.Component>();
         var gameStateId = m_GameStateData.GetSingleton<SpatialEntityId>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
@@ -123,7 +125,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
                                     if (actions.ActionsList[clientActionRequest.ActionId].Effects[0].EffectType != EffectTypeEnum.move_along_path)
                                     {
                                         var rCell = Random.Range(0, cachedCells.Count);
-                                        if (m_PathFindingSystem.ValidateTargetClient(coord.CubeCoordinate, cachedCells[rCell].Cell.CubeCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                                        if (m_PathFindingSystem.ValidateTargetClient(mapData, coord.CubeCoordinate, cachedCells[rCell].Cell.CubeCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
                                             clientActionRequest.TargetCoordinate = cachedCells[rCell].Cell.CubeCoordinate;
                                     }
                                     else
