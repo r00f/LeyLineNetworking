@@ -35,7 +35,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter, Dictionary<Vector2i, MapCell> mapData)
+    public static EntityTemplate GameState(Vector3f position, uint worldIndex, Vector2f mapCenter, Dictionary<Vector2i, MapCell> mapData, List<UnitSpawn> unitSpawns)
     {
         settings = Resources.Load<Settings>("Settings");
 
@@ -81,19 +81,21 @@ public static class LeyLineEntityTemplates {
 
         var map = new MapData.Snapshot
         {
-            CoordinateCellDictionary = mapData
+            CoordinateCellDictionary = mapData,
+            UnitsSpawnList = unitSpawns
         };
 
         var template = new EntityTemplate();
-        template.AddComponent(new ClientWorkerIds.Snapshot(), WorkerUtils.MapSpawn);
+        template.AddComponent(new ClientWorkerIds.Snapshot { ClientWorkerIds = new List<string>(), PlayerAttributes = new List<PlayerAttribute>() }, WorkerUtils.MapSpawn);
         template.AddComponent(oVisionClusters, WorkerUtils.MapSpawn);
         template.AddComponent(wIndex, WorkerUtils.MapSpawn);
         template.AddComponent(pos, WorkerUtils.MapSpawn);
+        template.AddComponent(map, WorkerUtils.MapSpawn);
+
         template.AddComponent(new Metadata.Snapshot { EntityType = "GameState" }, WorkerUtils.UnityGameLogic);
         template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
         template.AddComponent(gameState, WorkerUtils.UnityGameLogic);
         template.AddComponent(effectStack, WorkerUtils.UnityGameLogic);
-        template.AddComponent(map, WorkerUtils.UnityGameLogic);
         template.SetReadAccess(GameLogicAndClient.ToArray());
         return template;
     }
@@ -288,8 +290,7 @@ public static class LeyLineEntityTemplates {
 
         var playerAttributes = new PlayerAttributes.Snapshot
         {
-            HeroName = "KingCroak",
-            StartingUnitNames = new List<string> {"Leech", "Leech", "Axalotl"}
+            PlayerAttribute = new PlayerAttribute { StartingUnitNames = new List<string> { "KingCroak", "Leech", "Leech", "Axalotl" } }
         };
 
         var factionSnapshot = new FactionComponent.Snapshot();
@@ -342,13 +343,18 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Unit(string clientWorkerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation)
+    public static EntityTemplate Unit(string clientWorkerId, string unitName, Vector3f position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(clientWorkerId);
 
         var pos = new Position.Snapshot
         {
-            Coords = position.Coords
+            Coords = new Coordinates
+            {
+                X = position.X,
+                Y = position.Y,
+                Z = position.Z
+            }
         };
 
         var coord = new CubeCoordinate.Snapshot
@@ -622,7 +628,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate NeutralUnit(string workerId, string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, bool isManalithUnit = false)
+    public static EntityTemplate NeutralUnit(string workerId, string unitName, Vector3f position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, AIUnitDataSet aiUnitData, uint startRotation, bool isManalithUnit = false)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
 
@@ -633,7 +639,12 @@ public static class LeyLineEntityTemplates {
 
         var pos = new Position.Snapshot
         {
-            Coords = position.Coords
+            Coords = new Coordinates
+            {
+                X = position.X,
+                Y = position.Y,
+                Z = position.Z
+            }
         };
 
         var coord = new CubeCoordinate.Snapshot

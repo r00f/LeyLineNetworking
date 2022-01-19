@@ -5,6 +5,7 @@ import "generic/vector3.schema";
 component MapData {
     id = 106;
     map<generic.Vector2i, MapCell> coordinate_cell_dictionary = 1;
+    list<UnitSpawn> units_spawn_list = 2;
 }
 
 type MapCell {
@@ -17,4 +18,12 @@ type MapCell {
 
 type MapCellList {
     list<MapCell> cells = 1;
+}
+
+type UnitSpawn {
+    string unit_name = 1;
+	uint32 faction = 2;
+    uint32 start_rotation = 3;
+    uint32 starting_unit_index = 4;
+    generic.Vector2i axial_coordinate = 5;
 }

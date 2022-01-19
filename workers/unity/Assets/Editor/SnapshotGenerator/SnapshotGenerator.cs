@@ -66,9 +66,10 @@ namespace BlankProject.Editor
                         Vector2f mapCenter = new Vector2f(wi.centerCellTransform.position.x + settings.MapOffset * y - wi.transform.position.x, wi.centerCellTransform.position.z + settings.MapOffset * i - wi.transform.position.z);
 
                         Dictionary<Vector2i, MapCell> map = new Dictionary<Vector2i, MapCell>();
+                        List<UnitSpawn> unitSpawnList = new List<UnitSpawn>();
                         foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
                         {
-                            Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
+                            Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z);
                             Vector2i axialCoord = CellGridMethods.CubeToAxial(cubeCoord);
                             Vector3f p = new Vector3f(c.transform.position.x + settings.MapOffset * y - wi.transform.position.x, c.transform.position.y, c.transform.position.z + settings.MapOffset * i - wi.transform.position.z);
 
@@ -80,9 +81,22 @@ namespace BlankProject.Editor
                                 MovementCost = (uint)c.GetComponent<MovementCost>().Value
                             };
 
+                            if(c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn)
+                            {
+                                unitSpawnList.Add(new UnitSpawn
+                                {
+                                    AxialCoordinate = axialCoord,
+                                    UnitName = c.GetComponent<UnitToSpawnEditor>().UnitName,
+                                    StartingUnitIndex = c.GetComponent<UnitToSpawnEditor>().StartUnitIndex,
+                                    StartRotation = c.GetComponent<UnitToSpawnEditor>().StartRotation,
+                                    Faction = c.GetComponent<UnitToSpawnEditor>().Faction
+                                });
+                            }
+
                             map.Add(axialCoord, mapCell);
                         }
-                        var gameState = LeyLineEntityTemplates.GameState(pos, (i * settings.MapsPerRow) + y + 1, mapCenter, map);
+
+                        var gameState = LeyLineEntityTemplates.GameState(pos, (i * settings.MapsPerRow) + y + 1, mapCenter, map, unitSpawnList);
                         snapshot.AddEntity(gameState);
                     }
                 }
@@ -136,7 +150,7 @@ namespace BlankProject.Editor
                     circle.CellAttributes.Add(new CellAttribute
                     {
                         Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
                         IsTaken = n.GetComponent<IsTaken>().Value,
                         MovementCost = n.GetComponent<MovementCost>().Value
                     });
@@ -157,14 +171,14 @@ namespace BlankProject.Editor
                 var stats = m.GetComponent<UnitDataSet>();
                 var AIstats = m.GetComponent<AIUnitDataSet>();
 
-                var coordComp = m.GetComponent<ManalithInitializer>().occupiedCell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate;
+                var coordComp = m.GetComponent<ManalithInitializer>().occupiedCell.GetComponent<CoordinateDataComponent>().CubeCoordinate;
 
                 var coord = new Vector3f(coordComp.x, coordComp.y, coordComp.z);
 
                 var connectedManalithCoord = new Vector3f();
 
                 if (m.connectedManaLith)
-                    connectedManalithCoord = Vector3fext.ToVector3f(m.connectedManaLith.occupiedCell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+                    connectedManalithCoord = Vector3fext.ToVector3f(m.connectedManaLith.occupiedCell.GetComponent<CoordinateDataComponent>().CubeCoordinate);
 
                 var pathCoordList = new List<Vector3f>();
 
@@ -192,7 +206,7 @@ namespace BlankProject.Editor
                     neighbours.CellAttributes.Add(new CellAttribute
                     {
                         Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
                         IsTaken = n.GetComponent<IsTaken>().Value,
                         MovementCost = n.GetComponent<MovementCost>().Value,
                         ObstructVision = n.GetComponent<CellType>().thisCellsTerrain.obstructVision
@@ -200,7 +214,7 @@ namespace BlankProject.Editor
                 }
 
                 Vector3f pos = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z);
-                Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z);
+                Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z);
                 uint worldIndex = 0;
                 int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
                 var cell = LeyLineEntityTemplates.ArcheTypeCell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
@@ -245,7 +259,7 @@ namespace BlankProject.Editor
                     var cell = new CellAttribute
                     {
                         Position = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z),
-                        CubeCoordinate = new Vector3f(c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                        CubeCoordinate = new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
                         IsTaken = c.GetComponent<IsTaken>().Value,
                         MovementCost = 1,
                         ObstructVision = c.GetComponent<CellType>().thisCellsTerrain.obstructVision
@@ -262,7 +276,7 @@ namespace BlankProject.Editor
                         neighbours.CellAttributes.Add(new CellAttribute
                         {
                             Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                            CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate.z),
+                            CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
                             IsTaken = n.GetComponent<IsTaken>().Value,
                             MovementCost = n.GetComponent<MovementCost>().Value,
                             ObstructVision = n.GetComponent<CellType>().thisCellsTerrain.obstructVision

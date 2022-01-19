@@ -16,6 +16,8 @@ public class Settings : ScriptableObject
 
     public GameObject TempleValleyClientMap;
     public Color UINeutralColor;
+    public Material CellMat;
+    public Mesh CellMesh;
     //public Mesh TestMesh;
     //public Material TestMat;
     public List<Texture2D> ParialColorMasks;

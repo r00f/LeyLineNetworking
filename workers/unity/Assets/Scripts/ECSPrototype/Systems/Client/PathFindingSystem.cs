@@ -102,6 +102,32 @@ public class PathFindingSystem : JobComponentSystem
         return path;
     }
 
+    public Dictionary<MapCell, Dictionary<MapCell, uint>> GetMapGraphEdges(CurrentMapState mapData, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, MapCell origin)
+    {
+        Dictionary<MapCell, Dictionary<MapCell, uint>> ret = new Dictionary<MapCell, Dictionary<MapCell, uint>>();
+
+        //instead of looping over all cells in grid only loop over cells in CellsInMovementRange
+
+        for (int i = 0; i < cellsInRange.Count; ++i)
+        {
+            var isTaken = cellsInRange[i].Value.IsTaken;
+            var movementCost = cellsInRange[i].Value.MovementCost;
+
+            ret[cellsInRange[i].Value] = new Dictionary<MapCell, uint>();
+            if (!isTaken || Vector3fext.ToUnityVector(cellsInRange[i].Value.Position) == Vector3fext.ToUnityVector(origin.Position))
+            {
+                for (int y = 0; y < 6; y++)
+                {
+                    var v = CellGridMethods.CubeNeighbour(CellGridMethods.AxialToCube(cellsInRange[i].Key), (uint) y);
+
+                    if (Mathf.Abs(v.X) <= 14 && Mathf.Abs(v.Y) <= 14 && Mathf.Abs(v.Z) <= 14)
+                        ret[cellsInRange[i].Value][mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)]] = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)].MovementCost;
+                }
+            }
+        }
+        return ret;
+    }
+
     public Dictionary<MapCell, MapCellList> CacheMapPaths(CurrentMapState mapData, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, MapCell origin)
     {
         var edges = GetMapGraphEdges(mapData, cellsInRange, origin);
@@ -109,7 +135,158 @@ public class PathFindingSystem : JobComponentSystem
         return paths;
     }
 
+    public MapCellList FindPathFromCachedPaths(CurrentMapState mapData, Vector3f inDestination, Dictionary<MapCell, MapCellList> cachedPaths)
+    {
+        MapCell destination = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(inDestination)];
+
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new MapCellList(new List<MapCell>());
+    }
+
+    public Dictionary<Vector3f, Vector3fList> GetAllPathCoordinatesInRadius(CurrentMapState currentMapState, uint radius, List<KeyValuePair<Vector2i, MapCell>> cellsInRange)
+    {
+        var cachedPaths = new Dictionary<Vector3f, Vector3fList>();
+
+        if (cellsInRange.Count == 0)
+            return cachedPaths;
+
+        var paths = CacheMapPaths(currentMapState, cellsInRange, cellsInRange[0].Value);
+
+        foreach (var key in paths.Keys)
+        {
+            var path = new Vector3fList { Coordinates = new List<Vector3f>() };
+
+            foreach (MapCell c in paths[key].Cells)
+            {
+                path.Coordinates.Add(CellGridMethods.AxialToCube(c.AxialCoordinate));
+            }
+
+            long pathCost;
+
+            if (key.IsTaken)
+            {
+                continue;
+            }
+
+            pathCost = paths[key].Cells.Sum(c => c.MovementCost);
+
+            if (pathCost <= radius)
+            {
+                path.Coordinates.Reverse();
+                cachedPaths.Add(CellGridMethods.AxialToCube(key.AxialCoordinate), path);
+            }
+        }
+
+        return cachedPaths;
+    }
+
+    public Vector3fList FindPathCoordinates(Vector3f destination, Dictionary<Vector3f, Vector3fList> cachedPaths)
+    {
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new Vector3fList();
+    }
+
+    public bool ValidateMapCellTarget(Vector3f originCoord, Action inAction, MapCell cellAtt)
+    {
+        bool valid = false;
+
+        if (inAction.Index == -3)
+            return valid;
+
+        if (CellGridMethods.GetDistance(originCoord, CellGridMethods.AxialToCube(cellAtt.AxialCoordinate)) <= inAction.Targets[0].Targettingrange)
+        {
+            if (inAction.Targets[0].CellTargetNested.RequireEmpty)
+            {
+                if (!cellAtt.IsTaken)
+                    valid = true;
+            }
+            else
+            {
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
     #region Old Methods
+    /*
+
+            public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths, WorldIndexShared worldIndex)
+    {
+        CellAttribute destination = new CellAttribute();
+
+        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
+        {
+            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
+            {
+                destination = cellAttribute.CellAttributes.Cell;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new CellAttributeList(new List<CellAttribute>());
+    }
+
+    public CellAttributeList FindPathClient(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
+    {
+        CellAttribute destination = new CellAttribute();
+
+        Entities.ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
+        {
+            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
+            {
+                destination = cellAttribute.CellAttributes.Cell;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+
+        if (cachedPaths.ContainsKey(destination))
+        {
+            return cachedPaths[destination];
+        }
+        else
+            return new CellAttributeList(new List<CellAttribute>());
+    }
+
+    public bool ValidateCellTarget(Vector3f originCoord, Action inAction, CellAttribute cellAtt)
+    {
+        bool valid = false;
+
+        if (inAction.Index == -3)
+            return valid;
+
+        if (CellGridMethods.GetDistance(cellAtt.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
+        {
+            if (inAction.Targets[0].CellTargetNested.RequireEmpty)
+            {
+                if (!cellAtt.IsTaken)
+                    valid = true;
+            }
+            else
+            {
+                valid = true;
+            }
+        }
+
+        return valid;
+    }
+
     public CellAttribute GetCellAttributeAtCoordinate(Vector3f coordinate, WorldIndexShared worldIndex)
     {
         var cell = new CellAttribute();
@@ -267,32 +444,6 @@ public class PathFindingSystem : JobComponentSystem
         return cachedPaths;
     }
 
-    public Dictionary<MapCell, Dictionary<MapCell, uint>> GetMapGraphEdges(CurrentMapState mapData, List<KeyValuePair<Vector2i, MapCell>> cellsInRange, MapCell origin)
-    {
-        Dictionary<MapCell, Dictionary<MapCell, uint>> ret = new Dictionary<MapCell, Dictionary<MapCell, uint>>();
-
-        //instead of looping over all cells in grid only loop over cells in CellsInMovementRange
-
-        for (int i = 0; i < cellsInRange.Count; ++i)
-        {
-            var isTaken = cellsInRange[i].Value.IsTaken;
-            var movementCost = cellsInRange[i].Value.MovementCost;
-
-            ret[cellsInRange[i].Value] = new Dictionary<MapCell, uint>();
-            if (!isTaken || Vector3fext.ToUnityVector(cellsInRange[i].Value.Position) == Vector3fext.ToUnityVector(origin.Position))
-            {
-                for (int y = 0; y < 6; y++)
-                {
-                    var v = CellGridMethods.CubeNeighbour(CellGridMethods.AxialToCube(cellsInRange[i].Key), (uint) y);
-
-                    if (Mathf.Abs(v.X) <= 14 && Mathf.Abs(v.Y) <= 14 && Mathf.Abs(v.Z) <= 14)
-                        ret[cellsInRange[i].Value][mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)]] = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(v)].MovementCost;
-                }
-            }
-        }
-        return ret;
-    }
-
     public Dictionary<CellAttribute, CellAttributeList> GetAllPathsInRadius(uint radius, List<CellAttributes> cellsInRange, Vector3f originCoord)
     {
         CellAttribute origin = new CellAttribute();
@@ -380,6 +531,7 @@ public class PathFindingSystem : JobComponentSystem
             return new CellAttributeList(new List<CellAttribute>());
     }
 
+        */
     /*
     public List<CellAttribute> FindPath(List<CellAttributes> cellsInRange, CellAttribute origin, CellAttribute destination)
     {
@@ -391,94 +543,7 @@ public class PathFindingSystem : JobComponentSystem
     */
     #endregion
 
-    public Vector3fList FindPathCoordinates(Vector3f destination, Dictionary<Vector3f, Vector3fList> cachedPaths)
-    {
-        if (cachedPaths.ContainsKey(destination))
-        {
-            return cachedPaths[destination];
-        }
-        else
-            return new Vector3fList();
-    }
 
-    public CellAttributeList FindPath(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths, WorldIndexShared worldIndex)
-    {
-        CellAttribute destination = new CellAttribute();
-
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
-        {
-            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
-            {
-                destination = cellAttribute.CellAttributes.Cell;
-            }
-        })
-        .WithoutBurst()
-        .Run();
-
-        if (cachedPaths.ContainsKey(destination))
-        {
-            return cachedPaths[destination];
-        }
-        else
-            return new CellAttributeList(new List<CellAttribute>());
-    }
-
-    public CellAttributeList FindPathClient(Vector3f inDestination, Dictionary<CellAttribute, CellAttributeList> cachedPaths)
-    {
-        CellAttribute destination = new CellAttribute();
-
-        Entities.ForEach((in CubeCoordinate.Component coordinate, in CellAttributesComponent.Component cellAttribute) =>
-        {
-            if (Vector3fext.ToUnityVector(coordinate.CubeCoordinate) == Vector3fext.ToUnityVector(inDestination))
-            {
-                destination = cellAttribute.CellAttributes.Cell;
-            }
-        })
-        .WithoutBurst()
-        .Run();
-
-        if (cachedPaths.ContainsKey(destination))
-        {
-            return cachedPaths[destination];
-        }
-        else
-            return new CellAttributeList(new List<CellAttribute>());
-    }
-
-    public MapCellList FindMapPathClient(CurrentMapState mapData, Vector3f inDestination, Dictionary<MapCell, MapCellList> cachedPaths)
-    {
-        MapCell destination = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(inDestination)];
-
-        if (cachedPaths.ContainsKey(destination))
-        {
-            return cachedPaths[destination];
-        }
-        else
-            return new MapCellList(new List<MapCell>());
-    }
-
-    public bool ValidateCellTarget(Vector3f originCoord, Action inAction, CellAttribute cellAtt)
-    {
-        bool valid = false;
-
-        if (inAction.Index == -3)
-            return valid;
-
-        if (CellGridMethods.GetDistance(cellAtt.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
-        {
-            if (inAction.Targets[0].CellTargetNested.RequireEmpty)
-            {
-                if (!cellAtt.IsTaken)
-                    valid = true;
-            }
-            else
-            {
-                valid = true;
-            }
-        }
-
-        return valid;
-    }
 
     public bool ValidateUnitTarget(ApplyToRestrictionsEnum restrictions, long usingUnitId, uint usingUnitFaction, long targetUnitId, uint targetUnitFaction)
     {
@@ -528,7 +593,7 @@ public class PathFindingSystem : JobComponentSystem
         return valid;
     }
 
-    public bool ValidateTargetClient(MapData.Component mapData, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction)
+    public bool ValidateTargetClient(CurrentMapState currentMapState, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction)
     {
         bool valid = false;
 
@@ -580,7 +645,7 @@ public class PathFindingSystem : JobComponentSystem
         return valid;
     }
 
-    public bool ValidatePathTargetClient(CurrentMapState mapData, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<MapCell, MapCellList> inCachedPaths)
+    public bool ValidatePathTargetClient(CurrentMapState currentMapState, Vector3f originCoord, Vector3f coord, Action inAction, long usingUnitId, uint inFaction, Dictionary<MapCell, MapCellList> inCachedPaths)
     {
         bool valid = false;
 
@@ -593,7 +658,7 @@ public class PathFindingSystem : JobComponentSystem
 
                 if (inCachedPaths.Count != default)
                 {
-                    if (mapData.CoordinateCellDictionary.ContainsKey(CellGridMethods.CubeToAxial(coord)) && inCachedPaths.ContainsKey(mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coord)]))
+                    if (currentMapState.CoordinateCellDictionary.ContainsKey(CellGridMethods.CubeToAxial(coord)) && inCachedPaths.ContainsKey(currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coord)]))
                         valid = true;
                 }
                 else

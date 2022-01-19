@@ -140,11 +140,11 @@ public class ManalithSystem : JobComponentSystem
                     }
                     else if (fact == 1)
                     {
-                        a.Attribute[0] = "workerId:" + clientWorkerIds.ClientWorkerId1;
+                        a.Attribute[0] = "workerId:" + clientWorkerIds.ClientWorkerIds[0];
                     }
                     else if (fact == 2)
                     {
-                        a.Attribute[0] = "workerId:" + clientWorkerIds.ClientWorkerId2;
+                        a.Attribute[0] = "workerId:" + clientWorkerIds.ClientWorkerIds[1];
                     }
 
                     entityAcl.ComponentWriteAcl[135].AttributeSet[0] = a;

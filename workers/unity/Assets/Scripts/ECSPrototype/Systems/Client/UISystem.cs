@@ -138,13 +138,13 @@ namespace LeyLineHybridECS
             var playerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
             #endregion
 
-            var spawnUnitEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.SpawnUnitsEvent.Event>();
+            var mapInitializedEvent = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
-            if (spawnUnitEvents.Count > 0)
+            if (mapInitializedEvent.Count > 0)
             {
-                //Debug.Log("InitMapClientEvent");
+                Debug.Log("InitMapClientEvent");
                 //ClearUnitUIElements();
                 InitializeButtons();
 

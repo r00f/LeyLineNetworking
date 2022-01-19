@@ -1,5 +1,6 @@
 using Unity.Entities;
 using LeyLineHybridECS;
+using Unity.Rendering;
 
 public static class WorkerUtils
 {
@@ -10,6 +11,7 @@ public static class WorkerUtils
 
     public static void AddClientSystems(World world)
     {
+        world.GetOrCreateSystem<HybridRendererSystem>();
         world.GetOrCreateSystem<InitializeUnitsSystem>();
         world.GetOrCreateSystem<UnitLifeCycleSystemClient>();
         world.GetOrCreateSystem<MouseStateSystem>();
@@ -48,8 +50,10 @@ public static class WorkerUtils
 
     public static void AddSimulatedPlayerSystems(World world)
     {
+        world.GetOrCreateSystem<AddComponentsSystem>();
         world.GetOrCreateSystem<SimulatedPlayerSystem>();
         world.GetOrCreateSystem<SimulatedActionRequestSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystemClient>();
     }
 }

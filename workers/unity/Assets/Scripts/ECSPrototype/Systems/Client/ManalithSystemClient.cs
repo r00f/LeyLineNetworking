@@ -79,14 +79,12 @@ public class ManalithSystemClient : JobComponentSystem
         base.OnStartRunning();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
-        //m_CommandSystem = World.GetExistingSystem<CommandSystem>();
-        //m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.SpawnUnitsEvent.Event>();
+        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
 
         if (initMapEvents.Count > 0)
         {

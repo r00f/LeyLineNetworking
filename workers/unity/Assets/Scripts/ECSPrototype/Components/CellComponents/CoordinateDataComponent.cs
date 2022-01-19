@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Unity.Mathematics;
 using Unity.Entities;
@@ -8,7 +8,7 @@ using System;
 namespace LeyLineHybridECS
 {
     [Serializable]
-    public struct GridCoordinates : IComponentData
+    public class CoordinateDataComponent : MonoBehaviour
     {
         //[HideInInspector]
         public float2 OffsetCoordinate;
@@ -16,7 +16,7 @@ namespace LeyLineHybridECS
         public float3 CubeCoordinate;
     }
 
-    public class CoordinateDataComponent : ComponentDataProxy<GridCoordinates> { }
+    //public class CoordinateDataComponent : ComponentDataProxy<GridCoordinates> { }
 
 }
 

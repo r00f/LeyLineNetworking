@@ -81,7 +81,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     if (unitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
                     {
                         self = true;
-                        unitActions.LockedAction = SetLockedAction(unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction);
+                        unitActions.LockedAction = SetLockedAction(new CurrentMapState(), unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction);
                         unitActions.LastSelected = unitActions.CurrentSelected;
                         unitActions.CurrentSelected = unitActions.NullAction;
                     }
@@ -117,20 +117,8 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         {
             if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero && requestingUnitActions.CurrentSelected.Targets[0].Targettingrange > 0)
             {
-                bool valid = false;
-
-                switch (requestingUnitActions.CurrentSelected.Targets[0].TargetType)
-                {
-                    case TargetTypeEnum.cell:
-                        valid = ValidateCellTarget(worldIndex, requestingUnitActions, clientActionRequest.TargetCoordinate, requestingUnitCoord.CubeCoordinate);
-                        break;
-                    case TargetTypeEnum.unit:
-                        valid = ValidateUnitTarget(worldIndex, requestingUnitActions, clientActionRequest.TargetCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction);
-                        break;
-                }
-
-                if (valid)
-                    requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
+                if (ValidateTarget(worldIndex, requestingUnitActions.CurrentSelected, clientActionRequest.TargetCoordinate, requestingUnitCoord.CubeCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction))
+                    requestingUnitActions.LockedAction = SetLockedAction(new CurrentMapState(), worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
                 else
                     requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
 
@@ -144,6 +132,47 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         return inputDeps;
     }
 
+    public bool ValidateTarget(WorldIndexShared worldIndex, Action requestingUnitAction, Vector3f targetCoord, Vector3f requestingUnitCoord, long requestingUnitId, uint requestingUnitFaction)
+    {
+        bool valid = false;
+
+        switch (requestingUnitAction.Targets[0].TargetType)
+        {
+            case TargetTypeEnum.cell:
+                Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState currentMapState) =>
+                {
+                    valid = m_PathFindingSystem.ValidateMapCellTarget(requestingUnitCoord, requestingUnitAction, currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]);
+                })
+                .WithoutBurst()
+                .Run();
+                break;
+            case TargetTypeEnum.unit:
+                Entities.WithAll<Health.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
+                {
+                    if (Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
+                    {
+                        valid = m_PathFindingSystem.ValidateUnitTarget(requestingUnitAction.Effects[0].ApplyToRestrictions, requestingUnitId, requestingUnitFaction, targetUnitId.EntityId.Id, targetUnitFaction.Faction);
+                    }
+                })
+                .WithoutBurst()
+                .Run();
+                break;
+
+        }
+
+        return valid;
+    }
+
+    public bool ValidateCellTarget(WorldIndexShared worldIndex, Action requestingUnitAction, Vector3f targetCoord, Vector3f requestingUnitCoord)
+    {
+        bool valid = false;
+
+
+
+        return valid;
+    }
+
+    /*
     public bool ValidateCellTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, Vector3f requestingUnitCoord)
     {
         bool valid = false;
@@ -160,6 +189,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
 
         return valid;
     }
+    */
 
     public bool ValidateUnitTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, long requestingUnitId, uint requestingUnitFaction)
     {
@@ -195,9 +225,8 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         return combinedCost;
     }
 
-    public Action SetLockedAction(WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
+    public Action SetLockedAction(CurrentMapState currentMapState, WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
     {
-        var currentMapState = new CurrentMapState();
         Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState curMapState) =>
         {
             currentMapState = curMapState;

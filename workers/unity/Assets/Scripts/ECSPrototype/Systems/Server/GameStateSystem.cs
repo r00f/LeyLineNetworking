@@ -77,9 +77,8 @@ namespace LeyLineHybridECS
                     {
                         var mapData = EntityManager.GetComponentData<MapData.Component>(e);
                         EntityManager.AddComponent<GameStateServerVariables>(e);
-                        var curMapState = new CurrentMapState  { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
-                        EntityManager.AddComponentObject(e, curMapState);
-                        Debug.Log("Added CurrentMapState to GameLogic GameState: " + EntityManager.GetComponentObject<CurrentMapState>(e).CoordinateCellDictionary.Count);
+                        EntityManager.AddComponentObject(e, new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary });
+                        //Debug.Log("Added CurrentMapState to GameLogic GameState: " + EntityManager.GetComponentObject<CurrentMapState>(e).CoordinateCellDictionary.Count + " MapCell Coord 0: " + EntityManager.GetComponentObject<CurrentMapState>(e).CoordinateCellDictionary.ElementAt(0).Value.AxialCoordinate.X + EntityManager.GetComponentObject<CurrentMapState>(e).CoordinateCellDictionary.ElementAt(0).Value.AxialCoordinate.Y);
                     }
 
                     EntityManager.AddSharedComponentData(e, new WorldIndexShared { Value = entityWorldIndex.Value });

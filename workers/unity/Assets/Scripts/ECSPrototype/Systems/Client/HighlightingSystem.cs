@@ -495,7 +495,7 @@ public class HighlightingSystem : JobComponentSystem
                         if (playerHighlightingData.PathLine == 1)
                         {
                             MapCellList Path = new MapCellList();
-                            Path = m_PathFindingSystem.FindMapPathClient(inMapData, playerHighlightingData.HoveredCoordinate, playerPathing.CachedMapPaths);
+                            Path = m_PathFindingSystem.FindPathFromCachedPaths(inMapData, playerHighlightingData.HoveredCoordinate, playerPathing.CachedMapPaths);
 
                             /*
                             m_LogDispatcher.HandleLog(LogType.Warning,

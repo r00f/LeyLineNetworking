@@ -338,14 +338,22 @@ public class AISystem : JobComponentSystem
         }
     }
 
-    public void ChooseAIAction(ref AiUnit.Component aiUnit, ref Actions.Component actions, ref ClientActionRequest.Component actionRequest, SpatialEntityId AIid, CubeCoordinate.Component unitCoord, WorldIndexShared unitWorldIndex)
+    public void ChooseAIAction(ref AiUnit.Component aiUnit, ref Actions.Component actions, ref ClientActionRequest.Component actionRequest, SpatialEntityId AIid, CubeCoordinate.Component unitCoord, WorldIndexShared unitWorldIndex, CurrentMapState currentMapState = null)
     {
+
+        Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((in CurrentMapState curMapState) =>
+        {
+            currentMapState = curMapState;
+        })
+        .WithoutBurst()
+        .Run();
+
         switch(aiUnit.ChosenActionType)
         {
             case ActionTypeEnum.move:
                 actions.CurrentSelected = SelectActionFromPrioGroup(aiUnit.CulledMoveActionsPrioList, actions);
                 //HotFix for AI requesting targetcoordinate with empty cellAttributeRadius
-                actionRequest.TargetCoordinate = ClosestPathTarget(aiUnit.AggroedUnitCoordinate, m_PathFindingSystem.GetAllPathCoordinatesInRadius((uint) actions.ActionsList[0].Targets[0].Targettingrange, m_PathFindingSystem.GetCellAttributesRadius(unitCoord.CubeCoordinate, (uint) actions.ActionsList[0].Targets[0].Targettingrange, unitWorldIndex)));
+                actionRequest.TargetCoordinate = ClosestPathTarget(aiUnit.AggroedUnitCoordinate, m_PathFindingSystem.GetAllPathCoordinatesInRadius(currentMapState, (uint) actions.ActionsList[0].Targets[0].Targettingrange, m_PathFindingSystem.GetMapRadius(currentMapState, unitCoord.CubeCoordinate, (uint) actions.ActionsList[0].Targets[0].Targettingrange)));
                 break;
 
             case ActionTypeEnum.attack:

@@ -227,7 +227,7 @@ namespace LeyLineHybridECS
             {
                 case CircleSize.Three:
 
-                    var coord = Vector3fext.ToVector3f(occupiedCell.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+                    var coord = Vector3fext.ToVector3f(occupiedCell.GetComponent<CoordinateDataComponent>().CubeCoordinate);
                     var circleCoords = CellGridMethods.CircleDegreeToCoords(coord, occupiedCell.GetComponent<CellType>().ManalithSpawnDirection);
 
                     //Debug.Log(Vector3fext.ToUnityVector(circleCoords.Key) + " " + Vector3fext.ToUnityVector(circleCoords.Value));
@@ -241,7 +241,7 @@ namespace LeyLineHybridECS
 
                     for (int i = 0; i < occupiedCell.GetComponent<Neighbours>().NeighboursList.Count; i++)
                     {
-                        if (Vector3fext.ToFloat3(circleCoords.Key).Equals(occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<CoordinateDataComponent>().Value.CubeCoordinate) || Vector3fext.ToFloat3(circleCoords.Value).Equals(occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<CoordinateDataComponent>().Value.CubeCoordinate))
+                        if (Vector3fext.ToFloat3(circleCoords.Key).Equals(occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<CoordinateDataComponent>().CubeCoordinate) || Vector3fext.ToFloat3(circleCoords.Value).Equals(occupiedCell.GetComponent<Neighbours>().NeighboursList[i].GetComponent<CoordinateDataComponent>().CubeCoordinate))
                             leyLineCircle.Add(occupiedCell.GetComponent<Neighbours>().NeighboursList[i]);
                     }
                     foreach (Cell c in leyLineCircle)
@@ -521,7 +521,7 @@ namespace LeyLineHybridECS
             leyLinePathCoords.Clear();
             foreach(Cell c in leyLinePath)
             {
-                leyLinePathCoords.Add(c.transform.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+                leyLinePathCoords.Add(c.transform.GetComponent<CoordinateDataComponent>().CubeCoordinate);
             }
         }
 
@@ -530,7 +530,7 @@ namespace LeyLineHybridECS
             leyLineCircleCoords.Clear();
             foreach (Cell c in leyLineCircle)
             {
-                leyLineCircleCoords.Add(c.transform.GetComponent<CoordinateDataComponent>().Value.CubeCoordinate);
+                leyLineCircleCoords.Add(c.transform.GetComponent<CoordinateDataComponent>().CubeCoordinate);
             }
         }
 

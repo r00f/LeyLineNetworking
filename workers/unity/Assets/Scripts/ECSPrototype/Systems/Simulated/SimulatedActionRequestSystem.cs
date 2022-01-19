@@ -39,7 +39,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>(),
-        ComponentType.ReadOnly<MapData.Component>(),
+        ComponentType.ReadOnly<CurrentMapState>(),
         ComponentType.ReadOnly<SpatialEntityId>()
         );
     }
@@ -67,7 +67,10 @@ public class SimulatedActionRequestSystem : JobComponentSystem
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
-        var mapData = m_GameStateData.GetSingleton<MapData.Component>();
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+        var currentMapState = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
+
+
         var gameStateId = m_GameStateData.GetSingleton<SpatialEntityId>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
@@ -118,19 +121,19 @@ public class SimulatedActionRequestSystem : JobComponentSystem
                             }
                             else
                             {
-                                var cachedCells = m_PathFindingSystem.GetRadiusClient(coord.CubeCoordinate, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange);
+                                var cachedCells = m_PathFindingSystem.GetMapRadius(currentMapState, coord.CubeCoordinate, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange);
 
                                 if (cachedCells.Count > 0)
                                 {
                                     if (actions.ActionsList[clientActionRequest.ActionId].Effects[0].EffectType != EffectTypeEnum.move_along_path)
                                     {
                                         var rCell = Random.Range(0, cachedCells.Count);
-                                        if (m_PathFindingSystem.ValidateTargetClient(mapData, coord.CubeCoordinate, cachedCells[rCell].Cell.CubeCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
-                                            clientActionRequest.TargetCoordinate = cachedCells[rCell].Cell.CubeCoordinate;
+                                        if (m_PathFindingSystem.ValidateTargetClient(currentMapState, coord.CubeCoordinate, CellGridMethods.AxialToCube(cachedCells[rCell].Key), actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                                            clientActionRequest.TargetCoordinate = CellGridMethods.AxialToCube(cachedCells[rCell].Key);
                                     }
                                     else
                                     {
-                                        var pathsInRange = m_PathFindingSystem.GetAllPathCoordinatesInRadius((uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange, cachedCells);
+                                        var pathsInRange = m_PathFindingSystem.GetAllPathCoordinatesInRadius(currentMapState, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange, cachedCells);
                                         if (pathsInRange.Keys.Count > 0)
                                         {
                                             var rCell = Random.Range(0, pathsInRange.Count);

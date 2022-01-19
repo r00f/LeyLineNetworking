@@ -6,6 +6,10 @@ using Player;
 using Cell;
 using Improbable;
 using Unity.Collections;
+using Unity.Transforms;
+using Unity.Rendering;
+using UnityEngine.Rendering;
+using Unity.Mathematics;
 
 namespace LeyLineHybridECS
 {
@@ -18,6 +22,9 @@ namespace LeyLineHybridECS
         EntityQuery m_RequireMarkerUpdateData;
         EntityQuery m_NewCellData;
         Settings settings;
+        ComponentUpdateSystem m_ComponentUpdateSystem;
+        EndSimulationEntityCommandBufferSystem endSimulationEntityCommandBufferSystem;
+
 
         protected override void OnCreate()
         {
@@ -46,7 +53,9 @@ namespace LeyLineHybridECS
                 );
 
             m_GameStateData = GetEntityQuery(
-                ComponentType.ReadOnly<GameState.Component>()
+                ComponentType.ReadOnly<GameState.Component>(),
+                //ComponentType.ReadOnly<CurrentMapState>(),
+                ComponentType.ReadOnly<MapData.Component>()
             );
 
             m_PlayerStateData = GetEntityQuery(
@@ -59,10 +68,63 @@ namespace LeyLineHybridECS
         {
             base.OnStartRunning();
             settings = Resources.Load<Settings>("Settings");
+            m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+            endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        }
+
+        struct CellMarkerMeshRenderers : IComponentData
+        {
+            //public RenderMesh RenderMesh;
+            //public Re r;
+
+            //public RenderMesh r;
+            //public Unity.Rendering.HybridV2. testRenderer;
+        }
+
+        public float4x4 ComputeTransform(int index)
+        {
+            return float4x4.Translate(new float3(index, 0, 0));
         }
 
         protected override void OnUpdate()
         {
+            if (m_GameStateData.CalculateEntityCount() != 1)
+                return;
+
+            var mapData = m_GameStateData.GetSingleton<MapData.Component>();
+
+            var mapInitializedEvent = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
+
+            if (mapInitializedEvent.Count > 0)
+            {
+                //EntityCommandBuffer ecb = endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+
+                var desc = new RenderMeshDescription(
+                settings.CellMesh,
+                settings.CellMat,
+                shadowCastingMode: ShadowCastingMode.Off,
+                receiveShadows: false);
+
+                Debug.Log("Spawn Cell Entities On Client");
+                //var s = GameObjectConversionSettings.FromWorld(World, null);
+                //var prefab = GameObjectConversionUtility.ConvertGameObjectHierarchy(settings.CellPrefab, s);
+
+                foreach(MapCell c in mapData.CoordinateCellDictionary.Values)
+                {
+                    Debug.Log("InstanciateCellEntity");
+                    var instance = EntityManager.CreateEntity();
+                    EntityManager.SetName(instance, "ClientCell");
+                    EntityManager.AddComponentData(instance, new LocalToWorld { Value = float4x4.Translate(new float3(c.Position.X, c.Position.Y, c.Position.Z))});
+                    RenderMeshUtility.AddComponents(instance, EntityManager, desc);
+                    //EntityManager.AddComponentData(instance, new Translation { Value = new Vector3(c.Position.X, c.Position.Y, c.Position.Z) });
+                }
+            }
+
+            Entities.ForEach((CellTag c) =>
+            {
+                Debug.Log("Cell Entity Found");
+            });
+            
             /*
             if(m_NewCellData.CalculateEntityCount() > 0)
             {

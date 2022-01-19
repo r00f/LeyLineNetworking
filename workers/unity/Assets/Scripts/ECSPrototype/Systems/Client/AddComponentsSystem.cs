@@ -202,9 +202,8 @@ public class AddComponentsSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, ref CellAttributesComponent.Component cellAtt) =>
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, IsVisibleReferences isVisibleRef, ref CellAttributesComponent.Component cellAtt) =>
         {
-            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
             int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
 
             PopulateMap(UIRef.MinimapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
