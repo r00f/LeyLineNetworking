@@ -321,7 +321,7 @@ public static class LeyLineEntityTemplates {
         };
 
         var wIndex = new WorldIndex.Snapshot();
-        var pos = new Position.Snapshot { Coords = new Coordinates{X = -200, Y= 0, Z = 0 } };
+        var pos = new Position.Snapshot { Coords = new Coordinates{X = -500, Y= 0, Z = -500 } };
         var template = new EntityTemplate();
 
         template.AddComponent(pos, WorkerUtils.MapSpawn);

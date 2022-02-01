@@ -4,11 +4,9 @@ using Improbable;
 using Improbable.Gdk.Core;
 using Player;
 using System.Collections.Generic;
-using System.Linq;
 using Unit;
 using Unity.Entities;
 using Unity.Jobs;
-using UnityEngine;
 
 namespace LeyLineHybridECS
 {

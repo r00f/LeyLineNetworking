@@ -45,7 +45,7 @@ namespace BlankProject.Editor
             var snapshot = new Snapshot();
             AddGameState(snapshot);
             AddPlayerSpawner(snapshot);
-            AddCellGrid(snapshot);
+            //AddCellGrid(snapshot);
             AddManaliths(snapshot);
             AddObstructVisionClusters(snapshot);
             AddInitializeMapEventSenders(snapshot);
@@ -55,6 +55,7 @@ namespace BlankProject.Editor
         private static void AddGameState(Snapshot snapshot)
         {
             var columnCount = settings.MapCount / settings.MapsPerRow;
+            //Vector2f mapGridCenterOffset = new Vector2f(-400f, -400f);
 
             for (uint i = 0; i < columnCount; i++)
             {
@@ -62,8 +63,8 @@ namespace BlankProject.Editor
                 {
                     foreach (EditorWorldIndex wi in Object.FindObjectsOfType<EditorWorldIndex>())
                     {
-                        Vector3f pos = new Vector3f(settings.MapOffset * y, 0, settings.MapOffset * i);
-                        Vector2f mapCenter = new Vector2f(wi.centerCellTransform.position.x + settings.MapOffset * y - wi.transform.position.x, wi.centerCellTransform.position.z + settings.MapOffset * i - wi.transform.position.z);
+                        Vector3f pos = Vector3fext.FromUnityVector(new Vector3(settings.MapOffset * y, 0, settings.MapOffset * i) + new Vector3(settings.MapGridCenterOffset.X, 0f, settings.MapGridCenterOffset.Y));
+                        Vector2f mapCenter = new Vector2f(wi.centerCellTransform.position.x + settings.MapOffset * y - wi.transform.position.x + settings.MapGridCenterOffset.X, wi.centerCellTransform.position.z + settings.MapOffset * i - wi.transform.position.z + settings.MapGridCenterOffset.Y);
 
                         Dictionary<Vector2i, MapCell> map = new Dictionary<Vector2i, MapCell>();
                         List<UnitSpawn> unitSpawnList = new List<UnitSpawn>();
@@ -71,17 +72,18 @@ namespace BlankProject.Editor
                         {
                             Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z);
                             Vector2i axialCoord = CellGridMethods.CubeToAxial(cubeCoord);
-                            Vector3f p = new Vector3f(c.transform.position.x + settings.MapOffset * y - wi.transform.position.x, c.transform.position.y, c.transform.position.z + settings.MapOffset * i - wi.transform.position.z);
+                            Vector3f p = new Vector3f(c.transform.position.x + settings.MapOffset * y - wi.transform.position.x + settings.MapGridCenterOffset.X, c.transform.position.y, c.transform.position.z + settings.MapOffset * i - wi.transform.position.z + settings.MapGridCenterOffset.Y);
 
                             MapCell mapCell = new MapCell
                             {
                                 AxialCoordinate = axialCoord,
                                 Position = p,
                                 IsTaken = c.GetComponent<IsTaken>().Value,
-                                MovementCost = (uint)c.GetComponent<MovementCost>().Value
+                                MovementCost = (uint) c.GetComponent<MovementCost>().Value,
+                                MapCellColorIndex = (uint) c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex
                             };
 
-                            if(c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn)
+                            if (c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn)
                             {
                                 unitSpawnList.Add(new UnitSpawn
                                 {

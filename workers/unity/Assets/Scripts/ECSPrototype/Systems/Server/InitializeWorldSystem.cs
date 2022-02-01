@@ -52,20 +52,17 @@ namespace LeyLineHybridECS
                 var worldIndex = new WorldIndexShared { Value = initMapEvents[i].Event.Payload.WorldIndex };
                 var worldOffset = initMapEvents[i].Event.Payload.WorldOffset;
 
-                //replicate manaliths
                 Entities.WithSharedComponentFilter(new WorldIndexShared { Value = 0 }).ForEach((Entity e, in CubeCoordinate.Component coord, in Metadata.Component metaData, in FactionComponent.Component faction, in Position.Component position, in Manalith.Component manalith, in StartRotation.Component startRot) =>
                 {
-                    var unitGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + metaData.EntityType);
-                    var Stats = unitGO.GetComponent<UnitDataSet>();
-
-                    var entity = LeyLineEntityTemplates.ReplicateManalithUnit(metaData.EntityType, new Vector3f((float) position.Coords.X + worldOffset.X + 400, (float) position.Coords.Y, (float) position.Coords.Z + worldOffset.Y), coord.CubeCoordinate, faction.Faction, worldIndex.Value, Stats, startRot.Value, manalith);
+                    var manalithGO = Resources.Load<GameObject>("Prefabs/UnityClient/" + metaData.EntityType);
+                    var Stats = manalithGO.GetComponent<UnitDataSet>();
+                    var entity = LeyLineEntityTemplates.ReplicateManalithUnit(metaData.EntityType, new Vector3f((float) position.Coords.X + worldOffset.X + 450, (float) position.Coords.Y, (float) position.Coords.Z + worldOffset.Y), coord.CubeCoordinate, faction.Faction, worldIndex.Value, Stats, startRot.Value, manalith);
                     var createEntitiyRequest = new WorldCommands.CreateEntity.Request(entity);
                     m_CommandSystem.SendCommand(createEntitiyRequest);
                 })
                 .WithoutBurst()
                 .Run();
 
-                //replicate mapArchetype obstructVisionClusters
                 Entities.WithSharedComponentFilter(worldIndex).ForEach((Entity e, ref ClientWorkerIds.Component clientWorkerIds, ref ObstructVisionClusters.Component obstructVisionClusters, in MapData.Component mapData, in WorldIndexShared worldIndexShared, in SpatialEntityId id) =>
                 {
                     obstructVisionClusters.RawClusters = GetMapArchetypeObstructVisionClusters(0);
@@ -137,8 +134,7 @@ namespace LeyLineHybridECS
             }
             return inputDeps;
         }
-
-
+        
         public List<Vector3fList> GetMapArchetypeObstructVisionClusters(uint mapArchetypeIndex)
         {
             var rawClusters = new List<Vector3fList>();
@@ -162,6 +158,7 @@ namespace LeyLineHybridECS
             m_CommandSystem.SendCommand(createEntitiyRequest);
         }
 
+        /*
         private uint InitializedEntityCount(WorldIndexShared gameStateWorldIndex)
         {
             Entities.WithStoreEntityQueryInField(ref m_CellData).WithSharedComponentFilter(gameStateWorldIndex).ForEach((Entity e) =>
@@ -172,5 +169,6 @@ namespace LeyLineHybridECS
             //Debug.Log(InitializedCellCount(gameStateWorldIndex));
             return (uint) m_CellData.CalculateEntityCount();
         }
+        */
     }
 }

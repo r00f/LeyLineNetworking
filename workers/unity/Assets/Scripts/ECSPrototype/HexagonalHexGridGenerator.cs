@@ -115,7 +115,6 @@ namespace LeyLineHybridECS
             {
                 for (int j = 0; j < (Radius * 2) - i - 1; j++)
                 {
-                    Debug.Log(index);
                     GameObject hexagon = hexagons[index].gameObject;
 
                     hexagon.GetComponent<Position3DDataComponent>().Value = hexagon.transform.position;
@@ -140,7 +139,7 @@ namespace LeyLineHybridECS
                 }
             }
 
-            /*
+            
             foreach (var h in hexagons)
             {
                 var neighbours = h.GetComponent<Neighbours>().NeighboursList;
@@ -156,7 +155,7 @@ namespace LeyLineHybridECS
                     neighbours.Add(neighbour);
                 }
             }
-            */
+            
         }
 
         /// <summary>

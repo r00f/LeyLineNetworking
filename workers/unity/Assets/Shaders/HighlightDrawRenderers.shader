@@ -1,4 +1,4 @@
-﻿Shader "HDRP/PostFX/HighlightPassDrawRenderers"
+Shader "HDRP/PostFX/HighlightPassDrawRenderers"
 {
     Properties
     {
@@ -7,9 +7,11 @@
     }
  
     HLSLINCLUDE
- 
+    
+
     #pragma target 4.5
     #pragma only_renderers d3d11 ps4 xboxone vulkan metal switch
+    #pragma multi_compile _ DOTS_INSTANCING_ON
  
     // #pragma enable_d3d11_debug_symbols
  
@@ -33,6 +35,7 @@
             Cull Back
  
             HLSLPROGRAM
+
  
             // Toggle the alpha test
             #define _ALPHATEST_ON
@@ -55,9 +58,13 @@
             #define VARYINGS_NEED_POSITION_WS
        
             #include "Packages/com.unity.render-pipelines.high-definition/Runtime/RenderPipeline/RenderPass/CustomPass/CustomPassRenderers.hlsl"
-       
+
+            CBUFFER_START(UnityPerMaterial)
+
             float _MaxDistance;
             float _LerpMaxDistance;
+
+            CBUFFER_END
        
             float invLerp(float A, float B, float T)
             {

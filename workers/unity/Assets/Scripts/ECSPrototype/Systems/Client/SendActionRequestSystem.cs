@@ -87,6 +87,10 @@ public class SendActionRequestSystem : JobComponentSystem
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
+
         var playerHigh = m_PlayerData.GetSingleton<HighlightingDataComponent>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
@@ -147,7 +151,7 @@ public class SendActionRequestSystem : JobComponentSystem
                     if (anim.AnimationEvents)
                         anim.AnimationEvents.VoiceTrigger = true;
 
-                    m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+                    m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
                 }
                 #endregion
             })
@@ -184,6 +188,9 @@ public class SendActionRequestSystem : JobComponentSystem
         var gameStateEntity = m_GameStateData.GetSingletonEntity();
         var mapData = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
 
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
+
         var playerPathing = m_PlayerData.GetSingleton<PlayerPathing.Component>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
@@ -198,7 +205,7 @@ public class SendActionRequestSystem : JobComponentSystem
             lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates.Keys);
         }
 
-        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
         m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
         Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref ClientActionRequest.Component clientActionRequest, in SpatialEntityId idComponent, in Actions.Component actions, in CubeCoordinate.Component coord) =>
@@ -236,7 +243,7 @@ public class SendActionRequestSystem : JobComponentSystem
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
                         playerState = m_HighlightingSystem.FillUnitTargetsList(mapData, act, playerHigh, playerState, playerPathing, playerFaction.Faction);
                         playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh, mapData);
-                        m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing);
+                        m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing, playerEffects, mapData);
                     }
                     else
                     {

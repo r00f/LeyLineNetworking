@@ -6,8 +6,8 @@
       "snapshotWritePeriodSeconds": 0
     },
     "dimensions": {
-      "xMeters": 4000,
-      "zMeters": 4000
+      "xMeters": 1000,
+      "zMeters": 1000
     },
     "legacy_flags": [
       {
@@ -25,23 +25,31 @@
       {
         "layer": "UnityGameLogic",
         "points_of_interest": {
-          "num_workers": 4,
+          "num_workers": 6,
           "points": [
             {
-              "x": 800,
-              "z": 900
+              "x": -250,
+              "z": -250
             },
             {
-              "x": 1000,
-              "z": 900
+              "x": 0,
+              "z": -250
             },
             {
-              "x": 800,
-              "z": 1000
+              "x": 350,
+              "z": -250
             },
             {
-              "x": 1000,
-              "z": 1000
+              "x": -250,
+              "z": 350
+            },
+            {
+              "x": 0,
+              "z": 350
+            },
+            {
+              "x": 350,
+              "z": 350
             }
           ]
         },

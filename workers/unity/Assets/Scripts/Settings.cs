@@ -1,3 +1,4 @@
+using Generic;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,6 +6,7 @@ using UnityEngine;
 [CreateAssetMenu, System.Serializable]
 public class Settings : ScriptableObject
 {
+    public int CellHighlighterLayerOverride;
     public uint ForcePlayerFaction;
     public List<Color> FactionColors;
     public List<Color> FactionIncomeColors;
@@ -16,18 +18,19 @@ public class Settings : ScriptableObject
 
     public GameObject TempleValleyClientMap;
     public Color UINeutralColor;
-    public Material CellMat;
-    public Mesh CellMesh;
-    //public Mesh TestMesh;
-    //public Material TestMat;
+    public Material ShadowMarkerMat;
+    public Material TargetCellMat;
+    public Mesh ShadowMarkerMesh;
+    public Mesh HighlightCellMesh;
+    public MiniMapTile MapCellTile;
     public List<Texture2D> ParialColorMasks;
-    //public GameObject MouseClickPS;
     public GameObject ExplosionDebugSphere;
 
     [Header("Snapshot Settings")]
     public uint MapCount;
     public uint MapsPerRow;
     public uint MapOffset;
+    public Vector2f MapGridCenterOffset;
 
     [Header("Gameplay Settings")]
     public float MinimumExecuteTime;

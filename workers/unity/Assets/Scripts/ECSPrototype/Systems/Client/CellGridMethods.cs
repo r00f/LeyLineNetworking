@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using Generic;
 
@@ -10,6 +9,13 @@ public static class CellGridMethods
         var q = (2f / 3 * point.x);
         var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
         return CubeRound(AxialToCube(new Vector2f(q, r)));
+    }
+
+    public static Vector3f PosToCorner(Vector3f center, int i, float yOffset = 0)
+    {
+        var angle_deg = 60 * i;
+        var angle_rad = Mathf.PI / 180 * angle_deg;
+        return new Vector3f(center.X + Mathf.Cos(angle_rad), center.Y + yOffset, center.Z + Mathf.Sin(angle_rad));
     }
 
     public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2f mapCenter)

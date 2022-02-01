@@ -17,9 +17,7 @@ using Action = Unit.Action;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class HighlightingSystem : JobComponentSystem
 {
-
     private EndSimulationEntityCommandBufferSystem entityCommandBufferSystem;
-
     Settings settings;
     PathFindingSystem m_PathFindingSystem;
     EntityQuery m_ActiveUnitData;
@@ -85,9 +83,9 @@ public class HighlightingSystem : JobComponentSystem
             ComponentType.ReadWrite<PlayerPathing.Component>(),
             ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadOnly<PlayerEnergy.Component>(),
-            ComponentType.ReadWrite<HighlightingDataComponent>()
+            ComponentType.ReadWrite<HighlightingDataComponent>(),
+            ComponentType.ReadWrite<PlayerEffects>()
             );
-
 
         m_HoveredData = GetEntityQuery(
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
@@ -100,8 +98,6 @@ public class HighlightingSystem : JobComponentSystem
             ComponentType.ReadOnly<RightClickEvent>(),
             ComponentType.ReadWrite<LineRendererComponent>()
         );
-
-
     }
 
     protected override void OnStartRunning()
@@ -127,10 +123,11 @@ public class HighlightingSystem : JobComponentSystem
         var playerState = m_PlayerStateData.GetSingleton<PlayerState.Component>();
         var playerHighlightingData = m_PlayerStateData.GetSingleton<HighlightingDataComponent>();
         var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
+        var playerEntity = m_PlayerStateData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
         #endregion
 
         //var activeUnitLineRenderers = m_ActiveUnitData.ToComponentArray<LineRendererComponent>();
-
         if (gameState.CurrentState == GameStateEnum.planning)
         {
             Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref RightClickEvent r) =>
@@ -144,7 +141,6 @@ public class HighlightingSystem : JobComponentSystem
             {
                 if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerHighlightingData.TargetRestrictionIndex != 2)
                 {
-                    //Debug.Log("UpdateHighlights");
                     HashSet<Vector3f> currentActionTargetHash = new HashSet<Vector3f>();
 
                     if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
@@ -172,7 +168,7 @@ public class HighlightingSystem : JobComponentSystem
                         playerHighlightingData.ResetHighlightsBuffer -= Time.DeltaTime;
                     }
                     else
-                        ResetHighlights(ref playerState, playerHighlightingData);
+                        ResetHighlights(ref playerState, playerHighlightingData, playerEffects);
 
                     //ResetHighlights(ref playerState, playerHighlightingData);
                 }
@@ -210,16 +206,31 @@ public class HighlightingSystem : JobComponentSystem
 
     public PlayerState.Component FillUnitTargetsList(CurrentMapState mapData, Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
     {
-        //need to call validateTarget with hoveredCoord before doing anything
-        if(!m_PathFindingSystem.ValidatePathTargetClient(mapData, playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedMapPaths))
+        if(inAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
         {
-            playerState.TargetValid = false;
-            //if hovered cell / unit is not valid
-            return playerState;
+            if (!m_PathFindingSystem.ValidatePathTargetClient(mapData, playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedMapPaths))
+            {
+                playerState.TargetValid = false;
+                //if hovered cell / unit is not valid
+                return playerState;
+            }
+            else
+            {
+                playerState.TargetValid = true;
+            }
         }
         else
         {
-            playerState.TargetValid = true;
+            if (!m_PathFindingSystem.ValidateTargetClient(mapData, playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction))
+            {
+                playerState.TargetValid = false;
+                //if hovered cell / unit is not valid
+                return playerState;
+            }
+            else
+            {
+                playerState.TargetValid = true;
+            }
         }
 
         if (inHinghlightningData.AoERadius > 0)
@@ -670,9 +681,15 @@ public class HighlightingSystem : JobComponentSystem
         return yPosArray;
     }
 
-    public void ResetHighlights(ref PlayerState.Component playerState, HighlightingDataComponent playerHigh)
+    public void ResetHighlights(ref PlayerState.Component playerState, HighlightingDataComponent playerHigh, PlayerEffects playerEffects)
     {
         var p = playerState;
+
+        foreach (LineRenderer r in playerEffects.RangeOutlineRenderers)
+            r.gameObject.SetActive(false);
+
+        playerEffects.Shapes.Clear();
+        playerEffects.Edges.Clear();
 
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 
@@ -808,9 +825,62 @@ public class HighlightingSystem : JobComponentSystem
         .Run();
     }
 
-    public void HighlightReachable(ref PlayerState.Component playerState, ref PlayerPathing.Component playerPathing)
+    public void HighlightReachable(ref PlayerState.Component playerState, ref PlayerPathing.Component playerPathing, PlayerEffects playerEffects, CurrentMapState mapData)
     {
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
+
+        foreach(Vector2i coord in playerPathing.CoordinatesInRange)
+        {
+            for (int c = 0; c < 6; c++)
+            {
+                if (!playerPathing.CoordinatesInRange.Contains(CellGridMethods.CubeToAxial(CellGridMethods.CubeNeighbour(CellGridMethods.AxialToCube(coord), (uint) c))))
+                {
+                    var centerPos = mapData.CoordinateCellDictionary[coord].Position;
+                    if (c == 0)
+                    {
+                        playerEffects.Edges.Add(new HexEdgePositionPair
+                        {
+                            A = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, 0, playerEffects.RangeLineYOffset)),
+                            B = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, 5, playerEffects.RangeLineYOffset))
+                        });
+                    }
+                    else
+                    {
+                        playerEffects.Edges.Add(new HexEdgePositionPair
+                        {
+                            A = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, c, playerEffects.RangeLineYOffset)),
+                            B = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, c - 1, playerEffects.RangeLineYOffset))
+                        });
+                    }
+                }
+            }
+        }
+
+        //Move edges from all edges into a shape and sort by distance
+        for (int i = 0; i < playerEffects.RangeOutlineRenderers.Count; i++)
+        {
+            if (playerEffects.Edges.Count == 0)
+                break;
+
+            playerEffects.Shapes.Add(new HexOutlineShape
+            {
+                Edges = SortEdgeByDistance(ref playerEffects.Edges),
+                Positions = new HashSet<Vector3>()
+            });
+        }
+
+        for (int i = 0; i < playerEffects.Shapes.Count; i++)
+        {
+            foreach (HexEdgePositionPair edge in playerEffects.Shapes[i].Edges)
+            {
+                playerEffects.Shapes[i].Positions.Add(edge.A);
+                playerEffects.Shapes[i].Positions.Add(edge.B);
+            }
+
+            playerEffects.RangeOutlineRenderers[i].gameObject.SetActive(true);
+            playerEffects.RangeOutlineRenderers[i].positionCount = playerEffects.Shapes[i].Positions.Count;
+            playerEffects.RangeOutlineRenderers[i].SetPositions(playerEffects.Shapes[i].Positions.ToArray());
+        }
 
         //remove selected unit target from player UnitTargets Dict 
         if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
@@ -818,29 +888,135 @@ public class HighlightingSystem : JobComponentSystem
             playerState.UnitTargets.Remove(playerState.SelectedUnitId);
             playerState.TargetDictChange = true;
         }
-
-        HashSet<Vector2i> playerCellsInRangeHash = new HashSet<Vector2i>(playerPathing.CoordinatesInRange);
-
-        Entities.ForEach((Entity e, ref MarkerState marker, ref CubeCoordinate.Component coord) =>
-        {
-            if (marker.CurrentState == MarkerState.State.Hovered || marker.CurrentState == MarkerState.State.Clicked)
-            {
-                marker.CurrentState = MarkerState.State.Neutral;
-                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
-            }
-            
-            if (playerCellsInRangeHash.Contains(CellGridMethods.CubeToAxial(coord.CubeCoordinate)))
-            {
-                marker.CurrentState = MarkerState.State.Reachable;
-                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
-            }
-
-        })
-        .WithoutBurst()
-        .Run();
-
-
     }
+
+    List<HexEdgePositionPair> SortEdgeByDistance(ref List<HexEdgePositionPair> edgeList)
+    {
+        List<HexEdgePositionPair> output = new List<HexEdgePositionPair>
+            {
+                edgeList[NearestEdge(new Vector3(), edgeList)]
+            };
+
+        edgeList.Remove(output[0]);
+
+        int x = 0;
+        for (int i = 0; i < edgeList.Count + x; i++)
+        {
+            if (i >= 5)
+            {
+                double closestRemainingDistance = NearestEdgeDist(output[output.Count - 1].B, edgeList);
+                double firstLastAddedDistance = Vector3.Distance(output[0].B, output[output.Count - 1].A);
+
+                if(closestRemainingDistance > firstLastAddedDistance)
+                {
+                    return output;
+                }
+            }
+
+            output.Add(edgeList[NearestEdge(output[output.Count - 1].B, edgeList)]);
+            edgeList.Remove(output[output.Count - 1]);
+            x++;
+        }
+
+        return output;
+    }
+
+    Vector3 EdgeCenterPos(HexEdgePositionPair edge)
+    {
+        return (edge.A + edge.B) / 2;
+    }
+
+    int NearestEdge(Vector3 srcPos, List<HexEdgePositionPair> lookIn)
+    {
+        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
+        for (int i = 0; i < lookIn.Count; i++)
+        {
+            double distance = Vector3.Distance(srcPos, lookIn[i].A);
+            if (i == 0)
+            {
+                distanceListIndex = new KeyValuePair<double, int>(distance, i);
+            }
+            else
+            {
+                if (distance < distanceListIndex.Key)
+                {
+                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
+                }
+            }
+        }
+        return distanceListIndex.Value;
+    }
+
+    double NearestEdgeDist(Vector3 srcEdge, List<HexEdgePositionPair> lookIn)
+    {
+        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
+        for (int i = 0; i < lookIn.Count; i++)
+        {
+            double distance = Vector3.Distance(srcEdge, lookIn[i].A);
+            if (i == 0)
+            {
+                distanceListIndex = new KeyValuePair<double, int>(distance, i);
+            }
+            else
+            {
+                if (distance < distanceListIndex.Key)
+                {
+                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
+                }
+            }
+        }
+        return distanceListIndex.Key;
+    }
+
+    /*
+    HexEdgePositionPair NextEdge(Vector3 srcPos, List<HexEdgePositionPair> lookIn)
+    {
+        for (int i = 0; i < lookIn.Count; i++)
+        {
+            if ((int)srcPos.x == (int)lookIn[i].A.x && (int)srcPos.z == (int)lookIn[i].A.z)
+                return lookIn[i];
+        }
+        return lookIn[0];
+    }
+
+    Vector3[] SortByDistance(List<Vector3> pointList)
+    {
+        List<Vector3> output = new List<Vector3>
+            {
+                pointList[NearestPoint(new Vector3(0, 0, 0), pointList)]
+            };
+        pointList.Remove(output[0]);
+        int x = 0;
+        for (int i = 0; i < pointList.Count + x; i++)
+        {
+            output.Add(pointList[NearestPoint(output[output.Count - 1], pointList)]);
+            pointList.Remove(output[output.Count - 1]);
+            x++;
+        }
+        return output.ToArray();
+    }
+
+    int NearestPoint(Vector3 srcPt, List<Vector3> lookIn)
+    {
+        KeyValuePair<double, int> smallestDistance = new KeyValuePair<double, int>();
+        for (int i = 0; i < lookIn.Count; i++)
+        {
+            double distance = Math.Sqrt(Math.Pow(srcPt.x - lookIn[i].x, 2) + Math.Pow(srcPt.y - lookIn[i].y, 2) + Math.Pow(srcPt.z - lookIn[i].z, 2));
+            if (i == 0)
+            {
+                smallestDistance = new KeyValuePair<double, int>(distance, i);
+            }
+            else
+            {
+                if (distance < smallestDistance.Key)
+                {
+                    smallestDistance = new KeyValuePair<double, int>(distance, i);
+                }
+            }
+        }
+        return smallestDistance.Value;
+    }
+    */
 
     public void SetSelfTarget(long entityID, Action action, Vector3f coord, LineRendererComponent lineRendererComp)
     {

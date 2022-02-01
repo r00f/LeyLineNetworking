@@ -3,10 +3,7 @@ using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Player;
-using Unit;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 using Unity.Jobs;
 using Improbable;
@@ -134,12 +131,10 @@ public class AddComponentsSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
             ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<MapData.Component>(),
             ComponentType.ReadOnly<Position.Component>(),
             ComponentType.ReadOnly<SpatialEntityId>()
             );
-
-
-
     }
 
     protected override void OnStartRunning()
@@ -152,36 +147,36 @@ public class AddComponentsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_PlayerStateData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
-        {
+        if (m_PlayerStateData.CalculateEntityCount() != 1 || m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
-        }
 
         var gameStatePosition = m_GameStateData.GetSingleton<Position.Component>();
+        var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
+        var playerId = m_PlayerStateData.GetSingleton<SpatialEntityId>();
 
-
-
-        if (!clientPositionSet)
+        if (map && !clientPositionSet)
         {
             map.transform.position = new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
             map.Terrain.Flush();
             clientPositionSet = true;
         }
 
-        var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
-        var playerId = m_PlayerStateData.GetSingleton<SpatialEntityId>();
-
         Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, in MapData.Component mapData) =>
         {
+            foreach(MapCell c in mapData.CoordinateCellDictionary.Values)
+            {
+                Vector3 pos = CellGridMethods.CubeToPos(CellGridMethods.AxialToCube(c.AxialCoordinate), new Vector2f(0, 0));
+                Vector2 invertedPos = new Vector2(pos.x * UIRef.MinimapComponent.MapSize, pos.z * UIRef.MinimapComponent.MapSize);
+                InstanciateMapCellTileFromSettings(UIRef.MinimapComponent, invertedPos, settings.MapCellColors[(int)c.MapCellColorIndex]);
+            }
+
             var curMapState = new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
             EntityManager.AddComponentObject(entity, curMapState);
-            Debug.Log("Added CurrentMapState to Client GameState: " + EntityManager.GetComponentObject<CurrentMapState>(entity).CoordinateCellDictionary.Count);
             EntityManager.AddComponentData(entity, new ComponentsAddedIdentifier { });
         })
         .WithStructuralChanges()
         .WithoutBurst()
         .Run();
-
 
         Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, HeroTransform htrans) =>
         {
@@ -365,6 +360,16 @@ public class AddComponentsSystem : JobComponentSystem
         }
     }
 
+    void InstanciateMapCellTileFromSettings(MinimapScript miniMap, Vector2 invertedPos, Color tileColor)
+    {
+        MiniMapTile instanciatedTile = Object.Instantiate(settings.MapCellTile, Vector3.zero, Quaternion.identity);
+        instanciatedTile.TileColor = tileColor;
+        instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+        instanciatedTile.transform.SetParent(miniMap.MiniMapCellTilesPanel.transform, false);
+        instanciatedTile.TileRect.anchoredPosition = invertedPos;
+        instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
+    }
+
     MiniMapTile InstantiateMapTile(MinimapScript miniMap, byte isVisible, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
     {
         if (!isVisibleRef.MiniMapTilePrefab)
@@ -380,10 +385,11 @@ public class AddComponentsSystem : JobComponentSystem
             instanciatedTile.transform.SetParent(miniMap.MiniMapCellTilesPanel.transform, false);
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
-
+            /*
             instanciatedTile.DarknessTile.transform.SetParent(miniMap.MiniMapDarknessTilesPanel.transform, false);
             instanciatedTile.DarknessTile.anchoredPosition = invertedPos;
             instanciatedTile.DarknessTile.sizeDelta = miniMap.MapCellDarknessPixelSize;
+            */
 
         }
         else

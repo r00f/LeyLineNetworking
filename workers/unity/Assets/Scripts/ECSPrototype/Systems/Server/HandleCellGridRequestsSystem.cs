@@ -81,7 +81,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     if (unitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
                     {
                         self = true;
-                        unitActions.LockedAction = SetLockedAction(new CurrentMapState(), unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction);
+                        unitActions.LockedAction = SetLockedAction(unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction);
                         unitActions.LastSelected = unitActions.CurrentSelected;
                         unitActions.CurrentSelected = unitActions.NullAction;
                     }
@@ -118,7 +118,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
             if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero && requestingUnitActions.CurrentSelected.Targets[0].Targettingrange > 0)
             {
                 if (ValidateTarget(worldIndex, requestingUnitActions.CurrentSelected, clientActionRequest.TargetCoordinate, requestingUnitCoord.CubeCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction))
-                    requestingUnitActions.LockedAction = SetLockedAction(new CurrentMapState(), worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
+                    requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
                 else
                     requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
 
@@ -141,7 +141,8 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
             case TargetTypeEnum.cell:
                 Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState currentMapState) =>
                 {
-                    valid = m_PathFindingSystem.ValidateMapCellTarget(requestingUnitCoord, requestingUnitAction, currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]);
+                    if(currentMapState.CoordinateCellDictionary.ContainsKey(CellGridMethods.CubeToAxial(targetCoord)))
+                        valid = m_PathFindingSystem.ValidateMapCellTarget(requestingUnitCoord, requestingUnitAction, currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]);
                 })
                 .WithoutBurst()
                 .Run();
@@ -225,29 +226,13 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         return combinedCost;
     }
 
-    public Action SetLockedAction(CurrentMapState currentMapState, WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
+    public Action SetLockedAction(WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
     {
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState curMapState) =>
-        {
-            currentMapState = curMapState;
-        })
-        .WithoutBurst()
-        .Run();
-
         Action locked = selectedAction;
         var t = locked.Targets[0];
         t.TargetCoordinate = targetCoord;
         locked.Targets[0] = t;
         var effect = locked.Effects[0];
-
-        /*
-        effect.OriginUnitFaction = faction;
-        effect.OriginUnitId = usingUnitId;
-        if (effect.ApplyToRestrictions == ApplyToRestrictionsEnum.self)
-            effect.TargetCoordinates.Add(originCoord);
-        effect.TargetCoordinates.Add(targetCoord);
-        locked.Effects[0] = effect;
-        */
 
         for (int i = 0; i < locked.Effects.Count; i++)
         {
@@ -263,9 +248,9 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
 
             locked.Effects[i] = effect;
         }
-        
+
         effect = locked.Effects[0];
-        
+
         for (int mi = 0; mi < locked.Targets[0].Mods.Count; mi++)
         {
             var modType = locked.Targets[0].Mods[mi].ModType;
@@ -274,7 +259,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
             switch (modType)
             {
                 case ModTypeEnum.aoe:
-                    foreach (Vector3f v in CellGridMethods.CircleDraw(t.TargetCoordinate, (uint)mod.AoeNested.Radius))
+                    foreach (Vector3f v in CellGridMethods.CircleDraw(t.TargetCoordinate, (uint) mod.AoeNested.Radius))
                     {
                         mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(v, new Vector3f()));
                         effect.TargetCoordinates.Add(v);
@@ -292,13 +277,19 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     */
 
                     //Hotfix for Bots targeting themselves with move action 
-                    if(Vector3fext.ToUnityVector(originCoord) != Vector3fext.ToUnityVector(targetCoord))
+                    if (Vector3fext.ToUnityVector(originCoord) != Vector3fext.ToUnityVector(targetCoord))
                     {
-                        foreach (MapCell c in m_PathFindingSystem.FindMapPath(currentMapState, m_PathFindingSystem.GetMapRadius(currentMapState, originCoord, (uint) t.Targettingrange), currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(originCoord)], currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]))
+                        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState currentMapState) =>
                         {
-                            mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(CellGridMethods.AxialToCube(c.AxialCoordinate), currentMapState.CoordinateCellDictionary[c.AxialCoordinate].Position));
-                            effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(CellGridMethods.AxialToCube(c.AxialCoordinate), currentMapState.CoordinateCellDictionary[c.AxialCoordinate].Position));
-                        }
+                            foreach (MapCell c in m_PathFindingSystem.FindMapPath(currentMapState, m_PathFindingSystem.GetMapRadius(currentMapState, originCoord, (uint) t.Targettingrange), currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(originCoord)], currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]))
+                            {
+                                mod.CoordinatePositionPairs.Add(new CoordinatePositionPair(CellGridMethods.AxialToCube(c.AxialCoordinate), currentMapState.CoordinateCellDictionary[c.AxialCoordinate].Position));
+                                effect.MoveAlongPathNested.CoordinatePositionPairs.Add(new CoordinatePositionPair(CellGridMethods.AxialToCube(c.AxialCoordinate), currentMapState.CoordinateCellDictionary[c.AxialCoordinate].Position));
+                            }
+                        })
+                        .WithoutBurst()
+                        .Run();
+
 
                         mod.PathNested.OriginCoordinate = originCoord;
                         effect.MoveAlongPathNested.OriginCoordinate = originCoord;
@@ -331,8 +322,8 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
             }
         }
 
-
         m_ResourceSystem.SubstactEnergy(worldIndex, faction, locked.CombinedCost);
+
 
         return locked;
     }

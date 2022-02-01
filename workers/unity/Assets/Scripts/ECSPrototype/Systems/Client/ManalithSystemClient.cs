@@ -13,56 +13,19 @@ using FMODUnity;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ManalithSystemClient : JobComponentSystem
 {
-    //HighlightingSystem m_HighlightingSystem;
-    //EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
-    //EntityQuery m_CellData;
     EntityQuery m_ManalithData;
-    //CommandSystem m_CommandSystem;
     UISystem m_UISystem;
-    //EventSystem eventSystem;
     ILogDispatcher logger;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     Settings settings;
+    bool manalithsConnected;
 
     protected override void OnCreate()
     {
         base.OnCreate();
-
-        //eventSystem = Object.FindObjectOfType<EventSystem>();
         settings = Resources.Load<Settings>("Settings");
 
-        /*
-        m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<MouseState>(),
-        ComponentType.ReadOnly<Actions.Component>(),
-        ComponentType.ReadOnly<FactionComponent.Component>()
-        );
-
-        m_PlayerData = GetEntityQuery(
-        ComponentType.ReadOnly<PlayerEnergy.Component>(),
-        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
-        ComponentType.ReadWrite<PlayerState.Component>(),
-        ComponentType.ReadWrite<PlayerPathing.Component>(),
-        ComponentType.ReadOnly<FactionComponent.Component>(),
-        ComponentType.ReadWrite<HighlightingDataComponent>()
-        );
-
-        m_RightClickedUnitData = GetEntityQuery(
-        ComponentType.ReadOnly<Actions.Component>(),
-        ComponentType.ReadOnly<FactionComponent.Component>(),
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<RightClickEvent>(),
-        ComponentType.ReadWrite<AnimatorComponent>()
-        );
-
-
-        */
-
-        //var Manager = World.Active.GetExistingManager<EntityManager>();
         m_ManalithData = GetEntityQuery(
             ComponentType.ReadOnly<Manalith.Component>(),
             ComponentType.ReadWrite<MeshGradientColor>()
@@ -71,7 +34,6 @@ public class ManalithSystemClient : JobComponentSystem
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>()
         );
-
     }
 
     protected override void OnStartRunning()
@@ -82,60 +44,54 @@ public class ManalithSystemClient : JobComponentSystem
         m_UISystem = World.GetExistingSystem<UISystem>();
     }
 
+    void ConnectMeshGradientColor(MeshGradientColor meshGradient, Vector3f connectedManalithCoord)
+    {
+        Entities.ForEach((MeshColor meshColor, in CubeCoordinate.Component coord) =>
+        {
+            if (Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(connectedManalithCoord))
+            {
+                meshGradient.ConnectedManalithColor = meshColor;
+            }
+        })
+        .WithoutBurst()
+        .Run();
+    }
+
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var initMapEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
-
-        if (initMapEvents.Count > 0)
+        if (m_ManalithData.CalculateEntityCount() == 7 && !manalithsConnected)
         {
-            var manalithComps = m_ManalithData.ToComponentDataArray<Manalith.Component>(Allocator.TempJob);
-            var meshGradientColors = m_ManalithData.ToComponentArray<MeshGradientColor>();
-
-            //innitially connect MeshGradientColors with connected meshcolor to be able to construct gradients for the leylines
-            for (int i = 0; i < manalithComps.Length; i++)
+            Entities.ForEach((MeshGradientColor meshGradientColor, in Manalith.Component manalith) =>
             {
-                var manalith = manalithComps[i];
-                var meshGradientColor = meshGradientColors[i];
-
-                Entities.ForEach((MeshColor meshColor, in CubeCoordinate.Component coord) =>
-                {
-                    if(Vector3fext.ToUnityVector(coord.CubeCoordinate) == Vector3fext.ToUnityVector(manalith.ConnectedManalithCoordinate))
-                    {
-                        meshGradientColor.ConnectedManalithColor = meshColor;
-                    }
-                })
-                .WithoutBurst()
-                .Run();
-            }
-
-            manalithComps.Dispose();
+                ConnectMeshGradientColor(meshGradientColor, manalith.ConnectedManalithCoordinate);
+            })
+            .WithoutBurst()
+            .Run();
 
             Entities.ForEach((Entity e, ManalithObject manalithObject, MeshColor meshColor, ManalithInitializer initData, in Manalith.Component manalith, in FactionComponent.Component faction) =>
             {
-                meshColor.MapColor = settings.FactionMapColors[(int)faction.Faction];
-                meshColor.Color = settings.FactionColors[(int)faction.Faction];
+                meshColor.MapColor = settings.FactionMapColors[(int) faction.Faction];
+                meshColor.Color = settings.FactionColors[(int) faction.Faction];
 
-                if (m_UISystem.UIRef != null)
+                switch (initData.circleSize)
                 {
-                    switch (initData.circleSize)
-                    {
-                        case ManalithInitializer.CircleSize.Seven:
-                            if (!manalithObject.MiniMapTileInstance)
-                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList[0], manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
-                            if (!manalithObject.BigMapTileInstance)
-                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList[0], manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
-                            break;
-                        case ManalithInitializer.CircleSize.Three:
-                            if (!manalithObject.MiniMapTileInstance)
-                                PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList, manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
-                            if (!manalithObject.BigMapTileInstance)
-                                PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList, manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
-                            break;
-                    }
+                    case ManalithInitializer.CircleSize.Seven:
+                        if (!manalithObject.MiniMapTileInstance)
+                            PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList[0], manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
+                        if (!manalithObject.BigMapTileInstance)
+                            PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList[0], manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
+                        break;
+                    case ManalithInitializer.CircleSize.Three:
+                        if (!manalithObject.MiniMapTileInstance)
+                            PopulateMap(m_UISystem.UIRef.MinimapComponent.MapSize, m_UISystem.UIRef.MinimapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList, manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
+                        if (!manalithObject.BigMapTileInstance)
+                            PopulateMap(m_UISystem.UIRef.BigMapComponent.MapSize, m_UISystem.UIRef.BigMapComponent.MiniMapManalithTilesPanel.transform, manalith.CircleCoordinatesList, manalith.PathCoordinatesList, ref manalithObject, settings.FactionMapColors[0]);
+                        break;
                 }
             })
             .WithoutBurst()
             .Run();
+            manalithsConnected = true;
         }
 
         var manalithFactionChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Manalith.ManalithFactionChangeEvent.Event>();

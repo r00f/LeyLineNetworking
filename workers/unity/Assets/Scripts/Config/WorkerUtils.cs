@@ -11,6 +11,10 @@ public static class WorkerUtils
 
     public static void AddClientSystems(World world)
     {
+        //world.GetOrCreateSystem<MatrixPreviousSystem>();
+        var systems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default);
+        DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(world, systems);
+
         world.GetOrCreateSystem<HybridRendererSystem>();
         world.GetOrCreateSystem<InitializeUnitsSystem>();
         world.GetOrCreateSystem<UnitLifeCycleSystemClient>();
@@ -50,7 +54,6 @@ public static class WorkerUtils
 
     public static void AddSimulatedPlayerSystems(World world)
     {
-        world.GetOrCreateSystem<AddComponentsSystem>();
         world.GetOrCreateSystem<SimulatedPlayerSystem>();
         world.GetOrCreateSystem<SimulatedActionRequestSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();

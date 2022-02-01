@@ -6,17 +6,17 @@ using Unit;
 using Cell;
 using Player;
 using UnityEngine;
-using Improbable;
-using Unity.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Unity.Jobs;
-using UnityEngine.EventSystems;
 
 //Update after playerState selected unit has been set
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SimulatedActionRequestSystem : JobComponentSystem
 {
+    public struct ComponentsAddedIdentifierSim : ISystemStateComponentData
+    {
+    }
+
     PathFindingSystem m_PathFindingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
@@ -39,6 +39,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>(),
+        ComponentType.ReadOnly<MapData.Component>(),
         ComponentType.ReadOnly<CurrentMapState>(),
         ComponentType.ReadOnly<SpatialEntityId>()
         );
@@ -63,11 +64,22 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
+        Entities.WithNone<ComponentsAddedIdentifierSim>().ForEach((Entity entity, in MapData.Component mapData) =>
+        {
+            var curMapState = new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
+            EntityManager.AddComponentObject(entity, curMapState);
+            EntityManager.AddComponentData(entity, new ComponentsAddedIdentifierSim { });
+        })
+        .WithStructuralChanges()
+        .WithoutBurst()
+        .Run();
+
         if (m_PlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
         var gameStateEntity = m_GameStateData.GetSingletonEntity();
+
         var currentMapState = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
 
 
@@ -76,11 +88,12 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
         var simulatedPlayer = m_PlayerData.GetSingleton<SimulatedPlayer.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
-
         var simSkipTime = m_PlayerData.GetSingleton<SimPlayerSkipTime>();
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
-        for(int i = 0; i < cleanUpStateEvents.Count; i++)
+
+
+        for (int i = 0; i < cleanUpStateEvents.Count; i++)
         {
             if (cleanUpStateEvents[i].EntityId.Id == gameStateId.EntityId.Id)
             {

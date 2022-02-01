@@ -9,6 +9,7 @@ using Unit;
 using Improbable;
 using Unity.Collections;
 using Improbable.Gdk.TransformSynchronization;
+using Unity.Rendering;
 
 namespace LeyLineHybridECS
 {
@@ -16,10 +17,11 @@ namespace LeyLineHybridECS
     public class VisionSystemClient : ComponentSystem
     {
         ILogDispatcher logger;
-        //EntityQuery m_GameStateData;
+
         EntityQuery m_UnitData;
         EntityQuery m_IsVisibleData;
-        EntityQuery m_RequireVisibleUpdateData;
+        EntityQuery m_CellRequireVisibleUpdateData;
+        EntityQuery m_UnitRequireVisibleUpdateData;
         EntityQuery m_AuthorativePlayerData;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         Camera ProjectorCamera;
@@ -37,11 +39,16 @@ namespace LeyLineHybridECS
 
             m_IsVisibleData = GetEntityQuery(
                 ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadWrite<IsVisible>(),
-                ComponentType.ReadWrite<IsVisibleReferences>()
+                ComponentType.ReadWrite<IsVisible>()
                 );
 
-            m_RequireVisibleUpdateData = GetEntityQuery(
+            m_CellRequireVisibleUpdateData = GetEntityQuery(
+                ComponentType.ReadWrite<UnlitMaterialColor>(),
+                ComponentType.ReadWrite<RequireVisibleUpdate>(),
+                ComponentType.ReadWrite<IsVisible>()
+            );
+
+            m_UnitRequireVisibleUpdateData = GetEntityQuery(
                 ComponentType.ReadWrite<RequireVisibleUpdate>(),
                 ComponentType.ReadWrite<IsVisible>(),
                 ComponentType.ReadWrite<IsVisibleReferences>()
@@ -69,9 +76,7 @@ namespace LeyLineHybridECS
             if (!ProjectorCamera)
             {
                 if (GameObject.FindGameObjectWithTag("Projector"))
-                {
                     ProjectorCamera = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
-                }
                 else
                     return;
             }
@@ -79,106 +84,55 @@ namespace LeyLineHybridECS
             var updateVisionEvents = m_ComponentUpdateSystem.GetEventsReceived<Vision.UpdateClientVisionEvent.Event>();
 
             if(updateVisionEvents.Count > 0)
-            {
-                //Debug.Log("Update Vision Event");
                 UpdateVision();
-            }
 
-            if(m_RequireVisibleUpdateData.CalculateEntityCount() > 0)
+            if (m_UnitRequireVisibleUpdateData.CalculateEntityCount() > 0)
             {
-                ProjectorCamera.enabled = true;
-                
-                //Debug.Log("Require Visible Update Data > 0");
-                //REDUCED AMOUNT OF OBJECTS THAT ARE IN VISIBLEDATA 650 x if (isVisibleComp.RequireUpdate == 1) uses .5ms while doing nothing at all
-                Entities.With(m_RequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
+                Entities.With(m_UnitRequireVisibleUpdateData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
                 {
-                    if (isVisibleComp.LerpSpeed != 0)
+                    if (isVisibleComp.Value == 0)
                     {
-                        if (isVisibleComp.Value == 0)
-                        {
-                            if (isVisibleGOs.InGameTileColor.a > 0)
-                            {
-                                isVisibleGOs.InGameTileColor.a -= isVisibleComp.LerpSpeed * Time.DeltaTime;
-                                isVisibleGOs.MeshRenderer.material.SetColor("_UnlitColor", isVisibleGOs.InGameTileColor);
-                            }
-                            else
-                            {
-                                foreach (GameObject g in isVisibleGOs.GameObjects)
-                                {
-                                    g.SetActive(false);
-                                }
-                                PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                            }
-                        }
-                        else
-                        {
-                            foreach (GameObject g in isVisibleGOs.GameObjects)
-                            {
-                                g.SetActive(true);
-                            }
+                        foreach (GameObject g in isVisibleGOs.GameObjects)
+                            g.SetActive(false);
 
-                            if (isVisibleGOs.InGameTileColor.a < 1)
-                            {
-                                isVisibleGOs.InGameTileColor.a += isVisibleComp.LerpSpeed * Time.DeltaTime;
-                                isVisibleGOs.MeshRenderer.material.SetColor("_UnlitColor", isVisibleGOs.InGameTileColor);
-                            }
-                            else
-                            {
-                                PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                            }
-                        }
+                        if (isVisibleGOs.Collider)
+                            isVisibleGOs.Collider.enabled = false;
+
+                        PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
                     }
                     else
                     {
-                        if (isVisibleComp.Value == 0)
-                        {
-                            foreach (GameObject g in isVisibleGOs.GameObjects)
-                            {
-                                g.SetActive(false);
-                            }
+                        foreach (GameObject g in isVisibleGOs.GameObjects)
+                            g.SetActive(true);
 
-                            if (isVisibleGOs.Collider)
-                                isVisibleGOs.Collider.enabled = false;
+                        if (isVisibleGOs.Collider)
+                            isVisibleGOs.Collider.enabled = true;
 
-                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                        }
-                        else
-                        {
-                            foreach (GameObject g in isVisibleGOs.GameObjects)
-                            {
-                                g.SetActive(true);
-                            }
-
-                            if(isVisibleGOs.Collider)
-                                isVisibleGOs.Collider.enabled = true;
-
-                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
-                        }
+                        PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
                     }
+                });
+            }
 
-                    if(isVisibleGOs.MiniMapTileInstance)
-                        isVisibleGOs.MapTileColor.a = isVisibleGOs.MiniMapTileInstance.DarknessAlphaDefault - isVisibleGOs.InGameTileColor.a;
+            if (m_CellRequireVisibleUpdateData.CalculateEntityCount() > 0)
+            {
+                ProjectorCamera.enabled = true;
 
-                    if (isVisibleGOs.MiniMapTileInstance && isVisibleGOs.MiniMapTileInstance.DarknessTileImage)
+                Entities.With(m_CellRequireVisibleUpdateData).ForEach((Entity e, ref UnlitMaterialColor matColor, ref IsVisible isVisibleComp, ref CubeCoordinate.Component coord) =>
+                {
+                    if (isVisibleComp.Value == 0)
                     {
-                        isVisibleGOs.MiniMapTileInstance.DarknessTileImage.color = isVisibleGOs.MapTileColor;
-
-                        if (isVisibleGOs.MapTileColor.a >= 0)
-                            isVisibleGOs.MiniMapTileInstance.DarknessTile.gameObject.SetActive(true);
+                        if (matColor.Value.w > 0)
+                            matColor.Value.w -= isVisibleComp.LerpSpeed * Time.DeltaTime;
                         else
-                            isVisibleGOs.MiniMapTileInstance.DarknessTile.gameObject.SetActive(false);
+                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
                     }
-
-                    if (isVisibleGOs.BigMapTileInstance && isVisibleGOs.BigMapTileInstance.DarknessTileImage)
+                    else
                     {
-                        isVisibleGOs.BigMapTileInstance.DarknessTileImage.color = isVisibleGOs.MapTileColor;
-
-                        if (isVisibleGOs.MapTileColor.a >= 0)
-                            isVisibleGOs.BigMapTileInstance.DarknessTile.gameObject.SetActive(true);
+                        if (matColor.Value.w < 1)
+                            matColor.Value.w += isVisibleComp.LerpSpeed * Time.DeltaTime;
                         else
-                            isVisibleGOs.BigMapTileInstance.DarknessTile.gameObject.SetActive(false);
+                            PostUpdateCommands.RemoveComponent<RequireVisibleUpdate>(e);
                     }
-                    
                 });
             }
             else
@@ -210,7 +164,6 @@ namespace LeyLineHybridECS
                                 ping.ParticleSystem.Play();
                                 Object.Destroy(ping.gameObject, 2f);
                             }
-
                             isVisibleGOs.MiniMapTileInstance.gameObject.SetActive(true);
                         }
 
@@ -244,7 +197,7 @@ namespace LeyLineHybridECS
                 }
             });
 
-            Entities.With(m_IsVisibleData).ForEach((Entity e, IsVisibleReferences isVisibleGOs, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
+            Entities.With(m_IsVisibleData).ForEach((Entity e, ref IsVisible isVisibleComp, ref CubeCoordinate.Component cubeCoord) =>
             {
                 if(playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(cubeCoord.CubeCoordinate)))
                 {
@@ -264,6 +217,5 @@ namespace LeyLineHybridECS
                 }
             });
         }
-
     }
 }

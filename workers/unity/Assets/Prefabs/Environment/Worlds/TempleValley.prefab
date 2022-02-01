@@ -1318,7 +1318,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   terrain: {fileID: 7196706021740553577}
-  hexGridGenerator: {fileID: 0}
+  hexGridGenerator: {fileID: 3398060168058275243, guid: 76b77445fd5c1444fa4497c918c81f33,
+    type: 3}
   resolutionHeight: 3.2
   hexXrangeMultiplier: 4
   height: 3
@@ -1326,7 +1327,8 @@ MonoBehaviour:
   slopeTextureIndex: 6
   firVariantCount: 3
   grassHeightMinMax: {x: 0.9, y: 1.1}
-  manalithGroup: {fileID: 0}
+  manalithGroup: {fileID: 3398060168827670033, guid: 76b77445fd5c1444fa4497c918c81f33,
+    type: 3}
   randomGrasRotationMax: 30
   leyLineCrackPositions:
   - {x: 16.519804, y: 2.5, z: 35.042942}
@@ -8332,7 +8334,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7196706022515433626}
-  - component: {fileID: 2648021498631397135}
+  - component: {fileID: 1784344224}
   m_Layer: 0
   m_Name: TempleValley
   m_TagString: Untagged
@@ -8363,7 +8365,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2648021498631397135
+--- !u!114 &1784344224
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

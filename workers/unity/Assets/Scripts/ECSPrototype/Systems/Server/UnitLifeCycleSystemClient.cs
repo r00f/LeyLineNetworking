@@ -37,6 +37,9 @@ public class UnitLifeCycleSystemClient : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
 
+        if (m_GameStateData.CalculateEntityCount() != 1)
+            return inputDeps;
+
         var gameStateEntity = m_GameStateData.GetSingletonEntity();
         var currentMapState = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
 
@@ -85,7 +88,6 @@ public class UnitLifeCycleSystemClient : JobComponentSystem
                     }
                     currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)] = cell;
                 }
-
                 EntityManager.SetComponentData(e, new UnitStateData { CubeCoordState = cubeCoord,  EntityId = entityId.EntityId.Id, FactionState = unitFaction});
             }
         })
