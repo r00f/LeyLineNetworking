@@ -45,7 +45,6 @@ namespace BlankProject.Editor
             var snapshot = new Snapshot();
             AddGameState(snapshot);
             AddPlayerSpawner(snapshot);
-            //AddCellGrid(snapshot);
             AddManaliths(snapshot);
             AddObstructVisionClusters(snapshot);
             AddInitializeMapEventSenders(snapshot);
@@ -123,14 +122,9 @@ namespace BlankProject.Editor
 
                 var obstructVision = new List<Vector3fList>();
 
-                foreach(CellAttributesList c in BuildRawClusters(wi.WorldIndex))
+                foreach(Vector3fList c in BuildRawClusters(wi.WorldIndex))
                 {
-                    var currentClusterList = new List<Vector3f>();
-                    foreach(CellAttributes cA in c.CellAttributes)
-                    {
-                        currentClusterList.Add(cA.Cell.CubeCoordinate);
-                    }
-                    obstructVision.Add(new Vector3fList(currentClusterList));
+                    obstructVision.Add(c);
                 }
 
                 var oVisionCluster = LeyLineEntityTemplates.ObstructVisionClusters(pos, wi.WorldIndex, obstructVision);
@@ -142,20 +136,20 @@ namespace BlankProject.Editor
         {
             foreach (ManalithInitializer m in Object.FindObjectsOfType<ManalithInitializer>())
             {
-                var circle = new CellAttributeList
-                {
-                    CellAttributes = new List<CellAttribute>()
-                };
+                List<ManalithSlot> slots = new List<ManalithSlot>();
+                List<Vector3f> circleCellCoords = new List<Vector3f>();
 
                 foreach (LeyLineHybridECS.Cell n in m.leyLineCircle)
                 {
-                    circle.CellAttributes.Add(new CellAttribute
+                    if (n.GetComponent<IsTaken>().Value != true)
                     {
-                        Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
-                        IsTaken = n.GetComponent<IsTaken>().Value,
-                        MovementCost = n.GetComponent<MovementCost>().Value
-                    });
+                        slots.Add(new ManalithSlot
+                        {
+                            AxialCoordinate = CellGridMethods.CubeToAxial(new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z)),
+                            IsTaken = n.GetComponent<IsTaken>().Value
+                        });
+                    }
+                    circleCellCoords.Add(new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z));
                 }
 
                 Position.Component pos = new Position.Component
@@ -189,38 +183,8 @@ namespace BlankProject.Editor
                     pathCoordList.Add(Vector3fext.ToVector3f(f3));
                 }
 
-                var manalith = LeyLineEntityTemplates.ManalithUnit(m.name, pos, coord, 0, worldIndex, stats, (uint) m.transform.eulerAngles.y, circle, pathCoordList, connectedManalithCoord);
+                var manalith = LeyLineEntityTemplates.ManalithUnit(m.name, pos, coord, 0, worldIndex, stats, (uint) m.transform.eulerAngles.y, circleCellCoords, pathCoordList, slots, connectedManalithCoord);
                 snapshot.AddEntity(manalith);
-            }
-        }
-
-        private static void AddCellGrid(Snapshot snapshot)
-        {
-            foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
-            {
-                var neighbours = new CellAttributeList
-                {
-                    CellAttributes = new List<CellAttribute>()
-                };
-
-                foreach (LeyLineHybridECS.Cell n in c.GetComponent<Neighbours>().NeighboursList)
-                {
-                    neighbours.CellAttributes.Add(new CellAttribute
-                    {
-                        Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                        CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
-                        IsTaken = n.GetComponent<IsTaken>().Value,
-                        MovementCost = n.GetComponent<MovementCost>().Value,
-                        ObstructVision = n.GetComponent<CellType>().thisCellsTerrain.obstructVision
-                    });
-                }
-
-                Vector3f pos = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z);
-                Vector3f cubeCoord = new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z);
-                uint worldIndex = 0;
-                int mapCellColor = c.GetComponent<CellType>().thisCellsTerrain.MapCellColorIndex;
-                var cell = LeyLineEntityTemplates.ArcheTypeCell(cubeCoord, pos, c.GetComponent<IsTaken>().Value, c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell, c.GetComponent<UnitToSpawnEditor>().UnitName, c.GetComponent<UnitToSpawnEditor>().IsUnitSpawn, c.GetComponent<UnitToSpawnEditor>().Faction, neighbours, worldIndex, c.GetComponent<CellType>().thisCellsTerrain.obstructVision, mapCellColor, c.GetComponent<UnitToSpawnEditor>().StartUnitIndex, c.GetComponent<UnitToSpawnEditor>().StartRotation);
-                snapshot.AddEntity(cell);
             }
         }
 
@@ -248,67 +212,33 @@ namespace BlankProject.Editor
             snapshot.AddEntity(template);
         }
 
-        private static List<CellAttributesList> BuildRawClusters(uint worldIndex)
+        private static List<Vector3fList> BuildRawClusters(uint worldIndex)
         {
-            List<CellAttributesList> RawClusters = new List<CellAttributesList>();
+            List<Vector3fList> RawClusters = new List<Vector3fList>();
 
-            List<CellAttributes> obstructed = new List<CellAttributes>();
+            List<Vector3f> obstructed = new List<Vector3f>();
 
             foreach (LeyLineHybridECS.Cell c in Object.FindObjectsOfType<LeyLineHybridECS.Cell>())
             {
                 if (c.GetComponent<CellType>().thisCellsTerrain.obstructVision)
                 {
-                    var cell = new CellAttribute
-                    {
-                        Position = new Vector3f(c.transform.position.x, c.transform.position.y, c.transform.position.z),
-                        CubeCoordinate = new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
-                        IsTaken = c.GetComponent<IsTaken>().Value,
-                        MovementCost = 1,
-                        ObstructVision = c.GetComponent<CellType>().thisCellsTerrain.obstructVision
-                    };
-
-
-                    var neighbours = new CellAttributeList
-                    {
-                        CellAttributes = new List<CellAttribute>()
-                    };
-
-                    foreach (LeyLineHybridECS.Cell n in c.GetComponent<Neighbours>().NeighboursList)
-                    {
-                        neighbours.CellAttributes.Add(new CellAttribute
-                        {
-                            Position = new Vector3f(n.transform.position.x, n.transform.position.y, n.transform.position.z),
-                            CubeCoordinate = new Vector3f(n.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, n.GetComponent<CoordinateDataComponent>().CubeCoordinate.z),
-                            IsTaken = n.GetComponent<IsTaken>().Value,
-                            MovementCost = n.GetComponent<MovementCost>().Value,
-                            ObstructVision = n.GetComponent<CellType>().thisCellsTerrain.obstructVision
-                        });
-                    }
-
-                    obstructed.Add(new CellAttributes
-                    {
-                        Cell = cell,
-                        CellMapColorIndex = 0,
-                        Neighbours = neighbours
-                    });
-
+                    obstructed.Add(new Vector3f(c.GetComponent<CoordinateDataComponent>().CubeCoordinate.x, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.y, c.GetComponent<CoordinateDataComponent>().CubeCoordinate.z));
                 }
             }
             List<RawCluster> raw = new List<RawCluster>();
 
             while (obstructed.Count > 0)
             {
-                CellAttributes c = obstructed[0];
+                Vector3f c = obstructed[0];
                 RawCluster go = new RawCluster(c);
                 obstructed.Remove(c);
                 BuildCluster(c, go, obstructed, out obstructed);
                 raw.Add(go);
-                //Debug.Log("Cluster:" + go.cluster.Count);
             }
 
             for (int i = raw.Count - 1; i >= 0; i--)
             {
-                if (raw[i].cluster.CellAttributes.Count > 0)
+                if (raw[i].cluster.Coordinates.Count > 0)
                 {
                     RawClusters.Add(raw[i].cluster);
                 }
@@ -317,16 +247,20 @@ namespace BlankProject.Editor
             return RawClusters;
         }
 
-        private static void BuildCluster(CellAttributes cell, RawCluster cluster, List<CellAttributes> obstructed, out List<CellAttributes> newObstructed)
+        private static void BuildCluster(Vector3f cell, RawCluster cluster, List<Vector3f> obstructed, out List<Vector3f> newObstructed)
         {
-            List<CellAttribute> neighbours = cell.Neighbours.CellAttributes;
+            List<Vector3f> neighbours = new List<Vector3f>();
+
+            for (uint i = 0; i < 6; i++)
+                neighbours.Add(CellGridMethods.CubeNeighbour(cell, i));
+
             for (int i = neighbours.Count - 1; i >= 0; i--)
             {
                 bool contains = false;
                 {
-                    foreach (CellAttributes c in obstructed)
+                    foreach (Vector3f c in obstructed)
                     {
-                        if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate))
+                        if (Vector3fext.ToUnityVector(c) == Vector3fext.ToUnityVector(neighbours[i]))
                         {
                             contains = true;
                         }
@@ -339,18 +273,18 @@ namespace BlankProject.Editor
             {
                 bool contains = false;
 
-                foreach (CellAttributes c in cluster.cluster.CellAttributes)
+                foreach (Vector3f c in cluster.cluster.Coordinates)
                 {
-                    if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate)) contains = true;
+                    if (Vector3fext.ToUnityVector(c) == Vector3fext.ToUnityVector(neighbours[i])) contains = true;
                 }
 
                 if (!contains)
                 {
                     bool isSet = false;
-                    CellAttributes toRemove = new CellAttributes();
-                    foreach (CellAttributes c in obstructed)
+                    Vector3f toRemove = new Vector3f();
+                    foreach (Vector3f c in obstructed)
                     {
-                        if (Vector3fext.ToUnityVector(c.Cell.CubeCoordinate) == Vector3fext.ToUnityVector(neighbours[i].CubeCoordinate))
+                        if (Vector3fext.ToUnityVector(c) == Vector3fext.ToUnityVector(neighbours[i]))
                         {
                             toRemove = c;
                             isSet = true;
@@ -360,7 +294,7 @@ namespace BlankProject.Editor
                     if (isSet)
                     {
                         obstructed.Remove(toRemove);
-                        cluster.cluster.CellAttributes.Add(toRemove);
+                        cluster.cluster.Coordinates.Add(toRemove);
                         //Debug.Log("added " + i + " to" + cluster);
                         BuildCluster(toRemove, cluster, obstructed, out obstructed);
                     }
@@ -372,19 +306,21 @@ namespace BlankProject.Editor
 
     public struct RawCluster
     {
-        public CellAttributesList cluster;
+        public Vector3fList cluster;
 
-        public RawCluster(CellAttributesList inCluster)
+        public RawCluster(Vector3fList inCluster)
         {
             cluster = inCluster;
         }
-        public RawCluster(CellAttributes inStart)
+        public RawCluster(Vector3f inStart)
         {
-            cluster = new CellAttributesList
+            cluster = new Vector3fList
             {
-                CellAttributes = new List<CellAttributes>()
+                Coordinates = new List<Vector3f>
+                {
+                    inStart
+                }
             };
-            cluster.CellAttributes.Add(inStart);
         }
     }
 }

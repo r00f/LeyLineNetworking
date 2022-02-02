@@ -41,88 +41,6 @@ public class AddComponentsSystem : JobComponentSystem
         base.OnCreate();
         settings = Resources.Load<Settings>("Settings");
 
-        /*
-        var projectileAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<Projectile>()
-            }
-        };
-
-        m_ProjectileAddedData = GetEntityQuery(projectileAddedDesc);
-
-        var unitAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<Transform>(),
-                ComponentType.ReadOnly<UnitEffects>(),
-                ComponentType.ReadOnly<AnimatorComponent>()
-            }
-        };
-
-        m_UnitAddedData = GetEntityQuery(unitAddedDesc);
-
-        var unitMapPopulatedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-        {
-        typeof(MapPopulatedIdentifyier)
-        },
-            All = new ComponentType[]
-        {
-                typeof(WorldIndexStateData),
-                ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<IsVisible>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<AnimatorComponent>()
-        }
-        };
-
-        m_UnitMapPopulatedData = GetEntityQuery(unitMapPopulatedDesc);
-
-        var cellAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<CellAttributesComponent.Component>()
-            }
-        };
-
-        m_CellAddedData = GetEntityQuery(cellAddedDesc);
-
-        var playerAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[] 
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<PlayerState.Component>(),
-                ComponentType.ReadOnly<HeroTransform>(),
-                ComponentType.ReadWrite<Moba_Camera>()
-            }
-        };
-
-        m_PlayerAddedData = GetEntityQuery(playerAddedDesc);
-        */
-
         m_PlayerStateData = GetEntityQuery(
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<PlayerState.HasAuthority>(),
@@ -197,65 +115,6 @@ public class AddComponentsSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, IsVisibleReferences isVisibleRef, ref CellAttributesComponent.Component cellAtt) =>
-        {
-            int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-
-            PopulateMap(UIRef.MinimapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-            PopulateMap(UIRef.BigMapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-
-            //if this cell is not water, Add all components
-            if (cellAtt.CellAttributes.CellMapColorIndex != 5)
-            {
-                IsVisible isVisible = new IsVisible
-                {
-                    Value = 0,
-                    LerpSpeed = 0.5f,
-                };
-
-                MouseState mouseState = new MouseState
-                {
-                    CurrentState = MouseState.State.Neutral,
-                };
-
-                MouseVariables mouseVars = new MouseVariables
-                {
-                    Distance = 0.865f
-                };
-
-                MarkerState markerState = new MarkerState
-                {
-                    CurrentTargetType = MarkerState.TargetType.Neutral,
-                    IsSet = 0,
-                    TargetTypeSet = 0,
-                    CurrentState = MarkerState.State.Neutral,
-                    IsUnit = 0
-                };
-
-                EntityManager.AddComponents(entity, new ComponentTypes(typeof(MouseVariables), typeof(MouseState), typeof(MarkerState), typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
-
-                EntityManager.SetComponentData(entity, mouseVars);
-                EntityManager.SetComponentData(entity, markerState);
-                EntityManager.SetComponentData(entity, mouseState);
-                EntityManager.SetComponentData(entity, isVisible);
-            }
-            //if it is water, only add visibility component to exclude water from highlighting / mouse behaviour
-            else
-            {
-                IsVisible isVisible = new IsVisible
-                {
-                    Value = 0,
-                    LerpSpeed = 0.5f,
-                };
-
-                EntityManager.AddComponents(entity, new ComponentTypes(typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
-                EntityManager.SetComponentData(entity, isVisible);
-            }
-        })
-        .WithStructuralChanges()
-        .WithoutBurst()
-        .Run();
-
         Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, in FactionComponent.Component faction, in CubeCoordinate.Component coord, in SpatialEntityId id) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
@@ -309,9 +168,6 @@ public class AddComponentsSystem : JobComponentSystem
                 CurrentState = MarkerState.State.Neutral,
                 IsUnit = 1
             };
-
-            //ComponentTypes cTypes = new ComponentTypes();
-            //cTypes.m_masks.c
 
             EntityManager.AddComponents(entity, new ComponentTypes(typeof(MouseVariables), typeof(MouseState), typeof(MarkerState), typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
 
@@ -385,12 +241,6 @@ public class AddComponentsSystem : JobComponentSystem
             instanciatedTile.transform.SetParent(miniMap.MiniMapCellTilesPanel.transform, false);
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
-            /*
-            instanciatedTile.DarknessTile.transform.SetParent(miniMap.MiniMapDarknessTilesPanel.transform, false);
-            instanciatedTile.DarknessTile.anchoredPosition = invertedPos;
-            instanciatedTile.DarknessTile.sizeDelta = miniMap.MapCellDarknessPixelSize;
-            */
-
         }
         else
         {

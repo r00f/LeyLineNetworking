@@ -39,7 +39,6 @@ public class HighlightingSystem : JobComponentSystem
         m_CellData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
             ComponentType.ReadOnly<MouseState>(),
-            ComponentType.ReadOnly<CellAttributesComponent.Component>(),
             ComponentType.ReadOnly<Transform>(),
             ComponentType.ReadOnly<CubeCoordinate.Component>(),
             ComponentType.ReadOnly<MarkerState>()

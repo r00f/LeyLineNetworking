@@ -605,87 +605,6 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
-
-            /*
-            for(int i = 0; i < unitDict.Count; i++)
-            {
-                MapCell cell = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)];
-
-                if(cell.UnitOnCellId != unitDict.ElementAt(i).Value)
-                {
-                    cell.IsTaken = true;
-                    cell.UnitOnCellId = unitDict.ElementAt(i).Value;
-                }
-                else if (cell.IsTaken)
-                {
-                    cell.IsTaken = false;
-                    cell.UnitOnCellId = 0;
-                }
-                mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitDict.ElementAt(i).Key)] = cell;
-            }
-            */
-
-            Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((ref CellAttributesComponent.Component cellAtt, in CubeCoordinate.Component cellCubeCoordinate) =>
-            {
-                //Debug.Log("CellsWithWorldIndexShared");
-                if (unitDict.ContainsKey(cellCubeCoordinate.CubeCoordinate))
-                {
-                    long id = unitDict[cellCubeCoordinate.CubeCoordinate];
-
-                    if (cellAtt.CellAttributes.Cell.UnitOnCellId != id)
-                    {
-                        cellAtt.CellAttributes = SetCellAttributes(cellAtt.CellAttributes, true, id, gameStateWorldIndex);
-                        cellAtt.CellAttributes = cellAtt.CellAttributes;
-                    }
-                    else if (cellAtt.CellAttributes.Cell.IsTaken)
-                    {
-                        cellAtt.CellAttributes = SetCellAttributes(cellAtt.CellAttributes, false, 0, gameStateWorldIndex);
-                        cellAtt.CellAttributes = cellAtt.CellAttributes;
-                    }
-                }
-            })
-            .WithoutBurst()
-            .Run();
-        }
-
-        public CellAttributes SetCellAttributes(CellAttributes cellAttributes, bool isTaken, long entityId, WorldIndexShared worldIndex)
-        {
-            var cell = cellAttributes.Cell;
-            cell.IsTaken = isTaken;
-            cell.UnitOnCellId = entityId;
-
-            CellAttributes cellAtt = new CellAttributes
-            {
-                Neighbours = cellAttributes.Neighbours,
-                Cell = cell,
-                CellMapColorIndex = cellAttributes.CellMapColorIndex
-            };
-
-            UpdateNeighbours(cellAtt.Cell, cellAtt.Neighbours, worldIndex);
-            return cellAtt;
-        }
-
-        public void UpdateNeighbours(CellAttribute cell, CellAttributeList neighbours, WorldIndexShared worldIndex)
-        {
-            Entities.WithSharedComponentFilter(worldIndex).ForEach((ref CellAttributesComponent.Component cellAtt) =>
-            {
-                for (int n = 0; n < neighbours.CellAttributes.Count; n++)
-                {
-                    if (Vector3fext.ToUnityVector(neighbours.CellAttributes[n].CubeCoordinate) == Vector3fext.ToUnityVector(cellAtt.CellAttributes.Cell.CubeCoordinate))
-                    {
-                        for (int cn = 0; cn < cellAtt.CellAttributes.Neighbours.CellAttributes.Count; cn++)
-                        {
-                            if (Vector3fext.ToUnityVector(cellAtt.CellAttributes.Neighbours.CellAttributes[cn].CubeCoordinate) == Vector3fext.ToUnityVector(cell.CubeCoordinate))
-                            {
-                                cellAtt.CellAttributes.Neighbours.CellAttributes[cn] = cell;
-                                cellAtt.CellAttributes = cellAtt.CellAttributes;
-                            }
-                        }
-                    }
-                }
-            })
-            .WithoutBurst()
-            .Run();
         }
 
         private uint FindWinnerFaction(WorldIndexShared gameStateWorldIndex, bool isEditor = false)
@@ -733,18 +652,5 @@ namespace LeyLineHybridECS
 
             return b;
         }
-
-        private uint InitializedCellCount(WorldIndexShared gameStateWorldIndex)
-        {
-            Entities.WithStoreEntityQueryInField(ref m_CellData).WithAll<CellAttributesComponent.Component>().WithSharedComponentFilter(gameStateWorldIndex).ForEach((Entity e) =>
-            {
-
-            })
-            .Run();
-            //Debug.Log(InitializedCellCount(gameStateWorldIndex));
-            return (uint) m_CellData.CalculateEntityCount();
-        }
-
     }
-
 }

@@ -634,36 +634,10 @@ public class PathFindingSystem : JobComponentSystem
         switch (inAction.Targets[0].TargetType)
         {
             case TargetTypeEnum.cell:
-
                 if (inCachedPaths.Count != default)
                 {
                     if (currentMapState.CoordinateCellDictionary.ContainsKey(CellGridMethods.CubeToAxial(coord)) && inCachedPaths.ContainsKey(currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(coord)]))
                         valid = true;
-                }
-                else
-                {
-                    Entities.ForEach((in SpatialEntityId cellId, in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cellCoord) =>
-                    {
-                        var cell = cellAtts.CellAttributes.Cell;
-
-                        if (Vector3fext.ToUnityVector(cellCoord.CubeCoordinate) == Vector3fext.ToUnityVector(coord))
-                        {
-                            if (CellGridMethods.GetDistance(cellCoord.CubeCoordinate, originCoord) <= inAction.Targets[0].Targettingrange)
-                            {
-                                if (inAction.Targets[0].CellTargetNested.RequireEmpty)
-                                {
-                                    if (!cell.IsTaken)
-                                        valid = true;
-                                }
-                                else
-                                {
-                                    valid = true;
-                                }
-                            }
-                        }
-                    })
-                    .WithoutBurst()
-                    .Run();
                 }
                 break;
             case TargetTypeEnum.unit:

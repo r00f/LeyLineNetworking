@@ -58,16 +58,6 @@ public class UnitLifeCycleSystemServer : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((ref CubeCoordinate.Component cellCubeCoordinate, ref CellAttributesComponent.Component cellAttribute, in WorldIndexShared cellWorldIndex) =>
-            {
-                if (coord == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate))
-                {
-                    cellAttribute.CellAttributes = m_GameStateSystem.SetCellAttributes(cellAttribute.CellAttributes, true, id, cellWorldIndex);
-                }
-            })
-            .WithoutBurst()
-            .Run();
-
             var unitStateData = new UnitStateData { CubeCoordState = coordComp, WorldIndexState = worldIndex, EntityId = unitEntityId.EntityId.Id, FactionState = unitFaction };
             var unitVision = new UnitVision
             {
@@ -148,16 +138,6 @@ public class UnitLifeCycleSystemServer : JobComponentSystem
                 cell.IsTaken = false;
                 cell.UnitOnCellId = 0;
                 mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)] = cell;
-            })
-            .WithoutBurst()
-            .Run();
-
-            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((ref CellAttributesComponent.Component cellAttribute, in CubeCoordinate.Component cellCubeCoordinate) =>
-            {
-                if (unitCubeCoordinate == Vector3fext.ToUnityVector(cellCubeCoordinate.CubeCoordinate) && cellAttribute.CellAttributes.Cell.UnitOnCellId == unitStateVar.EntityId)
-                {
-                    cellAttribute.CellAttributes = m_GameStateSystem.SetCellAttributes(cellAttribute.CellAttributes, false, 0, unitWorldIndex);
-                }
             })
             .WithoutBurst()
             .Run();

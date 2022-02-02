@@ -100,181 +100,6 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate Cell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
-    {
-        var pos = new Position.Snapshot
-        {
-            Coords = new Coordinates
-            {
-                X = position.X,
-                Y = position.Y,
-                Z = position.Z
-            }
-        };
-        
-        var coord = new CubeCoordinate.Snapshot
-        {
-            CubeCoordinate = cubeCoordinate
-        };
-
-        var cellAttributes = new CellAttributesComponent.Snapshot
-        {
-            CellAttributes = new CellAttributes
-            {
-                CellMapColorIndex = mapColorIndex,
-                Cell = new CellAttribute
-                {
-                    Position = position,
-                    CubeCoordinate = cubeCoordinate,
-                    IsTaken = isTaken,
-                    MovementCost = 1,
-                    ObstructVision = inObstruction
-                },
-                Neighbours = neighbours
-            }
-
-        };
-
-        var unitToSpawn = new UnitToSpawn.Snapshot();
-
-        if (faction == 0)
-        {
-            unitToSpawn = new UnitToSpawn.Snapshot
-            {
-                UnitName = unitName,
-                Faction = 0,
-                StartRotation = startRotation,
-            };
-        }
-        else
-        {
-            unitToSpawn = new UnitToSpawn.Snapshot
-            {
-                UnitName = unitName,
-                Faction = faction,
-                StartRotation = startRotation,
-                StartingUnitIndex = startingUnitIndex
-            };
-        }
-
-        var wIndex = new WorldIndex.Snapshot
-        {
-            Value = worldIndex
-        };
-
-        var template = new EntityTemplate();
-        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
-
-        if (isSpawn)
-        {
-            template.AddComponent(new IsSpawn.Snapshot(), WorkerUtils.MapSpawn);
-            template.AddComponent(pos, WorkerUtils.MapSpawn);
-            template.AddComponent(coord, WorkerUtils.MapSpawn);
-            template.AddComponent(unitToSpawn, WorkerUtils.MapSpawn);
-        }
-        else
-        {
-            template.AddComponent(pos, WorkerUtils.UnityGameLogic);
-            template.AddComponent(coord, WorkerUtils.UnityGameLogic);
-        }
-
-        if (isCircleCell)
-            template.AddComponent(new IsCircleCell.Snapshot(), WorkerUtils.MapSpawn);
-
-        if (isTaken)
-            template.AddComponent(new StaticTaken.Snapshot(), WorkerUtils.MapSpawn);
-
-        template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, WorkerUtils.UnityGameLogic);
-        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.UnityGameLogic);
-        template.AddComponent(cellAttributes, WorkerUtils.UnityGameLogic);
-        template.SetReadAccess(GameLogicAndClient.ToArray());
-
-        return template;
-    }
-
-    public static EntityTemplate ArcheTypeCell(Vector3f cubeCoordinate, Vector3f position, bool isTaken, bool isCircleCell, string unitName, bool isSpawn, uint faction, CellAttributeList neighbours, uint worldIndex, bool inObstruction, int mapColorIndex, uint startingUnitIndex, uint startRotation = 0)
-    {
-        var pos = new Position.Snapshot
-        {
-            Coords = new Coordinates
-            {
-                X = position.X,
-                Y = position.Y,
-                Z = position.Z
-            }
-        };
-
-        var coord = new CubeCoordinate.Snapshot
-        {
-            CubeCoordinate = cubeCoordinate
-        };
-
-        var cellAttributes = new CellAttributesComponent.Snapshot
-        {
-            CellAttributes = new CellAttributes
-            {
-                CellMapColorIndex = mapColorIndex,
-                Cell = new CellAttribute
-                {
-                    Position = position,
-                    CubeCoordinate = cubeCoordinate,
-                    IsTaken = isTaken,
-                    MovementCost = 1,
-                    ObstructVision = inObstruction
-                },
-                Neighbours = neighbours
-            }
-
-        };
-
-        var unitToSpawn = new UnitToSpawn.Snapshot();
-
-        if (faction == 0)
-        {
-            unitToSpawn = new UnitToSpawn.Snapshot
-            {
-                UnitName = unitName,
-                Faction = 0,
-                StartRotation = startRotation,
-            };
-        }
-        else
-        {
-            unitToSpawn = new UnitToSpawn.Snapshot
-            {
-                UnitName = unitName,
-                Faction = faction,
-                StartRotation = startRotation,
-                StartingUnitIndex = startingUnitIndex
-            };
-        }
-
-        var wIndex = new WorldIndex.Snapshot
-        {
-            Value = worldIndex
-        };
-
-        var template = new EntityTemplate();
-
-        template.AddComponent(pos, WorkerUtils.MapSpawn);
-        template.AddComponent(coord, WorkerUtils.MapSpawn);
-        template.AddComponent(wIndex, WorkerUtils.MapSpawn);
-        if (isCircleCell)
-            template.AddComponent(new IsCircleCell.Snapshot(), WorkerUtils.MapSpawn);
-        if (isSpawn)
-            template.AddComponent(new IsSpawn.Snapshot(), WorkerUtils.MapSpawn);
-        if (isTaken)
-            template.AddComponent(new StaticTaken.Snapshot(), WorkerUtils.MapSpawn);
-        template.AddComponent(unitToSpawn, WorkerUtils.MapSpawn);
-
-        template.AddComponent(new Metadata.Snapshot { EntityType = "Cell" }, WorkerUtils.MapSpawn);
-        template.AddComponent(new Persistence.Snapshot(), WorkerUtils.MapSpawn);
-        template.AddComponent(cellAttributes, WorkerUtils.MapSpawn);
-        template.SetReadAccess(WorkerUtils.MapSpawn);
-
-        return template;
-    }
-
     public static EntityTemplate Player(EntityId entityId, string workerId, byte[] serializedArguments)
     {
         var client = EntityTemplate.GetWorkerAccessAttribute(workerId);
@@ -425,7 +250,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation, CellAttributeList circleCells, List<Vector3f> pathCellCoords, Vector3f connectedManalithCoord)
+    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation, List<Vector3f> circleCellCoords, List<Vector3f> pathCellCoords, List<ManalithSlot> manalithSlots, Vector3f connectedManalithCoord)
     {
         var turnTimer = new TurnTimer.Snapshot
         {
@@ -466,35 +291,14 @@ public static class LeyLineEntityTemplates {
         var actions = SetActions(Stats);
         energy.Harvesting = true;
 
-        List<ManalithSlot> slots = new List<ManalithSlot>();
-
-        foreach (CellAttribute n in circleCells.CellAttributes)
-        {
-            if (n.IsTaken != true)
-            {
-                ManalithSlot go = new ManalithSlot
-                {
-                    CorrespondingCell = n
-                };
-                slots.Add(go);
-            }
-        }
-
         var owningComponent = new OwningWorker.Snapshot();
-
-        var circleCellCoords = new List<Vector3f>();
-
-        foreach (CellAttribute c in circleCells.CellAttributes)
-        {
-            circleCellCoords.Add(c.CubeCoordinate);
-        }
 
         var manalith = new Manalith.Snapshot
         {
             CircleCoordinatesList = circleCellCoords,
             PathCoordinatesList = pathCellCoords,
             ConnectedManalithCoordinate = connectedManalithCoord,
-            Manalithslots = slots
+            Manalithslots = manalithSlots
         };
 
         var template = new EntityTemplate();

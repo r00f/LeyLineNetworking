@@ -1,12 +1,11 @@
 package cell;
 
-import "cell/cell_attributes.schema";
 import "generic/vector3.schema";
 
 component Manalith
 {
     id = 113;
-	list<generic.Vector3f> circle_coordinates_list = 1;
+    list<generic.Vector3f> circle_coordinates_list = 1;
     list<generic.Vector3f> path_coordinates_list = 2;
     generic.Vector3f connected_manalith_coordinate = 3;
 	uint32 combined_energy_gain = 4;
@@ -19,7 +18,9 @@ type ManalithSlot
 {
 	uint32 occupying_faction = 1;
 	uint32 energy_gained = 2;
-	cell.CellAttribute corresponding_cell = 3;
+    generic.Vector2i axial_coordinate = 3;
+    bool is_taken = 4;
+    int64 unit_on_cell_id = 5;
 }
 
 type ManalithFactionChange

@@ -15,7 +15,6 @@ public class ManalithSystem : JobComponentSystem
     private ComponentUpdateSystem componentUpdateSystem;
     private EntityQuery m_NonManalithUnitData;
     private EntityQuery m_ManalithData;
-    private EntityQuery m_CellData;
     private EntityQuery m_UnitData;
     private EntityQuery m_ManalithUnitData;
     private EntityQuery m_GameStateData;
@@ -31,13 +30,6 @@ public class ManalithSystem : JobComponentSystem
             ComponentType.ReadWrite<Manalith.Component>(),
             ComponentType.ReadWrite<FactionComponent.Component>()
         );
-
-        m_CellData = GetEntityQuery(
-            ComponentType.ReadOnly<CellAttributesComponent.HasAuthority>(),
-            ComponentType.ReadOnly<CellAttributesComponent.Component>(),
-            ComponentType.ReadOnly<IsCircleCell.Component>()
-        );
-
         
         var NormalUnitDesc = new EntityQueryDesc
         {
@@ -75,11 +67,6 @@ public class ManalithSystem : JobComponentSystem
         );
     }
 
-    protected override void OnStartRunning()
-    {
-        base.OnStartRunning();
-    }
-
     public void UpdateManaliths(WorldIndexShared worldIndex, ClientWorkerIds.Component clientWorkerIds)
     {
         Entities.WithSharedComponentFilter(worldIndex).ForEach((ref EntityAcl.Component entityAcl, ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref UnitVision vision, in SpatialEntityId entityId) =>
@@ -92,7 +79,7 @@ public class ManalithSystem : JobComponentSystem
                 var slot = manalithComp.Manalithslots[cci];
 
                 //unit on slot
-                if (slot.CorrespondingCell.UnitOnCellId != 0)
+                if (slot.UnitOnCellId != 0)
                 {
                     bool unitAlive = false;
 
@@ -120,7 +107,7 @@ public class ManalithSystem : JobComponentSystem
                 for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
                 {
                     var slot = manalithComp.Manalithslots[cci];
-                    UpdateUnit(worldIndex, slot.CorrespondingCell.UnitOnCellId, faction.Faction, ref manalithComp);
+                    UpdateUnit(worldIndex, slot.UnitOnCellId, faction.Faction, ref manalithComp);
                 }
 
                 manalith.CombinedEnergyGain += energy.EnergyIncome;
@@ -165,7 +152,7 @@ public class ManalithSystem : JobComponentSystem
     {
         Entities.WithSharedComponentFilter(worldIndex).ForEach((ref CubeCoordinate.Component unitCoord, in SpatialEntityId unitId, in FactionComponent.Component faction) =>
         {
-            if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(slot.CorrespondingCell.CubeCoordinate))
+            if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) == Vector3fext.ToUnityVector(CellGridMethods.AxialToCube(slot.AxialCoordinate)))
             {
                 UpdateManalithSlots(ref manalithComp, slotIndex, unitId.EntityId.Id, faction.Faction);
             }
@@ -182,11 +169,11 @@ public class ManalithSystem : JobComponentSystem
 
         Entities.WithSharedComponentFilter(worldIndex).ForEach((ref CubeCoordinate.Component unitCoord, ref SpatialEntityId unitId, ref Energy.Component energy) =>
         {
-            if (slot.CorrespondingCell.UnitOnCellId == unitId.EntityId.Id)
+            if (slot.UnitOnCellId == unitId.EntityId.Id)
             {
                 alive = true;
                 //if unit is still alive and has walked off the slot
-                if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) != Vector3fext.ToUnityVector(slot.CorrespondingCell.CubeCoordinate))
+                if (Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) != Vector3fext.ToUnityVector(CellGridMethods.AxialToCube(slot.AxialCoordinate)))
                 {
                     UpdateManalithSlots(ref manalithComp, slotIndex, 0, 0);
                     energy.Harvesting = false;
@@ -209,21 +196,13 @@ public class ManalithSystem : JobComponentSystem
     public void UpdateManalithSlots(ref Manalith.Component manalith, int slotIndex, long unitId, uint faction)
     {
         var slot = manalith.Manalithslots[slotIndex];
-
-        bool isTaken;
-
+        
         if (unitId == 0)
-            isTaken = false;
+            slot.IsTaken = false;
         else
-            isTaken = true;
+            slot.IsTaken = true;
 
-        slot.CorrespondingCell = new CellAttribute
-        {
-            IsTaken = isTaken,
-            UnitOnCellId = unitId,
-            CubeCoordinate = manalith.Manalithslots[slotIndex].CorrespondingCell.CubeCoordinate
-        };
-
+        slot.UnitOnCellId = unitId;
         slot.OccupyingFaction = faction;
         manalith.Manalithslots[slotIndex] = slot;
         manalith.Manalithslots = manalith.Manalithslots;
@@ -246,7 +225,7 @@ public class ManalithSystem : JobComponentSystem
             if (slot.OccupyingFaction == 0)
             {
                 //check if there is a neutral unit on the cell because Occupying faction == 0 is the default state
-                if(slot.CorrespondingCell.IsTaken)
+                if(slot.IsTaken)
                     player0Units++;
             }
             else if (slot.OccupyingFaction == player1Faction)
@@ -285,7 +264,7 @@ public class ManalithSystem : JobComponentSystem
                     for (int i = m_node.Manalithslots.Count-1; i >= 0; i--)
                     {
                         var slot = m_node.Manalithslots[i];
-                        if (slot.CorrespondingCell.UnitOnCellId == inUnitId)
+                        if (slot.UnitOnCellId == inUnitId)
                         {
                             slot.EnergyGained = energy.EnergyIncome;
                             energy.Harvesting = true;
@@ -300,7 +279,7 @@ public class ManalithSystem : JobComponentSystem
                     for (int i = m_node.Manalithslots.Count - 1; i >= 0; i--)
                     {
                         var slot = m_node.Manalithslots[i];
-                        if (slot.CorrespondingCell.UnitOnCellId == inUnitId)
+                        if (slot.UnitOnCellId == inUnitId)
                         {
                             slot.EnergyGained = 0;
                         }

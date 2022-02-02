@@ -1296,7 +1296,7 @@ namespace LeyLineHybridECS
                         {
                             UIRef.BottomLeftPortrait.InfoPanelHexes[i].Hex.enabled = true;
 
-                            if (manalith.Manalithslots[i].CorrespondingCell.IsTaken)
+                            if (manalith.Manalithslots[i].IsTaken)
                             {
                                 UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.gameObject.SetActive(true);
                                 UIRef.BottomLeftPortrait.InfoPanelHexes[i].EnergyRing.color = settings.FactionIncomeColors[(int) manalith.Manalithslots[i].OccupyingFaction];

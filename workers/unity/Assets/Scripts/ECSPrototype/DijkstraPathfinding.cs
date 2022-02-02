@@ -54,52 +54,7 @@ namespace LeyLineHybridECS
             }
             return paths;
         }
-
-        public Dictionary<CellAttribute, CellAttributeList> FindAllPaths(Dictionary<CellAttribute, Dictionary<CellAttribute, int>> edges, CellAttribute originNode)
-        {
-            IPriorityQueue<CellAttribute> frontier = new HeapPriorityQueue<CellAttribute>();
-            frontier.Enqueue(originNode, 0);
-
-            Dictionary<CellAttribute, CellAttribute> cameFrom = new Dictionary<CellAttribute, CellAttribute>
-            {
-                { originNode, default }
-            };
-            Dictionary<CellAttribute, int> costSoFar = new Dictionary<CellAttribute, int>
-            {
-                { originNode, 0 }
-            };
-
-            while (frontier.Count != 0)
-            {
-                var current = frontier.Dequeue();
-                var neighbours = GetNeigbours(new List<CellAttribute>(), edges, current);
-                foreach (var neighbour in neighbours)
-                {
-                    var newCost = costSoFar[current] + edges[current][neighbour];
-                    if (!costSoFar.ContainsKey(neighbour) || newCost < costSoFar[neighbour])
-                    {
-                        costSoFar[neighbour] = newCost;
-                        cameFrom[neighbour] = current;
-                        frontier.Enqueue(neighbour, newCost);
-                    }
-                }
-            }
-
-            Dictionary<CellAttribute, CellAttributeList> paths = new Dictionary<CellAttribute, CellAttributeList>();
-            foreach (CellAttribute destination in cameFrom.Keys)
-            {
-                List<CellAttribute> path = new List<CellAttribute>();
-                var current = destination;
-                while (!current.Equals(originNode))
-                {
-                    path.Add(current);
-                    current = cameFrom[current];
-                }
-                paths.Add(destination, new CellAttributeList {CellAttributes = path});
-            }
-            return paths;
-        }
-
+        
         public override List<T> FindPath<T>(Dictionary<T, Dictionary<T, uint>> edges, T originNode, T destinationNode)
         {
             IPriorityQueue<T> frontier = new HeapPriorityQueue<T>();
