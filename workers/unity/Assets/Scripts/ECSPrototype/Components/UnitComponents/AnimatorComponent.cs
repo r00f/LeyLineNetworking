@@ -16,6 +16,12 @@ public class AnimatorComponent : MonoBehaviour
     [Header("GenericAnimation")]
     [HideInInspector]
     public ECSAction CurrentLockedAction;
+
+    public ECSAction CurrentPreviewAction;
+    public Vector3 CurrentPreviewTarget;
+    public int CurrentPreviewIndex;
+    public bool ResumePreviewAnimation;
+
     public Animator Animator;
     public AnimationEvents AnimationEvents;
     [HideInInspector]

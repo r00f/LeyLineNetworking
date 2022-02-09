@@ -127,6 +127,9 @@ MonoBehaviour:
   WeaponTransform: {fileID: 1679381631963745655}
   IsMoving: 0
   CurrentLockedAction: {fileID: 0}
+  CurrentPreviewAction: {fileID: 0}
+  CurrentPreviewTarget: {x: 0, y: 0, z: 0}
+  CurrentPreviewIndex: 0
   Animator: {fileID: 2809895697405541867}
   AnimationEvents: {fileID: 8397182629797879279}
   ExecuteTriggerSet: 0
@@ -187,6 +190,7 @@ MonoBehaviour:
   FullColorMeshes:
   - {fileID: 4236818415891193068}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes:
   - {fileID: 7422891748961989369}
   EmissionIntensity: 0
@@ -262,6 +266,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 1.8
   UnitHeadUIPrefab: {fileID: 2609948338221265714, guid: a33dd47d3d0d0dd419c394e10f1024e1,
     type: 3}
@@ -307,6 +312,9 @@ MonoBehaviour:
   HeadUIRef: {fileID: 2507533135946710543}
   AnimPortraitComp: {fileID: 2417126995848513471}
   UnitEffectsComp: {fileID: 664739988800558804}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}
@@ -314,6 +322,9 @@ MonoBehaviour:
   SelectionMeshRenderer: {fileID: 4236818415891193068}
   SelectionGameObjects:
   - {fileID: 8892152875997683907}
+  AllMesheRenderers:
+  - {fileID: 7422891748961989369}
+  AllMeshMaterials: []
 --- !u!114 &664739988800558804
 MonoBehaviour:
   m_ObjectHideFlags: 0

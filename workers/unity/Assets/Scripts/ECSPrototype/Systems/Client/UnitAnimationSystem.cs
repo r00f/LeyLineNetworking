@@ -34,37 +34,6 @@ public class UnitAnimationSystem : JobComponentSystem
         ComponentType.ReadOnly<GameState.Component>()
         );
 
-
-
-        /*
-                m_TransformData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<Transform>()
-        );
-
-                m_CellData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<Position.Component>(),
-        ComponentType.ReadOnly<CellAttributesComponent.Component>()
-        );
-
-
-        m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<IsVisible>(),
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<Actions.Component>(),
-        ComponentType.ReadOnly<Energy.Component>(),
-        ComponentType.ReadOnly<Position.Component>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<UnitDataSet>(),
-        ComponentType.ReadOnly<UnitEffects>(),
-        ComponentType.ReadWrite<unitComponentReferences.AnimatorComp>(),
-        ComponentType.ReadWrite<Transform>(),
-        ComponentType.ReadOnly<MovementVariables.Component>()
-        );
-        */
-
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<Vision.Component>(),
         ComponentType.ReadOnly<HeroTransform>(),
@@ -152,6 +121,7 @@ public class UnitAnimationSystem : JobComponentSystem
             HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
             SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
             SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
+            HandleAnimStateEffects(unitComponentReferences, visible);
 
             if (gameState.CurrentState == GameStateEnum.planning)
             {
@@ -164,8 +134,6 @@ public class UnitAnimationSystem : JobComponentSystem
             }
             else
             {
-                HandleAnimStateEffects(unitComponentReferences, visible);
-
                 if (incomingActionEffects.MoveEffects.Count != 0)
                 {
                     /*
@@ -433,6 +401,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
         else
         {
+            if (unitComponentReferences.AnimatorComp.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
+                unitComponentReferences.AnimatorComp.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
+
             foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
                 g.layer = 11;
 
@@ -447,8 +418,6 @@ public class UnitAnimationSystem : JobComponentSystem
 
         unitComponentReferences.AnimatorComp.Animator.SetBool("Harvesting", energy.Harvesting);
 
-        if (unitComponentReferences.AnimatorComp.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
-            unitComponentReferences.AnimatorComp.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
     }
 
     public void SetHarvestingEmissiveColorMeshes(UnitComponentReferences unitComponentReferences, Energy.Component energy)
@@ -522,5 +491,4 @@ public class UnitAnimationSystem : JobComponentSystem
         
         return direction;
     }
-
 }

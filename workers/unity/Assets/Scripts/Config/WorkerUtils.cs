@@ -30,6 +30,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<PathFindingSystem>();
         world.GetOrCreateSystem<ManalithSystemClient>();
         world.GetOrCreateSystem<UISystem>();
+        world.GetOrCreateSystem<ActionPreviewSystem>();
     }
 
     public static void AddGameLogicSystems(World world)

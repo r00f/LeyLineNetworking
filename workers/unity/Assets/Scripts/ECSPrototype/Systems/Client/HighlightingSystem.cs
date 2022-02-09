@@ -153,12 +153,6 @@ public class HighlightingSystem : JobComponentSystem
 
                     m_PlayerStateData.SetSingleton(playerPathing);
                     m_PlayerStateData.SetSingleton(playerState);
-                    /*
-                    playerStates[0] = playerState;
-                    playerPathings[0] = playerPathing;
-                    m_PlayerStateData.CopyFromComponentDataArray(playerPathings);
-                    m_PlayerStateData.CopyFromComponentDataArray(playerStates);
-                    */
                 }
                 else
                 {
@@ -376,12 +370,12 @@ public class HighlightingSystem : JobComponentSystem
             uint nOfTargets = 0;
             int turnStepIndex = 0;
 
-            foreach (long l in playerState.UnitTargets.Keys)
-            {
-                if(!playerState.UnitTargets[l].IsUnitTarget)
+            //foreach (long l in playerState.UnitTargets.Keys)
+            //{
+                if(playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId) && !playerState.UnitTargets[playerState.SelectedUnitId].IsUnitTarget)
                 {
-                    HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[l].CubeCoordinates.Keys);
-                    int tI = playerState.UnitTargets[l].TurnStepIndex;
+                    HashSet<Vector3f> targetCoordsHash = new HashSet<Vector3f>(playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Keys);
+                    int tI = playerState.UnitTargets[playerState.SelectedUnitId].TurnStepIndex;
 
                     if (targetCoordsHash.Contains(coord.CubeCoordinate))
                     {
@@ -390,7 +384,7 @@ public class HighlightingSystem : JobComponentSystem
                         commandBuffer.AddComponent(e, new RequireMarkerUpdate());
                     }
                 }
-            }
+            //}
 
             markerState.TurnStepIndex = turnStepIndex;
             markerState.NumberOfTargets = nOfTargets;
@@ -696,6 +690,9 @@ public class HighlightingSystem : JobComponentSystem
 
         Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, in ClientActionRequest.Component clientActionRequest) =>
         {
+            if (clientActionRequest.ActionId != 0)
+                lineRendererComp.lineRenderer.positionCount = 0;
+
             //actions.CurrentSelected condition prevents line from being cleared instantly if invalid target is selected / rightclick action deselect is used
             if (clientActionRequest.ActionId == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
             {
@@ -712,6 +709,12 @@ public class HighlightingSystem : JobComponentSystem
 
         Entities.ForEach((Entity e, ref MarkerState markerState, ref MouseState mouseState, ref CubeCoordinate.Component coord) =>
         {
+            if(markerState.NumberOfTargets > 0)
+            {
+                markerState.NumberOfTargets = 0;
+                commandBuffer.AddComponent(e, new RequireMarkerUpdate());
+            }
+
             if (mouseState.CurrentState == MouseState.State.Clicked)
             {
                 mouseState.CurrentState = MouseState.State.Neutral;
@@ -781,7 +784,6 @@ public class HighlightingSystem : JobComponentSystem
         })
         .WithoutBurst()
         .Run();
-
 
         playerState.UnitTargets = playerState.UnitTargets;
 
@@ -966,56 +968,6 @@ public class HighlightingSystem : JobComponentSystem
         }
         return distanceListIndex.Key;
     }
-
-    /*
-    HexEdgePositionPair NextEdge(Vector3 srcPos, List<HexEdgePositionPair> lookIn)
-    {
-        for (int i = 0; i < lookIn.Count; i++)
-        {
-            if ((int)srcPos.x == (int)lookIn[i].A.x && (int)srcPos.z == (int)lookIn[i].A.z)
-                return lookIn[i];
-        }
-        return lookIn[0];
-    }
-
-    Vector3[] SortByDistance(List<Vector3> pointList)
-    {
-        List<Vector3> output = new List<Vector3>
-            {
-                pointList[NearestPoint(new Vector3(0, 0, 0), pointList)]
-            };
-        pointList.Remove(output[0]);
-        int x = 0;
-        for (int i = 0; i < pointList.Count + x; i++)
-        {
-            output.Add(pointList[NearestPoint(output[output.Count - 1], pointList)]);
-            pointList.Remove(output[output.Count - 1]);
-            x++;
-        }
-        return output.ToArray();
-    }
-
-    int NearestPoint(Vector3 srcPt, List<Vector3> lookIn)
-    {
-        KeyValuePair<double, int> smallestDistance = new KeyValuePair<double, int>();
-        for (int i = 0; i < lookIn.Count; i++)
-        {
-            double distance = Math.Sqrt(Math.Pow(srcPt.x - lookIn[i].x, 2) + Math.Pow(srcPt.y - lookIn[i].y, 2) + Math.Pow(srcPt.z - lookIn[i].z, 2));
-            if (i == 0)
-            {
-                smallestDistance = new KeyValuePair<double, int>(distance, i);
-            }
-            else
-            {
-                if (distance < smallestDistance.Key)
-                {
-                    smallestDistance = new KeyValuePair<double, int>(distance, i);
-                }
-            }
-        }
-        return smallestDistance.Value;
-    }
-    */
 
     public void SetSelfTarget(long entityID, Action action, Vector3f coord, LineRendererComponent lineRendererComp)
     {

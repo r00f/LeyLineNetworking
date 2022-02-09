@@ -39,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 5904640984428946566}
-  m_IndirectSpecularColor: {r: 3131.222, g: 2122.0269, b: 1910.4427, a: 1}
+  m_IndirectSpecularColor: {r: 3129.8948, g: 2116.2202, b: 1982.896, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -871,6 +871,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TempleValley
+      objectReference: {fileID: 0}
+    - target: {fileID: 7196706022515433627, guid: ae539041ae2d9764eb51525df73f068d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae539041ae2d9764eb51525df73f068d, type: 3}
@@ -21021,7 +21026,7 @@ PrefabInstance:
     - target: {fileID: 195072527898059093, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 18.182922
+      value: 268.18292
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}

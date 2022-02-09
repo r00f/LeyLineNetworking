@@ -64,7 +64,7 @@ public class InitializeUnitsSystem : JobComponentSystem
         var playerFactionComp = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var heroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
 
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp, in Health.Component health) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, UnitComponentReferences unitCompRef, AnimatorComponent anim, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp, in Health.Component health) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
@@ -168,6 +168,12 @@ public class InitializeUnitsSystem : JobComponentSystem
                 {
                     heroTransform.Transform = unitTransform;
                 }
+            }
+
+            unitCompRef.AllMeshMaterials.Clear();
+            foreach (Renderer r in unitCompRef.AllMesheRenderers)
+            {
+                unitCompRef.AllMeshMaterials.Add(r.material);
             }
         })
         .WithoutBurst()

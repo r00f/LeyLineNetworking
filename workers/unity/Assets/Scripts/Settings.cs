@@ -25,6 +25,7 @@ public class Settings : ScriptableObject
     public MiniMapTile MapCellTile;
     public List<Texture2D> ParialColorMasks;
     public GameObject ExplosionDebugSphere;
+    public Material ActionPreviewMat;
 
     [Header("Snapshot Settings")]
     public uint MapCount;

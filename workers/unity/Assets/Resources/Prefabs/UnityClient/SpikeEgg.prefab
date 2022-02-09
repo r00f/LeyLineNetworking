@@ -4897,6 +4897,7 @@ MonoBehaviour:
   - {fileID: 7550265048825398773}
   - {fileID: 7550265048825398771}
   HarvestingEmissionColorMeshes: []
+  HarvestingEmissionColorMaterials: []
   EmissionColorMeshes: []
   EmissionIntensity: 0
   EmissionLerpTime: 0
@@ -4917,6 +4918,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomingDamage: 0
+  IncomingArmor: 0
   HealthBarYOffset: 1.5
   UnitHeadUIPrefab: {fileID: 7821097187023044147, guid: 3419c72dfa3e3b1468af3cf41afe28fe,
     type: 3}
@@ -4974,13 +4976,53 @@ MonoBehaviour:
   HeadUIRef: {fileID: 6210986102677212119}
   AnimPortraitComp: {fileID: 4367961099226942553}
   UnitEffectsComp: {fileID: -4076010487680779361}
+  CurrentMoveTime: 0
+  CurrentMoveIndex: 0
+  LastStationaryPosition: {x: 0, y: 0, z: 0}
   HealthbarPrefab: {fileID: 5010307385159496677, guid: 546644da0f3e8584f8c507915f61f453,
     type: 3}
   HealthBarInstance: {fileID: 0}
   SelectionCircleGO: {fileID: 8456560364711203346}
   SelectionMeshRenderer: {fileID: 8456560364713200850}
   SelectionGameObjects:
+  - {fileID: 7550265048827665361}
+  - {fileID: 7550265048827665371}
+  - {fileID: 7550265048827665369}
+  - {fileID: 7550265048827665351}
+  - {fileID: 7550265048827665349}
+  - {fileID: 7550265048827665347}
+  - {fileID: 7550265048827665345}
+  - {fileID: 7550265048827665359}
+  - {fileID: 7550265048827665357}
+  - {fileID: 7550265048827665375}
+  - {fileID: 7550265048827665373}
+  - {fileID: 7550265048827665355}
+  - {fileID: 7550265048827665353}
+  - {fileID: 7550265048827665335}
+  - {fileID: 7550265048827665333}
+  - {fileID: 7550265048827665331}
+  - {fileID: 7550265048827665329}
   - {fileID: 7550265048827665363}
+  AllMesheRenderers:
+  - {fileID: 7550265048825398547}
+  - {fileID: 7550265048825398557}
+  - {fileID: 7550265048825398555}
+  - {fileID: 7550265048825398553}
+  - {fileID: 7550265048825398535}
+  - {fileID: 7550265048825398533}
+  - {fileID: 7550265048825398531}
+  - {fileID: 7550265048825398529}
+  - {fileID: 7550265048825398543}
+  - {fileID: 7550265048825398545}
+  - {fileID: 7550265048825398559}
+  - {fileID: 7550265048825398541}
+  - {fileID: 7550265048825398539}
+  - {fileID: 7550265048825398537}
+  - {fileID: 7550265048825398775}
+  - {fileID: 7550265048825398773}
+  - {fileID: 7550265048825398771}
+  - {fileID: 7550265048825398549}
+  AllMeshMaterials: []
 --- !u!136 &6943022816249909003
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5011,6 +5053,9 @@ MonoBehaviour:
   WeaponTransform: {fileID: 8846974289181975837}
   IsMoving: 0
   CurrentLockedAction: {fileID: 0}
+  CurrentPreviewAction: {fileID: 0}
+  CurrentPreviewTarget: {x: 0, y: 0, z: 0}
+  CurrentPreviewIndex: 0
   Animator: {fileID: 8045395822357648005}
   AnimationEvents: {fileID: 2081589284147450996}
   ExecuteTriggerSet: 0

@@ -1,12 +1,10 @@
 using Unity.Entities;
-using Cell;
 using Unit;
 using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Player;
 using Unity.Jobs;
-using UnityEngine;
 using Unity.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,13 +22,6 @@ public class UnitLifeCycleSystemServer : JobComponentSystem
 
     HandleCellGridRequestsSystem m_CellGridSystem;
     GameStateSystem m_GameStateSystem;
-    EntityQuery m_PlayerData;
-    EntityQuery m_CellData;
-    EntityQuery m_UnitAddedData;
-    EntityQuery m_UnitRemovedData;
-    private EntityQuery m_ManalithData;
-    EntityQuery m_UnitChangedData;
-    private EntityQuery m_ManalithUnitAddedData;
 
     protected override void OnCreate()
     {
@@ -41,6 +32,7 @@ public class UnitLifeCycleSystemServer : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        //unitadded mapstate update
         Entities.WithNone<UnitStateData>().ForEach((Entity e, in WorldIndexShared unitWorldIndex, in CubeCoordinate.Component unitCubeCoordinate, in FactionComponent.Component unitFaction, in SpatialEntityId unitEntityId, in StartRotation.Component startRotation) =>
         {
             var coordComp = unitCubeCoordinate;
@@ -69,6 +61,40 @@ public class UnitLifeCycleSystemServer : JobComponentSystem
             EntityManager.AddComponents(e, new ComponentTypes(typeof(UnitStateData), typeof(UnitVision)));
             EntityManager.SetComponentData(e, unitVision);
             EntityManager.SetComponentData(e, unitStateData);
+        })
+        .WithStructuralChanges()
+        .WithoutBurst()
+        .Run();
+
+        //Unitentityremoved mapstate update 
+        Entities.WithNone<CubeCoordinate.Component>().ForEach((Entity e, in UnitStateData unitState) =>
+        {
+            var unitStateVar = unitState;
+            var unitCubeCoordinate = Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate);
+            var unitWorldIndex = unitState.WorldIndexState;
+
+            Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction) =>
+            {
+                if (p_Faction.Faction == unitStateVar.FactionState.Faction)
+                    p_Vision.RequireUpdate = true;
+            })
+            .WithoutBurst()
+            .Run();
+
+            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((CurrentMapState mapData) =>
+            {
+                var cell = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)];
+                if(cell.UnitOnCellId == unitStateVar.EntityId)
+                {
+                    cell.IsTaken = false;
+                    cell.UnitOnCellId = 0;
+                    mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)] = cell;
+                }
+            })
+            .WithoutBurst()
+            .Run();
+
+            EntityManager.RemoveComponent<UnitStateData>(e);
         })
         .WithStructuralChanges()
         .WithoutBurst()
@@ -112,37 +138,6 @@ public class UnitLifeCycleSystemServer : JobComponentSystem
 
                 EntityManager.SetComponentData(e, new UnitStateData { WorldIndexState = unitWorldIndex, CubeCoordState = cubeCoord, EntityId = entityId.EntityId.Id, FactionState = unitFaction });
             }
-        })
-        .WithStructuralChanges()
-        .WithoutBurst()
-        .Run();
-
-        Entities.WithNone<CubeCoordinate.Component>().ForEach((Entity e, in UnitStateData unitState) =>
-        {
-            var unitStateVar = unitState;
-            var unitCubeCoordinate = Vector3fext.ToUnityVector(unitState.CubeCoordState.CubeCoordinate);
-            var unitWorldIndex = unitState.WorldIndexState;
-
-            //Tell player to update his vision
-            Entities.WithAll<PlayerAttributes.Component>().ForEach((ref Vision.Component p_Vision, in FactionComponent.Component p_Faction) =>
-            {
-                if(p_Faction.Faction == unitStateVar.FactionState.Faction)
-                    p_Vision.RequireUpdate = true;
-            })
-            .WithoutBurst()
-            .Run();
-
-            Entities.WithSharedComponentFilter(unitWorldIndex).ForEach((CurrentMapState mapData) =>
-            {
-                var cell = mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)];
-                cell.IsTaken = false;
-                cell.UnitOnCellId = 0;
-                mapData.CoordinateCellDictionary[CellGridMethods.CubeToAxial(unitStateVar.CubeCoordState.CubeCoordinate)] = cell;
-            })
-            .WithoutBurst()
-            .Run();
-
-            EntityManager.RemoveComponent<UnitStateData>(e);
         })
         .WithStructuralChanges()
         .WithoutBurst()
