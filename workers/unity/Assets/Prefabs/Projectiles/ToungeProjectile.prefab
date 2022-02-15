@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 1199834125490395627}
   - component: {fileID: 8820592072953713341}
   - component: {fileID: 624359500354215446}
+  - component: {fileID: 5724741513664847798}
   m_Layer: 16
   m_Name: ToungeProjectile
   m_TagString: Untagged
@@ -45,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EventEmitter: {fileID: 5724741513664847798}
   EnableIfVisibleObjects:
   - {fileID: 4265137128855694758}
   - {fileID: 2211747367441822814}
@@ -52,6 +54,8 @@ MonoBehaviour:
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
   CollisionDetection: {fileID: 0}
+  IsPreviewProjectile: 0
+  PlaySoundFX: 0
   TravellingCurveCutOff: 0
   TargetYOffset: 0
   ArriveInstantly: 1
@@ -84,7 +88,7 @@ MonoBehaviour:
   ParticleSystemsStopWaitTime: 0
   ParticleSystemsToStop: []
   ExplosionParticleSystem: {fileID: 4153580750195930896}
-  ExplosionEventEmitter: {fileID: 0}
+  ExplosionEventEmitter: {fileID: 7558584593160690279}
   UnitFaction: 0
   Action:
     Name: 
@@ -117,6 +121,29 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConversionMode: 1
+--- !u!114 &5724741513664847798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1199834125489964491}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  Event: event:/ActionSFX/KingCroak/Croaks
+  PlayEvent: 0
+  StopEvent: 2
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 1
+  OverrideMaxDistance: 15
 --- !u!1 &2211747367441822814
 GameObject:
   m_ObjectHideFlags: 0
@@ -4943,7 +4970,6 @@ ParticleSystemRenderer:
   m_RendererPriority: 0
   m_Materials:
   - {fileID: 2100000, guid: ce77e3ff354bad643815cea96d3779e4, type: 2}
-  - {fileID: 0}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -5250,7 +5276,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.8860065
+  m_MaxDistance: 1.3687147
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5336,7 +5362,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.8860065
+  m_MaxDistance: 1.3687147
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5442,7 +5468,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.8860065
+  m_MaxDistance: 1.3687147
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity
@@ -5490,7 +5516,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/ActionSFX/KingCroak/ToungeWhip
-  PlayEvent: 1
+  PlayEvent: 0
   StopEvent: 2
   AllowFadeout: 1
   TriggerOnce: 0
@@ -5564,7 +5590,7 @@ SpringJoint:
   m_Spring: 1000
   m_Damper: 0.5
   m_MinDistance: 0
-  m_MaxDistance: 1.8860065
+  m_MaxDistance: 1.3687147
   m_Tolerance: 0.025
   m_BreakForce: Infinity
   m_BreakTorque: Infinity

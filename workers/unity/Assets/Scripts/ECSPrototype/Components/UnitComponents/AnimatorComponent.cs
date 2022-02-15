@@ -17,10 +17,13 @@ public class AnimatorComponent : MonoBehaviour
     [HideInInspector]
     public ECSAction CurrentLockedAction;
 
+    [Header("Action Preview")]
     public ECSAction CurrentPreviewAction;
     public Vector3 CurrentPreviewTarget;
     public int CurrentPreviewIndex;
     public bool ResumePreviewAnimation;
+    public float CurrentPreviewAnimTime;
+    public bool PlayActionSFX;
 
     public Animator Animator;
     public AnimationEvents AnimationEvents;
@@ -31,7 +34,7 @@ public class AnimatorComponent : MonoBehaviour
     public Transform ProjectileSpawnOrigin;
     public List<GameObject> Visuals;
     public float EnableVisualsDelay;
-    public List<GameObject> CharacterEffects;
+    public List<StudioEventEmitter> CharacterEffects;
 
     [Header("SoundFX")]
     public StudioEventEmitter VoiceEmitter;

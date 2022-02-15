@@ -1116,6 +1116,9 @@ MonoBehaviour:
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
+  ResumePreviewAnimation: 0
+  CurrentPreviewAnimTime: 0
+  PreviewActionSFX: 0
   Animator: {fileID: 512922516772004001}
   AnimationEvents: {fileID: 4135289247206431232}
   ExecuteTriggerSet: 0
@@ -1123,8 +1126,7 @@ MonoBehaviour:
   ProjectileSpawnOrigin: {fileID: 8189970073007501741}
   Visuals: []
   EnableVisualsDelay: 0
-  CharacterEffects:
-  - {fileID: 3647463394038079088}
+  CharacterEffects: []
   VoiceEmitter: {fileID: 5282111986606286259}
   FootStempEmitter: {fileID: 2367910180618250539}
   RotationSpeed: 4
@@ -1337,7 +1339,6 @@ MonoBehaviour:
   - {fileID: 512922516777160101}
   - {fileID: 512922516777160001}
   - {fileID: 512922516777160013}
-  AllMeshMaterials: []
 --- !u!136 &771660692032844721
 CapsuleCollider:
   m_ObjectHideFlags: 0

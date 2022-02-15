@@ -34,7 +34,7 @@ public class UnitComponentReferences : MonoBehaviour
 
     public List<GameObject> SelectionGameObjects;
     public List<Renderer> AllMesheRenderers;
-    public List<Material> AllMeshMaterials;
+    public List<List<Material>> AllMeshMaterials = new List<List<Material>>();
 
     public void InitializeComponentReferences()
     {
@@ -50,7 +50,6 @@ public class UnitComponentReferences : MonoBehaviour
 
         SelectionGameObjects.Clear();
         AllMesheRenderers.Clear();
-        AllMeshMaterials.Clear();
 
         foreach (SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
         {

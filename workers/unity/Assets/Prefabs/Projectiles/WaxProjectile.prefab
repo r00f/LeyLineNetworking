@@ -46,12 +46,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EventEmitter: {fileID: -6923469273402858418}
   EnableIfVisibleObjects:
   - {fileID: 2488993293443066607}
   DestinationObjectPrefab: {fileID: 0}
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
   CollisionDetection: {fileID: 0}
+  IsPreviewProjectile: 0
+  PlaySoundFX: 0
   TravellingCurveCutOff: 3
   TargetYOffset: 0
   ArriveInstantly: 0
@@ -112,7 +115,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/ActionSFX/Effigy/FlameWoosh
-  PlayEvent: 1
+  PlayEvent: 0
   StopEvent: 2
   AllowFadeout: 1
   TriggerOnce: 0

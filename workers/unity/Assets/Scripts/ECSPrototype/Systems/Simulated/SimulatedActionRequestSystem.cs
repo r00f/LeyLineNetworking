@@ -16,7 +16,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
     public struct ComponentsAddedIdentifierSim : ISystemStateComponentData
     {
     }
-
+    Settings settings;
     PathFindingSystem m_PathFindingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
@@ -48,6 +48,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        settings = Resources.Load<Settings>("Settings");
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
@@ -172,7 +173,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         }
         else
         {
-            simSkipTime.StartPlanningWaitTime = 10f;
+            simSkipTime.StartPlanningWaitTime = settings.SimPlayerWaitTime;
             simSkipTime.SkipTurnWaitTime = 5f;
         }
 

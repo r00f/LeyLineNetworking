@@ -240,6 +240,9 @@ MonoBehaviour:
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
+  ResumePreviewAnimation: 0
+  CurrentPreviewAnimTime: 0
+  PreviewActionSFX: 0
   Animator: {fileID: 1088712875186128033}
   AnimationEvents: {fileID: 3472730449269197841}
   ExecuteTriggerSet: 0
@@ -248,7 +251,7 @@ MonoBehaviour:
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
-  - {fileID: 1088712873593290111}
+  - {fileID: 8898640410511564897}
   VoiceEmitter: {fileID: 4315194112650320755}
   FootStempEmitter: {fileID: 0}
   RotationSpeed: 4
@@ -455,7 +458,6 @@ MonoBehaviour:
   - {fileID: 3809287964457472553}
   - {fileID: 6759795141852134303}
   - {fileID: 2244270266143199948}
-  AllMeshMaterials: []
 --- !u!114 &1532122627691920114
 MonoBehaviour:
   m_ObjectHideFlags: 0

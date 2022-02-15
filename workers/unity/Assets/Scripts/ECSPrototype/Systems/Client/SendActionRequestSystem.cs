@@ -17,15 +17,13 @@ using UnityEngine.EventSystems;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendActionRequestSystem : JobComponentSystem
 {
+    PathFindingSystem m_PathFindingSystem;
     HighlightingSystem m_HighlightingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
-    //EntityQuery m_CellData;
     EntityQuery m_UnitData;
-    //EntityQuery m_ClickedUnitData;
     EntityQuery m_RightClickedUnitData;
-    //EntityQuery m_SelectActionRequestData;
     CommandSystem m_CommandSystem;
     UISystem m_UISystem;
     EventSystem eventSystem;
@@ -65,7 +63,8 @@ public class SendActionRequestSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>(),
-        ComponentType.ReadOnly<MapData.Component>()
+        ComponentType.ReadOnly<MapData.Component>(),
+        ComponentType.ReadOnly<CurrentMapState>()
         );
     }
 
@@ -76,6 +75,7 @@ public class SendActionRequestSystem : JobComponentSystem
 
 
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+        m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
@@ -87,6 +87,9 @@ public class SendActionRequestSystem : JobComponentSystem
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+
+        var currentMapState = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
 
         var playerEntity = m_PlayerData.GetSingletonEntity();
         var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
@@ -127,9 +130,8 @@ public class SendActionRequestSystem : JobComponentSystem
             .WithoutBurst()
             .Run();
 
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction, in Actions.Component actions) =>
             {
-                //set unit action to basic move if is clicked and player has energy
                 if (mouseState.ClickEvent == 1)
                 {
                     if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
@@ -146,7 +148,14 @@ public class SendActionRequestSystem : JobComponentSystem
                 //check if unit is the selected unit in playerState and if current selected action is not empty
                 if (id.EntityId.Id == playerState.SelectedUnitId && clientActionRequest.ActionId != -3 && Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
                 {
-                    clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
+                    //if target is illegal, reset clientActionRequest component
+                    if(m_PathFindingSystem.ValidateTargetClient(currentMapState, uCoord.CubeCoordinate, playerHigh.HoveredCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                        clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
+                    else
+                    {
+                        clientActionRequest.TargetCoordinate = new Vector3f();
+                        clientActionRequest.ActionId = -3;
+                    }
 
                     if (anim.AnimationEvents)
                         anim.AnimationEvents.VoiceTrigger = true;

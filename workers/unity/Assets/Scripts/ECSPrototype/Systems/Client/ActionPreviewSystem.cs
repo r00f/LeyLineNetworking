@@ -1,3 +1,4 @@
+using FMODUnity;
 using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
@@ -55,14 +56,22 @@ public class ActionPreviewSystem : JobComponentSystem
         {
             if (actionRequest.ActionId <= 0 || gameState.CurrentState != GameStateEnum.planning)
             {
+                animator.PlayActionSFX = true;
+
                 if (animator.CurrentPreviewAction)
                 {
                     for(int i = 0; i < unitComponentReferences.AllMesheRenderers.Count; i++)
                     {
-                        unitComponentReferences.AllMesheRenderers[i].material = unitComponentReferences.AllMeshMaterials[i];
+                        unitComponentReferences.AllMesheRenderers[i].materials = unitComponentReferences.AllMeshMaterials[i].ToArray();
                     }
+
+                    foreach (StudioEventEmitter g in animator.CharacterEffects)
+                        g.gameObject.SetActive(false);
+
                     animator.CurrentPreviewIndex = actionRequest.ActionId;
+
                     animator.Animator.ResetTrigger("Execute");
+                    animator.Animator.SetTrigger("CancelAction");
                     animator.CurrentPreviewIndex = 0;
                     animator.ResumePreviewAnimation = false;
                     animator.Animator.speed = 1;
@@ -84,8 +93,18 @@ public class ActionPreviewSystem : JobComponentSystem
 
                         foreach (Renderer r in unitComponentReferences.AllMesheRenderers)
                         {
-                            r.material = settings.ActionPreviewMat;
+                            var mats = new Material[r.materials.Length];
+
+                            for (int i = 0; i < mats.Length; i++)
+                            {
+                                mats[i] = settings.ActionPreviewMat;
+                            }
+
+                            r.materials = mats;
                         }
+
+                        animator.PlayActionSFX = true;
+                        animator.AnimationEvents.EventTrigger = false;
                         animator.ResumePreviewAnimation = false;
                         animator.CurrentPreviewIndex = actionRequest.ActionId;
                     }
@@ -95,6 +114,9 @@ public class ActionPreviewSystem : JobComponentSystem
                     animator.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
                     animator.Animator.SetTrigger("Execute");
 
+                    var currentClip = animator.Animator.GetCurrentAnimatorClipInfo(1);
+                    var currentState = animator.Animator.GetCurrentAnimatorStateInfo(1);
+
                     var nextClip = animator.Animator.GetNextAnimatorClipInfo(1);
                     var nextState = animator.Animator.GetNextAnimatorStateInfo(1);
                     //nextClip[0].clip.length * nextState.normalizedTime actual clip time
@@ -103,34 +125,29 @@ public class ActionPreviewSystem : JobComponentSystem
 
                     if (nextClip.Length > 0)
                     {
-                        //Debug.Log("Name: " + nextClip[0].clip.name + ", length: " + nextClip[0].clip.length + ", time: " + nextState.normalizedTime);
+                        animator.CurrentPreviewAnimTime = nextState.normalizedTime;
+                    }
+                    else if (currentClip.Length > 0)
+                    {
+                        animator.CurrentPreviewAnimTime = currentState.normalizedTime;
+                    }
 
-                        if (nextState.normalizedTime < stoptime)
-                            animator.Animator.speed = 1.1f - nextState.normalizedTime / stoptime;
-                        else if(!animator.ResumePreviewAnimation)
-                            animator.Animator.speed = 0;
-                        else
-                            animator.Animator.speed = 1;
-
+                    if (!animator.ResumePreviewAnimation)
+                    {
                         if (Input.GetButtonDown("Fire1"))
                             animator.ResumePreviewAnimation = true;
-                    }
 
-                    /*
-                    if (!currentState.IsName("Empty") && animator.Animator.speed > 0)
-                    {
-                        Debug.Log(currentState.normalizedTime % 1);
-                        animator.Animator.speed = 0f;
+                        if (animator.CurrentPreviewAnimTime < stoptime)
+                            animator.Animator.speed = 1.1f - animator.CurrentPreviewAnimTime / stoptime;
+                        else
+                            animator.Animator.speed = 0;
                     }
-                    else if(Input.GetButtonDown("Fire1"))
+                    else
                     {
                         animator.Animator.speed = 1;
                     }
-                    */
 
-                    //animator.Animator.speed = 0;
-
-                    if (animator.AnimationEvents.EventTrigger)
+                    if (animator.AnimationEvents.EventTrigger && animator.ResumePreviewAnimation)
                     {
                         if (animator.CurrentPreviewAction.ProjectileFab)
                         {
@@ -139,9 +156,9 @@ public class ActionPreviewSystem : JobComponentSystem
                             {
                                 targetYoffset = 1.3f;
                             }
-                            m_ActionEffectsSystem.LaunchProjectile(faction.Faction, playerVision, animator.CurrentPreviewAction.ProjectileFab, animator.ProjectileSpawnOrigin, animator.CurrentPreviewTarget, actions.ActionsList[actionRequest.ActionId], id.EntityId.Id, coord.CubeCoordinate, targetYoffset);
+                            m_ActionEffectsSystem.LaunchProjectile(faction.Faction, playerVision, animator.CurrentPreviewAction.ProjectileFab, animator.ProjectileSpawnOrigin, animator.CurrentPreviewTarget, actions.ActionsList[actionRequest.ActionId], id.EntityId.Id, coord.CubeCoordinate, targetYoffset, true, animator.PlayActionSFX);
                         }
-
+                        animator.PlayActionSFX = false;
                         unitComponentReferences.AnimatorComp.AnimationEvents.EventTriggered = true;
                         animator.AnimationEvents.EventTrigger = false;
                     }

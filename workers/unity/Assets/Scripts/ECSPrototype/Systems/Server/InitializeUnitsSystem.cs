@@ -6,6 +6,7 @@ using Unit;
 using Cell;
 using Unity.Jobs;
 using Player;
+using System.Linq;
 
 [DisableAutoCreation]
 public class InitializeUnitsSystem : JobComponentSystem
@@ -169,16 +170,13 @@ public class InitializeUnitsSystem : JobComponentSystem
                     heroTransform.Transform = unitTransform;
                 }
             }
-
-            unitCompRef.AllMeshMaterials.Clear();
             foreach (Renderer r in unitCompRef.AllMesheRenderers)
             {
-                unitCompRef.AllMeshMaterials.Add(r.material);
+                unitCompRef.AllMeshMaterials.Add(r.materials.ToList());
             }
         })
         .WithoutBurst()
         .Run();
-
 
         return inputDeps;
     }

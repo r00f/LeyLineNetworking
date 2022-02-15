@@ -98,7 +98,7 @@ public class PortraitRenderer : MonoBehaviour
                     {
                         if (a.CurrentEffectOnTimestamps[i].x <= 0)
                         {
-                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].gameObject.SetActive(true);
                             a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
                         }
                     }
@@ -107,7 +107,7 @@ public class PortraitRenderer : MonoBehaviour
                     {
                         if (a.CurrentEffectOffTimestamps[i].x <= 0)
                         {
-                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].gameObject.SetActive(false);
                             a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
                         }
                     }

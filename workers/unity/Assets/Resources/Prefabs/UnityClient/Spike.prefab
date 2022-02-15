@@ -250,7 +250,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/ActionSFX/Spike/TrailSwoosh
-  PlayEvent: 11
+  PlayEvent: 0
   StopEvent: 12
   AllowFadeout: 1
   TriggerOnce: 0
@@ -592,6 +592,9 @@ MonoBehaviour:
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
+  ResumePreviewAnimation: 0
+  CurrentPreviewAnimTime: 0
+  PreviewActionSFX: 0
   Animator: {fileID: 6277809151415814066}
   AnimationEvents: {fileID: 4624510965681803888}
   ExecuteTriggerSet: 0
@@ -600,9 +603,9 @@ MonoBehaviour:
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
-  - {fileID: 1094178332401473320}
-  - {fileID: 7156183395109989668}
-  - {fileID: 6712945080671107961}
+  - {fileID: 5108752829155667030}
+  - {fileID: 5302268243363656431}
+  - {fileID: 8302731159556301102}
   VoiceEmitter: {fileID: 1169538025521282994}
   FootStempEmitter: {fileID: 4035786856844519652}
   RotationSpeed: 4
@@ -787,7 +790,6 @@ MonoBehaviour:
   - {fileID: 6277809151408466452}
   - {fileID: 6277809151408466458}
   - {fileID: 6277809151408466456}
-  AllMeshMaterials: []
 --- !u!114 &9121732361173887378
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2184,7 +2186,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/ActionSFX/Spike/ThrustCone
-  PlayEvent: 11
+  PlayEvent: 0
   StopEvent: 12
   AllowFadeout: 1
   TriggerOnce: 0
@@ -2542,15 +2544,21 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 81c764ddb50a71a43882288cd09d1a20, type: 3}
---- !u!4 &1905142660381413622 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4332277508792890046, guid: 81c764ddb50a71a43882288cd09d1a20,
+--- !u!114 &8302731159556301102 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6149106365413589862, guid: 81c764ddb50a71a43882288cd09d1a20,
     type: 3}
   m_PrefabInstance: {fileID: 2769496441234235976}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &6712945080671107961 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8882806749499939121, guid: 81c764ddb50a71a43882288cd09d1a20,
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1905142660381413622 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4332277508792890046, guid: 81c764ddb50a71a43882288cd09d1a20,
     type: 3}
   m_PrefabInstance: {fileID: 2769496441234235976}
   m_PrefabAsset: {fileID: 0}

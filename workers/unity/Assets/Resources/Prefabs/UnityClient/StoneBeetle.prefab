@@ -15240,6 +15240,9 @@ MonoBehaviour:
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
+  ResumePreviewAnimation: 0
+  CurrentPreviewAnimTime: 0
+  PreviewActionSFX: 0
   Animator: {fileID: 1113965945702352347}
   AnimationEvents: {fileID: 7961001583877436035}
   ExecuteTriggerSet: 0
@@ -15248,7 +15251,7 @@ MonoBehaviour:
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
-  - {fileID: 792343195178939794}
+  - {fileID: 4676244062014109517}
   VoiceEmitter: {fileID: 7840823842697079482}
   FootStempEmitter: {fileID: 0}
   RotationSpeed: 4
@@ -15498,7 +15501,6 @@ MonoBehaviour:
   - {fileID: 6182571205087026135}
   - {fileID: 2509979672749266209}
   - {fileID: 7072035890801155191}
-  AllMeshMaterials: []
 --- !u!114 &6906682168850062236
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17401,12 +17403,18 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a2c8272f246dfd148bec0363920b5693, type: 3}
---- !u!4 &5237082857221897340 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4090169692338036927, guid: a2c8272f246dfd148bec0363920b5693,
+--- !u!114 &4676244062014109517 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3498086916350176142, guid: a2c8272f246dfd148bec0363920b5693,
     type: 3}
   m_PrefabInstance: {fileID: 8101668650703854787}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!198 &6160099158531729514 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 2671753033887020201, guid: a2c8272f246dfd148bec0363920b5693,
@@ -17443,9 +17451,9 @@ ParticleSystem:
     type: 3}
   m_PrefabInstance: {fileID: 8101668650703854787}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &792343195178939794 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8831593257965824337, guid: a2c8272f246dfd148bec0363920b5693,
+--- !u!4 &5237082857221897340 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4090169692338036927, guid: a2c8272f246dfd148bec0363920b5693,
     type: 3}
   m_PrefabInstance: {fileID: 8101668650703854787}
   m_PrefabAsset: {fileID: 0}

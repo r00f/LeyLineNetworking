@@ -130,6 +130,9 @@ MonoBehaviour:
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
+  ResumePreviewAnimation: 0
+  CurrentPreviewAnimTime: 0
+  PreviewActionSFX: 0
   Animator: {fileID: 2809895697405541867}
   AnimationEvents: {fileID: 8397182629797879279}
   ExecuteTriggerSet: 0
@@ -138,7 +141,7 @@ MonoBehaviour:
   Visuals: []
   EnableVisualsDelay: 0
   CharacterEffects:
-  - {fileID: 1504406520299490274}
+  - {fileID: 5034254533946836244}
   VoiceEmitter: {fileID: 1578841258704636373}
   FootStempEmitter: {fileID: 0}
   RotationSpeed: 4
@@ -324,7 +327,6 @@ MonoBehaviour:
   - {fileID: 8892152875997683907}
   AllMesheRenderers:
   - {fileID: 7422891748961989369}
-  AllMeshMaterials: []
 --- !u!114 &664739988800558804
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1747,18 +1749,24 @@ ParticleSystem:
     type: 3}
   m_PrefabInstance: {fileID: 4586006974226846781}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &1504406520299490274 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 3117754048744972255, guid: a103aa955d1fdb54ba587632bc55dad2,
-    type: 3}
-  m_PrefabInstance: {fileID: 4586006974226846781}
-  m_PrefabAsset: {fileID: 0}
 --- !u!4 &8038675750318905417 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5776948486877432948, guid: a103aa955d1fdb54ba587632bc55dad2,
     type: 3}
   m_PrefabInstance: {fileID: 4586006974226846781}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5034254533946836244 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8825233210981765417, guid: a103aa955d1fdb54ba587632bc55dad2,
+    type: 3}
+  m_PrefabInstance: {fileID: 4586006974226846781}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7383594369589141337
 PrefabInstance:
   m_ObjectHideFlags: 0

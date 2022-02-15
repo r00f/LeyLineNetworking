@@ -10,6 +10,7 @@ using Unity.Collections;
 using Cell;
 using Player;
 using Unity.Jobs;
+using FMODUnity;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : JobComponentSystem
@@ -188,9 +189,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
         else
         {
-            foreach (GameObject g in unitComponentReferences.AnimatorComp.CharacterEffects)
+            foreach (StudioEventEmitter g in unitComponentReferences.AnimatorComp.CharacterEffects)
             {
-                g.SetActive(false);
+                g.gameObject.SetActive(false);
             }
 
             if (unitComponentReferences.UnitEffectsComp.HarvestingEnergyParticleSystem)
@@ -319,7 +320,12 @@ public class UnitAnimationSystem : JobComponentSystem
                     if (a.CurrentEffectOnTimestamps[i].x <= 0)
                     {
                         if (visible.Value == 1)
-                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                        {
+                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].gameObject.SetActive(true);
+                            if(unitComponentReferences.AnimatorComp.PlayActionSFX)
+                                unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].Play();
+                        }
+
                         a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
                     }
                 }
@@ -329,7 +335,7 @@ public class UnitAnimationSystem : JobComponentSystem
                     if (a.CurrentEffectOffTimestamps[i].x <= 0)
                     {
                         if (visible.Value == 1)
-                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].gameObject.SetActive(false);
                         a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
                     }
                 }

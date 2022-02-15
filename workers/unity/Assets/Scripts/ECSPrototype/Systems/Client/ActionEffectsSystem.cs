@@ -394,7 +394,7 @@ public class ActionEffectsSystem : JobComponentSystem
         }
     }
 
-    public void LaunchProjectile(uint usingUnitFaction, Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
+    public void LaunchProjectile(uint usingUnitFaction, Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0, bool isPreviewProjectile = false, bool playSFX = true)
     {
         bool AoEcontainsTarget = false;
 
@@ -414,6 +414,8 @@ public class ActionEffectsSystem : JobComponentSystem
             g.SetActive(false);
         }
 
+        projectile.PlaySoundFX = playSFX;
+        projectile.IsPreviewProjectile = isPreviewProjectile;
         projectile.UnitId = unitId;
         projectile.Action = inAction;
         projectile.SpawnTransform = spawnTransform;

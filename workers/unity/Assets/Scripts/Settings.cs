@@ -8,6 +8,9 @@ public class Settings : ScriptableObject
 {
     public int CellHighlighterLayerOverride;
     public uint ForcePlayerFaction;
+
+    public int SimPlayerWaitTime;
+
     public List<Color> FactionColors;
     public List<Color> FactionIncomeColors;
     public List<Color> FactionMapColors;

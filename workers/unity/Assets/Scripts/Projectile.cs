@@ -12,11 +12,16 @@ using Unity.Entities;
 public class Projectile : MonoBehaviour
 {
     //currently only used for axa shield
+
+    public StudioEventEmitter EventEmitter;
     public List<GameObject> EnableIfVisibleObjects;
     public GameObject DestinationObjectPrefab;
-    public GameObject DestinationExplosionPrefab;
+    public StudioEventEmitter DestinationExplosionPrefab;
     public Transform ExplosionSpawnTransform;
     public CollisionDetectionComponent CollisionDetection;
+
+    public bool IsPreviewProjectile;
+    public bool PlaySoundFX;
 
     public uint TravellingCurveCutOff;
     public float TargetYOffset;
@@ -94,7 +99,4 @@ public class Projectile : MonoBehaviour
     public bool IsTravelling;
     [HideInInspector]
     public float MovementPercentage;
-
-
-
 }
