@@ -24,7 +24,8 @@ namespace LeyLineHybridECS
             base.OnCreate();
             m_GameStateData = GetEntityQuery(
                 ComponentType.ReadOnly<GameState.Component>(),
-                ComponentType.ReadOnly<MapData.Component>()
+                ComponentType.ReadOnly<MapData.Component>(),
+                ComponentType.ReadOnly<SpatialEntityId>()
             );
         }
 
@@ -40,27 +41,31 @@ namespace LeyLineHybridECS
             if (m_GameStateData.CalculateEntityCount() != 1)
                 return;
 
+            var gameStateId = m_GameStateData.GetSingleton<SpatialEntityId>();
             var mapData = m_GameStateData.GetSingleton<MapData.Component>();
             var mapInitializedEvent = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
 
-            if (mapInitializedEvent.Count > 0)
+            for (int i = 0; i < mapInitializedEvent.Count; i++)
             {
-                var visibilityDesc = new RenderMeshDescription(
-                   settings.ShadowMarkerMesh,
-                   settings.ShadowMarkerMat,
-                   shadowCastingMode: ShadowCastingMode.Off,
-                   layer: 12,
-                   receiveShadows: false);
+                if (mapInitializedEvent[i].EntityId.Id == gameStateId.EntityId.Id)
+                {
+                    var visibilityDesc = new RenderMeshDescription(
+                       settings.ShadowMarkerMesh,
+                       settings.ShadowMarkerMat,
+                       shadowCastingMode: ShadowCastingMode.Off,
+                       layer: 12,
+                       receiveShadows: false);
 
-                var highlightingDesc = new RenderMeshDescription(
-                   settings.ShadowMarkerMesh,
-                   settings.TargetCellMat,
-                   shadowCastingMode: ShadowCastingMode.Off,
-                   layer: 3,
-                   receiveShadows: false);
+                    var highlightingDesc = new RenderMeshDescription(
+                       settings.ShadowMarkerMesh,
+                       settings.TargetCellMat,
+                       shadowCastingMode: ShadowCastingMode.Off,
+                       layer: 3,
+                       receiveShadows: false);
 
-                InstanciateRenderMeshEntities(mapData, visibilityDesc, new ComponentTypes(typeof(LocalToWorld), typeof(CubeCoordinate.Component), typeof(UnlitMaterialColor), typeof(IsVisible), typeof(RequireVisibleUpdate)), -0.5f, "VisibilityCell");
-                InstanciateRenderMeshEntities(mapData, highlightingDesc, new ComponentTypes(typeof(LocalToWorld), typeof(CubeCoordinate.Component), typeof(MarkerState), typeof(MouseState), typeof(UnlitMaterialColor)), 0.1f, "ReachableCell");
+                    InstanciateRenderMeshEntities(mapData, visibilityDesc, new ComponentTypes(typeof(LocalToWorld), typeof(CubeCoordinate.Component), typeof(UnlitMaterialColor), typeof(IsVisible), typeof(RequireVisibleUpdate)), -0.5f, "VisibilityCell");
+                    InstanciateRenderMeshEntities(mapData, highlightingDesc, new ComponentTypes(typeof(LocalToWorld), typeof(CubeCoordinate.Component), typeof(MarkerState), typeof(MouseState), typeof(UnlitMaterialColor)), 0.1f, "ReachableCell");
+                }
             }
 
             Entities.ForEach((Entity e, RenderMesh renderMesh, ref UnlitMaterialColor matColor, ref MarkerState markerState, ref CubeCoordinate.Component cubeCoord, ref RequireMarkerUpdate reqUpdate) =>

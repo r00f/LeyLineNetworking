@@ -103,27 +103,25 @@ namespace LeyLineHybridECS
                                 gameState.WinnerFaction = 0;
                                 gameState.TurnCounter = 0;
 
-                                //if gameState.InitMapEventSent
                                 if (!gameState.InitMapEventSent)
                                 {
-                                    //Debug.Log("SendInitMapEvent");
                                     m_ComponentUpdateSystem.SendEvent(
                                     new InitMapEvent.InitializeMapEvent.Event(new InitializeMap(gameStateWorldIndex.Value, new Vector2f((int) position.Coords.X, (int) position.Coords.Z))),
                                     initMapEventSenderId.EntityId
                                     );
                                     gameState.InitMapEventSent = true;
                                 }
-                                //calculate initialized cellcount with sharedWorldIndex
-                                else
+
+                                var mapInitializedEvents = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
+
+                                for (int i = 0; i < mapInitializedEvents.Count; i++)
                                 {
-                                    gameState.CurrentWaitTime = gameState.CalculateWaitTime;
-                                    /*
-                                    logger.HandleLog(LogType.Warning,
-                                    new LogEvent("Exit WaitingForPlayers")
-                                    .WithField("GamestateWorldIndex", gameStateWorldIndex.Value));
-                                    */
-                                    UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
-                                    gameState.CurrentState = GameStateEnum.cleanup;
+                                    if (mapInitializedEvents[i].EntityId.Id == gameStateId.EntityId.Id)
+                                    {
+                                        gameState.CurrentWaitTime = gameState.CalculateWaitTime;
+                                        UpdateUnitsGameStateTag(GameStateEnum.cleanup, gameStateWorldIndex, ECBuffer);
+                                        gameState.CurrentState = GameStateEnum.cleanup;
+                                    }
                                 }
                             }
                             else

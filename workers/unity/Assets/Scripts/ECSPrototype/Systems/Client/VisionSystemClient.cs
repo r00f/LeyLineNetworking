@@ -1,15 +1,8 @@
-using Cell;
 using Generic;
 using Improbable.Gdk.Core;
 using Player;
-using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
-using Unit;
-using Improbable;
-using Unity.Collections;
-using Improbable.Gdk.TransformSynchronization;
-using Unity.Rendering;
 
 namespace LeyLineHybridECS
 {
@@ -17,7 +10,6 @@ namespace LeyLineHybridECS
     public class VisionSystemClient : ComponentSystem
     {
         ILogDispatcher logger;
-
         EntityQuery m_UnitData;
         EntityQuery m_IsVisibleData;
         EntityQuery m_CellRequireVisibleUpdateData;

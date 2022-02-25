@@ -39,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 5904640984428946566}
-  m_IndirectSpecularColor: {r: 3129.8948, g: 2116.2202, b: 1982.896, a: 1}
+  m_IndirectSpecularColor: {r: 3050.136, g: 2146.4312, b: 2113.2866, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -1087,7 +1087,7 @@ MonoBehaviour:
   MaxConnectionAttempts: 3
   SimulatedPlayerWorkerConnector: {fileID: 7738995759807356545, guid: dcb8475fc9a79f24da120840c699097b,
     type: 3}
-  MaxSimulatedPlayerCount: 1
+  MaxSimulatedPlayerCount: 100
   SimulatedPlayerCreationInterval: 1
 --- !u!4 &599719170
 Transform:

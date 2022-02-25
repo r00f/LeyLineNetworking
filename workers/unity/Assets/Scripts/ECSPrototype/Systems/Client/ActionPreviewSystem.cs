@@ -52,7 +52,7 @@ public class ActionPreviewSystem : JobComponentSystem
         var highlightingData = m_PlayerData.GetSingleton<HighlightingDataComponent>();
         var playerVision = m_PlayerData.GetSingleton<Vision.Component>();
 
-        Entities.ForEach((UnitComponentReferences unitComponentReferences, AnimatorComponent animator, in ClientActionRequest.Component actionRequest, in Actions.Component actions, in SpatialEntityId id, in FactionComponent.Component faction, in CubeCoordinate.Component coord) =>
+        Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((UnitComponentReferences unitComponentReferences, AnimatorComponent animator, in ClientActionRequest.Component actionRequest, in Actions.Component actions, in SpatialEntityId id, in FactionComponent.Component faction, in CubeCoordinate.Component coord) =>
         {
             if (actionRequest.ActionId <= 0 || gameState.CurrentState != GameStateEnum.planning)
             {
@@ -60,22 +60,25 @@ public class ActionPreviewSystem : JobComponentSystem
 
                 if (animator.CurrentPreviewAction)
                 {
+                    animator.Animator.fireEvents = false;
+
                     for(int i = 0; i < unitComponentReferences.AllMesheRenderers.Count; i++)
-                    {
                         unitComponentReferences.AllMesheRenderers[i].materials = unitComponentReferences.AllMeshMaterials[i].ToArray();
-                    }
 
                     foreach (StudioEventEmitter g in animator.CharacterEffects)
                         g.gameObject.SetActive(false);
 
                     animator.CurrentPreviewIndex = actionRequest.ActionId;
-
                     animator.Animator.ResetTrigger("Execute");
                     animator.Animator.SetTrigger("CancelAction");
                     animator.CurrentPreviewIndex = 0;
                     animator.ResumePreviewAnimation = false;
                     animator.Animator.speed = 1;
                     animator.CurrentPreviewAction = null;
+                }
+                else if(animator.Animator && !animator.Animator.GetAnimatorTransitionInfo(1).anyState && !animator.Animator.fireEvents)
+                {
+                    animator.Animator.fireEvents = true;
                 }
             }
             else
@@ -109,6 +112,7 @@ public class ActionPreviewSystem : JobComponentSystem
                         animator.CurrentPreviewIndex = actionRequest.ActionId;
                     }
                 }
+
                 if (animator.Animator && animator.AnimationEvents && animator.CurrentPreviewAction)
                 {
                     animator.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);

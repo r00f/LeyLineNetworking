@@ -72,7 +72,8 @@ namespace LeyLineHybridECS
 
             m_GameStateData = GetEntityQuery(
                 ComponentType.ReadOnly<GameState.Component>(),
-                ComponentType.ReadOnly<Position.Component>()
+                ComponentType.ReadOnly<Position.Component>(),
+                ComponentType.ReadOnly<SpatialEntityId>()
                 );
 
             m_AuthoritativePlayerData = GetEntityQuery(
@@ -130,6 +131,7 @@ namespace LeyLineHybridECS
             var authPlayerEntity = m_AuthoritativePlayerData.GetSingletonEntity();
             var authPlayerCam = EntityManager.GetComponentObject<Moba_Camera>(authPlayerEntity);
 
+            var gameStateId = m_GameStateData.GetSingleton<SpatialEntityId>();
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();
             var gameStatePosition = m_GameStateData.GetSingleton<Position.Component>();
             var authPlayerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
@@ -142,56 +144,59 @@ namespace LeyLineHybridECS
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
-            if (mapInitializedEvent.Count > 0)
+            for (int i = 0; i < mapInitializedEvent.Count; i++)
             {
-                Debug.Log("InitMapClientEvent");
-                //ClearUnitUIElements();
-                InitializeButtons();
-
-                UIRef.MinimapComponent.MapCenter += new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
-                UIRef.BigMapComponent.MapCenter += new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
-
-                UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[(int) authPlayerFaction.Faction];
-                UIRef.FriendlyColor = settings.FactionColors[(int) authPlayerFaction.Faction];
-
-                if (authPlayerFaction.Faction == 1)
-                    UIRef.EnemyColor = settings.FactionColors[2];
-                else
-                    UIRef.EnemyColor = settings.FactionColors[1];
-
-                UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
-                UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
-
-                UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
-
-                UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
-                UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
-
-                UIRef.TurnStatePnl.FriendlyReadyDot.color = UIRef.FriendlyColor;
-                UIRef.TurnStatePnl.FriendlyRope.color = UIRef.FriendlyColor;
-                UIRef.EnergyConnectorPlayerColorFill.color = UIRef.FriendlyColor;
-
-                UIRef.TurnStatePnl.EnemyReadyDot.color = UIRef.EnemyColor;
-                UIRef.TurnStatePnl.EnemyRope.color = UIRef.EnemyColor;
-
-                UIRef.TurnStatePnl.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
-                UIRef.TurnStatePnl.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
-                UIRef.TurnStatePnl.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
-
-                var fBurst = UIRef.FriendlyReadyBurstPS.main;
-                fBurst.startColor = UIRef.FriendlyColor;
-                var eBurst = UIRef.EnemyReadyBurstPS.main;
-                eBurst.startColor = UIRef.EnemyColor;
-
-                var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
-                main1.startColor = UIRef.FriendlyColor;
-
-                var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
-                main2.startColor = UIRef.EnemyColor;
-
-                if (!UIRef.MatchReadyPanel.activeSelf)
+                if(mapInitializedEvent[i].EntityId.Id == gameStateId.EntityId.Id)
                 {
-                    UIRef.MatchReadyPanel.SetActive(true);
+                    Debug.Log("InitMapClientEvent");
+                    //ClearUnitUIElements();
+                    InitializeButtons();
+
+                    UIRef.MinimapComponent.MapCenter += new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
+                    UIRef.BigMapComponent.MapCenter += new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
+
+                    UIRef.FriendlyIncomeColor = settings.FactionIncomeColors[(int) authPlayerFaction.Faction];
+                    UIRef.FriendlyColor = settings.FactionColors[(int) authPlayerFaction.Faction];
+
+                    if (authPlayerFaction.Faction == 1)
+                        UIRef.EnemyColor = settings.FactionColors[2];
+                    else
+                        UIRef.EnemyColor = settings.FactionColors[1];
+
+                    UIRef.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
+                    UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
+
+                    UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
+
+                    UIRef.HeroCurrentEnergyFill.color = UIRef.FriendlyColor;
+                    UIRef.TopEnergyFill.color = UIRef.FriendlyColor;
+
+                    UIRef.TurnStatePnl.FriendlyReadyDot.color = UIRef.FriendlyColor;
+                    UIRef.TurnStatePnl.FriendlyRope.color = UIRef.FriendlyColor;
+                    UIRef.EnergyConnectorPlayerColorFill.color = UIRef.FriendlyColor;
+
+                    UIRef.TurnStatePnl.EnemyReadyDot.color = UIRef.EnemyColor;
+                    UIRef.TurnStatePnl.EnemyRope.color = UIRef.EnemyColor;
+
+                    UIRef.TurnStatePnl.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
+                    UIRef.TurnStatePnl.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
+                    UIRef.TurnStatePnl.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
+
+                    var fBurst = UIRef.FriendlyReadyBurstPS.main;
+                    fBurst.startColor = UIRef.FriendlyColor;
+                    var eBurst = UIRef.EnemyReadyBurstPS.main;
+                    eBurst.startColor = UIRef.EnemyColor;
+
+                    var main1 = UIRef.FriendlyRopeBarParticle.LoopPS.main;
+                    main1.startColor = UIRef.FriendlyColor;
+
+                    var main2 = UIRef.EnemyRopeBarParticle.LoopPS.main;
+                    main2.startColor = UIRef.EnemyColor;
+
+                    if (!UIRef.MatchReadyPanel.activeSelf)
+                    {
+                        UIRef.MatchReadyPanel.SetActive(true);
+                    }
                 }
             }
 
