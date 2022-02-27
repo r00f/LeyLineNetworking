@@ -115,52 +115,58 @@ public class SendActionRequestSystem : JobComponentSystem
         if (gameState.CurrentState == GameStateEnum.planning)
         {
             //Clear right Clicked unit actions
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref RightClickEvent rightClickEvent, in FactionComponent.Component faction, in ClientActionRequest.Component clientActionRequest) =>
+            Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref RightClickEvent rightClickEvent, in ClientActionRequest.Component clientActionRequest) =>
             {
-                if (faction.Faction == playerFaction.Faction)
+                if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero)
                 {
-                    if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero)
-                    {
-                        if (anim.AnimationEvents)
-                            anim.AnimationEvents.VoiceTrigger = true;
-                        SelectActionCommand(-3, unitId.EntityId.Id);
-                    }
+                    if (anim.AnimationEvents)
+                        anim.AnimationEvents.VoiceTrigger = true;
+                    SelectActionCommand(-3, unitId.EntityId.Id);
                 }
             })
             .WithoutBurst()
             .Run();
 
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction, in Actions.Component actions) =>
+            Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction, in Actions.Component actions) =>
             {
                 if (mouseState.ClickEvent == 1)
                 {
                     if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                     {
-                        if (faction.Faction == playerFaction.Faction)
-                        {
-                            if (anim.AnimationEvents)
-                                anim.AnimationEvents.VoiceTrigger = true;
-                        }
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
                     }
                 }
 
                 #region Set Target Command
                 //check if unit is the selected unit in playerState and if current selected action is not empty
-                if (id.EntityId.Id == playerState.SelectedUnitId && clientActionRequest.ActionId != -3 && Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
+                if (id.EntityId.Id == playerState.SelectedUnitId && clientActionRequest.ActionId != -3)
                 {
-                    //if target is illegal, reset clientActionRequest component
-                    if(m_PathFindingSystem.ValidateTargetClient(currentMapState, uCoord.CubeCoordinate, playerHigh.HoveredCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
-                        clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
-                    else
+                    if (actions.ActionsList[clientActionRequest.ActionId].Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
                     {
-                        clientActionRequest.TargetCoordinate = new Vector3f();
-                        clientActionRequest.ActionId = -3;
+                        clientActionRequest.TargetCoordinate = uCoord.CubeCoordinate;
+
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
+
+                        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
                     }
+                    else if (Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
+                    {
+                        //if target is illegal, reset clientActionRequest component
+                        if (m_PathFindingSystem.ValidateTargetClient(currentMapState, uCoord.CubeCoordinate, playerHigh.HoveredCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                            clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
+                        else if (actions.LockedAction.Index == -3)
+                        {
+                            clientActionRequest.TargetCoordinate = new Vector3f();
+                            clientActionRequest.ActionId = -3;
+                        }
 
-                    if (anim.AnimationEvents)
-                        anim.AnimationEvents.VoiceTrigger = true;
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
 
-                    m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
+                        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
+                    }
                 }
                 #endregion
             })
@@ -258,6 +264,7 @@ public class SendActionRequestSystem : JobComponentSystem
                     {
                         if (unitCompRef.AnimatorComp.AnimationEvents)
                             unitCompRef.AnimatorComp.AnimationEvents.VoiceTrigger = true;
+
                         playerHigh.TargetRestrictionIndex = 2;
                         m_HighlightingSystem.SetSelfTarget(entityId, act, coord.CubeCoordinate, unitCompRef.LinerendererComp);
                         m_UISystem.DeactivateActionDisplay(e, .3f);

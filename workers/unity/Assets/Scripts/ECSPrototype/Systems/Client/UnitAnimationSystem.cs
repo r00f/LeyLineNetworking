@@ -75,19 +75,16 @@ public class UnitAnimationSystem : JobComponentSystem
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref Actions.Component actions, ref Energy.Component energy, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, in Actions.Component actions, in Energy.Component energy, in FactionComponent.Component faction, in SpatialEntityId id) =>
             {
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
 
                 if (unitComponentReferences.SelectionMeshRenderer.material.HasProperty("_UnlitColor"))
                     unitComponentReferences.SelectionMeshRenderer.material.SetColor("_UnlitColor", settings.FactionColors[(int)faction.Faction]);
 
-
                 unitComponentReferences.CurrentMoveIndex = -1;
                 unitComponentReferences.CurrentMoveTime = 0;
                 unitComponentReferences.LastStationaryPosition = unitComponentReferences.transform.position;
-
-
                 unitComponentReferences.AnimatorComp.DestinationPosition = Vector2.zero;
                 unitComponentReferences.UnitEffectsComp.OriginCoordinate = coord.CubeCoordinate;
                 unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = false;
@@ -105,7 +102,6 @@ public class UnitAnimationSystem : JobComponentSystem
                     unitComponentReferences.AnimatorComp.Animator.SetBool("Executed", false);
                     unitComponentReferences.AnimatorComp.Animator.ResetTrigger("DestinationReached");
                 }
-
             })
             .WithoutBurst()
             .Run();
@@ -137,12 +133,32 @@ public class UnitAnimationSystem : JobComponentSystem
             {
                 if (incomingActionEffects.MoveEffects.Count != 0)
                 {
-                    /*
-                    logger.HandleLog(LogType.Warning,
-                    new LogEvent("Call MoveUnit Method")
-                    .WithField("Unit", unitComponentReferences.transform.name));
-                    */
-                    MoveUnit(unitComponentReferences, incomingActionEffects);
+                    if (incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs.Count > unitComponentReferences.CurrentMoveIndex)
+                    {
+                        if (unitComponentReferences.CurrentMoveIndex >= 0)
+                            unitComponentReferences.AnimatorComp.RotationTarget = Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition);
+
+                        if (unitComponentReferences.CurrentMoveTime > 0)
+                        {
+                            unitComponentReferences.CurrentMoveTime -= Time.DeltaTime;
+                            float normalizedTime = 1f - (unitComponentReferences.CurrentMoveTime / incomingActionEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell);
+
+                            if (unitComponentReferences.CurrentMoveIndex == 0)
+                                unitComponentReferences.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[0].WorldPosition), normalizedTime);
+                            else
+                                unitComponentReferences.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex - 1].WorldPosition), Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                        }
+                        else
+                        {
+                            unitComponentReferences.CurrentMoveIndex++;
+                            unitComponentReferences.CurrentMoveTime = incomingActionEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell;
+                        }
+                    }
+                    else if (!unitComponentReferences.AnimatorComp.DestinationReachTriggerSet)
+                    {
+                        unitComponentReferences.AnimatorComp.Animator.SetTrigger("DestinationReached");
+                        unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = true;
+                    }
                 }
             }
         })
@@ -382,9 +398,9 @@ public class UnitAnimationSystem : JobComponentSystem
                 float normalizedTime = 1f - (unitComponentReferences.CurrentMoveTime / incomingEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell);
 
                 if(unitComponentReferences.CurrentMoveIndex == 0)
-                    unitComponentReferences.AnimatorComp.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                    unitComponentReferences.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[0].WorldPosition), normalizedTime);
                 else
-                    unitComponentReferences.AnimatorComp.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex -1].WorldPosition), Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                    unitComponentReferences.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex -1].WorldPosition), Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
             }
             else
             {

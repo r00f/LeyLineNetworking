@@ -45,14 +45,17 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         #region select action
         Entities.WithNone<AiUnit.Component>().ForEach((Entity e, ref Actions.Component unitActions, in ClientActionRequest.Component clientActionRequest, in FactionComponent.Component unitFaction, in WorldIndexShared unitWorldIndex, in SpatialEntityId unitEntityId, in CubeCoordinate.Component unitCoord) =>
         {
-            if(clientActionRequest.ActionId == -3 && (unitActions.CurrentSelected.Index != -3 || unitActions.LockedAction.Index != -3))
+            if(clientActionRequest.ActionId == -3)
             {
-                m_ResourceSystem.AddEnergy(unitWorldIndex, unitFaction.Faction, unitActions.LockedAction.CombinedCost);
-                unitActions.CurrentSelected = unitActions.NullAction;
-                unitActions.LastSelected = unitActions.NullAction;
-                unitActions.LockedAction = unitActions.NullAction;
+                if (unitActions.CurrentSelected.Index != -3 || unitActions.LockedAction.Index != -3)
+                {
+                    m_ResourceSystem.AddEnergy(unitWorldIndex, unitFaction.Faction, unitActions.LockedAction.CombinedCost);
+                    unitActions.CurrentSelected = unitActions.NullAction;
+                    unitActions.LastSelected = unitActions.NullAction;
+                    unitActions.LockedAction = unitActions.NullAction;
+                }
             }
-            else if (clientActionRequest.ActionId != unitActions.LastSelected.Index && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
+            else if (clientActionRequest.ActionId != unitActions.CurrentSelected.Index || Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero || (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3fext.ToUnityVector(unitCoord.CubeCoordinate) && unitActions.ActionsList[clientActionRequest.ActionId].Effects[0].ApplyToRestrictions == ApplyToRestrictionsEnum.self && unitActions.LastSelected.Index != clientActionRequest.ActionId) /* && unitActions.CurrentSelected.Index == -3 && clientActionRequest.ActionId != unitActions.CurrentSelected.Index && clientActionRequest.ActionId != unitActions.LockedAction.Index  && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero*/)
             {
                 m_ResourceSystem.AddEnergy(unitWorldIndex, unitFaction.Faction, unitActions.LockedAction.CombinedCost);
                 unitActions.LockedAction = unitActions.NullAction;
@@ -74,19 +77,10 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                 }
 
                 unitActions.CurrentSelected = actionToSelect;
-                bool self = false;
 
                 if (unitActions.CurrentSelected.Targets.Count != 0)
                 {
-                    if (unitActions.CurrentSelected.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
-                    {
-                        self = true;
-                        unitActions.LockedAction = SetLockedAction(unitWorldIndex, unitEntityId.EntityId.Id, unitActions.CurrentSelected, unitCoord.CubeCoordinate, unitCoord.CubeCoordinate, unitFaction.Faction);
-                        unitActions.LastSelected = unitActions.CurrentSelected;
-                        unitActions.CurrentSelected = unitActions.NullAction;
-                    }
-
-                    if (!unitActions.CurrentSelected.Equals(unitActions.LastSelected) && !self)
+                    if (!unitActions.CurrentSelected.Equals(unitActions.LastSelected))
                     {
                         switch (unitActions.CurrentSelected.Targets[0].Higlighter)
                         {
@@ -103,9 +97,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                         }
                     }
                 }
-
-                if (!self)
-                    unitActions.LastSelected = unitActions.CurrentSelected;
+                unitActions.LastSelected = unitActions.CurrentSelected;
             }
         })
         .WithoutBurst()
@@ -115,15 +107,17 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         #region set target
         Entities.ForEach((ref Actions.Component requestingUnitActions, in ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component requestingUnitCoord, in FactionComponent.Component requestingUnitFaction, in SpatialEntityId requestingUnitId, in WorldIndexShared worldIndex) =>
         {
-            if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero && requestingUnitActions.CurrentSelected.Targets[0].Targettingrange > 0)
+            if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero /* && requestingUnitActions.CurrentSelected.Targets[0].Targettingrange > 0*/)
             {
+                Debug.Log("SetTarget");
+
                 if (ValidateTarget(worldIndex, requestingUnitActions.CurrentSelected, clientActionRequest.TargetCoordinate, requestingUnitCoord.CubeCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction))
+                {
+                    Debug.Log("TargetValid");
                     requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
+                }
                 else
                     requestingUnitActions.LockedAction = requestingUnitActions.NullAction;
-
-                requestingUnitActions.CurrentSelected = requestingUnitActions.NullAction;
-                requestingUnitActions.LastSelected = requestingUnitActions.NullAction;
             }
         })
         .WithoutBurst()
@@ -148,49 +142,24 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                 .Run();
                 break;
             case TargetTypeEnum.unit:
-                Entities.WithAll<Health.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
+                if (requestingUnitAction.Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    valid = Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(requestingUnitCoord);
+                else
                 {
-                    if (Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
+                    Entities.WithAll<Health.Component>().WithSharedComponentFilter(worldIndex).ForEach((in SpatialEntityId targetUnitId, in CubeCoordinate.Component targetUnitCoord, in FactionComponent.Component targetUnitFaction) =>
                     {
-                        valid = m_PathFindingSystem.ValidateUnitTarget(requestingUnitAction.Effects[0].ApplyToRestrictions, requestingUnitId, requestingUnitFaction, targetUnitId.EntityId.Id, targetUnitFaction.Faction);
-                    }
-                })
-                .WithoutBurst()
-                .Run();
+                        if (Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(targetUnitCoord.CubeCoordinate))
+                        {
+                            valid = m_PathFindingSystem.ValidateUnitTarget(requestingUnitAction.Effects[0].ApplyToRestrictions, requestingUnitId, requestingUnitFaction, targetUnitId.EntityId.Id, targetUnitFaction.Faction);
+                        }
+                    })
+                   .WithoutBurst()
+                   .Run();
+                }
                 break;
-
         }
-
         return valid;
     }
-
-    public bool ValidateCellTarget(WorldIndexShared worldIndex, Action requestingUnitAction, Vector3f targetCoord, Vector3f requestingUnitCoord)
-    {
-        bool valid = false;
-
-
-
-        return valid;
-    }
-
-    /*
-    public bool ValidateCellTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, Vector3f requestingUnitCoord)
-    {
-        bool valid = false;
-
-        Entities.WithSharedComponentFilter(worldIndex).ForEach((in CellAttributesComponent.Component cellAtts, in CubeCoordinate.Component cCoord) =>
-        {
-            if (Vector3fext.ToUnityVector(targetCoord) == Vector3fext.ToUnityVector(cCoord.CubeCoordinate))
-            {
-                valid = m_PathFindingSystem.ValidateCellTarget(requestingUnitCoord, requestingUnitActions.CurrentSelected, cellAtts.CellAttributes.Cell);
-            }
-        })
-        .WithoutBurst()
-        .Run();
-
-        return valid;
-    }
-    */
 
     public bool ValidateUnitTarget(WorldIndexShared worldIndex, Actions.Component requestingUnitActions, Vector3f targetCoord, long requestingUnitId, uint requestingUnitFaction)
     {
@@ -255,6 +224,7 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         {
             var modType = locked.Targets[0].Mods[mi].ModType;
             var mod = locked.Targets[0].Mods[0];
+            
 
             switch (modType)
             {
@@ -279,6 +249,9 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                     //Hotfix for Bots targeting themselves with move action 
                     if (Vector3fext.ToUnityVector(originCoord) != Vector3fext.ToUnityVector(targetCoord))
                     {
+                        mod.CoordinatePositionPairs.Clear();
+                        effect.MoveAlongPathNested.CoordinatePositionPairs.Clear();
+
                         Entities.WithSharedComponentFilter(worldIndex).ForEach((in CurrentMapState currentMapState) =>
                         {
                             foreach (MapCell c in m_PathFindingSystem.FindMapPath(currentMapState, m_PathFindingSystem.GetMapRadius(currentMapState, originCoord, (uint) t.Targettingrange), currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(originCoord)], currentMapState.CoordinateCellDictionary[CellGridMethods.CubeToAxial(targetCoord)]))
@@ -289,7 +262,6 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
                         })
                         .WithoutBurst()
                         .Run();
-
 
                         mod.PathNested.OriginCoordinate = originCoord;
                         effect.MoveAlongPathNested.OriginCoordinate = originCoord;

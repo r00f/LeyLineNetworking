@@ -21,7 +21,7 @@ public class UnitComponentReferences : MonoBehaviour
     public float CurrentMoveTime;
     [HideInInspector]
     public int CurrentMoveIndex;
-    [HideInInspector]
+
     public Vector3 LastStationaryPosition;
 
     [Header("HealthBar")]

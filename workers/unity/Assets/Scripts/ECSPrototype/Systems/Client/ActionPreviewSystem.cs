@@ -3,8 +3,6 @@ using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Player;
-using System.Collections;
-using System.Collections.Generic;
 using Unit;
 using Unity.Entities;
 using Unity.Jobs;
@@ -62,6 +60,16 @@ public class ActionPreviewSystem : JobComponentSystem
                 {
                     animator.Animator.fireEvents = false;
 
+                    foreach (AnimStateEffectHandler a in animator.AnimStateEffectHandlers)
+                    {
+                        if(a.IsActiveState)
+                        {
+                            a.CurrentEffectOnTimestamps.Clear();
+                            a.CurrentEffectOffTimestamps.Clear();
+                            a.IsActiveState = false;
+                        }
+                    }
+
                     for(int i = 0; i < unitComponentReferences.AllMesheRenderers.Count; i++)
                         unitComponentReferences.AllMesheRenderers[i].materials = unitComponentReferences.AllMeshMaterials[i].ToArray();
 
@@ -69,6 +77,7 @@ public class ActionPreviewSystem : JobComponentSystem
                         g.gameObject.SetActive(false);
 
                     animator.CurrentPreviewIndex = actionRequest.ActionId;
+                    animator.Animator.SetInteger("Armor", 0);
                     animator.Animator.ResetTrigger("Execute");
                     animator.Animator.SetTrigger("CancelAction");
                     animator.CurrentPreviewIndex = 0;
@@ -76,16 +85,17 @@ public class ActionPreviewSystem : JobComponentSystem
                     animator.Animator.speed = 1;
                     animator.CurrentPreviewAction = null;
                 }
-                else if(animator.Animator && !animator.Animator.GetAnimatorTransitionInfo(1).anyState && !animator.Animator.fireEvents)
+                else if(animator.Animator && animator.Animator.layerCount > 1 && !animator.Animator.GetAnimatorTransitionInfo(1).anyState && !animator.Animator.fireEvents)
                 {
                     animator.Animator.fireEvents = true;
                 }
             }
             else
             {
-                if (playerState.CurrentState == PlayerStateEnum.waiting_for_target && playerState.SelectedUnitId == id.EntityId.Id)
+                if (playerState.SelectedUnitId == id.EntityId.Id)
                 {
-                    animator.CurrentPreviewTarget = CellGridMethods.CubeToPos(highlightingData.HoveredCoordinate, gameState.MapCenter);
+                    if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
+                        animator.CurrentPreviewTarget = CellGridMethods.CubeToPos(highlightingData.HoveredCoordinate, gameState.MapCenter);
 
                     if (animator.CurrentPreviewIndex != actionRequest.ActionId)
                     {
@@ -116,39 +126,52 @@ public class ActionPreviewSystem : JobComponentSystem
                 if (animator.Animator && animator.AnimationEvents && animator.CurrentPreviewAction)
                 {
                     animator.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
-                    animator.Animator.SetTrigger("Execute");
 
-                    var currentClip = animator.Animator.GetCurrentAnimatorClipInfo(1);
-                    var currentState = animator.Animator.GetCurrentAnimatorStateInfo(1);
-
-                    var nextClip = animator.Animator.GetNextAnimatorClipInfo(1);
-                    var nextState = animator.Animator.GetNextAnimatorStateInfo(1);
-                    //nextClip[0].clip.length * nextState.normalizedTime actual clip time
-
-                    var stoptime = .1f;
-
-                    if (nextClip.Length > 0)
+                    if (animator.CurrentPreviewAction.Targets[0].targettingRange > 0)
                     {
-                        animator.CurrentPreviewAnimTime = nextState.normalizedTime;
-                    }
-                    else if (currentClip.Length > 0)
-                    {
-                        animator.CurrentPreviewAnimTime = currentState.normalizedTime;
-                    }
+                        animator.Animator.SetInteger("Armor", 0);
+                        animator.Animator.SetTrigger("Execute");
 
-                    if (!animator.ResumePreviewAnimation)
-                    {
-                        if (Input.GetButtonDown("Fire1"))
-                            animator.ResumePreviewAnimation = true;
+                        var currentClip = animator.Animator.GetCurrentAnimatorClipInfo(1);
+                        var currentState = animator.Animator.GetCurrentAnimatorStateInfo(1);
 
-                        if (animator.CurrentPreviewAnimTime < stoptime)
-                            animator.Animator.speed = 1.1f - animator.CurrentPreviewAnimTime / stoptime;
+                        var nextClip = animator.Animator.GetNextAnimatorClipInfo(1);
+                        var nextState = animator.Animator.GetNextAnimatorStateInfo(1);
+                        //nextClip[0].clip.length * nextState.normalizedTime actual clip time
+
+                        var stoptime = .1f;
+
+                        if (nextClip.Length > 0)
+                            animator.CurrentPreviewAnimTime = nextState.normalizedTime;
+                        else if (currentClip.Length > 0)
+                            animator.CurrentPreviewAnimTime = currentState.normalizedTime;
+
+                        if (!animator.ResumePreviewAnimation)
+                        {
+                            if (animator.CurrentPreviewAnimTime < stoptime)
+                                animator.Animator.speed = 1.1f - animator.CurrentPreviewAnimTime / stoptime;
+                            else
+                                animator.Animator.speed = 0;
+
+                            if (Vector3fext.ToUnityVector(actionRequest.TargetCoordinate) != Vector3.zero)
+                                animator.ResumePreviewAnimation = true;
+                        }
                         else
-                            animator.Animator.speed = 0;
+                            animator.Animator.speed = 1;
+
+                        if (animator.RotateTransform)
+                        {
+                            Vector3 targetDirection = m_UnitAnimationSystem.RotateTowardsDirection(animator.RotateTransform, animator.CurrentPreviewTarget, animator.RotationSpeed);
+                            animator.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+                        }
                     }
-                    else
+                    else if(!animator.ResumePreviewAnimation)
                     {
+                        //self target currently only used for armoring
                         animator.Animator.speed = 1;
+                        animator.Animator.SetTrigger("Execute");
+                        animator.Animator.SetInteger("Armor", 10);
+                        animator.ResumePreviewAnimation = true;
                     }
 
                     if (animator.AnimationEvents.EventTrigger && animator.ResumePreviewAnimation)
@@ -156,21 +179,15 @@ public class ActionPreviewSystem : JobComponentSystem
                         if (animator.CurrentPreviewAction.ProjectileFab)
                         {
                             float targetYoffset = 0;
+
                             if (animator.CurrentPreviewAction.Targets[0] is ECSATarget_Unit)
-                            {
                                 targetYoffset = 1.3f;
-                            }
+
                             m_ActionEffectsSystem.LaunchProjectile(faction.Faction, playerVision, animator.CurrentPreviewAction.ProjectileFab, animator.ProjectileSpawnOrigin, animator.CurrentPreviewTarget, actions.ActionsList[actionRequest.ActionId], id.EntityId.Id, coord.CubeCoordinate, targetYoffset, true, animator.PlayActionSFX);
                         }
                         animator.PlayActionSFX = false;
                         unitComponentReferences.AnimatorComp.AnimationEvents.EventTriggered = true;
                         animator.AnimationEvents.EventTrigger = false;
-                    }
-
-                    if (animator.RotateTransform)
-                    {
-                        Vector3 targetDirection = m_UnitAnimationSystem.RotateTowardsDirection(animator.RotateTransform, animator.CurrentPreviewTarget, animator.RotationSpeed);
-                        animator.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                     }
                 }
             }
