@@ -198,13 +198,12 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.rendering.hybrid": {
-      "version": "0.11.0-preview.42",
+      "version": "file:com.unity.rendering.hybrid@0.11.0-preview.42",
       "depth": 0,
-      "source": "registry",
+      "source": "embedded",
       "dependencies": {
         "com.unity.entities": "0.17.0-preview.41"
-      },
-      "url": "https://packages.unity.com"
+      }
     },
     "com.unity.scriptablebuildpipeline": {
       "version": "1.9.0",
