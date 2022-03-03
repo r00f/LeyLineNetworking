@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Unit;
 using Unity.Entities;
 using Unity.Jobs;
+using UnityEngine;
 
 namespace LeyLineHybridECS
 {
@@ -26,6 +27,7 @@ namespace LeyLineHybridECS
         EntityQuery m_UnitData;
         EntityQuery m_EffectStackData;
         EntityQuery m_InitMapEventSenderData;
+        Settings settings;
 
         protected override void OnCreate()
         {
@@ -61,6 +63,7 @@ namespace LeyLineHybridECS
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
             m_SpawnSystem = World.GetExistingSystem<InitializeWorldSystem>();
+            settings = Resources.Load<Settings>("Settings");
         }
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
@@ -286,10 +289,13 @@ namespace LeyLineHybridECS
                         break;
                     case GameStateEnum.game_over:
                         //Cycle back to Start in order to stresstest
-                        m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
-                        gameState.InitMapEventSent = false;
-                        gameState.InitMapWaitTime = 2f;
-                        gameState.CurrentState = GameStateEnum.waiting_for_players;
+                        if(clientWorkerIds.PlayersOnMapCount == 0 || settings.StressTest)
+                        {
+                            m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
+                            gameState.InitMapEventSent = false;
+                            gameState.InitMapWaitTime = 2f;
+                            gameState.CurrentState = GameStateEnum.waiting_for_players;
+                        }
                         //RevealPlayerVisions(gameStateWorldIndex);
                         break;
                 }

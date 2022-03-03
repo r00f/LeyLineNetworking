@@ -35,6 +35,18 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
 
     private void Update()
     {
+        if(!Visuals.activeSelf)
+        {
+            if(SelectHandler.Selected)
+                SelectHandler.Selected = false;
+            if(TurnStepBauble.enabled)
+                TurnStepBauble.enabled = false;
+            if(SelectedGlow.enabled)
+                SelectedGlow.enabled = false;
+            if (Hovered)
+                Hovered = false;
+        }
+
         if(!SelectHandler.Selected && !Hovered)
         {
             TurnStepBauble.enabled = false;
@@ -52,24 +64,11 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
         if(Visuals.activeSelf)
         {
             Hovered = true;
-            /*
-            UIRef.TTRect.anchoredPosition = new Vector2(RectTransform.anchoredPosition.x, UIRef.TTRect.anchoredPosition.y);
-            UIRef.TTActionCost.text = "" + EnergyCost;
-            UIRef.TTActionDescription.text = ActionDescription;
-            UIRef.TTActionName.text = ActionName.Replace(" ", Environment.NewLine);
-            UIRef.TTExecuteStepImage.sprite = UIRef.ExecuteStepSprites[ExecuteStepIndex];
-            UIRef.TTPanel.SetActive(true);
-            */
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         Hovered = false;
-
-        //UIRef.TTPanel.SetActive(false);
-        //IconRectTransform.anchoredPosition = new Vector2(0, 0);
     }
-
-
 }

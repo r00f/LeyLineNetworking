@@ -104,12 +104,19 @@ namespace LeyLineHybridECS
 
             if (gameState.CurrentState == GameStateEnum.planning)
             {
+                UpdateSelectedUnit(playerCam, ref playerState, ref playerHigh, playerVision, playerFaction, playerEnergy);
+
                 if (ropeEndEvents.Count == 0)
                 {
                     if (playerState.CurrentState != PlayerStateEnum.ready && playerState.CurrentState != PlayerStateEnum.conceded)
                     {
                         if (playerHigh.CancelState)
                         {
+                            if (playerState.SelectedUnitId != 0)
+                            {
+                                playerState.SelectedUnitId = 0;
+                            }
+
                             if (playerHigh.CancelTime >= 0)
                                 playerHigh.CancelTime -= Time.DeltaTime;
                             else
@@ -117,24 +124,16 @@ namespace LeyLineHybridECS
                                 playerState.CurrentState = PlayerStateEnum.ready;
                             }
                         }
-                        else
+                        else if (playerHigh.CancelTime < UIRef.TurnStatePnl.CacelGraceTime)
                         {
-                            UpdateSelectedUnit(playerCam, ref playerState, ref playerHigh, playerVision, playerFaction, playerEnergy);
-
-                            if (playerHigh.CancelTime < UIRef.TurnStatePnl.CacelGraceTime)
-                                playerHigh.CancelTime += Time.DeltaTime * UIRef.TurnStatePnl.SlidersOpenMultiplier;
+                            playerHigh.CancelTime += Time.DeltaTime * UIRef.TurnStatePnl.SlidersOpenMultiplier;
                         }
-
                         UIRef.TurnStatePnl.GOButtonAnimator.SetFloat("CancelTimer", 1 - (playerHigh.CancelTime / UIRef.TurnStatePnl.CacelGraceTime));
-                    }
-                    else
-                    {
-                        if (playerState.SelectedUnitId != 0)
-                            playerState.SelectedUnitId = 0;
                     }
                 }
                 else
                 {
+                    playerState.SelectedUnitId = 0;
                     m_HighlightingSystem.ResetHighlightsNoIn();
                     playerState.CurrentState = PlayerStateEnum.ready;
                 }
@@ -198,7 +197,13 @@ namespace LeyLineHybridECS
                 {
                     unitComponentReferences.SelectionCircleGO.SetActive(false);
 
-                    if (mouseState.ClickEvent == 1)
+                    if(pHigh.CancelState && clientActionRequest.ActionId != -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
+                    {
+                        m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
+                        m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id);
+                    }
+
+                    if (!pHigh.CancelState && mouseState.ClickEvent == 1)
                     {
                         if ((EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(unitCoord.CubeCoordinate))) && pState.CurrentState != PlayerStateEnum.waiting_for_target)
                         {
@@ -218,16 +223,9 @@ namespace LeyLineHybridECS
                             {
                                 m_UISystem.PopulateManlithInfoHexes((uint)unitId.EntityId.Id, playerFaction.Faction);
                             }
-                            //m_UISystem.InitializeUnitPortraitInfo(playerFaction.Faction, faction.Faction, , health);
-                            //m_UISystem.InitializeSelectedActionTooltip(actions.LockedAction.Index, unitComponentReferences.BaseDataSetComp.Actions.Count);
 
                             pState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                             pState.SelectedUnitId = unitId.EntityId.Id;
-
-
-                            //pHigh.CurrentSelectedUnitId = unitId.EntityId.Id;
-                            //Selected UnitChange Event Occurs here
-                            //pHigh.LastSelectedUnitId = pHigh.CurrentSelectedUnitId;
                         }
                     }
                 }

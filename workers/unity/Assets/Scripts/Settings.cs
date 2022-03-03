@@ -9,6 +9,7 @@ public class Settings : ScriptableObject
     public int CellHighlighterLayerOverride;
     public uint ForcePlayerFaction;
 
+    public bool StressTest;
     public int SimPlayerWaitTime;
 
     public List<Color> FactionColors;

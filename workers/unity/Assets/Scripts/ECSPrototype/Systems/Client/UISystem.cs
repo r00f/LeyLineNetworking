@@ -130,14 +130,15 @@ namespace LeyLineHybridECS
             #region GetData
             var authPlayerEntity = m_AuthoritativePlayerData.GetSingletonEntity();
             var authPlayerCam = EntityManager.GetComponentObject<Moba_Camera>(authPlayerEntity);
+            var authPlayerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
+            var authPlayerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
+            var authPlayerEnergy = m_AuthoritativePlayerData.GetSingleton<PlayerEnergy.Component>();
+            var authPlayerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
 
             var gameStateId = m_GameStateData.GetSingleton<SpatialEntityId>();
             var gameState = m_GameStateData.GetSingleton<GameState.Component>();
             var gameStatePosition = m_GameStateData.GetSingleton<Position.Component>();
-            var authPlayerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
-            var authPlayerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
-            var playerEnergy = m_AuthoritativePlayerData.GetSingleton<PlayerEnergy.Component>();
-            var playerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
+
             #endregion
 
             var mapInitializedEvent = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
@@ -203,8 +204,8 @@ namespace LeyLineHybridECS
             if (energyChangeEvents.Count > 0)
             {
                 //Only convert energy numbers to string when energy change event is fired
-                UIRef.CurrentEnergyText.text = playerEnergy.Energy.ToString();
-                UIRef.MaxEnergyText.text = playerEnergy.MaxEnergy.ToString();
+                UIRef.CurrentEnergyText.text = authPlayerEnergy.Energy.ToString();
+                UIRef.MaxEnergyText.text = authPlayerEnergy.MaxEnergy.ToString();
             }
 
             if (cleanUpStateEvents.Count > 0)
@@ -287,9 +288,9 @@ namespace LeyLineHybridECS
 
             HandleTutorialVideoPlayers();
 
-            UnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, playerEnergy, playerHigh);
+            UnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, authPlayerEnergy, authPlayerHigh);
 
-            ManalithUnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, playerEnergy, playerHigh);
+            ManalithUnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, authPlayerEnergy, authPlayerHigh);
 
             if (gameState.CurrentState != GameStateEnum.planning)
             {
@@ -335,9 +336,9 @@ namespace LeyLineHybridECS
                     UIRef.TurnStatePnl.GOButtonScript.Button.interactable = true;
                 }
 
-                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount - .003f)
+                if (UIRef.HeroCurrentEnergyFill.fillAmount >= (float) authPlayerEnergy.Energy / authPlayerEnergy.MaxEnergy * UIRef.MaxFillAmount - .003f)
                 {
-                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float) playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
+                    UIRef.HeroEnergyIncomeFill.fillAmount = Mathf.Lerp(UIRef.HeroEnergyIncomeFill.fillAmount, Mathf.Clamp(authPlayerEnergy.Energy + authPlayerEnergy.Income, 0, authPlayerEnergy.MaxEnergy) / (float) authPlayerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
                     //FillBarToDesiredValue(UIRef.HeroEnergyIncomeFill, Mathf.Clamp(playerEnergy.Energy + playerEnergy.Income, 0, playerEnergy.MaxEnergy) / (float) playerEnergy.MaxEnergy * UIRef.MaxFillAmount, UIRef.EnergyLerpSpeed);
                 }
             }
@@ -404,7 +405,7 @@ namespace LeyLineHybridECS
 
             HandleMenuSettings(authPlayerCam);
 
-            UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float) playerEnergy.Energy / playerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
+            UIRef.HeroCurrentEnergyFill.fillAmount = Mathf.Lerp(UIRef.HeroCurrentEnergyFill.fillAmount, (float) authPlayerEnergy.Energy / authPlayerEnergy.MaxEnergy * UIRef.MaxFillAmount, Time.DeltaTime);
 
             if (authPlayerState.CurrentState != PlayerStateEnum.unit_selected && authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target)
             {
@@ -489,7 +490,7 @@ namespace LeyLineHybridECS
 
             #endregion
 
-            UIRef.TurnStatePnl.GOButtonScript.PlayerInCancelState = playerHigh.CancelState;
+            UIRef.TurnStatePnl.GOButtonScript.PlayerInCancelState = authPlayerHigh.CancelState;
 
             //Handle Ropes
             if (gameState.CurrentRopeTime < gameState.RopeTime)
@@ -577,7 +578,7 @@ namespace LeyLineHybridECS
                 UIRef.TurnStatePnl.RopeTimeText.enabled = false;
             }
 
-            m_AuthoritativePlayerData.SetSingleton(playerHigh);
+            m_AuthoritativePlayerData.SetSingleton(authPlayerHigh);
 
             HandleKeyCodeInput(gameState.CurrentState);
 
@@ -779,12 +780,12 @@ namespace LeyLineHybridECS
         public void UpdateActionHoverTooltip()
         {
             var anyButtonHovered = false;
-            foreach(ActionButton b in UIRef.Actions)
+
+            foreach (ActionButton b in UIRef.Actions)
             {
-                if(b.Hovered)
+                if (b.Hovered)
                 {
                     UIRef.SAToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x, UIRef.SAToolTip.Rect.anchoredPosition.y);
-                    UIRef.SAToolTip.gameObject.SetActive(true);
                     InitializeSelectedActionTooltip(b);
                     anyButtonHovered = true;
                 }
@@ -794,14 +795,12 @@ namespace LeyLineHybridECS
                 if (b.Hovered)
                 {
                     UIRef.SAToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x, UIRef.SAToolTip.Rect.anchoredPosition.y);
-                    UIRef.SAToolTip.gameObject.SetActive(true);
                     InitializeSelectedActionTooltip(b);
                     anyButtonHovered = true;
                 }
             }
 
-            if(!anyButtonHovered)
-                UIRef.SAToolTip.gameObject.SetActive(false);
+            UIRef.SAToolTip.gameObject.SetActive(anyButtonHovered);
         }
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
@@ -1435,32 +1434,32 @@ namespace LeyLineHybridECS
                 {
                     if (UIRef.ActionButtonGroup.activeSelf)
                     {
-                        if (Input.GetKeyDown(KeyCode.Alpha1))
+                        if (Input.GetKeyDown(KeyCode.Alpha1) && UIRef.Actions[0].Visuals.activeSelf)
                         {
                             UIRef.Actions[0].Button.Select();
                             UIRef.Actions[0].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha2))
+                        else if (Input.GetKeyDown(KeyCode.Alpha2) && UIRef.Actions[1].Visuals.activeSelf)
                         {
                             UIRef.Actions[1].Button.Select();
                             UIRef.Actions[1].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha3))
+                        else if (Input.GetKeyDown(KeyCode.Alpha3) && UIRef.Actions[2].Visuals.activeSelf)
                         {
                             UIRef.Actions[2].Button.Select();
                             UIRef.Actions[2].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha4))
+                        else if (Input.GetKeyDown(KeyCode.Alpha4) && UIRef.Actions[3].Visuals.activeSelf)
                         {
                             UIRef.Actions[3].Button.Select();
                             UIRef.Actions[3].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha5))
+                        else if (Input.GetKeyDown(KeyCode.Alpha5) && UIRef.Actions[4].Visuals.activeSelf)
                         {
                             UIRef.Actions[4].Button.Select();
                             UIRef.Actions[4].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha6))
+                        else if (Input.GetKeyDown(KeyCode.Alpha6) && UIRef.Actions[5].Visuals.activeSelf)
                         {
                             UIRef.Actions[5].Button.Select();
                             UIRef.Actions[5].Button.onClick.Invoke();
@@ -1468,32 +1467,32 @@ namespace LeyLineHybridECS
                     }
                     else
                     {
-                        if (Input.GetKeyDown(KeyCode.Alpha1))
+                        if (Input.GetKeyDown(KeyCode.Alpha1) && UIRef.Actions[0].Visuals.activeSelf)
                         {
                             UIRef.SpawnActions[0].Button.Select();
                             UIRef.SpawnActions[0].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha2))
+                        else if (Input.GetKeyDown(KeyCode.Alpha2) && UIRef.Actions[1].Visuals.activeSelf)
                         {
                             UIRef.SpawnActions[1].Button.Select();
                             UIRef.SpawnActions[1].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha3))
+                        else if (Input.GetKeyDown(KeyCode.Alpha3) && UIRef.Actions[2].Visuals.activeSelf)
                         {
                             UIRef.SpawnActions[2].Button.Select();
                             UIRef.SpawnActions[2].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha4))
+                        else if (Input.GetKeyDown(KeyCode.Alpha4) && UIRef.Actions[3].Visuals.activeSelf)
                         {
                             UIRef.SpawnActions[3].Button.Select();
                             UIRef.SpawnActions[3].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha5))
+                        else if (Input.GetKeyDown(KeyCode.Alpha5) && UIRef.Actions[4].Visuals.activeSelf)
                         {
                             UIRef.SpawnActions[4].Button.Select();
                             UIRef.SpawnActions[4].Button.onClick.Invoke();
                         }
-                        else if (Input.GetKeyDown(KeyCode.Alpha6))
+                        else if (Input.GetKeyDown(KeyCode.Alpha6) && UIRef.Actions[5].Visuals.activeSelf)
                         {
                             UIRef.SpawnActions[5].Button.Select();
                             UIRef.SpawnActions[5].Button.onClick.Invoke();

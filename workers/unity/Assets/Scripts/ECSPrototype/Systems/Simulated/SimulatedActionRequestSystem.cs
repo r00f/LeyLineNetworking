@@ -119,9 +119,9 @@ public class SimulatedActionRequestSystem : JobComponentSystem
                 if (simSkipTime.SkipTurnWaitTime > 0f)
                 {
                     simSkipTime.SkipTurnWaitTime -= Time.DeltaTime;
-                    Entities.ForEach((Entity e, ref ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component coord, in Energy.Component energy, in Actions.Component actions, in FactionComponent.Component faction, in SpatialEntityId id) =>
+                    Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, ref ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component coord, in Energy.Component energy, in Actions.Component actions, in FactionComponent.Component faction, in SpatialEntityId id) =>
                     {
-                        if (faction.Faction == playerFaction.Faction && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero && (!energy.Harvesting || EntityManager.HasComponent<Manalith.Component>(e)))
+                        if (actions.ActionsList.Count > 0 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero && (!energy.Harvesting || EntityManager.HasComponent<Manalith.Component>(e)))
                         {
                             if (clientActionRequest.ActionId == -3)
                             {

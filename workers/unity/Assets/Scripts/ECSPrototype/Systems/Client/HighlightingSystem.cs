@@ -740,6 +740,11 @@ public class HighlightingSystem : JobComponentSystem
     {
         var playerHigh = m_PlayerStateData.GetSingleton<HighlightingDataComponent>();
         var playerState = m_PlayerStateData.GetSingleton<PlayerState.Component>();
+        var playerEntity = m_PlayerStateData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
+
+        foreach (LineRenderer r in playerEffects.RangeOutlineRenderers)
+            r.gameObject.SetActive(false);
 
         EntityCommandBuffer commandBuffer = entityCommandBufferSystem.CreateCommandBuffer();
 

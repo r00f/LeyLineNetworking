@@ -66995,11 +66995,9 @@ MonoBehaviour:
   DeathPingSize: 40
   MapUnitPixelSize: {x: 10, y: 10}
   MapCellPixelSize: {x: 12, y: 12}
-  MapCellDarknessPixelSize: {x: 12, y: 12}
   UnitColorOffsetMin: {x: 2, y: 2}
   UnitColorOffsetMax: {x: 2, y: 2}
   MiniMapCellTilesPanel: {fileID: 57394642651042604}
-  MiniMapDarknessTilesPanel: {fileID: 0}
   MiniMapUnitTilesPanel: {fileID: 5568863359235412199}
   MiniMapEffectsPanel: {fileID: 1021290185366238682}
   MiniMapManalithTilesPanel: {fileID: 2037466645870986536}
@@ -69413,10 +69411,10 @@ RectTransform:
   m_Father: {fileID: 5674216400929756742}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 10, y: 10}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 3.3}
+  m_SizeDelta: {x: 270, y: 270}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6248801283567236718
 CanvasRenderer:
@@ -90181,11 +90179,9 @@ MonoBehaviour:
   DeathPingSize: 80
   MapUnitPixelSize: {x: 32, y: 32}
   MapCellPixelSize: {x: 50, y: 50}
-  MapCellDarknessPixelSize: {x: 49.4, y: 50.6}
   UnitColorOffsetMin: {x: 4, y: 4}
   UnitColorOffsetMax: {x: 4, y: 9}
   MiniMapCellTilesPanel: {fileID: 6686979984471094437}
-  MiniMapDarknessTilesPanel: {fileID: 3446578087889199574}
   MiniMapUnitTilesPanel: {fileID: 4262571920834110409}
   MiniMapEffectsPanel: {fileID: 4147601065434896705}
   MiniMapManalithTilesPanel: {fileID: 3939223012520536434}
@@ -96614,6 +96610,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3528822820529997012, guid: dbb780244a1cb79449abf85a7c2f8af0,
+        type: 3}
+      propertyPath: m_FillAmount
+      value: 0.63
       objectReference: {fileID: 0}
     - target: {fileID: 3554114740894312833, guid: dbb780244a1cb79449abf85a7c2f8af0,
         type: 3}
