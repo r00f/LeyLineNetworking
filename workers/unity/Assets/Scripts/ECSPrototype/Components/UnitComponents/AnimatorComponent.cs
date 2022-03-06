@@ -20,10 +20,11 @@ public class AnimatorComponent : MonoBehaviour
     [Header("Action Preview")]
     public ECSAction CurrentPreviewAction;
     public Vector3 CurrentPreviewTarget;
-    public int CurrentPreviewIndex;
+    public int CurrentPreviewIndex = -3;
     public bool ResumePreviewAnimation;
     public float CurrentPreviewAnimTime;
     public bool PlayActionSFX;
+    public MeshMaterialComponent MovePreviewUnitDupe;
 
     public Animator Animator;
     public AnimationEvents AnimationEvents;
@@ -71,5 +72,10 @@ public class AnimatorComponent : MonoBehaviour
     public int DeathExplosionForce;
     [HideInInspector]
     public float DeathExplosionRadius;
+
+    public void Start()
+    {
+        CurrentPreviewIndex = -3;
+    }
 
 }

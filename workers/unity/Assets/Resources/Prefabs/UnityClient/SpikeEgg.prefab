@@ -5003,25 +5003,7 @@ MonoBehaviour:
   - {fileID: 7550265048827665331}
   - {fileID: 7550265048827665329}
   - {fileID: 7550265048827665363}
-  AllMesheRenderers:
-  - {fileID: 7550265048825398547}
-  - {fileID: 7550265048825398557}
-  - {fileID: 7550265048825398555}
-  - {fileID: 7550265048825398553}
-  - {fileID: 7550265048825398535}
-  - {fileID: 7550265048825398533}
-  - {fileID: 7550265048825398531}
-  - {fileID: 7550265048825398529}
-  - {fileID: 7550265048825398543}
-  - {fileID: 7550265048825398545}
-  - {fileID: 7550265048825398559}
-  - {fileID: 7550265048825398541}
-  - {fileID: 7550265048825398539}
-  - {fileID: 7550265048825398537}
-  - {fileID: 7550265048825398775}
-  - {fileID: 7550265048825398773}
-  - {fileID: 7550265048825398771}
-  - {fileID: 7550265048825398549}
+  MeshMatComponent: {fileID: 2727498668125562198}
 --- !u!136 &6943022816249909003
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -5058,6 +5040,7 @@ MonoBehaviour:
   ResumePreviewAnimation: 0
   CurrentPreviewAnimTime: 0
   PlayActionSFX: 0
+  MovePreviewUnitDupe: {fileID: 0}
   Animator: {fileID: 8045395822357648005}
   AnimationEvents: {fileID: 2081589284147450996}
   ExecuteTriggerSet: 0
@@ -5065,7 +5048,7 @@ MonoBehaviour:
   ProjectileSpawnOrigin: {fileID: 0}
   Visuals:
   - {fileID: 7550265048827665367}
-  EnableVisualsDelay: 5.5
+  EnableVisualsDelay: 6.3
   CharacterEffects: []
   VoiceEmitter: {fileID: 0}
   FootStempEmitter: {fileID: 0}
@@ -5690,6 +5673,40 @@ MonoBehaviour:
   EventTrigger: 0
   EventTriggered: 0
   EffectGameObjectIndex: -1
+--- !u!114 &2727498668125562198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7550265048827665367}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be7e361b42bd7143aa6acffb4d84a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Animator: {fileID: 8045395822357648005}
+  AllMesheRenderers:
+  - {fileID: 7550265048825398547}
+  - {fileID: 7550265048825398557}
+  - {fileID: 7550265048825398555}
+  - {fileID: 7550265048825398553}
+  - {fileID: 7550265048825398535}
+  - {fileID: 7550265048825398533}
+  - {fileID: 7550265048825398531}
+  - {fileID: 7550265048825398529}
+  - {fileID: 7550265048825398543}
+  - {fileID: 7550265048825398545}
+  - {fileID: 7550265048825398559}
+  - {fileID: 7550265048825398541}
+  - {fileID: 7550265048825398539}
+  - {fileID: 7550265048825398537}
+  - {fileID: 7550265048825398775}
+  - {fileID: 7550265048825398773}
+  - {fileID: 7550265048825398771}
+  - {fileID: 7550265048825398549}
+  CurrentMoveIndex: 0
+  CurrentMoveTime: 0
 --- !u!54 &7204551455851060685
 Rigidbody:
   m_ObjectHideFlags: 0

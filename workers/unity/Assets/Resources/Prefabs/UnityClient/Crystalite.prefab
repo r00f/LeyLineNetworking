@@ -465,6 +465,26 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
+--- !u!114 &81108352430545771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1196422987792921909}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9be7e361b42bd7143aa6acffb4d84a5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Animator: {fileID: 5559275641791118903}
+  AllMesheRenderers:
+  - {fileID: 5311068598095945009}
+  - {fileID: 959004335689492150}
+  - {fileID: 4492717733003337370}
+  - {fileID: 5297150197300695327}
+  CurrentMoveIndex: 0
+  CurrentMoveTime: 0
 --- !u!114 &5163191610714612810
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -579,8 +599,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: 0.000000014901161, y: 1.0182649, z: 0.27801487}
-  - {x: -0.0210186, y: 0.57171595, z: 0.69914794}
-  - {x: 0.034074064, y: 0.071004435, z: 0.024841016}
+  - {x: 0.0073146145, y: 0.6104979, z: 0.7519343}
+  - {x: 0.014160596, y: 0.08559727, z: 0.025722789}
   - {x: 0.00000043359577, y: 0.5684761, z: -0.32098344}
   m_Parameters:
     serializedVersion: 3
@@ -599,7 +619,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.33333334
-        value: 0.15340726
+        value: 0.104075134
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -608,7 +628,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.6666667
-        value: 0.074149355
+        value: 0.112208486
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -703,7 +723,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.33333334
-      value: 0.15340726
+      value: 0.104075134
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -712,7 +732,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.6666667
-      value: 0.074149355
+      value: 0.112208486
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -805,11 +825,11 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -0.49365705, y: 1.06377, z: -0.109762006}
-  - {x: -0.95877236, y: 0.1860899, z: -0.09005381}
-  - {x: -0.61685616, y: -0.72046775, z: -0.13071164}
-  - {x: 0.029471252, y: -0.91441137, z: -0.13092011}
-  - {x: 0.6333401, y: -0.66656464, z: -0.13808316}
-  - {x: 0.9811474, y: 0.22715685, z: -0.12421782}
+  - {x: -1.0049431, y: 0.2012132, z: -0.13193774}
+  - {x: -0.6843924, y: -0.7131301, z: -0.14529958}
+  - {x: -0.0043292753, y: -0.9426557, z: -0.11316199}
+  - {x: 0.60675424, y: -0.708289, z: -0.11209669}
+  - {x: 0.94571865, y: 0.23201351, z: -0.14023896}
   - {x: 0.49365717, y: 1.0637732, z: -0.109762445}
   m_Parameters:
     serializedVersion: 3
@@ -828,7 +848,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.16666667
-        value: 0.07659641
+        value: 0.12826127
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -837,7 +857,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.33333334
-        value: 0.060646176
+        value: 0.13947044
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -846,7 +866,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.5
-        value: 0.099768475
+        value: 0.10845208
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -855,7 +875,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.6666667
-        value: 0.14134131
+        value: 0.085281774
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -864,7 +884,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.8333333
-        value: 0.07878815
+        value: 0.075231805
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -962,7 +982,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.16666667
-      value: 0.07659641
+      value: 0.12826127
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -971,7 +991,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.33333334
-      value: 0.060646176
+      value: 0.13947044
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -980,7 +1000,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.5
-      value: 0.099768475
+      value: 0.10845208
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -989,7 +1009,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.6666667
-      value: 0.14134131
+      value: 0.085281774
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -998,7 +1018,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.8333333
-      value: 0.07878815
+      value: 0.075231805
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1091,8 +1111,8 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: 0.000000014901161, y: 1.0182649, z: 0.27801487}
-  - {x: 0.08114666, y: 0.5969403, z: 0.75345576}
-  - {x: -0.0146974595, y: 0.059052322, z: 0.13524708}
+  - {x: 0.006343759, y: 0.48242962, z: 0.74030185}
+  - {x: 0.009680114, y: 0.014274351, z: 0.03997834}
   - {x: 0.00000043359577, y: 0.5684761, z: -0.32098344}
   m_Parameters:
     serializedVersion: 3
@@ -1111,7 +1131,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.33333334
-        value: 0.07403232
+        value: 0.02488861
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1120,7 +1140,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.6666667
-        value: 0.07504956
+        value: 0.19155471
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1215,7 +1235,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.33333334
-      value: 0.07403232
+      value: 0.02488861
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1224,7 +1244,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.6666667
-      value: 0.07504956
+      value: 0.19155471
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1317,11 +1337,11 @@ LineRenderer:
   m_SortingOrder: 0
   m_Positions:
   - {x: -0.49365705, y: 1.06377, z: -0.109762006}
-  - {x: -1.0089109, y: 0.13651419, z: -0.049867563}
-  - {x: -0.5938848, y: -0.6970251, z: -0.13303405}
-  - {x: 0.019210033, y: -0.9501428, z: -0.16336823}
-  - {x: 0.7056186, y: -0.72098154, z: -0.19661844}
-  - {x: 0.9740668, y: 0.28167394, z: -0.20739806}
+  - {x: -0.98014444, y: 0.16576912, z: -0.18250985}
+  - {x: -0.70096946, y: -0.794867, z: -0.17673752}
+  - {x: 0.03004732, y: -1.0129335, z: -0.08760564}
+  - {x: 0.55752784, y: -0.7170368, z: -0.19821125}
+  - {x: 1.0693771, y: 0.21171258, z: -0.103192404}
   - {x: 0.49365717, y: 1.0637732, z: -0.109762445}
   m_Parameters:
     serializedVersion: 3
@@ -1340,7 +1360,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.16666667
-        value: 0.09716449
+        value: 0.015133572
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1349,7 +1369,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.33333334
-        value: 0.066737436
+        value: 0.011471832
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1358,7 +1378,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.5
-        value: 0.07002652
+        value: 0.08987977
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1367,7 +1387,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.6666667
-        value: 0.0063193324
+        value: 0.023966957
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1376,7 +1396,7 @@ LineRenderer:
         outWeight: 0
       - serializedVersion: 3
         time: 0.8333333
-        value: 0.061254747
+        value: 0.04954669
         inSlope: 0
         outSlope: 0
         tangentMode: 0
@@ -1474,7 +1494,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.16666667
-      value: 0.09716449
+      value: 0.015133572
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1483,7 +1503,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.33333334
-      value: 0.066737436
+      value: 0.011471832
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1492,7 +1512,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.5
-      value: 0.07002652
+      value: 0.08987977
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1501,7 +1521,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.6666667
-      value: 0.0063193324
+      value: 0.023966957
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -1510,7 +1530,7 @@ MonoBehaviour:
       outWeight: 0
     - serializedVersion: 3
       time: 0.8333333
-      value: 0.061254747
+      value: 0.04954669
       inSlope: 0
       outSlope: 0
       tangentMode: 0
@@ -2244,7 +2264,8 @@ MonoBehaviour:
   CurrentPreviewIndex: 0
   ResumePreviewAnimation: 0
   CurrentPreviewAnimTime: 0
-  PreviewActionSFX: 0
+  PlayActionSFX: 0
+  MovePreviewUnitDupe: {fileID: 0}
   Animator: {fileID: 5559275641791118903}
   AnimationEvents: {fileID: 5163191610714612810}
   ExecuteTriggerSet: 0
@@ -2461,6 +2482,7 @@ MonoBehaviour:
   - {fileID: 959004335689492150}
   - {fileID: 4492717733003337370}
   - {fileID: 5297150197300695327}
+  MeshMatComponent: {fileID: 81108352430545771}
 --- !u!114 &6308482773748565955
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3290,6 +3312,12 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 2043479261247899748}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &7398477708586542428 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: -362740116227265224, guid: e12cc8f5809c5e64f91023092bd35ebe,
+    type: 3}
+  m_PrefabInstance: {fileID: 2043479261247899748}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1196422987792921909 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: e12cc8f5809c5e64f91023092bd35ebe,
@@ -3347,12 +3375,6 @@ Transform:
 --- !u!4 &6679444994060377775 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -4545888654782507317, guid: e12cc8f5809c5e64f91023092bd35ebe,
-    type: 3}
-  m_PrefabInstance: {fileID: 2043479261247899748}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &7398477708586542428 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: -362740116227265224, guid: e12cc8f5809c5e64f91023092bd35ebe,
     type: 3}
   m_PrefabInstance: {fileID: 2043479261247899748}
   m_PrefabAsset: {fileID: 0}

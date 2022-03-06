@@ -170,9 +170,13 @@ public class InitializeUnitsSystem : JobComponentSystem
                     heroTransform.Transform = unitTransform;
                 }
             }
-            foreach (Renderer r in unitCompRef.AllMesheRenderers)
+
+            if(unitCompRef.MeshMatComponent)
             {
-                unitCompRef.AllMeshMaterials.Add(r.materials.ToList());
+                foreach (Renderer r in unitCompRef.MeshMatComponent.AllMesheRenderers)
+                {
+                    unitCompRef.MeshMatComponent.AllMeshMaterials.Add(r.materials.ToList());
+                }
             }
         })
         .WithoutBurst()

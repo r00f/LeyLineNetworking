@@ -265,7 +265,7 @@ public class UnitAnimationSystem : JobComponentSystem
                         }
                         else
                         {
-                            //Debug.Log("TriggerActionEffect from unit animation system");
+                            Debug.Log("TriggerActionEffect from unit animation system");
                             m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, unitComponentReferences.AnimatorComp.WeaponTransform, gameState);
                         }
 
@@ -412,6 +412,37 @@ public class UnitAnimationSystem : JobComponentSystem
         {
             unitComponentReferences.AnimatorComp.Animator.SetTrigger("DestinationReached");
             unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = true;
+        }
+    }
+
+    public void MoveObjectAlongPath(MeshMaterialComponent objectToMove, Vector3[] pathPositions, float timePerCell, float rotationSpeed, bool loop = false)
+    {
+        if (objectToMove.CurrentMoveTime > 0)
+        {
+            objectToMove.CurrentMoveTime -= Time.DeltaTime;
+            float normalizedTime = 1f - (objectToMove.CurrentMoveTime / timePerCell);
+
+            Vector3 targetDirection = RotateTowardsDirection(objectToMove.transform, pathPositions[objectToMove.CurrentMoveIndex], rotationSpeed);
+            objectToMove.transform.rotation = Quaternion.LookRotation(targetDirection);
+
+            objectToMove.transform.position = Vector3.Lerp(pathPositions[objectToMove.CurrentMoveIndex - 1], pathPositions[objectToMove.CurrentMoveIndex], normalizedTime);
+        }
+        else if(objectToMove.CurrentMoveIndex < pathPositions.Length - 1)
+        {
+            objectToMove.CurrentMoveIndex++;
+            objectToMove.CurrentMoveTime = timePerCell;
+        }
+        else
+        {
+            if (loop)
+            {
+                objectToMove.transform.position = pathPositions[0];
+                objectToMove.CurrentMoveIndex = 0;
+            }
+            else
+            {
+                objectToMove.Animator.SetTrigger("DestinationReached");
+            }
         }
     }
 

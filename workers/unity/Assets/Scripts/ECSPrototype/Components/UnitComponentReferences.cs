@@ -33,8 +33,7 @@ public class UnitComponentReferences : MonoBehaviour
     public MeshRenderer SelectionMeshRenderer;
 
     public List<GameObject> SelectionGameObjects;
-    public List<Renderer> AllMesheRenderers;
-    public List<List<Material>> AllMeshMaterials = new List<List<Material>>();
+    public MeshMaterialComponent MeshMatComponent;
 
     public void InitializeComponentReferences()
     {
@@ -48,19 +47,32 @@ public class UnitComponentReferences : MonoBehaviour
         AnimPortraitComp = GetComponent<AnimatedPortraitReference>();
         UnitEffectsComp = GetComponent<UnitEffects>();
 
+        MeshMatComponent = GetComponentInChildren<MeshMaterialComponent>();
+
+        if(MeshMatComponent)
+        {
+            MeshMatComponent.Animator = AnimatorComp.Animator;
+            foreach (SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                MeshMatComponent.AllMesheRenderers.Add(s);
+            }
+
+            foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
+            {
+                MeshMatComponent.AllMesheRenderers.Add(m);
+            }
+        }
+
         SelectionGameObjects.Clear();
-        AllMesheRenderers.Clear();
 
         foreach (SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
         {
             SelectionGameObjects.Add(s.gameObject);
-            AllMesheRenderers.Add(s);
         }
 
         foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
         {
             SelectionGameObjects.Add(m.gameObject);
-            AllMesheRenderers.Add(m);
         }
 
         if(SelectionCircleGO && SelectionGameObjects.Contains(SelectionCircleGO))

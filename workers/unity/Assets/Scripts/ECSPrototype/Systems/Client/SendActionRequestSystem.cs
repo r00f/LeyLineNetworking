@@ -227,6 +227,7 @@ public class SendActionRequestSystem : JobComponentSystem
         {
             if (idComponent.EntityId.Id == entityId)
             {
+                unitCompRef.AnimatorComp.CurrentPreviewIndex = -3;
                 clientActionRequest.TargetCoordinate = new Vector3f(0, 0, 0);
                 clientActionRequest.ActionId = actionIndex;
                 Action act = actions.NullAction;
