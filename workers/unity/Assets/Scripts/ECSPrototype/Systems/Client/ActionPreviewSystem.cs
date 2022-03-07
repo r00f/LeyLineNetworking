@@ -64,6 +64,7 @@ public class ActionPreviewSystem : JobComponentSystem
                         animator.Animator.SetInteger("Armor", 0);
                         animator.Animator.ResetTrigger("Execute");
                         animator.Animator.SetTrigger("CancelAction");
+                        animator.Animator.speed = 1;
                     }
 
                     foreach (AnimStateEffectHandler a in animator.AnimStateEffectHandlers)
@@ -88,7 +89,6 @@ public class ActionPreviewSystem : JobComponentSystem
                     animator.CurrentPreviewIndex = actionRequest.ActionId;
                     animator.CurrentPreviewIndex = -3;
                     animator.ResumePreviewAnimation = false;
-                    animator.Animator.speed = 1;
                     animator.CurrentPreviewAction = null;
                 }
                 else if(animator.Animator && !animator.Animator.fireEvents && (animator.Animator.layerCount < 2 || !animator.Animator.GetAnimatorTransitionInfo(1).anyState))

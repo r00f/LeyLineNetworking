@@ -19,27 +19,7 @@ public class InitializeUnitsSystem : JobComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-        /*
-        m_UnitData = GetEntityQuery(
-            ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<UnitDataSet>(),
-            ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadWrite<UnitComponentReferences>(),
-            ComponentType.ReadWrite<LineRendererComponent>(),
-            ComponentType.ReadWrite<TeamColorMeshes>(),
-            ComponentType.ReadWrite<UnitEffects>(),
-            ComponentType.ReadWrite<AnimatorComponent>(),
-            ComponentType.ReadOnly<MovementVariables.Component>()
-            );
 
-
-        m_ManalithUnitData = GetEntityQuery(
-            ComponentType.ReadWrite<Transform>(),
-            ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
-            ComponentType.ReadOnly<MovementVariables.Component>()
-            );
-            */
         m_PlayerData = GetEntityQuery(
             ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadOnly<HeroTransform>(),
@@ -51,9 +31,17 @@ public class InitializeUnitsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, ref StartRotation.Component startRotation, ref Manalith.Component manalith) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, UnitComponentReferences unitCompRef, ref StartRotation.Component startRotation, ref Manalith.Component manalith) =>
         {
             t.rotation = Quaternion.Euler(new Vector3(0, startRotation.Value, 0));
+
+            if (unitCompRef.MeshMatComponent)
+            {
+                foreach (Renderer r in unitCompRef.MeshMatComponent.AllMesheRenderers)
+                {
+                    unitCompRef.MeshMatComponent.AllMeshMaterials.Add(r.materials.ToList());
+                }
+            }
         })
         .WithoutBurst()
         .Run();
