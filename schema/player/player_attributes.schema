@@ -1,9 +1,10 @@
 package player;
 
 component PlayerAttributes {
-	
     id = 110;
-	string hero_name = 1;
-	list<string> starting_unit_names = 2;
-	bool hero_spawned = 3;
+    PlayerAttribute player_attribute = 1;
+}
+
+type PlayerAttribute {
+    list<string> starting_unit_names = 1;
 }

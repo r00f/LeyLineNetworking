@@ -22,10 +22,7 @@ public class ActionEffectsSystem : JobComponentSystem
     UnitAnimationSystem m_UnitAnimationSystem;
     HighlightingSystem m_HighlightingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
-    //EntityQuery m_UnitData;
-    //EntityQuery m_CellData;
     EntityQuery m_GameStateData;
-    //EntityQuery m_PlayerData;
     GameObject GarbageCollection;
     EntityQuery m_GarbageCollection;
 
@@ -33,29 +30,6 @@ public class ActionEffectsSystem : JobComponentSystem
     {
         base.OnCreate();
         settings = Resources.Load<Settings>("Settings");
-
-        /*
-        m_PlayerData = GetEntityQuery(
-        ComponentType.ReadOnly<PlayerState.HasAuthority>()
-        );
-
-
-        m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<CapsuleCollider>(),
-        ComponentType.ReadOnly<FactionComponent.Component>(),
-        ComponentType.ReadWrite<AnimatorComponent>(),
-        ComponentType.ReadWrite<UnitEffects>(),
-        ComponentType.ReadOnly<IsVisible>(),
-        ComponentType.ReadWrite<UnitHeadUIReferences>()
-        );
-
-        m_CellData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<MarkerState>(),
-        ComponentType.ReadWrite<MarkerGameObjects>()
-        );
-        */
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>()
@@ -394,7 +368,7 @@ public class ActionEffectsSystem : JobComponentSystem
         }
     }
 
-    public void LaunchProjectile(uint usingUnitFaction, Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0)
+    public void LaunchProjectile(uint usingUnitFaction, Vision.Component playerVision, Projectile projectileFab, Transform spawnTransform, Vector3 targetPos, Action inAction, long unitId, Vector3f originCoord, float yOffset = 0, bool isPreviewProjectile = false, bool playSFX = true)
     {
         bool AoEcontainsTarget = false;
 
@@ -414,6 +388,8 @@ public class ActionEffectsSystem : JobComponentSystem
             g.SetActive(false);
         }
 
+        projectile.PlaySoundFX = playSFX;
+        projectile.IsPreviewProjectile = isPreviewProjectile;
         projectile.UnitId = unitId;
         projectile.Action = inAction;
         projectile.SpawnTransform = spawnTransform;

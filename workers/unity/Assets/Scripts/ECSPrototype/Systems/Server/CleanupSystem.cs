@@ -70,7 +70,7 @@ ComponentType.ReadOnly<GameState.Component>()
         },
             All = new ComponentType[]
         {
-                typeof(UnitLifeCycleSystem.UnitStateData)
+                typeof(UnitLifeCycleSystemServer.UnitStateData)
         }
         };
 

@@ -77,6 +77,7 @@ Material:
     - _AlphaCutoffEnable: 0
     - _AlphaDstBlend: 10
     - _AlphaSrcBlend: 1
+    - _AlphaToMask: 0
     - _BlendMode: 0
     - _BumpScale: 1
     - _CullMode: 2
@@ -139,6 +140,8 @@ Material:
     - _EmissiveColor: {r: 0, g: 0, b: 0, a: 1}
     - _EmissiveColorLDR: {r: 0, g: 0, b: 0, a: 1}
     - _UnlitColor: {r: 0, g: 0.14499107, b: 1, a: 0.09803922}
+    - _UnlitColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
+  m_BuildTextureStacks: []
 --- !u!114 &3310948866481884155
 MonoBehaviour:
   m_ObjectHideFlags: 11
@@ -151,4 +154,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da692e001514ec24dbc4cca1949ff7e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  version: 2
+  version: 4

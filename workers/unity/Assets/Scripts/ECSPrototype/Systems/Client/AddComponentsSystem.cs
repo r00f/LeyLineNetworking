@@ -3,10 +3,7 @@ using Generic;
 using Improbable.Gdk.Core;
 using LeyLineHybridECS;
 using Player;
-using Unit;
-using Unity.Collections;
 using Unity.Entities;
-using Unity.Transforms;
 using UnityEngine;
 using Unity.Jobs;
 using Improbable;
@@ -31,6 +28,7 @@ public class AddComponentsSystem : JobComponentSystem
     EntityQuery m_UnitRemovedData;
     EntityQuery m_CellAddedData;
     EntityQuery m_GameStateData;
+    EntityQuery m_InitializedGameStateData;
 
     UIReferences UIRef;
     Settings settings;
@@ -43,88 +41,6 @@ public class AddComponentsSystem : JobComponentSystem
         base.OnCreate();
         settings = Resources.Load<Settings>("Settings");
 
-        /*
-        var projectileAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<Projectile>()
-            }
-        };
-
-        m_ProjectileAddedData = GetEntityQuery(projectileAddedDesc);
-
-        var unitAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<Transform>(),
-                ComponentType.ReadOnly<UnitEffects>(),
-                ComponentType.ReadOnly<AnimatorComponent>()
-            }
-        };
-
-        m_UnitAddedData = GetEntityQuery(unitAddedDesc);
-
-        var unitMapPopulatedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-        {
-        typeof(MapPopulatedIdentifyier)
-        },
-            All = new ComponentType[]
-        {
-                typeof(WorldIndexStateData),
-                ComponentType.ReadOnly<FactionComponent.Component>(),
-                ComponentType.ReadOnly<IsVisible>(),
-                ComponentType.ReadOnly<CubeCoordinate.Component>(),
-                ComponentType.ReadOnly<AnimatorComponent>()
-        }
-        };
-
-        m_UnitMapPopulatedData = GetEntityQuery(unitMapPopulatedDesc);
-
-        var cellAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[]
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<CellAttributesComponent.Component>()
-            }
-        };
-
-        m_CellAddedData = GetEntityQuery(cellAddedDesc);
-
-        var playerAddedDesc = new EntityQueryDesc
-        {
-            None = new ComponentType[] 
-            {
-                typeof(WorldIndexStateData)
-            },
-            All = new ComponentType[]
-            {
-                ComponentType.ReadOnly<PlayerState.Component>(),
-                ComponentType.ReadOnly<HeroTransform>(),
-                ComponentType.ReadWrite<Moba_Camera>()
-            }
-        };
-
-        m_PlayerAddedData = GetEntityQuery(playerAddedDesc);
-        */
-
         m_PlayerStateData = GetEntityQuery(
             ComponentType.ReadOnly<FactionComponent.Component>(),
             ComponentType.ReadOnly<PlayerState.HasAuthority>(),
@@ -133,6 +49,7 @@ public class AddComponentsSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
             ComponentType.ReadOnly<GameState.Component>(),
+            ComponentType.ReadOnly<MapData.Component>(),
             ComponentType.ReadOnly<Position.Component>(),
             ComponentType.ReadOnly<SpatialEntityId>()
             );
@@ -148,22 +65,36 @@ public class AddComponentsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_PlayerStateData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
-        {
+        if (m_PlayerStateData.CalculateEntityCount() != 1 || m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
-        }
 
         var gameStatePosition = m_GameStateData.GetSingleton<Position.Component>();
+        var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
+        var playerId = m_PlayerStateData.GetSingleton<SpatialEntityId>();
 
-        if (!clientPositionSet)
+        if (map && !clientPositionSet)
         {
             map.transform.position = new Vector3((float) gameStatePosition.Coords.X, (float) gameStatePosition.Coords.Y, (float) gameStatePosition.Coords.Z);
             map.Terrain.Flush();
             clientPositionSet = true;
         }
 
-        var playerFaction = m_PlayerStateData.GetSingleton<FactionComponent.Component>();
-        var playerId = m_PlayerStateData.GetSingleton<SpatialEntityId>();
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, in MapData.Component mapData) =>
+        {
+            foreach(MapCell c in mapData.CoordinateCellDictionary.Values)
+            {
+                Vector3 pos = CellGridMethods.CubeToPos(CellGridMethods.AxialToCube(c.AxialCoordinate), new Vector2f(0, 0));
+                Vector2 invertedPos = new Vector2(pos.x * UIRef.MinimapComponent.MapSize, pos.z * UIRef.MinimapComponent.MapSize);
+                InstanciateMapCellTileFromSettings(UIRef.MinimapComponent, invertedPos, settings.MapCellColors[(int)c.MapCellColorIndex]);
+            }
+
+            var curMapState = new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
+            EntityManager.AddComponentObject(entity, curMapState);
+            EntityManager.AddComponentData(entity, new ComponentsAddedIdentifier { });
+        })
+        .WithStructuralChanges()
+        .WithoutBurst()
+        .Run();
 
         Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, HeroTransform htrans) =>
         {
@@ -184,67 +115,7 @@ public class AddComponentsSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, ref CellAttributesComponent.Component cellAtt) =>
-        {
-            var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
-            int colorIndex = cellAtt.CellAttributes.CellMapColorIndex;
-
-            PopulateMap(UIRef.MinimapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-            PopulateMap(UIRef.BigMapComponent, 1, cellAtt.CellAttributes.Cell.CubeCoordinate, ref isVisibleRef, settings.MapCellColors[colorIndex]);
-
-            //if this cell is not water, Add all components
-            if (cellAtt.CellAttributes.CellMapColorIndex != 5)
-            {
-                IsVisible isVisible = new IsVisible
-                {
-                    Value = 0,
-                    LerpSpeed = 0.5f,
-                };
-
-                MouseState mouseState = new MouseState
-                {
-                    CurrentState = MouseState.State.Neutral,
-                };
-
-                MouseVariables mouseVars = new MouseVariables
-                {
-                    Distance = 0.865f
-                };
-
-                MarkerState markerState = new MarkerState
-                {
-                    CurrentTargetType = MarkerState.TargetType.Neutral,
-                    IsSet = 0,
-                    TargetTypeSet = 0,
-                    CurrentState = MarkerState.State.Neutral,
-                    IsUnit = 0
-                };
-
-                EntityManager.AddComponents(entity, new ComponentTypes(typeof(MouseVariables), typeof(MouseState), typeof(MarkerState), typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
-
-                EntityManager.SetComponentData(entity, mouseVars);
-                EntityManager.SetComponentData(entity, markerState);
-                EntityManager.SetComponentData(entity, mouseState);
-                EntityManager.SetComponentData(entity, isVisible);
-            }
-            //if it is water, only add visibility component to exclude water from highlighting / mouse behaviour
-            else
-            {
-                IsVisible isVisible = new IsVisible
-                {
-                    Value = 0,
-                    LerpSpeed = 0.5f,
-                };
-
-                EntityManager.AddComponents(entity, new ComponentTypes(typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
-                EntityManager.SetComponentData(entity, isVisible);
-            }
-        })
-        .WithStructuralChanges()
-        .WithoutBurst()
-        .Run();
-
-        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, in FactionComponent.Component faction) =>
+        Entities.WithNone<ComponentsAddedIdentifier>().ForEach((Entity entity, UnitComponentReferences unitComponentReferences, in FactionComponent.Component faction, in CubeCoordinate.Component coord, in SpatialEntityId id) =>
         {
             var isVisibleRef = EntityManager.GetComponentObject<IsVisibleReferences>(entity);
 
@@ -298,9 +169,6 @@ public class AddComponentsSystem : JobComponentSystem
                 IsUnit = 1
             };
 
-            //ComponentTypes cTypes = new ComponentTypes();
-            //cTypes.m_masks.c
-
             EntityManager.AddComponents(entity, new ComponentTypes(typeof(MouseVariables), typeof(MouseState), typeof(MarkerState), typeof(IsVisible), typeof(ComponentsAddedIdentifier)));
 
             EntityManager.SetComponentData(entity, mouseVars);
@@ -348,6 +216,16 @@ public class AddComponentsSystem : JobComponentSystem
         }
     }
 
+    void InstanciateMapCellTileFromSettings(MinimapScript miniMap, Vector2 invertedPos, Color tileColor)
+    {
+        MiniMapTile instanciatedTile = Object.Instantiate(settings.MapCellTile, Vector3.zero, Quaternion.identity);
+        instanciatedTile.TileColor = tileColor;
+        instanciatedTile.TileImage.color = instanciatedTile.TileColor;
+        instanciatedTile.transform.SetParent(miniMap.MiniMapCellTilesPanel.transform, false);
+        instanciatedTile.TileRect.anchoredPosition = invertedPos;
+        instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
+    }
+
     MiniMapTile InstantiateMapTile(MinimapScript miniMap, byte isVisible, IsVisibleReferences isVisibleRef, Vector2 invertedPos, Color tileColor, bool isUnitTile)
     {
         if (!isVisibleRef.MiniMapTilePrefab)
@@ -363,11 +241,6 @@ public class AddComponentsSystem : JobComponentSystem
             instanciatedTile.transform.SetParent(miniMap.MiniMapCellTilesPanel.transform, false);
             instanciatedTile.TileRect.anchoredPosition = invertedPos;
             instanciatedTile.TileRect.sizeDelta = miniMap.MapCellPixelSize;
-
-            instanciatedTile.DarknessTile.transform.SetParent(miniMap.MiniMapDarknessTilesPanel.transform, false);
-            instanciatedTile.DarknessTile.anchoredPosition = invertedPos;
-            instanciatedTile.DarknessTile.sizeDelta = miniMap.MapCellDarknessPixelSize;
-
         }
         else
         {

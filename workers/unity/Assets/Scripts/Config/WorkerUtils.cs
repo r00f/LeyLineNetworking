@@ -1,5 +1,6 @@
 using Unity.Entities;
 using LeyLineHybridECS;
+using Unity.Rendering;
 
 public static class WorkerUtils
 {
@@ -10,7 +11,13 @@ public static class WorkerUtils
 
     public static void AddClientSystems(World world)
     {
+        //world.GetOrCreateSystem<MatrixPreviousSystem>();
+        var systems = DefaultWorldInitialization.GetAllSystems(WorldSystemFilterFlags.Default);
+        DefaultWorldInitialization.AddSystemsToRootLevelSystemGroups(world, systems);
+
+        world.GetOrCreateSystem<HybridRendererSystem>();
         world.GetOrCreateSystem<InitializeUnitsSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystemClient>();
         world.GetOrCreateSystem<MouseStateSystem>();
         world.GetOrCreateSystem<CellMarkerSystem>();
         world.GetOrCreateSystem<AddComponentsSystem>();
@@ -23,6 +30,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<PathFindingSystem>();
         world.GetOrCreateSystem<ManalithSystemClient>();
         world.GetOrCreateSystem<UISystem>();
+        world.GetOrCreateSystem<ActionPreviewSystem>();
     }
 
     public static void AddGameLogicSystems(World world)
@@ -30,7 +38,7 @@ public static class WorkerUtils
         world.GetOrCreateSystem<GameStateSystem>();
         world.GetOrCreateSystem<HandleCellGridRequestsSystem>();
         world.GetOrCreateSystem<ManalithSystem>();
-        world.GetOrCreateSystem<UnitLifeCycleSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystemServer>();
         world.GetOrCreateSystem<ResourceSystem>();
         world.GetOrCreateSystem<ExecuteActionsSystem>();
         world.GetOrCreateSystem<CleanupSystem>();
@@ -50,5 +58,6 @@ public static class WorkerUtils
         world.GetOrCreateSystem<SimulatedPlayerSystem>();
         world.GetOrCreateSystem<SimulatedActionRequestSystem>();
         world.GetOrCreateSystem<PathFindingSystem>();
+        world.GetOrCreateSystem<UnitLifeCycleSystemClient>();
     }
 }

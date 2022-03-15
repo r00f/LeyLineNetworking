@@ -43,6 +43,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 1
+  UnitDuration: 0
   ApplyToRestrictions: 2
   ArmorAmount: 30
 --- !u!114 &114578424212294910
@@ -58,7 +59,7 @@ MonoBehaviour:
   m_Name: T_Unit(Clone)
   m_EditorClassIdentifier: 
   HighlighterToUse: 1
-  targettingRange: 5
+  targettingRange: 0
   energyCost: 7
   ModToAdd: {fileID: 0}
   SecondaryTargets: []

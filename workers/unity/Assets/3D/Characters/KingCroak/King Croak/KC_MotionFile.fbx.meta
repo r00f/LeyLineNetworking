@@ -546,25 +546,13 @@ ModelImporter:
     rigImportErrors: 
     rigImportWarnings: "Copied Avatar Rig Configuration mis-match. Bone length in
       copied configuration does not match position in animation file:\n\t'LeftUpLeg'
-      : position error = 35.294739 mm\n\t'LeftLeg' : position error = 74.523460 mm\n\t'LeftFoot'
-      : position error = 86.151634 mm\n\t'LeftToeBase' : position error = 34.809910
-      mm\n\t'RightUpLeg' : position error = 35.290459 mm\n\t'RightLeg' : position
-      error = 74.540024 mm\n\t'RightFoot' : position error = 86.116692 mm\n\t'RightToeBase'
-      : position error = 34.812180 mm\n"
+      : position error = 35.625366 mm\n\t'LeftLeg' : position error = 75.221573 mm\n\t'LeftFoot'
+      : position error = 86.958679 mm\n\t'LeftToeBase' : position error = 35.135994
+      mm\n\t'RightUpLeg' : position error = 35.621044 mm\n\t'RightLeg' : position
+      error = 75.238297 mm\n\t'RightFoot' : position error = 86.923401 mm\n\t'RightToeBase'
+      : position error = 35.138287 mm\n"
     animationImportErrors: 
-    animationImportWarnings: "\nClip 'Attack' has import animation warnings that
-      might lower retargeting quality:\n\t'Spine1' is inbetween humanoid transforms
-      and has rotation animation that will be discarded.\n\nClip 'Spawn' has import
-      animation warnings that might lower retargeting quality:\n\t'Spine1' is inbetween
-      humanoid transforms and has rotation animation that will be discarded.\n\nClip
-      'Spit' has import animation warnings that might lower retargeting quality:\n\t'Spine1'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\nClip
-      'Harvesting' has import animation warnings that might lower retargeting quality:\n\t'Spine1'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\nClip
-      'Defensive' has import animation warnings that might lower retargeting quality:\n\t'Spine1'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n\nClip
-      'Parry' has import animation warnings that might lower retargeting quality:\n\t'Spine1'
-      is inbetween humanoid transforms and has rotation animation that will be discarded.\n"
+    animationImportWarnings: 
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
@@ -782,13 +770,6 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.35947007
-        functionName: PlayVoiceSFX
-        data: 
-        objectReferenceParameter: {instanceID: 0}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
       - time: 0.44333443
         functionName: TriggerEvent
         data: 

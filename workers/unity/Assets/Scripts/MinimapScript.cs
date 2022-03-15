@@ -24,7 +24,7 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
     //public int MapUnitOutlineOffset;
     public Vector2 MapUnitPixelSize;
     public Vector2 MapCellPixelSize;
-    public Vector2 MapCellDarknessPixelSize;
+    //public Vector2 MapCellDarknessPixelSize;
 
     public Vector2 UnitColorOffsetMin;
     public Vector2 UnitColorOffsetMax;
@@ -32,7 +32,7 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
 
     [Header("Panels")]
     public GameObject MiniMapCellTilesPanel;
-    public GameObject MiniMapDarknessTilesPanel;
+    //public GameObject MiniMapDarknessTilesPanel;
     public GameObject MiniMapUnitTilesPanel;
     public GameObject MiniMapEffectsPanel;
     public GameObject MiniMapManalithTilesPanel;

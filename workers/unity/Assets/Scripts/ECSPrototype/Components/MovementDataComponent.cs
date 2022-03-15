@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System;
 using Unity.Entities;
@@ -11,5 +11,5 @@ public struct MovementData : IComponentData
     public int PathIndex;
 }
 
-public class MovementDataComponent : ComponentDataProxy<MovementData> { }
+//ublic class MovementDataComponent : ComponentDataProxy<MovementData> { }
 

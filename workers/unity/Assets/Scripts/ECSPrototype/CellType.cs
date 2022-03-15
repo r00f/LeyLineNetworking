@@ -3,6 +3,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
+using Unity.Mathematics;
 
 namespace LeyLineHybridECS
 {
@@ -13,8 +14,10 @@ namespace LeyLineHybridECS
 
         [SerializeField, HideInInspector]
         IsTaken isTaken;
+        //[SerializeField, HideInInspector]
+        //Position3DDataComponent pos3D;
         [SerializeField, HideInInspector]
-        Position3DDataComponent pos3D;
+        float3 pos3D;
         [SerializeField, HideInInspector]
         CellDimensions cellDimensions;
         [SerializeField, HideInInspector]
@@ -67,10 +70,7 @@ namespace LeyLineHybridECS
 
         public void ApplyCellOffset()
         {
-            pos3D.Value = new Position3D
-            {
-                Value = new Vector3(pos3D.Value.Value.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.Value.Value.z)
-            };
+            pos3D = new float3(pos3D.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.z);
             //pos3D.Value.y = transform.parent.position.y + height;
             transform.localPosition = new Vector3(transform.localPosition.x, thisCellsTerrain.yOffset + terrainHeightOffset, transform.localPosition.z);
         }
@@ -84,10 +84,8 @@ namespace LeyLineHybridECS
                 if(thisCellsTerrain.cellTerrainYOffset != 0)
                     terrainHeightOffset = thisCellsTerrain.cellTerrainYOffset;
 
-                pos3D.Value = new Position3D
-                {
-                    Value = new Vector3(pos3D.Value.Value.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.Value.Value.z)
-                };
+                pos3D = new float3(pos3D.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.z);
+
                 //pos3D.Value.y = transform.parent.position.y + height;
                 transform.localPosition = new Vector3(transform.localPosition.x, thisCellsTerrain.yOffset + terrainHeightOffset, transform.localPosition.z);
 

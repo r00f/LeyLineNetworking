@@ -127,20 +127,20 @@ public class MouseStateSystem : JobComponentSystem
                 else if (mouseState.CurrentState != MouseState.State.Clicked && mouseState.CurrentState != MouseState.State.Neutral)
                 {
                     if (mouseState.CurrentState == MouseState.State.Hovered)
-                        ECBuffer.RemoveComponent(entityInQueryIndex, entity, typeof(HoveredState));
+                        ECBuffer.RemoveComponent<HoveredState>(entityInQueryIndex, entity);
                     mouseState.CurrentState = MouseState.State.Neutral;
                 }
 
                 if (mouseState.ClickEvent == 1 && !mouseLeftClick)
                 {
-                    ECBuffer.RemoveComponent(entityInQueryIndex, entity, typeof(ClickEvent));
+                    ECBuffer.RemoveComponent<ClickEvent>(entityInQueryIndex, entity);
                     mouseState.CurrentState = MouseState.State.Clicked;
                     mouseState.ClickEvent = 0;
                 }
 
                 if (mouseState.RightClickEvent == 1 && !mouseRightClick)
                 {
-                    ECBuffer.RemoveComponent(entityInQueryIndex, entity, typeof(RightClickEvent));
+                    ECBuffer.RemoveComponent<RightClickEvent>(entityInQueryIndex, entity);
                     mouseState.RightClickEvent = 0;
                 }
             })

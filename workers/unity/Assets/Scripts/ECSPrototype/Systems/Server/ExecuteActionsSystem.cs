@@ -117,7 +117,10 @@ public class ExecuteActionsSystem : JobComponentSystem
             incomingEffects.InterruptEffects = incomingEffects.InterruptEffects;
             ecbConcurrent.RemoveComponent<InterruptTag>(entityInQueryIndex, entity);
         })
+        .WithoutBurst()
         .Schedule(inputDeps);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyInterruptDataTransformationJob);
+        applyInterruptDataTransformationJob.Complete();
 
         JobHandle applyAttackDataTransformationJob = Entities.WithAll<IncomingAttackTag, AttackTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
         {
@@ -158,7 +161,10 @@ public class ExecuteActionsSystem : JobComponentSystem
             incomingEffects.AttackEffects = incomingEffects.AttackEffects;
             ecbConcurrent.RemoveComponent<AttackTag>(entityInQueryIndex, entity);
         })
+        .WithoutBurst()
         .Schedule(inputDeps);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyAttackDataTransformationJob);
+        applyAttackDataTransformationJob.Complete();
 
         JobHandle applyMoveDataTransformationJob = Entities.WithAll<IncomingMoveTag, MoveTag>().ForEach((Entity entity, int entityInQueryIndex, ref Position.Component position, ref CubeCoordinate.Component coord, ref UnitVision vision, ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
         {
@@ -216,7 +222,10 @@ public class ExecuteActionsSystem : JobComponentSystem
             //EntityManager.RemoveComponent<MoveTag>(entity);
             ecbConcurrent.RemoveComponent<MoveTag>(entityInQueryIndex, entity);
         })
+        .WithoutBurst()
         .Schedule(inputDeps);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyMoveDataTransformationJob);
+        applyMoveDataTransformationJob.Complete();
 
         JobHandle applySkillshotDataTransformationJob = Entities.WithAll<IncomingSkillshotTag, SkillshotTag>().ForEach((Entity entity, int entityInQueryIndex, ref IncomingActionEffects.Component incomingEffects, ref Health.Component health) =>
         {
@@ -257,15 +266,14 @@ public class ExecuteActionsSystem : JobComponentSystem
             incomingEffects.SkillshotEffects = incomingEffects.SkillshotEffects;
             ecbConcurrent.RemoveComponent<SkillshotTag>(entityInQueryIndex, entity);
         })
+        .WithoutBurst()
         .Schedule(inputDeps);
+        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applySkillshotDataTransformationJob);
+        applySkillshotDataTransformationJob.Complete();
 
         #endregion
 
-        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyInterruptDataTransformationJob);
-        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyAttackDataTransformationJob);
-        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applyMoveDataTransformationJob);
-        endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applySkillshotDataTransformationJob);
-        
+
         return inputDeps;
     }
 
@@ -347,25 +355,8 @@ public class ExecuteActionsSystem : JobComponentSystem
                         switch (effectStack.InterruptEffects[y].EffectType)
                         {
                             case EffectTypeEnum.spawn_unit:
-                                var pos = new Position.Component
-                                {
-                                    Coords = new Coordinates
-                                    {
-                                        X = effectStack.InterruptEffects[y].TargetPosition.X,
-                                        Y = effectStack.InterruptEffects[y].TargetPosition.Y,
-                                        Z = effectStack.InterruptEffects[y].TargetPosition.Z
-                                    }
-                                };
-
-                                string clientWorkerId = "";
-
-                                if (effectStack.InterruptEffects[y].OriginUnitFaction == 1)
-                                    clientWorkerId = clientWorkerIds.ClientWorkerId1;
-                                else
-                                    clientWorkerId = clientWorkerIds.ClientWorkerId2;
-
                                 var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + effectStack.InterruptEffects[y].SpawnUnitNested.UnitName).GetComponent<UnitDataSet>();
-                                var newUnit = LeyLineEntityTemplates.Unit(clientWorkerId, effectStack.InterruptEffects[y].SpawnUnitNested.UnitName, pos, effectStack.InterruptEffects[y].TargetCoordinates[0], effectStack.InterruptEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
+                                var newUnit = LeyLineEntityTemplates.Unit(clientWorkerIds.ClientWorkerIds[(int)effectStack.InterruptEffects[y].OriginUnitFaction - 1], effectStack.InterruptEffects[y].SpawnUnitNested.UnitName, effectStack.InterruptEffects[y].TargetPosition, effectStack.InterruptEffects[y].TargetCoordinates[0], effectStack.InterruptEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
                                 var createEntitiyRequest = new WorldCommands.CreateEntity.Request(newUnit);
                                 m_CommandSystem.SendCommand(createEntitiyRequest);
                                 break;
@@ -552,25 +543,8 @@ public class ExecuteActionsSystem : JobComponentSystem
                         switch (effectStack.MoveEffects[y].EffectType)
                         {
                             case EffectTypeEnum.spawn_unit:
-                                var pos = new Position.Component
-                                {
-                                    Coords = new Coordinates
-                                    {
-                                        X = effectStack.MoveEffects[y].TargetPosition.X,
-                                        Y = effectStack.MoveEffects[y].TargetPosition.Y,
-                                        Z = effectStack.MoveEffects[y].TargetPosition.Z
-                                    }
-                                };
-
-                                string clientWorkerId = "";
-
-                                if (effectStack.MoveEffects[y].OriginUnitFaction == 1)
-                                    clientWorkerId = clientWorkerIds.ClientWorkerId1;
-                                else
-                                    clientWorkerId = clientWorkerIds.ClientWorkerId2;
-
                                 var Stats = Resources.Load<GameObject>("Prefabs/UnityClient/" + effectStack.MoveEffects[y].SpawnUnitNested.UnitName).GetComponent<UnitDataSet>();
-                                var newUnit = LeyLineEntityTemplates.Unit(clientWorkerId, effectStack.MoveEffects[y].SpawnUnitNested.UnitName, pos, effectStack.MoveEffects[y].TargetCoordinates[0], effectStack.MoveEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
+                                var newUnit = LeyLineEntityTemplates.Unit(clientWorkerIds.ClientWorkerIds[(int)effectStack.MoveEffects[y].OriginUnitFaction - 1], effectStack.MoveEffects[y].SpawnUnitNested.UnitName, effectStack.MoveEffects[y].TargetPosition, effectStack.MoveEffects[y].TargetCoordinates[0], effectStack.MoveEffects[y].OriginUnitFaction, gameStateWorldIndex.Value, Stats, 0);
                                 var createEntitiyRequest = new WorldCommands.CreateEntity.Request(newUnit);
                                 m_CommandSystem.SendCommand(createEntitiyRequest);
                                 break;

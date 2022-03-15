@@ -12,16 +12,6 @@ public class AnimStateEffectHandler : StateMachineBehaviour
     public List<Vector2> CurrentEffectOffTimestamps;
 
     public bool IsActiveState;
-
-
-    /*
-    public override void OnStateMachineEnter(Animator animator, int stateMachinePathHash)
-    {
-        IsActiveState = true;
-        CurrentEffectOnTimestamps.AddRange(EffectOnTimestamps);
-        CurrentEffectOffTimestamps.AddRange(EffectOffTimestamps);
-    }
-    */
     
     override public void OnStateEnter(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
@@ -36,7 +26,7 @@ public class AnimStateEffectHandler : StateMachineBehaviour
         {
             if (CurrentEffectOnTimestamps[i].x >= 0f)
             {
-                CurrentEffectOnTimestamps[i] -= new Vector2(Time.deltaTime, 0);
+                CurrentEffectOnTimestamps[i] -= new Vector2(Time.deltaTime * animator.speed, 0);
             }
         }
 
@@ -44,7 +34,7 @@ public class AnimStateEffectHandler : StateMachineBehaviour
         {
             if (CurrentEffectOffTimestamps[i].x >= 0f)
             {
-                CurrentEffectOffTimestamps[i] -= new Vector2(Time.deltaTime, 0);
+                CurrentEffectOffTimestamps[i] -= new Vector2(Time.deltaTime * animator.speed, 0);
             }
         }
     }

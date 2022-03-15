@@ -12,7 +12,6 @@ public class UnitCompReferencesHelper : Editor
     private void OnEnable()
     {
         myTarget = (UnitComponentReferences) target;
-
     }
 
     public override void OnInspectorGUI()
@@ -26,6 +25,5 @@ public class UnitCompReferencesHelper : Editor
             serializedObject.ApplyModifiedProperties();
             PrefabUtility.SavePrefabAsset(myTarget.gameObject);
         }
-
     }
 }

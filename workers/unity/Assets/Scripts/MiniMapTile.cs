@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,14 +18,9 @@ public class MiniMapTile : MonoBehaviour
     public MapEffectComponent DeathBlowMapEffect;
     public MapEffectComponent GetCapturedMapEffect;
     public int AddPingSize;
-    //public RectTransform DeathBlow;
     public Vector2 DeathCrossSize;
     public bool EvenOutlineOffset = true;
-    public RectTransform DarknessTile;
-    public float DarknessAlphaDefault;
-    public Image DarknessTileImage;
     public RectTransform UnitPlayerColorSprite;
-    //public RectTransform DeathCrossPrefab;
     public MapEffectComponent BecomeVisibleMapEffect;
     public UILineRenderer UILineRenderer;
 }

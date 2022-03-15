@@ -1,8 +1,30 @@
 package generic;
 import "generic/vector3.schema";
 
+
 component MapData {
     id = 106;
-    map<generic.Vector3f, generic.Vector3f> coordinate_position_dictionary = 1;
+    map<generic.Vector2i, MapCell> coordinate_cell_dictionary = 1;
+    list<UnitSpawn> units_spawn_list = 2;
 }
 
+type MapCell {
+    generic.Vector2i axial_coordinate = 1;
+    generic.Vector3f position = 2;
+    uint32 movement_cost = 3;
+    bool is_taken = 4;
+    int64 unit_on_cell_id = 5;
+    uint32 map_cell_color_index = 6;
+}
+
+type MapCellList {
+    list<MapCell> cells = 1;
+}
+
+type UnitSpawn {
+    string unit_name = 1;
+	uint32 faction = 2;
+    uint32 start_rotation = 3;
+    uint32 starting_unit_index = 4;
+    generic.Vector2i axial_coordinate = 5;
+}

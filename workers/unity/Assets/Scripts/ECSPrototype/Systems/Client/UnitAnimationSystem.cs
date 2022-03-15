@@ -10,6 +10,7 @@ using Unity.Collections;
 using Cell;
 using Player;
 using Unity.Jobs;
+using FMODUnity;
 
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class UnitAnimationSystem : JobComponentSystem
@@ -33,37 +34,6 @@ public class UnitAnimationSystem : JobComponentSystem
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>()
         );
-
-
-
-        /*
-                m_TransformData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<Transform>()
-        );
-
-                m_CellData = GetEntityQuery(
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<Position.Component>(),
-        ComponentType.ReadOnly<CellAttributesComponent.Component>()
-        );
-
-
-        m_UnitData = GetEntityQuery(
-        ComponentType.ReadOnly<IsVisible>(),
-        ComponentType.ReadOnly<SpatialEntityId>(),
-        ComponentType.ReadOnly<Actions.Component>(),
-        ComponentType.ReadOnly<Energy.Component>(),
-        ComponentType.ReadOnly<Position.Component>(),
-        ComponentType.ReadOnly<CubeCoordinate.Component>(),
-        ComponentType.ReadOnly<UnitDataSet>(),
-        ComponentType.ReadOnly<UnitEffects>(),
-        ComponentType.ReadWrite<unitComponentReferences.AnimatorComp>(),
-        ComponentType.ReadWrite<Transform>(),
-        ComponentType.ReadOnly<MovementVariables.Component>()
-        );
-        */
 
         m_PlayerData = GetEntityQuery(
         ComponentType.ReadOnly<Vision.Component>(),
@@ -105,19 +75,16 @@ public class UnitAnimationSystem : JobComponentSystem
 
         if (cleanUpStateEvents.Count > 0)
         {
-            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, ref SpatialEntityId id, ref Actions.Component actions, ref Energy.Component energy, in FactionComponent.Component faction) =>
+            Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences, in Actions.Component actions, in Energy.Component energy, in FactionComponent.Component faction, in SpatialEntityId id) =>
             {
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
 
                 if (unitComponentReferences.SelectionMeshRenderer.material.HasProperty("_UnlitColor"))
                     unitComponentReferences.SelectionMeshRenderer.material.SetColor("_UnlitColor", settings.FactionColors[(int)faction.Faction]);
 
-
                 unitComponentReferences.CurrentMoveIndex = -1;
                 unitComponentReferences.CurrentMoveTime = 0;
                 unitComponentReferences.LastStationaryPosition = unitComponentReferences.transform.position;
-
-
                 unitComponentReferences.AnimatorComp.DestinationPosition = Vector2.zero;
                 unitComponentReferences.UnitEffectsComp.OriginCoordinate = coord.CubeCoordinate;
                 unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = false;
@@ -135,7 +102,6 @@ public class UnitAnimationSystem : JobComponentSystem
                     unitComponentReferences.AnimatorComp.Animator.SetBool("Executed", false);
                     unitComponentReferences.AnimatorComp.Animator.ResetTrigger("DestinationReached");
                 }
-
             })
             .WithoutBurst()
             .Run();
@@ -152,6 +118,7 @@ public class UnitAnimationSystem : JobComponentSystem
             HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
             SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
             SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
+            HandleAnimStateEffects(unitComponentReferences, visible);
 
             if (gameState.CurrentState == GameStateEnum.planning)
             {
@@ -164,16 +131,34 @@ public class UnitAnimationSystem : JobComponentSystem
             }
             else
             {
-                HandleAnimStateEffects(unitComponentReferences, visible);
-
                 if (incomingActionEffects.MoveEffects.Count != 0)
                 {
-                    /*
-                    logger.HandleLog(LogType.Warning,
-                    new LogEvent("Call MoveUnit Method")
-                    .WithField("Unit", unitComponentReferences.transform.name));
-                    */
-                    MoveUnit(unitComponentReferences, incomingActionEffects);
+                    if (incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs.Count > unitComponentReferences.CurrentMoveIndex)
+                    {
+                        if (unitComponentReferences.CurrentMoveIndex >= 0)
+                            unitComponentReferences.AnimatorComp.RotationTarget = Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition);
+
+                        if (unitComponentReferences.CurrentMoveTime > 0)
+                        {
+                            unitComponentReferences.CurrentMoveTime -= Time.DeltaTime;
+                            float normalizedTime = 1f - (unitComponentReferences.CurrentMoveTime / incomingActionEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell);
+
+                            if (unitComponentReferences.CurrentMoveIndex == 0)
+                                unitComponentReferences.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[0].WorldPosition), normalizedTime);
+                            else
+                                unitComponentReferences.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex - 1].WorldPosition), Vector3fext.ToUnityVector(incomingActionEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                        }
+                        else
+                        {
+                            unitComponentReferences.CurrentMoveIndex++;
+                            unitComponentReferences.CurrentMoveTime = incomingActionEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell;
+                        }
+                    }
+                    else if (!unitComponentReferences.AnimatorComp.DestinationReachTriggerSet)
+                    {
+                        unitComponentReferences.AnimatorComp.Animator.SetTrigger("DestinationReached");
+                        unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = true;
+                    }
                 }
             }
         })
@@ -220,9 +205,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
         else
         {
-            foreach (GameObject g in unitComponentReferences.AnimatorComp.CharacterEffects)
+            foreach (StudioEventEmitter g in unitComponentReferences.AnimatorComp.CharacterEffects)
             {
-                g.SetActive(false);
+                g.gameObject.SetActive(false);
             }
 
             if (unitComponentReferences.UnitEffectsComp.HarvestingEnergyParticleSystem)
@@ -280,7 +265,7 @@ public class UnitAnimationSystem : JobComponentSystem
                         }
                         else
                         {
-                            //Debug.Log("TriggerActionEffect from unit animation system");
+                            Debug.Log("TriggerActionEffect from unit animation system");
                             m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, unitComponentReferences.AnimatorComp.WeaponTransform, gameState);
                         }
 
@@ -351,7 +336,12 @@ public class UnitAnimationSystem : JobComponentSystem
                     if (a.CurrentEffectOnTimestamps[i].x <= 0)
                     {
                         if (visible.Value == 1)
-                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                        {
+                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].gameObject.SetActive(true);
+                            if(unitComponentReferences.AnimatorComp.PlayActionSFX)
+                                unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].Play();
+                        }
+
                         a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
                     }
                 }
@@ -361,7 +351,7 @@ public class UnitAnimationSystem : JobComponentSystem
                     if (a.CurrentEffectOffTimestamps[i].x <= 0)
                     {
                         if (visible.Value == 1)
-                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                            unitComponentReferences.AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].gameObject.SetActive(false);
                         a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
                     }
                 }
@@ -408,9 +398,9 @@ public class UnitAnimationSystem : JobComponentSystem
                 float normalizedTime = 1f - (unitComponentReferences.CurrentMoveTime / incomingEffects.MoveEffects[0].MoveAlongPathNested.TimePerCell);
 
                 if(unitComponentReferences.CurrentMoveIndex == 0)
-                    unitComponentReferences.AnimatorComp.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                    unitComponentReferences.transform.position = Vector3.Lerp(unitComponentReferences.LastStationaryPosition, Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[0].WorldPosition), normalizedTime);
                 else
-                    unitComponentReferences.AnimatorComp.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex -1].WorldPosition), Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
+                    unitComponentReferences.transform.position = Vector3.Lerp(Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex -1].WorldPosition), Vector3fext.ToUnityVector(incomingEffects.MoveEffects[0].MoveAlongPathNested.CoordinatePositionPairs[unitComponentReferences.CurrentMoveIndex].WorldPosition), normalizedTime);
             }
             else
             {
@@ -425,6 +415,37 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
+    public void MoveObjectAlongPath(MeshMaterialComponent objectToMove, Vector3[] pathPositions, float timePerCell, float rotationSpeed, bool loop = false)
+    {
+        if (objectToMove.CurrentMoveTime > 0)
+        {
+            objectToMove.CurrentMoveTime -= Time.DeltaTime;
+            float normalizedTime = 1f - (objectToMove.CurrentMoveTime / timePerCell);
+
+            Vector3 targetDirection = RotateTowardsDirection(objectToMove.transform, pathPositions[objectToMove.CurrentMoveIndex], rotationSpeed);
+            objectToMove.transform.rotation = Quaternion.LookRotation(targetDirection);
+
+            objectToMove.transform.position = Vector3.Lerp(pathPositions[objectToMove.CurrentMoveIndex - 1], pathPositions[objectToMove.CurrentMoveIndex], normalizedTime);
+        }
+        else if(objectToMove.CurrentMoveIndex < pathPositions.Length - 1)
+        {
+            objectToMove.CurrentMoveIndex++;
+            objectToMove.CurrentMoveTime = timePerCell;
+        }
+        else
+        {
+            if (loop)
+            {
+                objectToMove.transform.position = pathPositions[0];
+                objectToMove.CurrentMoveIndex = 0;
+            }
+            else
+            {
+                objectToMove.Animator.SetTrigger("DestinationReached");
+            }
+        }
+    }
+
     public void SetAnimatorVariables(UnitComponentReferences unitComponentReferences, GameStateEnum currentGameState, Energy.Component energy, Actions.Component actions)
     {
         if (currentGameState == GameStateEnum.planning)
@@ -433,6 +454,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
         else
         {
+            if (unitComponentReferences.AnimatorComp.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
+                unitComponentReferences.AnimatorComp.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
+
             foreach (GameObject g in unitComponentReferences.SelectionGameObjects)
                 g.layer = 11;
 
@@ -447,8 +471,6 @@ public class UnitAnimationSystem : JobComponentSystem
 
         unitComponentReferences.AnimatorComp.Animator.SetBool("Harvesting", energy.Harvesting);
 
-        if (unitComponentReferences.AnimatorComp.Animator.GetInteger("ActionIndexInt") != actions.LockedAction.Index)
-            unitComponentReferences.AnimatorComp.Animator.SetInteger("ActionIndexInt", actions.LockedAction.Index);
     }
 
     public void SetHarvestingEmissiveColorMeshes(UnitComponentReferences unitComponentReferences, Energy.Component energy)
@@ -522,5 +544,4 @@ public class UnitAnimationSystem : JobComponentSystem
         
         return direction;
     }
-
 }

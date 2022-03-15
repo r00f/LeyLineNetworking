@@ -16,6 +16,16 @@ public class AnimatorComponent : MonoBehaviour
     [Header("GenericAnimation")]
     [HideInInspector]
     public ECSAction CurrentLockedAction;
+
+    [Header("Action Preview")]
+    public ECSAction CurrentPreviewAction;
+    public Vector3 CurrentPreviewTarget;
+    public int CurrentPreviewIndex = -3;
+    public bool ResumePreviewAnimation;
+    public float CurrentPreviewAnimTime;
+    public bool PlayActionSFX;
+    public MeshMaterialComponent MovePreviewUnitDupe;
+
     public Animator Animator;
     public AnimationEvents AnimationEvents;
     [HideInInspector]
@@ -25,7 +35,7 @@ public class AnimatorComponent : MonoBehaviour
     public Transform ProjectileSpawnOrigin;
     public List<GameObject> Visuals;
     public float EnableVisualsDelay;
-    public List<GameObject> CharacterEffects;
+    public List<StudioEventEmitter> CharacterEffects;
 
     [Header("SoundFX")]
     public StudioEventEmitter VoiceEmitter;
@@ -62,5 +72,10 @@ public class AnimatorComponent : MonoBehaviour
     public int DeathExplosionForce;
     [HideInInspector]
     public float DeathExplosionRadius;
+
+    public void Start()
+    {
+        CurrentPreviewIndex = -3;
+    }
 
 }

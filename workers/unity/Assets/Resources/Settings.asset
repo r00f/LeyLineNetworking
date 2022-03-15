@@ -12,7 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ebbb01d8a91084d41a7f422dfdb67183, type: 3}
   m_Name: Settings
   m_EditorClassIdentifier: 
+  CellHighlighterLayerOverride: 22
   ForcePlayerFaction: 0
+  StressTest: 0
+  SimPlayerWaitTime: 10
   FactionColors:
   - {r: 0.65882355, g: 0.65882355, b: 0.39607847, a: 1}
   - {r: 0, g: 0.52156866, b: 1, a: 1}
@@ -57,15 +60,26 @@ MonoBehaviour:
   TempleValleyClientMap: {fileID: 7196706022515433627, guid: ae539041ae2d9764eb51525df73f068d,
     type: 3}
   UINeutralColor: {r: 1, g: 0.9905042, b: 0.3820755, a: 1}
+  ShadowMarkerMat: {fileID: 2100000, guid: 3c9dd31db041f5e4c9db2e22f3ae0842, type: 2}
+  TargetCellMat: {fileID: 2100000, guid: 9a7c717ea031800438de0ef98a540116, type: 2}
+  ShadowMarkerMesh: {fileID: 4300000, guid: 84765fd0058f4ec41a7b27f7a060611a, type: 3}
+  HighlightCellMesh: {fileID: -1208101907805011227, guid: 76e41022911c743499761a2ad3652de4,
+    type: 3}
+  MapCellTile: {fileID: 3617814909377836915, guid: 7da2eec5ef82b894fb18f88e9625c408,
+    type: 3}
   ParialColorMasks:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   ExplosionDebugSphere: {fileID: 3937053955492011579, guid: ab8f5f369440e964fa69633247f76f25,
     type: 3}
-  MapCount: 100
-  MapsPerRow: 10
-  MapOffset: 200
+  ActionPreviewMat: {fileID: 2100000, guid: 3b2609fdb2866b342910a7336b0fcac3, type: 2}
+  MapCount: 9
+  MapsPerRow: 3
+  MapOffset: 100
+  MapGridCenterOffset:
+    X: -400
+    Y: -400
   MinimumExecuteTime: 1
   RopeTime: 35
   MouseRayCastLayerMask:

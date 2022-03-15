@@ -7,11 +7,10 @@ using UnityEditor.Recorder;
 using System.IO;
 using UnityEditor.Recorder.Input;
 using System;
+using UnityEngine.Rendering.HighDefinition;
 
 public class PortraitRenderer : MonoBehaviour
 {
-
-
     [SerializeField]
     Color color;
 
@@ -53,6 +52,12 @@ public class PortraitRenderer : MonoBehaviour
     [SerializeField]
     RecordMode recordmode;
 
+    [SerializeField]
+    string cameraBackgroundHexColor;
+
+    public Camera CurrentRenderingCamera;
+    public Color HexColor;
+
     enum RecordMode
     {
         ImageSequence,
@@ -77,7 +82,17 @@ public class PortraitRenderer : MonoBehaviour
 
     private void Update()
     {
-        if(unitComponentReferences.Count > currentRenderingUnitIndex)
+        if(Camera.current)
+            CurrentRenderingCamera = Camera.current;
+
+        if (CurrentRenderingCamera && ColorUtility.TryParseHtmlString("#" + cameraBackgroundHexColor, out HexColor))
+        {
+            CurrentRenderingCamera.GetComponent<HDAdditionalCameraData>().backgroundColorHDR = HexColor;
+            //CurrentRenderingCamera.backgroundColor = HexColor;
+        }
+
+
+        if (unitComponentReferences.Count > currentRenderingUnitIndex)
         {
             if (unitComponentReferences[currentRenderingUnitIndex].BaseDataSetComp.Actions[animActionIndex].ProjectileFab && unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.AnimationEvents.EventTrigger && !unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.AnimationEvents.EventTriggered)
             {
@@ -98,7 +113,7 @@ public class PortraitRenderer : MonoBehaviour
                     {
                         if (a.CurrentEffectOnTimestamps[i].x <= 0)
                         {
-                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].SetActive(true);
+                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOnTimestamps[i].y].gameObject.SetActive(true);
                             a.CurrentEffectOnTimestamps.Remove(a.CurrentEffectOnTimestamps[i]);
                         }
                     }
@@ -107,7 +122,7 @@ public class PortraitRenderer : MonoBehaviour
                     {
                         if (a.CurrentEffectOffTimestamps[i].x <= 0)
                         {
-                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].SetActive(false);
+                            unitComponentReferences[currentRenderingUnitIndex].AnimatorComp.CharacterEffects[(int) a.CurrentEffectOffTimestamps[i].y].gameObject.SetActive(false);
                             a.CurrentEffectOffTimestamps.Remove(a.CurrentEffectOffTimestamps[i]);
                         }
                     }
@@ -369,6 +384,13 @@ public class PortraitRenderer : MonoBehaviour
 
             //set layer1 color to factionColor
             r.sharedMaterial.SetColor("_BaseColor1", teamColorMeshes.color);
+        }
+
+        foreach(LineRenderer l in teamColorMeshes.LineRenderers)
+        {
+            l.startColor = teamColorMeshes.color;
+            l.endColor = teamColorMeshes.color;
+
         }
 
         foreach (TrailRenderer tr in teamColorMeshes.TrailRenderers)

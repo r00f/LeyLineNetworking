@@ -3,7 +3,13 @@
     "tasks": [
       {
         "name": "Codegen",
-        "steps": [{"name": "** Load Unity to generate code **", "command": "echo", "arguments": ["No-op."]}]
+        "steps": [
+          {
+            "name": "** Load Unity to generate code **",
+            "command": "echo",
+            "arguments": [ "No-op." ]
+          }
+        ]
       },
       {
         "name": "build",
@@ -17,10 +23,17 @@
       },
       {
         "name": "clean",
-        "steps": [{"name": "No-op", "command": "echo", "arguments": ["No-op."]}]
+        "steps": [
+          {
+            "name": "No-op",
+            "command": "echo",
+            "arguments": [ "No-op." ]
+          }
+        ]
       }
     ]
   },
+
   "bridge": {
     "worker_attribute_set": {
       "attributes": [
@@ -37,96 +50,96 @@
       "checkoutAllInitially": false
     }
   },
-  "external": {
-    "default": {
-      "run_type": "EXECUTABLE",
+    "external": {
+      "default": {
+        "run_type": "EXECUTABLE",
+        "windows": {
+          "command": "build/worker/UnityGameLogic@Windows/UnityGameLogic@Windows.exe",
+          "arguments": [
+            "+workerType",
+            "UnityGameLogic",
+            "-batchmode",
+            "-nographics",
+            "-logfile",
+            "../../logs/external-default-unitygamelogic.log"
+          ]
+        },
+        "macos": {
+          "command": "open",
+          "arguments": [
+            "-n",
+            "./build/worker/UnityGameLogic@Mac/UnityGameLogic@Mac.app",
+            "--args",
+            "+workerType",
+            "UnityGameLogic",
+            "-batchmode",
+            "-nographics",
+            "-logfile",
+            "../../logs/external-default-unitygamelogic.log"
+          ]
+        }
+      }
+    },
+    "managed": {
       "windows": {
-        "command": "build/worker/UnityGameLogic@Windows/UnityGameLogic@Windows.exe",
+        "artifact_name": "UnityGameLogic@Windows.zip",
+        "command": "UnityGameLogic@Windows.exe",
         "arguments": [
           "+workerType",
           "UnityGameLogic",
+          "+workerId",
+          "${IMPROBABLE_WORKER_ID}",
+          "+receptionistHost",
+          "${IMPROBABLE_RECEPTIONIST_HOST}",
+          "+receptionistPort",
+          "${IMPROBABLE_RECEPTIONIST_PORT}",
+          "+linkProtocol",
+          "Tcp",
           "-batchmode",
           "-nographics",
           "-logfile",
-          "../../logs/external-default-unitygamelogic.log"
+          "${IMPROBABLE_LOG_FILE}"
         ]
       },
       "macos": {
-        "command": "open",
+        "artifact_name": "UnityGameLogic@Mac.zip",
+        "command": "UnityGameLogic@Mac.app/Contents/MacOS/UnityGameLogic@Mac",
         "arguments": [
-          "-n",
-          "./build/worker/UnityGameLogic@Mac/UnityGameLogic@Mac.app",
-          "--args",
           "+workerType",
           "UnityGameLogic",
+          "+workerId",
+          "${IMPROBABLE_WORKER_ID}",
+          "+receptionistHost",
+          "${IMPROBABLE_RECEPTIONIST_HOST}",
+          "+receptionistPort",
+          "${IMPROBABLE_RECEPTIONIST_PORT}",
+          "+linkProtocol",
+          "Tcp",
           "-batchmode",
           "-nographics",
           "-logfile",
-          "../../logs/external-default-unitygamelogic.log"
+          "${IMPROBABLE_LOG_FILE}"
+        ]
+      },
+      "linux": {
+        "artifact_name": "UnityGameLogic@Linux.zip",
+        "command": "UnityGameLogic@Linux",
+        "arguments": [
+          "+workerType",
+          "UnityGameLogic",
+          "+workerId",
+          "${IMPROBABLE_WORKER_ID}",
+          "+receptionistHost",
+          "${IMPROBABLE_RECEPTIONIST_HOST}",
+          "+receptionistPort",
+          "${IMPROBABLE_RECEPTIONIST_PORT}",
+          "+linkProtocol",
+          "Tcp",
+          "-batchmode",
+          "-nographics",
+          "-logfile",
+          "${IMPROBABLE_LOG_FILE}"
         ]
       }
     }
-  },
-  "managed": {
-    "windows": {
-      "artifact_name": "UnityGameLogic@Windows.zip",
-      "command": "UnityGameLogic@Windows.exe",
-      "arguments": [
-        "+workerType",
-        "UnityGameLogic",
-        "+workerId",
-        "${IMPROBABLE_WORKER_ID}",
-        "+receptionistHost",
-        "${IMPROBABLE_RECEPTIONIST_HOST}",
-        "+receptionistPort",
-        "${IMPROBABLE_RECEPTIONIST_PORT}",
-        "+linkProtocol",
-        "Tcp",
-        "-batchmode",
-        "-nographics",
-        "-logfile",
-        "${IMPROBABLE_LOG_FILE}"
-      ]
-    },
-    "macos": {
-      "artifact_name": "UnityGameLogic@Mac.zip",
-      "command": "UnityGameLogic@Mac.app/Contents/MacOS/UnityGameLogic@Mac",
-      "arguments": [
-        "+workerType",
-        "UnityGameLogic",
-        "+workerId",
-        "${IMPROBABLE_WORKER_ID}",
-        "+receptionistHost",
-        "${IMPROBABLE_RECEPTIONIST_HOST}",
-        "+receptionistPort",
-        "${IMPROBABLE_RECEPTIONIST_PORT}",
-        "+linkProtocol",
-        "Tcp",
-        "-batchmode",
-        "-nographics",
-        "-logfile",
-        "${IMPROBABLE_LOG_FILE}"
-      ]
-    },
-    "linux": {
-      "artifact_name": "UnityGameLogic@Linux.zip",
-      "command": "UnityGameLogic@Linux",
-      "arguments": [
-        "+workerType",
-        "UnityGameLogic",
-        "+workerId",
-        "${IMPROBABLE_WORKER_ID}",
-        "+receptionistHost",
-        "${IMPROBABLE_RECEPTIONIST_HOST}",
-        "+receptionistPort",
-        "${IMPROBABLE_RECEPTIONIST_PORT}",
-        "+linkProtocol",
-        "Tcp",
-        "-batchmode",
-        "-nographics",
-        "-logfile",
-        "${IMPROBABLE_LOG_FILE}"
-      ]
-    }
   }
-}

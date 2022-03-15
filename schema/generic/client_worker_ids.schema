@@ -1,16 +1,16 @@
 package generic;
 import "generic/vector3.schema";
+import "player/player_attributes.schema";
 		
 component ClientWorkerIds {
     id = 109;
     uint32 players_on_map_count = 1;
-    bool spawn_units_event_sent = 2;
-    string client_worker_id_1 = 3;
-    string client_worker_id_2 = 4;
-    event SpawnUnits spawn_units_event;
+    list<string> client_worker_ids = 2;
+    list<player.PlayerAttribute> player_attributes = 3;
+    event MapInitialized map_initialized_event;
 }
 
-type SpawnUnits
+type MapInitialized
 {
     uint32 world_index = 1;
 }

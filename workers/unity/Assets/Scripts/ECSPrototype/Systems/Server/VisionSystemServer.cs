@@ -239,10 +239,9 @@ public class VisionSystemServer : JobComponentSystem
     {
         inVision.CellsInVisionrange.Clear();
 
-        //Add all coordinates to Vision TODO: Store all mapCoords in a dict on Gamestate
-        Entities.WithSharedComponentFilter(new WorldIndexShared { Value = worldIndex }).ForEach((in CubeCoordinate.Component coord, in CellAttributesComponent.Component cellAtt) =>
+        Entities.WithSharedComponentFilter(new WorldIndexShared { Value = worldIndex }).ForEach((in MapData.Component mapData) =>
         {
-            inVision.CellsInVisionrange.Add(CellGridMethods.CubeToAxial(coord.CubeCoordinate));
+            inVision.CellsInVisionrange.AddRange(mapData.CoordinateCellDictionary.Keys);
         })
         .WithoutBurst()
         .Run();

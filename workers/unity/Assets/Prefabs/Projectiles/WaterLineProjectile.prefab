@@ -14839,16 +14839,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EventEmitter: {fileID: 4178519868625791593}
   EnableIfVisibleObjects:
   - {fileID: 4896425436571225840}
   - {fileID: 8129573533116636894}
   - {fileID: 3280190647370396165}
   - {fileID: 1805750484437186918}
   DestinationObjectPrefab: {fileID: 0}
-  DestinationExplosionPrefab: {fileID: 4723404049532625160, guid: 57d3e76a55d8c3246971622ec77fdf8d,
+  DestinationExplosionPrefab: {fileID: -7965398785296240854, guid: 9942b6b025c41df4aa7ccb18c0b332e8,
     type: 3}
   ExplosionSpawnTransform: {fileID: 5341185222269292129}
   CollisionDetection: {fileID: 0}
+  IsPreviewProjectile: 0
+  PlaySoundFX: 1
   TravellingCurveCutOff: 0
   TargetYOffset: 0.5
   ArriveInstantly: 1
@@ -14909,7 +14912,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/ActionSFX/Axalotl/WaterSpear
-  PlayEvent: 1
+  PlayEvent: 0
   StopEvent: 2
   AllowFadeout: 1
   TriggerOnce: 0

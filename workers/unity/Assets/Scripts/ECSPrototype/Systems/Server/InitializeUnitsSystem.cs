@@ -6,6 +6,7 @@ using Unit;
 using Cell;
 using Unity.Jobs;
 using Player;
+using System.Linq;
 
 [DisableAutoCreation]
 public class InitializeUnitsSystem : JobComponentSystem
@@ -18,27 +19,7 @@ public class InitializeUnitsSystem : JobComponentSystem
     protected override void OnCreate()
     {
         base.OnCreate();
-        /*
-        m_UnitData = GetEntityQuery(
-            ComponentType.ReadOnly<Transform>(),
-            ComponentType.ReadOnly<UnitDataSet>(),
-            ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
-            ComponentType.ReadOnly<FactionComponent.Component>(),
-            ComponentType.ReadWrite<UnitComponentReferences>(),
-            ComponentType.ReadWrite<LineRendererComponent>(),
-            ComponentType.ReadWrite<TeamColorMeshes>(),
-            ComponentType.ReadWrite<UnitEffects>(),
-            ComponentType.ReadWrite<AnimatorComponent>(),
-            ComponentType.ReadOnly<MovementVariables.Component>()
-            );
 
-
-        m_ManalithUnitData = GetEntityQuery(
-            ComponentType.ReadWrite<Transform>(),
-            ComponentType.ReadOnly<NewlyAddedSpatialOSEntity>(),
-            ComponentType.ReadOnly<MovementVariables.Component>()
-            );
-            */
         m_PlayerData = GetEntityQuery(
             ComponentType.ReadOnly<PlayerState.HasAuthority>(),
             ComponentType.ReadOnly<HeroTransform>(),
@@ -50,9 +31,17 @@ public class InitializeUnitsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, ref StartRotation.Component startRotation, ref Manalith.Component manalith) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Transform t, UnitComponentReferences unitCompRef, ref StartRotation.Component startRotation, ref Manalith.Component manalith) =>
         {
             t.rotation = Quaternion.Euler(new Vector3(0, startRotation.Value, 0));
+
+            if (unitCompRef.MeshMatComponent)
+            {
+                foreach (Renderer r in unitCompRef.MeshMatComponent.AllMesheRenderers)
+                {
+                    unitCompRef.MeshMatComponent.AllMeshMaterials.Add(r.materials.ToList());
+                }
+            }
         })
         .WithoutBurst()
         .Run();
@@ -64,7 +53,7 @@ public class InitializeUnitsSystem : JobComponentSystem
         var playerFactionComp = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var heroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
 
-        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, AnimatorComponent anim, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp, in Health.Component health) =>
+        Entities.WithAll<NewlyAddedSpatialOSEntity>().ForEach((Entity e, UnitComponentReferences unitCompRef, AnimatorComponent anim, ref StartRotation.Component startRotation, in FactionComponent.Component unitFactionComp, in Health.Component health) =>
         {
             var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
             var teamColorMeshes = EntityManager.GetComponentObject<TeamColorMeshes>(e);
@@ -169,10 +158,17 @@ public class InitializeUnitsSystem : JobComponentSystem
                     heroTransform.Transform = unitTransform;
                 }
             }
+
+            if(unitCompRef.MeshMatComponent)
+            {
+                foreach (Renderer r in unitCompRef.MeshMatComponent.AllMesheRenderers)
+                {
+                    unitCompRef.MeshMatComponent.AllMeshMaterials.Add(r.materials.ToList());
+                }
+            }
         })
         .WithoutBurst()
         .Run();
-
 
         return inputDeps;
     }

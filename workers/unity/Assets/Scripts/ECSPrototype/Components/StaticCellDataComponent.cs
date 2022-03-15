@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -16,4 +16,4 @@ public struct StaticCellData : IComponentData
     public float3 Position3D;
 }
 
-public class StaticCellDataComponent : ComponentDataProxy<StaticCellData> { }
+//public class StaticCellDataComponent : ComponentDataProxy<StaticCellData> { }

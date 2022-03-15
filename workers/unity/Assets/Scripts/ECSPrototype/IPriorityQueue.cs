@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 /// <summary>
 /// Represents a prioritized queue.
@@ -14,6 +14,9 @@ public interface IPriorityQueue<T>
     /// Method adds item to the queue.
     /// </summary>
     void Enqueue(T item, int priority);
+
+
+    void Enqueue(T item, uint priority);
     /// <summary>
     /// Method returns item with the LOWEST priority value.
     /// </summary>

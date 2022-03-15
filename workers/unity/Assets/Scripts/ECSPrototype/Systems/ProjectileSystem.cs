@@ -5,6 +5,7 @@ using Generic;
 using Player;
 using Unity.Jobs;
 using Improbable.Gdk.Core;
+using FMODUnity;
 
 //[DisableAutoCreation]
 public class ProjectileSystem : JobComponentSystem
@@ -51,20 +52,9 @@ public class ProjectileSystem : JobComponentSystem
         {
             if (Worlds.ClientWorldWorker != default)
             {
-                /*
-                m_UnitData = Worlds.ClientWorld.CreateEntityQuery(
-                    ComponentType.ReadWrite<AnimatorComponent>()
-                );
-                */
-
                 m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
                 );
-/*
-                m_PlayerData = Worlds.ClientWorld.CreateEntityQuery(
-                ComponentType.ReadOnly<PlayerState.HasAuthority>()
-                );
-                */
                 initialized = true;
             }
         }
@@ -86,7 +76,6 @@ public class ProjectileSystem : JobComponentSystem
                 {
                     if (projectile.CollisionDetection.HasCollided)
                     {
-                        //Debug.Log("Projectile Collision Detected");
                         projectile.DestinationReached = true;
                         projectile.FlagForDestruction = true;
                     }
@@ -124,6 +113,11 @@ public class ProjectileSystem : JobComponentSystem
                 }
                 else if (projectile.IsTravelling)
                 {
+                    if(projectile.EventEmitter && projectile.PlaySoundFX)
+                    {
+                        projectile.EventEmitter.Play();
+                    }
+
                     if (projectile.ArriveInstantly)
                     {
                         if (projectile.RigidbodiesToLaunch.Count == 0)
@@ -190,15 +184,17 @@ public class ProjectileSystem : JobComponentSystem
                             new LogEvent("TriggerProjectileEvent")
                             .WithField("InAction", projectile.UnitId));
                             */
-
-                            m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameState, projectile.AxaShieldOrbitCount);
+                            if(!projectile.IsPreviewProjectile)
+                                m_ActionEffectSystem.TriggerActionEffect(projectile.UnitFaction, projectile.Action, projectile.UnitId, projectile.PhysicsExplosionOrigin, gameState, projectile.AxaShieldOrbitCount);
 
                             if (projectile.DestinationExplosionPrefab && projectile.ExplosionSpawnTransform)
                             {
-                                Object.Instantiate(projectile.DestinationExplosionPrefab, projectile.ExplosionSpawnTransform.position, Quaternion.identity, projectile.transform.parent);
+                                StudioEventEmitter explosion = Object.Instantiate(projectile.DestinationExplosionPrefab, projectile.ExplosionSpawnTransform.position, Quaternion.identity, projectile.transform.parent);
+                                if (projectile.PlaySoundFX)
+                                    explosion.Play();
                             }
 
-                            if (projectile.ExplosionEventEmitter)
+                            if (projectile.ExplosionEventEmitter && projectile.PlaySoundFX)
                             {
                                 projectile.ExplosionEventEmitter.Play();
                             }
@@ -223,8 +219,6 @@ public class ProjectileSystem : JobComponentSystem
                                 projectile.FlagForDestruction = true;
                             }
                         }
-
-                        //Explode(projectile);
                         projectile.IsTravelling = false;
                     }
                 }
@@ -236,7 +230,7 @@ public class ProjectileSystem : JobComponentSystem
                         go.SetActive(false);
                     }
                     if(projectile)
-                        GameObject.Destroy(projectile.gameObject, 0.5f);
+                        Object.Destroy(projectile.gameObject, 0.5f);
 
                     projectile.QueuedForDestruction = true;
                 }

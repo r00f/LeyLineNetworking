@@ -6,17 +6,17 @@ using Unit;
 using Cell;
 using Player;
 using UnityEngine;
-using Improbable;
-using Unity.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using Unity.Jobs;
-using UnityEngine.EventSystems;
 
 //Update after playerState selected unit has been set
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SimulatedActionRequestSystem : JobComponentSystem
 {
+    public struct ComponentsAddedIdentifierSim : ISystemStateComponentData
+    {
+    }
+    Settings settings;
     PathFindingSystem m_PathFindingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
@@ -39,6 +39,8 @@ public class SimulatedActionRequestSystem : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>(),
+        ComponentType.ReadOnly<MapData.Component>(),
+        ComponentType.ReadOnly<CurrentMapState>(),
         ComponentType.ReadOnly<SpatialEntityId>()
         );
     }
@@ -46,6 +48,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
+        settings = Resources.Load<Settings>("Settings");
         m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
@@ -62,20 +65,36 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         .WithoutBurst()
         .Run();
 
+        Entities.WithNone<ComponentsAddedIdentifierSim>().ForEach((Entity entity, in MapData.Component mapData) =>
+        {
+            var curMapState = new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
+            EntityManager.AddComponentObject(entity, curMapState);
+            EntityManager.AddComponentData(entity, new ComponentsAddedIdentifierSim { });
+        })
+        .WithStructuralChanges()
+        .WithoutBurst()
+        .Run();
+
         if (m_PlayerData.CalculateEntityCount() == 0 || m_GameStateData.CalculateEntityCount() != 1)
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+
+        var currentMapState = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
+
+
         var gameStateId = m_GameStateData.GetSingleton<SpatialEntityId>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerEnergy = m_PlayerData.GetSingleton<PlayerEnergy.Component>();
         var simulatedPlayer = m_PlayerData.GetSingleton<SimulatedPlayer.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
-
         var simSkipTime = m_PlayerData.GetSingleton<SimPlayerSkipTime>();
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
 
-        for(int i = 0; i < cleanUpStateEvents.Count; i++)
+
+
+        for (int i = 0; i < cleanUpStateEvents.Count; i++)
         {
             if (cleanUpStateEvents[i].EntityId.Id == gameStateId.EntityId.Id)
             {
@@ -100,9 +119,9 @@ public class SimulatedActionRequestSystem : JobComponentSystem
                 if (simSkipTime.SkipTurnWaitTime > 0f)
                 {
                     simSkipTime.SkipTurnWaitTime -= Time.DeltaTime;
-                    Entities.ForEach((Entity e, ref ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component coord, in Energy.Component energy, in Actions.Component actions, in FactionComponent.Component faction, in SpatialEntityId id) =>
+                    Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, ref ClientActionRequest.Component clientActionRequest, in CubeCoordinate.Component coord, in Energy.Component energy, in Actions.Component actions, in FactionComponent.Component faction, in SpatialEntityId id) =>
                     {
-                        if (faction.Faction == playerFaction.Faction && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero && (!energy.Harvesting || EntityManager.HasComponent<Manalith.Component>(e)))
+                        if (actions.ActionsList.Count > 0 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero && (!energy.Harvesting || EntityManager.HasComponent<Manalith.Component>(e)))
                         {
                             if (clientActionRequest.ActionId == -3)
                             {
@@ -116,19 +135,19 @@ public class SimulatedActionRequestSystem : JobComponentSystem
                             }
                             else
                             {
-                                var cachedCells = m_PathFindingSystem.GetRadiusClient(coord.CubeCoordinate, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange);
+                                var cachedCells = m_PathFindingSystem.GetMapRadius(currentMapState, coord.CubeCoordinate, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange);
 
                                 if (cachedCells.Count > 0)
                                 {
                                     if (actions.ActionsList[clientActionRequest.ActionId].Effects[0].EffectType != EffectTypeEnum.move_along_path)
                                     {
                                         var rCell = Random.Range(0, cachedCells.Count);
-                                        if (m_PathFindingSystem.ValidateTargetClient(coord.CubeCoordinate, cachedCells[rCell].Cell.CubeCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
-                                            clientActionRequest.TargetCoordinate = cachedCells[rCell].Cell.CubeCoordinate;
+                                        if (m_PathFindingSystem.ValidateTargetClient(currentMapState, coord.CubeCoordinate, CellGridMethods.AxialToCube(cachedCells[rCell].Key), actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                                            clientActionRequest.TargetCoordinate = CellGridMethods.AxialToCube(cachedCells[rCell].Key);
                                     }
                                     else
                                     {
-                                        var pathsInRange = m_PathFindingSystem.GetAllPathCoordinatesInRadius((uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange, cachedCells);
+                                        var pathsInRange = m_PathFindingSystem.GetAllPathCoordinatesInRadius(currentMapState, (uint) actions.ActionsList[clientActionRequest.ActionId].Targets[0].Targettingrange, cachedCells);
                                         if (pathsInRange.Keys.Count > 0)
                                         {
                                             var rCell = Random.Range(0, pathsInRange.Count);
@@ -154,7 +173,7 @@ public class SimulatedActionRequestSystem : JobComponentSystem
         }
         else
         {
-            simSkipTime.StartPlanningWaitTime = 10f;
+            simSkipTime.StartPlanningWaitTime = settings.SimPlayerWaitTime;
             simSkipTime.SkipTurnWaitTime = 5f;
         }
 

@@ -21,7 +21,7 @@ public class UnitComponentReferences : MonoBehaviour
     public float CurrentMoveTime;
     [HideInInspector]
     public int CurrentMoveIndex;
-    [HideInInspector]
+
     public Vector3 LastStationaryPosition;
 
     [Header("HealthBar")]
@@ -33,6 +33,7 @@ public class UnitComponentReferences : MonoBehaviour
     public MeshRenderer SelectionMeshRenderer;
 
     public List<GameObject> SelectionGameObjects;
+    public MeshMaterialComponent MeshMatComponent;
 
     public void InitializeComponentReferences()
     {
@@ -46,18 +47,37 @@ public class UnitComponentReferences : MonoBehaviour
         AnimPortraitComp = GetComponent<AnimatedPortraitReference>();
         UnitEffectsComp = GetComponent<UnitEffects>();
 
+        MeshMatComponent = GetComponentInChildren<MeshMaterialComponent>();
+
+        if(MeshMatComponent)
+        {
+            MeshMatComponent.Animator = AnimatorComp.Animator;
+            foreach (SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                MeshMatComponent.AllMesheRenderers.Add(s);
+            }
+
+            foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
+            {
+                MeshMatComponent.AllMesheRenderers.Add(m);
+            }
+        }
+
         SelectionGameObjects.Clear();
 
-        foreach(SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
+        foreach (SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
+        {
             SelectionGameObjects.Add(s.gameObject);
+        }
 
         foreach (MeshRenderer m in GetComponentsInChildren<MeshRenderer>())
+        {
             SelectionGameObjects.Add(m.gameObject);
+        }
 
         if(SelectionCircleGO && SelectionGameObjects.Contains(SelectionCircleGO))
         {
             SelectionGameObjects.Remove(SelectionCircleGO);
         }
-
     }
 }

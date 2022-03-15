@@ -9,8 +9,9 @@ Shader "HDRP/PostFX/HighlightPassFullscreen"
         _OuterColor( "Outer Color", Color ) = (1, 1, 0, 1)
         _Texture ("Texture", 2D ) = "black" {}
         _TextureSize("Texture Pixels Size", Vector) = (64,64,0,0)
-   
+        
         _BehindFactor("Behind Factor", Range(0,1)) = 0.2
+        _InnerBehindFactor("Inner Behind Factor", Range(0,1)) = 0.2
     }
  
     HLSLINCLUDE
@@ -70,7 +71,9 @@ Shader "HDRP/PostFX/HighlightPassFullscreen"
         float2( -s225, c225 ),
         float2( -s225, -c225 )
     };
- 
+
+    CBUFFER_START(UnityPerMaterial)
+
     int _SamplePrecision;
     float _OutlineWidth;
  
@@ -82,7 +85,9 @@ Shader "HDRP/PostFX/HighlightPassFullscreen"
  
     float _BehindFactor;
     float _InnerBehindFactor;
- 
+
+    CBUFFER_END
+
     float4 FullScreenPass(Varyings varyings) : SV_Target
     {
         float depth = LoadCameraDepth(varyings.positionCS.xy);

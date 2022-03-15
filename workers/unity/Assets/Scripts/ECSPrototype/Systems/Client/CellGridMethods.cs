@@ -1,7 +1,7 @@
 using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
 using Generic;
+using Unity.Collections;
 
 public static class CellGridMethods
 {
@@ -10,6 +10,13 @@ public static class CellGridMethods
         var q = (2f / 3 * point.x);
         var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
         return CubeRound(AxialToCube(new Vector2f(q, r)));
+    }
+
+    public static Vector3f PosToCorner(Vector3f center, int i, float yOffset = 0)
+    {
+        var angle_deg = 60 * i;
+        var angle_rad = Mathf.PI / 180 * angle_deg;
+        return new Vector3f(center.X + Mathf.Cos(angle_rad), center.Y + yOffset, center.Z + Mathf.Sin(angle_rad));
     }
 
     public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2f mapCenter)
@@ -34,6 +41,11 @@ public static class CellGridMethods
     }
 
     public static Vector3f AxialToCube(Vector2f axial)
+    {
+        return new Vector3f(axial.X, axial.Y, -axial.X - axial.Y);
+    }
+
+    public static Vector3f AxialToCube(Vector2i axial)
     {
         return new Vector3f(axial.X, axial.Y, -axial.X - axial.Y);
     }
@@ -122,6 +134,24 @@ public static class CellGridMethods
         return ring;
     }
 
+    public static FixedList128<Vector3f> RingDrawFixed(Vector3f origin, uint radius)
+    {
+        var ring = new FixedList128<Vector3f>();
+        var cubeScale = CubeScale(DirectionsArray[4], radius);
+        var coord = CubeAdd(origin, cubeScale);
+
+        for (int i = 0; i < 6; i++)
+        {
+            for (int j = 0; j < radius; j++)
+            {
+                ring.Add(coord);
+                coord = CubeNeighbour(coord, (uint) i);
+            }
+        }
+
+        return ring;
+    }
+
     public static Vector3f RotateRight(Vector3f origin)
     {
         return new Vector3f(-origin.Z, -origin.X, -origin.Y);
@@ -153,6 +183,37 @@ public static class CellGridMethods
         for (int i = 0; i <= halfExtent; i++)
         {
             if(i != 0)
+                cone.Add(coord);
+            var direction = CoordinateDirection(center, coord);
+            var rotatedDirectionL = RotateLeft(direction);
+            var rotatedCoordL = CubeAdd(rotatedDirectionL, center);
+            coord = rotatedCoordL;
+        }
+
+        return cone;
+    }
+
+    public static FixedList128<Vector3f> ConeDrawFixed(Vector3f center, Vector3f target, uint radius, uint extent)
+    {
+
+        var cone = new FixedList128<Vector3f>();
+        var coord = target;
+        var halfExtent = (extent - 1) / 2;
+
+        for (int i = 0; i <= halfExtent; i++)
+        {
+            cone.Add(coord);
+            var direction = CoordinateDirection(center, coord);
+            var rotatedDirection = RotateRight(direction);
+            var rotatedCoord = CubeAdd(rotatedDirection, center);
+            coord = rotatedCoord;
+        }
+
+        coord = target;
+
+        for (int i = 0; i <= halfExtent; i++)
+        {
+            if (i != 0)
                 cone.Add(coord);
             var direction = CoordinateDirection(center, coord);
             var rotatedDirectionL = RotateLeft(direction);
@@ -208,6 +269,27 @@ public static class CellGridMethods
 
         return line;
     }
+
+    public static FixedList128<Vector3f> LineDrawFixed(Vector3f origin, Vector3f destination)
+    {
+        var line = new FixedList128<Vector3f>();
+
+        var n = GetDistance(origin, destination);
+
+        //nudge destination
+        destination = new Vector3f(destination.X + 0.000001f, destination.Y + 0.000002f, destination.Z + 0.000003f);
+
+        for (int i = 0; i <= n; i++)
+        {
+            var resultingCoordinate = CubeLerp(origin, destination, 1f / n * i);
+
+            if (IsCoordinateWithinMapBounds(resultingCoordinate))
+                line.Add(resultingCoordinate);
+        }
+
+        return line;
+    }
+
 
     public static List<Vector3f> LineDrawWhitoutOrigin(List<Vector3f> line, Vector3f origin, Vector3f destination)
     {
@@ -304,6 +386,28 @@ public static class CellGridMethods
         return results;
     }
 
+    public static FixedList128<Vector3f> CircleDrawFixed(Vector3f originCellCubeCoordinate, uint radius)
+    {
+        var results = new FixedList128<Vector3f>
+        {
+            originCellCubeCoordinate
+        };
+
+        for (int x = (int)-radius; x <= radius; x++)
+        {
+            for (int y = (int)Mathf.Max(-radius, -x - (float)radius); y <= (int)Mathf.Min(radius, -x + radius); y++)
+            {
+                var z = -x - y;
+                var resultingCoordinate = new Vector3f(originCellCubeCoordinate.X + x, originCellCubeCoordinate.Y + y, originCellCubeCoordinate.Z + z);
+
+                if (IsCoordinateWithinMapBounds(resultingCoordinate))
+                    results.Add(resultingCoordinate);
+            }
+        }
+        return results;
+    }
+
+
     public static HashSet<Vector3f> CircleDrawHash(Vector3f originCellCubeCoordinate, uint radius)
     {
         var results = new HashSet<Vector3f>
@@ -322,6 +426,4 @@ public static class CellGridMethods
         }
         return results;
     }
-
-
 }

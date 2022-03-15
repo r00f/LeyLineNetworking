@@ -17,15 +17,13 @@ using UnityEngine.EventSystems;
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class SendActionRequestSystem : JobComponentSystem
 {
+    PathFindingSystem m_PathFindingSystem;
     HighlightingSystem m_HighlightingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
-    //EntityQuery m_CellData;
     EntityQuery m_UnitData;
-    //EntityQuery m_ClickedUnitData;
     EntityQuery m_RightClickedUnitData;
-    //EntityQuery m_SelectActionRequestData;
     CommandSystem m_CommandSystem;
     UISystem m_UISystem;
     EventSystem eventSystem;
@@ -64,7 +62,9 @@ public class SendActionRequestSystem : JobComponentSystem
         );
 
         m_GameStateData = GetEntityQuery(
-        ComponentType.ReadOnly<GameState.Component>()
+        ComponentType.ReadOnly<GameState.Component>(),
+        ComponentType.ReadOnly<MapData.Component>(),
+        ComponentType.ReadOnly<CurrentMapState>()
         );
     }
 
@@ -75,6 +75,7 @@ public class SendActionRequestSystem : JobComponentSystem
 
 
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
+        m_PathFindingSystem = World.GetExistingSystem<PathFindingSystem>();
         m_CommandSystem = World.GetExistingSystem<CommandSystem>();
         m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
         m_UISystem = World.GetExistingSystem<UISystem>();
@@ -86,6 +87,13 @@ public class SendActionRequestSystem : JobComponentSystem
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+
+        var currentMapState = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
+
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
+
         var playerHigh = m_PlayerData.GetSingleton<HighlightingDataComponent>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
@@ -107,46 +115,58 @@ public class SendActionRequestSystem : JobComponentSystem
         if (gameState.CurrentState == GameStateEnum.planning)
         {
             //Clear right Clicked unit actions
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref RightClickEvent rightClickEvent, in FactionComponent.Component faction, in ClientActionRequest.Component clientActionRequest) =>
+            Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref RightClickEvent rightClickEvent, in ClientActionRequest.Component clientActionRequest) =>
             {
-                if (faction.Faction == playerFaction.Faction)
+                if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero)
                 {
-                    if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero)
-                    {
-                        if (anim.AnimationEvents)
-                            anim.AnimationEvents.VoiceTrigger = true;
-                        SelectActionCommand(-3, unitId.EntityId.Id);
-                    }
+                    if (anim.AnimationEvents)
+                        anim.AnimationEvents.VoiceTrigger = true;
+                    SelectActionCommand(-3, unitId.EntityId.Id);
                 }
             })
             .WithoutBurst()
             .Run();
 
-            Entities.ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction) =>
+            Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, AnimatorComponent anim, ref ClientActionRequest.Component clientActionRequest, in MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component uCoord, in FactionComponent.Component faction, in Actions.Component actions) =>
             {
-                //set unit action to basic move if is clicked and player has energy
                 if (mouseState.ClickEvent == 1)
                 {
                     if (playerState.CurrentState != PlayerStateEnum.waiting_for_target)
                     {
-                        if (faction.Faction == playerFaction.Faction)
-                        {
-                            if (anim.AnimationEvents)
-                                anim.AnimationEvents.VoiceTrigger = true;
-                        }
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
                     }
                 }
 
                 #region Set Target Command
                 //check if unit is the selected unit in playerState and if current selected action is not empty
-                if (id.EntityId.Id == playerState.SelectedUnitId && clientActionRequest.ActionId != -3 && Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
+                if (id.EntityId.Id == playerState.SelectedUnitId && clientActionRequest.ActionId != -3)
                 {
-                    clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
+                    if (actions.ActionsList[clientActionRequest.ActionId].Targets[0].UnitTargetNested.UnitReq == UnitRequisitesEnum.self)
+                    {
+                        clientActionRequest.TargetCoordinate = uCoord.CubeCoordinate;
 
-                    if (anim.AnimationEvents)
-                        anim.AnimationEvents.VoiceTrigger = true;
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
 
-                    m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+                        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
+                    }
+                    else if (Input.GetButtonUp("Fire1") && !eventSystem.IsPointerOverGameObject())
+                    {
+                        //if target is illegal, reset clientActionRequest component
+                        if (m_PathFindingSystem.ValidateTargetClient(currentMapState, uCoord.CubeCoordinate, playerHigh.HoveredCoordinate, actions.ActionsList[clientActionRequest.ActionId], id.EntityId.Id, faction.Faction))
+                            clientActionRequest.TargetCoordinate = playerHigh.HoveredCoordinate;
+                        else if (actions.LockedAction.Index == -3)
+                        {
+                            clientActionRequest.TargetCoordinate = new Vector3f();
+                            clientActionRequest.ActionId = -3;
+                        }
+
+                        if (anim.AnimationEvents)
+                            anim.AnimationEvents.VoiceTrigger = true;
+
+                        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
+                    }
                 }
                 #endregion
             })
@@ -180,6 +200,12 @@ public class SendActionRequestSystem : JobComponentSystem
         //Debug.Log("SelectActionCommand with index: " + actionIndex + " from entity with id: " + entityId);
         bool isSelfTarget = false;
 
+        var gameStateEntity = m_GameStateData.GetSingletonEntity();
+        var mapData = EntityManager.GetComponentObject<CurrentMapState>(gameStateEntity);
+
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerEffects = EntityManager.GetComponentObject<PlayerEffects>(playerEntity);
+
         var playerPathing = m_PlayerData.GetSingleton<PlayerPathing.Component>();
         var playerFaction = m_PlayerData.GetSingleton<FactionComponent.Component>();
         var playerState = m_PlayerData.GetSingleton<PlayerState.Component>();
@@ -194,13 +220,14 @@ public class SendActionRequestSystem : JobComponentSystem
             lastSelectedActionTargets.AddRange(playerState.UnitTargets[entityId].CubeCoordinates.Keys);
         }
 
-        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh);
+        m_HighlightingSystem.ResetHighlights(ref playerState, playerHigh, playerEffects);
         m_HighlightingSystem.ResetMarkerNumberOfTargets(lastSelectedActionTargets);
 
         Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref ClientActionRequest.Component clientActionRequest, in SpatialEntityId idComponent, in Actions.Component actions, in CubeCoordinate.Component coord) =>
         {
             if (idComponent.EntityId.Id == entityId)
             {
+                unitCompRef.AnimatorComp.CurrentPreviewIndex = -3;
                 clientActionRequest.TargetCoordinate = new Vector3f(0, 0, 0);
                 clientActionRequest.ActionId = actionIndex;
                 Action act = actions.NullAction;
@@ -225,19 +252,20 @@ public class SendActionRequestSystem : JobComponentSystem
                     {
                         playerPathing.CoordinatesInRange.Clear();
                         playerPathing.CellsInRange.Clear();
-                        playerPathing.CachedPaths.Clear();
+                        playerPathing.CachedMapPaths.Clear();
                         playerPathing.CoordinatesInRange = playerPathing.CoordinatesInRange;
                         playerPathing.CellsInRange = playerPathing.CellsInRange;
-                        playerPathing.CachedPaths = playerPathing.CachedPaths;
+                        playerPathing.CachedMapPaths = playerPathing.CachedMapPaths;
                         playerHigh = m_HighlightingSystem.GatherHighlightingInformation(e, actionIndex, playerHigh);
-                        playerState = m_HighlightingSystem.FillUnitTargetsList(act, playerHigh, playerState, playerPathing, playerFaction.Faction);
-                        playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh);
-                        m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing);
+                        playerState = m_HighlightingSystem.FillUnitTargetsList(mapData, act, playerHigh, playerState, playerPathing, playerFaction.Faction);
+                        playerPathing = m_HighlightingSystem.UpdateSelectedUnit(playerState, playerPathing, playerHigh, mapData);
+                        m_HighlightingSystem.HighlightReachable(ref playerState, ref playerPathing, playerEffects, mapData);
                     }
                     else
                     {
                         if (unitCompRef.AnimatorComp.AnimationEvents)
                             unitCompRef.AnimatorComp.AnimationEvents.VoiceTrigger = true;
+
                         playerHigh.TargetRestrictionIndex = 2;
                         m_HighlightingSystem.SetSelfTarget(entityId, act, coord.CubeCoordinate, unitCompRef.LinerendererComp);
                         m_UISystem.DeactivateActionDisplay(e, .3f);

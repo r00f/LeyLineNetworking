@@ -189,6 +189,7 @@ Material:
     - _HeightPoMAmplitude: 2
     - _HeightTessAmplitude: 2
     - _HeightTessCenter: 0.5
+    - _InnerBehindFactor: 0.2
     - _InvTilingScale: 1
     - _Ior: 1.5
     - _IridescenceMask: 1
@@ -262,7 +263,7 @@ Material:
     - _InnerColor: {r: 0.3262709, g: 1, b: 0, a: 0.4117647}
     - _InvPrimScale: {r: 1, g: 1, b: 0, a: 0}
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
-    - _OuterColor: {r: 0.65881914, g: 0.65881914, b: 0.3960758, a: 0.99999326}
+    - _OuterColor: {r: 0, g: 0.52156866, b: 1, a: 1}
     - _SelectionColor: {r: 1, g: 1, b: 1, a: 1}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
     - _TextureSize: {r: 64, g: 64, b: 0, a: 0}

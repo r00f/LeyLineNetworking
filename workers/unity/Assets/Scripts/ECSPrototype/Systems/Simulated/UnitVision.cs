@@ -1,6 +1,7 @@
 using Generic;
 using Unity.Entities;
 using Unity.Collections;
+using System.Collections.Generic;
 
 public struct UnitVision : IComponentData
 {

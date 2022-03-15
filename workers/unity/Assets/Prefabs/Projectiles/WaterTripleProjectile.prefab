@@ -99,6 +99,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f21b7648d2fa1fe45ab8d2f2d159b1ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  EventEmitter: {fileID: 3128612020489682228}
   EnableIfVisibleObjects:
   - {fileID: 6692764611301298036}
   - {fileID: 7929112319451173664}
@@ -108,6 +109,8 @@ MonoBehaviour:
   DestinationExplosionPrefab: {fileID: 0}
   ExplosionSpawnTransform: {fileID: 0}
   CollisionDetection: {fileID: 0}
+  IsPreviewProjectile: 0
+  PlaySoundFX: 0
   TravellingCurveCutOff: 1
   TargetYOffset: 0
   ArriveInstantly: 0
@@ -177,7 +180,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/ActionSFX/Axalotl/WaterBallLoop
-  PlayEvent: 1
+  PlayEvent: 0
   StopEvent: 2
   AllowFadeout: 1
   TriggerOnce: 0
@@ -5421,11 +5424,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 5341185222269292129}
     m_Modifications:
-    - target: {fileID: -7965398785296240854, guid: d9be79d053e0b084fb780d27b518eeaa,
-        type: 3}
-      propertyPath: PlayEvent
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3602980402949883786, guid: d9be79d053e0b084fb780d27b518eeaa,
         type: 3}
       propertyPath: m_Name

@@ -27,7 +27,7 @@ public class BindInstanciatedAnimator : MonoBehaviour
         {
             hero = FindObjectOfType<HeroIdentifier>();
             AnimatorToBind = hero.transform.GetComponentInChildren<Animator>();
-            egg = hero.GetComponent<AnimatorComponent>().CharacterEffects[0];
+            egg = hero.GetComponent<AnimatorComponent>().CharacterEffects[0].gameObject;
             egg.SetActive(true);
         }
 

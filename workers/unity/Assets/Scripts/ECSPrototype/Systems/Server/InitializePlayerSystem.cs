@@ -56,12 +56,12 @@ namespace LeyLineHybridECS
             new LogEvent("GameStates with worldIndexShared Count")
             .WithField("Count", m_GameStateData.CalculateEntityCount()));
             */
-            Entities.WithAll<PlayerAttributes.Component>().WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in OwningWorker.Component owningWorker) =>
+            Entities.WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in PlayerAttributes.Component playerAttributes, in OwningWorker.Component owningWorker) =>
             {
                 //Prevent PlayerFaction being initialized with WorldIndex 0 because gamestate has not had its WorldIndexShared added
                 if(spatialWorldIndex.Value == 0)
                 {
-                    spatialWorldIndex.Value = SetPlayerWorld(1, owningWorker.WorkerId);
+                    spatialWorldIndex.Value = SetPlayerWorld(1, owningWorker.WorkerId, playerAttributes.PlayerAttribute);
                     //Debug.Log("Newly added player spatialWorldIndex after SetPlayerWorld: " + spatialWorldIndex.Value);
                     /*
                     logger.HandleLog(LogType.Warning,
@@ -110,7 +110,7 @@ namespace LeyLineHybridECS
             return inputDeps;
         }
 
-        uint SetPlayerWorld(uint index, string clientWorkerId)
+        uint SetPlayerWorld(uint index, string clientWorkerId, PlayerAttribute playerAttribute)
         {
             if (m_GameStateData.CalculateEntityCount() < index)
             {
@@ -127,18 +127,22 @@ namespace LeyLineHybridECS
                     clientWorkerIds.PlayersOnMapCount++;
 
                     if (clientWorkerIds.PlayersOnMapCount == 1)
-                        clientWorkerIds.ClientWorkerId1 = clientWorkerId;
-                    else
                     {
-                        clientWorkerIds.ClientWorkerId2 = clientWorkerId;
+                        clientWorkerIds.ClientWorkerIds.Clear();
+                        clientWorkerIds.PlayerAttributes.Clear();
                     }
+                    clientWorkerIds.ClientWorkerIds.Add(clientWorkerId);
+                    clientWorkerIds.PlayerAttributes.Add(playerAttribute);
+
+                    clientWorkerIds.ClientWorkerIds = clientWorkerIds.ClientWorkerIds;
+                    clientWorkerIds.PlayerAttributes = clientWorkerIds.PlayerAttributes;
                 }
             })
             .WithoutBurst()
             .Run();
 
             if (wIndex == 0)
-                return SetPlayerWorld(index + 1, clientWorkerId);
+                return SetPlayerWorld(index + 1, clientWorkerId, playerAttribute);
             else
                 return wIndex;
         }

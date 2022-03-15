@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 /// <summary>
 /// Implementation of priority queue based on heap. Should be fast.
@@ -18,6 +18,22 @@ class HeapPriorityQueue<T> : IPriorityQueue<T>
     }
 
     public void Enqueue(T item, int priority)
+    {
+        _queue.Add(new PriorityQueueNode<T>(item, priority));
+        int ci = _queue.Count - 1;
+        while (ci > 0)
+        {
+            int pi = (ci - 1) / 2;
+            if (_queue[ci].CompareTo(_queue[pi]) >= 0)
+                break;
+            var tmp = _queue[ci];
+            _queue[ci] = _queue[pi];
+            _queue[pi] = tmp;
+            ci = pi;
+        }
+    }
+
+    public void Enqueue(T item, uint priority)
     {
         _queue.Add(new PriorityQueueNode<T>(item, priority));
         int ci = _queue.Count - 1;
