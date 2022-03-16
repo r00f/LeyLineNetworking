@@ -12,19 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 668265c3ec730f84cb55fbc65d7d4e76, type: 3}
   m_Name: BridgeWater
   m_EditorClassIdentifier: 
+  TerrainName: Water
+  additionalCost: 0
+  obstructVision: 0
+  Walkable: 1
   MapCellIconIndex: 2
   MapCellColorIndex: 7
   textureIndex: 0
-  TreeIndexMinMax: {x: 0, y: 0}
-  GrassAmountMinMax: {x: 0, y: 0}
-  NeighbourIndexMinMax: {x: 0, y: 0}
-  NeighbourAmountMinMax: {x: 0, y: 0}
-  terrain_Name: 
-  additionalCost: 0
+  Details: []
   yOffset: -3
-  Walkable: 1
-  spawnAllAssets: 0
-  probabilityToSpawnNeighbourAsset: 0
-  probabilityToSpawnAsset: 0
-  obstructVision: 0
-  assets_to_Spawn: []
+  cellTerrainYOffset: 0
+  DetailObjectSpawnYOffset: 0
+  DetailObjectSpawnYOffsetMinMax: {x: 0, y: 0}
+  AssetsToSpawn: []

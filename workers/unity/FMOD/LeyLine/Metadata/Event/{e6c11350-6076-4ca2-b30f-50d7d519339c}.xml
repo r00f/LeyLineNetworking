@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{e6c11350-6076-4ca2-b30f-50d7d519339c}">
 		<property name="name">
 			<value>ClickParticle</value>
@@ -42,6 +42,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{6eacfbd8-599e-46e2-8167-078edd3dddbb}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{ec1a867b-d7e9-48d4-ab30-efef57e6622b}</destination>
 		</relationship>
@@ -58,8 +61,15 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{dfc654a2-43d2-4c01-9745-ce500838f820}" />
-	<object class="MarkerTrack" id="{e0316ac5-a5a6-4fc8-a551-bc4b07239377}" />
+	<object class="MarkerTrack" id="{e0316ac5-a5a6-4fc8-a551-bc4b07239377}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{d0d7c883-11e6-4f8d-bb0f-6098f4fd04bd}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{b3473390-8e69-4d14-9ff4-7b4be0f5f70a}</destination>
 		</relationship>
@@ -68,6 +78,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{0d0ddd9c-ba38-4a20-bb8b-64e41492b29e}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{876ab376-1340-48c7-a64b-0928257a580c}</destination>
 		</relationship>
@@ -77,8 +90,8 @@
 	</object>
 	<object class="Timeline" id="{cd20cad9-2847-4372-a992-25a8f6e39c1e}">
 		<relationship name="modules">
-			<destination>{b3473390-8e69-4d14-9ff4-7b4be0f5f70a}</destination>
 			<destination>{876ab376-1340-48c7-a64b-0928257a580c}</destination>
+			<destination>{b3473390-8e69-4d14-9ff4-7b4be0f5f70a}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{ec1a867b-d7e9-48d4-ab30-efef57e6622b}">
@@ -86,8 +99,8 @@
 			<value>-25.5</value>
 		</property>
 		<relationship name="modulators">
-			<destination>{d0dc6110-7bf2-4d49-b622-eb2bcf42d34f}</destination>
 			<destination>{168a9576-1606-4dc5-a93f-f465f784b6df}</destination>
+			<destination>{d0dc6110-7bf2-4d49-b622-eb2bcf42d34f}</destination>
 		</relationship>
 		<relationship name="effectChain">
 			<destination>{51622b68-bc95-4f9a-a8a1-de03d89916e3}</destination>
@@ -171,14 +184,6 @@
 			<destination>{ec1a867b-d7e9-48d4-ab30-efef57e6622b}</destination>
 		</relationship>
 	</object>
-	<object class="RandomizerModulator" id="{d0dc6110-7bf2-4d49-b622-eb2bcf42d34f}">
-		<property name="nameOfPropertyBeingModulated">
-			<value>volume</value>
-		</property>
-		<property name="amount">
-			<value>7.20000029</value>
-		</property>
-	</object>
 	<object class="ADSRModulator" id="{168a9576-1606-4dc5-a93f-f465f784b6df}">
 		<property name="nameOfPropertyBeingModulated">
 			<value>volume</value>
@@ -191,6 +196,14 @@
 		</property>
 		<property name="finalValue">
 			<value>-80</value>
+		</property>
+	</object>
+	<object class="RandomizerModulator" id="{d0dc6110-7bf2-4d49-b622-eb2bcf42d34f}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>volume</value>
+		</property>
+		<property name="amount">
+			<value>7.20000029</value>
 		</property>
 	</object>
 	<object class="MixerBusEffectChain" id="{51622b68-bc95-4f9a-a8a1-de03d89916e3}">

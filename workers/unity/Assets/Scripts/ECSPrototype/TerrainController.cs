@@ -68,8 +68,30 @@ namespace LeyLineHybridECS
         [SerializeField]
         float[,] strength;
 
+        [SerializeField]
+        LineRenderer RiverOutline;
+
+        [SerializeField]
+        List<Vector3> RiverCellPositions;
+
+        public void GenerateRiverOutline()
+        {
+            foreach(Cell c in hexGridGenerator.hexagons)
+            {
+                if(c.GetComponent<CellType>().thisCellsTerrain.TerrainName == "Water" || c.GetComponent<CellType>().thisCellsTerrain.TerrainName == "Bridge")
+                {
+                    RiverCellPositions.Add(c.transform.position);
+                }
+            }
+
+            for(int i = 0; i < RiverCellPositions.Count; i++)
+            {
+                RiverCellPositions[i] = new Vector3(RiverCellPositions[i].x, 2.3f, RiverCellPositions[i].z);
+            }
 
 
+        }
+        
         public void GenerateMap()
         {
             UpdateAllMapTiles();

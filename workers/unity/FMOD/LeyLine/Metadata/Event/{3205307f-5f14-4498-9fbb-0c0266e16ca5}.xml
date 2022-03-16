@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{3205307f-5f14-4498-9fbb-0c0266e16ca5}">
 		<property name="name">
 			<value>ElectricBuzz</value>
@@ -41,6 +41,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{7be8ea8d-2ae8-4017-a766-c536cc0514b1}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{96dbc9d2-15ed-43ed-82d9-bac2190ce000}</destination>
 		</relationship>
@@ -57,8 +60,15 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{74d5bc4c-46d1-478d-99c9-fb9651d292d9}" />
-	<object class="MarkerTrack" id="{86b87ce6-47a9-4cf8-9064-9174f784d0ec}" />
+	<object class="MarkerTrack" id="{86b87ce6-47a9-4cf8-9064-9174f784d0ec}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{ed9e1cc1-9507-4e33-9cae-bc5281fcdf24}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{bf9d34d5-5df7-4cdf-bc9c-c0bad8590034}</destination>
 		</relationship>

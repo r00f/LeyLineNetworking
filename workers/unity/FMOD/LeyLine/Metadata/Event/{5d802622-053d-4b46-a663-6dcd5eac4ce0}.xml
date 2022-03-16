@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{5d802622-053d-4b46-a663-6dcd5eac4ce0}">
 		<property name="name">
 			<value>GameOver</value>
@@ -41,6 +41,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{3fd27fa9-2279-4dde-93ec-e597f1370021}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{caac59f4-7dee-42aa-9219-9e87e4dcff94}</destination>
 		</relationship>
@@ -57,8 +60,15 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{cf6bbf65-4b3d-46ab-b3a7-1530ed569f5a}" />
-	<object class="MarkerTrack" id="{31175ae5-180b-4f0c-bb4f-6f48176466e2}" />
+	<object class="MarkerTrack" id="{31175ae5-180b-4f0c-bb4f-6f48176466e2}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{5a9e3d4b-6498-485f-b187-500ae5ffd9c0}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{102a1606-3584-4a69-a4b8-1f3956a712f4}</destination>
 		</relationship>

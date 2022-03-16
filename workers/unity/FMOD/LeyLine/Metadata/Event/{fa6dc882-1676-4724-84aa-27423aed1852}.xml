@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{fa6dc882-1676-4724-84aa-27423aed1852}">
 		<property name="name">
 			<value>TrailSwoosh</value>
@@ -43,6 +43,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{9d5d55c8-f9ec-43e3-a880-41b3807c010a}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{02bd5313-059d-472c-a640-c5bfe46d1672}</destination>
 		</relationship>
@@ -58,9 +61,20 @@
 			<destination>{6692e5af-336b-4062-bd41-a9f1c96d30c6}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{142c1821-9b52-4735-b318-b388842c2391}" />
-	<object class="MarkerTrack" id="{7ed2e235-d1ca-4f97-938e-0b7dab515c47}" />
+	<object class="EventAutomatableProperties" id="{142c1821-9b52-4735-b318-b388842c2391}">
+		<property name="maximumDistance">
+			<value>15</value>
+		</property>
+	</object>
+	<object class="MarkerTrack" id="{7ed2e235-d1ca-4f97-938e-0b7dab515c47}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{0aa9980c-fdd7-4fe9-8afb-ab2c2944cd66}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{fed713d4-5fdf-4e9c-b542-22bb81bbeb27}</destination>
 		</relationship>
@@ -69,6 +83,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{6a5d2c24-9874-4901-af2e-8919df539b30}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{d39ff2eb-bac8-493f-9593-f2b56a4c87e4}</destination>
 		</relationship>
@@ -77,6 +94,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{f7860e16-e67c-480d-8ef9-14175654b14c}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{0c1e3e2d-4424-4c16-9200-54e9517248e8}</destination>
 		</relationship>
@@ -86,9 +106,9 @@
 	</object>
 	<object class="Timeline" id="{788cf8dc-1be8-443c-9bb2-03e88e21f936}">
 		<relationship name="modules">
-			<destination>{fed713d4-5fdf-4e9c-b542-22bb81bbeb27}</destination>
-			<destination>{d39ff2eb-bac8-493f-9593-f2b56a4c87e4}</destination>
 			<destination>{0c1e3e2d-4424-4c16-9200-54e9517248e8}</destination>
+			<destination>{d39ff2eb-bac8-493f-9593-f2b56a4c87e4}</destination>
+			<destination>{fed713d4-5fdf-4e9c-b542-22bb81bbeb27}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{02bd5313-059d-472c-a640-c5bfe46d1672}">

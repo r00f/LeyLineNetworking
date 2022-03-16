@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{95d06f49-a073-4f2e-a092-9b8d6f18135f}">
 		<property name="name">
 			<value>FlameWoosh</value>
@@ -44,6 +44,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{ef6d45a3-971b-43ae-9329-20085445aef2}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{4464e5b5-84b0-4ad6-a333-e9ad7e447717}</destination>
 		</relationship>
@@ -60,8 +63,15 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{50fd4e63-30d7-4679-97b1-390fda60c70c}" />
-	<object class="MarkerTrack" id="{83962ba4-fad8-455f-bb8e-08f5c64a99a8}" />
+	<object class="MarkerTrack" id="{83962ba4-fad8-455f-bb8e-08f5c64a99a8}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{589f42aa-2cc2-4518-81fc-b91d8140d622}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{23a10d43-f1cf-4885-bb46-32c61b61ba51}</destination>
 		</relationship>
@@ -70,6 +80,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{d2fa6da9-69c6-460f-94c9-4b38c1d97562}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{b5293e11-c752-48a4-8701-717b653ae983}</destination>
 		</relationship>
@@ -78,6 +91,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{53798ea9-b85f-4c78-894d-241ef9e60510}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{4c7ca7a9-16f6-405e-9719-d572877d593d}</destination>
 		</relationship>
@@ -86,6 +102,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{2b94a7c5-17f6-4a93-90cc-29c36b4503f7}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{196d8f0c-35e5-4e21-a517-fb62e1207af3}</destination>
 		</relationship>
@@ -96,8 +115,8 @@
 	<object class="Timeline" id="{e5f53559-cb13-45ea-8c08-b2d92ff916bb}">
 		<relationship name="modules">
 			<destination>{23a10d43-f1cf-4885-bb46-32c61b61ba51}</destination>
-			<destination>{b5293e11-c752-48a4-8701-717b653ae983}</destination>
 			<destination>{4c7ca7a9-16f6-405e-9719-d572877d593d}</destination>
+			<destination>{b5293e11-c752-48a4-8701-717b653ae983}</destination>
 			<destination>{196d8f0c-35e5-4e21-a517-fb62e1207af3}</destination>
 		</relationship>
 	</object>
@@ -169,8 +188,8 @@
 			<value>-3</value>
 		</property>
 		<relationship name="modulators">
-			<destination>{27aa6a1d-916c-4175-8590-aa818de683eb}</destination>
 			<destination>{a62e04e5-8235-4bc7-a5e9-a3a7be93ce12}</destination>
+			<destination>{27aa6a1d-916c-4175-8590-aa818de683eb}</destination>
 		</relationship>
 		<relationship name="sounds">
 			<destination>{02617272-87b9-46fc-84c0-21ebfaba3494}</destination>
@@ -315,20 +334,20 @@
 		</relationship>
 	</object>
 	<object class="MixerBusPanner" id="{b0750e40-ed72-4495-ba58-fbafce334134}" />
-	<object class="RandomizerModulator" id="{27aa6a1d-916c-4175-8590-aa818de683eb}">
-		<property name="nameOfPropertyBeingModulated">
-			<value>pitch</value>
-		</property>
-		<property name="amount">
-			<value>9.5</value>
-		</property>
-	</object>
 	<object class="RandomizerModulator" id="{a62e04e5-8235-4bc7-a5e9-a3a7be93ce12}">
 		<property name="nameOfPropertyBeingModulated">
 			<value>volume</value>
 		</property>
 		<property name="amount">
 			<value>1.19999993</value>
+		</property>
+	</object>
+	<object class="RandomizerModulator" id="{27aa6a1d-916c-4175-8590-aa818de683eb}">
+		<property name="nameOfPropertyBeingModulated">
+			<value>pitch</value>
+		</property>
+		<property name="amount">
+			<value>9.5</value>
 		</property>
 	</object>
 	<object class="SingleSound" id="{02617272-87b9-46fc-84c0-21ebfaba3494}">

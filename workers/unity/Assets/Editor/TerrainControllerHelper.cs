@@ -74,6 +74,10 @@ public class TerrainControllerHelper : Editor
                 myTarget.GenerateMap();
             }
 
+            if (GUILayout.Button("Generate River Outline"))
+            {
+                myTarget.GenerateRiverOutline();
+            }
 
 
             serializedObject.ApplyModifiedProperties();

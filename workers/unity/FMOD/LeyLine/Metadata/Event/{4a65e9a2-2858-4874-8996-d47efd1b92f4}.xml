@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{4a65e9a2-2858-4874-8996-d47efd1b92f4}">
 		<property name="name">
 			<value>InsectBuzz</value>
@@ -42,6 +42,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{5e42fb31-03dc-436f-a6fe-0ba95f746554}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{19e59464-c61f-454f-9c98-e2db08ac009f}</destination>
 		</relationship>
@@ -57,9 +60,20 @@
 			<destination>{6692e5af-336b-4062-bd41-a9f1c96d30c6}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{40db5dc9-e6f3-4327-a36b-d2e25716582b}" />
-	<object class="MarkerTrack" id="{c53ab597-8523-4e63-8d89-cc42fa5abaa9}" />
+	<object class="EventAutomatableProperties" id="{40db5dc9-e6f3-4327-a36b-d2e25716582b}">
+		<property name="maximumDistance">
+			<value>5</value>
+		</property>
+	</object>
+	<object class="MarkerTrack" id="{c53ab597-8523-4e63-8d89-cc42fa5abaa9}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{4b398e9a-c8db-49de-926f-3d857bd0fbde}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{64ca1e58-ddab-41b9-99b1-8d775401a1f1}</destination>
 		</relationship>
@@ -68,6 +82,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{3be6f996-3c6a-4504-8b97-bf5e4145adf4}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{ebca89b1-56db-4a7c-87f4-d396f4d58621}</destination>
 		</relationship>

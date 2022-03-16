@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{49745209-04e4-4d77-9a0d-1df8fd69b682}">
 		<property name="name">
 			<value>ManalithCapture</value>
@@ -43,6 +43,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{175a1ac2-578f-40bd-ac76-26dd8c2c4c9e}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{64c175b3-7e6a-4dcc-bb01-5bf0492cf15a}</destination>
 		</relationship>
@@ -58,9 +61,20 @@
 			<destination>{a1c43fe6-46cb-4a95-8f89-a5ffb9ce4d10}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{39340e3e-de96-4876-81a9-d009ce190ef2}" />
-	<object class="MarkerTrack" id="{ff727f02-b939-4ce2-9af9-0892c74f5e4a}" />
+	<object class="EventAutomatableProperties" id="{39340e3e-de96-4876-81a9-d009ce190ef2}">
+		<property name="maximumDistance">
+			<value>10</value>
+		</property>
+	</object>
+	<object class="MarkerTrack" id="{ff727f02-b939-4ce2-9af9-0892c74f5e4a}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{56c00c52-35bd-4c75-acdf-ea71b1da3fd2}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{6ebffee4-4fdb-4a78-abcc-87bc19bda678}</destination>
 		</relationship>
@@ -69,6 +83,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{62243576-b18f-4057-9ee2-e739f0475d7a}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{71418437-166c-45e5-b5b1-816b3e83594f}</destination>
 		</relationship>
@@ -77,6 +94,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{6df8f307-3346-4c1f-94a5-cebd37ae2312}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{c2372300-14c3-412b-965e-c9c223be2fc0}</destination>
 		</relationship>

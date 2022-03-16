@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{b42e4ddb-670f-4db6-86d5-4b2745763304}">
 		<property name="name">
 			<value>MapManalithCapture</value>
@@ -43,6 +43,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{4531ae2f-63d4-41c9-8f13-689dd4db7e45}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{3e307f2e-87c7-41bd-ad59-0e275b46d4d4}</destination>
 		</relationship>
@@ -66,8 +69,15 @@
 			<value>3</value>
 		</property>
 	</object>
-	<object class="MarkerTrack" id="{aee18159-cbd9-4d16-a98f-fe9a6fc2e8a1}" />
+	<object class="MarkerTrack" id="{aee18159-cbd9-4d16-a98f-fe9a6fc2e8a1}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{e184ab5a-0039-4b41-b92d-3acd73c46ffd}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{37a89316-61b3-4c73-9923-2d9e4852fdb6}</destination>
 		</relationship>
@@ -76,6 +86,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{087895b1-6c44-489c-8022-ac8574942453}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{fa58fbfe-ca1b-4061-bcfc-1ecdaf6c220a}</destination>
 		</relationship>
@@ -84,6 +97,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{71677e96-bf74-4f3a-aca3-d2e3f9820865}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{3abe1b9e-bd00-4a83-8b7e-7d3149bec8b6}</destination>
 		</relationship>
@@ -93,9 +109,9 @@
 	</object>
 	<object class="Timeline" id="{00e521e9-fcce-4eb9-be2e-910b7b137ace}">
 		<relationship name="modules">
-			<destination>{37a89316-61b3-4c73-9923-2d9e4852fdb6}</destination>
-			<destination>{fa58fbfe-ca1b-4061-bcfc-1ecdaf6c220a}</destination>
 			<destination>{3abe1b9e-bd00-4a83-8b7e-7d3149bec8b6}</destination>
+			<destination>{fa58fbfe-ca1b-4061-bcfc-1ecdaf6c220a}</destination>
+			<destination>{37a89316-61b3-4c73-9923-2d9e4852fdb6}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{3e307f2e-87c7-41bd-ad59-0e275b46d4d4}">

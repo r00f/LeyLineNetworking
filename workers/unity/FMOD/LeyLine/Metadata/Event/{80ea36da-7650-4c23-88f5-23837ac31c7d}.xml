@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{80ea36da-7650-4c23-88f5-23837ac31c7d}">
 		<property name="name">
 			<value>ReadyIndicator</value>
@@ -47,6 +47,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{c97aafe4-05f1-4b7a-b36d-df2fbecc05ca}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{255524f4-f1da-433e-8853-ad38dbe7200b}</destination>
 		</relationship>
@@ -63,8 +66,15 @@
 		</relationship>
 	</object>
 	<object class="EventAutomatableProperties" id="{b2c03c29-cfcc-4ff7-83b4-2f0f775d5e7c}" />
-	<object class="MarkerTrack" id="{563296b9-76ec-4f63-a98b-bf36841795e9}" />
+	<object class="MarkerTrack" id="{563296b9-76ec-4f63-a98b-bf36841795e9}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{79278883-d60e-479d-bbb8-25a197944173}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{0e3bec5d-bef0-49e6-93a8-272e59f15899}</destination>
 		</relationship>
@@ -73,6 +83,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{4b94383b-444f-4b20-bd6b-103bb1564af7}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{2c6aabdc-d6be-4b1a-aafd-a96461071398}</destination>
 		</relationship>
@@ -81,6 +94,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{b088bd6c-4095-47f8-9783-abf9f52f6b8f}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{02652300-e035-437e-92a6-e9b488fdf931}</destination>
 		</relationship>
@@ -89,6 +105,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{ed220431-de75-441e-96b3-6aae69654ae3}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{7f80c306-e709-4be5-ac33-d7c717dd6989}</destination>
 		</relationship>
@@ -97,6 +116,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{1bcf0de0-7390-4722-b56f-244049bd9a3b}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{e3a6528d-f290-4468-8744-a57aa0fb6afd}</destination>
 		</relationship>
@@ -105,6 +127,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{d5b3796e-1788-4a13-b0ac-2d54614525d1}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{e084ee14-814e-457b-b205-5ebd801ad04e}</destination>
 		</relationship>
@@ -113,6 +138,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{3a66a181-7857-4f29-a7d2-57f7659a28f3}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{8c83a959-a6b2-491f-9d43-c47a54e3260e}</destination>
 		</relationship>
@@ -122,13 +150,13 @@
 	</object>
 	<object class="Timeline" id="{77584055-3d47-469f-8503-71dff5aeab93}">
 		<relationship name="modules">
+			<destination>{8c83a959-a6b2-491f-9d43-c47a54e3260e}</destination>
 			<destination>{0e3bec5d-bef0-49e6-93a8-272e59f15899}</destination>
 			<destination>{2c6aabdc-d6be-4b1a-aafd-a96461071398}</destination>
 			<destination>{02652300-e035-437e-92a6-e9b488fdf931}</destination>
 			<destination>{e3a6528d-f290-4468-8744-a57aa0fb6afd}</destination>
 			<destination>{e084ee14-814e-457b-b205-5ebd801ad04e}</destination>
 			<destination>{7f80c306-e709-4be5-ac33-d7c717dd6989}</destination>
-			<destination>{8c83a959-a6b2-491f-9d43-c47a54e3260e}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{255524f4-f1da-433e-8853-ad38dbe7200b}">

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{d7a7d373-ef2d-45d2-89f7-18431561752f}">
 		<property name="name">
 			<value>ShieldBrake</value>
@@ -43,6 +43,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{875ef7bd-3e35-4dae-8e71-76fac25b0671}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{5cbfef2c-27a8-490d-973c-91abf93a7a48}</destination>
 		</relationship>
@@ -58,14 +61,28 @@
 			<destination>{6692e5af-336b-4062-bd41-a9f1c96d30c6}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{1db98f28-0cd1-45e8-bd97-ce6ae35baf52}" />
-	<object class="MarkerTrack" id="{81744b3e-f1f7-4dce-a960-ba9473e2ed4c}" />
+	<object class="EventAutomatableProperties" id="{1db98f28-0cd1-45e8-bd97-ce6ae35baf52}">
+		<property name="maximumDistance">
+			<value>15</value>
+		</property>
+	</object>
+	<object class="MarkerTrack" id="{81744b3e-f1f7-4dce-a960-ba9473e2ed4c}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{f041fbcb-c2c4-491a-9711-dd95b8977035}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{b856e283-439e-4ea4-a779-b903ac6bf920}</destination>
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{09ce55b2-389f-4d19-8bef-10380babea18}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{781a7b75-4712-4ef5-89f4-f2f3bdc681e2}</destination>
 		</relationship>
@@ -74,6 +91,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{6be31618-7c8a-4b2a-ab8f-12135efb32cb}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{85e6971a-21b8-4829-b2a9-4c335a6e297d}</destination>
 		</relationship>

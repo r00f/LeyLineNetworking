@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<objects serializationModel="Studio.02.00.00">
+<objects serializationModel="Studio.02.02.00">
 	<object class="Event" id="{2060a2ab-9d83-41de-a851-7c8cdd88828e}">
 		<property name="name">
 			<value>BeetleSwoosh</value>
@@ -44,6 +44,9 @@
 		</relationship>
 	</object>
 	<object class="MasterTrack" id="{cb65e24a-3062-45a3-8d37-6c8aa10edf20}">
+		<property name="uiTrackHeight">
+			<value>28</value>
+		</property>
 		<relationship name="mixerGroup">
 			<destination>{0a8eeb48-e84b-4eaa-9d37-8b4bfca9383f}</destination>
 		</relationship>
@@ -59,9 +62,20 @@
 			<destination>{6692e5af-336b-4062-bd41-a9f1c96d30c6}</destination>
 		</relationship>
 	</object>
-	<object class="EventAutomatableProperties" id="{e646f968-8bd7-4a2c-b7b2-1e912e2ad914}" />
-	<object class="MarkerTrack" id="{20e41ea0-b14a-4138-88ad-1f64815cdc51}" />
+	<object class="EventAutomatableProperties" id="{e646f968-8bd7-4a2c-b7b2-1e912e2ad914}">
+		<property name="maximumDistance">
+			<value>15</value>
+		</property>
+	</object>
+	<object class="MarkerTrack" id="{20e41ea0-b14a-4138-88ad-1f64815cdc51}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
+	</object>
 	<object class="GroupTrack" id="{e58ea61b-bc59-403f-947c-82abc3813553}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{d180f11b-0d32-4cc0-b451-8dd528a7bcc6}</destination>
 		</relationship>
@@ -70,6 +84,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{04576514-edcc-4c71-bcf6-43912050e4ac}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{2a927bd4-00de-42a0-85e3-be2c1ad47a97}</destination>
 		</relationship>
@@ -78,6 +95,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{8e1f5c96-36f9-4ec2-8ece-305880f595d9}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{50e180c6-0ce9-41a8-9fe4-ed96a252b704}</destination>
 		</relationship>
@@ -86,6 +106,9 @@
 		</relationship>
 	</object>
 	<object class="GroupTrack" id="{9bdfd41a-24f1-479e-9a5d-c8e77e296b2d}">
+		<property name="uiTrackHeight">
+			<value>100</value>
+		</property>
 		<relationship name="modules">
 			<destination>{97b6acc8-7e01-4eb6-a103-9a59ab0b0442}</destination>
 		</relationship>
@@ -95,10 +118,10 @@
 	</object>
 	<object class="Timeline" id="{f8a6e994-b51c-457d-8082-333df6472b06}">
 		<relationship name="modules">
-			<destination>{2a927bd4-00de-42a0-85e3-be2c1ad47a97}</destination>
-			<destination>{50e180c6-0ce9-41a8-9fe4-ed96a252b704}</destination>
 			<destination>{97b6acc8-7e01-4eb6-a103-9a59ab0b0442}</destination>
+			<destination>{2a927bd4-00de-42a0-85e3-be2c1ad47a97}</destination>
 			<destination>{d180f11b-0d32-4cc0-b451-8dd528a7bcc6}</destination>
+			<destination>{50e180c6-0ce9-41a8-9fe4-ed96a252b704}</destination>
 		</relationship>
 	</object>
 	<object class="EventMixerMaster" id="{0a8eeb48-e84b-4eaa-9d37-8b4bfca9383f}">
