@@ -122,7 +122,7 @@ Material:
     - _ATDistance: 1
     - _AddPrecomputedVelocity: 0
     - _AlbedoAffectEmissive: 0
-    - _Alpha: 0.9
+    - _Alpha: 0.97
     - _AlphaCutoff: 0.5
     - _AlphaCutoffEnable: 0
     - _AlphaCutoffPostpass: 0.5
@@ -136,7 +136,7 @@ Material:
     - _CullMode: 2
     - _CullModeForward: 2
     - _Cutoff: 0.5
-    - _Depth: 0.3
+    - _Depth: 0.27
     - _DepthOffsetEnable: 0
     - _DetailAlbedoScale: 1
     - _DetailNormalScale: 1
@@ -172,9 +172,9 @@ Material:
     - _EnableGeometricSpecularAA: 0
     - _EnableSpecularOcclusion: 0
     - _EnergyConservingSpecularColor: 1
-    - _FoamDistance: 0.3
-    - _FoamStr: 0.1
-    - _FoamTiling: 1
+    - _FoamDistance: 0.07
+    - _FoamStr: 0.59
+    - _FoamTiling: 0.43
     - _HdrpVersion: 2
     - _HeightAmplitude: 0.02
     - _HeightCenter: 0.5
@@ -194,8 +194,8 @@ Material:
     - _Metallic: 0
     - _NormalMapSpace: 0
     - _NormalScale: 1
-    - _NormalStrength: 0.1
-    - _NormalTile: 0.07
+    - _NormalStrength: 0.03
+    - _NormalTile: 0.06
     - _PPDLodThreshold: 5
     - _PPDMaxSamples: 15
     - _PPDMinSamples: 5
@@ -206,7 +206,7 @@ Material:
     - _RenderQueueType: 5
     - _RequireSplitLighting: 0
     - _SSRefractionProjectionModel: 0
-    - _Smoothness: 0.25
+    - _Smoothness: 1
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
     - _SpecularAAScreenSpaceVariance: 0.1
@@ -245,7 +245,7 @@ Material:
     - _WaveHeight: 0.2
     - _WaveScale: 0.2
     - _WaveSpeed: 70
-    - _WaveTile: -1
+    - _WaveTile: -0.7
     - _ZTestDepthEqualForOpaque: 4
     - _ZTestGBuffer: 4
     - _ZTestModeDistortion: 4
@@ -258,9 +258,9 @@ Material:
     - _BaseColor: {r: 0.13817179, g: 0.21698093, b: 0.17922094, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 0.13817176, g: 0.2169809, b: 0.17922091, a: 1}
-    - _ColorA: {r: 0.22054109, g: 0.26415092, b: 0.2607963, a: 1}
-    - _ColorB: {r: 0.26179245, g: 0.3490566, b: 0.31415093, a: 1}
-    - _DepthColor: {r: 0.35473478, g: 0.3679245, b: 0.26900142, a: 1}
+    - _ColorA: {r: 0.22485758, g: 0.2924528, b: 0.24687712, a: 1}
+    - _ColorB: {r: 0.23137255, g: 0.32941177, b: 0.29803923, a: 1}
+    - _DepthColor: {r: 0.09144708, g: 0.09433959, b: 0.065414704, a: 1}
     - _DiffusionProfileAsset: {r: -3.110872e-17, g: -1.8157844e+22, b: 8.936132e+29,
         a: 1.5976006e-12}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
@@ -271,7 +271,7 @@ Material:
     - _IridescenceThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _PanDirection: {r: 0.4, g: 0, b: 0, a: 0}
     - _SpecularColor: {r: 1, g: 1, b: 1, a: 1}
-    - _Stretch: {r: 5, g: 3, b: 0, a: 0}
+    - _Stretch: {r: 4, g: 3, b: 0, a: 0}
     - _ThicknessRemap: {r: 0, g: 1, b: 0, a: 0}
     - _TransmittanceColor: {r: 1, g: 1, b: 1, a: 1}
     - _UVDetailsMappingMask: {r: 1, g: 0, b: 0, a: 0}
