@@ -39,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 5904640984428946566}
-  m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
+  m_IndirectSpecularColor: {r: 3131.2952, g: 2120.3179, b: 1993.896, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -786,6 +786,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.x
       value: 18.182922
+      objectReference: {fileID: 0}
+    - target: {fileID: 2404135703738468399, guid: ae539041ae2d9764eb51525df73f068d,
+        type: 3}
+      propertyPath: m_UseWorldSpace
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
@@ -3469,7 +3474,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1031266339
 Transform:
   m_ObjectHideFlags: 0
@@ -21038,10 +21043,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1031266339}
     m_Modifications:
-    - target: {fileID: 195072527898059093, guid: ae539041ae2d9764eb51525df73f068d,
+    - target: {fileID: 1501036868468861760, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 268.18292
+      propertyPath: m_Name
+      value: RiverOutline
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
@@ -21053,11 +21058,6 @@ PrefabInstance:
       propertyPath: parameters.textureOffset.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
-        type: 3}
-      propertyPath: parameters.textureIndex
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7196706021266168746, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: parameters.textureOffset.x
@@ -21066,11 +21066,6 @@ PrefabInstance:
     - target: {fileID: 7196706021266168746, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: parameters.textureOffset.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7196706021266168746, guid: ae539041ae2d9764eb51525df73f068d,
-        type: 3}
-      propertyPath: parameters.textureIndex
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021740553583, guid: ae539041ae2d9764eb51525df73f068d,
@@ -21152,11 +21147,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TempleValleyClientObjects
-      objectReference: {fileID: 0}
-    - target: {fileID: 7196706022515433627, guid: ae539041ae2d9764eb51525df73f068d,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ae539041ae2d9764eb51525df73f068d, type: 3}

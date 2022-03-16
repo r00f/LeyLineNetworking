@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Generic;
 using Unity.Collections;
+using Unity.Mathematics;
 
 public static class CellGridMethods
 {
@@ -17,6 +18,13 @@ public static class CellGridMethods
         var angle_deg = 60 * i;
         var angle_rad = Mathf.PI / 180 * angle_deg;
         return new Vector3f(center.X + Mathf.Cos(angle_rad), center.Y + yOffset, center.Z + Mathf.Sin(angle_rad));
+    }
+
+    public static Vector3f PosToCorner(Vector3 center, int i, float yOffset = 0)
+    {
+        var angle_deg = 60 * i;
+        var angle_rad = Mathf.PI / 180 * angle_deg;
+        return new Vector3f(center.x + Mathf.Cos(angle_rad), center.y + yOffset, center.z + Mathf.Sin(angle_rad));
     }
 
     public static Vector3 CubeToPos(Vector3f cubeCoord, Vector2f mapCenter)
@@ -38,6 +46,11 @@ public static class CellGridMethods
     public static Vector2i CubeToAxial(Vector3f cube)
     {
         return new Vector2i((int)cube.X, (int)cube.Y);
+    }
+
+    public static Vector2i CubeToAxial(float3 cube)
+    {
+        return new Vector2i((int) cube.x, (int) cube.y);
     }
 
     public static Vector3f AxialToCube(Vector2f axial)
@@ -290,7 +303,6 @@ public static class CellGridMethods
         return line;
     }
 
-
     public static List<Vector3f> LineDrawWhitoutOrigin(List<Vector3f> line, Vector3f origin, Vector3f destination)
     {
         var n = GetDistance(origin, destination);
@@ -407,7 +419,6 @@ public static class CellGridMethods
         return results;
     }
 
-
     public static HashSet<Vector3f> CircleDrawHash(Vector3f originCellCubeCoordinate, uint radius)
     {
         var results = new HashSet<Vector3f>
@@ -425,5 +436,78 @@ public static class CellGridMethods
             }
         }
         return results;
+    }
+
+    public static List<HexEdgePositionPair> SortEdgeByDistance(ref List<HexEdgePositionPair> edgeList)
+    {
+        List<HexEdgePositionPair> output = new List<HexEdgePositionPair>
+            {
+                edgeList[NearestEdge(new Vector3(), edgeList)]
+            };
+
+        edgeList.Remove(output[0]);
+
+        int x = 0;
+        for (int i = 0; i < edgeList.Count + x; i++)
+        {
+            if (i >= 5)
+            {
+                double closestRemainingDistance = NearestEdgeDist(output[output.Count - 1].B, edgeList);
+                double firstLastAddedDistance = Vector3.Distance(output[0].B, output[output.Count - 1].A);
+
+                if (closestRemainingDistance > firstLastAddedDistance)
+                {
+                    return output;
+                }
+            }
+
+            output.Add(edgeList[NearestEdge(output[output.Count - 1].B, edgeList)]);
+            edgeList.Remove(output[output.Count - 1]);
+            x++;
+        }
+
+        return output;
+    }
+
+    static int NearestEdge(Vector3 srcPos, List<HexEdgePositionPair> lookIn)
+    {
+        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
+        for (int i = 0; i < lookIn.Count; i++)
+        {
+            double distance = Vector3.Distance(srcPos, lookIn[i].A);
+            if (i == 0)
+            {
+                distanceListIndex = new KeyValuePair<double, int>(distance, i);
+            }
+            else
+            {
+                if (distance < distanceListIndex.Key)
+                {
+                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
+                }
+            }
+        }
+        return distanceListIndex.Value;
+    }
+
+    static double NearestEdgeDist(Vector3 srcEdge, List<HexEdgePositionPair> lookIn)
+    {
+        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
+        for (int i = 0; i < lookIn.Count; i++)
+        {
+            double distance = Vector3.Distance(srcEdge, lookIn[i].A);
+            if (i == 0)
+            {
+                distanceListIndex = new KeyValuePair<double, int>(distance, i);
+            }
+            else
+            {
+                if (distance < distanceListIndex.Key)
+                {
+                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
+                }
+            }
+        }
+        return distanceListIndex.Key;
     }
 }

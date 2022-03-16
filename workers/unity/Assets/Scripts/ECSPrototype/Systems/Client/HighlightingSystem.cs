@@ -794,7 +794,6 @@ public class HighlightingSystem : JobComponentSystem
 
         m_PlayerStateData.SetSingleton(playerState);
         m_PlayerStateData.SetSingleton(playerHigh);
-
     }
 
     public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId)
@@ -870,7 +869,7 @@ public class HighlightingSystem : JobComponentSystem
 
             playerEffects.Shapes.Add(new HexOutlineShape
             {
-                Edges = SortEdgeByDistance(ref playerEffects.Edges),
+                Edges = CellGridMethods.SortEdgeByDistance(ref playerEffects.Edges),
                 Positions = new HashSet<Vector3>()
             });
         }
@@ -896,82 +895,9 @@ public class HighlightingSystem : JobComponentSystem
         }
     }
 
-    List<HexEdgePositionPair> SortEdgeByDistance(ref List<HexEdgePositionPair> edgeList)
-    {
-        List<HexEdgePositionPair> output = new List<HexEdgePositionPair>
-            {
-                edgeList[NearestEdge(new Vector3(), edgeList)]
-            };
-
-        edgeList.Remove(output[0]);
-
-        int x = 0;
-        for (int i = 0; i < edgeList.Count + x; i++)
-        {
-            if (i >= 5)
-            {
-                double closestRemainingDistance = NearestEdgeDist(output[output.Count - 1].B, edgeList);
-                double firstLastAddedDistance = Vector3.Distance(output[0].B, output[output.Count - 1].A);
-
-                if(closestRemainingDistance > firstLastAddedDistance)
-                {
-                    return output;
-                }
-            }
-
-            output.Add(edgeList[NearestEdge(output[output.Count - 1].B, edgeList)]);
-            edgeList.Remove(output[output.Count - 1]);
-            x++;
-        }
-
-        return output;
-    }
-
     Vector3 EdgeCenterPos(HexEdgePositionPair edge)
     {
         return (edge.A + edge.B) / 2;
-    }
-
-    int NearestEdge(Vector3 srcPos, List<HexEdgePositionPair> lookIn)
-    {
-        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
-        for (int i = 0; i < lookIn.Count; i++)
-        {
-            double distance = Vector3.Distance(srcPos, lookIn[i].A);
-            if (i == 0)
-            {
-                distanceListIndex = new KeyValuePair<double, int>(distance, i);
-            }
-            else
-            {
-                if (distance < distanceListIndex.Key)
-                {
-                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
-                }
-            }
-        }
-        return distanceListIndex.Value;
-    }
-
-    double NearestEdgeDist(Vector3 srcEdge, List<HexEdgePositionPair> lookIn)
-    {
-        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
-        for (int i = 0; i < lookIn.Count; i++)
-        {
-            double distance = Vector3.Distance(srcEdge, lookIn[i].A);
-            if (i == 0)
-            {
-                distanceListIndex = new KeyValuePair<double, int>(distance, i);
-            }
-            else
-            {
-                if (distance < distanceListIndex.Key)
-                {
-                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
-                }
-            }
-        }
-        return distanceListIndex.Key;
     }
 
     public void SetSelfTarget(long entityID, Action action, Vector3f coord, LineRendererComponent lineRendererComp)

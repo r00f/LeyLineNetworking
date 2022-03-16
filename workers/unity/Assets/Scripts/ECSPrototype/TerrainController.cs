@@ -4,7 +4,8 @@ using System.Collections;
 using UnityEditor;
 using System.Collections.Generic;
 using Unity.Mathematics;
-
+using Generic;
+using System.Linq;
 
 namespace LeyLineHybridECS
 {
@@ -68,7 +69,75 @@ namespace LeyLineHybridECS
         [SerializeField]
         float[,] strength;
 
+        [SerializeField]
+        LineRenderer RiverOutline;
 
+        Dictionary<Vector2i, Vector3> RiverCellCoordinatePositionDict = new Dictionary<Vector2i, Vector3>();
+
+        List<HexEdgePositionPair> RiverEdgePositionPairs = new List<HexEdgePositionPair>();
+
+        List<Vector3> RiverEdgePositions = new List<Vector3>();
+
+        public void GenerateRiverOutline()
+        {
+            RiverCellCoordinatePositionDict.Clear();
+
+            foreach (Cell c in hexGridGenerator.hexagons)
+            {
+                if (c.GetComponent<CellType>().thisCellsTerrain.TerrainName == "Water" || c.GetComponent<CellType>().thisCellsTerrain.TerrainName == "Bridge")
+                {
+                    RiverCellCoordinatePositionDict.Add(CellGridMethods.CubeToAxial(c.GetComponent<CoordinateDataComponent>().CubeCoordinate), new Vector3(c.transform.localPosition.x + hexGridGenerator.transform.localPosition.x, 2.3f, c.transform.localPosition.z + hexGridGenerator.transform.localPosition.z));
+                    //RiverCellPositions.Add(c.transform.position);
+                }
+            }
+
+            RiverEdgePositionPairs.Clear();
+
+            for (int i = 0; i < RiverCellCoordinatePositionDict.Count; i++)
+            {
+                for (int c = 0; c < 6; c++)
+                {
+                    if (!RiverCellCoordinatePositionDict.ContainsKey(CellGridMethods.CubeToAxial(CellGridMethods.CubeNeighbour(CellGridMethods.AxialToCube(RiverCellCoordinatePositionDict.ElementAt(i).Key), (uint) c))))
+                    {
+                        var centerPos = RiverCellCoordinatePositionDict.ElementAt(i).Value;
+                        if (c == 0)
+                        {
+                            RiverEdgePositionPairs.Add(new HexEdgePositionPair
+                            {
+                                A = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, 0)),
+                                B = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, 5))
+                            });
+                        }
+                        else
+                        {
+                            RiverEdgePositionPairs.Add(new HexEdgePositionPair
+                            {
+                                A = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, c)),
+                                B = Vector3fext.ToUnityVector(CellGridMethods.PosToCorner(centerPos, c - 1))
+                            });
+                        }
+                    }
+                }
+            }
+
+            RiverEdgePositionPairs = CellGridMethods.SortEdgeByDistance(ref RiverEdgePositionPairs);
+
+            RiverEdgePositions.Clear();
+
+            foreach (HexEdgePositionPair edge in RiverEdgePositionPairs)
+            {
+                RiverEdgePositions.Add(edge.A);
+                RiverEdgePositions.Add(edge.B);
+            }
+
+            if (RiverOutline)
+            {
+                RiverOutline.positionCount = RiverEdgePositions.Count;
+                RiverOutline.SetPositions(RiverEdgePositions.ToArray());
+            }
+            else
+                Debug.LogWarning("No RiverOutline set set one on the terrain controller");
+        }
 
         public void GenerateMap()
         {
