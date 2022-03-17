@@ -39,7 +39,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 5904640984428946566}
-  m_IndirectSpecularColor: {r: 3131.2952, g: 2120.3179, b: 1993.896, a: 1}
+  m_IndirectSpecularColor: {r: 3129.7083, g: 2128.9019, b: 2020.0327, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -3474,7 +3474,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1031266339
 Transform:
   m_ObjectHideFlags: 0
@@ -21043,10 +21043,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 1031266339}
     m_Modifications:
-    - target: {fileID: 1501036868468861760, guid: ae539041ae2d9764eb51525df73f068d,
+    - target: {fileID: 195072527898059093, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
-      propertyPath: m_Name
-      value: RiverOutline
+      propertyPath: m_LocalPosition.x
+      value: 268.18292
       objectReference: {fileID: 0}
     - target: {fileID: 7196706021195338978, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
@@ -21078,11 +21078,6 @@ PrefabInstance:
       propertyPath: manalithGroup
       value: 
       objectReference: {fileID: 65998233}
-    - target: {fileID: 7196706022289887904, guid: ae539041ae2d9764eb51525df73f068d,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7196706022345090752, guid: ae539041ae2d9764eb51525df73f068d,
         type: 3}
       propertyPath: UIRef

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2266592664922327996}
   - component: {fileID: 2404135703738468399}
   m_Layer: 0
-  m_Name: Line
+  m_Name: RiverOutline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -50,7 +50,7 @@ LineRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10306, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: bcf9b8a430b25f240810c7eaf3c8ed52, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -338,7 +338,7 @@ LineRenderer:
   - {x: 6.5, y: 2.3, z: 21.186533}
   m_Parameters:
     serializedVersion: 3
-    widthMultiplier: 0.1
+    widthMultiplier: 0.15
     widthCurve:
       serializedVersion: 2
       m_Curve:
@@ -358,7 +358,7 @@ LineRenderer:
       serializedVersion: 2
       key0: {r: 1, g: 1, b: 1, a: 1}
       key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
+      key2: {r: 0, g: 0, b: 0, a: 1}
       key3: {r: 0, g: 0, b: 0, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
@@ -374,7 +374,7 @@ LineRenderer:
       ctime7: 0
       atime0: 0
       atime1: 65535
-      atime2: 0
+      atime2: 65535
       atime3: 0
       atime4: 0
       atime5: 0
@@ -386,7 +386,7 @@ LineRenderer:
     numCornerVertices: 0
     numCapVertices: 0
     alignment: 0
-    textureMode: 0
+    textureMode: 1
     shadowBias: 0.5
     generateLightingData: 0
   m_UseWorldSpace: 0
@@ -9435,7 +9435,7 @@ PrefabInstance:
     - target: {fileID: 7621747516474807757, guid: cc15bff0d89ec394889c38e4458eb870,
         type: 3}
       propertyPath: parameters.textureIndex
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7621747516474807759, guid: cc15bff0d89ec394889c38e4458eb870,
         type: 3}
@@ -10715,7 +10715,7 @@ PrefabInstance:
     - target: {fileID: 7019665484922856839, guid: 772b47e5176d42a459a36e58ea56b997,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 268.18292
+      value: 18.182922
       objectReference: {fileID: 0}
     - target: {fileID: 7019665484922856839, guid: 772b47e5176d42a459a36e58ea56b997,
         type: 3}
@@ -16341,7 +16341,7 @@ PrefabInstance:
     - target: {fileID: 1617181939288284927, guid: 282b6ff6fc5a08d45ab581f254298f70,
         type: 3}
       propertyPath: parameters.textureIndex
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 282b6ff6fc5a08d45ab581f254298f70, type: 3}
