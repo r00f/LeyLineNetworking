@@ -14,7 +14,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 2999
   stringTagMap:
     MotionVector: User
     RenderType: Transparent
@@ -163,14 +163,14 @@ Material:
     - _ATDistance: 1
     - _AddPrecomputedVelocity: 0
     - _AlbedoAffectEmissive: 0
-    - _Alpha: 0.9
+    - _Alpha: 0.95
     - _AlphaCutoff: 0.5
     - _AlphaCutoffEnable: 0
     - _AlphaCutoffPostpass: 0.5
     - _AlphaCutoffPrepass: 0.5
     - _AlphaCutoffShadow: 0.5
     - _AlphaDstBlend: 10
-    - _AlphaSrcBlend: 0
+    - _AlphaSrcBlend: 1
     - _AlphaToMask: 0
     - _Anisotropy: 0
     - _BlendMode: 0
@@ -261,7 +261,7 @@ Material:
     - _SPECULAR_ROUGHNESS: 1
     - _SPECULAR_WEIGHT: 0
     - _SSRefractionProjectionModel: 0
-    - _Smoothness: 0.25
+    - _Smoothness: 0.95
     - _SmoothnessRemapMax: 1
     - _SmoothnessRemapMin: 0
     - _SpecularAAScreenSpaceVariance: 0.1
@@ -298,7 +298,7 @@ Material:
     - _UVEmissive: 0
     - _UseEmissiveIntensity: 0
     - _UseShadowThreshold: 0
-    - _WaveHeight: 0.2
+    - _WaveHeight: 0
     - _WaveScale: 0.2
     - _WaveSpeed: 70
     - _WaveTile: -1
@@ -310,7 +310,7 @@ Material:
     - _bluStr: 0.003
     - _blurDist: 2
     m_Colors:
-    - Color_B930EA2C: {r: 0.27266523, g: 0.3679245, b: 0.26900142, a: 1}
+    - Color_B930EA2C: {r: 0.19335172, g: 0.5188679, b: 0.19335172, a: 1}
     - _BASE_COLOR: {r: 1, g: 1, b: 1, a: 0}
     - _BaseColor: {r: 0.13817179, g: 0.21698093, b: 0.17922094, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
@@ -318,7 +318,7 @@ Material:
     - _Color: {r: 0.13817176, g: 0.2169809, b: 0.17922091, a: 1}
     - _ColorA: {r: 0.22054109, g: 0.26415092, b: 0.2607963, a: 1}
     - _ColorB: {r: 0.26179245, g: 0.3490566, b: 0.31415093, a: 1}
-    - _DepthColor: {r: 0.35473478, g: 0.3679245, b: 0.26900142, a: 1}
+    - _DepthColor: {r: 0.24359201, g: 0.28384513, b: 0.3207547, a: 1}
     - _DiffusionProfileAsset: {r: -3.110872e-17, g: -1.8157844e+22, b: 8.936132e+29,
         a: 1.5976006e-12}
     - _DoubleSidedConstants: {r: 1, g: 1, b: -1, a: 0}
