@@ -4,16 +4,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using LeyLineHybridECS;
+using UnityEditor;
 
 public class ManalithGroup : MonoBehaviour
 {
     [SerializeField]
     TerrainController terrainController;
-
     public List<ManalithInitializer> ManalithInitializers = new List<ManalithInitializer>();
-
-    //[SerializeField]
-    //Transform ManalithObjects;
     public List<Vector2> ManalithPairs = new List<Vector2>();
 
     public void ConnectManalithInitializerScripts()
@@ -24,7 +21,6 @@ public class ManalithGroup : MonoBehaviour
             {
                 var manalithInitializer = ManalithInitializers[(int)ManalithPairs[i].x];
                 var manalithInitializerToConnect = ManalithInitializers[(int)ManalithPairs[i].y];
-
                 manalithInitializer.connectedManaLith = manalithInitializerToConnect;
             }
         }
@@ -36,6 +32,7 @@ public class ManalithGroup : MonoBehaviour
             terrainController = FindObjectOfType<TerrainController>();
 
         terrainController.leyLineCrackPositions.Clear();
+        EditorUtility.SetDirty(terrainController);
 
         for (int i = 0; i < ManalithInitializers.Count; i++)
         {
@@ -48,6 +45,8 @@ public class ManalithGroup : MonoBehaviour
         }
 
         terrainController.UpdateLeyLineCracks();
+
+
     }
 
 }
