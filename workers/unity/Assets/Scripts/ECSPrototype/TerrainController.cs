@@ -65,9 +65,10 @@ namespace LeyLineHybridECS
 
         List<Vector3> RiverEdgePositions = new List<Vector3>();
 
-
         public void GenerateMap()
         {
+            SetWholeTerrainHeight();
+            SetWholeTerrainTexture();
             UpdateAllMapTiles();
             manalithGroup.ConnectManaliths();
             SmoothTerrainHeights();
@@ -149,7 +150,6 @@ namespace LeyLineHybridECS
             else
                 Debug.LogWarning("No RiverOutline set set one on the terrain controller");
         }
-
 
         public void ConnectManaliths()
         {
