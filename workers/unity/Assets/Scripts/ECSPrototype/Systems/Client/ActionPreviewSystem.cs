@@ -8,7 +8,7 @@ using Unity.Entities;
 using Unity.Jobs;
 using UnityEngine;
 
-[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
+[DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup)), UpdateBefore(typeof(UnitAnimationSystem))]
 public class ActionPreviewSystem : JobComponentSystem
 {
     EntityQuery m_PlayerData;
@@ -58,6 +58,12 @@ public class ActionPreviewSystem : JobComponentSystem
 
                 if (animator.CurrentPreviewAction)
                 {
+                    if (animator.AnimationEvents)
+                    {
+                        animator.AnimationEvents.EventTrigger = false;
+                        animator.AnimationEvents.EventTriggered = false;
+                    }
+
                     if (animator.Animator)
                     {
                         animator.Animator.fireEvents = false;
@@ -67,11 +73,6 @@ public class ActionPreviewSystem : JobComponentSystem
                         animator.Animator.speed = 1;
                     }
 
-                    if(animator.AnimationEvents)
-                    {
-                        animator.AnimationEvents.EventTrigger = false;
-                        animator.AnimationEvents.EventTriggered = false;
-                    }
 
                     foreach (AnimStateEffectHandler a in animator.AnimStateEffectHandlers)
                     {
