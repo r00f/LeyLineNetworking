@@ -67,6 +67,12 @@ public class ActionPreviewSystem : JobComponentSystem
                         animator.Animator.speed = 1;
                     }
 
+                    if(animator.AnimationEvents)
+                    {
+                        animator.AnimationEvents.EventTrigger = false;
+                        animator.AnimationEvents.EventTriggered = false;
+                    }
+
                     foreach (AnimStateEffectHandler a in animator.AnimStateEffectHandlers)
                     {
                         if(a.IsActiveState)

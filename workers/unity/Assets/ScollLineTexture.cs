@@ -26,6 +26,6 @@ public class ScollLineTexture : MonoBehaviour
         else
             offset = 0;
 
-        lineRenderer.material.SetTextureOffset("_UnlitColorMap", new Vector2(0, offset));
+        lineRenderer.sharedMaterial.SetTextureOffset("_UnlitColorMap", new Vector2(0, offset));
     }
 }

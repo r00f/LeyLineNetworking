@@ -296,7 +296,6 @@ public class ActionEffectsSystem : JobComponentSystem
                             {
                                 Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
                             }
-
                         }
                     }
                 }
