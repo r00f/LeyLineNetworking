@@ -258,7 +258,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400010, guid: 823b52735c600b3488ca59d719ba097e, type: 3}
+  m_Motion: {fileID: 907697464825292364, guid: 823b52735c600b3488ca59d719ba097e, type: 3}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -278,9 +278,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.25
+  m_TransitionDuration: 0.31940168
   m_TransitionOffset: 0
-  m_ExitTime: 0.90625
+  m_ExitTime: 0
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -327,7 +327,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   EffectOnTimestamps:
-  - {x: 0.4, y: 0}
+  - {x: 0.3, y: 0}
   EffectOffTimestamps: []
   CurrentEffectOnTimestamps: []
   CurrentEffectOffTimestamps: []
@@ -406,7 +406,7 @@ AnimatorState:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: AxaLob
-  m_Speed: 1
+  m_Speed: 1.5
   m_CycleOffset: 0
   m_Transitions:
   - {fileID: 1406592914358355067}
@@ -514,9 +514,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.39869964
-  m_TransitionOffset: 0.3706561
-  m_ExitTime: 0.60130036
+  m_TransitionDuration: 0.31642264
+  m_TransitionOffset: 0
+  m_ExitTime: 0.7554931
   m_HasExitTime: 0
   m_HasFixedDuration: 1
   m_InterruptionSource: 0
@@ -694,7 +694,7 @@ AnimatorState:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: AxaSpellIntro
+  m_Name: AxaLaserIntro
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -1163,7 +1163,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EffectOnTimestamps: []
   EffectOffTimestamps:
-  - {x: 1.8, y: 0}
+  - {x: 1, y: 0}
   CurrentEffectOnTimestamps: []
   CurrentEffectOffTimestamps: []
   IsActiveState: 0
@@ -1284,9 +1284,9 @@ AnimatorStateTransition:
   m_Mute: 0
   m_IsExit: 0
   serializedVersion: 3
-  m_TransitionDuration: 0.10470772
+  m_TransitionDuration: 0.1726737
   m_TransitionOffset: 0
-  m_ExitTime: 0.9478896
+  m_ExitTime: 0.88531226
   m_HasExitTime: 1
   m_HasFixedDuration: 1
   m_InterruptionSource: 0

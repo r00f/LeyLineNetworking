@@ -87,6 +87,7 @@ public class UnitAnimationSystem : JobComponentSystem
                 unitComponentReferences.LastStationaryPosition = unitComponentReferences.transform.position;
                 unitComponentReferences.AnimatorComp.DestinationPosition = Vector2.zero;
                 unitComponentReferences.UnitEffectsComp.OriginCoordinate = coord.CubeCoordinate;
+                unitComponentReferences.UnitEffectsComp.DestinationCoordinate = coord.CubeCoordinate;
                 unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = false;
                 unitComponentReferences.AnimatorComp.InitialValuesSet = false;
                 unitComponentReferences.AnimatorComp.ExecuteTriggerSet = false;

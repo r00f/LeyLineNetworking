@@ -247,7 +247,7 @@ public class ActionEffectsSystem : JobComponentSystem
                     unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
                 }
 
-                if (unitEffects.CurrentHealth == 0 && !animator.Dead && isVisible.Value == 1)
+                if (unitEffects.CurrentHealth == 0 && !animator.Dead && isVisible.Value == 1 && health.CurrentHealth == 0)
                 {
                     if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.CurrentGetHitEffect.Key.ActionExecuteStep)
                     {

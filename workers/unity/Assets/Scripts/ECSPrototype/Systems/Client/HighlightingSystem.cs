@@ -162,8 +162,6 @@ public class HighlightingSystem : JobComponentSystem
                     }
                     else
                         ResetHighlights(ref playerState, playerHighlightingData, playerEffects);
-
-                    //ResetHighlights(ref playerState, playerHighlightingData);
                 }
 
                 playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
@@ -194,11 +192,13 @@ public class HighlightingSystem : JobComponentSystem
         SetSingleton(playerHighlightingData);
 
         return inputDeps;
-
     }
 
     public PlayerState.Component FillUnitTargetsList(CurrentMapState mapData, Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
     {
+        if (inHinghlightningData.SelectedUnitFaction != playerFaction || inAction.Index == -3)
+            return playerState;
+
         if(inAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
         {
             if (!m_PathFindingSystem.ValidatePathTargetClient(mapData, playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedMapPaths))
@@ -259,23 +259,13 @@ public class HighlightingSystem : JobComponentSystem
 
         Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, in SpatialEntityId unitId, in FactionComponent.Component unitFaction) =>
         {
-            if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+            //if selected unit has a action planned && this unit in the loop is one of the targets && this unit is not a valid target
+            if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId) && playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Keys.Contains(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget((ApplyToRestrictionsEnum) inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction, unitId.EntityId.Id, unitFaction.Faction))
             {
-                if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Keys.Contains(unitCoord.CubeCoordinate))
-                {
-                    //if target is not valid, remove it from UnitTargets Dict
-                   
-                    if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget((ApplyToRestrictionsEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction, unitId.EntityId.Id, unitFaction.Faction))
-                    {
-                        //Debug.Log("TargetInvalid - Remove from playerTargets");
-                        //playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
+                playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates[unitCoord.CubeCoordinate] = false;
 
-                        playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates[unitCoord.CubeCoordinate] = false;
-
-                        if(Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) == Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
-                            playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
-                    }
-                }
+                if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) == Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
+                    playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
             }
         })
         .WithoutBurst()

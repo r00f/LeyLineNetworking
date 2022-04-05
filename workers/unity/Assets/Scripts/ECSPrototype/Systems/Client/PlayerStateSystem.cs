@@ -162,6 +162,7 @@ namespace LeyLineHybridECS
         {
             var pHigh = playerHigh;
             var pState = playerState;
+            var pFact = playerFaction;
 
             Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences,  ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref MouseState mouseState, in Actions.Component actions, in FactionComponent.Component faction, in ClientActionRequest.Component clientActionRequest) =>
             {
@@ -176,7 +177,7 @@ namespace LeyLineHybridECS
 
                     if (clientActionRequest.ActionId != -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
                     {
-                        if (pState.CurrentState != PlayerStateEnum.waiting_for_target)
+                        if (pState.CurrentState != PlayerStateEnum.waiting_for_target && playerFaction.Faction == faction.Faction)
                         {
                             pState.CurrentState = PlayerStateEnum.waiting_for_target;
                         }
@@ -224,6 +225,16 @@ namespace LeyLineHybridECS
                                 m_UISystem.PopulateManlithInfoHexes((uint)unitId.EntityId.Id, playerFaction.Faction);
                             }
 
+                            pState.SelectedActionId = -3;
+
+                            pState.SelectedAction = new Action
+                            {
+                                Targets = new List<ActionTarget>(),
+                                Effects = new List<ActionEffect>(),
+                                Index = -3
+                            };
+
+                            pHigh.SelectedUnitFaction = faction.Faction;
                             pState.SelectedUnitCoordinate = unitCoord.CubeCoordinate;
                             pState.SelectedUnitId = unitId.EntityId.Id;
                         }
