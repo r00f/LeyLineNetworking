@@ -41,5 +41,7 @@ public class Settings : ScriptableObject
     public float MinimumExecuteTime;
     public float RopeTime;
     public LayerMask MouseRayCastLayerMask;
-    
+
+    [Header("Holographic Materials")]
+    public List<Material> HolographicMaterials;
 }

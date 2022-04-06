@@ -105,7 +105,7 @@ public class ActionPreviewSystem : JobComponentSystem
             }
             else
             {
-                if (playerState.SelectedUnitId == id.EntityId.Id)
+                if (playerState.SelectedUnitId == id.EntityId.Id && unitComponentReferences.MeshMatComponent)
                 {
                     if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
                         animator.CurrentPreviewTarget = CellGridMethods.CubeToPos(highlightingData.HoveredCoordinate, gameState.MapCenter);
@@ -128,39 +128,44 @@ public class ActionPreviewSystem : JobComponentSystem
 
                         if (animator.MovePreviewUnitDupe)
                             Object.Destroy(animator.MovePreviewUnitDupe.gameObject);
-
-                        foreach (Renderer r in unitComponentReferences.MeshMatComponent.AllMesheRenderers)
+                   
+                        if(!(animator.CurrentPreviewAction.Effects[0] is ECS_MoveAlongPathEffect))
                         {
-                            var mats = new Material[r.materials.Length];
+                            foreach (Renderer r in unitComponentReferences.MeshMatComponent.AllMesheRenderers)
+                            {
+                                var mats = new Material[r.materials.Length];
 
-                            for (int i = 0; i < mats.Length; i++)
-                                mats[i] = settings.ActionPreviewMat;
+                                for (int i = 0; i < mats.Length; i++)
+                                    mats[i] = settings.HolographicMaterials[(int)animator.CurrentPreviewAction.ActionExecuteStep];
 
-                            r.materials = mats;
+                                r.materials = mats;
+                            }
                         }
 
-                        if (animator.CurrentPreviewAction.Effects[0] is ECS_MoveAlongPathEffect && unitComponentReferences.MeshMatComponent)
+                        else
                         {
-                                animator.MovePreviewUnitDupe = Object.Instantiate(unitComponentReferences.MeshMatComponent, animator.transform.position, animator.Animator.transform.rotation, animator.Animator.transform.parent);
+                            for (int i = 0; i < unitComponentReferences.MeshMatComponent.AllMesheRenderers.Count; i++)
+                                unitComponentReferences.MeshMatComponent.AllMesheRenderers[i].materials = unitComponentReferences.MeshMatComponent.AllMeshMaterials[i].ToArray();
+
+                            animator.MovePreviewUnitDupe = Object.Instantiate(unitComponentReferences.MeshMatComponent, animator.transform.position, animator.Animator.transform.rotation, animator.Animator.transform.parent);
                                 
                                 foreach (Renderer r in animator.MovePreviewUnitDupe.AllMesheRenderers)
                                 {
                                     var mats = new Material[r.materials.Length];
 
                                     for (int i = 0; i < mats.Length; i++)
-                                        mats[i] = settings.ActionPreviewMat;
+                                        mats[i] = settings.HolographicMaterials[(int)animator.CurrentPreviewAction.ActionExecuteStep];
 
                                     r.materials = mats;
                                 }
 
                                 animator.MovePreviewUnitDupe.gameObject.SetActive(false);
                         }
-                        else
-                        {
+
                             animator.PlayActionSFX = true;
                             animator.AnimationEvents.EventTrigger = false;
                             animator.ResumePreviewAnimation = false;
-                        }
+
 
                         animator.CurrentPreviewIndex = actionRequest.ActionId;
                     }
