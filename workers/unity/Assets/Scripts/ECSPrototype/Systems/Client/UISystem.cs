@@ -894,10 +894,7 @@ namespace LeyLineHybridECS
                 {
                     if (unitCompRef.UnitEffectsComp.CurrentHealth == 0)
                     {
-                        if (unitCompRef.HeadUIRef.UnitHeadUIInstance.FlagForDestruction == false)
-                        {
-                            CleanupUnitUI(unitCompRef.IsVisibleRefComp, unitCompRef.HeadUIRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction);
-                        }
+
                     }
                     else
                     {
@@ -1901,15 +1898,22 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void TriggerUnitDeathUI(Entity e)
+        public void TriggerUnitDeathUI(Entity e, uint unitFaction, uint authPlayerFaction, long unitID, bool displayDeathSkull)
         {
+            var unitCompRef = EntityManager.GetComponentObject<UnitComponentReferences>(e);
             var headUI = EntityManager.GetComponentObject<UnitHeadUIReferences>(e);
+
+            CleanupUnitUI(unitCompRef.IsVisibleRefComp, unitCompRef.HeadUIRef, unitCompRef.BaseDataSetComp, unitID, unitFaction, authPlayerFaction);
 
             if (headUI.UnitHeadUIInstance)
             {
-                headUI.UnitHeadUIInstance.DeathBlowImage.SetActive(true);
+                if(displayDeathSkull)
+                    headUI.UnitHeadUIInstance.DeathBlowImage.SetActive(true);
+                Object.Destroy(headUI.UnitHeadUIInstance.gameObject, headUI.UnitHeadUIInstance.DestroyWaitTime);
             }
 
+            if (headUI.UnitHeadHealthBarInstance)
+                Object.Destroy(headUI.UnitHeadHealthBarInstance.gameObject);
         }
 
         public void SetHealthFloatText(Entity e, bool positive, uint inHealthAmount, Color color, float waitTime = 0f)
@@ -2098,12 +2102,6 @@ namespace LeyLineHybridECS
                 Object.Destroy(isVisibleRef.BigMapTileInstance.gameObject, 0.5f);
             }
 
-            if(unitHeadUIRef.UnitHeadUIInstance)
-                Object.Destroy(unitHeadUIRef.UnitHeadUIInstance.gameObject, unitHeadUIRef.UnitHeadUIInstance.DestroyWaitTime);
-
-            if (unitHeadUIRef.UnitHeadHealthBarInstance)
-                Object.Destroy(unitHeadUIRef.UnitHeadHealthBarInstance.gameObject);
-
             if (!stats.IsHero && unitFaction == playerFaction && UIRef.ExistingUnitGroups.ContainsKey(stats.UnitTypeId))
             {
                 //remove unitID from unitGRPUI / delete selectUnitButton
@@ -2122,7 +2120,6 @@ namespace LeyLineHybridECS
             }
 
             unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction = true;
-
         }
 
         public void InitializeSelectedActionTooltip(ActionButton actionButton)

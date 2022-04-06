@@ -98,7 +98,7 @@ public class ActionPreviewSystem : JobComponentSystem
                     animator.ResumePreviewAnimation = false;
                     animator.CurrentPreviewAction = null;
                 }
-                else if(animator.Animator && !animator.Animator.fireEvents && (animator.Animator.layerCount < 2 || !animator.Animator.GetAnimatorTransitionInfo(1).anyState))
+                else if (animator.Animator && !animator.Animator.fireEvents && !animator.Animator.GetBool("CancelAction") && (animator.Animator.layerCount < 2 || animator.Animator.GetCurrentAnimatorStateInfo(1).IsName("Empty")))
                 {
                     animator.Animator.fireEvents = true;
                 }
