@@ -256,12 +256,14 @@ public class Moba_Camera : MonoBehaviour {
 	private const float MINROTATIONXAXIS = -89.0f;
 
     HeroTransform heroTransform;
+    UIReferences UIRef;
 	
 	// Use this for initialization
 	void Start () {
 
         //Canvas canvas = FindObjectOfType<Canvas>();
         //canvas.worldCamera = requirements.camera;
+        UIRef = FindObjectOfType<UIReferences>();
         heroTransform = GetComponent<HeroTransform>();
 		
 		if(!requirements.pivot || !requirements.offset || !requirements.virtualCam) {
@@ -474,29 +476,71 @@ public class Moba_Camera : MonoBehaviour {
         _currentCameraRotation.y += changeInRotationY * settings.rotation.cameraRotationRate.y * Time.deltaTime;
 		
 	}
-	
-	void CalculateCameraMovement() {
-		////////////////////////////////////////////////////////////////////////////////////////////////////
-		// Camera Movement : When mouse is near the screens edge
-		
-		// Lock / Unlock camera movement
-		if((inputs.useKeyCodeInputs)?
-			(Input.GetKeyDown(inputs.keycodes.LockCamera)):
-			(Input.GetButtonDown(inputs.axis.button_lock_camera)) && 
-			settings.lockTargetTransform != null)
-		{
-			if(settings.lockTargetTransform != null) 
-			{
-				//flip bool value
-				settings.cameraLocked = !settings.cameraLocked;
-			}
-		}
-		
-		// if camera is locked or if character focus, set move pivot to target
-		if(settings.lockTargetTransform != null && (settings.cameraLocked || 
-			((inputs.useKeyCodeInputs)?
-				(Input.GetKey(inputs.keycodes.characterFocus)):
-				(Input.GetButton(inputs.axis.button_char_focus)))))
+
+    bool IsMouseOverGameWindow { get { return !(0 > Input.mousePosition.x || 0 > Input.mousePosition.y || Screen.width < Input.mousePosition.x || Screen.height < Input.mousePosition.y); } }
+
+    void CalculateCameraMovement() {
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        // Camera Movement : When mouse is near the screens edge / WASD / Only if DollyCam is not active and the cursor is over the game window
+
+        Vector3 movementVector = Vector3.zero;
+        
+        if(IsMouseOverGameWindow && !UIRef.DollyPathCameraActive)
+        {
+            // Move camera when mouse is near the edge of the screen
+            if ((Input.mousePosition.x < settings.movement.edgeHoverOffset && settings.movement.edgeHoverMovement)
+                || ((inputs.useKeyCodeInputs) ?
+                        (Input.GetKey(inputs.keycodes.CameraMoveLeft)) :
+                        (Input.GetButton(inputs.axis.button_camera_move_left))))
+            {
+                movementVector += requirements.pivot.transform.right;
+            }
+            if ((Input.mousePosition.x > Screen.width - settings.movement.edgeHoverOffset && settings.movement.edgeHoverMovement)
+                || ((inputs.useKeyCodeInputs) ?
+                        (Input.GetKey(inputs.keycodes.CameraMoveRight)) :
+                        (Input.GetButton(inputs.axis.button_camera_move_right))))
+            {
+                movementVector -= requirements.pivot.transform.right;
+            }
+            if ((Input.mousePosition.y < settings.movement.edgeHoverOffset && settings.movement.edgeHoverMovement)
+                || ((inputs.useKeyCodeInputs) ?
+                        (Input.GetKey(inputs.keycodes.CameraMoveBackward)) :
+                        (Input.GetButton(inputs.axis.button_camera_move_backward))))
+            {
+                movementVector += requirements.pivot.transform.forward;
+            }
+            if ((Input.mousePosition.y > Screen.height - settings.movement.edgeHoverOffset && settings.movement.edgeHoverMovement)
+                || ((inputs.useKeyCodeInputs) ?
+                        (Input.GetKey(inputs.keycodes.CameraMoveForward)) :
+                        (Input.GetButton(inputs.axis.button_camera_move_forward))))
+            {
+                movementVector -= requirements.pivot.transform.forward;
+            }
+        }
+
+        if (movementVector == Vector3.zero)
+        {
+            // Lock / Unlock camera movement
+            if (inputs.useKeyCodeInputs ?
+                Input.GetKeyDown(inputs.keycodes.LockCamera) :
+                Input.GetButtonDown(inputs.axis.button_lock_camera) &&
+                settings.lockTargetTransform != null)
+            {
+                if (settings.lockTargetTransform != null)
+                {
+                    //flip bool value
+                    settings.cameraLocked = !settings.cameraLocked;
+                }
+            }
+        }
+        else
+            settings.cameraLocked = false;
+        
+        // if camera is locked or if character focus, set move pivot to target
+        if (settings.lockTargetTransform != null && (settings.cameraLocked || 
+			(inputs.useKeyCodeInputs?
+				Input.GetKey(inputs.keycodes.characterFocus):
+				Input.GetButton(inputs.axis.button_char_focus))))
 		{
 			Vector3 target = settings.lockTargetTransform.position;
 			if((requirements.pivot.position - target).magnitude > 0.2f) {
@@ -516,40 +560,7 @@ public class Moba_Camera : MonoBehaviour {
 		}
 		else
 		{
-			Vector3 movementVector = new Vector3(0,0,0);
-			
-			// Move camera when mouse is near the edge of the screen
-			if((Input.mousePosition.x < settings.movement.edgeHoverOffset && settings.movement.edgeHoverMovement)
-				|| ((inputs.useKeyCodeInputs)?
-						(Input.GetKey(inputs.keycodes.CameraMoveLeft)):
-						(Input.GetButton(inputs.axis.button_camera_move_left))))
-			{
-				movementVector += requirements.pivot.transform.right;
-			}
-			if((Input.mousePosition.x > Screen.width - settings.movement.edgeHoverOffset  && settings.movement.edgeHoverMovement)
-				|| ((inputs.useKeyCodeInputs)?
-						(Input.GetKey(inputs.keycodes.CameraMoveRight)):
-						(Input.GetButton(inputs.axis.button_camera_move_right))))
-			{
-				movementVector -= requirements.pivot.transform.right;
-			}
-			if((Input.mousePosition.y < settings.movement.edgeHoverOffset  && settings.movement.edgeHoverMovement)
-				|| ((inputs.useKeyCodeInputs)?
-						(Input.GetKey(inputs.keycodes.CameraMoveBackward)):
-						(Input.GetButton(inputs.axis.button_camera_move_backward))))
-			{
-				movementVector += requirements.pivot.transform.forward;
-			}
-			if((Input.mousePosition.y > Screen.height - settings.movement.edgeHoverOffset  && settings.movement.edgeHoverMovement)
-				|| ((inputs.useKeyCodeInputs)?
-						(Input.GetKey(inputs.keycodes.CameraMoveForward)):
-						(Input.GetButton(inputs.axis.button_camera_move_forward))))
-			{
-				movementVector -= requirements.pivot.transform.forward;
-			}
-			
 			requirements.pivot.position += movementVector.normalized * settings.movement.cameraMovementRate * Time.deltaTime;
-			
 			
 			// Lerp between the z position if magnitude is greater than value
 			Vector3 target = Vector3.zero;
