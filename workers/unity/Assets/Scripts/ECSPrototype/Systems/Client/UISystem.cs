@@ -1390,10 +1390,6 @@ namespace LeyLineHybridECS
             if (UIRef.DollyPathCameraActive)
                 return;
 
-            if (Input.GetButtonDown("SwitchIngameUI"))
-            {
-                UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
-            }
             if (Input.GetKeyDown(KeyCode.M))
             {
                 UIRef.UIActive = !UIRef.UIActive;
@@ -1422,9 +1418,11 @@ namespace LeyLineHybridECS
                         UIRef.TurnStatePnl.GOButtonScript.Button.onClick.Invoke();
                 }
 
-                if (Input.GetKeyDown(KeyCode.Tab) && UIRef.SwapActionButton.gameObject.activeSelf)
+                if (Input.GetKeyDown(KeyCode.Tab))
                 {
-                    UIRef.SwapActionButton.Button.onClick.Invoke();
+                    //UIRef.IngameUIPanel.SetActive(!UIRef.IngameUIPanel.activeSelf);
+                    if(UIRef.SwapActionButton.gameObject.activeSelf)
+                        UIRef.SwapActionButton.Button.onClick.Invoke();
                 }
 
                 if (!UIRef.EscapeMenu.gameObject.activeSelf)
