@@ -148,6 +148,9 @@ public class UIReferences : MonoBehaviour
     public string CurrentStateString;
 
 
+    [Header("MainTurnDisplay")]
+    public MainTurnDisplay TurnDisplay;
+
     [Header("ParticleSystems")]
     public List<ParticleSystem> CowExhaleParticleSystems;
     public FillBarParticleComponent FriendlyRopeBarParticle;
@@ -180,6 +183,7 @@ public class UIReferences : MonoBehaviour
     public string OpponentReadySoundEventPath;
     public string ExecuteStepChangePath;
     public string PlanningSlideInPath;
+
 
     public enum UIEffectsFired
     {
