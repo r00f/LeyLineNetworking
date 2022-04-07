@@ -73,7 +73,6 @@ public class ActionPreviewSystem : JobComponentSystem
                         animator.Animator.speed = 1;
                     }
 
-
                     foreach (AnimStateEffectHandler a in animator.AnimStateEffectHandlers)
                     {
                         if(a.IsActiveState)
@@ -93,6 +92,7 @@ public class ActionPreviewSystem : JobComponentSystem
                     if (animator.MovePreviewUnitDupe)
                         Object.Destroy(animator.MovePreviewUnitDupe.gameObject);
 
+                    //animator.CurrentPreviewAnimTime = 0;
                     animator.CurrentPreviewIndex = actionRequest.ActionId;
                     animator.CurrentPreviewIndex = -3;
                     animator.ResumePreviewAnimation = false;
@@ -112,6 +112,8 @@ public class ActionPreviewSystem : JobComponentSystem
 
                     if (animator.CurrentPreviewIndex != actionRequest.ActionId)
                     {
+                        //animator.CurrentPreviewAnimTime = 0;
+
                         foreach (StudioEventEmitter g in animator.CharacterEffects)
                             g.gameObject.SetActive(false);
 
@@ -141,33 +143,30 @@ public class ActionPreviewSystem : JobComponentSystem
                                 r.materials = mats;
                             }
                         }
-
                         else
                         {
                             for (int i = 0; i < unitComponentReferences.MeshMatComponent.AllMesheRenderers.Count; i++)
                                 unitComponentReferences.MeshMatComponent.AllMesheRenderers[i].materials = unitComponentReferences.MeshMatComponent.AllMeshMaterials[i].ToArray();
 
                             animator.MovePreviewUnitDupe = Object.Instantiate(unitComponentReferences.MeshMatComponent, animator.transform.position, animator.Animator.transform.rotation, animator.Animator.transform.parent);
-                                
-                                foreach (Renderer r in animator.MovePreviewUnitDupe.AllMesheRenderers)
-                                {
-                                    var mats = new Material[r.materials.Length];
 
-                                    for (int i = 0; i < mats.Length; i++)
-                                        mats[i] = settings.HolographicMaterials[(int)animator.CurrentPreviewAction.ActionExecuteStep];
+                            foreach (Renderer r in animator.MovePreviewUnitDupe.AllMesheRenderers)
+                            {
+                                var mats = new Material[r.materials.Length];
 
-                                    r.materials = mats;
-                                }
+                                for (int i = 0; i < mats.Length; i++)
+                                    mats[i] = settings.HolographicMaterials[(int) animator.CurrentPreviewAction.ActionExecuteStep];
 
-                                animator.MovePreviewUnitDupe.gameObject.SetActive(false);
+                                r.materials = mats;
+                            }
+
+                            animator.MovePreviewUnitDupe.gameObject.SetActive(false);
                         }
 
-                            animator.PlayActionSFX = true;
-                            animator.AnimationEvents.EventTrigger = false;
-                            animator.ResumePreviewAnimation = false;
-
-
-                        animator.CurrentPreviewIndex = actionRequest.ActionId;
+                        animator.PlayActionSFX = true;
+                        animator.AnimationEvents.EventTrigger = false;
+                        animator.ResumePreviewAnimation = false;
+                        //animator.CurrentPreviewIndex = actionRequest.ActionId;
                     }
                 }
 
@@ -196,39 +195,34 @@ public class ActionPreviewSystem : JobComponentSystem
                     }
                     else if (animator.AnimationEvents)
                     {
-                        animator.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
+                        //animator.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
 
                         if (animator.CurrentPreviewAction.Targets[0].targettingRange > 0)
                         {
+                            float firstEventTiming = 0;
+                            var currentStateInfo = animator.Animator.GetCurrentAnimatorStateInfo(1);
+                            var nextStateInfo = animator.Animator.GetNextAnimatorStateInfo(1);
                             animator.Animator.SetInteger("Armor", 0);
-                            animator.Animator.SetTrigger("Execute");
 
-                            var currentClip = animator.Animator.GetCurrentAnimatorClipInfo(1);
-                            var currentState = animator.Animator.GetCurrentAnimatorStateInfo(1);
-
-                            var nextClip = animator.Animator.GetNextAnimatorClipInfo(1);
-                            var nextState = animator.Animator.GetNextAnimatorStateInfo(1);
-                            //nextClip[0].clip.length * nextState.normalizedTime actual clip time
-
-                            var stoptime = .1f;
-
-                            if (nextClip.Length > 0)
-                                animator.CurrentPreviewAnimTime = nextState.normalizedTime;
-                            else if (currentClip.Length > 0)
-                                animator.CurrentPreviewAnimTime = currentState.normalizedTime;
+                            foreach (AnimationClip c in animator.Animator.runtimeAnimatorController.animationClips)
+                            {
+                                if (c.name == animator.AnimatorCrossFadeTargetStateName)
+                                    firstEventTiming = c.events[0].time;
+                            }
 
                             if (!animator.ResumePreviewAnimation)
                             {
-                                if (animator.CurrentPreviewAnimTime < stoptime)
-                                    animator.Animator.speed = 1.1f - animator.CurrentPreviewAnimTime / stoptime;
-                                else
-                                    animator.Animator.speed = 0;
+                                if (!nextStateInfo.IsName(animator.AnimatorCrossFadeTargetStateName) && !currentStateInfo.IsName(animator.AnimatorCrossFadeTargetStateName))
+                                    animator.Animator.CrossFade(animator.AnimatorCrossFadeTargetStateName, .1f, 1, firstEventTiming - 0.01f);
 
                                 if (Vector3fext.ToUnityVector(actionRequest.TargetCoordinate) != Vector3.zero)
+                                {
+                                    animator.Animator.speed = 1;
                                     animator.ResumePreviewAnimation = true;
+                                }
+                                else if (currentStateInfo.IsName(animator.AnimatorCrossFadeTargetStateName))
+                                    animator.Animator.speed = 0;
                             }
-                            else
-                                animator.Animator.speed = 1;
                         }
                         else if (!animator.ResumePreviewAnimation)
                         {

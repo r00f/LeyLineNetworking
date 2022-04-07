@@ -8,7 +8,7 @@ using FMODUnity;
 
 public class AnimatorComponent : MonoBehaviour
 {
-
+    public string AnimatorCrossFadeTargetStateName;
     public List<AnimStateEffectHandler> AnimStateEffectHandlers;
     public Transform WeaponTransform;
     public bool IsMoving;
