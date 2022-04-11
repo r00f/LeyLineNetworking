@@ -179,6 +179,9 @@ namespace LeyLineHybridECS
                         if (serverVariables.HighestExecuteTime == 0)
                         {
                             serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex, gameState.MinExecuteStepTime);
+
+
+                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
                         }
                         else
                         {
@@ -196,6 +199,7 @@ namespace LeyLineHybridECS
                         if (serverVariables.HighestExecuteTime == 0)
                         {
                             serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
                         }
                         else
                         {
@@ -213,6 +217,7 @@ namespace LeyLineHybridECS
                         if (serverVariables.HighestExecuteTime == 0)
                         {
                             serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
                         }
                         else
                         {
@@ -231,6 +236,7 @@ namespace LeyLineHybridECS
                         if (serverVariables.HighestExecuteTime == 0)
                         {
                             serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
                         }
                         else
                         {

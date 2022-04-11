@@ -15,10 +15,12 @@ component GameState {
 	generic.Vector2f map_center = 8;
 	uint32 turn_counter = 9;
 	float min_execute_step_time = 10;
-    float init_map_wait_time = 11;
-    bool init_map_event_sent = 12;
+    	float init_map_wait_time = 11;
+    	bool init_map_event_sent = 12;
+	bool turn_state_is_active = 13;
 	event Cleanup cleanup_state_event;
 	event RopeEnd rope_end_event;
+
 }
 
 type RopeEnd

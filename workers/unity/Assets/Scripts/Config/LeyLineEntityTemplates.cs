@@ -48,7 +48,8 @@ public static class LeyLineEntityTemplates {
             CurrentRopeTime = 30f,
             MapCenter = mapCenter,
             MinExecuteStepTime = settings.MinimumExecuteTime,
-            InitMapWaitTime = 2f
+            InitMapWaitTime = 2f,
+            TurnStateIsActive = false
         };
 
         var effectStack = new EffectStack.Snapshot
@@ -110,7 +111,9 @@ public static class LeyLineEntityTemplates {
             Energy = 40,
             BaseIncome = 5,
             Income = 0,
-            IncomeAdded = true
+            IncomeAdded = true,
+            LastGained = 0
+
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot

@@ -109,6 +109,7 @@ public class ResourceSystem : JobComponentSystem
                 {
                     energyComp.Energy = energyComp.MaxEnergy;
                 }
+                energyComp.LastGained = energyComp.Income;
 
                 componentUpdateSystem.SendEvent(
                 new PlayerEnergy.EnergyChangeEvent.Event(),
