@@ -5034,11 +5034,11 @@ MonoBehaviour:
   WeaponTransform: {fileID: 8846974289181975837}
   IsMoving: 0
   CurrentLockedAction: {fileID: 0}
+  FirstEventTiming: 0
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
   ResumePreviewAnimation: 0
-  CurrentPreviewAnimTime: 0
   PlayActionSFX: 0
   MovePreviewUnitDupe: {fileID: 0}
   Animator: {fileID: 8045395822357648005}
@@ -5048,7 +5048,7 @@ MonoBehaviour:
   ProjectileSpawnOrigin: {fileID: 0}
   Visuals:
   - {fileID: 7550265048827665367}
-  EnableVisualsDelay: 6.3
+  EnableVisualsDelay: 5.5
   CharacterEffects: []
   VoiceEmitter: {fileID: 0}
   FootStempEmitter: {fileID: 0}

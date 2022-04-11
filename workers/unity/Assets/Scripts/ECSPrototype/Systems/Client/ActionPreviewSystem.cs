@@ -50,30 +50,30 @@ public class ActionPreviewSystem : JobComponentSystem
         var highlightingData = m_PlayerData.GetSingleton<HighlightingDataComponent>();
         var playerVision = m_PlayerData.GetSingleton<Vision.Component>();
 
-        Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((UnitComponentReferences unitComponentReferences, AnimatorComponent animator, in ClientActionRequest.Component actionRequest, in Actions.Component actions, in SpatialEntityId id, in FactionComponent.Component faction, in CubeCoordinate.Component coord) =>
+        Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((UnitComponentReferences unitComponentReferences, AnimatorComponent animatorComp, in ClientActionRequest.Component actionRequest, in Actions.Component actions, in SpatialEntityId id, in FactionComponent.Component faction, in CubeCoordinate.Component coord) =>
         {
             if (actionRequest.ActionId < 0 || gameState.CurrentState != GameStateEnum.planning)
             {
-                animator.PlayActionSFX = true;
+                animatorComp.PlayActionSFX = true;
 
-                if (animator.CurrentPreviewAction)
+                if (animatorComp.CurrentPreviewAction)
                 {
-                    if (animator.AnimationEvents)
+                    if (animatorComp.AnimationEvents)
                     {
-                        animator.AnimationEvents.EventTrigger = false;
-                        animator.AnimationEvents.EventTriggered = false;
+                        animatorComp.AnimationEvents.EventTrigger = false;
+                        animatorComp.AnimationEvents.EventTriggered = false;
                     }
 
-                    if (animator.Animator)
+                    if (animatorComp.Animator)
                     {
-                        animator.Animator.fireEvents = false;
-                        animator.Animator.SetInteger("Armor", 0);
-                        animator.Animator.ResetTrigger("Execute");
-                        animator.Animator.SetTrigger("CancelAction");
-                        animator.Animator.speed = 1;
+                        animatorComp.Animator.fireEvents = false;
+                        animatorComp.Animator.SetInteger("Armor", 0);
+                        animatorComp.Animator.ResetTrigger("Execute");
+                        animatorComp.Animator.SetTrigger("CancelAction");
+                        animatorComp.Animator.speed = 1;
                     }
 
-                    foreach (AnimStateEffectHandler a in animator.AnimStateEffectHandlers)
+                    foreach (AnimStateEffectHandler a in animatorComp.AnimStateEffectHandlers)
                     {
                         if(a.IsActiveState)
                         {
@@ -86,21 +86,22 @@ public class ActionPreviewSystem : JobComponentSystem
                     for(int i = 0; i < unitComponentReferences.MeshMatComponent.AllMesheRenderers.Count; i++)
                         unitComponentReferences.MeshMatComponent.AllMesheRenderers[i].materials = unitComponentReferences.MeshMatComponent.AllMeshMaterials[i].ToArray();
 
-                    foreach (StudioEventEmitter g in animator.CharacterEffects)
+                    foreach (StudioEventEmitter g in animatorComp.CharacterEffects)
                         g.gameObject.SetActive(false);
 
-                    if (animator.MovePreviewUnitDupe)
-                        Object.Destroy(animator.MovePreviewUnitDupe.gameObject);
+                    if (animatorComp.MovePreviewUnitDupe)
+                        Object.Destroy(animatorComp.MovePreviewUnitDupe.gameObject);
 
-                    //animator.CurrentPreviewAnimTime = 0;
-                    animator.CurrentPreviewIndex = actionRequest.ActionId;
-                    animator.CurrentPreviewIndex = -3;
-                    animator.ResumePreviewAnimation = false;
-                    animator.CurrentPreviewAction = null;
+                    Debug.Log("Clear CurrentPreviewAction");
+
+                    animatorComp.CurrentPreviewIndex = actionRequest.ActionId;
+                    animatorComp.CurrentPreviewIndex = -3;
+                    animatorComp.ResumePreviewAnimation = false;
+                    animatorComp.CurrentPreviewAction = null;
                 }
-                else if (animator.Animator && !animator.Animator.fireEvents && !animator.Animator.GetBool("CancelAction") && (animator.Animator.layerCount < 2 || animator.Animator.GetCurrentAnimatorStateInfo(1).IsName("Empty")))
+                else if (animatorComp.Animator && !animatorComp.Animator.fireEvents && !animatorComp.Animator.GetBool("CancelAction") && (animatorComp.Animator.layerCount < 2 || animatorComp.Animator.GetCurrentAnimatorStateInfo(1).IsName("Empty")))
                 {
-                    animator.Animator.fireEvents = true;
+                    animatorComp.Animator.fireEvents = true;
                 }
             }
             else
@@ -108,39 +109,47 @@ public class ActionPreviewSystem : JobComponentSystem
                 if (playerState.SelectedUnitId == id.EntityId.Id && unitComponentReferences.MeshMatComponent)
                 {
                     if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
-                        animator.CurrentPreviewTarget = CellGridMethods.CubeToPos(highlightingData.HoveredCoordinate, gameState.MapCenter);
+                        animatorComp.CurrentPreviewTarget = CellGridMethods.CubeToPos(highlightingData.HoveredCoordinate, gameState.MapCenter);
 
-                    if (animator.CurrentPreviewIndex != actionRequest.ActionId)
+                    if (animatorComp.CurrentPreviewIndex != actionRequest.ActionId)
                     {
-                        //animator.CurrentPreviewAnimTime = 0;
-
-                        foreach (StudioEventEmitter g in animator.CharacterEffects)
+                        foreach (StudioEventEmitter g in animatorComp.CharacterEffects)
                             g.gameObject.SetActive(false);
 
-                        if(animator.Animator)
+                        if(animatorComp.Animator)
                         {
-                            animator.Animator.ResetTrigger("Execute");
-                            animator.Animator.SetTrigger("CancelAction");
+                            Debug.Log("CancelAction on preview Action Change");
+                            animatorComp.Animator.ResetTrigger("Execute");
+                            animatorComp.Animator.SetTrigger("CancelAction");
                         }
 
                         if (actionRequest.ActionId < unitComponentReferences.BaseDataSetComp.Actions.Count)
-                            animator.CurrentPreviewAction = unitComponentReferences.BaseDataSetComp.Actions[actionRequest.ActionId];
+                            animatorComp.CurrentPreviewAction = unitComponentReferences.BaseDataSetComp.Actions[actionRequest.ActionId];
                         else
-                            animator.CurrentPreviewAction = unitComponentReferences.BaseDataSetComp.SpawnActions[actionRequest.ActionId - unitComponentReferences.BaseDataSetComp.Actions.Count];
+                            animatorComp.CurrentPreviewAction = unitComponentReferences.BaseDataSetComp.SpawnActions[actionRequest.ActionId - unitComponentReferences.BaseDataSetComp.Actions.Count];
 
-                        if (animator.MovePreviewUnitDupe)
-                            Object.Destroy(animator.MovePreviewUnitDupe.gameObject);
+                        if (animatorComp.MovePreviewUnitDupe)
+                            Object.Destroy(animatorComp.MovePreviewUnitDupe.gameObject);
                    
-                        if(!(animator.CurrentPreviewAction.Effects[0] is ECS_MoveAlongPathEffect))
+                        if(!(animatorComp.CurrentPreviewAction.Effects[0] is ECS_MoveAlongPathEffect))
                         {
                             foreach (Renderer r in unitComponentReferences.MeshMatComponent.AllMesheRenderers)
                             {
                                 var mats = new Material[r.materials.Length];
 
                                 for (int i = 0; i < mats.Length; i++)
-                                    mats[i] = settings.HolographicMaterials[(int)animator.CurrentPreviewAction.ActionExecuteStep];
+                                    mats[i] = settings.HolographicMaterials[(int)animatorComp.CurrentPreviewAction.ActionExecuteStep];
 
                                 r.materials = mats;
+                            }
+
+                            foreach (AnimationClip c in animatorComp.Animator.runtimeAnimatorController.animationClips)
+                            {
+                                if (c.name == animatorComp.CurrentPreviewAction.AnimatorStateName)
+                                {
+                                    animatorComp.FirstEventTiming = c.events[0].time;
+                                    Debug.Log("Clip length = " + c.length + ", first event time = " + c.events[0].time);
+                                }
                             }
                         }
                         else
@@ -148,112 +157,112 @@ public class ActionPreviewSystem : JobComponentSystem
                             for (int i = 0; i < unitComponentReferences.MeshMatComponent.AllMesheRenderers.Count; i++)
                                 unitComponentReferences.MeshMatComponent.AllMesheRenderers[i].materials = unitComponentReferences.MeshMatComponent.AllMeshMaterials[i].ToArray();
 
-                            animator.MovePreviewUnitDupe = Object.Instantiate(unitComponentReferences.MeshMatComponent, animator.transform.position, animator.Animator.transform.rotation, animator.Animator.transform.parent);
+                            animatorComp.MovePreviewUnitDupe = Object.Instantiate(unitComponentReferences.MeshMatComponent, animatorComp.transform.position, animatorComp.Animator.transform.rotation, animatorComp.Animator.transform.parent);
 
-                            foreach (Renderer r in animator.MovePreviewUnitDupe.AllMesheRenderers)
+                            foreach (Renderer r in animatorComp.MovePreviewUnitDupe.AllMesheRenderers)
                             {
                                 var mats = new Material[r.materials.Length];
 
                                 for (int i = 0; i < mats.Length; i++)
-                                    mats[i] = settings.HolographicMaterials[(int) animator.CurrentPreviewAction.ActionExecuteStep];
+                                    mats[i] = settings.HolographicMaterials[(int) animatorComp.CurrentPreviewAction.ActionExecuteStep];
 
                                 r.materials = mats;
                             }
 
-                            animator.MovePreviewUnitDupe.gameObject.SetActive(false);
+                            animatorComp.MovePreviewUnitDupe.gameObject.SetActive(false);
                         }
 
-                        animator.PlayActionSFX = true;
-                        animator.AnimationEvents.EventTrigger = false;
-                        animator.ResumePreviewAnimation = false;
-                        //animator.CurrentPreviewIndex = actionRequest.ActionId;
+                        Debug.Log("Reset ResumePreviewAction. CurrentPreviewIndex = " + animatorComp.CurrentPreviewIndex + ", actionId = " + actionRequest.ActionId);
+
+                        animatorComp.PlayActionSFX = true;
+                        animatorComp.AnimationEvents.EventTrigger = false;
+                        animatorComp.ResumePreviewAnimation = false;
+                        animatorComp.CurrentPreviewIndex = actionRequest.ActionId;
                     }
                 }
 
-                if(animator.Animator && animator.CurrentPreviewAction)
+                if(animatorComp.Animator && animatorComp.CurrentPreviewAction)
                 {
-                    if(animator.CurrentPreviewAction.Effects[0] is ECS_MoveAlongPathEffect)
+                    if(animatorComp.CurrentPreviewAction.Effects[0] is ECS_MoveAlongPathEffect)
                     {
                         //animate path movement for dupe
-                        if (animator.MovePreviewUnitDupe && Vector3fext.ToUnityVector(actionRequest.TargetCoordinate) != Vector3.zero)
+                        if (animatorComp.MovePreviewUnitDupe && Vector3fext.ToUnityVector(actionRequest.TargetCoordinate) != Vector3.zero)
                         {
                             if (unitComponentReferences.LinerendererComp.lineRenderer.positionCount > 0)
                             {
-                                if(!animator.MovePreviewUnitDupe.gameObject.activeSelf)
+                                if(!animatorComp.MovePreviewUnitDupe.gameObject.activeSelf)
                                 {
-                                    animator.MovePreviewUnitDupe.gameObject.SetActive(true);
-                                    animator.MovePreviewUnitDupe.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
-                                    animator.MovePreviewUnitDupe.Animator.SetTrigger("Execute");
+                                    animatorComp.MovePreviewUnitDupe.gameObject.SetActive(true);
+                                    animatorComp.MovePreviewUnitDupe.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
+                                    animatorComp.MovePreviewUnitDupe.Animator.SetTrigger("Execute");
                                 }
 
                                 Vector3[] linePosArray = new Vector3[unitComponentReferences.LinerendererComp.lineRenderer.positionCount];
                                 unitComponentReferences.LinerendererComp.lineRenderer.GetPositions(linePosArray);
 
-                                m_UnitAnimationSystem.MoveObjectAlongPath(animator.MovePreviewUnitDupe, linePosArray, actions.ActionsList[actionRequest.ActionId].Effects[0].MoveAlongPathNested.TimePerCell, animator.RotationSpeed, false);
+                                m_UnitAnimationSystem.MoveObjectAlongPath(animatorComp.MovePreviewUnitDupe, linePosArray, actions.ActionsList[actionRequest.ActionId].Effects[0].MoveAlongPathNested.TimePerCell, animatorComp.RotationSpeed, false);
                             }
                         }
                     }
-                    else if (animator.AnimationEvents)
+                    else if (animatorComp.AnimationEvents)
                     {
-                        //animator.Animator.SetInteger("ActionIndexInt", actionRequest.ActionId);
+                        var currentStateInfo = animatorComp.Animator.GetCurrentAnimatorStateInfo(1);
+                        var nextStateInfo = animatorComp.Animator.GetNextAnimatorStateInfo(1);
 
-                        if (animator.CurrentPreviewAction.Targets[0].targettingRange > 0)
+                        if (!nextStateInfo.IsName(animatorComp.CurrentPreviewAction.AnimatorStateName) && !currentStateInfo.IsName(animatorComp.CurrentPreviewAction.AnimatorStateName))
+                            animatorComp.Animator.CrossFadeInFixedTime(animatorComp.CurrentPreviewAction.AnimatorStateName, 0.2f, 1, animatorComp.FirstEventTiming - 0.2f);
+
+                        if (!animatorComp.ResumePreviewAnimation)
                         {
-                            float firstEventTiming = 0;
-                            var currentStateInfo = animator.Animator.GetCurrentAnimatorStateInfo(1);
-                            var nextStateInfo = animator.Animator.GetNextAnimatorStateInfo(1);
-                            animator.Animator.SetInteger("Armor", 0);
-
-                            foreach (AnimationClip c in animator.Animator.runtimeAnimatorController.animationClips)
+                            if (animatorComp.CurrentPreviewAction.Targets[0].targettingRange > 0)
                             {
-                                if (c.name == animator.AnimatorCrossFadeTargetStateName)
-                                    firstEventTiming = c.events[0].time;
-                            }
-
-                            if (!animator.ResumePreviewAnimation)
-                            {
-                                if (!nextStateInfo.IsName(animator.AnimatorCrossFadeTargetStateName) && !currentStateInfo.IsName(animator.AnimatorCrossFadeTargetStateName))
-                                    animator.Animator.CrossFade(animator.AnimatorCrossFadeTargetStateName, .1f, 1, firstEventTiming - 0.01f);
-
+                                animatorComp.Animator.SetInteger("Armor", 0);
                                 if (Vector3fext.ToUnityVector(actionRequest.TargetCoordinate) != Vector3.zero)
                                 {
-                                    animator.Animator.speed = 1;
-                                    animator.ResumePreviewAnimation = true;
+                                    animatorComp.Animator.ResetTrigger("CancelAction");
+                                    animatorComp.Animator.speed = 1;
+                                    animatorComp.ResumePreviewAnimation = true;
                                 }
-                                else if (currentStateInfo.IsName(animator.AnimatorCrossFadeTargetStateName))
-                                    animator.Animator.speed = 0;
+                                else if (currentStateInfo.IsName(animatorComp.CurrentPreviewAction.AnimatorStateName))
+                                {
+
+                                    animatorComp.Animator.ResetTrigger("CancelAction");
+                                    if (currentStateInfo.length * currentStateInfo.normalizedTime == animatorComp.FirstEventTiming)
+                                        animatorComp.Animator.speed = 0;
+                                    else
+                                        animatorComp.Animator.PlayInFixedTime(animatorComp.CurrentPreviewAction.AnimatorStateName, 1, animatorComp.FirstEventTiming);
+                                }
+                            }
+                            else
+                            {
+                                //self target currently only used for armoring
+                                animatorComp.Animator.speed = 1;
+                                animatorComp.Animator.SetTrigger("Execute");
+                                animatorComp.Animator.SetInteger("Armor", 10);
+                                animatorComp.ResumePreviewAnimation = true;
                             }
                         }
-                        else if (!animator.ResumePreviewAnimation)
+                        if (animatorComp.AnimationEvents.EventTrigger && animatorComp.ResumePreviewAnimation)
                         {
-                            //self target currently only used for armoring
-                            animator.Animator.speed = 1;
-                            animator.Animator.SetTrigger("Execute");
-                            animator.Animator.SetInteger("Armor", 10);
-                            animator.ResumePreviewAnimation = true;
-                        }
-
-                        if (animator.AnimationEvents.EventTrigger && animator.ResumePreviewAnimation)
-                        {
-                            if (animator.CurrentPreviewAction.ProjectileFab)
+                            if (animatorComp.CurrentPreviewAction.ProjectileFab)
                             {
                                 float targetYoffset = 0;
 
-                                if (animator.CurrentPreviewAction.Targets[0] is ECSATarget_Unit)
+                                if (animatorComp.CurrentPreviewAction.Targets[0] is ECSATarget_Unit)
                                     targetYoffset = 1.3f;
 
-                                m_ActionEffectsSystem.LaunchProjectile(faction.Faction, playerVision, animator.CurrentPreviewAction.ProjectileFab, animator.ProjectileSpawnOrigin, animator.CurrentPreviewTarget, actions.ActionsList[actionRequest.ActionId], id.EntityId.Id, coord.CubeCoordinate, targetYoffset, true, animator.PlayActionSFX);
+                                m_ActionEffectsSystem.LaunchProjectile(faction.Faction, playerVision, animatorComp.CurrentPreviewAction.ProjectileFab, animatorComp.ProjectileSpawnOrigin, animatorComp.CurrentPreviewTarget, actions.ActionsList[actionRequest.ActionId], id.EntityId.Id, coord.CubeCoordinate, targetYoffset, true, animatorComp.PlayActionSFX);
                             }
-                            animator.PlayActionSFX = false;
+                            animatorComp.PlayActionSFX = false;
                             unitComponentReferences.AnimatorComp.AnimationEvents.EventTriggered = true;
-                            animator.AnimationEvents.EventTrigger = false;
+                            animatorComp.AnimationEvents.EventTrigger = false;
                         }
                     }
 
-                    if (animator.RotateTransform)
+                    if (animatorComp.RotateTransform)
                     {
-                        Vector3 targetDirection = m_UnitAnimationSystem.RotateTowardsDirection(animator.RotateTransform, animator.CurrentPreviewTarget, animator.RotationSpeed);
-                        animator.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
+                        Vector3 targetDirection = m_UnitAnimationSystem.RotateTowardsDirection(animatorComp.RotateTransform, animatorComp.CurrentPreviewTarget, animatorComp.RotationSpeed);
+                        animatorComp.RotateTransform.rotation = Quaternion.LookRotation(targetDirection);
                     }
                 }
             }

@@ -58,6 +58,7 @@ MonoBehaviour:
   ActionName: Sweep
   Description: Swings his weapon around to deal <color=red>35</color> damage to adjacent
     enemies.
+  AnimatorStateName: SpikeSweep
   TimeToExecute: 4
   HasWindup: 0
   TargetToAdd: {fileID: 0}
@@ -81,6 +82,7 @@ MonoBehaviour:
   ApplyToTargets: 1
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 4
   DamageAmount: 35
   ExplosionRadius: 1

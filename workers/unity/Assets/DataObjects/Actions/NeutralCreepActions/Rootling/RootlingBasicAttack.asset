@@ -18,6 +18,7 @@ MonoBehaviour:
   ProjectileFab: {fileID: 0}
   ActionName: Root Stab
   Description: Stabs a enemy nearby for <color=red>35</color> damage.
+  AnimatorStateName: RootlingPoke
   TimeToExecute: 3
   HasWindup: 0
   TargetToAdd: {fileID: 0}
@@ -41,6 +42,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 4
   DamageAmount: 35
   ExplosionRadius: 1

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -38,6 +38,7 @@ namespace LeyLineHybridECS
         public string ActionName;
         [TextArea]
         public string Description;
+        public string AnimatorStateName;
         public float TimeToExecute;
         public bool HasWindup;
 

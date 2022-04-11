@@ -19,6 +19,7 @@ MonoBehaviour:
   ActionName: Axalotl Egg
   Description: Summons an axolotl mage egg. They come with a variety of long ranged
     attacks and supportive abilities.
+  AnimatorStateName: Spawn
   TimeToExecute: 2
   HasWindup: 0
   TargetToAdd: {fileID: 0}

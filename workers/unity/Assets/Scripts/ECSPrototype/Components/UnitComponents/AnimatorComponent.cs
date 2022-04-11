@@ -8,7 +8,6 @@ using FMODUnity;
 
 public class AnimatorComponent : MonoBehaviour
 {
-    public string AnimatorCrossFadeTargetStateName;
     public List<AnimStateEffectHandler> AnimStateEffectHandlers;
     public Transform WeaponTransform;
     public bool IsMoving;
@@ -18,11 +17,11 @@ public class AnimatorComponent : MonoBehaviour
     public ECSAction CurrentLockedAction;
 
     [Header("Action Preview")]
+    public float FirstEventTiming;
     public ECSAction CurrentPreviewAction;
     public Vector3 CurrentPreviewTarget;
     public int CurrentPreviewIndex = -3;
     public bool ResumePreviewAnimation;
-    public float CurrentPreviewAnimTime;
     public bool PlayActionSFX;
     public MeshMaterialComponent MovePreviewUnitDupe;
 

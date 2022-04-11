@@ -19,6 +19,7 @@ MonoBehaviour:
     type: 3}
   ActionName: Spew Leech
   Description: Summons a leech. Leeches attach to nodes to gather energy for you.
+  AnimatorStateName: Spit
   TimeToExecute: 2
   HasWindup: 0
   TargetToAdd: {fileID: 0}
