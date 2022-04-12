@@ -178,10 +178,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.interrupt:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex, gameState.MinExecuteStepTime);
-
-
-                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -198,8 +197,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.attack:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex, gameState.MinExecuteStepTime);
-                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -216,8 +216,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.move:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex, gameState.MinExecuteStepTime);
-                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -235,8 +236,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.skillshot:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex, gameState.MinExecuteStepTime);
-                            gameState.TurnStateIsActive = (gameState.MinExecuteStepTime != serverVariables.HighestExecuteTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -554,13 +556,15 @@ namespace LeyLineHybridECS
             return f;
         }
 
-        private float HighestExecuteTime(GameStateEnum gameState, WorldIndexShared gameStateWorldIndex, float minStepTime)
+        private float HighestExecuteTime(GameStateEnum gameState, WorldIndexShared gameStateWorldIndex, float minStepTime, ref bool stepIsActive)
         {
             float highestTime = minStepTime;
+            bool stepActive = false;
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in Actions.Component unitAction) =>
             {
                 if (unitAction.LockedAction.Index != -3 && (int) unitAction.LockedAction.ActionExecuteStep == (int) gameState - 3)
                 {
+                    stepActive = true;
                     if (unitAction.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                     {
                         float unitMoveTime = unitAction.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (unitAction.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count - 1);
@@ -576,7 +580,7 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
-
+            stepIsActive = stepActive;
             return highestTime;
         }
 

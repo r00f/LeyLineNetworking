@@ -118,7 +118,6 @@ namespace LeyLineHybridECS
             UIRef.SFXBus = RuntimeManager.GetBus(UIRef.SFXBusString);
             UIRef.MusicBus = RuntimeManager.GetBus(UIRef.MusicBusString);
             UIRef.UINonMapSFXBus = RuntimeManager.GetBus(UIRef.UINonMapSFXBusString);
-            UIRef.TurnDisplay.BaseTurnStepWaitTime = settings.MinimumExecuteTime;
             AddSettingsListeners();
         }
 
@@ -344,6 +343,8 @@ namespace LeyLineHybridECS
                 }
             }
 
+            UIRef.TurnDisplay.StepIsActive = gameState.TurnStateIsActive;
+
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
@@ -355,28 +356,28 @@ namespace LeyLineHybridECS
                 case GameStateEnum.interrupt:
                     if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2, gameState.TurnStateIsActive);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.interruptFired;
                     }
                     break;
                 case GameStateEnum.attack:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.attackFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2, gameState.TurnStateIsActive);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.attackFired;
                     }
                     break;
                 case GameStateEnum.move:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.moveFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2, gameState.TurnStateIsActive);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.moveFired;
                     }
                     break;
                 case GameStateEnum.skillshot:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.skillshotFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2, gameState.TurnStateIsActive);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
                     }
                     break;
@@ -1369,7 +1370,7 @@ namespace LeyLineHybridECS
 
         }
 
-        void FireStepChangedEffects(string stateName, Color effectColor, string soundEffectPath, uint turnStepID, bool isActive = false)
+        void FireStepChangedEffects(string stateName, Color effectColor, string soundEffectPath, uint turnStepID)
         {
             RuntimeManager.PlayOneShot(soundEffectPath);
             UIRef.TurnStatePnl.TurnStateText.color = effectColor;
@@ -1387,10 +1388,8 @@ namespace LeyLineHybridECS
             UIRef.TurnDisplay.StateName = stateName;
             UIRef.TurnDisplay.ColorizeText = effectColor;
             UIRef.TurnDisplay.CurrentStepID = turnStepID;
-            UIRef.TurnDisplay.CurrentTurnStepWaitTime = 1;
             UIRef.TurnDisplay.InAnimation = true;
             UIRef.TurnDisplay.StateName = char.ToUpper(stateName[0]) + stateName.Substring(1);
-            UIRef.TurnDisplay.StepIsActive = isActive;
         }
 
         void HandleKeyCodeInput(GameStateEnum gameState)
