@@ -476,6 +476,8 @@ MonoBehaviour:
   - {fileID: 6579972602937201615}
   - {fileID: 3731915945827692666}
   - {fileID: 7164558077638757635}
+  - {fileID: 1994136435088044296}
+  - {fileID: 2686333041823996887}
   OneShotParticleSystems:
   - {fileID: 6599258057042335692}
   - {fileID: 3771555658127110484}
@@ -1278,15 +1280,27 @@ MeshRenderer:
     type: 3}
   m_PrefabInstance: {fileID: 4222008232259535138}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &6659324677154492695 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 7421152206345441333, guid: f4bb048bb64bc214eb2e5b896c912e09,
+--- !u!198 &1994136435088044296 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2394523688135094314, guid: f4bb048bb64bc214eb2e5b896c912e09,
+    type: 3}
+  m_PrefabInstance: {fileID: 4222008232259535138}
+  m_PrefabAsset: {fileID: 0}
+--- !u!198 &2686333041823996887 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 2292424247333264117, guid: f4bb048bb64bc214eb2e5b896c912e09,
     type: 3}
   m_PrefabInstance: {fileID: 4222008232259535138}
   m_PrefabAsset: {fileID: 0}
 --- !u!198 &3853255714203487918 stripped
 ParticleSystem:
   m_CorrespondingSourceObject: {fileID: 1147878827046539148, guid: f4bb048bb64bc214eb2e5b896c912e09,
+    type: 3}
+  m_PrefabInstance: {fileID: 4222008232259535138}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1 &6659324677154492695 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7421152206345441333, guid: f4bb048bb64bc214eb2e5b896c912e09,
     type: 3}
   m_PrefabInstance: {fileID: 4222008232259535138}
   m_PrefabAsset: {fileID: 0}

@@ -188,8 +188,8 @@ public class ManalithSystemClient : JobComponentSystem
             {
                 var mainModule = p.main;
 
-                if (mainModule.startColor.color != meshColor.LerpColor)
-                    mainModule.startColor = meshColor.LerpColor;
+                if (mainModule.startColor.color != new Color(meshColor.LerpColor.r, meshColor.LerpColor.g, meshColor.LerpColor.b, mainModule.startColor.color.a))
+                    mainModule.startColor = new Color(meshColor.LerpColor.r, meshColor.LerpColor.g, meshColor.LerpColor.b, mainModule.startColor.color.a);
             }
 
             for (int i = 0; i < manalithObject.DetailColorRenderers.Count; i++)
