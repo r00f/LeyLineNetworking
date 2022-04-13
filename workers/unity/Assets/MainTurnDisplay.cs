@@ -6,6 +6,8 @@ using UnityEngine.UI;
 public class MainTurnDisplay : MonoBehaviour
 {
     [SerializeField]
+    Image screenGlowImage;
+    [SerializeField]
     MovingStepsData turnstateDisplay;
     [SerializeField]
     Text currentTurnstepText;
@@ -111,6 +113,7 @@ public class MainTurnDisplay : MonoBehaviour
                         {
                             timer = 0f;
                             currentTurnstepText.text = StateName;
+                            screenGlowImage.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                             currentTurnstepText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                             turnstateDisplay.coloredImages[(int)CurrentStepID - 1].color = new Color(turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color.r, turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color.g, turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color.b, 1);
 
@@ -133,11 +136,13 @@ public class MainTurnDisplay : MonoBehaviour
             {
                 if (currentTurnstepText.text != StateName /*|| new Color(currentTurnstepText.color.r, currentTurnstepText.color.g, currentTurnstepText.color.b, 1) != new Color(ColorizeText.a, ColorizeText.g, ColorizeText.b, 1)*/)
                 {
+                    screenGlowImage.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0);
                     currentTurnstepText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0);
                 }
                 else
                 {
                     currentTurnstepText.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
+                    screenGlowImage.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
                     timer += delta / fadeDuration;
                 }
             }
