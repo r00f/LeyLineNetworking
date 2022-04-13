@@ -233,16 +233,6 @@ namespace LeyLineHybridECS
                 .WithoutBurst()
                 .Run();
 
-                if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning)
-                {
-                    if (UIRef.EscapeMenu.TurnOverrideInputField.text == "")
-                        FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.PlanningSlideInPath, 0);
-                    else
-                        FireStepChangedEffects("Turn " + UIRef.EscapeMenu.TurnOverrideInputField.text, settings.TurnStepColors[0], UIRef.PlanningSlideInPath, 0);
-
-                    UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
-                }
-
                 foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                 {
                     g.CleanupReset = true;
@@ -348,6 +338,22 @@ namespace LeyLineHybridECS
             switch (gameState.CurrentState)
             {
                 case GameStateEnum.planning:
+                    /*
+                    logger.HandleLog(LogType.Warning,
+                    new LogEvent("Lerp down Planning Text")
+                    .WithField("CurrentStepId", UIRef.TurnDisplay.CurrentStepID)
+                    .WithField("timer", UIRef.TurnDisplay.timer)
+                    );
+                    */
+                    if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.planning && UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.readyFired && UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.enemyReadyFired)
+                    {
+                        if (UIRef.EscapeMenu.TurnOverrideInputField.text == "")
+                            FireStepChangedEffects("Turn " + gameState.TurnCounter, settings.TurnStepColors[0], UIRef.PlanningSlideInPath, 0);
+                        else
+                            FireStepChangedEffects("Turn " + UIRef.EscapeMenu.TurnOverrideInputField.text, settings.TurnStepColors[0], UIRef.PlanningSlideInPath, 0);
+
+                        UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.planning;
+                    }
                     foreach (UnitGroupUI g in UIRef.ExistingUnitGroups.Values)
                     {
                         UpdateUnitGroupBauble(g, authPlayerFaction, g.transform.GetSiblingIndex());
@@ -402,6 +408,9 @@ namespace LeyLineHybridECS
                     }
                     break;
             }
+
+
+
 
             #region PlayerLoops
 
@@ -1388,7 +1397,6 @@ namespace LeyLineHybridECS
             UIRef.TurnDisplay.StateName = stateName;
             UIRef.TurnDisplay.ColorizeText = effectColor;
             UIRef.TurnDisplay.CurrentStepID = turnStepID;
-            UIRef.TurnDisplay.InAnimation = true;
             UIRef.TurnDisplay.StateName = char.ToUpper(stateName[0]) + stateName.Substring(1);
         }
 

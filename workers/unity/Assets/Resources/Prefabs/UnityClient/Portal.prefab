@@ -215,11 +215,11 @@ MonoBehaviour:
   WeaponTransform: {fileID: 0}
   IsMoving: 0
   CurrentLockedAction: {fileID: 0}
+  FirstEventTiming: 0
   CurrentPreviewAction: {fileID: 0}
   CurrentPreviewTarget: {x: 0, y: 0, z: 0}
   CurrentPreviewIndex: 0
   ResumePreviewAnimation: 0
-  CurrentPreviewAnimTime: 0
   PlayActionSFX: 0
   MovePreviewUnitDupe: {fileID: 0}
   Animator: {fileID: 0}
@@ -301,8 +301,7 @@ MonoBehaviour:
   UnitTypeId: 0
   UnitGroupSprite: {fileID: 0}
   UnitSprite: {fileID: 0}
-  Actions:
-  - {fileID: 11400000, guid: f863e7f14e9802547906d90b8173ecfb, type: 2}
+  Actions: []
   SpawnActions: []
 --- !u!114 &1130299993275380547
 MonoBehaviour:

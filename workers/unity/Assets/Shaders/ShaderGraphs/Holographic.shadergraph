@@ -11,6 +11,9 @@
         },
         {
             "m_Id": "327a0c7570a344d482b688d5890293d6"
+        },
+        {
+            "m_Id": "94fc0086800d44569cb026de49a9c76e"
         }
     ],
     "m_Keywords": [],
@@ -589,7 +592,7 @@
     },
     "m_Name": "BaseColor",
     "m_DefaultReferenceName": "Color_2e9bf60b52f645bfa8a41e9354103e5c",
-    "m_OverrideReferenceName": "",
+    "m_OverrideReferenceName": "_BaseColor",
     "m_GeneratePropertyBlock": true,
     "m_Precision": 0,
     "m_GPUInstanced": false,
@@ -649,9 +652,9 @@
     "m_Guid": {
         "m_GuidSerialized": "4127ed67-daf5-418e-a0a4-4e1f3ae24ceb"
     },
-    "m_Name": "emissionMultiplier",
+    "m_Name": "EmissionMultiplier",
     "m_DefaultReferenceName": "Vector1_327a0c7570a344d482b688d5890293d6",
-    "m_OverrideReferenceName": "",
+    "m_OverrideReferenceName": "_EmissionMultiplier",
     "m_GeneratePropertyBlock": true,
     "m_Precision": 0,
     "m_GPUInstanced": false,
@@ -798,7 +801,7 @@
     "m_Type": "UnityEditor.ShaderGraph.Vector1MaterialSlot",
     "m_ObjectId": "46bd18c8c99d4b8e97eb227c47c14153",
     "m_Id": 0,
-    "m_DisplayName": "emissionMultiplier",
+    "m_DisplayName": "EmissionMultiplier",
     "m_SlotType": 1,
     "m_Priority": 2147483647,
     "m_Hidden": false,
@@ -1225,6 +1228,28 @@
 
 {
     "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Vector1ShaderProperty",
+    "m_ObjectId": "94fc0086800d44569cb026de49a9c76e",
+    "m_Guid": {
+        "m_GuidSerialized": "fe29a5a0-9873-487d-a03d-2a7ba52bf301"
+    },
+    "m_Name": "EmissiveIntensity",
+    "m_DefaultReferenceName": "Vector1_94fc0086800d44569cb026de49a9c76e",
+    "m_OverrideReferenceName": "_EmissiveIntensity",
+    "m_GeneratePropertyBlock": true,
+    "m_Precision": 0,
+    "m_GPUInstanced": false,
+    "m_Hidden": false,
+    "m_Value": 0.0,
+    "m_FloatType": 0,
+    "m_RangeValues": {
+        "x": 0.0,
+        "y": 1.0
+    }
+}
+
+{
+    "m_SGVersion": 0,
     "m_Type": "UnityEditor.ShaderGraph.BlockNode",
     "m_ObjectId": "9585ca9a921d497195d123440ba6ae3f",
     "m_Group": {
@@ -1460,7 +1485,7 @@
     },
     "m_Name": "FresnelPower",
     "m_DefaultReferenceName": "Vector1_c5cbb5d515e946b7b1e9f6808b12d13c",
-    "m_OverrideReferenceName": "",
+    "m_OverrideReferenceName": "_FresnelPower",
     "m_GeneratePropertyBlock": true,
     "m_Precision": 0,
     "m_GPUInstanced": false,

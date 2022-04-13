@@ -12214,7 +12214,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &7615631042955252189
 RectTransform:
   m_ObjectHideFlags: 0
@@ -13208,13 +13208,13 @@ MonoBehaviour:
   energyIcon: {fileID: 399401576}
   fadeDuration: 1.3
   scrollSpeed: 1000
-  turnXFadeDuration: 0
+  turnXFadeDuration: 4
   EnergyGained: 0
   CurrentStepID: 0
   ColorizeText: {r: 0, g: 0, b: 0, a: 0}
   StateName: 
-  InAnimation: 0
   StepIsActive: 0
+  timer: 0
 --- !u!1 &669308960348056586
 GameObject:
   m_ObjectHideFlags: 0

@@ -92,7 +92,7 @@ public class ActionPreviewSystem : JobComponentSystem
                     if (animatorComp.MovePreviewUnitDupe)
                         Object.Destroy(animatorComp.MovePreviewUnitDupe.gameObject);
 
-                    Debug.Log("Clear CurrentPreviewAction");
+                    //Debug.Log("Clear CurrentPreviewAction");
 
                     animatorComp.CurrentPreviewIndex = actionRequest.ActionId;
                     animatorComp.CurrentPreviewIndex = -3;
@@ -118,7 +118,7 @@ public class ActionPreviewSystem : JobComponentSystem
 
                         if(animatorComp.Animator)
                         {
-                            Debug.Log("CancelAction on preview Action Change");
+                            //Debug.Log("CancelAction on preview Action Change");
                             animatorComp.Animator.ResetTrigger("Execute");
                             animatorComp.Animator.SetTrigger("CancelAction");
                         }
@@ -143,12 +143,15 @@ public class ActionPreviewSystem : JobComponentSystem
                                 r.materials = mats;
                             }
 
-                            foreach (AnimationClip c in animatorComp.Animator.runtimeAnimatorController.animationClips)
+                            if(animatorComp.Animator)
                             {
-                                if (c.name == animatorComp.CurrentPreviewAction.AnimatorStateName)
+                                foreach (AnimationClip c in animatorComp.Animator.runtimeAnimatorController.animationClips)
                                 {
-                                    animatorComp.FirstEventTiming = c.events[0].time;
-                                    Debug.Log("Clip length = " + c.length + ", first event time = " + c.events[0].time);
+                                    if (c.name == animatorComp.CurrentPreviewAction.AnimatorStateName)
+                                    {
+                                        animatorComp.FirstEventTiming = c.events[0].time;
+                                        //Debug.Log("Clip length = " + c.length + ", first event time = " + c.events[0].time);
+                                    }
                                 }
                             }
                         }
@@ -171,8 +174,7 @@ public class ActionPreviewSystem : JobComponentSystem
 
                             animatorComp.MovePreviewUnitDupe.gameObject.SetActive(false);
                         }
-
-                        Debug.Log("Reset ResumePreviewAction. CurrentPreviewIndex = " + animatorComp.CurrentPreviewIndex + ", actionId = " + actionRequest.ActionId);
+                        //Debug.Log("Reset ResumePreviewAction. CurrentPreviewIndex = " + animatorComp.CurrentPreviewIndex + ", actionId = " + actionRequest.ActionId);
 
                         animatorComp.PlayActionSFX = true;
                         animatorComp.AnimationEvents.EventTrigger = false;
