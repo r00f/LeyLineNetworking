@@ -8,9 +8,13 @@ public static class CellGridMethods
 {
     public static Vector3f PosToCube(Vector2 point)
     {
-        var q = (2f / 3 * point.x);
-        var r = (-1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y);
-        return CubeRound(AxialToCube(new Vector2f(q, r)));
+        var q = 2f / 3 * point.x;
+        var r = -1f / 3 * point.x + Mathf.Sqrt(3) / 3 * point.y;
+
+        if (IsCoordinateWithinMapBounds(CubeRound(AxialToCube(new Vector2f(q, r)))))
+            return CubeRound(AxialToCube(new Vector2f(q, r)));
+        else
+            return new Vector3f(0, 0, 0);
     }
 
     public static Vector3f PosToCorner(Vector3f center, int i, float yOffset = 0)
@@ -177,7 +181,6 @@ public static class CellGridMethods
 
     public static List<Vector3f> ConeDraw(Vector3f center, Vector3f target, uint radius, uint extent)
     {
-
         var cone = new List<Vector3f>();
         var coord = target;
         var halfExtent = (extent - 1) / 2;

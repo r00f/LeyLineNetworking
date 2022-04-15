@@ -125,7 +125,7 @@ public class UnitAnimationSystem : JobComponentSystem
             {
                 if (visible.Value == 1 && !playerVision.RevealVision)
                 {
-                    SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
+                    //SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
                 }
                 else
                     unitComponentReferences.SelectionCircleGO.SetActive(false);
@@ -175,7 +175,21 @@ public class UnitAnimationSystem : JobComponentSystem
 
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
             HandleLockedAction(unitComponentReferences, playerVision, actions, faction, gameState, id, coord);
-            SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
+            
+        })
+        .WithoutBurst()
+        .Run();
+
+        Entities.WithAll<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+        {
+            SetHoveredOutlineColor(unitComponentReferences, true);
+        })
+        .WithoutBurst()
+        .Run();
+
+        Entities.WithNone<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+        {
+            SetHoveredOutlineColor(unitComponentReferences, false);
         })
         .WithoutBurst()
         .Run();
@@ -491,9 +505,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void SetHoveredOutlineColor(UnitComponentReferences unitComponentReferences, Vector3f unitCoord, Vector3f playerHoveredCoord, PlayerStateEnum currentPlayerState)
+    public void SetHoveredOutlineColor(UnitComponentReferences unitComponentReferences, bool enableOutline)
     {
-        if (Vector3fext.ToUnityVector(unitCoord) == Vector3fext.ToUnityVector(playerHoveredCoord) && currentPlayerState != PlayerStateEnum.waiting_for_target)
+        if(enableOutline)
         {
             m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
 
