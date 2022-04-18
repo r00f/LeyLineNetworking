@@ -34,10 +34,14 @@ public class MainTurnDisplay : MonoBehaviour
     RectTransform TurnstateDisplayRect;
     public bool StepIsActive = false;
     public float timer;
+    float startpos;
+    float xposInterval;
 
     void Start()
     {
         TurnstateDisplayRect = turnstateDisplay.gameObject.GetComponent<RectTransform>();
+        startpos = TurnstateDisplayRect.anchoredPosition.x;
+        xposInterval = TurnstateDisplayRect.rect.width / 6;
     }
 
     // Update is called once per frame
@@ -47,15 +51,16 @@ public class MainTurnDisplay : MonoBehaviour
         if (CurrentStepID == 0)
         {
             //reset scrolling bar at the end
-            if (TurnstateDisplayRect.anchoredPosition.x != 100)
+            if (TurnstateDisplayRect.anchoredPosition.x != startpos)
             {
-                if (TurnstateDisplayRect.anchoredPosition.x - delta * scrollSpeed <= 100 - 5 * 320)
+                if (TurnstateDisplayRect.anchoredPosition.x - delta * scrollSpeed <= startpos - 5 * xposInterval)
                 {
-                    TurnstateDisplayRect.anchoredPosition = new Vector2(100, TurnstateDisplayRect.anchoredPosition.y);
+                    TurnstateDisplayRect.anchoredPosition = new Vector2(startpos, TurnstateDisplayRect.anchoredPosition.y);
 
                 }
-                else if (TurnstateDisplayRect.anchoredPosition.x - delta * scrollSpeed != 100 - 5 * 320)
+                else if (TurnstateDisplayRect.anchoredPosition.x - delta * scrollSpeed != startpos - 5 * xposInterval)
                 {
+                    turnstateDisplay.PlanningOutline.color = Color.black;
                     TurnstateDisplayRect.anchoredPosition = new Vector2(TurnstateDisplayRect.anchoredPosition.x - (delta * scrollSpeed), TurnstateDisplayRect.anchoredPosition.y);
                 }
             }
@@ -79,19 +84,25 @@ public class MainTurnDisplay : MonoBehaviour
                     energyNumber.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
                     energyIcon.color = Color.Lerp(Color.white, new Color(1, 1, 1, 0), timer);
                     turnstateDisplay.uncoloredImages[0].color = Color.Lerp(new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 1), new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 0), timer);
+                    turnstateDisplay.PlanningOutline.color = Color.Lerp(Color.black, new Color(0, 0, 0, 0), timer);
                     timer += delta / turnXFadeDuration;
                 }
             }
         }
         else if (CurrentStepID > 0 && CurrentStepID < 5)
         {
-            if (turnstateDisplay.uncoloredImages[0].color.a == 0) turnstateDisplay.uncoloredImages[0].color = new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 1);
-            // Move scrolling bar to desired position
-            if (TurnstateDisplayRect.anchoredPosition.x > 100 - (int) CurrentStepID * 320)
+            if (turnstateDisplay.uncoloredImages[0].color.a == 0)
             {
-                if (TurnstateDisplayRect.anchoredPosition.x - (delta * scrollSpeed) <= 100 - (int) CurrentStepID * 320)
+                turnstateDisplay.PlanningOutline.color = Color.black;
+                turnstateDisplay.uncoloredImages[0].color = new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 1);
+            }
+
+            // Move scrolling bar to desired position
+            if (TurnstateDisplayRect.anchoredPosition.x > startpos - (int) CurrentStepID * xposInterval)
+            {
+                if (TurnstateDisplayRect.anchoredPosition.x - (delta * scrollSpeed) <= startpos - (int) CurrentStepID * xposInterval)
                 {
-                    TurnstateDisplayRect.anchoredPosition = new Vector2(100 - (int) CurrentStepID * 320, TurnstateDisplayRect.anchoredPosition.y);
+                    TurnstateDisplayRect.anchoredPosition = new Vector2(startpos - (int) CurrentStepID * xposInterval, TurnstateDisplayRect.anchoredPosition.y);
                 }
                 else
                 {
