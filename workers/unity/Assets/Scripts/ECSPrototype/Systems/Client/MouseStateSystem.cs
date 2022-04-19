@@ -147,13 +147,13 @@ public class MouseStateSystem : JobComponentSystem
 
             JobHandle clickJobHandle = Entities.WithAll<HoveredState>().ForEach((Entity entity, int entityInQueryIndex, ref MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component coord) =>
             {
-                if (mouseRightClick && playerState.CurrentState != PlayerStateEnum.ready)
+                if (mouseRightClick)
                 {
                     ECBuffer.AddComponent(entityInQueryIndex, entity, new RightClickEvent());
                     mouseState.RightClickEvent = 1;
                 }
 
-                if (mouseLeftClick && playerState.CurrentState != PlayerStateEnum.ready)
+                if (mouseLeftClick)
                 {
                     ECBuffer.AddComponent(entityInQueryIndex, entity, new ClickEvent());
                     mouseState.ClickEvent = 1;

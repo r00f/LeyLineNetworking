@@ -788,6 +788,9 @@ public class HighlightingSystem : JobComponentSystem
 
     public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId)
     {
+        if (playerState.CurrentState == PlayerStateEnum.ready)
+            return;
+
         if (EntityManager.GetComponentObject<LineRendererComponent>(e))
         {
             var lineRendererComp = EntityManager.GetComponentObject<LineRendererComponent>(e);

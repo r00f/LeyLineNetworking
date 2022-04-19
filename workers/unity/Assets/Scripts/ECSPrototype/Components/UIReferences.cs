@@ -82,6 +82,7 @@ public class UIReferences : MonoBehaviour
     public HealthBar PortraitHealthBar;
     */
     [Header("Actions")]
+    public GameObject ActionPanel;
     public Button CancelActionButton;
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;

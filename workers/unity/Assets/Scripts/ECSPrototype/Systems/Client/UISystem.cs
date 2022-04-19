@@ -238,6 +238,8 @@ namespace LeyLineHybridECS
                     g.CleanupReset = true;
                 }
 
+                UIRef.ActionPanel.SetActive(true);
+
                 UIRef.GameOverPanel.SetActive(false);
 
                 UIRef.TurnStatePnl.FriendlyReadyDot.enabled = false;
@@ -278,7 +280,7 @@ namespace LeyLineHybridECS
 
             HandleTutorialVideoPlayers();
 
-            UnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, authPlayerEnergy, authPlayerHigh);
+            UnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, authPlayerEnergy, authPlayerHigh, authPlayerCam);
 
             ManalithUnitLoop(authPlayerState, authPlayerFaction.Faction, gameState, authPlayerEnergy, authPlayerHigh);
 
@@ -606,7 +608,8 @@ namespace LeyLineHybridECS
             UIRef.CancelActionButton.onClick.AddListener(delegate { CancelLockedAction(); });
             UIRef.RevealVisionButton.onClick.AddListener(delegate { m_SendActionRequestSystem.RevealPlayerVision(); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.TurnStatePnl.CacelGraceTime);});
-            UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.waiting); });
+            UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { InvertActionsPanelActive(); });
+            //UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.waiting); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlightsNoIn(); });
             UIRef.EscapeMenu.ConcedeButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.conceded); });
 
@@ -639,6 +642,11 @@ namespace LeyLineHybridECS
                 ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab); });
                 ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
+        }
+
+        public void InvertActionsPanelActive()
+        {
+            UIRef.ActionPanel.SetActive(!UIRef.ActionPanel.activeSelf);
         }
 
         public void SetHelpPanelMenuActive(int index)
@@ -814,7 +822,7 @@ namespace LeyLineHybridECS
             UIRef.SAToolTip.gameObject.SetActive(anyButtonHovered);
         }
 
-        public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh)
+        public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh, Moba_Camera playerCam)
         {
             Entities.ForEach((Entity e, UnitComponentReferences unitCompRef, ref Energy.Component energy, ref IsVisible isVisible, ref MouseState mouseState, in ClientActionRequest.Component clientActionRequest, in Actions.Component actions, in Health.Component health) =>
             {
@@ -898,7 +906,7 @@ namespace LeyLineHybridECS
 
                 if (!unitCompRef.BaseDataSetComp.UIInitialized)
                 {
-                    InitializeUnitUI(playerEnergy, actions, unitCompRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction, worldIndex.Value);
+                    InitializeUnitUI(playerEnergy, actions, unitCompRef, unitCompRef.BaseDataSetComp, unitId, faction.Faction, authPlayerFaction, worldIndex.Value, playerCam);
                     unitCompRef.BaseDataSetComp.UIInitialized = true;
                 }
                 else
@@ -1347,26 +1355,6 @@ namespace LeyLineHybridECS
         {
             return new Vector3((int) inVector.x, (int) inVector.y, (int) inVector.z);
         }
-
-        /*
-        void ClearUnitUIElements()
-        {
-            for (var i = 0; i < UIRef.MinimapComponent.MiniMapUnitTilesPanel.transform.childCount; i++)
-            {
-                Object.Destroy(UIRef.MinimapComponent.MiniMapUnitTilesPanel.transform.GetChild(i).gameObject);
-            }
-
-            for (var i = 0; i < UIRef.BigMapComponent.MiniMapUnitTilesPanel.transform.childCount; i++)
-            {
-                Object.Destroy(UIRef.BigMapComponent.MiniMapUnitTilesPanel.transform.GetChild(i).gameObject);
-            }
-
-            for (var i = 0; i < UIRef.HealthBarsPanel.transform.childCount; i++)
-            {
-                Object.Destroy(UIRef.HealthBarsPanel.transform.GetChild(i).gameObject);
-            }
-        }
-        */
 
         void HandleMenuSettings(Moba_Camera playerCam)
         {
@@ -1967,7 +1955,7 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void InitializeUnitUI(PlayerEnergy.Component playerEnergy, Actions.Component actions,  UnitComponentReferences unitCompRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction, uint worldIndex)
+        public void InitializeUnitUI(PlayerEnergy.Component playerEnergy, Actions.Component actions, UnitComponentReferences unitCompRef, UnitDataSet stats, long unitId, uint unitFaction, uint playerFaction, uint worldIndex, Moba_Camera playerCam)
         {
             unitCompRef.HeadUIRef.UnitHeadUIInstance = Object.Instantiate(unitCompRef.HeadUIRef.UnitHeadUIPrefab, unitCompRef.HeadUIRef.transform.position, Quaternion.identity, UIRef.ActionEffectUIPanel.transform);
             unitCompRef.HeadUIRef.UnitHeadHealthBarInstance = unitCompRef.HeadUIRef.UnitHeadUIInstance.HealthBar;
@@ -2025,11 +2013,7 @@ namespace LeyLineHybridECS
                         stats.SelectUnitButtonInstance = unitButton;
                         //problematic if unit has a locked action
                         //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                        unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); });
-
-
-                        
-
+                        unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true; });
                         unitGroup.ExistingUnitIds.Add(unitId);
                         unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
@@ -2056,7 +2040,7 @@ namespace LeyLineHybridECS
                             stats.SelectUnitButtonInstance = unitButton;
                             //problematic if unit has a locked action
                             //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                            unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); });
+                            unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true;});
                             unitGroup.ExistingUnitIds.Add(unitId);
                             unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         }
@@ -2065,7 +2049,7 @@ namespace LeyLineHybridECS
                 else
                 {
                     UIRef.SelectHeroButton.UnitId = unitId;
-                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); });
+                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true; });
                 }
             }
             else if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay)
