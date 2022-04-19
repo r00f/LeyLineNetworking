@@ -91,7 +91,7 @@ public class MainTurnDisplay : MonoBehaviour
         }
         else if (CurrentStepID > 0 && CurrentStepID < 5)
         {
-            if (turnstateDisplay.uncoloredImages[0].color.a == 0)
+            if (turnstateDisplay.uncoloredImages[0].color.a < 1)
             {
                 turnstateDisplay.PlanningOutline.color = Color.black;
                 turnstateDisplay.uncoloredImages[0].color = new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 1);
@@ -119,21 +119,21 @@ public class MainTurnDisplay : MonoBehaviour
                         currentTurnstepText.text = StateName;
                         screenGlowImage.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                         currentTurnstepText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
-                        turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color = new Color(turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color.r, turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color.g, turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color.b, 1);
+                        turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
 
                     }
                 }
             }
             if (CurrentStepID == 1)
             {
-                if (turnstateDisplay.coloredImages[3].color.a != 0)
+                if (turnstateDisplay.coloredImages[3].color.a > 0.5)
                 {
-                    turnstateDisplay.coloredImages[3].color = new Color(turnstateDisplay.coloredImages[3].color.r, turnstateDisplay.coloredImages[3].color.g, turnstateDisplay.coloredImages[3].color.b, 0);
+                    turnstateDisplay.coloredImages[3].color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
                 }
             }
-            else if (turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color.a != 0)
+            else if (turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color.a > 0.5)
             {
-                turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color = new Color(turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color.r, turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color.g, turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color.b, 0);
+                turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
             }
         }
         if (currentTurnstepText.color.a > 0)
