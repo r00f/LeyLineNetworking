@@ -280,7 +280,7 @@ public class UnitAnimationSystem : JobComponentSystem
                         }
                         else
                         {
-                            Debug.Log("TriggerActionEffect from unit animation system");
+                            //Debug.Log("TriggerActionEffect from unit animation system");
                             m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, unitComponentReferences.AnimatorComp.WeaponTransform, gameState);
                         }
 

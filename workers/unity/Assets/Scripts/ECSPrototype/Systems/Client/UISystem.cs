@@ -1194,7 +1194,7 @@ namespace LeyLineHybridECS
 
                         if (bi < actionCount)
                         {
-                            if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost)
+                            if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost || playerEnergy.Energy == 0)
                             {
                                 UIRef.Actions[bi].Button.interactable = false;
                             }
@@ -2133,6 +2133,7 @@ namespace LeyLineHybridECS
         {
             var playerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
             var playerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
+            var playerHigh = m_AuthoritativePlayerData.GetSingleton<HighlightingDataComponent>();
 
             Entities.ForEach((Entity e, ref SpatialEntityId unitId,  ref Actions.Component actions, in FactionComponent.Component faction) =>
             {
@@ -2142,7 +2143,7 @@ namespace LeyLineHybridECS
                     {
                         m_SendActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                         //Call methods so line/target gets disabled instantly
-                        m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                        m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id, playerHigh);
                     }
                 }
             })
@@ -2158,7 +2159,7 @@ namespace LeyLineHybridECS
                     {
                         m_SendActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
                         //Call methods so line/target gets disabled instantly
-                        m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                        m_HighlightingSystem.ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id, playerHigh);
                     }
                 }
             })

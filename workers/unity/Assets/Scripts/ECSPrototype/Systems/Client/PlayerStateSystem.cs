@@ -170,7 +170,7 @@ namespace LeyLineHybridECS
                         if (Input.GetButtonDown("Fire2"))
                         {
                             m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
-                            m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id);
+                            m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id, pHigh);
                         }
                     }
                     else if (pState.CurrentState != PlayerStateEnum.unit_selected && !pHigh.CancelState)
@@ -185,13 +185,13 @@ namespace LeyLineHybridECS
                     if(pHigh.CancelState && clientActionRequest.ActionId != -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) == Vector3.zero)
                     {
                         m_ActionRequestSystem.SelectActionCommand(-3, unitId.EntityId.Id);
-                        m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id);
+                        m_HighlightingSystem.ResetUnitHighLights(e, ref pState, unitId.EntityId.Id, pHigh);
                     }
                 }
 
                 if (mouseState.ClickEvent == 1 && (EntityManager.HasComponent<Manalith.Component>(e) || playerVision.CellsInVisionrange.Contains(CellGridMethods.CubeToAxial(unitCoord.CubeCoordinate))) && pState.CurrentState != PlayerStateEnum.waiting_for_target)
                 {
-                    Debug.Log("UpdateUnitClickEvent");
+                    //Debug.Log("UpdateUnitClickEvent");
                     if (pState.CurrentState != PlayerStateEnum.unit_selected && !pHigh.CancelState)
                     {
                         pState.CurrentState = PlayerStateEnum.unit_selected;

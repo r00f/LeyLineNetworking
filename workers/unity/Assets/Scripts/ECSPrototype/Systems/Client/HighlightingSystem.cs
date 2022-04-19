@@ -131,7 +131,7 @@ public class HighlightingSystem : JobComponentSystem
         {
             Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref RightClickEvent r) =>
             {
-                ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id, playerHighlightingData);
             })
             .WithoutBurst()
             .Run();
@@ -667,6 +667,7 @@ public class HighlightingSystem : JobComponentSystem
     public void ResetHighlights(ref PlayerState.Component playerState, HighlightingDataComponent playerHigh, PlayerEffects playerEffects)
     {
         var p = playerState;
+        var ph = playerHigh;
 
         foreach (LineRenderer r in playerEffects.RangeOutlineRenderers)
             r.gameObject.SetActive(false);
@@ -688,7 +689,7 @@ public class HighlightingSystem : JobComponentSystem
             {
                 if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, ref p, unitId.EntityId.Id);
+                    ResetUnitHighLights(e, ref p, unitId.EntityId.Id, ph);
                 }
             }
         })
@@ -749,7 +750,7 @@ public class HighlightingSystem : JobComponentSystem
             {
                 if (playerState.UnitTargets.ContainsKey(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                    ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id, playerHigh);
                     playerState.UnitTargets.Remove(unitId.EntityId.Id);
                     playerState.TargetDictChange = true;
                 }
@@ -786,9 +787,9 @@ public class HighlightingSystem : JobComponentSystem
         m_PlayerStateData.SetSingleton(playerHigh);
     }
 
-    public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId)
+    public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId, HighlightingDataComponent highlightingData)
     {
-        if (playerState.CurrentState == PlayerStateEnum.ready)
+        if (playerState.CurrentState == PlayerStateEnum.ready || highlightingData.CancelState)
             return;
 
         if (EntityManager.GetComponentObject<LineRendererComponent>(e))
