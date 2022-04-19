@@ -98,16 +98,9 @@ public class MainTurnDisplay : MonoBehaviour
             }
 
             // Move scrolling bar to desired position
-            if (TurnstateDisplayRect.anchoredPosition.x > startpos - (int) CurrentStepID * xposInterval)
+            if (TurnstateDisplayRect.anchoredPosition.x >= (startpos - (int) CurrentStepID * xposInterval) - delta * scrollSpeed)
             {
-                if (TurnstateDisplayRect.anchoredPosition.x - (delta * scrollSpeed) <= startpos - (int) CurrentStepID * xposInterval)
-                {
-                    TurnstateDisplayRect.anchoredPosition = new Vector2(startpos - (int) CurrentStepID * xposInterval, TurnstateDisplayRect.anchoredPosition.y);
-                }
-                else
-                {
                     TurnstateDisplayRect.anchoredPosition = new Vector2(TurnstateDisplayRect.anchoredPosition.x - delta * scrollSpeed, TurnstateDisplayRect.anchoredPosition.y);
-                }
             }
             else
             {
@@ -115,6 +108,7 @@ public class MainTurnDisplay : MonoBehaviour
                 {
                     if (currentTurnstepText.text != StateName)
                     {
+
                         timer = 0f;
                         currentTurnstepText.text = StateName;
                         screenGlowImage.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
