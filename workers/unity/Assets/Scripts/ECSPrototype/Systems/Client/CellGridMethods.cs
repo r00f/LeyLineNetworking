@@ -456,9 +456,10 @@ public static class CellGridMethods
             if (i >= 5)
             {
                 double closestRemainingDistance = NearestEdgeDist(output[output.Count - 1].B, edgeList);
-                double firstLastAddedDistance = Vector3.Distance(output[0].B, output[output.Count - 1].A);
+                double firstLastAddedDistance = Vector2.Distance(new Vector2(output[0].B.x, output[0].B.z), new Vector2(output[output.Count - 1].A.x, output[output.Count - 1].A.z));
 
-                if (closestRemainingDistance > firstLastAddedDistance)
+                //offset firstLastDistance so closing shapes is prefered when closestRemaining and firstLastAddedDist are the same
+                if (closestRemainingDistance > firstLastAddedDistance -.01)
                 {
                     return output;
                 }

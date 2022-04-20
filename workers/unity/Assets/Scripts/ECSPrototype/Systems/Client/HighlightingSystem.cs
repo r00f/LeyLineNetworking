@@ -868,6 +868,8 @@ public class HighlightingSystem : JobComponentSystem
             });
         }
 
+        Debug.Log("ShapeCount: " + playerEffects.Shapes.Count);
+
         for (int i = 0; i < playerEffects.Shapes.Count; i++)
         {
             foreach (HexEdgePositionPair edge in playerEffects.Shapes[i].Edges)
