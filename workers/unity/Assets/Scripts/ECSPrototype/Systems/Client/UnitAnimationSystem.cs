@@ -91,8 +91,9 @@ public class UnitAnimationSystem : JobComponentSystem
                 unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = false;
                 unitComponentReferences.AnimatorComp.InitialValuesSet = false;
                 unitComponentReferences.AnimatorComp.ExecuteTriggerSet = false;
+                unitComponentReferences.AnimatorComp.CurrentLockedAction = null;
 
-                if(unitComponentReferences.AnimatorComp.AnimationEvents)
+                if (unitComponentReferences.AnimatorComp.AnimationEvents)
                     unitComponentReferences.AnimatorComp.AnimationEvents.EventTriggered = false;
 
                 if (unitComponentReferences.AnimatorComp.Animator)
@@ -271,6 +272,8 @@ public class UnitAnimationSystem : JobComponentSystem
 
                         if (unitComponentReferences.AnimatorComp.CurrentLockedAction.ProjectileFab)
                         {
+                            Debug.Log("Launch Projectile from unit animation system");
+
                             Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
                             float targetYoffset = 0;
                             if (unitComponentReferences.AnimatorComp.CurrentLockedAction.Targets[0] is ECSATarget_Unit)

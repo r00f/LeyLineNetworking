@@ -13,7 +13,6 @@ public class AnimatorComponent : MonoBehaviour
     public bool IsMoving;
 
     [Header("GenericAnimation")]
-    [HideInInspector]
     public ECSAction CurrentLockedAction;
 
     [Header("Action Preview")]
