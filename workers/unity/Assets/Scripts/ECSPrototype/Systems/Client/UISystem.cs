@@ -818,6 +818,15 @@ namespace LeyLineHybridECS
                     anyButtonHovered = true;
                 }
             }
+            foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
+            {
+                if (b.Hovered)
+                {
+                    UIRef.SAToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x, UIRef.SAToolTip.Rect.anchoredPosition.y);
+                    InitializeSelectedActionTooltip(b);
+                    anyButtonHovered = true;
+                }
+            }
 
             UIRef.SAToolTip.gameObject.SetActive(anyButtonHovered);
         }
@@ -830,6 +839,12 @@ namespace LeyLineHybridECS
                 var worldIndex = EntityManager.GetComponentData<WorldIndex.Component>(e);
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
                 var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
+                if(mouseState.RightClickEvent == 1)
+                {
+                    Debug.Log("I'm getting right dicked");
+                    FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
+                    UIRef.UnitInspection.gameObject.SetActive(true);
+                }
 
                 if (EntityManager.HasComponent<AiUnit.Component>(e) && unitCompRef.HeadUIRef.UnitHeadUIInstance)
                 {
@@ -1703,15 +1718,6 @@ namespace LeyLineHybridECS
             }
         }
 
-        public void ResetEnergyBaubles()
-        {
-            //UIRef.SAEnergyFill.fillAmount = Mathf.Lerp(UIRef.SAEnergyFill.fillAmount, 0, Time.DeltaTime);
-            UIRef.TopEnergyFill.fillAmount = Mathf.Lerp(UIRef.TopEnergyFill.fillAmount, 0, Time.DeltaTime);
-
-            UIRef.HeroBaubleEnergyText.text = 0.ToString();
-            //UIRef.SAEnergyText.text = 0.ToString();
-        }
-
         public void EqualizeHealthBarFillAmounts(HealthBar fromHealthBar, HealthBar toHealthBar, uint unitFaction, uint playerFaction)
         {
             toHealthBar.HealthFill.fillAmount = fromHealthBar.HealthFill.fillAmount;
@@ -2165,6 +2171,27 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
+        }
+
+        public void FillInspectWindowInformation(Actions.Component actions, UnitDataSet stats)
+        {
+            int actionCount = stats.Actions.Count;
+            UIRef.UnitInspection.UnitDescription.text = stats.UnitDescription;
+            UIRef.UnitInspection.UnitName.text = stats.UnitName;
+
+            for (int i = 0; i < 6; i++)
+            {
+                if (i < actionCount)
+                {
+                    UIRef.UnitInspection.HoverOnlyButtons[i] = FillButtonFields(UIRef.UnitInspection.HoverOnlyButtons[i], stats, 0, i, false);
+                    UIRef.UnitInspection.HoverOnlyButtons[i].Visuals.gameObject.SetActive(true);
+
+                }
+                else
+                {
+                    UIRef.UnitInspection.HoverOnlyButtons[i].Visuals.gameObject.SetActive(false);
+                }
+            }
         }
     }
 }

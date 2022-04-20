@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class UnitInspectionPanel : MonoBehaviour
 {
+    public Text UnitName;
     public Text UnitDescription;
     public Image Portrait;
     public List<ActionButton> HoverOnlyButtons = new List<ActionButton>();
