@@ -98,9 +98,17 @@ public class MainTurnDisplay : MonoBehaviour
             }
 
             // Move scrolling bar to desired position
-            if (TurnstateDisplayRect.anchoredPosition.x >= (startpos - (int) CurrentStepID * xposInterval) - delta * scrollSpeed)
+            if (TurnstateDisplayRect.anchoredPosition.x > (startpos - ((int) CurrentStepID * xposInterval)+.05f))
             {
+
+                if (TurnstateDisplayRect.anchoredPosition.x < (startpos - ((int) CurrentStepID * xposInterval) - (delta * scrollSpeed + .05f)))
+                {
+                    TurnstateDisplayRect.anchoredPosition = new Vector2 (startpos - (((int) CurrentStepID * xposInterval) - (delta * scrollSpeed + .1f)), TurnstateDisplayRect.anchoredPosition.y);
+                }
+                else
+                {
                     TurnstateDisplayRect.anchoredPosition = new Vector2(TurnstateDisplayRect.anchoredPosition.x - delta * scrollSpeed, TurnstateDisplayRect.anchoredPosition.y);
+                }
             }
             else
             {
