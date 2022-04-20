@@ -148,6 +148,8 @@ public class UIReferences : MonoBehaviour
     [HideInInspector]
     public string CurrentStateString;
 
+    [Header("UnitInspectorWindow")]
+    public UnitInspectionPanel UnitInspection;
 
     [Header("MainTurnDisplay")]
     public MainTurnDisplay TurnDisplay;

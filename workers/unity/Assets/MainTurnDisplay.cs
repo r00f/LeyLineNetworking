@@ -50,6 +50,7 @@ public class MainTurnDisplay : MonoBehaviour
         float delta = Time.deltaTime;
         if (CurrentStepID == 0)
         {
+
             //reset scrolling bar at the end
             if (TurnstateDisplayRect.anchoredPosition.x != startpos)
             {
@@ -69,6 +70,7 @@ public class MainTurnDisplay : MonoBehaviour
             {
                 if (turnXLargeText.text != StateName)
                 {
+                    currentTurnstepText.text = "";
                     turnXLargeText.text = StateName;
                     turnXLargeText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                     energyText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);

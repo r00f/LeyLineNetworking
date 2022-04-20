@@ -726,7 +726,7 @@ namespace LeyLineHybridECS
             bus.setVolume(volume);
         }
 
-        ActionButton FillButtonFields(ActionButton inButton, UnitDataSet inBaseData, long inUnitId, int inIndex, bool isSpawnAction, bool hasBasicAction)
+        ActionButton FillButtonFields(ActionButton inButton, UnitDataSet inBaseData, long inUnitId, int inIndex, bool isSpawnAction)
         {
             if (isSpawnAction)
             {
@@ -926,7 +926,7 @@ namespace LeyLineHybridECS
                         }
 
                         HandleEnergyGainOverHeadDisplay(isVisible, actions, energy, authPlayerState, unitId, faction.Faction, authPlayerFaction, unitCompRef, coord.CubeCoordinate, playerHigh, gameState);
-                        HandleUnitVisibility(isVisible, unitCompRef, health, faction.Faction, authPlayerFaction);
+                        HandleUnitVisibility(isVisible, unitCompRef, health);
 
                         if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
                         {
@@ -1044,7 +1044,7 @@ namespace LeyLineHybridECS
             .Run();
         }
 
-        public void HandleUnitVisibility(IsVisible isVisible, UnitComponentReferences unitCompRef, Health.Component health, uint unitFaction, uint playerFaction)
+        public void HandleUnitVisibility(IsVisible isVisible, UnitComponentReferences unitCompRef, Health.Component health)
         {
             if (isVisible.Value == 1)
             {
@@ -1178,7 +1178,7 @@ namespace LeyLineHybridECS
                         }
                         UIRef.SpawnActions[si].Visuals.SetActive(true);
 
-                        UIRef.SpawnActions[si] = FillButtonFields(UIRef.SpawnActions[si], stats, unitId, si, true, true);
+                        UIRef.SpawnActions[si] = FillButtonFields(UIRef.SpawnActions[si], stats, unitId, si, true);
                     }
                     else
                     {
@@ -1202,7 +1202,7 @@ namespace LeyLineHybridECS
                             {
                                 UIRef.Actions[bi].Button.interactable = true;
                             }
-                            UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false, false);
+                            UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false);
                         }
                         else
                         {
