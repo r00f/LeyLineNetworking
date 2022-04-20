@@ -97,6 +97,7 @@ public class UnitAnimationSystem : JobComponentSystem
 
                 if (unitComponentReferences.AnimatorComp.Animator)
                 {
+                    unitComponentReferences.AnimatorComp.Animator.SetInteger("ActionIndexInt", -3);
                     unitComponentReferences.AnimatorComp.Animator.SetInteger("Armor", 0);
                     unitComponentReferences.AnimatorComp.Animator.ResetTrigger("Execute");
                     unitComponentReferences.AnimatorComp.Animator.SetBool("Harvesting", energy.Harvesting);
@@ -116,7 +117,7 @@ public class UnitAnimationSystem : JobComponentSystem
             HandleEnableVisualsDelay(unitComponentReferences, startRotation, playerHeroTransform.Transform);
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
             HandleLockedAction(unitComponentReferences, playerVision, actions, faction, gameState, id, coord);
-            HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
+            HandleHarverstingVisuals(unitComponentReferences, visible, energy);
             SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
             SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
             HandleAnimStateEffects(unitComponentReferences, visible);
@@ -197,7 +198,7 @@ public class UnitAnimationSystem : JobComponentSystem
         return inputDeps;
     }
 
-    public void HandleHarverstingVisuals(UnitComponentReferences unitComponentReferences, Actions.Component actions, IsVisible visible, Energy.Component energy, SpatialEntityId id, CubeCoordinate.Component coord, GameStateEnum currentGameState, FactionComponent.Component unitFaction, FactionComponent.Component playerFaction, PlayerState.Component playerState, HighlightingDataComponent playerHigh)
+    public void HandleHarverstingVisuals(UnitComponentReferences unitComponentReferences, IsVisible visible, Energy.Component energy)
     {
         if (visible.Value == 1)
         {

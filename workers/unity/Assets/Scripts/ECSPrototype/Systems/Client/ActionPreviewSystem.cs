@@ -15,6 +15,7 @@ public class ActionPreviewSystem : JobComponentSystem
     EntityQuery m_GameStateData;
     ActionEffectsSystem m_ActionEffectsSystem;
     UnitAnimationSystem m_UnitAnimationSystem;
+    ComponentUpdateSystem m_ComponentUpdateSystem;
     Settings settings;
 
     protected override void OnCreate()
@@ -38,11 +39,15 @@ public class ActionPreviewSystem : JobComponentSystem
         settings = Resources.Load<Settings>("Settings");
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
         m_UnitAnimationSystem = World.GetExistingSystem<UnitAnimationSystem>();
+        m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_GameStateData.CalculateEntityCount() != 1 || m_PlayerData.CalculateEntityCount() == 0)
+        var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
+
+        if (m_GameStateData.CalculateEntityCount() != 1 || m_PlayerData.CalculateEntityCount() == 0 || cleanUpStateEvents.Count > 0)
             return inputDeps;
 
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
@@ -70,6 +75,7 @@ public class ActionPreviewSystem : JobComponentSystem
                         animatorComp.Animator.SetInteger("Armor", 0);
                         animatorComp.Animator.ResetTrigger("Execute");
                         animatorComp.Animator.SetTrigger("CancelAction");
+                        animatorComp.Animator.SetInteger("ActionIndexInt", -3);
                         animatorComp.Animator.speed = 1;
                     }
 
@@ -92,8 +98,6 @@ public class ActionPreviewSystem : JobComponentSystem
                     if (animatorComp.MovePreviewUnitDupe)
                         Object.Destroy(animatorComp.MovePreviewUnitDupe.gameObject);
 
-                    //Debug.Log("Clear CurrentPreviewAction");
-
                     animatorComp.CurrentPreviewIndex = actionRequest.ActionId;
                     animatorComp.CurrentPreviewIndex = -3;
                     animatorComp.ResumePreviewAnimation = false;
@@ -109,7 +113,10 @@ public class ActionPreviewSystem : JobComponentSystem
                 if (playerState.SelectedUnitId == id.EntityId.Id && unitComponentReferences.MeshMatComponent)
                 {
                     if(playerState.CurrentState == PlayerStateEnum.waiting_for_target)
+                    {
                         animatorComp.CurrentPreviewTarget = CellGridMethods.CubeToPos(highlightingData.HoveredCoordinate, gameState.MapCenter);
+
+                    }
 
                     if (animatorComp.CurrentPreviewIndex != actionRequest.ActionId)
                     {
@@ -118,7 +125,6 @@ public class ActionPreviewSystem : JobComponentSystem
 
                         if(animatorComp.Animator)
                         {
-                            //Debug.Log("CancelAction on preview Action Change");
                             animatorComp.Animator.ResetTrigger("Execute");
                             animatorComp.Animator.SetTrigger("CancelAction");
                         }
@@ -239,7 +245,6 @@ public class ActionPreviewSystem : JobComponentSystem
                             {
                                 //self target currently only used for armoring
                                 animatorComp.Animator.speed = 1;
-                                animatorComp.Animator.SetTrigger("Execute");
                                 animatorComp.Animator.SetInteger("Armor", 10);
                                 animatorComp.ResumePreviewAnimation = true;
                             }

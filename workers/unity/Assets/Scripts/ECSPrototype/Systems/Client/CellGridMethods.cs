@@ -477,7 +477,7 @@ public static class CellGridMethods
         KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
         for (int i = 0; i < lookIn.Count; i++)
         {
-            double distance = Vector3.Distance(srcPos, lookIn[i].A);
+            double distance = Vector2.Distance(new Vector2(srcPos.x, srcPos.z), new Vector2(lookIn[i].A.x, lookIn[i].A.z));
             if (i == 0)
             {
                 distanceListIndex = new KeyValuePair<double, int>(distance, i);
@@ -498,7 +498,7 @@ public static class CellGridMethods
         KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
         for (int i = 0; i < lookIn.Count; i++)
         {
-            double distance = Vector3.Distance(srcEdge, lookIn[i].A);
+            double distance = Vector2.Distance(new Vector2(srcEdge.x, srcEdge.z), new Vector2(lookIn[i].A.x, lookIn[i].A.z));
             if (i == 0)
             {
                 distanceListIndex = new KeyValuePair<double, int>(distance, i);
