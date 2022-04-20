@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 7019665484922856833}
   - component: {fileID: 7019665484922856834}
   - component: {fileID: 3625085810485790154}
+  - component: {fileID: 194691907914551644}
   m_Layer: 20
   m_Name: PlayerCam
   m_TagString: MainCamera
@@ -114,8 +115,8 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7019665484922856835}
-  m_LocalRotation: {x: 0.082456894, y: 0.8117599, z: -0.56591254, w: 0.11827835}
-  m_LocalPosition: {x: 18.182903, y: 21.33804, z: 65.052}
+  m_LocalRotation: {x: 0.081827834, y: 0.81194687, z: -0.5659181, w: 0.11740189}
+  m_LocalPosition: {x: -181.81708, y: 21.33804, z: 65.052}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1370798392}
@@ -145,7 +146,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.1
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -236,6 +237,11 @@ MonoBehaviour:
   dithering: 0
   stopNaNs: 0
   taaSharpenStrength: 0.6
+  TAAQuality: 1
+  taaHistorySharpening: 0.35
+  taaAntiFlicker: 0.5
+  taaMotionVectorRejection: 0
+  taaAntiHistoryRinging: 0
   physicalParameters:
     m_Iso: 300
     m_ShutterSpeed: 0.01
@@ -264,6 +270,9 @@ MonoBehaviour:
     maximumLODLevel: 0
     maximumLODLevelMode: 0
     maximumLODLevelQualityLevel: 0
+    sssQualityMode: 0
+    sssQualityLevel: 0
+    sssCustomSampleBudget: 20
     materialQuality: 0
   renderingPathCustomFrameSettingsOverrideMask:
     mask:
@@ -318,6 +327,29 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   CollisionTag: 
   Event: event:/Environment/Ambience
+  PlayEvent: 1
+  StopEvent: 0
+  AllowFadeout: 1
+  TriggerOnce: 0
+  Preload: 0
+  Params: []
+  OverrideAttenuation: 0
+  OverrideMinDistance: 0
+  OverrideMaxDistance: 0
+--- !u!114 &194691907914551644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7019665484922856835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a6610d2e704f1648819acc8d7460285, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CollisionTag: 
+  Event: event:/Music/LeylineOST
   PlayEvent: 1
   StopEvent: 0
   AllowFadeout: 1
