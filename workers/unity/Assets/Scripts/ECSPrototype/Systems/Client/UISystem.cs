@@ -845,6 +845,7 @@ namespace LeyLineHybridECS
                     {
                         FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
                         UIRef.UnitInspection.gameObject.SetActive(true);
+                        SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color);
                     }
                 }
 
@@ -1019,6 +1020,17 @@ namespace LeyLineHybridECS
                         UIRef.UnitInfoPanel.UnitStatsPanel.SetActive(false);
                     }
                 }
+
+                if (mouseState.RightClickEvent == 1)
+                {
+                    if (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3)
+                    {
+                        FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
+                        UIRef.UnitInspection.gameObject.SetActive(true);
+                        SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color);
+                    }
+                }
+
 
                 if (authPlayerState.SelectedUnitId == 0)
                 {
@@ -2194,6 +2206,15 @@ namespace LeyLineHybridECS
                     UIRef.UnitInspection.HoverOnlyButtons[i].Visuals.gameObject.SetActive(false);
                 }
             }
+        }
+        public void SetInspectionPortraitInfo(uint faction, List<AnimationClip> animatedPortraits, Color teamColor)
+        {
+                if (animatedPortraits.Count != 0 && UIRef.UnitInspection.Portrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction].GetHashCode())
+                {
+                    UIRef.UnitInspection.Portrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int) faction];
+                }
+               // UIRef.UnitInspection.Portrait.PortraitPlayerColorGlow.enabled = true;  Why is this outsido of that script
+
         }
     }
 }

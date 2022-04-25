@@ -7,7 +7,7 @@ public class UnitInspectionPanel : MonoBehaviour
 {
     public Text UnitName;
     public Text UnitDescription;
-    public Image Portrait;
+    public SetPortraitClip Portrait;
     public List<ActionButton> HoverOnlyButtons = new List<ActionButton>();
 
     public SelectedActionToolTip ToolTip;
