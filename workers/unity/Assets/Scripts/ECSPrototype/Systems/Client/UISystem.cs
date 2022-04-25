@@ -841,9 +841,11 @@ namespace LeyLineHybridECS
                 var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
                 if(mouseState.RightClickEvent == 1)
                 {
-                    Debug.Log("I'm getting right dicked");
-                    FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
-                    UIRef.UnitInspection.gameObject.SetActive(true);
+                    if (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3)
+                    {
+                        FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
+                        UIRef.UnitInspection.gameObject.SetActive(true);
+                    }
                 }
 
                 if (EntityManager.HasComponent<AiUnit.Component>(e) && unitCompRef.HeadUIRef.UnitHeadUIInstance)
