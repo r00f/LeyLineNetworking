@@ -198,7 +198,7 @@ namespace LeyLineHybridECS
                     }
                     //Debug.Log("Player Selects A New Unit with id: " + unitId.EntityId.Id);
                     m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);
-                    m_UISystem.SetPortraitInfo(unitComponentReferences.BaseDataSetComp, faction.Faction, unitComponentReferences.AnimPortraitComp.PortraitClips, unitComponentReferences.TeamColorMeshesComp.color, true);
+                    m_UISystem.SetPortraitInfo(unitComponentReferences.BaseDataSetComp, faction.Faction, unitComponentReferences.AnimPortraitComp.PortraitClips, unitComponentReferences.UnitEffectsComp.PlayerColor, true);
 
                     if (!EntityManager.HasComponent<Manalith.Component>(e))
                     {

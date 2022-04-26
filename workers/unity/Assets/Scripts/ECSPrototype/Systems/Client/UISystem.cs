@@ -229,6 +229,7 @@ namespace LeyLineHybridECS
                 Entities.ForEach((UnitHeadUIReferences unitHeadUIRef, ref Manalith.Component m, in FactionComponent.Component faction) =>
                 {
                     unitHeadUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) faction.Faction];
+                    unitHeadUIRef.UnitHeadUIInstance.EnergyGainImage.color = settings.FactionIncomeColors[(int) faction.Faction];
                 })
                 .WithoutBurst()
                 .Run();
@@ -853,7 +854,7 @@ namespace LeyLineHybridECS
             {
                 if (b.Hovered)
                 {
-                    UIRef.UnitInspection.ToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x - UIRef.UnitInspection.ToolTip.Rect.rect.width / 2, UIRef.UnitInspection.ToolTip.Rect.anchoredPosition.y);
+                    UIRef.UnitInspection.ToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x - (UIRef.UnitInspection.ToolTip.Rect.rect.width / 2 + b.ButtonRect.rect.width), UIRef.UnitInspection.ToolTip.Rect.anchoredPosition.y);
                     InitializeSelectedActionTooltip(b, UIRef.UnitInspection.ToolTip);
                     INanyButtonHovered = true;
                 }
@@ -873,11 +874,15 @@ namespace LeyLineHybridECS
                 var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
                 if(mouseState.RightClickEvent == 1)
                 {
-                    if (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3)
+                    if (isVisible.Value==1 && (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3))
                     {
                         FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
                         SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
-                        SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color);
+                        SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor);
+                        foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
+                        {
+                            b.Hovered = false;
+                        }
                     }
                 }
 
@@ -1059,7 +1064,11 @@ namespace LeyLineHybridECS
                     {
                         FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
                         SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
-                        SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color);
+                        SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor);
+                        foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
+                        {
+                            b.Hovered = false;
+                        }
                     }
                 }
 
@@ -1069,7 +1078,7 @@ namespace LeyLineHybridECS
                     if (UIRef.SwapActionButton.gameObject.activeSelf)
                         UIRef.SwapActionButton.gameObject.SetActive(false);
 
-                    SetPortraitInfo(unitCompRef.BaseDataSetComp, faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, false);
+                    SetPortraitInfo(unitCompRef.BaseDataSetComp, faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor, false);
                 }
 
                 if (!unitCompRef.BaseDataSetComp.UIInitialized)
@@ -1146,25 +1155,25 @@ namespace LeyLineHybridECS
                 {
                     if ((authPlayerState.SelectedUnitId == unitId || Vector3fext.ToUnityVector(unitCoord) == Vector3fext.ToUnityVector(playerHigh.HoveredCoordinate)) && actions.LockedAction.Index == -3 && actions.CurrentSelected.Index == -3 && gameState.CurrentState == GameStateEnum.planning && unitFaction == playerFaction)
                     {
-                        if (!unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled)
+                        if (!unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.gameObject.activeSelf)
                         {
                             unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.text = "+" + energy.EnergyIncome.ToString();
-                            unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = true;
+                            unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.gameObject.SetActive(true);
                         }
                     }
                     else
                     {
-                        unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                        unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.gameObject.SetActive(false);
                     }
                 }
                 else
                 {
-                    unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                    unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.gameObject.SetActive(false);
                 }
             }
             else
             {
-                unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.enabled = false;
+                unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.gameObject.SetActive(false);
             }
         }
 
@@ -2019,9 +2028,11 @@ namespace LeyLineHybridECS
                 unitCompRef.HeadUIRef.UnitHeadHealthBarInstance.HoveredImage.color = settings.FactionColors[(int) unitFaction];
             }
 
-            if(unitFaction != 0)
+            if (unitFaction != 0)
+            {
                 unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainText.color = settings.FactionIncomeColors[(int) unitFaction];
-
+                unitCompRef.HeadUIRef.UnitHeadUIInstance.EnergyGainImage.color = settings.FactionIncomeColors[(int) unitFaction];
+            }
             unitCompRef.HeadUIRef.UnitHeadUIInstance.ArmorPanel.SetActive(false);
             //initialize GroupUI and hero select button
             if (unitFaction == playerFaction && playerFaction != 0)
@@ -2065,7 +2076,21 @@ namespace LeyLineHybridECS
                         stats.SelectUnitButtonInstance = unitButton;
                         //problematic if unit has a locked action
                         //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                        unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true; });
+                        unitButton.UnitButton.onClick.AddListener(delegate {
+                            SetSelectedUnitId(unitId);
+                            FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy);
+                            SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor, true); playerCam.settings.cameraLocked = true;
+                        });
+                        unitButton.rightClick.AddListener(delegate
+                        {
+                            FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
+                            SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
+                            SetInspectionPortraitInfo(playerFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor);
+                            foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
+                            {
+                                b.Hovered = false;
+                            }
+                        });
                         unitGroup.ExistingUnitIds.Add(unitId);
                         unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         UIRef.ExistingUnitGroups.Add(stats.UnitTypeId, unitGroup);
@@ -2092,7 +2117,21 @@ namespace LeyLineHybridECS
                             stats.SelectUnitButtonInstance = unitButton;
                             //problematic if unit has a locked action
                             //unitButton.UnitButton.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(-2, unitId); });
-                            unitButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true;});
+                            unitButton.UnitButton.onClick.AddListener(delegate {
+                                SetSelectedUnitId(unitId);
+                                FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy);
+                                SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor, true); playerCam.settings.cameraLocked = true;
+                            });
+                            unitButton.rightClick.AddListener(delegate
+                            {
+                                FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
+                                SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
+                                SetInspectionPortraitInfo(playerFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor);
+                                foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
+                                {
+                                    b.Hovered = false;
+                                }
+                            });
                             unitGroup.ExistingUnitIds.Add(unitId);
                             unitGroup.UnitCountText.text = "" + unitGroup.ExistingUnitIds.Count;
                         }
@@ -2101,7 +2140,21 @@ namespace LeyLineHybridECS
                 else
                 {
                     UIRef.SelectHeroButton.UnitId = unitId;
-                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate { SetSelectedUnitId(unitId); FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy); SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true; });
+                    UIRef.SelectHeroButton.UnitButton.onClick.AddListener(delegate {
+                        SetSelectedUnitId(unitId);
+                        FillUnitButtons(actions, stats, unitFaction, playerFaction, unitId, playerEnergy);
+                        SetPortraitInfo(stats, unitFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color, true); playerCam.settings.cameraLocked = true;
+                    });
+                    UIRef.SelectHeroButton.rightClick.AddListener(delegate
+                    {
+                        FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
+                        SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
+                        SetInspectionPortraitInfo(playerFaction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.UnitEffectsComp.PlayerColor);
+                        foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
+                        {
+                            b.Hovered = false;
+                        }
+                    });
                 }
             }
             else if (unitCompRef.HeadUIRef.UnitHeadUIInstance.ActionDisplay)
@@ -2243,6 +2296,7 @@ namespace LeyLineHybridECS
             if (animatedPortraits.Count != 0 && UIRef.UnitInspection.Portrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction].GetHashCode())
             {
                 UIRef.UnitInspection.Portrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int) faction];
+                UIRef.UnitInspection.PortraitGlow.color = teamColor;
             }
         }
     }

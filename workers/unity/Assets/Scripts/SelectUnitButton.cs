@@ -1,9 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class SelectUnitButton : MonoBehaviour
+public class SelectUnitButton : ButtonClickEventHandler
 {
     public bool HasLockedAction;
     public int EnergyAmountChange;
