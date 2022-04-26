@@ -598,18 +598,48 @@ namespace LeyLineHybridECS
             return inputDeps;
         }
 
+        public void SwapActiveMenuPanel(GameObject menuPanelToActivate)
+        {
+            //if menuPanelToActivate is the active Panel, invert its active state
+            if (UIRef.ActiveMenuPanel == menuPanelToActivate)
+            {
+                UIRef.ActiveMenuPanel.SetActive(!UIRef.ActiveMenuPanel.activeSelf);
+            }
+            //if menuPanelToActivate is not the active Panel, deactivate active menu and swap it with menuPanelToActivate
+            else
+            {
+                if (UIRef.ActiveMenuPanel)
+                    UIRef.ActiveMenuPanel.SetActive(false);
+
+                UIRef.ActiveMenuPanel = menuPanelToActivate;
+                UIRef.ActiveMenuPanel.SetActive(true);
+            }
+        }
+
+        void DeactivateActiveMenuActivateMainMenu()
+        {
+            if (UIRef.ActiveMenuPanel && UIRef.ActiveMenuPanel.activeSelf)
+            {
+                UIRef.ActiveMenuPanel.SetActive(false);
+                UIRef.ActiveMenuPanel = null;
+            }
+            else
+            {
+                UIRef.ActiveMenuPanel = UIRef.EscapeMenu.gameObject;
+                UIRef.ActiveMenuPanel.SetActive(true);
+            }
+        }
+
         public void InitializeButtons()
         {
-            UIRef.MainMenuButton.Button.onClick.AddListener(delegate { UIRef.EscapeMenu.gameObject.SetActive(!UIRef.EscapeMenu.gameObject.activeSelf); SetEscapePanelMenuActive(0); });
-            UIRef.HelpButton.Button.onClick.AddListener(delegate { UIRef.HelpPanel.SetActive(!UIRef.HelpPanel.activeSelf); });
-            UIRef.HelpButton.Button.onClick.AddListener(delegate { SetHelpPanelMenuActive(0); });
-            UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { UIRef.SkillTreePanel.SetActive(!UIRef.SkillTreePanel.activeSelf); });
+            UIRef.MainMenuButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.EscapeMenu.gameObject); SetEscapePanelMenuActive(0); });
+            UIRef.HelpButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.HelpPanel); SetHelpPanelMenuActive(0); });
+            UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.SkillTreePanel); });
             UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
             UIRef.CancelActionButton.onClick.AddListener(delegate { CancelLockedAction(); });
             UIRef.RevealVisionButton.onClick.AddListener(delegate { m_SendActionRequestSystem.RevealPlayerVision(); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.TurnStatePnl.CacelGraceTime);});
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { InvertActionsPanelActive(); });
-            //UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.waiting); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_HighlightingSystem.ResetHighlightsNoIn(); });
             UIRef.EscapeMenu.ConcedeButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.conceded); });
 
@@ -631,7 +661,7 @@ namespace LeyLineHybridECS
             {
                 ActionButton ab = UIRef.Actions[bi];
                 ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
-                ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab); });
+                ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab, UIRef.SAToolTip); });
                 ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
 
@@ -639,7 +669,7 @@ namespace LeyLineHybridECS
             {
                 ActionButton ab = UIRef.SpawnActions[si];
                 ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
-                ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab); });
+                ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab, UIRef.SAToolTip); });
                 ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
         }
@@ -697,7 +727,7 @@ namespace LeyLineHybridECS
 
             foreach(VideoPlayerHandler v in UIRef.HelpPanelComponent.ActiveHelpSection.VideoPlayerHandlers)
             {
-                if(v.HoveredHandler.Hovered)
+                if(v.HoveredHandler.Hovered && UIRef.HelpPanelComponent.gameObject.activeSelf)
                 {
                     if (!v.VideoPlayer.isPlaying)
                         v.VideoPlayer.Play();
@@ -798,15 +828,16 @@ namespace LeyLineHybridECS
 
         public void UpdateActionHoverTooltip()
         {
-            var anyButtonHovered = false;
+            bool SAanyButtonHovered = false;
+            bool INanyButtonHovered = false;
 
             foreach (ActionButton b in UIRef.Actions)
             {
                 if (b.Hovered)
                 {
                     UIRef.SAToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x, UIRef.SAToolTip.Rect.anchoredPosition.y);
-                    InitializeSelectedActionTooltip(b);
-                    anyButtonHovered = true;
+                    InitializeSelectedActionTooltip(b, UIRef.SAToolTip);
+                    SAanyButtonHovered = true;
                 }
             }
             foreach (ActionButton b in UIRef.SpawnActions)
@@ -814,21 +845,22 @@ namespace LeyLineHybridECS
                 if (b.Hovered)
                 {
                     UIRef.SAToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x, UIRef.SAToolTip.Rect.anchoredPosition.y);
-                    InitializeSelectedActionTooltip(b);
-                    anyButtonHovered = true;
+                    InitializeSelectedActionTooltip(b, UIRef.SAToolTip);
+                    SAanyButtonHovered = true;
                 }
             }
             foreach (ActionButton b in UIRef.UnitInspection.HoverOnlyButtons)
             {
                 if (b.Hovered)
                 {
-                    UIRef.SAToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x, UIRef.SAToolTip.Rect.anchoredPosition.y);
-                    InitializeSelectedActionTooltip(b);
-                    anyButtonHovered = true;
+                    UIRef.UnitInspection.ToolTip.Rect.anchoredPosition = new Vector2(b.ButtonRect.anchoredPosition.x - UIRef.UnitInspection.ToolTip.Rect.rect.width / 2, UIRef.UnitInspection.ToolTip.Rect.anchoredPosition.y);
+                    InitializeSelectedActionTooltip(b, UIRef.UnitInspection.ToolTip);
+                    INanyButtonHovered = true;
                 }
             }
 
-            UIRef.SAToolTip.gameObject.SetActive(anyButtonHovered);
+            UIRef.SAToolTip.gameObject.SetActive(SAanyButtonHovered);
+            UIRef.UnitInspection.ToolTip.gameObject.SetActive(INanyButtonHovered);
         }
 
         public void UnitLoop(PlayerState.Component authPlayerState, uint authPlayerFaction, GameState.Component gameState, PlayerEnergy.Component playerEnergy, HighlightingDataComponent playerHigh, Moba_Camera playerCam)
@@ -844,7 +876,7 @@ namespace LeyLineHybridECS
                     if (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3)
                     {
                         FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
-                        UIRef.UnitInspection.gameObject.SetActive(true);
+                        SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
                         SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color);
                     }
                 }
@@ -1026,7 +1058,7 @@ namespace LeyLineHybridECS
                     if (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3)
                     {
                         FillInspectWindowInformation(actions, unitCompRef.BaseDataSetComp);
-                        UIRef.UnitInspection.gameObject.SetActive(true);
+                        SwapActiveMenuPanel(UIRef.UnitInspection.gameObject);
                         SetInspectionPortraitInfo(faction.Faction, unitCompRef.AnimPortraitComp.PortraitClips, unitCompRef.TeamColorMeshesComp.color);
                     }
                 }
@@ -1432,7 +1464,7 @@ namespace LeyLineHybridECS
             }
             if (Input.GetKeyDown(KeyCode.Escape))
             {
-                UIRef.MainMenuButton.Button.onClick.Invoke();
+                DeactivateActiveMenuActivateMainMenu();
             }
 
             if (Input.GetKeyDown(KeyCode.U))
@@ -2139,16 +2171,14 @@ namespace LeyLineHybridECS
             unitHeadUIRef.UnitHeadUIInstance.FlagForDestruction = true;
         }
 
-        public void InitializeSelectedActionTooltip(ActionButton actionButton)
+        public void InitializeSelectedActionTooltip(ActionButton actionButton, SelectedActionToolTip inTooltip)
         {
-            UIRef.SAToolTip.EnergyText.text = actionButton.EnergyCost.ToString();
-            UIRef.SAToolTip.ActionDescription.text = actionButton.ActionDescription;
-            UIRef.SAToolTip.ActionName.text = actionButton.ActionName;
-            UIRef.SAToolTip.ExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[actionButton.ExecuteStepIndex];
-            UIRef.SAToolTip.ExecuteStepIcon.color = settings.TurnStepBgColors[actionButton.ExecuteStepIndex];
-            //UIRef.SAInfoPanel.SetActive(true);
+            inTooltip.EnergyText.text = actionButton.EnergyCost.ToString();
+            inTooltip.ActionDescription.text = actionButton.ActionDescription;
+            inTooltip.ActionName.text = actionButton.ActionName;
+            inTooltip.ExecuteStepIcon.sprite = UIRef.ExecuteStepSprites[actionButton.ExecuteStepIndex];
+            inTooltip.ExecuteStepIcon.color = settings.TurnStepBgColors[actionButton.ExecuteStepIndex];
         }
-
         public void CancelLockedAction()
         {
             var playerState = m_AuthoritativePlayerData.GetSingleton<PlayerState.Component>();
@@ -2207,14 +2237,13 @@ namespace LeyLineHybridECS
                 }
             }
         }
+
         public void SetInspectionPortraitInfo(uint faction, List<AnimationClip> animatedPortraits, Color teamColor)
         {
-                if (animatedPortraits.Count != 0 && UIRef.UnitInspection.Portrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction].GetHashCode())
-                {
-                    UIRef.UnitInspection.Portrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int) faction];
-                }
-               // UIRef.UnitInspection.Portrait.PortraitPlayerColorGlow.enabled = true;  Why is this outsido of that script
-
+            if (animatedPortraits.Count != 0 && UIRef.UnitInspection.Portrait.AnimatorOverrideController.animationClips[0].GetHashCode() != animatedPortraits[(int) faction].GetHashCode())
+            {
+                UIRef.UnitInspection.Portrait.AnimatorOverrideController["KingCroakPortrait"] = animatedPortraits[(int) faction];
+            }
         }
     }
 }

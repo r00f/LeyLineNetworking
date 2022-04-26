@@ -7,8 +7,10 @@ public class UIReferences : MonoBehaviour
 {
     public Canvas Canvas;
 
-    //public Animator SlideOutUIAnimator;
+    [Header("Active Menu")]
+    public GameObject ActiveMenuPanel;
 
+    [Header("GameStateInfo")]
     public bool OpponentReady;
     public bool UIActive;
 
@@ -23,18 +25,16 @@ public class UIReferences : MonoBehaviour
 
     [Header("MenuPanels")]
     public HelpPanel HelpPanelComponent;
-    //public GameObject UIMainPanel;
     public GameObject HelpPanel;
     public GameObject SkillTreePanel;
+    public UnitInspectionPanel UnitInspection;
+    public EscapeMenu EscapeMenu;
 
     [Header("MenuButtons")]
     public Button RevealVisionButton;
     public MenuButton MainMenuButton;
     public MenuButton HelpButton;
     public MenuButton SkilltreeButton;
-
-    [Header("EscapeMenu")]
-    public EscapeMenu EscapeMenu;
 
     [Header("Startup")]
     public float StartUpWaitTime = 3f;
@@ -65,22 +65,7 @@ public class UIReferences : MonoBehaviour
     [Header("UnitPortrait")]
     public BottomLeftPortraitComponent BottomLeftPortrait;
     public UnitInfoPanel UnitInfoPanel;
-    /*
-    public GameObject InfoEnabledPanel;
-    public Image PortraitPlayerColor;
-    public Image PortraitPlayerColorGlow;
-    public SetPortraitClip AnimatedPortrait;
-    public Text PortraitNameText;
-    
-    [Header("UnitStats")]
-    public Text UnitStats;
 
-    [Header("UnitPortraitInfoPanel")]
-    public Text PortraitHealthText;
-    public Text PortraitArmorText;
-    public Text PortraitRegenText;
-    public HealthBar PortraitHealthBar;
-    */
     [Header("Actions")]
     public GameObject ActionPanel;
     public Button CancelActionButton;
@@ -92,7 +77,6 @@ public class UIReferences : MonoBehaviour
 
     [Header("SelectedActionToolTip")]
     public SelectedActionToolTip SAToolTip;
-
     public List<Sprite> ExecuteStepSprites;
 
     [Header("UnitGroups")]
@@ -122,12 +106,6 @@ public class UIReferences : MonoBehaviour
     public MinimapScript BigMapComponent;
     public Text BigMapTurnCounter;
 
-    /*
-    [Header("ManaLithUI")]
-    public ManalithInfoComponent ManalithIconPrefab;
-    public ManalithTooltip ManalithToolTipFab;
-    */
-
     [Header("ReadyPanel")]
     public TurnStatePanel TurnStatePnl;
 
@@ -147,9 +125,6 @@ public class UIReferences : MonoBehaviour
     public Color EnemyColor;
     [HideInInspector]
     public string CurrentStateString;
-
-    [Header("UnitInspectorWindow")]
-    public UnitInspectionPanel UnitInspection;
 
     [Header("MainTurnDisplay")]
     public MainTurnDisplay TurnDisplay;
@@ -186,7 +161,6 @@ public class UIReferences : MonoBehaviour
     public string OpponentReadySoundEventPath;
     public string ExecuteStepChangePath;
     public string PlanningSlideInPath;
-
 
     public enum UIEffectsFired
     {
