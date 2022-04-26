@@ -69,20 +69,20 @@ public class MouseStateSystem : JobComponentSystem
         var mouseLeftClick = Input.GetButtonDown("Fire1");
         var mouseRightClick = Input.GetButtonDown("Fire2");
 
-        Entities.WithAll<HoveredState>().ForEach((Entity entity, int entityInQueryIndex, ref MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component coord) =>
+        Entities.WithAll<ClickEvent>().ForEach((Entity entity, int entityInQueryIndex, ref MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component coord) =>
         {
-            if (mouseState.ClickEvent == 1 && !mouseLeftClick)
-            {
-                EntityManager.RemoveComponent<ClickEvent>(entity);
-                mouseState.CurrentState = MouseState.State.Clicked;
-                mouseState.ClickEvent = 0;
-            }
+            mouseState.CurrentState = MouseState.State.Clicked;
+            mouseState.ClickEvent = 0;
+            EntityManager.RemoveComponent<ClickEvent>(entity);
+        })
+        .WithStructuralChanges()
+        .WithoutBurst()
+        .Run();
 
-            if (mouseState.RightClickEvent == 1 && !mouseRightClick)
-            {
-                EntityManager.RemoveComponent<RightClickEvent>(entity);
-                mouseState.RightClickEvent = 0;
-            }
+        Entities.WithAll<RightClickEvent>().ForEach((Entity entity, int entityInQueryIndex, ref MouseState mouseState, in SpatialEntityId id, in CubeCoordinate.Component coord) =>
+        {
+            mouseState.RightClickEvent = 0;
+            EntityManager.RemoveComponent<RightClickEvent>(entity);
         })
         .WithStructuralChanges()
         .WithoutBurst()
