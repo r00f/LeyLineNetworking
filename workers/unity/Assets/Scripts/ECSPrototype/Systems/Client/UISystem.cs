@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Unit;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.UI.Extensions;
 using Cell;
@@ -636,7 +637,7 @@ namespace LeyLineHybridECS
             UIRef.MainMenuButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.EscapeMenu.gameObject); SetEscapePanelMenuActive(0); });
             UIRef.HelpButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.HelpPanel); SetHelpPanelMenuActive(0); });
             UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.SkillTreePanel); });
-            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { Application.Quit(); });
+            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { SceneManager.LoadScene("MainMenu"); });
             UIRef.CancelActionButton.onClick.AddListener(delegate { CancelLockedAction(); });
             UIRef.RevealVisionButton.onClick.AddListener(delegate { m_SendActionRequestSystem.RevealPlayerVision(); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.TurnStatePnl.CacelGraceTime);});

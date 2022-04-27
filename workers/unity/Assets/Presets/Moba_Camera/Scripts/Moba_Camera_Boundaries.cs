@@ -161,17 +161,22 @@ public class Moba_Camera_Boundaries {
 		// loop through each sphere boundary
 		foreach(Moba_Camera_Boundary boundary in sphere_boundaries) {
 			// check if the boundary is not active. if true, skip it.
-			if(boundary.isActive == false) continue;
-			
-			SphereCollider sphereCollider = boundary.GetComponent<SphereCollider>();
-			if(sphereCollider == null) {
-				Debug.LogWarning("Boundary: " + boundary.name + "; Error: BoundaryType and Collider mismatch.");
-				continue;	
-			}
-			// check if the distance from the center of the boundary to the point is less then the radius
-			if((boundary.transform.position + sphereCollider.center - point).magnitude < sphereCollider.radius) {
-				pointIsInBoundary = true;
-			}
+            if(boundary != null)
+            {
+                if (boundary.isActive == false) continue;
+
+                SphereCollider sphereCollider = boundary.GetComponent<SphereCollider>();
+                if (sphereCollider == null)
+                {
+                    Debug.LogWarning("Boundary: " + boundary.name + "; Error: BoundaryType and Collider mismatch.");
+                    continue;
+                }
+                // check if the distance from the center of the boundary to the point is less then the radius
+                if ((boundary.transform.position + sphereCollider.center - point).magnitude < sphereCollider.radius)
+                {
+                    pointIsInBoundary = true;
+                }
+            }
 		}
 		return pointIsInBoundary;
 	}
@@ -200,25 +205,30 @@ public class Moba_Camera_Boundaries {
 		}
 		
 		foreach(Moba_Camera_Boundary boundary in sphere_boundaries) {
-			if(boundary.isActive == false) continue;
-			
-			SphereCollider sphereCollider = boundary.GetComponent<SphereCollider>();
-			
-			Vector3 center 	= boundary.transform.position + sphereCollider.center;
-			float radius 	= sphereCollider.radius;
-			
-			Vector3 centerToPoint = point - center;
-			
-			Vector3 pointOnSurface = center + (centerToPoint.normalized * radius);
-			
-			// the distance from the center of the sphere to the posiiton
-			float distance 	= (point - pointOnSurface).magnitude;
-			
-			// check if it's the closest point
-			if(distance < closestDistance) {
-				closestBoundary = boundary;
-				closestDistance = distance;
-			}
+
+            if(boundary != null)
+            {
+                if (boundary.isActive == false) continue;
+
+                SphereCollider sphereCollider = boundary.GetComponent<SphereCollider>();
+
+                Vector3 center = boundary.transform.position + sphereCollider.center;
+                float radius = sphereCollider.radius;
+
+                Vector3 centerToPoint = point - center;
+
+                Vector3 pointOnSurface = center + (centerToPoint.normalized * radius);
+
+                // the distance from the center of the sphere to the posiiton
+                float distance = (point - pointOnSurface).magnitude;
+
+                // check if it's the closest point
+                if (distance < closestDistance)
+                {
+                    closestBoundary = boundary;
+                    closestDistance = distance;
+                }
+            }
 		}
 		
 		return closestBoundary;

@@ -17,14 +17,19 @@ public class ClientCleanupSystem : JobComponentSystem
         m_GarbageCollectorData = GetEntityQuery(
         ComponentType.ReadWrite<GarbageCollectorComponent>()
         );
+    }
 
+    protected override void OnStartRunning()
+    {
+        base.OnStartRunning();
+        initialized = false;
     }
 
     private bool WorldsInitialized()
     {
         if (!initialized)
         {
-            if (Worlds.ClientWorldWorker != default)
+            if (Worlds.ClientWorldWorker != default && Worlds.ClientWorldWorker.World != null)
             {
                 m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
@@ -37,6 +42,7 @@ public class ClientCleanupSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
+        
         if(WorldsInitialized())
         {
             if (m_GameStateData.CalculateEntityCount() != 1 || m_GarbageCollectorData.CalculateEntityCount() == 0)
