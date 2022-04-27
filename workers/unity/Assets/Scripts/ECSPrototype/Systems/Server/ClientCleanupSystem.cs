@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Entities;
 using Generic;
 using Unity.Jobs;
+using UnityEngine.SceneManagement;
 
 public class ClientCleanupSystem : JobComponentSystem
 {
@@ -27,23 +28,22 @@ public class ClientCleanupSystem : JobComponentSystem
 
     private bool WorldsInitialized()
     {
-        if (!initialized)
+        if (!initialized && Worlds.ClientWorldWorker != default && Worlds.ClientWorldWorker.World != null && Worlds.ClientWorldWorker.World.EntityManager != null)
         {
-            if (Worlds.ClientWorldWorker != default && Worlds.ClientWorldWorker.World != null)
-            {
-                m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
+            m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
                     ComponentType.ReadOnly<GameState.Component>()
                 );
-                initialized = true;
-            }
+            initialized = true;
         }
         return initialized;
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        
-        if(WorldsInitialized())
+        if (SceneManager.GetActiveScene().buildIndex == 0)
+            return inputDeps;
+
+        if (WorldsInitialized())
         {
             if (m_GameStateData.CalculateEntityCount() != 1 || m_GarbageCollectorData.CalculateEntityCount() == 0)
             {

@@ -632,12 +632,18 @@ namespace LeyLineHybridECS
             }
         }
 
+        void DisposeWorldAndSwitchToMainMenu()
+        {
+            Worlds.DefaultWorld.DestroyAndResetAllEntities();
+            SceneManager.LoadScene("MainMenu");
+        }
+
         public void InitializeButtons()
         {
             UIRef.MainMenuButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.EscapeMenu.gameObject); SetEscapePanelMenuActive(0); });
             UIRef.HelpButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.HelpPanel); SetHelpPanelMenuActive(0); });
             UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.SkillTreePanel); });
-            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { SceneManager.LoadScene("MainMenu"); });
+            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { DisposeWorldAndSwitchToMainMenu();  });
             UIRef.CancelActionButton.onClick.AddListener(delegate { CancelLockedAction(); });
             UIRef.RevealVisionButton.onClick.AddListener(delegate { m_SendActionRequestSystem.RevealPlayerVision(); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.TurnStatePnl.CacelGraceTime);});
