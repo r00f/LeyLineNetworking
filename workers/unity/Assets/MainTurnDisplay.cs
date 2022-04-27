@@ -76,7 +76,7 @@ public class MainTurnDisplay : MonoBehaviour
                     energyText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                     energyNumber.text = "+ " + EnergyGained.ToString();
                     energyNumber.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
-                    energyIcon.color = Color.white;
+                    energyIcon.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                     timer = 0f;
                 }
                 if (timer < 1f)
@@ -84,7 +84,7 @@ public class MainTurnDisplay : MonoBehaviour
                     turnXLargeText.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
                     energyText.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
                     energyNumber.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
-                    energyIcon.color = Color.Lerp(Color.white, new Color(1, 1, 1, 0), timer);
+                    energyIcon.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
                     turnstateDisplay.uncoloredImages[0].color = Color.Lerp(new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 1), new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 0), timer);
                     turnstateDisplay.PlanningOutline.color = Color.Lerp(Color.black, new Color(0, 0, 0, 0), timer);
                     timer += delta / turnXFadeDuration;
@@ -102,7 +102,6 @@ public class MainTurnDisplay : MonoBehaviour
             // Move scrolling bar to desired position
             if (TurnstateDisplayRect.anchoredPosition.x > (startpos - ((int) CurrentStepID * xposInterval)+.05f))
             {
-
                 if (TurnstateDisplayRect.anchoredPosition.x < (startpos - ((int) CurrentStepID * xposInterval) - (delta * scrollSpeed + .05f)))
                 {
                     TurnstateDisplayRect.anchoredPosition = new Vector2 (startpos - (((int) CurrentStepID * xposInterval) - (delta * scrollSpeed + .1f)), TurnstateDisplayRect.anchoredPosition.y);
@@ -118,13 +117,11 @@ public class MainTurnDisplay : MonoBehaviour
                 {
                     if (currentTurnstepText.text != StateName)
                     {
-
                         timer = 0f;
                         currentTurnstepText.text = StateName;
                         screenGlowImage.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                         currentTurnstepText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                         turnstateDisplay.coloredImages[(int) CurrentStepID - 1].color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
-
                     }
                 }
             }
