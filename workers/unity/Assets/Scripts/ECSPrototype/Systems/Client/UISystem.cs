@@ -12,6 +12,9 @@ using UnityEngine.UI.Extensions;
 using Cell;
 using Improbable;
 using Unity.Jobs;
+using Improbable.Gdk.PlayerLifecycle;
+using Improbable.Restricted;
+using Improbable.Gdk.Core.Commands;
 
 namespace LeyLineHybridECS
 {
@@ -25,12 +28,15 @@ namespace LeyLineHybridECS
         SendActionRequestSystem m_SendActionRequestSystem;
         ComponentUpdateSystem m_ComponentUpdateSystem;
         CommandSystem m_CommandSystem;
+        WorkerSystem m_workerSystem;
         EntityQuery m_PlayerData;
         EntityQuery m_AuthoritativePlayerData;
         EntityQuery m_GameStateData;
         EntityQuery m_UnitData;
         EntityQuery m_ManalithUnitData;
         EntityQuery m_ManalithData;
+        EntityQuery m_WorkerConnectorData;
+
 
         public UIReferences UIRef { get; set; }
 
@@ -39,6 +45,7 @@ namespace LeyLineHybridECS
         protected override void OnCreate()
         {
             base.OnCreate();
+
             m_UnitData = GetEntityQuery(
                 ComponentType.ReadOnly<Energy.Component>(),
                 ComponentType.ReadOnly<SpatialEntityId>(),
@@ -83,7 +90,8 @@ namespace LeyLineHybridECS
                 ComponentType.ReadOnly<FactionComponent.Component>(),
                 ComponentType.ReadOnly<HighlightingDataComponent>(),
                 ComponentType.ReadWrite<Moba_Camera>(),
-                ComponentType.ReadWrite<PlayerState.Component>()
+                ComponentType.ReadWrite<PlayerState.Component>(),
+                ComponentType.ReadOnly<SpatialEntityId>()
                 );
 
 
@@ -106,6 +114,7 @@ namespace LeyLineHybridECS
 
             logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
             m_HighlightingSystem = World.GetExistingSystem<HighlightingSystem>();
+            m_workerSystem = World.GetExistingSystem<WorkerSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             m_CommandSystem = World.GetExistingSystem<CommandSystem>();
             m_PlayerStateSystem = World.GetExistingSystem<PlayerStateSystem>();
@@ -124,6 +133,16 @@ namespace LeyLineHybridECS
 
         protected override JobHandle OnUpdate(JobHandle inputDeps)
         {
+            /*
+            var deleteEntityResponses = m_CommandSystem.GetResponses<PlayerEnergy.PlayerDeletion.ReceivedResponse>();
+
+            for (int i = 0; i < deleteEntityResponses.Count; i++)
+            {
+                Worlds.DefaultWorld.DestroyAndResetAllEntities();
+                SceneManager.LoadScene("MainMenu");
+            }
+            */
+
             if (m_GameStateData.CalculateEntityCount() != 1 || m_AuthoritativePlayerData.CalculateEntityCount() == 0)
                 return inputDeps;
 
@@ -144,6 +163,9 @@ namespace LeyLineHybridECS
             var mapInitializedEvent = m_ComponentUpdateSystem.GetEventsReceived<ClientWorkerIds.MapInitializedEvent.Event>();
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
+
+            
+
 
             for (int i = 0; i < mapInitializedEvent.Count; i++)
             {
@@ -634,16 +656,45 @@ namespace LeyLineHybridECS
 
         void DisposeWorldAndSwitchToMainMenu()
         {
-            Worlds.DefaultWorld.DestroyAndResetAllEntities();
-            SceneManager.LoadScene("MainMenu");
+            var waitTime = 0f;
+
+#if UNITY_EDITOR
+            //all players
+            waitTime = .2f;
+            Entities.ForEach((in PlayerState.Component playerState, in FactionComponent.Component faction, in SpatialEntityId id) =>
+            {
+                var playerDeleteReq = new PlayerEnergy.PlayerDeletion.Request
+                (
+                 id.EntityId,
+                 new PlayerDeletionRequest()
+                );
+
+                m_CommandSystem.SendCommand(playerDeleteReq);
+            })
+            .WithoutBurst()
+            .Run();
+#else
+            var playerDeleteReq = new PlayerEnergy.PlayerDeletion.Request
+             (
+                 m_AuthoritativePlayerData.GetSingleton<SpatialEntityId>().EntityId,
+                 new PlayerDeletionRequest()
+             );
+
+            m_CommandSystem.SendCommand(playerDeleteReq);
+#endif
+
+            //Open loading panel
+            UIRef.LoadSceneAfterSeconds(waitTime);
         }
 
         public void InitializeButtons()
         {
+
             UIRef.MainMenuButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.EscapeMenu.gameObject); SetEscapePanelMenuActive(0); });
             UIRef.HelpButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.HelpPanel); SetHelpPanelMenuActive(0); });
             UIRef.SkilltreeButton.Button.onClick.AddListener(delegate { SwapActiveMenuPanel(UIRef.SkillTreePanel); });
-            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { DisposeWorldAndSwitchToMainMenu();  });
+            UIRef.EscapeMenu.ExitGameButton.onClick.AddListener(delegate { m_PlayerStateSystem.SetPlayerState(PlayerStateEnum.conceded); DisposeWorldAndSwitchToMainMenu(); });
+            UIRef.GameOverPanelButton.onClick.AddListener(delegate { DisposeWorldAndSwitchToMainMenu(); });
             UIRef.CancelActionButton.onClick.AddListener(delegate { CancelLockedAction(); });
             UIRef.RevealVisionButton.onClick.AddListener(delegate { m_SendActionRequestSystem.RevealPlayerVision(); });
             UIRef.TurnStatePnl.GOButtonScript.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetCancelTimer(UIRef.TurnStatePnl.CacelGraceTime);});
@@ -1240,7 +1291,7 @@ namespace LeyLineHybridECS
                     UIRef.SwapActionButton.gameObject.SetActive(true);
                 }
 
-                #region FILL UI BUTTON INFO
+#region FILL UI BUTTON INFO
                 for (int si = 0; si < UIRef.SpawnActions.Count; si++)
                 {
                     if (si < spawnActionCount)
@@ -1291,7 +1342,7 @@ namespace LeyLineHybridECS
                         UIRef.Actions[bi].Visuals.SetActive(false);
                     }
                 }
-                #endregion
+#endregion
             }
             else
             {

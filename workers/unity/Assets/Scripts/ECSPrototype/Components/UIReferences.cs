@@ -1,6 +1,8 @@
 using FMODUnity;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIReferences : MonoBehaviour
@@ -31,6 +33,7 @@ public class UIReferences : MonoBehaviour
     public EscapeMenu EscapeMenu;
 
     [Header("MenuButtons")]
+    public Button GameOverPanelButton;
     public Button RevealVisionButton;
     public MenuButton MainMenuButton;
     public MenuButton HelpButton;
@@ -172,5 +175,19 @@ public class UIReferences : MonoBehaviour
         moveFired,
         skillshotFired,
         gameOverFired
+    }
+
+    public void LoadSceneAfterSeconds(float waitTime)
+    {
+        StartCoroutine(WaitForSceneLoad(waitTime));
+    }
+
+
+    public IEnumerator WaitForSceneLoad(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        Worlds.DefaultWorld.DestroyAndResetAllEntities();
+        SceneManager.LoadScene("MainMenu");
     }
 }

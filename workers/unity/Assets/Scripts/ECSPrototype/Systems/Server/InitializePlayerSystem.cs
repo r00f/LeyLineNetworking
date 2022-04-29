@@ -6,6 +6,7 @@ using Unity.Jobs;
 using Unity.Entities;
 using UnityEngine;
 using Improbable.Gdk.PlayerLifecycle;
+using Improbable.Gdk.Core.Commands;
 
 namespace LeyLineHybridECS
 {
@@ -16,6 +17,8 @@ namespace LeyLineHybridECS
         {
             public uint WorldIndexState;
         }
+
+        CommandSystem m_CommandSystem;
 
         EntityQuery m_GameStateData;
         EntityQuery m_GameStateSharedData;
@@ -44,6 +47,7 @@ namespace LeyLineHybridECS
         protected override void OnStartRunning()
         {
             base.OnStartRunning();
+            m_CommandSystem = World.GetExistingSystem<CommandSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
             logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         }
@@ -56,6 +60,10 @@ namespace LeyLineHybridECS
             new LogEvent("GameStates with worldIndexShared Count")
             .WithField("Count", m_GameStateData.CalculateEntityCount()));
             */
+
+
+            //var playerDeleStionRequests = m_CommandSystem.GetRequests<PlayerState.DeleteRequest>();
+
             Entities.WithNone<WorldIndexShared, PlayerStateData, NewlyAddedSpatialOSEntity>().ForEach((Entity entity, ref FactionComponent.Component factionComp, ref Position.Component pos, ref WorldIndex.Component spatialWorldIndex, in PlayerAttributes.Component playerAttributes, in OwningWorker.Component owningWorker) =>
             {
                 //Prevent PlayerFaction being initialized with WorldIndex 0 because gamestate has not had its WorldIndexShared added
