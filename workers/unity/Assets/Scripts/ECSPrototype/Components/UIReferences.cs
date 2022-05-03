@@ -15,6 +15,7 @@ public class UIReferences : MonoBehaviour
     [Header("GameStateInfo")]
     public bool OpponentReady;
     public bool UIActive;
+    public List<Rope> Ropes;
 
     public float EnergyLerpSpeed;
     public bool DollyPathCameraActive;
@@ -52,9 +53,7 @@ public class UIReferences : MonoBehaviour
     public Image HeroPortraitPlayerColor;
 
     [Header("EnergyBarPanel")]
-    public float MaxFillAmount;
-    public Image HeroEnergyIncomeFill;
-    public Image HeroCurrentEnergyFill;
+    public HeroEnergyBar HeroEnergyBar;
     public Text CurrentEnergyText;
     public Text MaxEnergyText;
     public Text TotalEnergyIncomeText;
@@ -134,10 +133,6 @@ public class UIReferences : MonoBehaviour
 
     [Header("ParticleSystems")]
     public List<ParticleSystem> CowExhaleParticleSystems;
-    public FillBarParticleComponent FriendlyRopeBarParticle;
-    public FillBarParticleComponent EnemyRopeBarParticle;
-    public ParticleSystem FriendlyReadyBurstPS;
-    public ParticleSystem EnemyReadyBurstPS;
 
     [Header("TurnWheel")]
     public UIEffectsFired CurrentEffectsFiredState;
