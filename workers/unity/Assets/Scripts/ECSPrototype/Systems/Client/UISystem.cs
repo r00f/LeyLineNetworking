@@ -838,7 +838,7 @@ namespace LeyLineHybridECS
             }
             inButton.UnitId = (int) inUnitId;
             inButton.SelectedGlow.color = settings.TurnStepColors[inButton.ExecuteStepIndex + 1];
-            inButton.TurnStepBauble.color = settings.TurnStepColors[inButton.ExecuteStepIndex + 1];
+            inButton.StaticGlow.color = settings.TurnStepColors[inButton.ExecuteStepIndex + 1];
 
             return inButton;
         }

@@ -22,7 +22,7 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
     public RectTransform ButtonRect;
     public GameObject Visuals;
     public Image Icon;
-    public Image TurnStepBauble;
+    public Image StaticGlow;
     public Image SelectedGlow;
     public int ExecuteStepIndex;
     public string ActionName;
@@ -39,8 +39,6 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
         {
             if(SelectHandler.Selected)
                 SelectHandler.Selected = false;
-            if(TurnStepBauble.enabled)
-                TurnStepBauble.enabled = false;
             if(SelectedGlow.enabled)
                 SelectedGlow.enabled = false;
             if (Hovered)
@@ -49,12 +47,10 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
 
         if(!SelectHandler.Selected && !Hovered)
         {
-            TurnStepBauble.enabled = false;
             SelectedGlow.enabled = false;
         }
         else
         {
-            TurnStepBauble.enabled = true;
             SelectedGlow.enabled = true;
         }
     }
