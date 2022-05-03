@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -67,6 +67,7 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
     {
         if (!ButtonInverted)
         {
+            gameObject.name = "Normal Actions";
             NormalActions.SetActive(false);
             SpawnActions.SetActive(true);
             IconImage.sprite = ActionsIconSprite;
@@ -76,6 +77,7 @@ public class SwapActionGroupButton : MonoBehaviour, IPointerExitHandler, IPointe
         }
         else
         {
+            gameObject.name = "Spawn Actions";
             NormalActions.SetActive(true);
             SpawnActions.SetActive(false);
             IconImage.sprite = SpawnIconSprite;
