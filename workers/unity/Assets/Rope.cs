@@ -4,7 +4,15 @@ using UnityEngine.UI;
 
 public class Rope : MonoBehaviour
 {
-    public StudioEventEmitter RopeLoopEmitter;
+    [HideInInspector]
+    public bool RopeSlamOneTime;
+    [HideInInspector]
+    public float FriendlyRopeEndFillAmount;
+    [HideInInspector]
+    public float EnemyRopeEndFillAmount;
+    [HideInInspector]
+    public float RopeEndsLerpTime;
+
     public float RopeFillsEndDist;
     public float ReadySwooshFadeOutSpeed;
     public float RopeEndFadeOutSpeed;
@@ -17,4 +25,5 @@ public class Rope : MonoBehaviour
     public FillBarParticleComponent EnemyRopeBarParticle;
     public ParticleSystem FriendlyReadyBurstPS;
     public ParticleSystem EnemyReadyBurstPS;
+
 }

@@ -164,12 +164,12 @@ namespace LeyLineHybridECS
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
-            
+
 
 
             for (int i = 0; i < mapInitializedEvent.Count; i++)
             {
-                if(mapInitializedEvent[i].EntityId.Id == gameStateId.EntityId.Id)
+                if (mapInitializedEvent[i].EntityId.Id == gameStateId.EntityId.Id)
                 {
                     Debug.Log("InitMapClientEvent");
                     //ClearUnitUIElements();
@@ -200,7 +200,7 @@ namespace LeyLineHybridECS
 
                     UIRef.TurnStatePnl.EnemyReadyDot.color = UIRef.EnemyColor;
 
-                    foreach(Rope r in UIRef.Ropes)
+                    foreach (Rope r in UIRef.Ropes)
                     {
                         r.FriendlyRope.color = UIRef.FriendlyColor;
                         r.EnemyRope.color = UIRef.EnemyColor;
@@ -275,11 +275,12 @@ namespace LeyLineHybridECS
                 UIRef.TurnStatePnl.FriendlyReadyDot.enabled = false;
                 UIRef.TurnStatePnl.EnemyReadyDot.enabled = false;
 
-                UIRef.RopeSlamOneTime = false;
-                UIRef.RopeEndsLerpTime = 0;
 
-                foreach(Rope r in UIRef.Ropes)
+
+                foreach (Rope r in UIRef.Ropes)
                 {
+                    r.RopeSlamOneTime = false;
+                    r.RopeEndsLerpTime = 0;
                     r.FriendlyRope.fillAmount = 0;
                     r.EnemyRope.fillAmount = 0;
                     r.EnemyRope.color = UIRef.EnemyColor;
@@ -326,7 +327,7 @@ namespace LeyLineHybridECS
                     UIRef.TurnStatePnl.GOButtonScript.Button.interactable = false;
                 }
 
-                UIRef.TurnStatePnl.RopeComponent.RopeLoopEmitter.Stop();
+                UIRef.RopeLoopEmitter.Stop();
             }
             else
             {
@@ -396,28 +397,28 @@ namespace LeyLineHybridECS
                 case GameStateEnum.interrupt:
                     if (UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.readyFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint) gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.interruptFired;
                     }
                     break;
                 case GameStateEnum.attack:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.attackFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint) gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.attackFired;
                     }
                     break;
                 case GameStateEnum.move:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.moveFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint) gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.moveFired;
                     }
                     break;
                 case GameStateEnum.skillshot:
                     if (UIRef.CurrentEffectsFiredState != UIReferences.UIEffectsFired.skillshotFired)
                     {
-                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint)gameState.CurrentState - 2);
+                        FireStepChangedEffects(gameState.CurrentState.ToString(), settings.TurnStepColors[(int) gameState.CurrentState - 2], UIRef.ExecuteStepChangePath, (uint) gameState.CurrentState - 2);
                         UIRef.CurrentEffectsFiredState = UIReferences.UIEffectsFired.skillshotFired;
                     }
                     break;
@@ -542,90 +543,75 @@ namespace LeyLineHybridECS
             .WithoutBurst()
             .Run();
 
-            #endregion
-
             UIRef.TurnStatePnl.GOButtonScript.PlayerInCancelState = authPlayerHigh.CancelState;
 
-            //Handle Ropes
+            #endregion
             if (gameState.CurrentRopeTime < gameState.RopeTime)
             {
-                foreach (Rope r in UIRef.Ropes)
+                if (gameState.CurrentState == GameStateEnum.planning)
+                {
+                    if (!UIRef.RopeLoopEmitter.IsPlaying())
+                        UIRef.RopeLoopEmitter.Play();
+
+                    UIRef.RopeLoopEmitter.SetParameter("FadeInFastTikTok", 1 - gameState.CurrentRopeTime / gameState.RopeTime);
+                }
+            }
+            else
+                UIRef.RopeLoopEmitter.Stop();
+
+            foreach (Rope r in UIRef.Ropes)
+            {
+                //Handle Ropes
+                if (gameState.CurrentRopeTime < gameState.RopeTime)
                 {
                     r.EnemyRopeBarParticle.Rect.anchoredPosition = new Vector2(1 - (r.EnemyRope.fillAmount * r.EnemyRopeBarParticle.ParentRect.sizeDelta.x - r.EnemyRopeBarParticle.ParentRect.sizeDelta.x), r.EnemyRopeBarParticle.Rect.anchoredPosition.y);
                     r.FriendlyRopeBarParticle.Rect.anchoredPosition = new Vector2(r.FriendlyRope.fillAmount * r.FriendlyRopeBarParticle.ParentRect.sizeDelta.x - r.FriendlyRopeBarParticle.ParentRect.sizeDelta.x, r.FriendlyRopeBarParticle.Rect.anchoredPosition.y);
-                }
+                    r.RopeTimeText.text = "0:" + ((int) gameState.CurrentRopeTime).ToString("D2");
 
-                UIRef.TurnStatePnl.RopeComponent.RopeTimeText.text = "0:" + ((int) gameState.CurrentRopeTime).ToString("D2");
-
-                if (gameState.CurrentState == GameStateEnum.planning)
-                {
-                    UIRef.TurnStatePnl.RopeComponent.RopeTimeText.enabled = true;
-
-                    if (!UIRef.TurnStatePnl.RopeComponent.RopeLoopEmitter.IsPlaying())
-                        UIRef.TurnStatePnl.RopeComponent.RopeLoopEmitter.Play();
-
-                    UIRef.TurnStatePnl.RopeComponent.RopeLoopEmitter.SetParameter("FadeInFastTikTok", 1 - gameState.CurrentRopeTime / gameState.RopeTime);
-
-                    if (authPlayerState.CurrentState == PlayerStateEnum.ready)
+                    if (gameState.CurrentState == GameStateEnum.planning)
                     {
-                        UIRef.TurnStatePnl.RopeComponent.RopeTimeText.color = UIRef.FriendlyColor;
+                        r.RopeTimeText.enabled = true;
 
-                        if (!UIRef.OpponentReady)
+                        if (authPlayerState.CurrentState == PlayerStateEnum.ready)
                         {
-                            foreach (Rope r in UIRef.Ropes)
+                            if (!UIRef.OpponentReady)
                             {
+                                r.RopeTimeText.color = UIRef.FriendlyColor;
                                 r.FriendlyRopeBarParticle.LoopPS.Play(false);
                                 r.FriendlyRope.fillAmount = 1 - (gameState.CurrentRopeTime / gameState.RopeTime);
                             }
                         }
-                    }
-                    else
-                    {
-                        //GETTING ROPED
-
-                        UIRef.TurnStatePnl.RopeComponent.RopeTimeText.color = UIRef.EnemyColor;
-
-                        foreach (Rope r in UIRef.Ropes)
+                        else
                         {
+                            //GETTING ROPED
+                            r.RopeTimeText.color = UIRef.EnemyColor;
                             r.EnemyRopeBarParticle.LoopPS.Play(false);
                             r.FriendlyRope.fillAmount = 0;
                             r.EnemyRope.fillAmount = 1 - (gameState.CurrentRopeTime / gameState.RopeTime);
                         }
                     }
-                }
-                else
-                {
-                    //Find Center and Lerp both ropes to Center
-                    if (!UIRef.RopeSlamOneTime)
-                    {
-                        UIRef.EnemyRopeEndFillAmount = UIRef.TurnStatePnl.RopeComponent.EnemyRope.fillAmount;
-                        UIRef.FriendlyRopeEndFillAmount = UIRef.TurnStatePnl.RopeComponent.FriendlyRope.fillAmount;
-
-                        foreach (Rope r in UIRef.Ropes)
-                        {
-                            r.RopeFillsEndDist = (1 - UIRef.FriendlyRopeEndFillAmount - UIRef.EnemyRopeEndFillAmount) / 2f;
-                        }
-
-                        UIRef.TurnStatePnl.RopeComponent.RopeTimeText.enabled = false;
-                        UIRef.RopeSlamOneTime = true;
-                    }
-
-                    if (UIRef.RopeEndsLerpTime < 1)
-                    {
-                        if (UIRef.RopeSlamOneTime)
-                        {
-                            UIRef.RopeEndsLerpTime += Time.DeltaTime * UIRef.TurnStatePnl.RopeComponent.RopeEndLerpSpeed;
-
-                            foreach (Rope r in UIRef.Ropes)
-                            {
-                                r.FriendlyRope.fillAmount = Mathf.Lerp(UIRef.FriendlyRopeEndFillAmount, UIRef.FriendlyRopeEndFillAmount + r.RopeFillsEndDist, UIRef.RopeEndsLerpTime);
-                                r.EnemyRope.fillAmount = Mathf.Lerp(UIRef.EnemyRopeEndFillAmount, UIRef.EnemyRopeEndFillAmount + r.RopeFillsEndDist, UIRef.RopeEndsLerpTime);
-                            }
-                        }
-                    }
                     else
                     {
-                        foreach (Rope r in UIRef.Ropes)
+                        //Find Center and Lerp both ropes to Center
+                        if (!r.RopeSlamOneTime)
+                        {
+                            r.EnemyRopeEndFillAmount = UIRef.TurnStatePnl.RopeComponent.EnemyRope.fillAmount;
+                            r.FriendlyRopeEndFillAmount = UIRef.TurnStatePnl.RopeComponent.FriendlyRope.fillAmount;
+                            r.RopeTimeText.enabled = false;
+                            r.RopeFillsEndDist = (1 - r.FriendlyRopeEndFillAmount - r.EnemyRopeEndFillAmount) / 2f;
+                            r.RopeSlamOneTime = true;
+                        }
+
+                        if (r.RopeEndsLerpTime < 1)
+                        {
+                            if (r.RopeSlamOneTime)
+                            {
+                                r.RopeEndsLerpTime += Time.DeltaTime * UIRef.TurnStatePnl.RopeComponent.RopeEndLerpSpeed;
+                                r.FriendlyRope.fillAmount = Mathf.Lerp(r.FriendlyRopeEndFillAmount, r.FriendlyRopeEndFillAmount + r.RopeFillsEndDist, r.RopeEndsLerpTime);
+                                r.EnemyRope.fillAmount = Mathf.Lerp(r.EnemyRopeEndFillAmount, r.EnemyRopeEndFillAmount + r.RopeFillsEndDist, r.RopeEndsLerpTime);
+                            }
+                        }
+                        else
                         {
                             if (r.FriendlyRope.color.a == 1)
                             {
@@ -646,16 +632,12 @@ namespace LeyLineHybridECS
                         }
                     }
                 }
-            }
-            else
-            {
-                UIRef.TurnStatePnl.RopeComponent.RopeLoopEmitter.Stop();
-                foreach (Rope r in UIRef.Ropes)
+                else
                 {
                     r.FriendlyRopeBarParticle.LoopPS.Stop();
                     r.EnemyRopeBarParticle.LoopPS.Stop();
+                    r.RopeTimeText.enabled = false;
                 }
-                UIRef.TurnStatePnl.RopeComponent.RopeTimeText.enabled = false;
             }
 
             m_AuthoritativePlayerData.SetSingleton(authPlayerHigh);

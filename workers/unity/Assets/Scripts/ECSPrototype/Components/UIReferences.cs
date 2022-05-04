@@ -111,15 +111,6 @@ public class UIReferences : MonoBehaviour
     [Header("ReadyPanel")]
     public TurnStatePanel TurnStatePnl;
 
-    [HideInInspector]
-    public bool RopeSlamOneTime;
-    [HideInInspector]
-    public float FriendlyRopeEndFillAmount;
-    [HideInInspector]
-    public float EnemyRopeEndFillAmount;
-    [HideInInspector]
-    public float RopeEndsLerpTime;
-
     public Color FriendlyIncomeColor;
     [HideInInspector]
     public Color FriendlyColor;
@@ -153,6 +144,8 @@ public class UIReferences : MonoBehaviour
     public FMOD.Studio.Bus UISFXBus;
     public FMOD.Studio.Bus UINonMapSFXBus;
     public FMOD.Studio.Bus MusicBus;
+
+    public StudioEventEmitter RopeLoopEmitter;
 
     [Header("SoundEventPaths")]
     public string ReadySoundEventPath;
