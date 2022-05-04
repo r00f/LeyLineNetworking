@@ -31,7 +31,6 @@ public class ManalithGroup : MonoBehaviour
         if (!terrainController)
             terrainController = FindObjectOfType<TerrainController>();
 
-        terrainController.leyLineCrackPositions.Clear();
         EditorUtility.SetDirty(terrainController);
 
         for (int i = 0; i < ManalithInitializers.Count; i++)

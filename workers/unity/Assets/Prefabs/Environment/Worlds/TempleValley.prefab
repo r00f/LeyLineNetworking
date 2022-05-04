@@ -7578,6 +7578,8 @@ MonoBehaviour:
   - {x: 16, y: 2.5, z: 18.574026}
   - {x: 16, y: 2.5, z: 18.588459}
   - {x: 16, y: 2.5, z: 18.602892}
+  leyLineCircleCrackPositions: []
+  ManalithNodeStampPositions: []
   leyLineCrackBrushes:
   - {fileID: 2800000, guid: 29035e3016a94f84c92753d715501c75, type: 3}
   - {fileID: 2800000, guid: c80999e2666fcf94f921bd44a36658d7, type: 3}
@@ -7585,8 +7587,10 @@ MonoBehaviour:
   - {fileID: 2800000, guid: a1599087622430b4db1bbc6b93a4c2df, type: 3}
   - {fileID: 2800000, guid: 490526939afce2d4cb4096c72d266291, type: 3}
   - {fileID: 2800000, guid: ce41b736bfa58474d94ff93510ff7926, type: 3}
+  NodeCrackBrush: {fileID: 0}
   leyLineCrackWorldPos: {x: 0, y: 0, z: 0}
   leyLineCrackSize: 0.3
+  ManalithNodeHoleSize: 0.3
   RiverOutline: {fileID: 2404135703738468399}
 --- !u!1 &7196706021805924005
 GameObject:

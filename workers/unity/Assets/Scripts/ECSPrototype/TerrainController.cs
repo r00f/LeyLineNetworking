@@ -43,15 +43,25 @@ namespace LeyLineHybridECS
 
         [HideInInspector]
         public List<Vector3> leyLineCrackPositions = new List<Vector3>();
+        [HideInInspector]
+        public List<Vector3> leyLineCircleCrackPositions = new List<Vector3>();
+        [HideInInspector]
+        public List<Vector3> ManalithNodeStampPositions = new List<Vector3>();
 
         [SerializeField]
         List<Texture2D> leyLineCrackBrushes;
+
+        [SerializeField]
+        Texture2D NodeCrackBrush;
 
         [SerializeField]
         public Vector3 leyLineCrackWorldPos;
 
         [SerializeField]
         public float leyLineCrackSize;
+
+        [SerializeField]
+        public float ManalithNodeHoleSize;
 
         [SerializeField]
         float[,] strength;
@@ -67,6 +77,10 @@ namespace LeyLineHybridECS
 
         public void GenerateMap()
         {
+            leyLineCircleCrackPositions.Clear();
+            ManalithNodeStampPositions.Clear();
+            leyLineCrackPositions.Clear();
+
             SetWholeTerrainHeight();
             SetWholeTerrainTexture();
             UpdateAllMapTiles();
@@ -77,6 +91,11 @@ namespace LeyLineHybridECS
             SetSlopeTexture();
             UpdateTerrainDetailObjects();
             GenerateRiverOutline();
+
+            leyLineCircleCrackPositions.Clear();
+            ManalithNodeStampPositions.Clear();
+            leyLineCrackPositions.Clear();
+
         }
 
         public void SaveTerrainAsset()
@@ -173,13 +192,47 @@ namespace LeyLineHybridECS
 
         public void UpdateLeyLineCracks()
         {
-            foreach(Vector3 v in leyLineCrackPositions)
+            foreach(Vector3 v in leyLineCircleCrackPositions)
             {
-                PaintHeightAtPosition(leyLineCrackSize, v);
+                PaintHeightAtPosition(v);
+            }
+
+            foreach (Vector3 v in leyLineCrackPositions)
+            {
+                int r = UnityEngine.Random.Range(0, leyLineCrackBrushes.Count);
+                Texture2D textureToUse = leyLineCrackBrushes[r];
+                PaintHeightAtPosition(leyLineCrackSize, v, textureToUse);
+            }
+
+            foreach (Vector3 v in ManalithNodeStampPositions)
+            {
+                PaintHeightAtPosition(ManalithNodeHoleSize, v, NodeCrackBrush);
             }
         }
 
-        public void PaintHeightAtPosition(float size, Vector3 position)
+        public void PaintHeightAtPosition(Vector3 position)
+        {
+            int totalXrange = 1;
+            int totalYrange = 1;
+
+            terrainHeights = new float[totalXrange, totalYrange];
+            strength = new float[totalXrange, totalYrange];
+
+            int xOffset = (int) (terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * position.x) - totalXrange / 2;
+            int yOffset = (int) (terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * position.z) - totalYrange / 2;
+
+            //generates a square
+            for (int x = 0; x < totalXrange; x++)
+            {
+                for (int y = 0; y < totalYrange; y++)
+                {
+                    terrainHeights[x, y] = strength[x, y] + (position.y / resolutionHeight);
+                }
+            }
+            terrain.terrainData.SetHeights(xOffset, yOffset, terrainHeights);
+        }
+
+        public void PaintHeightAtPosition(float size, Vector3 position, Texture2D textureToUse)
         {
             //paint height with crackbrush at terrain position
 
@@ -194,9 +247,6 @@ namespace LeyLineHybridECS
 
             int xOffset = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.x * position.x) - totalXrange / 2;
             int yOffset = (int)(terrain.terrainData.heightmapResolution / terrain.terrainData.size.z * position.z) - totalYrange / 2;
-
-            int r = UnityEngine.Random.Range(0, leyLineCrackBrushes.Count);
-            Texture2D textureToUse = leyLineCrackBrushes[r];
 
             //generates a square
             for (int x = 0; x < totalXrange; x++)

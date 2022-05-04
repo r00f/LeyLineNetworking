@@ -70,9 +70,6 @@ MonoBehaviour:
   AddPingSize: 100
   DeathCrossSize: {x: 0, y: 0}
   EvenOutlineOffset: 1
-  DarknessTile: {fileID: 0}
-  DarknessAlphaDefault: 0
-  DarknessTileImage: {fileID: 0}
   UnitPlayerColorSprite: {fileID: 0}
   BecomeVisibleMapEffect: {fileID: 0}
   UILineRenderer: {fileID: 5688474810037538337}
@@ -174,9 +171,6 @@ MonoBehaviour:
   AddPingSize: 0
   DeathCrossSize: {x: 0, y: 0}
   EvenOutlineOffset: 1
-  DarknessTile: {fileID: 0}
-  DarknessAlphaDefault: 0
-  DarknessTileImage: {fileID: 0}
   UnitPlayerColorSprite: {fileID: 0}
   BecomeVisibleMapEffect: {fileID: 0}
   UILineRenderer: {fileID: 0}
@@ -247,32 +241,32 @@ MonoBehaviour:
       m_Calls: []
   Gradient:
     serializedVersion: 2
-    key0: {r: 0.94482756, g: 1, b: 0, a: 1}
-    key1: {r: 0.8862746, g: 0.93725497, b: 0, a: 1}
-    key2: {r: 0, g: 0, b: 0, a: 0}
-    key3: {r: 0.6039216, g: 0.62352943, b: 0.827451, a: 0.38039216}
-    key4: {r: 0.6039216, g: 0.62352943, b: 0.827451, a: 0.38039216}
-    key5: {r: 0.6039216, g: 0.62352943, b: 0.827451, a: 0.38039216}
+    key0: {r: 1, g: 0, b: 0.03915453, a: 1}
+    key1: {r: 0.9582432, g: 1, b: 0.25103185, a: 1}
+    key2: {r: 0.9666707, g: 1, b: 0.40872657, a: 1}
+    key3: {r: 0.9778507, g: 1, b: 0.6179246, a: 1}
+    key4: {r: 0.7830189, g: 0.7830189, b: 0.7830189, a: 0.38039216}
+    key5: {r: 0.9778507, g: 1, b: 0.6179246, a: 0.38039216}
     key6: {r: 0.6039216, g: 0.62352943, b: 0.827451, a: 0.38039216}
     key7: {r: 0.6039216, g: 0.62352943, b: 0.827451, a: 0.38039216}
     ctime0: 0
-    ctime1: 65535
-    ctime2: 65535
-    ctime3: 0
-    ctime4: 0
-    ctime5: 0
+    ctime1: 16384
+    ctime2: 35852
+    ctime3: 49151
+    ctime4: 65535
+    ctime5: 65535
     ctime6: 0
     ctime7: 0
     atime0: 0
     atime1: 65535
     atime2: 65535
-    atime3: 0
+    atime3: 65535
     atime4: 0
     atime5: 0
     atime6: 0
     atime7: 0
     m_Mode: 0
-    m_NumColorKeys: 2
+    m_NumColorKeys: 5
     m_NumAlphaKeys: 2
   m_Sprite: {fileID: 21300000, guid: 498b360f6b58c9746972fe69cc2ca1fb, type: 3}
   m_improveResolution: 0

@@ -40,12 +40,12 @@ public class TerrainControllerHelper : Editor
             {
                 myTarget.SmoothTerrainHeights();
             }
-
+            /*
             if (GUILayout.Button("PaintTerrainHeight"))
             {
                 myTarget.PaintHeightAtPosition(myTarget.leyLineCrackSize, myTarget.leyLineCrackWorldPos);
             }
-
+            */
 
             if (GUILayout.Button("Set Whole Terrain Height"))
             {
