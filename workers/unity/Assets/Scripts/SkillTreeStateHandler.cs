@@ -7,9 +7,10 @@ public class SkillTreeStateHandler : MonoBehaviour
 {
     uint currentTier = 0;
     public List<SkillTreeButtonData> Nodes = new List<SkillTreeButtonData>();
-    public List<Image> ButtonUPSet = new List<Image>();
-    public List<Image> ButtonDOWNSet = new List<Image>();
-    public Color PlayerColor = Color.white;
+    public List<Sprite> ButtonUPSet = new List<Sprite>();
+    public List<Sprite> ButtonDOWNSet = new List<Sprite>();
+    public Transform LinePanel;
+    public Color PlayerColor = Color.red;
     // Start is called before the first frame update
 
 
@@ -26,11 +27,17 @@ public class SkillTreeStateHandler : MonoBehaviour
             if(button.Tier == currentTier)
             {
                 button.UpdateButtonstate(currentTier);
+                Debug.Log("Tier upgraded to:" + currentTier);
             }
         }
     }
     void Start()
     {
+        foreach(SkillTreeButtonData n in Nodes)
+        {
+            n.StateHandler = this;
+        }
+
         
     }
 

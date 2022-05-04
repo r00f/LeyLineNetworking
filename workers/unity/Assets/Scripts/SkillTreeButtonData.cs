@@ -11,19 +11,21 @@ public class SkillTreeButtonData : MonoBehaviour
 
     public Image Icon;
     public Image GlowingRing;
-    public Image ButtonImageUP;
+    public Image  ButtonImageUP;
     public Image ButtonImageDOWN;
-    public Button myButton;
     public String InfoText;
     public Image InfoSketch;
     public UILineRenderer InConnectionLine;
     public SkillTreeButtonData IncomingConnection;
     public List<SkillTreeButtonData> OutgoingConnections = new  List<SkillTreeButtonData>();
     public SkillTreeButtonData DecisionPartner;
+    public Color ColorizeIn;
     public uint Tier;
     public uint NodeCost;
-    SkillTreeStateHandler StateHandler;
+    public SkillTreeStateHandler StateHandler;
     public RectTransform rectTransform;
+    [SerializeField]
+    UnityEngine.Gradient graduate = new UnityEngine.Gradient();
     public enum ButtonState
     {
         invisible,
@@ -38,7 +40,7 @@ public class SkillTreeButtonData : MonoBehaviour
         UnlockUnit,
         UpgradeUnitType,
         UlockAction,
-        GenericUpgrade,
+        StatChange,
         DecisionNode,
         TierUpgrade
     }
@@ -54,30 +56,33 @@ public class SkillTreeButtonData : MonoBehaviour
         {
             rectTransform = gameObject.GetComponent<RectTransform>();
 
-            InConnectionLine.Points[1] = new Vector2(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y);
+
+            InConnectionLine.Points[0] = new Vector2(0, 0);
             if(IncomingConnection!=null)
             {
                 if (IncomingConnection.initialized)
                 {
-                    InConnectionLine.Points[0] = new Vector2(IncomingConnection.rectTransform.anchoredPosition.x, IncomingConnection.rectTransform.anchoredPosition.y);
+                    InConnectionLine.Points[1] = new Vector2(IncomingConnection.rectTransform.anchoredPosition.x - rectTransform.anchoredPosition.x, IncomingConnection.rectTransform.anchoredPosition.y - rectTransform.anchoredPosition.y);
+                    InConnectionLine.gameObject.transform.parent = StateHandler.LinePanel;
+                    InConnectionLine.SetAllDirty();
+                    
                 }
-                else
-                {
-                    return;
-                }
+                else return;
             }
             else
             {
                 RectTransform baseRect = StateHandler.gameObject.GetComponent<RectTransform>();
-                InConnectionLine.Points[0] = new Vector2(baseRect.anchoredPosition.x, baseRect.anchoredPosition.y);
+                InConnectionLine.Points[1] = new Vector2(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y);
+                InConnectionLine.gameObject.transform.parent = StateHandler.LinePanel;
+                InConnectionLine.SetAllDirty();
             }
 
 
             if ((int) NodeType <= 3)
             {
-                ButtonImageUP.sprite = StateHandler.ButtonUPSet[(int) NodeType].sprite;
+                ButtonImageUP.sprite = StateHandler.ButtonUPSet[(int) NodeType];
                 ButtonImageUP.gameObject.SetActive(true);
-                ButtonImageDOWN.sprite = StateHandler.ButtonDOWNSet[(int) NodeType].sprite;
+                ButtonImageDOWN.sprite = StateHandler.ButtonDOWNSet[(int) NodeType];
                 UpdateButtonstate(StateHandler.CurrentTier());
                 initialized = true;
             }
@@ -88,10 +93,15 @@ public class SkillTreeButtonData : MonoBehaviour
             }
             else if ((int)NodeType == 5)
             {
-                ButtonImageUP.sprite = StateHandler.ButtonUPSet[0].sprite;
+                ButtonImageUP.sprite = StateHandler.ButtonUPSet[0];
                 ButtonImageUP.gameObject.SetActive(true);
-                ButtonImageDOWN.sprite = StateHandler.ButtonDOWNSet[0].sprite;
+                ButtonImageDOWN.sprite = StateHandler.ButtonDOWNSet[0];
                 UpdateButtonstate(StateHandler.CurrentTier());
+                if(State == ButtonState.learned)
+                {
+                    ColorizeIn = StateHandler.PlayerColor;
+                    colorize();
+                }
                 initialized = true;
             }
         }
@@ -106,15 +116,24 @@ public class SkillTreeButtonData : MonoBehaviour
                 if (State != ButtonState.learned || State != ButtonState.unlearned)
                 {
                     State = ButtonState.unlearned;
+                    ColorizeIn = Color.white;
+                    InConnectionLine.color = Color.white;
+                    colorize();
                 }
             }
             else if (IncomingConnection.State == ButtonState.invisible || IncomingConnection.NodeType == Nodetype.DecisionNode)
             {
                 State = ButtonState.invisible;
+                ColorizeIn = new Color(0f, 0f, 0f, .0f);
+                InConnectionLine.color = new Color(0f, 0f, 0f, .0f);
+                colorize();
             }
             else
             {
                 State = ButtonState.unaccessible;
+                ColorizeIn = new Color(1f, 1f, 1f, .5f);
+                InConnectionLine.color = Color.white;
+                colorize();
             }
         }
     }
@@ -123,6 +142,8 @@ public class SkillTreeButtonData : MonoBehaviour
     {
 
         State = ButtonState.learned;
+        ColorizeIn = StateHandler.PlayerColor;
+        colorize();
 
         if (StateHandler){
             if (NodeType == Nodetype.TierUpgrade)
@@ -135,5 +156,45 @@ public class SkillTreeButtonData : MonoBehaviour
             }
         }
 
+    }
+
+    public void colorize()
+    {
+        GlowingRing.color = ColorizeIn;
+        foreach(SkillTreeButtonData b in OutgoingConnections)
+        {
+            b.colorize();
+        }
+        if (IncomingConnection != null)
+        {
+            GraduateLine(InConnectionLine, ColorizeIn, IncomingConnection.ColorizeIn);
+        }
+        else
+        {
+            GraduateLine(InConnectionLine, ColorizeIn, Color.white);
+        }
+    }
+
+    public void GraduateLine(UILineRenderer ren, Color a, Color b)
+
+
+    {
+        var colorkeyarray = new GradientColorKey[2];
+        var alphakeyarray = new GradientAlphaKey[2];
+
+
+        colorkeyarray[0].color = a;
+        colorkeyarray[0].time = 0;
+        colorkeyarray[1].color = b;
+        colorkeyarray[1].time = 1;
+        alphakeyarray[0].alpha = a.a;
+        alphakeyarray[0].time = 0;
+        alphakeyarray[1].alpha = b.a;
+        alphakeyarray[1].time = 1;
+
+
+        graduate.SetKeys(colorkeyarray, alphakeyarray);
+        ren.Gradient = graduate;
+        ren.SetVerticesDirty();
     }
 }

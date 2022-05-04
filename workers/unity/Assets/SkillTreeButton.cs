@@ -20,6 +20,10 @@ public class SkillTreeButton : Button
         base.OnPointerDown(eventData);
         data.ButtonImageDOWN.gameObject.SetActive(true);
         data.ButtonImageUP.gameObject.SetActive(false);
+        if(data.State == SkillTreeButtonData.ButtonState.unlearned)
+        {
+            data.learnNode();
+        }
     }
 
     public override void OnPointerUp(PointerEventData eventData)
