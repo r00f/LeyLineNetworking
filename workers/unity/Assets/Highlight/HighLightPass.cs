@@ -92,9 +92,14 @@ namespace FX.Highlight
         private static readonly int BehindFactor = Shader.PropertyToID("_BehindFactor");
         private static readonly int InnerBehindFactor = Shader.PropertyToID("_InnerBehindFactor");
 
-        ProfilingSampler outlineObjectsSampler = new ProfilingSampler("Render Outline Objects");
-        ProfilingSampler fullscreenOutlineSampler = new ProfilingSampler("Fullscreen Outline Pass");
+        ProfilingSampler outlineObjectsSampler;
+        ProfilingSampler fullscreenOutlineSampler;
 
+        public void Start()
+        {
+            outlineObjectsSampler = new ProfilingSampler("Render Outline Objects");
+            fullscreenOutlineSampler = new ProfilingSampler("Fullscreen Outline Pass");
+        }
         protected override void Setup(ScriptableRenderContext renderContext, CommandBuffer cmd)
         {
             _objectShader = Shader.Find("HDRP/PostFX/HighlightPassDrawRenderers");
