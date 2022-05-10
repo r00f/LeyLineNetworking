@@ -11,6 +11,8 @@ public class SkillTreeStateHandler : MonoBehaviour
     public List<Sprite> ButtonDOWNSet = new List<Sprite>();
     public Transform LinePanel;
     public Color PlayerColor = Color.red;
+    public int Knowledge;
+    public TreeNodeTooltipHandler ToolTipPanel;
     // Start is called before the first frame update
 
 
@@ -37,6 +39,7 @@ public class SkillTreeStateHandler : MonoBehaviour
         {
             n.StateHandler = this;
         }
+        ToolTipPanel.rect = ToolTipPanel.gameObject.GetComponent<RectTransform>();
 
         
     }
