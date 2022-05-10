@@ -99,11 +99,19 @@ public class ManalithSystemClient : JobComponentSystem
         for (int q = 0; q < manalithFactionChangeEvents.Count; q++)
         {
             var EventID = manalithFactionChangeEvents[q].EntityId.Id;
+            var bountyCollect = manalithFactionChangeEvents[q].Event.Payload.BountyCollect;
 
             Entities.ForEach((Entity e, MeshColor meshColor, ManalithObject manalithObject, StudioEventEmitter eventEmitter, in SpatialEntityId id, in FactionComponent.Component faction) =>
             {
                 if (id.EntityId.Id == EventID)
                 {
+                    //if a player captures a manalith for the first time, visualize Bounty collection
+                    if (bountyCollect)
+                    {
+                        Debug.Log("Collect Bounty from Manalith with ID: " + EventID);
+                        manalithObject.ChargedPS.Stop();
+                    }
+
                     //Fire Get Capture effects
                     if (manalithObject.BigMapTileInstance && manalithObject.BigMapTileInstance.isActiveAndEnabled)
                     {

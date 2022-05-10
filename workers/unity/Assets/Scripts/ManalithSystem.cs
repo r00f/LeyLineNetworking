@@ -13,6 +13,7 @@ using System.Collections.Generic;
 public class ManalithSystem : JobComponentSystem
 {
     private ComponentUpdateSystem componentUpdateSystem;
+    private ResourceSystem resourceSystem;
     private EntityQuery m_NonManalithUnitData;
     private EntityQuery m_ManalithData;
     private EntityQuery m_UnitData;
@@ -24,6 +25,7 @@ public class ManalithSystem : JobComponentSystem
         base.OnCreate();
 
         componentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+
 
         m_ManalithData = GetEntityQuery(
             ComponentType.ReadOnly<SpatialEntityId>(),
@@ -66,7 +68,10 @@ public class ManalithSystem : JobComponentSystem
             ComponentType.ReadOnly<GameState.Component>()
         );
     }
-
+    protected override void OnStartRunning()
+    {
+        resourceSystem = World.GetExistingSystem<ResourceSystem>();
+    }
     public void UpdateManaliths(WorldIndexShared worldIndex, ClientWorkerIds.Component clientWorkerIds)
     {
         Entities.WithSharedComponentFilter(worldIndex).ForEach((ref EntityAcl.Component entityAcl, ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref UnitVision vision, in SpatialEntityId entityId) =>
@@ -115,8 +120,6 @@ public class ManalithSystem : JobComponentSystem
 
                 manalithComp.StateChange = false;
 
-                manalith = manalithComp;
-
                 if (oldFact != faction.Faction)
                 {
                     var a = entityAcl.ComponentWriteAcl[135].AttributeSet[0];
@@ -138,10 +141,24 @@ public class ManalithSystem : JobComponentSystem
                     entityAcl.MarkDataDirty(1);
                     //Debug.Log(entityAcl.ComponentWriteAcl[135].AttributeSet[0].Attribute[0]);
 
-                    componentUpdateSystem.SendEvent(
-                     new Manalith.ManalithFactionChangeEvent.Event(),
-                     entityId.EntityId);
+                    if (manalithComp.Bounty > 0)
+                    {
+                        resourceSystem.AddEnergy(worldIndex, faction.Faction, manalithComp.Bounty);
+                        componentUpdateSystem.SendEvent(
+                         new Manalith.ManalithFactionChangeEvent.Event(new ManalithFactionChange(true)),
+                         entityId.EntityId
+                         );
+                        manalithComp.Bounty = 0;
+                    }
+                    else
+                    {
+                        componentUpdateSystem.SendEvent(
+                         new Manalith.ManalithFactionChangeEvent.Event(new ManalithFactionChange(false)),
+                         entityId.EntityId);
+                    }
                 }
+
+                manalith = manalithComp;
             }
         })
         .WithoutBurst()

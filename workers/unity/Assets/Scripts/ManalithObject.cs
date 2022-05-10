@@ -8,6 +8,7 @@ public class ManalithObject : MonoBehaviour
     public string Name;
     public List<MeshRenderer> EmissionColorRenderers;
     //public List<GameObject> SelectionOutlineRenderers;
+    public ParticleSystem ChargedPS;
     public List<MeshRenderer> DetailColorRenderers;
     public List<Light> Lights;
     public List<ParticleSystem> ParticleSystems;

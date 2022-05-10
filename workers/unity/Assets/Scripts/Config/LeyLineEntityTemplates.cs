@@ -113,7 +113,6 @@ public static class LeyLineEntityTemplates {
             Income = 0,
             IncomeAdded = true,
             LastGained = 0
-
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
@@ -298,6 +297,7 @@ public static class LeyLineEntityTemplates {
 
         var manalith = new Manalith.Snapshot
         {
+            Bounty = 30,
             CircleCoordinatesList = circleCellCoords,
             PathCoordinatesList = pathCellCoords,
             ConnectedManalithCoordinate = connectedManalithCoord,
@@ -373,6 +373,7 @@ public static class LeyLineEntityTemplates {
 
         var manalith = new Manalith.Snapshot
         {
+            Bounty = m.Bounty,
             CircleCoordinatesList = m.CircleCoordinatesList,
             PathCoordinatesList = m.PathCoordinatesList,
             ConnectedManalithCoordinate = m.ConnectedManalithCoordinate,
