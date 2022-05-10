@@ -65,7 +65,8 @@ public class SkillTreeButtonData : MonoBehaviour
                 if (IncomingConnection.initialized)
                 {
                     InConnectionLine.Points[1] = new Vector2(IncomingConnection.rectTransform.anchoredPosition.x - rectTransform.anchoredPosition.x, IncomingConnection.rectTransform.anchoredPosition.y - rectTransform.anchoredPosition.y);
-                    InConnectionLine.gameObject.transform.parent = StateHandler.LinePanel;
+                    InConnectionLine.gameObject.transform.SetParent(StateHandler.LinePanel, true);
+                    InConnectionLine.gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
                     InConnectionLine.SetAllDirty();
 
                 }
@@ -75,7 +76,8 @@ public class SkillTreeButtonData : MonoBehaviour
             {
                 RectTransform baseRect = StateHandler.gameObject.GetComponent<RectTransform>();
                 InConnectionLine.Points[1] = new Vector2(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y);
-                InConnectionLine.gameObject.transform.parent = StateHandler.LinePanel;
+                InConnectionLine.gameObject.transform.SetParent(StateHandler.LinePanel, true);
+                InConnectionLine.gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
                 InConnectionLine.SetAllDirty();
             }
 
@@ -86,7 +88,7 @@ public class SkillTreeButtonData : MonoBehaviour
                 ButtonImageUP.sprite = StateHandler.ButtonUPSet[(int) NodeType];
                 ButtonImageUP.gameObject.SetActive(true);
                 ButtonImageDOWN.sprite = StateHandler.ButtonDOWNSet[(int) NodeType];
-                UpdateButtonstate(StateHandler.CurrentTier());
+                UpdateButtonstate();
                 rectTransform = gameObject.GetComponent<RectTransform>();
                 initialized = true;
             }
@@ -101,7 +103,7 @@ public class SkillTreeButtonData : MonoBehaviour
                 ButtonImageUP.sprite = StateHandler.ButtonUPSet[0];
                 ButtonImageUP.gameObject.SetActive(true);
                 ButtonImageDOWN.sprite = StateHandler.ButtonDOWNSet[0];
-                UpdateButtonstate(StateHandler.CurrentTier());
+                UpdateButtonstate();
                 if (State == ButtonState.learned)
                 {
                     ColorizeIn = StateHandler.PlayerColor;
@@ -113,11 +115,11 @@ public class SkillTreeButtonData : MonoBehaviour
         }
     }
 
-    public void UpdateButtonstate(uint currentTier)
+    public void UpdateButtonstate()
     {
         if (IncomingConnection != null)
         {
-            if (IncomingConnection.State == ButtonState.learned && currentTier >= Tier)
+            if (IncomingConnection.State == ButtonState.learned && StateHandler.CurrentTier() >= Tier)
             {
                 if (State != ButtonState.learned || State != ButtonState.unlearned)
                 {
@@ -159,7 +161,7 @@ public class SkillTreeButtonData : MonoBehaviour
                 }
                 foreach (SkillTreeButtonData b in OutgoingConnections)
                 {
-                    b.UpdateButtonstate(StateHandler.CurrentTier());
+                    b.UpdateButtonstate();
                 }
             }
         }

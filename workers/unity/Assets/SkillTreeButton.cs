@@ -41,7 +41,7 @@ public class SkillTreeButton : Button
         if (!data.StateHandler.ToolTipPanel.gameObject.activeSelf)
         {
             data.StateHandler.ToolTipPanel.gameObject.SetActive(true);
-            data.StateHandler.ToolTipPanel.rect.anchoredPosition = new Vector2(data.rectTransform.anchoredPosition.x - (data.StateHandler.ToolTipPanel.rect.sizeDelta.x * .75f), data.rectTransform.anchoredPosition.y);
+            data.StateHandler.ToolTipPanel.rect.anchoredPosition = new Vector2(data.rectTransform.anchoredPosition.x, data.rectTransform.anchoredPosition.y - (data.StateHandler.ToolTipPanel.rect.sizeDelta.y * .75f));
             data.PopulateTooltip();
         }
 
@@ -50,6 +50,10 @@ public class SkillTreeButton : Button
     {
         base.OnPointerExit(eventData);
         data.HoverGlow.gameObject.SetActive(false);
-        
+        if (data.StateHandler.ToolTipPanel.gameObject.activeSelf)
+        {
+            data.StateHandler.ToolTipPanel.gameObject.SetActive(false);
+
+        }
     }
 }
