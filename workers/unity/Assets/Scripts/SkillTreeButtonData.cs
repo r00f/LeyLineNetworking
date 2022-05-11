@@ -74,7 +74,7 @@ public class SkillTreeButtonData : MonoBehaviour
             }
             else
             {
-                RectTransform baseRect = StateHandler.gameObject.GetComponent<RectTransform>();
+                //RectTransform baseRect = StateHandler.gameObject.GetComponent<RectTransform>();
                 InConnectionLine.Points[1] = new Vector2(rectTransform.anchoredPosition.x, rectTransform.anchoredPosition.y);
                 InConnectionLine.gameObject.transform.SetParent(StateHandler.LinePanel, true);
                 InConnectionLine.gameObject.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -121,11 +121,18 @@ public class SkillTreeButtonData : MonoBehaviour
         {
             if (IncomingConnection.State == ButtonState.learned && StateHandler.CurrentTier() >= Tier)
             {
-                if (State != ButtonState.learned || State != ButtonState.unlearned)
+                if (State != ButtonState.learned && State != ButtonState.unlearned && StateHandler.Knowledge - NodeCost >= 0)
                 {
                     State = ButtonState.unlearned;
                     ColorizeIn = Color.white;
                     InConnectionLine.color = Color.white;
+                    colorize();
+                }
+                else if (State == ButtonState.unlearned && StateHandler.Knowledge - NodeCost < 0)
+                {
+                    State = ButtonState.unaccessible;
+                    ColorizeIn = new Color(.6f, .6f, .6f, .5f);
+                    InConnectionLine.color = new Color(.6f, .6f, .6f, .5f); ;
                     colorize();
                 }
             }
@@ -154,15 +161,15 @@ public class SkillTreeButtonData : MonoBehaviour
                 State = ButtonState.learned;
                 ColorizeIn = StateHandler.PlayerColor;
                 StateHandler.Knowledge -= NodeCost;
+                StateHandler.KnowledgeText.text = StateHandler.Knowledge.ToString();
                 colorize();
                 if (NodeType == Nodetype.TierUpgrade)
                 {
                     StateHandler.IncrementTier();
                 }
-                foreach (SkillTreeButtonData b in OutgoingConnections)
-                {
-                    b.UpdateButtonstate();
-                }
+                var nodes = StateHandler.Nodes;
+                StateHandler.Nodes = nodes;
+                StateHandler.UpdateAllOtherButtons(this);
             }
         }
 
@@ -182,7 +189,7 @@ public class SkillTreeButtonData : MonoBehaviour
         }
         else
         {
-            GraduateLine(InConnectionLine, ColorizeIn, Color.white);
+            GraduateLine(InConnectionLine, ColorizeIn, StateHandler.PlayerColor);
         }
     }
 

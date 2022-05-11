@@ -16,6 +16,7 @@ public class SkillTreeStateHandler : MonoBehaviour, IPointerDownHandler, IPointe
     public int Knowledge;
     public TreeNodeTooltipHandler ToolTipPanel;
     public RectTransform rect;
+    public Text KnowledgeText;
     bool dragmode;
     Vector2 MoseDragStartpos = new Vector2(0,0);
     // Start is called before the first frame update
@@ -46,6 +47,7 @@ public class SkillTreeStateHandler : MonoBehaviour, IPointerDownHandler, IPointe
         }
         ToolTipPanel.rect = ToolTipPanel.gameObject.GetComponent<RectTransform>();
         rect = gameObject.GetComponent<RectTransform>();
+        KnowledgeText.text = Knowledge.ToString();
         
     }
 
@@ -85,7 +87,7 @@ public class SkillTreeStateHandler : MonoBehaviour, IPointerDownHandler, IPointe
     bool inbounds_x(float DesiredPosX)
     {
         bool isInBounds = false;
-        if(DesiredPosX > -(rect.sizeDelta.x/2) && DesiredPosX < (rect.sizeDelta.x / 2)) { 
+        if(DesiredPosX > -(rect.sizeDelta.x/4) && DesiredPosX < (rect.sizeDelta.x / 4)) { 
             isInBounds = true;
         }
         return isInBounds;
@@ -93,11 +95,21 @@ public class SkillTreeStateHandler : MonoBehaviour, IPointerDownHandler, IPointe
     bool inbounds_y(float DesiredPosY)
     {
         bool isInBounds = false;
-        if (DesiredPosY > -rect.sizeDelta.y && DesiredPosY <= 0)
+        if (DesiredPosY > -(rect.sizeDelta.y/2) && DesiredPosY <= 0)
         {
             isInBounds = true;
         }
         return isInBounds;
+    }
+
+    public void UpdateAllOtherButtons(SkillTreeButtonData data) {
+        foreach (SkillTreeButtonData b in Nodes)
+        {
+            if (b != data)
+            {
+                b.UpdateButtonstate();
+            }
+        }
     }
 
 

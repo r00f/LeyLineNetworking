@@ -30,6 +30,7 @@ public class UIReferences : MonoBehaviour
     public HelpPanel HelpPanelComponent;
     public GameObject HelpPanel;
     public GameObject SkillTreePanel;
+    public SkillTreeStateHandler SkilltreeHandler;
     public UnitInspectionPanel UnitInspection;
     public EscapeMenu EscapeMenu;
 

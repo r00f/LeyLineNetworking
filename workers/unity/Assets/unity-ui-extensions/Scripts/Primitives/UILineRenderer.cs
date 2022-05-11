@@ -391,17 +391,21 @@ namespace UnityEngine.UI.Extensions
         protected override UIVertex[] SetVbo(Vector2[] vertices, Vector2[] uvs, int segmentIndex)
         {
             UIVertex[] vbo = new UIVertex[4];
-
-            for (int i = 0; i < vertices.Length; i++)
+            if (Points.Length > 1)
             {
-                var vert = UIVertex.simpleVert;
-                if (i < 2)
-                    vert.color = Gradient.Evaluate((segmentIndex + 3) / Points.Length);
-                else
-                    vert.color = Gradient.Evaluate((segmentIndex + 4) / Points.Length);
-                vert.position = vertices[i];
-                vert.uv0 = uvs[i];
-                vbo[i] = vert;
+                var offset = Mathf.RoundToInt(Points.Length / 2);
+
+                for (int i = 0; i < vertices.Length; i++)
+                {
+                    var vert = UIVertex.simpleVert;
+                    if (i < 2)
+                        vert.color = Gradient.Evaluate((segmentIndex + (offset-1)) / Points.Length);
+                    else
+                        vert.color = Gradient.Evaluate((segmentIndex + offset) / Points.Length);
+                    vert.position = vertices[i];
+                    vert.uv0 = uvs[i];
+                    vbo[i] = vert;
+                }
             }
             return vbo;
         }

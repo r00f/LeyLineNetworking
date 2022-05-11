@@ -220,7 +220,7 @@ namespace LeyLineHybridECS
                     UIRef.TurnStatePnl.GOButtonScript.LightCircle.color = UIRef.FriendlyColor;
                     UIRef.TurnStatePnl.GOButtonScript.LightFlare.color = UIRef.FriendlyColor;
                     UIRef.TurnStatePnl.GOButtonScript.LightInner.color = UIRef.FriendlyColor;
-
+                    UIRef.SkilltreeHandler.PlayerColor = UIRef.FriendlyColor;
 
                     if (!UIRef.MatchReadyPanel.activeSelf)
                     {
