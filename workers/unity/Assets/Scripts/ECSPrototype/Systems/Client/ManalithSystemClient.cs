@@ -109,7 +109,11 @@ public class ManalithSystemClient : JobComponentSystem
                     if (bountyCollect)
                     {
                         Debug.Log("Collect Bounty from Manalith with ID: " + EventID);
-                        manalithObject.ChargedPS.Stop();
+                        var emission = manalithObject.ChargedPS.emission;
+                        var main = manalithObject.ChargedPS.main;
+                        main.startLifetimeMultiplier = 5;
+                        emission.enabled = false;
+                        //manalithObject.ChargedPS.Stop();
                     }
 
                     //Fire Get Capture effects
