@@ -61,12 +61,12 @@ public class MinimapScript : MonoBehaviour, IPointerEnterHandler, IPointerExitHa
             Vector2 MouseScreenPos = Input.mousePosition;
             Vector2 RectPos = Map.position;
             Vector2 Dir = (MouseScreenPos - RectPos) / (Screen.width / Map.rect.width);
-            Vector3 PlanePosition = new Vector3(MapCenter.x + (scale * Dir.x), 0, MapCenter.z + (scale * Dir.y));
+            //Vector3 PlanePosition = new Vector3(MapCenter.x + (scale * Dir.x), 0, MapCenter.z + (scale * Dir.y));
 
             if(h_Transform != null)
             {
                 h_Transform.Transform = null;
-                h_Transform.Position = PlanePosition;
+                //h_Transform.Position = PlanePosition;
                 h_Transform.requireUpdate = true;
             }
         }

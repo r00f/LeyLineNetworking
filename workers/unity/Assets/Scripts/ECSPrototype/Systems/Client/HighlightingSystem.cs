@@ -613,7 +613,7 @@ public class HighlightingSystem : JobComponentSystem
         Vector3 arcOrigin = inLineRendererComp.transform.position + inLineRendererComp.arcOffset;
         Vector3 arcTarget = new Vector3(inTarget.x, inTarget.y + targetYOffset, inTarget.z);
 
-        Vector3[] arcPath = CalculateSinusPath(arcOrigin, arcTarget, 1);
+        Vector3[] arcPath = CellGridMethods.CalculateSinusPath(arcOrigin, arcTarget, 1);
         inLineRendererComp.lineRenderer.positionCount = arcPath.Length;
 
         Keyframe[] keys = inLineRendererComp.ArcLineWidthCurve.keys;
@@ -625,44 +625,6 @@ public class HighlightingSystem : JobComponentSystem
         inLineRendererComp.lineRenderer.SetPositions(arcPath);
     }
 
-    public Vector3[] CalculateSinusPath(Vector3 origin, Vector3 target, float zenitHeight)
-    {
-        Vector3 distance = target - origin;
-        int numberOfPositions = 8 + (2 * Mathf.RoundToInt(distance.magnitude) / 2);
-
-        Vector3[] sinusPath = new Vector3[numberOfPositions + 1];
-        float heightDifference = origin.y - target.y;
-        float[] ypositions = CalculateSinusPoints(numberOfPositions);
-        float xstep = 1.0f / numberOfPositions;
-
-        for (int i = 0; i < ypositions.Length; i++)
-        {
-            float sinYpos = ypositions[i] * zenitHeight - heightDifference * (xstep * i);
-            sinusPath[i] = origin + new Vector3(distance.x * (xstep * i), sinYpos, distance.z * (xstep * i));
-        }
-
-        sinusPath[numberOfPositions] = target;
-
-        return sinusPath;
-    }
-
-    public float[] CalculateSinusPoints(int numberOfPositions)
-    {
-        float[] yPosArray = new float[numberOfPositions];
-        float xStep = 1.0f / numberOfPositions;
-        int i = 0;
-
-        for (float x = 0.0f; x <= 1.0f; x += xStep)
-        {
-            if (i < yPosArray.Length)
-            {
-                yPosArray[i] = (float)Math.Sin(x * Math.PI);
-                i++;
-            }
-        }
-
-        return yPosArray;
-    }
 
     public void ResetHighlights(ref PlayerState.Component playerState, HighlightingDataComponent playerHigh, PlayerEffects playerEffects)
     {

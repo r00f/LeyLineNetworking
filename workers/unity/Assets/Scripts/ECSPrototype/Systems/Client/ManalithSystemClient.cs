@@ -8,11 +8,13 @@ using Unity.Collections;
 using System.Collections.Generic;
 using Unity.Jobs;
 using FMODUnity;
+using Player;
 
 //Update after playerState selected unit has been set
 [DisableAutoCreation, UpdateInGroup(typeof(SpatialOSUpdateGroup))]
 public class ManalithSystemClient : JobComponentSystem
 {
+    EntityQuery m_PlayerData;
     EntityQuery m_GameStateData;
     EntityQuery m_ManalithData;
     UISystem m_UISystem;
@@ -33,6 +35,12 @@ public class ManalithSystemClient : JobComponentSystem
 
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>()
+        );
+
+        m_PlayerData = GetEntityQuery(
+            ComponentType.ReadOnly<HeroTransform>(),
+            ComponentType.ReadOnly<PlayerState.HasAuthority>(),
+            ComponentType.ReadOnly<PlayerState.Component>()
         );
     }
 
@@ -94,6 +102,11 @@ public class ManalithSystemClient : JobComponentSystem
             manalithsConnected = true;
         }
 
+        if (m_PlayerData.CalculateEntityCount() != 1)
+            return inputDeps;
+
+        var playerEntity = m_PlayerData.GetSingletonEntity();
+        var playerHeroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
         var manalithFactionChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Manalith.ManalithFactionChangeEvent.Event>();
 
         for (int q = 0; q < manalithFactionChangeEvents.Count; q++)
@@ -108,12 +121,23 @@ public class ManalithSystemClient : JobComponentSystem
                     //if a player captures a manalith for the first time, visualize Bounty collection
                     if (bountyCollect)
                     {
-                        Debug.Log("Collect Bounty from Manalith with ID: " + EventID);
                         var emission = manalithObject.ChargedPS.emission;
                         var main = manalithObject.ChargedPS.main;
-                        main.startLifetimeMultiplier = 5;
+
+                        manalithObject.ChargePSTravelCurve = CellGridMethods.CalculateSinusPath(manalithObject.OneShotParticleSystems[0].transform.position + new Vector3(0, 3, 0), playerHeroTransform.Transform.position, 5f);
+                        
+                        manalithObject.InitializeChargedParticlesIfNeeded();
+                        int numParticlesAlive = manalithObject.ChargedPS.GetParticles(manalithObject.ChargedPSParticles);
+
+                        for (int i = 0; i < numParticlesAlive; i++)
+                        {
+                            manalithObject.ChargedPSParticles[i].remainingLifetime = Vector3.Distance(manalithObject.transform.position, playerHeroTransform.Transform.position) * manalithObject.ChargedPSParticleLifeTimeModifier;
+                        }
+
+                        manalithObject.ChargedPS.SetParticles(manalithObject.ChargedPSParticles, numParticlesAlive);
+                        
                         emission.enabled = false;
-                        //manalithObject.ChargedPS.Stop();
+                        manalithObject.MoveChargedParticlesTowardsHero = true;
                     }
 
                     //Fire Get Capture effects
@@ -161,8 +185,47 @@ public class ManalithSystemClient : JobComponentSystem
             .Run();
         }
 
+
+
         Entities.ForEach((MeshColor meshColor, ManalithObject manalithObject, MeshGradientColor meshGradientColor, UnitEffects unitEffects) =>
         {
+            if (manalithObject.MoveChargedParticlesTowardsHero)
+            {
+                manalithObject.InitializeChargedParticlesIfNeeded();
+
+                int numParticlesAlive = manalithObject.ChargedPS.GetParticles(manalithObject.ChargedPSParticles);
+                var deltaTime = Time.DeltaTime;
+                var velocity = manalithObject.ChargedPS.velocityOverLifetime;
+
+                if (manalithObject.CurrentTravelTime > 0)
+                {
+                    manalithObject.CurrentTravelTime -= deltaTime;
+                }
+                else if(manalithObject.CurrentTargetIndex < manalithObject.ChargePSTravelCurve.Length-1)
+                {
+                    float dist;
+                    if (manalithObject.CurrentTargetIndex == 0)
+                        dist = 0.1f;
+                    else
+                        dist = Vector3.Distance(manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex - 1], manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex]);
+
+                    manalithObject.CurrentTravelTime = dist / manalithObject.ChargedPSParticleSpeed;
+                    manalithObject.CurrentTargetIndex++;
+                }
+
+                velocity.orbitalOffsetX = manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex].x - manalithObject.transform.position.x;
+                velocity.orbitalOffsetY = manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex].y - manalithObject.transform.position.y;
+                velocity.orbitalOffsetZ = manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex].z - manalithObject.transform.position.z;
+
+                for (int i = 0; i < numParticlesAlive; i++)
+                {
+                    manalithObject.ChargedPSParticles[i].position = Vector3.MoveTowards(manalithObject.ChargedPSParticles[i].position, manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex], deltaTime * manalithObject.ChargedPSParticleSpeed);
+                    manalithObject.ChargedPSParticles[i].startColor = meshColor.LerpColor;
+                }
+
+                manalithObject.ChargedPS.SetParticles(manalithObject.ChargedPSParticles, numParticlesAlive);
+            }
+
             if (meshColor.LerpColor != meshColor.Color)
                 meshColor.LerpColor = Color.Lerp(meshColor.LerpColor, meshColor.Color, 0.05f);
 

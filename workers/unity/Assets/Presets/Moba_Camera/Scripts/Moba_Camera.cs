@@ -344,7 +344,7 @@ public class Moba_Camera : MonoBehaviour {
         {
             settings.cameraLocked = false;
             settings.lockTargetTransform = null;
-            requirements.pivot.position = new Vector3(heroTransform.Position.x, requirements.pivot.position.y, heroTransform.Position.z);
+            requirements.pivot.position = new Vector3(heroTransform.Transform.position.x, requirements.pivot.position.y, heroTransform.Transform.position.z);
             heroTransform.requireUpdate = false;
         }
     }
