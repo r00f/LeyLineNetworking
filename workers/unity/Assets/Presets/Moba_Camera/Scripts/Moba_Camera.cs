@@ -332,20 +332,15 @@ public class Moba_Camera : MonoBehaviour {
 
     void SetTarget()
     {
-        if(heroTransform.Transform != null)
+        if(heroTransform.Transform != null && settings.lockTargetTransform == null)
         {
-            if(settings.lockTargetTransform == null)
-            {
-                settings.lockTargetTransform = heroTransform.Transform;
-                settings.cameraLocked = true;
-            }
+            settings.lockTargetTransform = heroTransform.Transform;
         }
-        if (heroTransform.requireUpdate)
+        if (heroTransform.MoveCameraToMapClickPosition)
         {
             settings.cameraLocked = false;
-            settings.lockTargetTransform = null;
-            requirements.pivot.position = new Vector3(heroTransform.Transform.position.x, requirements.pivot.position.y, heroTransform.Transform.position.z);
-            heroTransform.requireUpdate = false;
+            requirements.pivot.position = new Vector3(heroTransform.TargetMapPosition.x, requirements.pivot.position.y, heroTransform.TargetMapPosition.z);
+            heroTransform.MoveCameraToMapClickPosition = false;
         }
     }
 	

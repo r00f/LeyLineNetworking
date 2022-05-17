@@ -6,6 +6,9 @@ using FMODUnity;
 public class ManalithObject : MonoBehaviour
 {
     [HideInInspector]
+    public float VelocitySpeedMultiplier = 2;
+    public bool ResetSuccParticleBehaviour;
+    [HideInInspector]
     public float ChargedPSParticleLifeTimeModifier = 1000;
     public float ChargedPSParticleSpeed = 5;
     public int CurrentTargetIndex;
