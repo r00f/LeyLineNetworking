@@ -145,7 +145,7 @@ public class ManalithSystem : JobComponentSystem
                     {
                         resourceSystem.AddEnergy(worldIndex, faction.Faction, manalithComp.Bounty);
                         componentUpdateSystem.SendEvent(
-                         new Manalith.ManalithFactionChangeEvent.Event(new ManalithFactionChange(true)),
+                         new Manalith.ManalithFactionChangeEvent.Event(new ManalithFactionChange(manalithComp.Bounty)),
                          entityId.EntityId
                          );
                         manalithComp.Bounty = 0;
@@ -153,7 +153,7 @@ public class ManalithSystem : JobComponentSystem
                     else
                     {
                         componentUpdateSystem.SendEvent(
-                         new Manalith.ManalithFactionChangeEvent.Event(new ManalithFactionChange(false)),
+                         new Manalith.ManalithFactionChangeEvent.Event(new ManalithFactionChange(0)),
                          entityId.EntityId);
                     }
                 }

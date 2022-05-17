@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class MainTurnDisplay : MonoBehaviour
 {
+    [Header("TurnstateDisplay")]
     [SerializeField]
     Image screenGlowImage;
     [SerializeField]
@@ -12,19 +13,29 @@ public class MainTurnDisplay : MonoBehaviour
     [SerializeField]
     Text turnXLargeText;
     [SerializeField]
-    Text energyText;
-    [SerializeField]
-    Text energyNumber;
-    [SerializeField]
-    Image energyIcon;
-    [SerializeField]
     float fadeDuration;
     [SerializeField]
     float scrollSpeed;
     [SerializeField]
     float turnXFadeDuration;
+    [Header("EnergyGain")]
+    [SerializeField]
+    Text energyText;
+    [SerializeField]
+    Text energyNumber;
+    [SerializeField]
+    Image energyIcon;
+    [Header("BountyEnergy")]
+    [SerializeField]
+    Text bonusEnergyText;
+    [SerializeField]
+    Text bonusEnergyNumber;
+    [SerializeField]
+    Image bonusEnergyIcon;
     [HideInInspector]
     public uint EnergyGained = 0;
+  //  [HideInInspector]
+    public uint BonusEnergy = 0;
     [HideInInspector]
     public uint CurrentStepID;
     [HideInInspector]
@@ -36,6 +47,7 @@ public class MainTurnDisplay : MonoBehaviour
     public float timer;
     float startpos;
     float xposInterval;
+    bool bonusgained = false;
 
     void Start()
     {
@@ -78,13 +90,38 @@ public class MainTurnDisplay : MonoBehaviour
                     energyNumber.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                     energyIcon.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
                     timer = 0f;
+                    if (BonusEnergy > 0)
+                    {
+                        bonusEnergyIcon.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
+                        bonusEnergyNumber.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
+                        bonusEnergyNumber.text = "+" + BonusEnergy.ToString();
+                        bonusEnergyText.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1);
+                        BonusEnergy = 0;
+                        bonusgained = true;
+                    }
+                    else
+                    {
+                        bonusEnergyNumber.text = "+ 0";
+                        bonusEnergyIcon.color = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0);
+                        bonusEnergyNumber.color = new Color(1, 1, 1, 0);
+                        bonusEnergyText.color = new Color(1, 1, 1, 0);
+                        bonusgained = false;
+                    }
                 }
                 if (timer < 1f)
                 {
-                    turnXLargeText.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
-                    energyText.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
-                    energyNumber.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
-                    energyIcon.color = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
+                    Color Lerpcolor = Color.Lerp(new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 1), new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0), timer);
+
+                    turnXLargeText.color = Lerpcolor;
+                    energyText.color = Lerpcolor;
+                    energyNumber.color = Lerpcolor;
+                    energyIcon.color = Lerpcolor;
+                    if (bonusgained)
+                    {
+                        bonusEnergyText.color = Lerpcolor;
+                        bonusEnergyNumber.color = Lerpcolor;
+                        bonusEnergyIcon.color = Color.Lerp(new Color(bonusEnergyIcon.color.r, bonusEnergyIcon.color.g, bonusEnergyIcon.color.b, 1), new Color(bonusEnergyIcon.color.r, bonusEnergyIcon.color.g, bonusEnergyIcon.color.b, 0), timer);
+                    }
                     turnstateDisplay.uncoloredImages[0].color = Color.Lerp(new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 1), new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 0), timer);
                     turnstateDisplay.PlanningOutline.color = Color.Lerp(Color.black, new Color(0, 0, 0, 0), timer);
                     timer += delta / turnXFadeDuration;

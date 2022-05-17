@@ -26,5 +26,5 @@ type ManalithSlot
 
 type ManalithFactionChange
 {
-    bool bounty_collect = 1;
+    uint32 bounty_collect = 1;
 }

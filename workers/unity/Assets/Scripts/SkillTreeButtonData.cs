@@ -161,7 +161,7 @@ public class SkillTreeButtonData : MonoBehaviour
                 State = ButtonState.learned;
                 ColorizeIn = StateHandler.PlayerColor;
                 StateHandler.Knowledge -= NodeCost;
-                StateHandler.KnowledgeText.text = StateHandler.Knowledge.ToString();
+                StateHandler.KnowledgeText.text = "Knowledge: " + StateHandler.Knowledge.ToString();
                 colorize();
                 if (NodeType == Nodetype.TierUpgrade)
                 {

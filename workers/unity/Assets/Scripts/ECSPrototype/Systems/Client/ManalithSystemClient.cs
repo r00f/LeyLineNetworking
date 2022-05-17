@@ -18,6 +18,7 @@ public class ManalithSystemClient : JobComponentSystem
     EntityQuery m_GameStateData;
     EntityQuery m_ManalithData;
     UISystem m_UISystem;
+    UIReferences m_UIRef;
     ILogDispatcher logger;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     Settings settings;
@@ -49,6 +50,7 @@ public class ManalithSystemClient : JobComponentSystem
     {
         base.OnStartRunning();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+        m_UIRef = Object.FindObjectOfType<UIReferences>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
         m_UISystem = World.GetExistingSystem<UISystem>();
     }
@@ -121,13 +123,15 @@ public class ManalithSystemClient : JobComponentSystem
                 if (id.EntityId.Id == EventID)
                 {
                     //if a player captures a manalith for the first time, visualize Bounty collection
-                    if (bountyCollect)
+                    if (bountyCollect > 0)
                     {
                         if(faction.Faction == authPlayerFaction.Faction)
                         {
                             manalithObject.ChargePSTravelCurve = CellGridMethods.CalculateSinusPath(manalithObject.OneShotParticleSystems[0].transform.position + new Vector3(0, 3, 0), playerHeroTransform.Transform.position, 5f);
                             manalithObject.MoveChargedParticlesTowardsHero = true;
+                            m_UIRef.TurnDisplay.BonusEnergy += bountyCollect;
                         }
+                        
                         var emission = manalithObject.ChargedPS.emission;
                         emission.enabled = false;
                     }

@@ -47,7 +47,7 @@ public class SkillTreeStateHandler : MonoBehaviour, IPointerDownHandler, IPointe
         }
         ToolTipPanel.rect = ToolTipPanel.gameObject.GetComponent<RectTransform>();
         rect = gameObject.GetComponent<RectTransform>();
-        KnowledgeText.text = Knowledge.ToString();
+        KnowledgeText.text = "Knowledge: " + Knowledge.ToString();
         
     }
 
