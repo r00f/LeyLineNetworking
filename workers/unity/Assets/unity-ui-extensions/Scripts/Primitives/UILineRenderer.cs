@@ -8,6 +8,7 @@ namespace UnityEngine.UI.Extensions
 {
     [AddComponentMenu("UI/Extensions/Primitives/UILineRenderer")]
     [RequireComponent(typeof(RectTransform))]
+    [RequireComponent(typeof(CanvasRenderer))]
     public class UILineRenderer : UIPrimitiveBase
 	{
 		private enum SegmentType
