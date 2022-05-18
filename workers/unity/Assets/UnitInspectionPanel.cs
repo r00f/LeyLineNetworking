@@ -11,4 +11,6 @@ public class UnitInspectionPanel : MonoBehaviour
     public Image PortraitGlow;
     public List<ActionButton> HoverOnlyButtons = new List<ActionButton>();
     public SelectedActionToolTip ToolTip;
+    public ManalithStatDisplay ManalithStatPanel;
+    public UnitStatDisplay UnitStatPanel;
 }
