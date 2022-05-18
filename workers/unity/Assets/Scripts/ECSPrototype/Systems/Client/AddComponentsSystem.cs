@@ -121,7 +121,12 @@ public class AddComponentsSystem : JobComponentSystem
 
             if (EntityManager.HasComponent<ManalithInitializer>(entity))
             {
+                var manalith = EntityManager.GetComponentData<Manalith.Component>(entity);
+                var manalithObject = EntityManager.GetComponentObject<ManalithObject>(entity);
                 var manalithInit = EntityManager.GetComponentObject<ManalithInitializer>(entity);
+
+                var em = manalithObject.ChargedPS.emission;
+                em.rateOverTime = manalith.Bounty;
 
                 for (int i = 0; i < manalithInit.leyLinePathRenderer.positionCount; i++)
                 {

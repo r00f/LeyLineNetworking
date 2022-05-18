@@ -31,6 +31,14 @@ public class Settings : ScriptableObject
     public GameObject ExplosionDebugSphere;
     public Material ActionPreviewMat;
 
+    [Header("Manalith Global Settings")]
+    public float ChargedPSSpeedMultiplier;
+    public float ChargedPSVelocityMultiplier;
+    public float ChargedPSRemainingLifetime;
+    public int ChargedPSCurveCutoff;
+
+
+
     [Header("Snapshot Settings")]
     public uint MapCount;
     public uint MapsPerRow;

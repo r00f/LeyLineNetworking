@@ -6,11 +6,9 @@ using FMODUnity;
 public class ManalithObject : MonoBehaviour
 {
     [HideInInspector]
-    public float VelocitySpeedMultiplier = 2;
+    public bool IncomeParticlesEmitted;
     public bool ResetSuccParticleBehaviour;
-    [HideInInspector]
-    public float ChargedPSParticleLifeTimeModifier = 1000;
-    public float ChargedPSParticleSpeed = 5;
+    public float AdjustedChargedPSParticleSpeed;
     public int CurrentTargetIndex;
     public float CurrentTravelTime;
     public Vector3[] ChargePSTravelCurve;
@@ -30,16 +28,7 @@ public class ManalithObject : MonoBehaviour
     [HideInInspector]
     public MiniMapTile BigMapTileInstance;
     public ParticleSystem.Particle[] ChargedPSParticles;
-    /*
-    public void FillSelectionOutlineObjects()
-    {
-        SelectionOutlineRenderers.Clear();
-        foreach(MeshRenderer r in GetComponentsInChildren<MeshRenderer>())
-        {
-            SelectionOutlineRenderers.Add(r.gameObject);
-        }
-    }
-    */
+
     public void InitializeChargedParticlesIfNeeded()
     {
         if (ChargedPSParticles == null || ChargedPSParticles.Length < ChargedPS.main.maxParticles)

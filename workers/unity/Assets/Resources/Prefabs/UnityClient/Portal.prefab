@@ -460,10 +460,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b287518373f8be64c859b37feb3723e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IncomeParticlesEmitted: 0
   VelocitySpeedMultiplier: 3
   ResetSuccParticleBehaviour: 0
-  ChargedPSParticleLifeTimeModifier: 1000
-  ChargedPSParticleSpeed: 5
+  ChargedPSParticleSpeed: 1.5
+  AdjustedChargedPSParticleSpeed: 0
   CurrentTargetIndex: 0
   CurrentTravelTime: 0
   ChargePSTravelCurve: []
