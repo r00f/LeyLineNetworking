@@ -301,6 +301,7 @@ public static class LeyLineEntityTemplates {
             CircleCoordinatesList = circleCellCoords,
             PathCoordinatesList = pathCellCoords,
             ConnectedManalithCoordinate = connectedManalithCoord,
+            CombinedEnergyGain = Stats.EnergyIncome,
             Manalithslots = manalithSlots
         };
 

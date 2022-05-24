@@ -34,7 +34,7 @@ public class MainTurnDisplay : MonoBehaviour
     Image bonusEnergyIcon;
     [HideInInspector]
     public uint EnergyGained = 0;
-  //  [HideInInspector]
+    [HideInInspector]
     public uint BonusEnergy = 0;
     [HideInInspector]
     public uint CurrentStepID;

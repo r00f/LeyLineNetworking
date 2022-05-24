@@ -77,7 +77,7 @@ public class ManalithSystem : JobComponentSystem
         Entities.WithSharedComponentFilter(worldIndex).ForEach((ref EntityAcl.Component entityAcl, ref Manalith.Component manalith, ref FactionComponent.Component faction, ref Energy.Component energy, ref UnitVision vision, in SpatialEntityId entityId) =>
         {
             var manalithComp = manalith;
-            manalithComp.CombinedEnergyGain = 0;
+            manalithComp.CombinedEnergyGain = energy.EnergyIncome;
 
             for (int cci = 0; cci < manalithComp.Manalithslots.Count; cci++)
             {
@@ -115,7 +115,7 @@ public class ManalithSystem : JobComponentSystem
                     UpdateUnit(worldIndex, slot.UnitOnCellId, faction.Faction, ref manalithComp);
                 }
 
-                manalith.CombinedEnergyGain += energy.EnergyIncome;
+                //manalith.CombinedEnergyGain += energy.EnergyIncome;
                 vision.RequireUpdate = true;
 
                 manalithComp.StateChange = false;
@@ -157,9 +157,8 @@ public class ManalithSystem : JobComponentSystem
                          entityId.EntityId);
                     }
                 }
-
-                manalith = manalithComp;
             }
+            manalith = manalithComp;
         })
         .WithoutBurst()
         .Run();
