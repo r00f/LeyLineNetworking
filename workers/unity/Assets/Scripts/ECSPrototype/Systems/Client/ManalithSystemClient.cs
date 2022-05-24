@@ -113,20 +113,7 @@ public class ManalithSystemClient : JobComponentSystem
         var playerHeroTransform = EntityManager.GetComponentObject<HeroTransform>(playerEntity);
         var manalithFactionChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<Manalith.ManalithFactionChangeEvent.Event>();
         var cleanupEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
-        /*
-        var initMapEvent = m_ComponentUpdateSystem.GetEventsReceived<InitMapEvent.InitializeMapEvent.Event>();
 
-        for (int i = 0; i < initMapEvent.Count; i++)
-        {
-            Entities.ForEach((Manalith.Component manalith, ManalithObject manalithObject) =>
-            {
-                var em = manalithObject.ChargedPS.emission;
-                em.rateOverTime = manalith.Bounty;
-            })
-            .WithoutBurst()
-            .Run();
-        }
-        */
         for (int i = 0; i < cleanupEvents.Count; i++)
         {
             Entities.ForEach((ManalithObject manalithObject) =>
@@ -153,6 +140,14 @@ public class ManalithSystemClient : JobComponentSystem
                         {
                             manalithObject.ChargePSTravelCurve = CellGridMethods.CalculateSinusPath(manalithObject.OneShotParticleSystems[0].transform.position + new Vector3(0, 3, 0), playerHeroTransform.Transform.position, 5f);
                             UIRef.TurnDisplay.BonusEnergy += bountyCollect;
+                            var sub = manalithObject.ChargedPS.subEmitters.GetSubEmitterSystem(0);
+                            var subVelocity = sub.velocityOverLifetime;
+
+                            Vector3 rotatedOffset = manalithObject.transform.InverseTransformPoint(playerHeroTransform.Transform.position) + Vector3.up;
+                            //rotatedOffset *= manalithObject.transform.rotation.eulerAngles;
+                            subVelocity.orbitalOffsetX = rotatedOffset.x;
+                            subVelocity.orbitalOffsetY = rotatedOffset.y;
+                            subVelocity.orbitalOffsetZ = rotatedOffset.z;
                         }
                         
                         var emission = manalithObject.ChargedPS.emission;
@@ -211,14 +206,14 @@ public class ManalithSystemClient : JobComponentSystem
             if (faction.Faction == authPlayerFaction.Faction && !manalithObject.IncomeParticlesEmitted && UIRef.CurrentEffectsFiredState == UIReferences.UIEffectsFired.interruptFired)
             {
                 manalithObject.ChargePSTravelCurve = CellGridMethods.CalculateSinusPath(manalithObject.OneShotParticleSystems[0].transform.position + new Vector3(0, 3, 0), playerHeroTransform.Transform.position, 5f);
-                EmitEnergyParticlesTowardsHero(manalithObject, (int)manalith.CombinedEnergyGain);
+                EmitEnergyParticlesTowardsHero(manalithObject, (int)manalith.CombinedEnergyGain, playerHeroTransform.Transform.position);
                 manalithObject.IncomeParticlesEmitted = true;
             }
 
             if (manalithObject.ResetSuccParticleBehaviour)
             {
                 manalithObject.ChargePSTravelCurve = CellGridMethods.CalculateSinusPath(manalithObject.OneShotParticleSystems[0].transform.position + new Vector3(0, 3, 0), playerHeroTransform.Transform.position, 5f);
-                EmitEnergyParticlesTowardsHero(manalithObject, 100);
+                EmitEnergyParticlesTowardsHero(manalithObject, 20, playerHeroTransform.Transform.position);
                 manalithObject.ResetSuccParticleBehaviour = false;
             }
 
@@ -258,9 +253,11 @@ public class ManalithSystemClient : JobComponentSystem
                     manalithObject.CurrentTargetIndex++;
                 }
 
-                velocity.orbitalOffsetX = manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex].x - manalithObject.transform.position.x;
-                velocity.orbitalOffsetY = manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex].y - manalithObject.transform.position.y;
-                velocity.orbitalOffsetZ = manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex].z - manalithObject.transform.position.z;
+                Vector3 rotatedOffset = manalithObject.transform.InverseTransformPoint(manalithObject.ChargePSTravelCurve[manalithObject.CurrentTargetIndex]);
+
+                velocity.orbitalOffsetX = rotatedOffset.x;
+                velocity.orbitalOffsetY = rotatedOffset.y;
+                velocity.orbitalOffsetZ = rotatedOffset.z;
 
                 for (int i = 0; i < numParticlesAlive; i++)
                 {
@@ -342,11 +339,17 @@ public class ManalithSystemClient : JobComponentSystem
         return inputDeps;
     }
 
-    void EmitEnergyParticlesTowardsHero(ManalithObject manalithObject, int particleAmount)
+    void EmitEnergyParticlesTowardsHero(ManalithObject manalithObject, int particleAmount, Vector3 heroPosition)
     {
         manalithObject.CurrentTargetIndex = 0;
-        var em = manalithObject.ChargedPS.emission;
+        var sub = manalithObject.ChargedPS.subEmitters.GetSubEmitterSystem(0);
+        var subVelocity = sub.velocityOverLifetime;
         var velocity = manalithObject.ChargedPS.velocityOverLifetime;
+
+        Vector3 rotatedOffset = manalithObject.transform.InverseTransformPoint(heroPosition) + Vector3.up;
+        subVelocity.orbitalOffsetX = rotatedOffset.x;
+        subVelocity.orbitalOffsetY = rotatedOffset.y;
+        subVelocity.orbitalOffsetZ = rotatedOffset.z;
 
         velocity.speedModifier = 1;
         manalithObject.ChargedPS.Emit(particleAmount);
