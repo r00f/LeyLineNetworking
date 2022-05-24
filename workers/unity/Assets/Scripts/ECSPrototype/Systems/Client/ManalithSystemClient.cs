@@ -153,7 +153,8 @@ public class ManalithSystemClient : JobComponentSystem
                         var emission = manalithObject.ChargedPS.emission;
                         emission.enabled = false;
                     }
-
+                    meshColor.MapColor = settings.FactionMapColors[(int) faction.Faction];
+                    meshColor.Color = settings.FactionColors[(int) faction.Faction];
                     manalithObject.MoveChargedParticlesTowardsHero = faction.Faction == authPlayerFaction.Faction;
 
                     //Fire Get Capture effects
@@ -164,7 +165,7 @@ public class ManalithSystemClient : JobComponentSystem
                             var ping = Object.Instantiate(manalithObject.BigMapTileInstance.GetCapturedMapEffect, manalithObject.BigMapTileInstance.TileRect.position, Quaternion.identity, m_UISystem.UIRef.BigMapComponent.MiniMapEffectsPanel.transform);
                             ParticleSystem.MainModule main = ping.ParticleSystem.main;
                             ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
-                            main.startColor = meshColor.Color;
+                            main.startColor = meshColor.MapColor;
                             size.sizeMultiplier = m_UISystem.UIRef.BigMapComponent.ManalithCapturePingSize + manalithObject.BigMapTileInstance.AddPingSize;
                             ping.ParticleSystem.Play();
                             ping.FMODEmitter.Play();
@@ -178,15 +179,14 @@ public class ManalithSystemClient : JobComponentSystem
                             var ping = Object.Instantiate(manalithObject.BigMapTileInstance.GetCapturedMapEffect, manalithObject.MiniMapTileInstance.TileRect.position, Quaternion.identity, m_UISystem.UIRef.MinimapComponent.MiniMapEffectsPanel.transform);
                             ParticleSystem.MainModule main = ping.ParticleSystem.main;
                             ParticleSystem.SizeOverLifetimeModule size = ping.ParticleSystem.sizeOverLifetime;
-                            main.startColor = meshColor.Color;
+                            main.startColor = meshColor.MapColor;
                             size.sizeMultiplier = m_UISystem.UIRef.MinimapComponent.ManalithCapturePingSize;
                             ping.ParticleSystem.Play();
                             Object.Destroy(ping.gameObject, 4f);
                         }
                     }
 
-                    meshColor.MapColor = settings.FactionMapColors[(int) faction.Faction];
-                    meshColor.Color = settings.FactionColors[(int) faction.Faction];
+
 
                     manalithObject.GainControlSoundEmitter.Play();
                     foreach (ParticleSystem p in manalithObject.OneShotParticleSystems)

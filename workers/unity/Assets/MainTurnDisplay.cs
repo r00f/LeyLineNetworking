@@ -174,6 +174,24 @@ public class MainTurnDisplay : MonoBehaviour
                 turnstateDisplay.coloredImages[(int) CurrentStepID - 2].color = new Color(0.5f, 0.5f, 0.5f, 0.5f);
             }
         }
+        else if (CurrentStepID == 5)
+        {
+            Color Lerpcolor = new Color(ColorizeText.r, ColorizeText.g, ColorizeText.b, 0);
+
+            turnXLargeText.color = Lerpcolor;
+            energyText.color = Lerpcolor;
+            energyNumber.color = Lerpcolor;
+            energyIcon.color = Lerpcolor;
+            if (bonusgained)
+            {
+                bonusEnergyText.color = Lerpcolor;
+                bonusEnergyNumber.color = Lerpcolor;
+                bonusEnergyIcon.color = new Color(bonusEnergyIcon.color.r, bonusEnergyIcon.color.g, bonusEnergyIcon.color.b, 0);
+            }
+            turnstateDisplay.uncoloredImages[0].color = new Color(turnstateDisplay.uncoloredImages[0].color.r, turnstateDisplay.uncoloredImages[0].color.g, turnstateDisplay.uncoloredImages[0].color.b, 0);
+            turnstateDisplay.PlanningOutline.color = new Color(0, 0, 0, 0);
+
+        }
         if (currentTurnstepText.color.a > 0)
         {
             if (currentTurnstepText.text != StateName /*|| new Color(currentTurnstepText.color.r, currentTurnstepText.color.g, currentTurnstepText.color.b, 1) != new Color(ColorizeText.a, ColorizeText.g, ColorizeText.b, 1)*/)
