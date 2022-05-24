@@ -32,6 +32,8 @@ public class ActionButton : MonoBehaviour, IPointerExitHandler, IPointerEnterHan
     public int ActionIndex;
     public int UnitId;
     public bool Hovered;
+    public bool IsSelectable = false;
+    public Image NotEnoughEnergyOverlay;
 
     private void Update()
     {

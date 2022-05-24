@@ -187,6 +187,8 @@ namespace LeyLineHybridECS
                         UIRef.EnemyColor = settings.FactionColors[1];
 
                     UIRef.HeroEnergyBar.HeroEnergyIncomeFill.color = UIRef.FriendlyIncomeColor;
+                    UIRef.HeroEnergyBar.baseEnergyColor = UIRef.FriendlyColor;
+                    UIRef.HeroEnergyBar.baseIncomeColor = UIRef.FriendlyIncomeColor;
                     UIRef.TotalEnergyIncomeText.color = UIRef.FriendlyIncomeColor;
 
                     UIRef.HeroPortraitPlayerColor.color = UIRef.FriendlyColor;
@@ -744,16 +746,18 @@ namespace LeyLineHybridECS
             for (int bi = 0; bi < UIRef.Actions.Count; bi++)
             {
                 ActionButton ab = UIRef.Actions[bi];
-                ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
-                ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab, UIRef.SAToolTip); });
+                ab.Button.onClick.AddListener(delegate { if (ab.IsSelectable) m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
+                ab.Button.onClick.AddListener(delegate { if (ab.IsSelectable) InitializeSelectedActionTooltip(ab, UIRef.SAToolTip); });
+                ab.Button.onClick.AddListener(delegate { if (!ab.IsSelectable) UIRef.HeroEnergyBar.NotEnoughEnergy(); });
                 ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
 
             for (int si = 0; si < UIRef.SpawnActions.Count; si++)
             {
                 ActionButton ab = UIRef.SpawnActions[si];
-                ab.Button.onClick.AddListener(delegate { m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
-                ab.Button.onClick.AddListener(delegate { InitializeSelectedActionTooltip(ab, UIRef.SAToolTip); });
+                ab.Button.onClick.AddListener(delegate { if (ab.IsSelectable) m_SendActionRequestSystem.SelectActionCommand(ab.ActionIndex, ab.UnitId); });
+                ab.Button.onClick.AddListener(delegate { if (ab.IsSelectable) InitializeSelectedActionTooltip(ab, UIRef.SAToolTip); });
+                ab.Button.onClick.AddListener(delegate { if (!ab.IsSelectable) UIRef.HeroEnergyBar.NotEnoughEnergy(); });
                 ab.Button.onClick.AddListener(delegate { m_PlayerStateSystem.ResetInputCoolDown(0.3f); });
             }
         }
@@ -1332,11 +1336,14 @@ namespace LeyLineHybridECS
                     {
                         if (stats.SpawnActions[si].Targets[0].energyCost > playerEnergy.Energy)
                         {
-                            UIRef.SpawnActions[si].Button.interactable = false;
+                            UIRef.SpawnActions[si].IsSelectable = false;
+                            UIRef.SpawnActions[si].NotEnoughEnergyOverlay.gameObject.SetActive(true);
                         }
                         else
                         {
-                            UIRef.SpawnActions[si].Button.interactable = true;
+                            UIRef.SpawnActions[si].IsSelectable = true;
+                            UIRef.SpawnActions[si].NotEnoughEnergyOverlay.gameObject.SetActive(false);
+
                         }
                         UIRef.SpawnActions[si].Visuals.SetActive(true);
 
@@ -1358,11 +1365,20 @@ namespace LeyLineHybridECS
                         {
                             if (stats.Actions[bi].Targets[0].energyCost > playerEnergy.Energy + actions.LockedAction.CombinedCost || playerEnergy.Energy == 0)
                             {
-                                UIRef.Actions[bi].Button.interactable = false;
+                                UIRef.Actions[bi].IsSelectable = false;
+                                UIRef.Actions[bi].NotEnoughEnergyOverlay.gameObject.SetActive(true);
+
+                                /*ColorBlock m_block = UIRef.Actions[bi].Button.colors;
+                                m_block.normalColor = new Color(UIRef.Actions[bi].Button.colors.normalColor.a, UIRef.Actions[bi].Button.colors.normalColor.b, UIRef.Actions[bi].Button.colors.normalColor.g, .5f);
+                                UIRef.Actions[bi].Button.colors = m_block; */
                             }
                             else
                             {
-                                UIRef.Actions[bi].Button.interactable = true;
+                                UIRef.Actions[bi].IsSelectable = true;
+                                UIRef.Actions[bi].NotEnoughEnergyOverlay.gameObject.SetActive(false);
+                                /* ColorBlock m_block = UIRef.Actions[bi].Button.colors;
+                                 m_block.normalColor = new Color(UIRef.Actions[bi].Button.colors.normalColor.a, UIRef.Actions[bi].Button.colors.normalColor.b, UIRef.Actions[bi].Button.colors.normalColor.g, 1f);
+                                 UIRef.Actions[bi].Button.colors = m_block; */
                             }
                             UIRef.Actions[bi] = FillButtonFields(UIRef.Actions[bi], stats, unitId, bi, false);
                         }
