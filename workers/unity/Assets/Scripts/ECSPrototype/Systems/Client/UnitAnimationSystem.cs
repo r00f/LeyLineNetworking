@@ -25,6 +25,7 @@ public class UnitAnimationSystem : JobComponentSystem
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
     Settings settings;
+    public UIReferences UIRef;
 
     protected override void OnCreate()
     {
@@ -53,6 +54,7 @@ public class UnitAnimationSystem : JobComponentSystem
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+        UIRef = Object.FindObjectOfType<UIReferences>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
     }
@@ -181,15 +183,15 @@ public class UnitAnimationSystem : JobComponentSystem
         })
         .WithoutBurst()
         .Run();
-        if (m_UISystem != null && !m_UISystem.UIRef.DollyPathCameraActive)
+
+        if (!UIRef.DollyPathCameraActive)
         {
             Entities.WithAll<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
-        {
-
-            SetHoveredOutlineColor(unitComponentReferences, true);
-        })
-        .WithoutBurst()
-        .Run();
+            {
+                SetHoveredOutlineColor(unitComponentReferences, true);
+            })
+            .WithoutBurst()
+            .Run();
 
             Entities.WithNone<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
             {

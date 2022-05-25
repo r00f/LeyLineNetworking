@@ -167,7 +167,7 @@ namespace BlankProject.Editor
                 var stats = m.GetComponent<UnitDataSet>();
                 var AIstats = m.GetComponent<AIUnitDataSet>();
 
-                var coordComp = m.GetComponent<ManalithInitializer>().occupiedCell.GetComponent<CoordinateDataComponent>().CubeCoordinate;
+                var coordComp = m.occupiedCell.GetComponent<CoordinateDataComponent>().CubeCoordinate;
 
                 var coord = new Vector3f(coordComp.x, coordComp.y, coordComp.z);
 
@@ -183,7 +183,7 @@ namespace BlankProject.Editor
                     pathCoordList.Add(Vector3fext.ToVector3f(f3));
                 }
 
-                var manalith = LeyLineEntityTemplates.ManalithUnit(m.name, pos, coord, 0, worldIndex, stats, (uint) m.transform.eulerAngles.y, circleCellCoords, pathCoordList, slots, connectedManalithCoord);
+                var manalith = LeyLineEntityTemplates.ManalithUnit(m.name, pos, coord, 0, worldIndex, stats, (uint) m.transform.eulerAngles.y, m, circleCellCoords, pathCoordList, slots, connectedManalithCoord);
                 snapshot.AddEntity(manalith);
             }
         }

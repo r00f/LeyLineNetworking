@@ -18,6 +18,8 @@ namespace LeyLineHybridECS
         DijkstraPathfinding pathFinder;
         HexagonalHexGridGenerator gridGenerator;
 
+        public uint bounty;
+
         [SerializeField]
         public List<bool> TakenNeighbours = new List<bool>();
 

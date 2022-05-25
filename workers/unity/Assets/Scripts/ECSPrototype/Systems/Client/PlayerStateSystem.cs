@@ -147,7 +147,7 @@ namespace LeyLineHybridECS
 
             Entities.ForEach((Entity e, UnitComponentReferences unitComponentReferences,  ref SpatialEntityId unitId, ref CubeCoordinate.Component unitCoord, ref MouseState mouseState, in Actions.Component actions, in FactionComponent.Component faction, in ClientActionRequest.Component clientActionRequest) =>
             {
-                if (unitId.EntityId.Id == pState.SelectedUnitId)
+                if (unitId.EntityId.Id == pState.SelectedUnitId && pState.CurrentState != PlayerStateEnum.conceded)
                 {
                     if(initialize)
                         m_UISystem.FillUnitButtons(actions, unitComponentReferences.BaseDataSetComp, faction.Faction, playerFaction.Faction, unitId.EntityId.Id, playerEnergy);

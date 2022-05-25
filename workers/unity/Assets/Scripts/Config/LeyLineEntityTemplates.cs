@@ -252,7 +252,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation, List<Vector3f> circleCellCoords, List<Vector3f> pathCellCoords, List<ManalithSlot> manalithSlots, Vector3f connectedManalithCoord)
+    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation, ManalithInitializer initializer,  List<Vector3f> circleCellCoords, List<Vector3f> pathCellCoords, List<ManalithSlot> manalithSlots, Vector3f connectedManalithCoord)
     {
         var turnTimer = new TurnTimer.Snapshot
         {
@@ -297,7 +297,7 @@ public static class LeyLineEntityTemplates {
 
         var manalith = new Manalith.Snapshot
         {
-            Bounty = 30,
+            Bounty = initializer.bounty,
             CircleCoordinatesList = circleCellCoords,
             PathCoordinatesList = pathCellCoords,
             ConnectedManalithCoordinate = connectedManalithCoord,
