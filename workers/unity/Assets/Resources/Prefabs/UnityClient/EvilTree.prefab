@@ -568,9 +568,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   IncomeParticlesEmitted: 0
-  VelocitySpeedMultiplier: 5
   ResetSuccParticleBehaviour: 0
-  ChargedPSParticleSpeed: 1.5
   AdjustedChargedPSParticleSpeed: 0
   CurrentTargetIndex: 0
   CurrentTravelTime: 0
@@ -1204,6 +1202,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: EvilTree
+      objectReference: {fileID: 0}
+    - target: {fileID: 2680405691785282148, guid: eb35fb18937f543489467dc6ea81c078,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5122251057176566542, guid: eb35fb18937f543489467dc6ea81c078,
+        type: 3}
+      propertyPath: AllMesheRenderers.Array.size
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5122251057176566542, guid: eb35fb18937f543489467dc6ea81c078,
         type: 3}
