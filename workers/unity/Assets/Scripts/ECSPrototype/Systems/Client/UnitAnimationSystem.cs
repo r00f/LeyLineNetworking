@@ -181,21 +181,23 @@ public class UnitAnimationSystem : JobComponentSystem
         })
         .WithoutBurst()
         .Run();
-
-        Entities.WithAll<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+        if (m_UISystem != null && !m_UISystem.UIRef.DollyPathCameraActive)
         {
+            Entities.WithAll<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+        {
+
             SetHoveredOutlineColor(unitComponentReferences, true);
         })
         .WithoutBurst()
         .Run();
 
-        Entities.WithNone<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
-        {
-            SetHoveredOutlineColor(unitComponentReferences, false);
-        })
-        .WithoutBurst()
-        .Run();
-
+            Entities.WithNone<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+            {
+                SetHoveredOutlineColor(unitComponentReferences, false);
+            })
+            .WithoutBurst()
+            .Run();
+        }
         return inputDeps;
     }
 
