@@ -186,8 +186,6 @@ public class ManalithSystemClient : JobComponentSystem
                         }
                     }
 
-
-
                     manalithObject.GainControlSoundEmitter.Play();
                     foreach (ParticleSystem p in manalithObject.OneShotParticleSystems)
                     {
@@ -217,28 +215,34 @@ public class ManalithSystemClient : JobComponentSystem
                 manalithObject.ResetSuccParticleBehaviour = false;
             }
 
-            if (manalithObject.MoveChargedParticlesTowardsHero)
+            if (manalithObject.MoveChargedParticlesTowardsHero && manalithObject.ChargePSTravelCurve.Length > 0)
             {
                 manalithObject.InitializeChargedParticlesIfNeeded();
                 int numParticlesAlive = manalithObject.ChargedPS.GetParticles(manalithObject.ChargedPSParticles);
                 var deltaTime = Time.DeltaTime;
                 var velocity = manalithObject.ChargedPS.velocityOverLifetime;
                 var main = manalithObject.ChargedPS.main;
+                var collision = manalithObject.ChargedPS.collision;
+
                 manalithObject.AdjustedChargedPSParticleSpeed = settings.ChargedPSSpeedMultiplier * Vector3.Distance(manalithObject.transform.position, playerHeroTransform.Transform.position);
 
                 if (manalithObject.CurrentTravelTime > 0)
                 {
                     manalithObject.CurrentTravelTime -= deltaTime;
                 }
-                else if(manalithObject.CurrentTargetIndex < manalithObject.ChargePSTravelCurve.Length-1)
+                else if (manalithObject.CurrentTargetIndex < manalithObject.ChargePSTravelCurve.Length - 1)
                 {
-                    if(manalithObject.CurrentTargetIndex < manalithObject.ChargePSTravelCurve.Length-settings.ChargedPSCurveCutoff)
+                    if (manalithObject.CurrentTargetIndex < manalithObject.ChargePSTravelCurve.Length - settings.ChargedPSCurveCutoff)
                     {
+                        collision.enabled = false;
                         for (int i = 0; i < numParticlesAlive; i++)
                         {
                             manalithObject.ChargedPSParticles[i].remainingLifetime = settings.ChargedPSRemainingLifetime;
                         }
                     }
+                    else
+                        collision.enabled = true;
+
                     float dist;
                     if (manalithObject.CurrentTargetIndex == 0)
                         dist = 0.1f;
@@ -275,14 +279,11 @@ public class ManalithSystemClient : JobComponentSystem
                 meshColor.MapLerpColor = Color.Lerp(meshColor.MapLerpColor, meshColor.MapColor, 0.05f);
 
             if (meshColor.MapLerpColor == meshColor.MapColor && meshColor.LerpColor == meshColor.Color)
-            {
                 meshColor.IsLerping = false;
-            }
             else
                 meshColor.IsLerping = true;
 
             unitEffects.PlayerColor = meshColor.LerpColor;
-
             meshColor.MeshRenderer.material.SetColor("_UnlitColor", meshColor.LerpColor);
             meshColor.MeshRenderer.material.SetColor("_EmissiveColor", meshColor.LerpColor * meshColor.MeshRenderer.material.GetFloat("_EmissiveIntensity"));
 

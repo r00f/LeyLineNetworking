@@ -84,8 +84,10 @@ public class AddComponentsSystem : JobComponentSystem
             foreach(MapCell c in mapData.CoordinateCellDictionary.Values)
             {
                 Vector3 pos = CellGridMethods.CubeToPos(CellGridMethods.AxialToCube(c.AxialCoordinate), new Vector2f(0, 0));
-                Vector2 invertedPos = new Vector2(pos.x * UIRef.MinimapComponent.MapSize, pos.z * UIRef.MinimapComponent.MapSize);
-                InstanciateMapCellTileFromSettings(UIRef.MinimapComponent, invertedPos, settings.MapCellColors[(int)c.MapCellColorIndex]);
+                Vector2 v2Pos = new Vector2(pos.x, pos.z);
+
+                InstanciateMapCellTileFromSettings(UIRef.MinimapComponent, v2Pos, settings.MapCellColors[(int)c.MapCellColorIndex]);
+                InstanciateMapCellTileFromSettings(UIRef.BigMapComponent, v2Pos, settings.MapCellColors[(int) c.MapCellColorIndex]);
             }
 
             var curMapState = new CurrentMapState { CoordinateCellDictionary = mapData.CoordinateCellDictionary };
@@ -221,8 +223,9 @@ public class AddComponentsSystem : JobComponentSystem
         }
     }
 
-    void InstanciateMapCellTileFromSettings(MinimapScript miniMap, Vector2 invertedPos, Color tileColor)
+    void InstanciateMapCellTileFromSettings(MinimapScript miniMap, Vector2 pos, Color tileColor)
     {
+        Vector2 invertedPos = new Vector2(pos.x * miniMap.MapSize, pos.y * miniMap.MapSize);
         MiniMapTile instanciatedTile = Object.Instantiate(settings.MapCellTile, Vector3.zero, Quaternion.identity);
         instanciatedTile.TileColor = tileColor;
         instanciatedTile.TileImage.color = instanciatedTile.TileColor;

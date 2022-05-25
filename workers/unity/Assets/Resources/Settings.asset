@@ -74,10 +74,10 @@ MonoBehaviour:
   ExplosionDebugSphere: {fileID: 3937053955492011579, guid: ab8f5f369440e964fa69633247f76f25,
     type: 3}
   ActionPreviewMat: {fileID: 2100000, guid: 3b2609fdb2866b342910a7336b0fcac3, type: 2}
-  ChargedPSSpeedMultiplier: 3
-  ChargedPSVelocityMultiplier: 10
+  ChargedPSSpeedMultiplier: 3.5
+  ChargedPSVelocityMultiplier: 9
   ChargedPSRemainingLifetime: 0.4
-  ChargedPSCurveCutoff: 10
+  ChargedPSCurveCutoff: 8
   MapCount: 9
   MapsPerRow: 3
   MapOffset: 100
