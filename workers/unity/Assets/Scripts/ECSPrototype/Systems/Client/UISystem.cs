@@ -164,9 +164,6 @@ namespace LeyLineHybridECS
             var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
             var energyChangeEvents = m_ComponentUpdateSystem.GetEventsReceived<PlayerEnergy.EnergyChangeEvent.Event>();
 
-
-
-
             for (int i = 0; i < mapInitializedEvent.Count; i++)
             {
                 if (mapInitializedEvent[i].EntityId.Id == gameStateId.EntityId.Id)
@@ -237,6 +234,16 @@ namespace LeyLineHybridECS
                 UIRef.TurnDisplay.EnergyGained = authPlayerEnergy.LastGained;
                 UIRef.CurrentEnergyText.text = authPlayerEnergy.Energy.ToString();
                 UIRef.MaxEnergyText.text = authPlayerEnergy.MaxEnergy.ToString();
+
+                Entities.ForEach((Entity e,UnitComponentReferences unitCompRef, in FactionComponent.Component faction, in Actions.Component actions, in SpatialEntityId id) =>
+                {
+                    if(id.EntityId.Id == authPlayerState.SelectedUnitId)
+                    {
+                        FillUnitButtons(actions, unitCompRef.BaseDataSetComp, faction.Faction, authPlayerFaction.Faction, id.EntityId.Id, authPlayerEnergy);
+                    }
+                })
+                .WithoutBurst()
+                .Run();
             }
 
             if (cleanUpStateEvents.Count > 0)
@@ -445,9 +452,6 @@ namespace LeyLineHybridECS
                     }
                     break;
             }
-
-
-
 
             #region PlayerLoops
 
@@ -836,7 +840,6 @@ namespace LeyLineHybridECS
             UIRef.EscapeMenu.MasterVolumeSlider.onValueChanged.AddListener(delegate { OnVolumeSliderChanged(UIRef.MasterBus, UIRef.EscapeMenu.MasterVolumeSlider.value); });
             UIRef.EscapeMenu.SFXVolumeSlider.onValueChanged.AddListener(delegate { OnVolumeSliderChanged(UIRef.SFXBus, UIRef.EscapeMenu.SFXVolumeSlider.value); });
             UIRef.EscapeMenu.MusicVolumeSlider.onValueChanged.AddListener(delegate { OnVolumeSliderChanged(UIRef.MusicBus, UIRef.EscapeMenu.MusicVolumeSlider.value); });
-
         }
 
         void OnVolumeSliderChanged(FMOD.Studio.Bus bus, float volume)
@@ -960,7 +963,7 @@ namespace LeyLineHybridECS
                 var coord = EntityManager.GetComponentData<CubeCoordinate.Component>(e);
                 var faction = EntityManager.GetComponentData<FactionComponent.Component>(e);
 
-                if(mouseState.RightClickEvent == 1)
+                if (mouseState.RightClickEvent == 1)
                 {
                     if (authPlayerState.CurrentState != PlayerStateEnum.waiting_for_target && isVisible.Value==1 && (faction.Faction != authPlayerFaction || actions.LockedAction.Index == -3))
                     {
