@@ -74,14 +74,23 @@ MonoBehaviour:
   ExplosionDebugSphere: {fileID: 3937053955492011579, guid: ab8f5f369440e964fa69633247f76f25,
     type: 3}
   ActionPreviewMat: {fileID: 2100000, guid: 3b2609fdb2866b342910a7336b0fcac3, type: 2}
+  ChargedPSSpeedMultiplier: 3.5
+  ChargedPSVelocityMultiplier: 9
+  ChargedPSRemainingLifetime: 0.4
+  ChargedPSCurveCutoff: 8
   MapCount: 9
   MapsPerRow: 3
   MapOffset: 100
   MapGridCenterOffset:
     X: -400
     Y: -400
-  MinimumExecuteTime: 1
-  RopeTime: 35
+  MinimumExecuteTime: 1.5
+  RopeTime: 25
   MouseRayCastLayerMask:
     serializedVersion: 2
     m_Bits: 7339827
+  HolographicMaterials:
+  - {fileID: 2100000, guid: f4831a3df1aeb6043b4517fb12cfdbfa, type: 2}
+  - {fileID: 2100000, guid: 56e9b513a286a7a4382f34a99ab4680e, type: 2}
+  - {fileID: 2100000, guid: baa6e4e15798d4d478fbab4da9dc7af3, type: 2}
+  - {fileID: 2100000, guid: 05dc31835dc907249a33fd2821ad7c79, type: 2}

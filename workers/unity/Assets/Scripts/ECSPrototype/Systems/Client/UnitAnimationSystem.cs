@@ -25,6 +25,7 @@ public class UnitAnimationSystem : JobComponentSystem
     EntityQuery m_UnitData;
     EntityQuery m_CellData;
     Settings settings;
+    public UIReferences UIRef;
 
     protected override void OnCreate()
     {
@@ -53,6 +54,7 @@ public class UnitAnimationSystem : JobComponentSystem
         m_UISystem = World.GetExistingSystem<UISystem>();
         m_ActionEffectsSystem = World.GetExistingSystem<ActionEffectsSystem>();
         m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+        UIRef = Object.FindObjectOfType<UIReferences>();
         logger = World.GetExistingSystem<WorkerSystem>().LogDispatcher;
 
     }
@@ -87,15 +89,18 @@ public class UnitAnimationSystem : JobComponentSystem
                 unitComponentReferences.LastStationaryPosition = unitComponentReferences.transform.position;
                 unitComponentReferences.AnimatorComp.DestinationPosition = Vector2.zero;
                 unitComponentReferences.UnitEffectsComp.OriginCoordinate = coord.CubeCoordinate;
+                unitComponentReferences.UnitEffectsComp.DestinationCoordinate = coord.CubeCoordinate;
                 unitComponentReferences.AnimatorComp.DestinationReachTriggerSet = false;
                 unitComponentReferences.AnimatorComp.InitialValuesSet = false;
                 unitComponentReferences.AnimatorComp.ExecuteTriggerSet = false;
+                unitComponentReferences.AnimatorComp.CurrentLockedAction = null;
 
-                if(unitComponentReferences.AnimatorComp.AnimationEvents)
+                if (unitComponentReferences.AnimatorComp.AnimationEvents)
                     unitComponentReferences.AnimatorComp.AnimationEvents.EventTriggered = false;
 
                 if (unitComponentReferences.AnimatorComp.Animator)
                 {
+                    unitComponentReferences.AnimatorComp.Animator.SetInteger("ActionIndexInt", -3);
                     unitComponentReferences.AnimatorComp.Animator.SetInteger("Armor", 0);
                     unitComponentReferences.AnimatorComp.Animator.ResetTrigger("Execute");
                     unitComponentReferences.AnimatorComp.Animator.SetBool("Harvesting", energy.Harvesting);
@@ -115,7 +120,7 @@ public class UnitAnimationSystem : JobComponentSystem
             HandleEnableVisualsDelay(unitComponentReferences, startRotation, playerHeroTransform.Transform);
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
             HandleLockedAction(unitComponentReferences, playerVision, actions, faction, gameState, id, coord);
-            HandleHarverstingVisuals(unitComponentReferences, actions, visible, energy, id, coord, gameState.CurrentState, faction, playerFaction, playerState, playerHigh);
+            HandleHarverstingVisuals(unitComponentReferences, visible, energy);
             SetAnimatorVariables(unitComponentReferences, gameState.CurrentState, energy, actions);
             SetHarvestingEmissiveColorMeshes(unitComponentReferences, energy);
             HandleAnimStateEffects(unitComponentReferences, visible);
@@ -124,7 +129,7 @@ public class UnitAnimationSystem : JobComponentSystem
             {
                 if (visible.Value == 1 && !playerVision.RevealVision)
                 {
-                    SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
+                    //SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
                 }
                 else
                     unitComponentReferences.SelectionCircleGO.SetActive(false);
@@ -174,15 +179,31 @@ public class UnitAnimationSystem : JobComponentSystem
 
             HandleSoundTriggers(unitComponentReferences, gameState.CurrentState);
             HandleLockedAction(unitComponentReferences, playerVision, actions, faction, gameState, id, coord);
-            SetHoveredOutlineColor(unitComponentReferences, coord.CubeCoordinate, playerHigh.HoveredCoordinate, playerState.CurrentState);
+            
         })
         .WithoutBurst()
         .Run();
 
+        if (!UIRef.DollyPathCameraActive)
+        {
+            Entities.WithAll<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+            {
+                SetHoveredOutlineColor(unitComponentReferences, true);
+            })
+            .WithoutBurst()
+            .Run();
+
+            Entities.WithNone<HoveredState>().ForEach((Entity e, UnitComponentReferences unitComponentReferences) =>
+            {
+                SetHoveredOutlineColor(unitComponentReferences, false);
+            })
+            .WithoutBurst()
+            .Run();
+        }
         return inputDeps;
     }
 
-    public void HandleHarverstingVisuals(UnitComponentReferences unitComponentReferences, Actions.Component actions, IsVisible visible, Energy.Component energy, SpatialEntityId id, CubeCoordinate.Component coord, GameStateEnum currentGameState, FactionComponent.Component unitFaction, FactionComponent.Component playerFaction, PlayerState.Component playerState, HighlightingDataComponent playerHigh)
+    public void HandleHarverstingVisuals(UnitComponentReferences unitComponentReferences, IsVisible visible, Energy.Component energy)
     {
         if (visible.Value == 1)
         {
@@ -255,6 +276,8 @@ public class UnitAnimationSystem : JobComponentSystem
 
                         if (unitComponentReferences.AnimatorComp.CurrentLockedAction.ProjectileFab)
                         {
+                            Debug.Log("Launch Projectile from unit animation system");
+
                             Vector3 targetPos = CellGridMethods.CubeToPos(actions.LockedAction.Targets[0].TargetCoordinate, gameState.MapCenter);
                             float targetYoffset = 0;
                             if (unitComponentReferences.AnimatorComp.CurrentLockedAction.Targets[0] is ECSATarget_Unit)
@@ -265,7 +288,7 @@ public class UnitAnimationSystem : JobComponentSystem
                         }
                         else
                         {
-                            Debug.Log("TriggerActionEffect from unit animation system");
+                            //Debug.Log("TriggerActionEffect from unit animation system");
                             m_ActionEffectsSystem.TriggerActionEffect(faction.Faction, actions.LockedAction, id.EntityId.Id, unitComponentReferences.AnimatorComp.WeaponTransform, gameState);
                         }
 
@@ -490,9 +513,9 @@ public class UnitAnimationSystem : JobComponentSystem
         }
     }
 
-    public void SetHoveredOutlineColor(UnitComponentReferences unitComponentReferences, Vector3f unitCoord, Vector3f playerHoveredCoord, PlayerStateEnum currentPlayerState)
+    public void SetHoveredOutlineColor(UnitComponentReferences unitComponentReferences, bool enableOutline)
     {
-        if (Vector3fext.ToUnityVector(unitCoord) == Vector3fext.ToUnityVector(playerHoveredCoord) && currentPlayerState != PlayerStateEnum.waiting_for_target)
+        if(enableOutline)
         {
             m_UISystem.UIRef.SelectionOutlineMaterial.SetColor("_OuterColor", unitComponentReferences.UnitEffectsComp.PlayerColor);
 

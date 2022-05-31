@@ -40,12 +40,12 @@ public class TerrainControllerHelper : Editor
             {
                 myTarget.SmoothTerrainHeights();
             }
-
+            /*
             if (GUILayout.Button("PaintTerrainHeight"))
             {
                 myTarget.PaintHeightAtPosition(myTarget.leyLineCrackSize, myTarget.leyLineCrackWorldPos);
             }
-
+            */
 
             if (GUILayout.Button("Set Whole Terrain Height"))
             {
@@ -74,11 +74,13 @@ public class TerrainControllerHelper : Editor
                 myTarget.GenerateMap();
             }
 
-
+            if (GUILayout.Button("Generate River Outline"))
+            {
+                myTarget.GenerateRiverOutline();
+            }
 
             serializedObject.ApplyModifiedProperties();
         }
-
 }
 #endif
 }

@@ -23,6 +23,7 @@ public class ActionEffectsSystem : JobComponentSystem
     HighlightingSystem m_HighlightingSystem;
     ComponentUpdateSystem m_ComponentUpdateSystem;
     EntityQuery m_GameStateData;
+    EntityQuery m_AuthoritativePlayerData;
     GameObject GarbageCollection;
     EntityQuery m_GarbageCollection;
 
@@ -34,6 +35,12 @@ public class ActionEffectsSystem : JobComponentSystem
         m_GameStateData = GetEntityQuery(
         ComponentType.ReadOnly<GameState.Component>()
         );
+
+        m_AuthoritativePlayerData = GetEntityQuery(
+        ComponentType.ReadOnly<PlayerState.HasAuthority>(),
+        ComponentType.ReadOnly<FactionComponent.Component>()
+        );
+
     }
 
     protected override void OnStartRunning()
@@ -55,9 +62,10 @@ public class ActionEffectsSystem : JobComponentSystem
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if (m_GameStateData.CalculateEntityCount() != 1)
+        if (m_GameStateData.CalculateEntityCount() != 1 || m_AuthoritativePlayerData.CalculateEntityCount() != 1)
             return inputDeps;
 
+        var authPlayerFaction = m_AuthoritativePlayerData.GetSingleton<FactionComponent.Component>();
         var gameState = m_GameStateData.GetSingleton<GameState.Component>();
 
         var cleanUpStateEvents = m_ComponentUpdateSystem.GetEventsReceived<GameState.CleanupStateEvent.Event>();
@@ -93,7 +101,7 @@ public class ActionEffectsSystem : JobComponentSystem
 
         if (gameState.CurrentState != GameStateEnum.planning)
         {
-            Entities.ForEach((Entity e, AnimatorComponent animator, ref CubeCoordinate.Component coord, ref Actions.Component actions, ref IsVisible isVisible, in Health.Component health) =>
+            Entities.ForEach((Entity e, AnimatorComponent animator, ref CubeCoordinate.Component coord, ref Actions.Component actions, ref IsVisible isVisible, in Health.Component health, in SpatialEntityId unitId, in FactionComponent.Component faction) =>
             {
                 var unitEffects = EntityManager.GetComponentObject<UnitEffects>(e);
                 var capsuleCollider = EntityManager.GetComponentObject<CapsuleCollider>(e);
@@ -247,13 +255,11 @@ public class ActionEffectsSystem : JobComponentSystem
                     unitEffects.GetHitEffects.Remove(unitEffects.GetHitEffects.ElementAt(i).Key);
                 }
 
-                if (unitEffects.CurrentHealth == 0 && !animator.Dead && isVisible.Value == 1)
+                if (unitEffects.CurrentHealth == 0 && !animator.Dead && isVisible.Value == 1 && health.CurrentHealth == 0)
                 {
                     if (actions.LockedAction.Index == -3 || actions.LockedAction.ActionExecuteStep != unitEffects.CurrentGetHitEffect.Key.ActionExecuteStep)
                     {
-                        //NORMAL DEATH - INSTANTLY DIE
-                        if (unitEffects.DisplayDeathSkull)
-                            m_UISystem.TriggerUnitDeathUI(e);
+                        m_UISystem.TriggerUnitDeathUI(e, faction.Faction, authPlayerFaction.Faction, unitId.EntityId.Id, unitEffects.DisplayDeathSkull);
 
                         if (unitEffects.BodyPartBloodParticleSystem)
                         {
@@ -285,8 +291,7 @@ public class ActionEffectsSystem : JobComponentSystem
                                     ps.Stop();
                             }
 
-                            if (unitEffects.DisplayDeathSkull)
-                                m_UISystem.TriggerUnitDeathUI(e);
+                            m_UISystem.TriggerUnitDeathUI(e, faction.Faction, authPlayerFaction.Faction, unitId.EntityId.Id, unitEffects.DisplayDeathSkull);
 
                             if (unitEffects.BodyPartBloodParticleSystem)
                             {
@@ -296,7 +301,6 @@ public class ActionEffectsSystem : JobComponentSystem
                             {
                                 Death(ref animator, unitEffects.CurrentGetHitEffect.Key, unitEffects.CurrentGetHitEffect.Value, unitEffects.PlayerColor);
                             }
-
                         }
                     }
                 }
@@ -410,7 +414,7 @@ public class ActionEffectsSystem : JobComponentSystem
         List<Vector3> travellingPoints = new List<Vector3>();
 
         //THIS USES SINUS CALC FOR STRAIGHT LINES -- CHANGE METHOD TO HANDLE STRAIGHT LINES WHITOUT CALCULATING SINUS STUFF
-        travellingPoints.AddRange(m_HighlightingSystem.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
+        travellingPoints.AddRange(CellGridMethods.CalculateSinusPath(spawnTransform.position, offSetTarget, projectileFab.MaxHeight));
 
         Vector3 distance = offSetTarget - spawnTransform.position;
 

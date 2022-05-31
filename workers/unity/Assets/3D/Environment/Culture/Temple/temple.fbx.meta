@@ -1,19 +1,19 @@
 fileFormatVersion: 2
 guid: b9dbb75959ab7c746ac596dc5fc3a94d
 ModelImporter:
-  serializedVersion: 19300
+  serializedVersion: 20101
   internalIDToNameTable: []
   externalObjects:
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: Efeu
-    second: {fileID: 2100000, guid: 424361de8c2df4c4bad4da354cf03f5a, type: 2}
+    second: {fileID: 2100000, guid: 7a5bef67d89d697408b52825596376b4, type: 2}
   - first:
       type: UnityEngine:Material
       assembly: UnityEngine.CoreModule
       name: lambert1
-    second: {fileID: 2100000, guid: 40880f1fe4a83b14e84a61f614498b8d, type: 2}
+    second: {fileID: 2100000, guid: b16a3f76a91d46046be8a01c72d7c79b, type: 2}
   materials:
     materialImportMode: 1
     materialName: 0
@@ -53,11 +53,13 @@ ModelImporter:
     importBlendShapes: 1
     importCameras: 1
     importLights: 1
+    fileIdsGeneration: 1
     swapUVChannels: 0
-    generateSecondaryUV: 0
+    generateSecondaryUV: 1
     useFileUnits: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
     preserveHierarchy: 0
     skinWeightsMode: 0
     maxBonesPerVertex: 4
@@ -67,6 +69,9 @@ ModelImporter:
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 1
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
   tangentSpace:

@@ -1,45 +1,24 @@
-using System.Collections.Generic;
 using Unity.Entities;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Generic;
-using Player;
 using Unity.Jobs;
 using Improbable.Gdk.Core;
 using FMODUnity;
 
-//[DisableAutoCreation]
 public class ProjectileSystem : JobComponentSystem
 {
     private EntityQuery m_GameStateData;
-    //private EntityQuery m_MoveAnimData;
-    //private EntityQuery m_ProjectileData;
-    //private EntityQuery m_UnitData;
-    //EntityQuery m_PlayerData;
     bool initialized;
     ActionEffectsSystem m_ActionEffectSystem;
     ILogDispatcher logger;
-
-    /*
-    protected override void OnCreate()
-    {
-        base.OnCreate();
-        m_ProjectileData = GetEntityQuery(
-        ComponentType.ReadWrite<Projectile>(),
-        ComponentType.ReadWrite<Transform>()
-        );
-
-        m_MoveAnimData = GetEntityQuery(
-        ComponentType.ReadWrite<MovementAnimComponent>(),
-        ComponentType.ReadWrite<Transform>()
-        );
-    }
-    */
 
     protected override void OnStartRunning()
     {
         base.OnStartRunning();
 
-        if(Worlds.ClientWorldWorker != default)
+        initialized = false;
+        if (Worlds.ClientWorldWorker != default)
         {
             logger = Worlds.ClientWorldWorker.World.GetExistingSystem<WorkerSystem>().LogDispatcher;
             m_ActionEffectSystem = Worlds.ClientWorldWorker.World.GetExistingSystem<ActionEffectsSystem>();
@@ -48,22 +27,19 @@ public class ProjectileSystem : JobComponentSystem
 
     private bool WorldsInitialized()
     {
-        if (!initialized)
+        if (!initialized && Worlds.ClientWorldWorker != default && Worlds.ClientWorldWorker.World != null)
         {
-            if (Worlds.ClientWorldWorker != default)
-            {
-                m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
-                    ComponentType.ReadOnly<GameState.Component>()
-                );
-                initialized = true;
-            }
+            m_GameStateData = Worlds.ClientWorldWorker.World.EntityManager.CreateEntityQuery(
+                ComponentType.ReadOnly<GameState.Component>()
+            );
+            initialized = true;
         }
         return initialized;
     }
 
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        if(WorldsInitialized())
+        if (WorldsInitialized())
         {
             if (m_GameStateData.CalculateEntityCount() == 0)
                 return inputDeps;

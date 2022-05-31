@@ -1,10 +1,6 @@
 
 using UnityEngine;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Collections;
-using UnityEngine.UI;
 using UnityEditor;
 using Unity.Mathematics;
 
@@ -19,47 +15,24 @@ namespace LeyLineHybridECS
     public class ManalithInitializer : MonoBehaviour
     {
         TerrainController terrainController;
-        Camera projectorCam;
         DijkstraPathfinding pathFinder;
         HexagonalHexGridGenerator gridGenerator;
-        Transform manaLithParent;
 
+        public uint bounty;
 
         [SerializeField]
         public List<bool> TakenNeighbours = new List<bool>();
-
-        //public bool meshGenerated;
 
         [SerializeField]
         public Cell occupiedCell;
 
         [SerializeField]
         public LineRenderer leyLinePathRenderer;
-        //[SerializeField]
-        //LineRenderer leyLineCircleRenderer;
-        //Mesh leyLinePathMesh;
-        Mesh leyLineCircleMesh;
-
-        //[SerializeField]
-        //public MeshFilter leyLinePathMeshFilter;
-        //[SerializeField]
-        //MeshFilter leyLineCircleMeshFilter;
-
-        /*
-        [SerializeField]
-        MeshRenderer leyLineCircleMeshRenderer;
-
-        [SerializeField]
-        ParticleSystem circlePs;
-        [SerializeField]
-        ParticleSystem pathPs;
-        */
 
         [SerializeField]
         List<Cell> leyLinePath = new List<Cell>();
 
         public List<Cell> leyLineCircle = new List<Cell>();
-
 
         [SerializeField]
         public List<float3> leyLinePathCoords = new List<float3>();
@@ -71,9 +44,6 @@ namespace LeyLineHybridECS
 
         [SerializeField]
         public ManalithInitializer connectedManaLith;
-
-        //[SerializeField]
-        //List<Cell> otherManaliths = new List<Cell>();
 
         [SerializeField]
         [Range(0, 256)]
@@ -101,100 +71,6 @@ namespace LeyLineHybridECS
         //public Vector3 planePos;
 
         #if UNITY_EDITOR
-
-        void OnDestroy()
-        {
-            /*
-            foreach (Cell c in leyLineCircle)
-            {
-                c.GetComponent<IsCircleCell>().Value = false;
-            }
-            */
-        }
-
-        void OnEnable()
-        {
-
-        }
-
-        
-        public void GenerateMeshes()
-        {
-            //manaLithParent = GameObject.Find("Manaliths").transform;
-            //transform.parent = manaLithParent;
-            //terrainController = FindObjectOfType<TerrainController>();
-            //projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
-            //leyLinePathMesh = new Mesh();
-            //UpdatePathRenderer();
-            /*
-            if (leyLinePathMeshFilter.sharedMesh != null)
-            {
-                //create unique name for the asset
-                string assetName = "leylinepath" + Resources.FindObjectsOfTypeAll(typeof(Mesh)).Count();
-
-                if(leyLinePathMeshFilter.sharedMesh.name != assetName)
-                {
-                    Mesh lineMesh = Instantiate(leyLinePathMeshFilter.sharedMesh);
-                    AssetDatabase.CreateAsset(lineMesh, "Assets/Resources/ManalithMeshes/" + assetName + ".asset");
-                    AssetDatabase.SaveAssets();
-                }
-
-                var mesh = Resources.Load("ManalithMeshes/" + assetName);
-                leyLinePathMeshFilter.sharedMesh = (Mesh)mesh;
-            }
-            */
-            /*
-            if(leyLineCircleMeshFilter.sharedMesh != null)
-            {
-                //create unique name for the asset
-                string assetName = "leylinecircle" + circleSize;
-
-                //if this circlesize does not exist
-
-                if(Resources.Load("ManalithMeshes/" + assetName) == null)
-                {
-                    Mesh circleMesh = Instantiate(leyLineCircleMeshFilter.sharedMesh);
-                    AssetDatabase.CreateAsset(circleMesh, "Assets/Resources/ManalithMeshes/" + assetName + ".asset");
-                    AssetDatabase.SaveAssets();
-                }
-
-                var mesh = Resources.Load("ManalithMeshes/" + assetName);
-                leyLineCircleMeshFilter.sharedMesh = (Mesh)mesh;
-            }
-            */
-
-        }
-
-        /*
-        public void InitManalithCircle()
-        {
-
-            UpdateLeyLineCircle();
-
-            //otherManaliths.Clear();
-
-            foreach (ManalithInitializer m in FindObjectsOfType<ManalithInitializer>())
-            {
-                if (m != this && !otherManaliths.Contains(m.transform.GetComponentInParent<Cell>()))
-                    otherManaliths.Add(m.transform.GetComponentInParent<Cell>());
-            }
-            otherManaliths = otherManaliths.OrderBy(x => Vector3.Distance(transform.position, x.transform.position)).ToList();
-
-            //if this manalith has no connected Manalith, destroy MeshGradientColor component on pressing connect
-            //if(!connectedManaLith && transform.GetComponent<MeshGradientColor>())
-            //{
-            //DestroyImmediate(transform.GetComponent<MeshGradientColor>());
-            //}
-
-            projectorCam = GameObject.FindGameObjectWithTag("Projector").GetComponent<Camera>();
-            gridGenerator = FindObjectOfType<HexagonalHexGridGenerator>();
-            pathFinder = new DijkstraPathfinding();
-
-            //leyLineCircleMesh = new Mesh();
-            //leyLinePathMesh = new Mesh();
-
-        }
-    */
         public void GeneratePathAndFinalize()
         {
             UpdateLeyLinePath();
@@ -233,7 +109,7 @@ namespace LeyLineHybridECS
                     //Debug.Log(Vector3fext.ToUnityVector(circleCoords.Key) + " " + Vector3fext.ToUnityVector(circleCoords.Value));
 
                     //factor in direction to determine circle center
-                    circleCenter = occupiedCell.transform.position + transform.forward * (occupiedCell.GetComponent<CellDimensions>().Value.x / 2);
+                    circleCenter = occupiedCell.transform.localPosition + occupiedCell.transform.parent.localPosition + transform.forward * (occupiedCell.GetComponent<CellDimensions>().Value.x / 2);
 
                     leyLineCircle.Clear();
 
@@ -248,12 +124,10 @@ namespace LeyLineHybridECS
                     {
                         c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell = true;
                     }
-
-                    UpdateCircleRenderer();
-                    return;
+                    break;
 
                 case CircleSize.Seven:
-                    circleCenter = transform.position;
+                    circleCenter = transform.localPosition;
                     leyLineCircle.Add(occupiedCell);
 
                     if (leyLineCircle.Count == 1)
@@ -267,11 +141,11 @@ namespace LeyLineHybridECS
                     {
                         c.GetComponent<EditorIsCircleCell>().IsLeylineCircleCell = true;
                     }
-
-
-                    UpdateCircleRenderer();
-                    return;
+                    break;
             }
+
+            UpdateCircleRenderer();
+            AddManalithNodeStampPositions();
 
         }
 
@@ -384,7 +258,6 @@ namespace LeyLineHybridECS
             {
                 leyLinePathRenderer.gameObject.SetActive(false);
             }
-
         }
 
         public void RemovePathOverLap()
@@ -406,24 +279,10 @@ namespace LeyLineHybridECS
                         leyLinePath.RemoveAt(i);
                     }
                 }
-
-
-
-                /*
-                if (leyLinePath[leyLinePath.Count - 2].GetComponent<EditorIsCircleCell>().Value)
-                {
-                    leyLinePath.RemoveAt(leyLinePath.Count - 1);
-                }
-                if (leyLinePath[1].GetComponent<EditorIsCircleCell>().Value)
-                {
-                    leyLinePath.RemoveAt(0);
-                }
-                */
             }
         }
 
         #region LineRendererUpdates
-
         void UpdatePathRenderer()
         {
             leyLinePathRenderer.positionCount = leyLinePath.Count;
@@ -432,17 +291,14 @@ namespace LeyLineHybridECS
                 Vector3 pos = leyLinePath[i].transform.position + offset;
                 leyLinePathRenderer.SetPosition(i, pos);
             }
-            //leyLinePathRenderer.transform.rotation = Quaternion.Euler(0, -transform.rotation.y, 0);
 
             for (int i = 0; i < leyLinePath.Count - 1; i++)
             {
                 if(!leyLinePath[i].GetComponent<CellType>().ignoreLeylineStamp || !leyLinePath[i + 1].GetComponent<CellType>().ignoreLeylineStamp)
                 {
-                    Vector3 currentPos = leyLinePath[i].transform.position + offset;
-                    Vector3 nextPos = leyLinePath[i + 1].transform.position + offset;
+                    Vector3 currentPos = leyLinePath[i].transform.localPosition + leyLinePath[i].transform.parent.localPosition + offset;
+                    Vector3 nextPos = leyLinePath[i + 1].transform.localPosition + leyLinePath[i + 1].transform.parent.localPosition + offset;
                     Vector3 direction = nextPos - currentPos;
-
-
 
                     if (!leyLinePath[i].GetComponent<CellType>().ignoreLeylineStamp)
                     {
@@ -458,47 +314,35 @@ namespace LeyLineHybridECS
                         currentPos += direction;
                     }
 
-
                     for (int s = 1; s <= lineSegments + 1; s++)
                     {
                         Vector3 segmentPos = currentPos + (direction * s / lineSegments);
 
                         if (!terrainController.leyLineCrackPositions.Contains(segmentPos))
+                        {
                             terrainController.leyLineCrackPositions.Add(segmentPos - new Vector3(0, 0.1f, 0));
+                        }
                     }
                 }
+                EditorUtility.SetDirty(terrainController);
             }
-
-            //leyLinePathRenderer.BakeMesh(leyLinePathMesh, projectorCam);
-            //ParticleSystem pPs = pathPs;
-            //var pathShapeModule = pPs.shape;
-            //pathShapeModule.shapeType = ParticleSystemShapeType.Mesh;
-            //pathShapeModule.mesh = leyLinePathMesh;
-
-            //leyLinePathMeshFilter.mesh = leyLinePathMesh;
-            //leyLinePathRenderer.enabled = false;
         }
 
         void UpdateCircleRenderer()
         {
-            CalculateCircle(Vector3.Distance(circleCenter, leyLineCircle[1].transform.position));
-            //leyLineCircleRenderer.BakeMesh(leyLineCircleMesh, projectorCam);
+            CalculateCircle(Vector3.Distance(circleCenter, leyLineCircle[1].transform.localPosition + leyLineCircle[1].transform.parent.localPosition));
+        }
 
-
-            //ParticleSystem cPs = circlePs;
-            //var circleShapeModule = cPs.shape;
-            //circleShapeModule.shapeType = ParticleSystemShapeType.Mesh;
-            //circleShapeModule.mesh = leyLineCircleMesh;
-
-            //leyLineCircleMeshFilter.mesh = leyLineCircleMesh;
-            //leyLineCircleRenderer.enabled = false;
-
+        void AddManalithNodeStampPositions()
+        {
+            foreach(Cell c in leyLineCircle)
+            {
+                terrainController.ManalithNodeStampPositions.Add(c.transform.localPosition + c.transform.parent.localPosition + offset);
+            }
         }
 
         public void CalculateCircle(float radius)
         {
-            //leyLineCircleRenderer.positionCount = circleSegments;
-
             float deltaTheta = (float)(2.0 * Mathf.PI) / circleSegments;
             float theta = 0f;
 
@@ -507,9 +351,8 @@ namespace LeyLineHybridECS
                 float x = radius * Mathf.Cos(theta);
                 float z = radius * Mathf.Sin(theta);
                 Vector3 pos = new Vector3(x, 0, z) + circleCenter;
-                if (!terrainController.leyLineCrackPositions.Contains(pos))
-                    terrainController.leyLineCrackPositions.Add(pos + offset - new Vector3 (0, 0.1f, 0));
-                //leyLineCircleRenderer.SetPosition(i, pos + offset - transform.position);
+                if (!terrainController.leyLineCircleCrackPositions.Contains(pos))
+                    terrainController.leyLineCircleCrackPositions.Add(pos + offset);
                 theta += deltaTheta;
             }
         }

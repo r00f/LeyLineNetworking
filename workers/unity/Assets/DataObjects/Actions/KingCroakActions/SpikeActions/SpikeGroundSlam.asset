@@ -19,6 +19,7 @@ MonoBehaviour:
   ActionName: Ground Slam
   Description: Slams his weapon into the ground. Deals <color=red>60</color> damge
     to all enemies in the area.
+  AnimatorStateName: SpikeGroundSlam
   TimeToExecute: 4
   HasWindup: 0
   TargetToAdd: {fileID: 0}
@@ -80,6 +81,7 @@ MonoBehaviour:
   ApplyToTargets: 2
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 4
   DamageAmount: 60
   ExplosionRadius: 4

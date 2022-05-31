@@ -22,5 +22,6 @@ public class UnitHeadUI : MonoBehaviour
     public HeadUILockedActionDisplay ActionDisplay;
     public HealthBar HealthBar;
     public Text EnergyGainText;
+    public Image EnergyGainImage;
 
 }

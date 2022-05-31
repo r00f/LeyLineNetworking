@@ -19,6 +19,7 @@ MonoBehaviour:
     type: 3}
   ActionName: Splash
   Description: Attacks an enemy from afar. Deals <color=red>20</color> damage.
+  AnimatorStateName: RootlingFling
   TimeToExecute: 4
   HasWindup: 1
   TargetToAdd: {fileID: 0}
@@ -42,6 +43,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 4
   DamageAmount: 20
   ExplosionRadius: 1

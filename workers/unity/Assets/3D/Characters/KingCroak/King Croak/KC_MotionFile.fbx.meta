@@ -590,15 +590,8 @@ ModelImporter:
       bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
       curves: []
       events:
-      - time: 0.033707865
-        functionName: SwitchEffect
-        data: 
-        objectReferenceParameter: {instanceID: 0}
-        floatParameter: 0
-        intParameter: 0
-        messageOptions: 0
-      - time: 0.66292137
-        functionName: SwitchEffect
+      - time: 0.5669617
+        functionName: ActionPreview
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0
@@ -772,6 +765,13 @@ ModelImporter:
       events:
       - time: 0.44333443
         functionName: TriggerEvent
+        data: 
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      - time: 0.36491227
+        functionName: ActionPreview
         data: 
         objectReferenceParameter: {instanceID: 0}
         floatParameter: 0

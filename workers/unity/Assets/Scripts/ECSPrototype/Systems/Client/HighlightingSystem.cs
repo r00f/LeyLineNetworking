@@ -131,7 +131,7 @@ public class HighlightingSystem : JobComponentSystem
         {
             Entities.ForEach((Entity e, LineRendererComponent lineRendererComp, ref SpatialEntityId unitId, ref RightClickEvent r) =>
             {
-                ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id, playerHighlightingData);
             })
             .WithoutBurst()
             .Run();
@@ -162,8 +162,6 @@ public class HighlightingSystem : JobComponentSystem
                     }
                     else
                         ResetHighlights(ref playerState, playerHighlightingData, playerEffects);
-
-                    //ResetHighlights(ref playerState, playerHighlightingData);
                 }
 
                 playerHighlightingData.LastHoveredCoordinate = playerHighlightingData.HoveredCoordinate;
@@ -194,11 +192,13 @@ public class HighlightingSystem : JobComponentSystem
         SetSingleton(playerHighlightingData);
 
         return inputDeps;
-
     }
 
     public PlayerState.Component FillUnitTargetsList(CurrentMapState mapData, Action inAction, HighlightingDataComponent inHinghlightningData, PlayerState.Component playerState, PlayerPathing.Component playerPathing, uint playerFaction)
     {
+        if (inHinghlightningData.SelectedUnitFaction != playerFaction || inAction.Index == -3)
+            return playerState;
+
         if(inAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
         {
             if (!m_PathFindingSystem.ValidatePathTargetClient(mapData, playerState.SelectedUnitCoordinate, inHinghlightningData.HoveredCoordinate, inAction, playerState.SelectedUnitId, playerFaction, playerPathing.CachedMapPaths))
@@ -259,23 +259,13 @@ public class HighlightingSystem : JobComponentSystem
 
         Entities.ForEach((Entity e, ref CubeCoordinate.Component unitCoord, in SpatialEntityId unitId, in FactionComponent.Component unitFaction) =>
         {
-            if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId))
+            //if selected unit has a action planned && this unit in the loop is one of the targets && this unit is not a valid target
+            if (playerState.UnitTargets.ContainsKey(playerState.SelectedUnitId) && playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Keys.Contains(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget((ApplyToRestrictionsEnum) inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction, unitId.EntityId.Id, unitFaction.Faction))
             {
-                if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Keys.Contains(unitCoord.CubeCoordinate))
-                {
-                    //if target is not valid, remove it from UnitTargets Dict
-                   
-                    if (playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.ContainsKey(unitCoord.CubeCoordinate) && !m_PathFindingSystem.ValidateUnitTarget((ApplyToRestrictionsEnum)inHinghlightningData.EffectRestrictionIndex, playerState.SelectedUnitId, playerFaction, unitId.EntityId.Id, unitFaction.Faction))
-                    {
-                        //Debug.Log("TargetInvalid - Remove from playerTargets");
-                        //playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
+                playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates[unitCoord.CubeCoordinate] = false;
 
-                        playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates[unitCoord.CubeCoordinate] = false;
-
-                        if(Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) == Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
-                            playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
-                    }
-                }
+                if (Vector3fext.ToUnityVector(playerState.SelectedUnitCoordinate) == Vector3fext.ToUnityVector(unitCoord.CubeCoordinate))
+                    playerState.UnitTargets[playerState.SelectedUnitId].CubeCoordinates.Remove(unitCoord.CubeCoordinate);
             }
         })
         .WithoutBurst()
@@ -623,7 +613,7 @@ public class HighlightingSystem : JobComponentSystem
         Vector3 arcOrigin = inLineRendererComp.transform.position + inLineRendererComp.arcOffset;
         Vector3 arcTarget = new Vector3(inTarget.x, inTarget.y + targetYOffset, inTarget.z);
 
-        Vector3[] arcPath = CalculateSinusPath(arcOrigin, arcTarget, 1);
+        Vector3[] arcPath = CellGridMethods.CalculateSinusPath(arcOrigin, arcTarget, 1);
         inLineRendererComp.lineRenderer.positionCount = arcPath.Length;
 
         Keyframe[] keys = inLineRendererComp.ArcLineWidthCurve.keys;
@@ -635,48 +625,11 @@ public class HighlightingSystem : JobComponentSystem
         inLineRendererComp.lineRenderer.SetPositions(arcPath);
     }
 
-    public Vector3[] CalculateSinusPath(Vector3 origin, Vector3 target, float zenitHeight)
-    {
-        Vector3 distance = target - origin;
-        int numberOfPositions = 8 + (2 * Mathf.RoundToInt(distance.magnitude) / 2);
-
-        Vector3[] sinusPath = new Vector3[numberOfPositions + 1];
-        float heightDifference = origin.y - target.y;
-        float[] ypositions = CalculateSinusPoints(numberOfPositions);
-        float xstep = 1.0f / numberOfPositions;
-
-        for (int i = 0; i < ypositions.Length; i++)
-        {
-            float sinYpos = ypositions[i] * zenitHeight - heightDifference * (xstep * i);
-            sinusPath[i] = origin + new Vector3(distance.x * (xstep * i), sinYpos, distance.z * (xstep * i));
-        }
-
-        sinusPath[numberOfPositions] = target;
-
-        return sinusPath;
-    }
-
-    public float[] CalculateSinusPoints(int numberOfPositions)
-    {
-        float[] yPosArray = new float[numberOfPositions];
-        float xStep = 1.0f / numberOfPositions;
-        int i = 0;
-
-        for (float x = 0.0f; x <= 1.0f; x += xStep)
-        {
-            if (i < yPosArray.Length)
-            {
-                yPosArray[i] = (float)Math.Sin(x * Math.PI);
-                i++;
-            }
-        }
-
-        return yPosArray;
-    }
 
     public void ResetHighlights(ref PlayerState.Component playerState, HighlightingDataComponent playerHigh, PlayerEffects playerEffects)
     {
         var p = playerState;
+        var ph = playerHigh;
 
         foreach (LineRenderer r in playerEffects.RangeOutlineRenderers)
             r.gameObject.SetActive(false);
@@ -698,7 +651,7 @@ public class HighlightingSystem : JobComponentSystem
             {
                 if (unitIdHash.Contains(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, ref p, unitId.EntityId.Id);
+                    ResetUnitHighLights(e, ref p, unitId.EntityId.Id, ph);
                 }
             }
         })
@@ -759,7 +712,7 @@ public class HighlightingSystem : JobComponentSystem
             {
                 if (playerState.UnitTargets.ContainsKey(unitId.EntityId.Id) && playerHigh.TargetRestrictionIndex != 2)
                 {
-                    ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id);
+                    ResetUnitHighLights(e, ref playerState, unitId.EntityId.Id, playerHigh);
                     playerState.UnitTargets.Remove(unitId.EntityId.Id);
                     playerState.TargetDictChange = true;
                 }
@@ -794,11 +747,13 @@ public class HighlightingSystem : JobComponentSystem
 
         m_PlayerStateData.SetSingleton(playerState);
         m_PlayerStateData.SetSingleton(playerHigh);
-
     }
 
-    public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId)
+    public void ResetUnitHighLights(Entity e, ref PlayerState.Component playerState, long unitId, HighlightingDataComponent highlightingData)
     {
+        if (playerState.CurrentState == PlayerStateEnum.ready || highlightingData.CancelState)
+            return;
+
         if (EntityManager.GetComponentObject<LineRendererComponent>(e))
         {
             var lineRendererComp = EntityManager.GetComponentObject<LineRendererComponent>(e);
@@ -870,7 +825,7 @@ public class HighlightingSystem : JobComponentSystem
 
             playerEffects.Shapes.Add(new HexOutlineShape
             {
-                Edges = SortEdgeByDistance(ref playerEffects.Edges),
+                Edges = CellGridMethods.SortEdgeByDistance(ref playerEffects.Edges),
                 Positions = new HashSet<Vector3>()
             });
         }
@@ -896,82 +851,9 @@ public class HighlightingSystem : JobComponentSystem
         }
     }
 
-    List<HexEdgePositionPair> SortEdgeByDistance(ref List<HexEdgePositionPair> edgeList)
-    {
-        List<HexEdgePositionPair> output = new List<HexEdgePositionPair>
-            {
-                edgeList[NearestEdge(new Vector3(), edgeList)]
-            };
-
-        edgeList.Remove(output[0]);
-
-        int x = 0;
-        for (int i = 0; i < edgeList.Count + x; i++)
-        {
-            if (i >= 5)
-            {
-                double closestRemainingDistance = NearestEdgeDist(output[output.Count - 1].B, edgeList);
-                double firstLastAddedDistance = Vector3.Distance(output[0].B, output[output.Count - 1].A);
-
-                if(closestRemainingDistance > firstLastAddedDistance)
-                {
-                    return output;
-                }
-            }
-
-            output.Add(edgeList[NearestEdge(output[output.Count - 1].B, edgeList)]);
-            edgeList.Remove(output[output.Count - 1]);
-            x++;
-        }
-
-        return output;
-    }
-
     Vector3 EdgeCenterPos(HexEdgePositionPair edge)
     {
         return (edge.A + edge.B) / 2;
-    }
-
-    int NearestEdge(Vector3 srcPos, List<HexEdgePositionPair> lookIn)
-    {
-        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
-        for (int i = 0; i < lookIn.Count; i++)
-        {
-            double distance = Vector3.Distance(srcPos, lookIn[i].A);
-            if (i == 0)
-            {
-                distanceListIndex = new KeyValuePair<double, int>(distance, i);
-            }
-            else
-            {
-                if (distance < distanceListIndex.Key)
-                {
-                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
-                }
-            }
-        }
-        return distanceListIndex.Value;
-    }
-
-    double NearestEdgeDist(Vector3 srcEdge, List<HexEdgePositionPair> lookIn)
-    {
-        KeyValuePair<double, int> distanceListIndex = new KeyValuePair<double, int>();
-        for (int i = 0; i < lookIn.Count; i++)
-        {
-            double distance = Vector3.Distance(srcEdge, lookIn[i].A);
-            if (i == 0)
-            {
-                distanceListIndex = new KeyValuePair<double, int>(distance, i);
-            }
-            else
-            {
-                if (distance < distanceListIndex.Key)
-                {
-                    distanceListIndex = new KeyValuePair<double, int>(distance, i);
-                }
-            }
-        }
-        return distanceListIndex.Key;
     }
 
     public void SetSelfTarget(long entityID, Action action, Vector3f coord, LineRendererComponent lineRendererComp)

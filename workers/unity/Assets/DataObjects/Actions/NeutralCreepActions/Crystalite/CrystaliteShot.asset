@@ -19,6 +19,7 @@ MonoBehaviour:
   ActionName: Piercing Shot
   Description: Fires a piercing shot that deals <color=red>55</color> damage to all
     units in a line.
+  AnimatorStateName: CrystalCreepShot
   TimeToExecute: 4
   HasWindup: 1
   TargetToAdd: {fileID: 0}
@@ -42,6 +43,7 @@ MonoBehaviour:
   ApplyToTargets: 2
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 3
   DamageAmount: 60
   ExplosionRadius: 3

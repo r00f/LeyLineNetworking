@@ -2,6 +2,7 @@ using Cell;
 using Generic;
 using Improbable;
 using Improbable.Gdk.Core;
+using Improbable.Gdk.Core.Commands;
 using Player;
 using System.Collections.Generic;
 using Unit;
@@ -28,6 +29,7 @@ namespace LeyLineHybridECS
         EntityQuery m_EffectStackData;
         EntityQuery m_InitMapEventSenderData;
         Settings settings;
+        CommandSystem m_CommandSystem;
 
         protected override void OnCreate()
         {
@@ -60,6 +62,7 @@ namespace LeyLineHybridECS
             m_AISystem = World.GetExistingSystem<AISystem>();
             m_ManalithSystem = World.GetExistingSystem<ManalithSystem>();
             m_ComponentUpdateSystem = World.GetExistingSystem<ComponentUpdateSystem>();
+            m_CommandSystem = World.GetExistingSystem<CommandSystem>();
             m_CellGridSystem = World.GetExistingSystem<HandleCellGridRequestsSystem>();
             m_CleanUpSystem = World.GetExistingSystem<CleanupSystem>();
             m_SpawnSystem = World.GetExistingSystem<InitializeWorldSystem>();
@@ -132,14 +135,7 @@ namespace LeyLineHybridECS
                         }
                         break;
                     case GameStateEnum.planning:
-                        if (clientWorkerIds.PlayersOnMapCount == 0)
-                        {
-                            m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
-                            gameState.InitMapEventSent = false;
-                            gameState.InitMapWaitTime = 2f;
-                            gameState.CurrentState = GameStateEnum.waiting_for_players;
-                        }
-                        else if (clientWorkerIds.PlayersOnMapCount == 2)
+                        if (clientWorkerIds.PlayersOnMapCount == 2)
                         {
                             if (gameState.CurrentRopeTime <= 0)
                             {
@@ -178,7 +174,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.interrupt:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.interrupt, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -195,7 +193,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.attack:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.attack, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -212,7 +212,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.move:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.move, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -230,7 +232,9 @@ namespace LeyLineHybridECS
                     case GameStateEnum.skillshot:
                         if (serverVariables.HighestExecuteTime == 0)
                         {
-                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex, gameState.MinExecuteStepTime);
+                            bool stepActive = false;
+                            serverVariables.HighestExecuteTime = HighestExecuteTime(GameStateEnum.skillshot, gameStateWorldIndex, gameState.MinExecuteStepTime, ref stepActive);
+                            gameState.TurnStateIsActive = stepActive;
                         }
                         else
                         {
@@ -300,6 +304,14 @@ namespace LeyLineHybridECS
                         break;
                 }
 
+                if (clientWorkerIds.PlayersOnMapCount == 0)
+                {
+                    m_CleanUpSystem.DeleteMap(gameStateWorldIndex);
+                    gameState.InitMapEventSent = false;
+                    gameState.InitMapWaitTime = 2f;
+                    gameState.CurrentState = GameStateEnum.waiting_for_players;
+                }
+
                 if (gameState.CurrentState != GameStateEnum.game_over && gameState.CurrentState != GameStateEnum.waiting_for_players)
                 {
                     uint concededFaction = PlayerWithFactionConceded(gameStateWorldIndex);
@@ -318,6 +330,25 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
+
+
+            var playerDeletionRequests = m_CommandSystem.GetRequests<PlayerEnergy.PlayerDeletion.ReceivedRequest>();
+
+            for (int i = 0; i < playerDeletionRequests.Count; i++)
+            {
+                Debug.Log("Recieved PlayerDeletionEvent from player ID: " + playerDeletionRequests[i].EntityId.Id);
+                var deletePlayerEntityCommand = new WorldCommands.DeleteEntity.Request(playerDeletionRequests[i].EntityId);
+                m_CommandSystem.SendCommand(deletePlayerEntityCommand);
+                /*
+                var playerDeletionResponse = new PlayerEnergy.PlayerDeletion.Response
+                (
+                    playerDeletionRequests[i].EntityId.Id,
+                    new PlayerDeletionResponse()
+                );
+
+                m_CommandSystem.SendResponse(playerDeletionResponse);
+                */
+            }
 
             return inputDeps;
         }
@@ -548,13 +579,15 @@ namespace LeyLineHybridECS
             return f;
         }
 
-        private float HighestExecuteTime(GameStateEnum gameState, WorldIndexShared gameStateWorldIndex, float minStepTime)
+        private float HighestExecuteTime(GameStateEnum gameState, WorldIndexShared gameStateWorldIndex, float minStepTime, ref bool stepIsActive)
         {
             float highestTime = minStepTime;
+            bool stepActive = false;
             Entities.WithSharedComponentFilter(gameStateWorldIndex).ForEach((in Actions.Component unitAction) =>
             {
                 if (unitAction.LockedAction.Index != -3 && (int) unitAction.LockedAction.ActionExecuteStep == (int) gameState - 3)
                 {
+                    stepActive = true;
                     if (unitAction.LockedAction.Effects[0].EffectType == EffectTypeEnum.move_along_path)
                     {
                         float unitMoveTime = unitAction.LockedAction.Effects[0].MoveAlongPathNested.TimePerCell * (unitAction.LockedAction.Targets[0].Mods[0].CoordinatePositionPairs.Count - 1);
@@ -570,7 +603,7 @@ namespace LeyLineHybridECS
             })
             .WithoutBurst()
             .Run();
-
+            stepIsActive = stepActive;
             return highestTime;
         }
 

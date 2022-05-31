@@ -28,11 +28,12 @@ namespace LeyLineHybridECS
                 myTarget.InitManalithCircle();
             }
             */
-
+            /*
             if (GUILayout.Button("Generate Meshes"))
             {
                 myTarget.GenerateMeshes();
             }
+            */
 
             /*
             if (GUILayout.Button("Fill Circle Coords"))

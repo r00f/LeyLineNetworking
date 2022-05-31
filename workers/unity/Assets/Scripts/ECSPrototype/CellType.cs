@@ -11,13 +11,10 @@ namespace LeyLineHybridECS
     [ExecuteInEditMode()]
     public class CellType : MonoBehaviour
     {
-
         [SerializeField, HideInInspector]
         IsTaken isTaken;
         //[SerializeField, HideInInspector]
-        //Position3DDataComponent pos3D;
-        [SerializeField, HideInInspector]
-        float3 pos3D;
+        //float3 pos3D;
         [SerializeField, HideInInspector]
         CellDimensions cellDimensions;
         [SerializeField, HideInInspector]
@@ -44,33 +41,23 @@ namespace LeyLineHybridECS
         // Use this for initialization
         void OnEnable()
         {
-
             if(!terrainController)
                 terrainController = FindObjectOfType<TerrainController>();
-            /*
-            if(!isTaken)
-                isTaken = GetComponent<IsTaken>();
-            if(!pos3D)
-                pos3D = GetComponent<Position3DDataComponent>();
-            if(!cellDimensions)
-                cellDimensions = GetComponent<CellDimensions>();
-           */
-            //myHexagon = GetComponent<MyHexagon>();
         }
 
         public void UpdateTerrainTexture()
         {
-            terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
+            terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.localPosition + transform.parent.localPosition - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
         }
 
         public void UpdateTerrainHeight()
         {
-            terrainController.SetHexagonTerrainHeight(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0));
+            terrainController.SetHexagonTerrainHeight(cellDimensions.Size, transform.localPosition + transform.parent.localPosition - new Vector3(0, terrainHeightOffset, 0), transform.position);
         }
 
         public void ApplyCellOffset()
         {
-            pos3D = new float3(pos3D.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.z);
+            //pos3D = new float3(pos3D.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.z);
             //pos3D.Value.y = transform.parent.position.y + height;
             transform.localPosition = new Vector3(transform.localPosition.x, thisCellsTerrain.yOffset + terrainHeightOffset, transform.localPosition.z);
         }
@@ -84,16 +71,9 @@ namespace LeyLineHybridECS
                 if(thisCellsTerrain.cellTerrainYOffset != 0)
                     terrainHeightOffset = thisCellsTerrain.cellTerrainYOffset;
 
-                pos3D = new float3(pos3D.x, transform.parent.position.y + terrainHeightOffset + thisCellsTerrain.yOffset, pos3D.z);
-
-                //pos3D.Value.y = transform.parent.position.y + height;
                 transform.localPosition = new Vector3(transform.localPosition.x, thisCellsTerrain.yOffset + terrainHeightOffset, transform.localPosition.z);
-
-
-                terrainController.SetHexagonTerrainHeight(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0));
-                terrainController.SetHexagonTerrainTexture(cellDimensions.Size, transform.position - new Vector3(0, terrainHeightOffset, 0), thisCellsTerrain.textureIndex);
-                //terrainController.SetHexagonTerrainDetails(cellDimensions.Size, transform.position, thisCellsTerrain.detailIndex, thisCellsTerrain.detailSpawnPercentage);
-                //terrainController.UpdateTerrainDetailObjects();
+                UpdateTerrainHeight();
+                UpdateTerrainTexture();
 
                 if (thisCellsTerrain.Walkable)
                 {
@@ -139,17 +119,11 @@ namespace LeyLineHybridECS
                         {
                             Debug.LogError("No Manalith Object Assigned to Manalith Cell - Assign Manalith Object to Cell in editor");
                         }
-
                     }
-
                 }
             }
         }
-
-
     }
-
-
 }
 
 #endif

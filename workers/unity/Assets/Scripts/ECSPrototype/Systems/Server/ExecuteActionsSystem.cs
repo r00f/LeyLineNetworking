@@ -270,9 +270,7 @@ public class ExecuteActionsSystem : JobComponentSystem
         .Schedule(inputDeps);
         endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(applySkillshotDataTransformationJob);
         applySkillshotDataTransformationJob.Complete();
-
         #endregion
-
 
         return inputDeps;
     }

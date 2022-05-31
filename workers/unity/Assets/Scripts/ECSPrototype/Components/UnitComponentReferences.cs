@@ -51,6 +51,7 @@ public class UnitComponentReferences : MonoBehaviour
 
         if(MeshMatComponent)
         {
+            MeshMatComponent.AllMesheRenderers.Clear();
             MeshMatComponent.Animator = AnimatorComp.Animator;
             foreach (SkinnedMeshRenderer s in GetComponentsInChildren<SkinnedMeshRenderer>())
             {

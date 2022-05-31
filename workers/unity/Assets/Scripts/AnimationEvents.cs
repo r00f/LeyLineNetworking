@@ -15,7 +15,12 @@ public class AnimationEvents : MonoBehaviour
     {
         EventTrigger = true;
     }
-    
+
+    public void ActionPreview()
+    {
+        //Dummy Method for action Preview start
+    }
+
     public void SwitchEffect(int index = 0)
     {
         EffectGameObjectIndex = index;

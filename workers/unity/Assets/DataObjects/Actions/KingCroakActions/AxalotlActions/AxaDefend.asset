@@ -20,6 +20,7 @@ MonoBehaviour:
   ActionName: Water Shield
   Description: Gives an ally a water shield. That ally gains <color=yellow>30</color>
     armor.
+  AnimatorStateName: AxaLob
   TimeToExecute: 3
   HasWindup: 0
   TargetToAdd: {fileID: 0}

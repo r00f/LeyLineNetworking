@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4580321023970950126}
   - component: {fileID: 673512704128048922}
   - component: {fileID: 2662906090931416109}
+  - component: {fileID: 6562928682945309961}
   m_Layer: 5
   m_Name: SelectUnitButton
   m_TagString: Untagged
@@ -105,6 +106,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00b1510866a897a42beb7b2f204f00fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  leftClick:
+    m_PersistentCalls:
+      m_Calls: []
+  middleClick:
+    m_PersistentCalls:
+      m_Calls: []
+  rightClick:
+    m_PersistentCalls:
+      m_Calls: []
   HasLockedAction: 0
   EnergyAmountChange: 0
   EnergyFill: {fileID: 2742733950275568291}
@@ -125,6 +135,27 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   OnPointerEnterEventPath: event:/UISFX/OnPointerEnter
   OnPointerDownEventPath: event:/UISFX/OnPointerEnter
+--- !u!114 &6562928682945309961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2284335731201693628}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ab5fe64ff796e04d8a350d22191feb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftClick:
+    m_PersistentCalls:
+      m_Calls: []
+  middleClick:
+    m_PersistentCalls:
+      m_Calls: []
+  rightClick:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &3599689451784617649
 GameObject:
   m_ObjectHideFlags: 0

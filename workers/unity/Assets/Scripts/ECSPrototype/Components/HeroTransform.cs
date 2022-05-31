@@ -1,9 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class HeroTransform : MonoBehaviour
 {
+    public Vector3 TargetMapPosition;
     public Transform Transform;
-    public Vector3 Position;
-    public bool requireUpdate;
+    public bool MoveCameraToMapClickPosition;
 }

@@ -22,19 +22,25 @@ public class AnimStateEffectHandler : StateMachineBehaviour
     
     override public void OnStateUpdate(Animator animator, AnimatorStateInfo stateInfo, int layerIndex)
     {
-        for (int i = 0; i < CurrentEffectOnTimestamps.Count; i++)
-        {
-            if (CurrentEffectOnTimestamps[i].x >= 0f)
-            {
-                CurrentEffectOnTimestamps[i] -= new Vector2(Time.deltaTime * animator.speed, 0);
-            }
-        }
 
-        for (int i = 0; i < CurrentEffectOffTimestamps.Count; i++)
+
+        if(animator.speed != 0)
         {
-            if (CurrentEffectOffTimestamps[i].x >= 0f)
+            //Debug.Log(stateInfo.length * stateInfo.normalizedTime);
+            for (int i = 0; i < CurrentEffectOnTimestamps.Count; i++)
             {
-                CurrentEffectOffTimestamps[i] -= new Vector2(Time.deltaTime * animator.speed, 0);
+                if (CurrentEffectOnTimestamps[i].x <= stateInfo.length * stateInfo.normalizedTime)
+                {
+                    CurrentEffectOnTimestamps[i] = new Vector2(0, CurrentEffectOnTimestamps[i].y);
+                }
+            }
+
+            for (int i = 0; i < CurrentEffectOffTimestamps.Count; i++)
+            {
+                if (CurrentEffectOffTimestamps[i].x <= stateInfo.length * stateInfo.normalizedTime)
+                {
+                    CurrentEffectOffTimestamps[i] = new Vector2(0, CurrentEffectOffTimestamps[i].y);
+                }
             }
         }
     }

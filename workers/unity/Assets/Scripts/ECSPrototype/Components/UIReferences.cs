@@ -1,16 +1,21 @@
 using FMODUnity;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class UIReferences : MonoBehaviour
 {
     public Canvas Canvas;
 
-    //public Animator SlideOutUIAnimator;
+    [Header("Active Menu")]
+    public GameObject ActiveMenuPanel;
 
+    [Header("GameStateInfo")]
     public bool OpponentReady;
     public bool UIActive;
+    public List<Rope> Ropes;
 
     public float EnergyLerpSpeed;
     public bool DollyPathCameraActive;
@@ -23,18 +28,18 @@ public class UIReferences : MonoBehaviour
 
     [Header("MenuPanels")]
     public HelpPanel HelpPanelComponent;
-    //public GameObject UIMainPanel;
     public GameObject HelpPanel;
     public GameObject SkillTreePanel;
+    public SkillTreeStateHandler SkilltreeHandler;
+    public UnitInspectionPanel UnitInspection;
+    public EscapeMenu EscapeMenu;
 
     [Header("MenuButtons")]
+    public Button GameOverPanelButton;
     public Button RevealVisionButton;
     public MenuButton MainMenuButton;
     public MenuButton HelpButton;
     public MenuButton SkilltreeButton;
-
-    [Header("EscapeMenu")]
-    public EscapeMenu EscapeMenu;
 
     [Header("Startup")]
     public float StartUpWaitTime = 3f;
@@ -49,9 +54,7 @@ public class UIReferences : MonoBehaviour
     public Image HeroPortraitPlayerColor;
 
     [Header("EnergyBarPanel")]
-    public float MaxFillAmount;
-    public Image HeroEnergyIncomeFill;
-    public Image HeroCurrentEnergyFill;
+    public HeroEnergyBar HeroEnergyBar;
     public Text CurrentEnergyText;
     public Text MaxEnergyText;
     public Text TotalEnergyIncomeText;
@@ -65,23 +68,9 @@ public class UIReferences : MonoBehaviour
     [Header("UnitPortrait")]
     public BottomLeftPortraitComponent BottomLeftPortrait;
     public UnitInfoPanel UnitInfoPanel;
-    /*
-    public GameObject InfoEnabledPanel;
-    public Image PortraitPlayerColor;
-    public Image PortraitPlayerColorGlow;
-    public SetPortraitClip AnimatedPortrait;
-    public Text PortraitNameText;
-    
-    [Header("UnitStats")]
-    public Text UnitStats;
 
-    [Header("UnitPortraitInfoPanel")]
-    public Text PortraitHealthText;
-    public Text PortraitArmorText;
-    public Text PortraitRegenText;
-    public HealthBar PortraitHealthBar;
-    */
     [Header("Actions")]
+    public GameObject ActionPanel;
     public Button CancelActionButton;
     public List<ActionButton> Actions;
     public List<ActionButton> SpawnActions;
@@ -91,7 +80,6 @@ public class UIReferences : MonoBehaviour
 
     [Header("SelectedActionToolTip")]
     public SelectedActionToolTip SAToolTip;
-
     public List<Sprite> ExecuteStepSprites;
 
     [Header("UnitGroups")]
@@ -121,23 +109,8 @@ public class UIReferences : MonoBehaviour
     public MinimapScript BigMapComponent;
     public Text BigMapTurnCounter;
 
-    /*
-    [Header("ManaLithUI")]
-    public ManalithInfoComponent ManalithIconPrefab;
-    public ManalithTooltip ManalithToolTipFab;
-    */
-
     [Header("ReadyPanel")]
     public TurnStatePanel TurnStatePnl;
-
-    [HideInInspector]
-    public bool RopeSlamOneTime;
-    [HideInInspector]
-    public float FriendlyRopeEndFillAmount;
-    [HideInInspector]
-    public float EnemyRopeEndFillAmount;
-    [HideInInspector]
-    public float RopeEndsLerpTime;
 
     public Color FriendlyIncomeColor;
     [HideInInspector]
@@ -147,13 +120,11 @@ public class UIReferences : MonoBehaviour
     [HideInInspector]
     public string CurrentStateString;
 
+    [Header("MainTurnDisplay")]
+    public MainTurnDisplay TurnDisplay;
 
     [Header("ParticleSystems")]
     public List<ParticleSystem> CowExhaleParticleSystems;
-    public FillBarParticleComponent FriendlyRopeBarParticle;
-    public FillBarParticleComponent EnemyRopeBarParticle;
-    public ParticleSystem FriendlyReadyBurstPS;
-    public ParticleSystem EnemyReadyBurstPS;
 
     [Header("TurnWheel")]
     public UIEffectsFired CurrentEffectsFiredState;
@@ -175,6 +146,8 @@ public class UIReferences : MonoBehaviour
     public FMOD.Studio.Bus UINonMapSFXBus;
     public FMOD.Studio.Bus MusicBus;
 
+    public StudioEventEmitter RopeLoopEmitter;
+
     [Header("SoundEventPaths")]
     public string ReadySoundEventPath;
     public string OpponentReadySoundEventPath;
@@ -191,5 +164,19 @@ public class UIReferences : MonoBehaviour
         moveFired,
         skillshotFired,
         gameOverFired
+    }
+
+    public void LoadSceneAfterSeconds(float waitTime)
+    {
+        StartCoroutine(WaitForSceneLoad(waitTime));
+    }
+
+
+    public IEnumerator WaitForSceneLoad(float waitTime)
+    {
+        yield return new WaitForSeconds(waitTime);
+
+        Worlds.DefaultWorld.DestroyAndResetAllEntities();
+        SceneManager.LoadScene("MainMenu");
     }
 }

@@ -19,6 +19,7 @@ MonoBehaviour:
     type: 3}
   ActionName: Tounge Slap
   Description: Slaps an enemy with his tounge dealing <color=red>40</color> damage.
+  AnimatorStateName: Spit
   TimeToExecute: 3
   HasWindup: 0
   TargetToAdd: {fileID: 0}
@@ -42,6 +43,7 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 4
   DamageAmount: 40
   ExplosionRadius: 0.8

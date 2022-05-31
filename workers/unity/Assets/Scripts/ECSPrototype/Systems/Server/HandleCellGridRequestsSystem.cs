@@ -109,11 +109,11 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
         {
             if (requestingUnitActions.CurrentSelected.Index != -3 && requestingUnitActions.LockedAction.Index == -3 && Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero /* && requestingUnitActions.CurrentSelected.Targets[0].Targettingrange > 0*/)
             {
-                Debug.Log("SetTarget");
+                //Debug.Log("SetTarget");
 
                 if (ValidateTarget(worldIndex, requestingUnitActions.CurrentSelected, clientActionRequest.TargetCoordinate, requestingUnitCoord.CubeCoordinate, requestingUnitId.EntityId.Id, requestingUnitFaction.Faction))
                 {
-                    Debug.Log("TargetValid");
+                    //Debug.Log("TargetValid");
                     requestingUnitActions.LockedAction = SetLockedAction(worldIndex, requestingUnitId.EntityId.Id, requestingUnitActions.CurrentSelected, requestingUnitCoord.CubeCoordinate, clientActionRequest.TargetCoordinate, requestingUnitFaction.Faction);
                 }
                 else
@@ -197,15 +197,16 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
 
     public Action SetLockedAction(WorldIndexShared worldIndex, long usingUnitId, Action selectedAction, Vector3f originCoord, Vector3f targetCoord, uint faction)
     {
-        Action locked = selectedAction;
-        var t = locked.Targets[0];
+        Action currentSelectedAction = selectedAction;
+        var t = currentSelectedAction.Targets[0];
         t.TargetCoordinate = targetCoord;
-        locked.Targets[0] = t;
-        var effect = locked.Effects[0];
-
-        for (int i = 0; i < locked.Effects.Count; i++)
+        currentSelectedAction.Targets[0] = t;
+        var effect = currentSelectedAction.Effects[0];
+        
+        for (int i = 0; i < currentSelectedAction.Effects.Count; i++)
         {
-            effect = locked.Effects[i];
+            effect = currentSelectedAction.Effects[i];
+            effect.TargetCoordinates.Clear();
             effect.OriginUnitFaction = faction;
             effect.OriginUnitId = usingUnitId;
             if (effect.ApplyToRestrictions == ApplyToRestrictionsEnum.self)
@@ -215,16 +216,15 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
 
             effect.TargetPosition = GetPositionFromGameState(worldIndex, targetCoord);
 
-            locked.Effects[i] = effect;
+            currentSelectedAction.Effects[i] = effect;
         }
 
-        effect = locked.Effects[0];
+        effect = currentSelectedAction.Effects[0];
 
-        for (int mi = 0; mi < locked.Targets[0].Mods.Count; mi++)
+        for (int mi = 0; mi < currentSelectedAction.Targets[0].Mods.Count; mi++)
         {
-            var modType = locked.Targets[0].Mods[mi].ModType;
-            var mod = locked.Targets[0].Mods[0];
-            
+            var modType = currentSelectedAction.Targets[0].Mods[mi].ModType;
+            var mod = currentSelectedAction.Targets[0].Mods[0];
 
             switch (modType)
             {
@@ -265,9 +265,9 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
 
                         mod.PathNested.OriginCoordinate = originCoord;
                         effect.MoveAlongPathNested.OriginCoordinate = originCoord;
-                        locked.Effects[0] = effect;
-                        locked.Targets[0].Mods[0] = mod;
-                        locked.CombinedCost = CalculateCombinedCost(t);
+                        currentSelectedAction.Effects[0] = effect;
+                        currentSelectedAction.Targets[0].Mods[0] = mod;
+                        currentSelectedAction.CombinedCost = CalculateCombinedCost(t);
                     }
                     break;
                 case ModTypeEnum.line:
@@ -294,10 +294,8 @@ public class HandleCellGridRequestsSystem : JobComponentSystem
             }
         }
 
-        m_ResourceSystem.SubstactEnergy(worldIndex, faction, locked.CombinedCost);
-
-
-        return locked;
+        m_ResourceSystem.SubstactEnergy(worldIndex, faction, currentSelectedAction.CombinedCost);
+        return currentSelectedAction;
     }
 
     public Vector3f GetPositionFromGameState(WorldIndexShared worldIndex, Vector3f coord)

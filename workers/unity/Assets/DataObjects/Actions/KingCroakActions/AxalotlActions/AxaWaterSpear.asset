@@ -20,6 +20,7 @@ MonoBehaviour:
   ActionName: Water Lance
   Description: Fires a piercing water lance that deals <color=red>55</color> damage
     to all units in a line.
+  AnimatorStateName: AxaLaserShot
   TimeToExecute: 1
   HasWindup: 1
   TargetToAdd: {fileID: 0}

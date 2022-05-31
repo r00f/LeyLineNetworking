@@ -15,10 +15,12 @@ MonoBehaviour:
   ApplyToTargets: 0
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 5
   DamageAmount: 50
   ExplosionRadius: 2
   ExplosionForce: 500
+  UpForce: 0
 --- !u!114 &-544109678270897568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -59,7 +61,9 @@ MonoBehaviour:
     type: 3}
   ActionName: ToungeSlam
   Description: Let the Tounge hit the floor
+  AnimatorStateName: Spit
   TimeToExecute: 1.5
+  HasWindup: 0
   TargetToAdd: {fileID: 0}
   EffectToAdd: {fileID: 0}
   Targets:

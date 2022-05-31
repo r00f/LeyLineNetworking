@@ -5,9 +5,17 @@ using FMODUnity;
 
 public class ManalithObject : MonoBehaviour
 {
+    [HideInInspector]
+    public bool IncomeParticlesEmitted;
+    public bool ResetSuccParticleBehaviour;
+    public float AdjustedChargedPSParticleSpeed;
+    public int CurrentTargetIndex;
+    public float CurrentTravelTime;
+    public Vector3[] ChargePSTravelCurve;
+    public bool MoveChargedParticlesTowardsHero;
     public string Name;
     public List<MeshRenderer> EmissionColorRenderers;
-    //public List<GameObject> SelectionOutlineRenderers;
+    public ParticleSystem ChargedPS;
     public List<MeshRenderer> DetailColorRenderers;
     public List<Light> Lights;
     public List<ParticleSystem> ParticleSystems;
@@ -19,15 +27,13 @@ public class ManalithObject : MonoBehaviour
     public MiniMapTile MiniMapTileInstance;
     [HideInInspector]
     public MiniMapTile BigMapTileInstance;
-    /*
-    public void FillSelectionOutlineObjects()
+    public ParticleSystem.Particle[] ChargedPSParticles;
+
+    public void InitializeChargedParticlesIfNeeded()
     {
-        SelectionOutlineRenderers.Clear();
-        foreach(MeshRenderer r in GetComponentsInChildren<MeshRenderer>())
-        {
-            SelectionOutlineRenderers.Add(r.gameObject);
-        }
+        if (ChargedPSParticles == null || ChargedPSParticles.Length < ChargedPS.main.maxParticles)
+            ChargedPSParticles = new ParticleSystem.Particle[ChargedPS.main.maxParticles];
     }
-    */
+
 }
 

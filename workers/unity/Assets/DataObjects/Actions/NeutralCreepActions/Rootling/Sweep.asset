@@ -19,6 +19,7 @@ MonoBehaviour:
   ActionName: Root Sweep
   Description: Sweeps the root. Deals <color=red>35</color> damge to all enemies
     in the area.
+  AnimatorStateName: RootlingWhip
   TimeToExecute: 4
   HasWindup: 1
   TargetToAdd: {fileID: 0}
@@ -80,6 +81,7 @@ MonoBehaviour:
   ApplyToTargets: 2
   specificTargetIdentifier: 0
   TurnDuration: 0
+  UnitDuration: 0
   ApplyToRestrictions: 3
   DamageAmount: 35
   ExplosionRadius: 4

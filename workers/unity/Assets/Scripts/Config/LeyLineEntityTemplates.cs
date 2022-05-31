@@ -48,7 +48,8 @@ public static class LeyLineEntityTemplates {
             CurrentRopeTime = 30f,
             MapCenter = mapCenter,
             MinExecuteStepTime = settings.MinimumExecuteTime,
-            InitMapWaitTime = 2f
+            InitMapWaitTime = 2f,
+            TurnStateIsActive = false
         };
 
         var effectStack = new EffectStack.Snapshot
@@ -107,10 +108,11 @@ public static class LeyLineEntityTemplates {
         var energy = new PlayerEnergy.Snapshot
         {
             MaxEnergy = 80,
-            Energy = 40,
+            Energy = 7,
             BaseIncome = 5,
             Income = 0,
-            IncomeAdded = true
+            IncomeAdded = true,
+            LastGained = 0
         };
 
         var playerAttributes = new PlayerAttributes.Snapshot
@@ -250,7 +252,7 @@ public static class LeyLineEntityTemplates {
         return template;
     }
 
-    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation, List<Vector3f> circleCellCoords, List<Vector3f> pathCellCoords, List<ManalithSlot> manalithSlots, Vector3f connectedManalithCoord)
+    public static EntityTemplate ManalithUnit(string unitName, Position.Component position, Vector3f cubeCoordinate, uint faction, uint worldIndex, UnitDataSet Stats, uint startRotation, ManalithInitializer initializer,  List<Vector3f> circleCellCoords, List<Vector3f> pathCellCoords, List<ManalithSlot> manalithSlots, Vector3f connectedManalithCoord)
     {
         var turnTimer = new TurnTimer.Snapshot
         {
@@ -295,9 +297,11 @@ public static class LeyLineEntityTemplates {
 
         var manalith = new Manalith.Snapshot
         {
+            Bounty = initializer.bounty,
             CircleCoordinatesList = circleCellCoords,
             PathCoordinatesList = pathCellCoords,
             ConnectedManalithCoordinate = connectedManalithCoord,
+            CombinedEnergyGain = Stats.EnergyIncome,
             Manalithslots = manalithSlots
         };
 
@@ -370,6 +374,7 @@ public static class LeyLineEntityTemplates {
 
         var manalith = new Manalith.Snapshot
         {
+            Bounty = m.Bounty,
             CircleCoordinatesList = m.CircleCoordinatesList,
             PathCoordinatesList = m.PathCoordinatesList,
             ConnectedManalithCoordinate = m.ConnectedManalithCoordinate,

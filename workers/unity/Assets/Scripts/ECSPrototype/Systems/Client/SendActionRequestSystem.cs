@@ -117,7 +117,7 @@ public class SendActionRequestSystem : JobComponentSystem
             //Clear right Clicked unit actions
             Entities.WithAll<ClientActionRequest.HasAuthority>().ForEach((Entity e, AnimatorComponent anim, ref SpatialEntityId unitId, ref RightClickEvent rightClickEvent, in ClientActionRequest.Component clientActionRequest) =>
             {
-                if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero)
+                if (Vector3fext.ToUnityVector(clientActionRequest.TargetCoordinate) != Vector3.zero && playerState.CurrentState != PlayerStateEnum.ready && !playerHigh.CancelState)
                 {
                     if (anim.AnimationEvents)
                         anim.AnimationEvents.VoiceTrigger = true;
